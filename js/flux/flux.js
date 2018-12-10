@@ -329,7 +329,7 @@ ipcRenderer.send('console-logs',"Retrieving collections for user "+ zoteroUser);
 keytar.getPassword("Zotero",zoteroUser).then((zoteroApiKey) => {
 
 // URL Building blocks
-let rootUrl = "https://api.zotero.org/users/";
+let rootUrl = "https://api.zotero.org/groups/";
 let urlCollections = "/collections";
 var zoteroVersion = "&v=3&key=";
 
@@ -394,7 +394,7 @@ const pubDebDatasetLoader = () => {
 
 let uploadedFile = document.getElementById("load-local-pubdeb").files;
 let uploadPath = uploadedFile[0].path;
-let targetFolder = "datasets/publicdebate/capco/" + uploadedFile[0].name;
+let targetFolder = userDataPath+"/datasets/publicdebate/capco/" + uploadedFile[0].name;
 
 ipcRenderer.send('console-logs',"Loading file "+ uploadedFile + " in "+targetFolder);
 
@@ -410,7 +410,7 @@ const pubDeblinkDatasetLoader = () => {
 
 let uploadedFile = document.getElementById("load-local-links").files;
 let uploadPath = uploadedFile[0].path;
-let targetFolder = "datasets/publicdebate/matching/" + uploadedFile[0].name;
+let targetFolder = userDataPath+"/datasets/publicdebate/matching/" + uploadedFile[0].name;
 ipcRenderer.send('console-logs',"Loading file "+ uploadedFile + " in "+targetFolder);
   fs.copyFile(uploadPath, targetFolder, (err) => {
     if (err) throw err;
@@ -467,5 +467,4 @@ const datasetsSubdirList = (dirListId) => {
       datasetDirList = datasetDirList + datasetDirArray[i];                  // Add it to the string
     }
     document.getElementById(dirListId).innerHTML = datasetDirList;           // The string is a <ul> list
-    console.log(datasetDirList)
 }
