@@ -99,10 +99,9 @@ let userID = {"UserName":"Enter your name (not required)","UserMail":"Enter your
   }
 
 //CONSOLE
-var dataLog = "";
+
 let date = new Date().toJSON().replace(/:/g,"-");                 // Create a timestamp
-let introline = "PANDORÆ Log - "+date;
-dataLog = dataLog + date;
+var dataLog =  "PANDORÆ Log - "+date;
 
   ipcMain.on('console-logs', (event,message) => {
     let newLine = "\r\n"+new Date().toLocaleTimeString('fr-FR')+" - "+message;

@@ -9,11 +9,20 @@
 
 // ============ VERSION ===========
 const msg = '      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ\n\n';
-const version ='ALPHA/DEV-V0.0.87';
+const version ='ALPHA/DEV-V0.0.88';
 
-console.log(msg);
-console.log(version);
+// =========== NODE - NPM ===========
+const {remote, ipcRenderer} = require('electron');
+const Request = require('request');
+const rpn = require('request-promise-native');
+const events = require('events');
+const fs = require('fs');
+const d3 = require("d3");
+const THREE = require('three');
+const userDataPath = remote.app.getPath('userData');
 
+// =========== MAIN DISPLAY ===========
+console.log(msg+version);
 let coreLogoArchive = "";
 
 document.getElementById("version").innerHTML = version;
@@ -45,16 +54,6 @@ aelogo.addEventListener('dblclick', ()=>{location.reload()});
 // =========== Global Variables ===========
 var pandoratio = 0;                         // Used in three.js transitions (from one shape to another)
 var chronoLinksKeywords = [];               // Create an array of keywords to be looked for (converted back to Regexp)
-
-// =========== NODE - NPM ===========
-const {remote, ipcRenderer} = require('electron');
-const Request = require('request');
-const rpn = require('request-promise-native');
-const events = require('events');
-const fs = require('fs');
-const d3 = require("d3");
-const THREE = require('three');
-const userDataPath = remote.app.getPath('userData');
 
 // =========== XTYPE ===========
 const xtype = document.getElementById("xtype");             // xtype is a div containing each (-type) visualisation
@@ -427,9 +426,9 @@ const mainDisplay = (type,options) =>{
 
       case 'chronotype':toggleSecondaryMenu();
                         document.getElementById('secMenTopTab').innerHTML = "<strong>Select Chronotype Data</strong><br><br>Select a bibliography and links and then click <strong><a onclick='chronotype(options[0],options[1])'>Start</a></strong>";
-                        ipcRenderer.send('datalist',{"type":"chronotype","kind":"bibliography"});
+                        ipcRenderer.send('datalist',{"type":"chronotype","kind":"biblio"});
                         ipcRenderer.send('datalist',{"type":"chronotype","kind":"links"});
-                        ipcRenderer.send('datalist',{"type":"zotero","kind":"zoteroCollections"});
+                        //ipcRenderer.send('datalist',{"type":"zotero","kind":"zoteroCollections"});
                         break;
 
       case 'anthropotype': toggleSecondaryMenu();

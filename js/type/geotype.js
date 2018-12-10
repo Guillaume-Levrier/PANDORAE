@@ -60,8 +60,6 @@ var geoData = datajson[0];
 
 var data = datajson[1][0].items;
 
-console.log(data)
-
 const links = [];
 
 var linksBuffer =[]
@@ -199,8 +197,6 @@ var collaborations = view.selectAll("lines")
   .enter().append("path")
     .attr("class", "arc")
     .attr("d", path);
-
-console.log(collaborations);
 
 var locations = view.selectAll("locations")
 							  .data(cities)

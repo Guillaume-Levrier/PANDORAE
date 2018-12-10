@@ -70,8 +70,8 @@ var docs = datajson[0];                                          // Second array
 const clusters = [];
 const links = [];                                                  // Declaring links as empty array
 const nodeDocs = [];
-
 var codeFreq = {};
+
 const csl_material = {'paper-conference': 'event', 'NA2': 'dns', 'personal_communication': 'mail', 'article-magazine': 'chrome_reader_mode', 'report': 'tab', 'broadcast': 'radio', 'chapter': 'list', 'webpage': 'web', 'map': 'map', 'manuscript': 'receipt', 'entry-dictionary': 'format_list_numbered', 'entry-encyclopedia': 'art_track', 'NA5': 'add_to_queue', 'NA4': 'video_label', 'NA3': 'question_answer', 'NA1': 'markunread_mailbox', 'interview': 'speaker_notes', 'legal_case': 'announcement', 'thesis': 'note', 'graphic': 'edit', 'motion_picture': 'videocam', 'article-journal': 'timeline', 'article-newspaper': 'dashboard', 'article': 'description', 'post-weblog': 'content_paste', 'speech': 'subtitles', 'patent': 'card_membership', 'song': 'mic', 'book': 'developer_board', 'legislation': 'assignment', 'bill': 'account_balance'};
 
 const dataSorter = () => {
@@ -84,7 +84,7 @@ doc.forEach(d => {
 
   if (d.issued) {
 
-    if (d.issued['date-parts'][0].length===3){
+    if (d.issued.hasOwnProperty('date-parts') && d.issued['date-parts'][0].length===3){
 
         d.date = d.issued['date-parts'][0][0]+"-"+d.issued['date-parts'][0][1]+"-"+d.issued['date-parts'][0][2];
         d.date = parseTime(d.date);
@@ -221,8 +221,6 @@ var shadowLines = view.selectAll("shadowLines")                                 
               .style('stroke', "grey")                          // Color according to key
               .style('stroke-width', .5);                                  // Stroke width
 
-console.log(clusterData);
-
 var categories = view.selectAll("categoriesText")                                     // Display category name
               .data(clusterData)                                 // Loading relevant data, ie nested clusters
             .enter().append("text")                                         // Lines are paths
@@ -349,8 +347,6 @@ var node = view.selectAll("nodes").append('g'),
 
 const expand = (d) => {
 
-console.log(node);
-
 simulation.alpha(1).restart();
 
 // First the relevant nodes in the data, i.e. those whose code is exactly the same as the clicked circle.
@@ -436,7 +432,6 @@ setTimeout(                                                                     
             nodeData.splice(i, 1);                                                // It gets removed from data
         }
     }
-    console.log(nodeData);
   }, 500);                                                                        // Delay value in milliseconds
 
 simulation.nodes(nodeData);                                                       // Simulation with updated data
