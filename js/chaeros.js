@@ -116,6 +116,8 @@ let cityRequests = multiSet.from(totalCityArray);      // Create a multiset from
 
 let cities = [];
 
+console.log(cityRequests);
+
 Promise.all(cityRequests.forEachMultiplicity((count, key) => {                  // Generate requests per city (=> key)
 
     let options = {
@@ -206,7 +208,7 @@ rpn(optionsRequest)                                 // RPN stands for Request-pr
 
     let docAmount = firstResponse['search-results']['opensearch:totalResults']; // Get the total amount of docs
 
-    let output = fs.createWriteStream('datasets/scopus/scopusDatasets/scopus-data-'+ scopusQuery +'.json'); // Start the stream
+    let output = fs.createWriteStream(userDataPath+'/datasets/scopus/scopusDatasets/scopus-data-'+ scopusQuery +'.json'); // Start the stream
 
 // Create the output document's properties
     let date = new Date().toJSON();                 // Create a timestamp
