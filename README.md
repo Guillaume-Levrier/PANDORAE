@@ -1,4 +1,8 @@
 # PANDORÆ Roadmap
+
+Download alpha version for:
+- [macOS](https://anthropos-ecosystems.com/pandorae/PANDORAE.app.zip)
+
 License issues : some package/code license issues might still be around after the pre-upload cleanup. If you find one or more, please reach out on Twitter (@Li_Guilong) and I'll try to make it right.
 
 ### TODO
