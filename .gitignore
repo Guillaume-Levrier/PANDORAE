@@ -1,0 +1,7 @@
+*.csv
+*.txt
+img/*
+node_modules/*
+package-lock.json
+!package.json
+!json/world-countries.json

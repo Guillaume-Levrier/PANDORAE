@@ -1,0 +1,29 @@
+{
+	"name": "PANDORAE",
+	"version": "0.0.87",
+	"description": "A document-based public policy research protocol",
+	"license": "MIT",
+	"author": "Guillaume Levrier",
+	"main": "main.js",
+	"repository": {},
+	"scripts": {
+		"start": "electron ."
+	},
+	"dependencies": {
+		"bottleneck": "^2.13.2",
+		"d3": "^5.7.0",
+		"electron-debug": "^2.0.0",
+		"events": "^3.0.0",
+		"keytar": "^4.3.0",
+		"mnemonist": "^0.24.0",
+		"npm": "^6.4.1",
+		"request": "^2.88.0",
+		"request-promise-native": "^1.0.0",
+		"talisman": "^0.21.0",
+		"three": "^0.94.0"
+	},
+	"devDependencies": {
+		"electron": "^2.0.14",
+		"electron-rebuild": "^1.8.2"
+	}
+}
