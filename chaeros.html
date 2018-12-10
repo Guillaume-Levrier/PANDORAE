@@ -1,0 +1,22 @@
+<!DOCTYPE html><html><meta charset="UTF-8">
+<title>CHÆROS-COMPUTE</title>
+<script>
+  const chaeros = require('./js/chaeros');
+  const {remote, ipcRenderer} = require('electron');
+  let win = remote.getCurrentWindow();
+
+ipcRenderer.on('chaeros-compute', (event, fluxAction,fluxArgs,message) => {
+  try{
+      ipcRenderer.send('test', 'Switch Started');
+      chaeros.chaerosSwitch(fluxAction,fluxArgs);
+    } catch (err){
+      console.log(err);
+      ipcRenderer.send('chaeros-failure', JSON.stringify(err));
+    } finally{
+
+  }
+})
+
+ipcRenderer.send('chaeros-is-ready', 'ready')
+
+</script>
