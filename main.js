@@ -49,7 +49,7 @@ var pandoDir = userDataPath;
 
 var dirTree = [
   "/logs",
-  "userid",
+  "/userID",
   "/datasets",
   "/datasets/altmetric",
   "/datasets/altmetric/requests",
@@ -90,10 +90,10 @@ const userDataDirTree = (path,dirTree) => {
 
 userDataDirTree(pandoDir,dirTree);
 
-let userID = {"UserName":"","UserMail":"","ZoteroID":""};
+let userID = {"UserName":"Enter your name (not required)","UserMail":"Enter your e-mail (not required)","ZoteroID":"Enter your Zotero ID (required to use Flux features)"};
 
   if (!fs.existsSync(userDataPath+'/userID/user-id.json')) {
-    fs.writeFile(userDataPath +'/userID/user-id.json",JSON.stringify(userID),'utf8',
+    fs.writeFile(userDataPath +"/userID/user-id.json",JSON.stringify(userID),'utf8',
       (err) => {if (err) throw err;}
     );
   }
