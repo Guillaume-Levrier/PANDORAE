@@ -206,7 +206,7 @@ rpn(optionsRequest)                                 // RPN stands for Request-pr
 
     let docAmount = firstResponse['search-results']['opensearch:totalResults']; // Get the total amount of docs
 
-    let output = fs.createWriteStream('datasets/scopus/scopusDatasets/scopus-data-'+ scopusQuery +'.json'); // Start the stream
+    let output = fs.createWriteStream(userDataPath+'/datasets/scopus/scopusDatasets/scopus-data-'+ scopusQuery +'.json'); // Start the stream
 
 // Create the output document's properties
     let date = new Date().toJSON();                 // Create a timestamp
@@ -269,10 +269,8 @@ const capcoRebuilder = (dataFile,dataMatch) => {
 
 ipcRenderer.send('console-logs',"Rebuilding Capco dataset " + dataFile + " with matching file "+ dataMatch);
 
-console.log(dataFile,dataMatch);
-
-Promise.all([d3.csv("datasets/publicdebate/capco/"+dataFile, {credentials: 'include'}),     // Load the main datafile
-             d3.csv("datasets/publicdebate/matching/"+dataMatch, {credentials: 'include'})  // Load secondary datafile with prop eval
+Promise.all([d3.csv(userDataPath+"/datasets/publicdebate/capco/"+dataFile, {credentials: 'include'}),     // Load the main datafile
+             d3.csv(userDataPath+"/datasets/publicdebate/matching/"+dataMatch, {credentials: 'include'})  // Load secondary datafile with prop eval
           ]).then(datajson => {                                             // Then with the response array
           const rawData = datajson[0];                                      // First array/datafile is rawData var
           const opinionData = datajson[1];                                  // Second is opinionData (-> prop eval)
@@ -309,8 +307,6 @@ const dataCleaner = () => {                                                 // C
  }
 
 dataCleaner();                                                              // Run this function (comment out to prevent)
-
-console.log(dataBuffer);                                                    // Display dataBuffer in console to check result
 
 const authDirectory = () => {                                                // Add all authors to the "data" variable
   for (let i = 0; i < dataBuffer.length; i++) {                              // Iterate on the 5 arrays
@@ -629,8 +625,6 @@ const opinionBuilder = () => {                                             // Bu
 }
 opinionBuilder();
 
-console.log(links);
-
 const amountCalc = (e,f) => {                                   // Create a function to compute the total amount of items
   let amount = 0;
   for (let i=0; i<e.length; i++){                               // Loop through all elements
@@ -647,7 +641,7 @@ const sourcesTotalAmount = amountCalc(data,"sources");
 
 const totalEngagement = {"Contributions":contribTotalAmount, "Arguments":argsTotalAmount, "Votes":votesTotalAmount,"Reports":reportTotalAmount, "Sources":sourcesTotalAmount};
 
-console.log(totalEngagement);
+ipcRenderer.send('console-logs',totalEngagement);
 
 let bestScore = () => {                                                    // Establish who's the best score
   let topOne = {};
@@ -659,7 +653,7 @@ let bestScore = () => {                                                    // Es
       topOne.id = data[i].author_id;                                       // Store its author_id
     }
   }
-  console.log(topOne);                                                     // Useful for visualisation calibration
+  ipcRenderer.send('console-logs',topOne);                                                     // Useful for visualisation calibration
   for (let i=0; i<data.length; i++){
     if (data[i].author_id===topOne.id){
       data[i].score.totalScore = -200;
@@ -708,8 +702,6 @@ finally{
 
 const lexicAnalysis = (data,dataset) => {
 
-console.log(data);
-
 var totalText = "";                                                 // totalText will the total amount of material
 
 data.forEach(d=>{
@@ -753,8 +745,6 @@ frequencyBuilder(totalTextStemmedArray);
 
 var idf = totalFreqs.top(totalFreqs.dimension);         // Order freqs for dev purpose
 
-console.log(idf);
-
 var communitySet = new multiSet();
 
 data.forEach(d=>{                                                    // Do TF then TF-IDF for each term
@@ -797,10 +787,6 @@ data.forEach(d=>{                                                    // Do TF th
 
 var communitySet = communitySet.top(50)
 
-console.log(data);
-console.log(communitySet);
-
-
       console.log("writing...");
       data = JSON.stringify(data);
         fs.writeFile(
@@ -836,14 +822,11 @@ keytar.getPassword("Zotero", zoteroUser).then((zoteroApiKey) => {               
 for (let j = 0; j < collections.length; j++) {                                    // Loop on collections
 
   // URL Building blocks
-  let rootUrl = "https://api.zotero.org/users/";
+  let rootUrl = "https://api.zotero.org/groups/";
   let urlBase = "/collections/"+collections[j].key;
   let collectionComp = "&v=3&key=";
 
   let zoteroCollectionRequest = rootUrl + zoteroUser + urlBase + "?" + collectionComp + zoteroApiKey;   // Build the url
-
-  console.log(zoteroCollectionRequest);
-
 
   var optionsCollecsRequest = {                      // Prepare options for the Request-Promise-Native Package
       uri: zoteroCollectionRequest,                  // URI to be accessed
@@ -865,7 +848,7 @@ for (let j = 0; j < collections.length; j++) {                                  
 
           for (var i = 0; i < f.meta.numItems; i+=100) {
 
-            let rootUrl = "https://api.zotero.org/users/";
+            let rootUrl = "https://api.zotero.org/groups/";
             let urlBase = "/collections/"+ f.data.key;
             var zoteroVersion = "/items/top?&v=3&format=csljson&start="+ i +"&limit=100&key=";
             let zoteroItemsRequest = rootUrl + zoteroUser + urlBase + zoteroVersion + zoteroApiKey;
@@ -889,7 +872,6 @@ for (let j = 0; j < collections.length; j++) {                                  
          }
       })
   })
-    console.log(zoteroItemsResponse)
     ipcRenderer.send('console-logs',"Retrieval successful.");
     win.hide();
   })
@@ -916,7 +898,7 @@ ipcRenderer.send('console-logs',"Building collection" + collectionName + " for u
 keytar.getPassword("Zotero", zoteroUser).then((zoteroApiKey) => {   // Open keytar
 
 // URL Building blocks
-var rootUrl = "https://api.zotero.org/users/";
+var rootUrl = "https://api.zotero.org/groups/";
 var collectionCreationUrl = rootUrl + zoteroUser + "/collections?&v=3&key="+zoteroApiKey;
 var collectionItem = [{"name" : "","parentCollection" : ""}];
 collectionItem[0].name = collectionName;
@@ -971,7 +953,7 @@ win.hide();
 }); //end of keytar
 
 })    } catch(e) {
-        console.log(e);
+        ipcRenderer.send('console-logs',e);
       }
   })
 }
@@ -982,7 +964,6 @@ win.hide();
 // Switch used to choose the function to execute in CHÆROS.
 
 const chaerosSwitch = (fluxAction,fluxArgs) => {
-console.log(fluxArgs);
 
 ipcRenderer.send('console-logs',"CHÆROS started a "+ fluxAction +" process.");
 

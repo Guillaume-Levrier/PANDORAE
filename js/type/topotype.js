@@ -48,10 +48,6 @@ Promise.all([d3.json(pubdeb, {credentials: 'include'}),                     // L
 
 var tokens=[];
 
-console.log(commun);
-console.log(data);
-
-
 //managing keywords
 
     for(let i = 0; i < commun.length; i++){
@@ -88,9 +84,7 @@ const interventionBuilder = (inter,type) => {                               // C
             }
             tokenSelected.forEach(d => {
               if (contribList.indexOf(d)>-1){
-                console.log("marked " +d);
                 let target = new RegExp(d,'gi');
-                console.log(target);
                 contribList = contribList.replace(target,'<mark>'+d+'</mark>');
               }
             })
@@ -115,7 +109,6 @@ const interventionBuilder = (inter,type) => {                               // C
             tokenSelected.forEach(d => {
               if (argList.indexOf(d)>-1){
                 let target = new RegExp(d,'gi');
-                console.log(target);
                 argList = argList.replace(target,'<mark>'+d+'</mark>');
               }
             })
@@ -215,8 +208,6 @@ else { focusTokens=  data.filter(item => {
   });
 }
 
-console.log(focusTokens);
-
 view.selectAll("path").remove();
 
 densityContour = view.insert("g")                                     // Create contour density graph
@@ -292,7 +283,6 @@ const selectTokens = () => {
         tokenSelected.push(selectedToken[i].name)
       }
   }
-console.log(tokenSelected);
 
   updateData(tokenSelected);
 

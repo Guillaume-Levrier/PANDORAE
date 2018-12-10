@@ -1,16 +1,12 @@
 # PANDORÆ Roadmap
 
-Download alpha version for:
-- [macOS](https://anthropos-ecosystems.com/pandorae/PANDORAE.app.zip)
+To test the dev branch, clone the repo, cd into it, and use 'npm i', './node_modules/.bin/electron-rebuild' then 'npm start'.
 
 License issues : some package/code license issues might still be around after the pre-upload cleanup. If you find one or more, please reach out on Twitter (@Li_Guilong) and I'll try to make it right.
 
-### Known issues
-- macOS alpha : userData mkdir error on first launch.
-
 ### TODO
 - comment each and every line of JS
-- create an interactive scroller/flowchart tutorial for pandorae
+- create an interactive scroller/flowchart tutorial
 
 ##### Flux
 - design a specific flux landing page
