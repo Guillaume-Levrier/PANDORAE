@@ -116,20 +116,20 @@ const availableDatasets = (datasets) => {
 
     let dataList = [];
 
-fs.readdir('datasets/',{withFileTypes: true}, (err, files) => {      // list dataset subfolders
+fs.readdir(userDataPath+'/datasets/',{withFileTypes: true}, (err, files) => {      // list dataset subfolders
     for (let i = 0;i<files.length;i++){                              // loop on available subfolders
       if (datasets.type===files[i]){                                 // if this is the relevant subfolder
-        fs.readdir('datasets/'+files[i],{withFileTypes: true}, (err, folderOne) => { // read its content
+        fs.readdir(userDataPath+'/datasets/'+files[i],{withFileTypes: true}, (err, folderOne) => { // read its content
 
   for (let j = 0;j<folderOne.length;j++){
     if (datasets.kind===folderOne[j]){                                 // if this is the relevant subsubfolder
-      fs.readdir('datasets/'+files[i]+'/'+folderOne[j], (err, folderTwo) => {     // read its content
+      fs.readdir(userDataPath+'/datasets/'+files[i]+'/'+folderOne[j], (err, folderTwo) => {     // read its content
 
           for (let k = 0;k<folderTwo.length;k++){           // loop on each object
             let item = folderTwo[k];
             let kind = folderOne[j];
             let type = files[i];
-            let path = 'datasets/'+ files[i]+'/'+folderOne[j]+'/'+item;
+            let path = userDataPath+'/datasets/'+ files[i]+'/'+folderOne[j]+'/'+item;
               mainWindow.webContents.send('datalist',type,kind,item,path);           // send it to requester
 
                     };
