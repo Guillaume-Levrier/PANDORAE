@@ -5,6 +5,9 @@ Download alpha version for:
 
 License issues : some package/code license issues might still be around after the pre-upload cleanup. If you find one or more, please reach out on Twitter (@Li_Guilong) and I'll try to make it right.
 
+### Known issues
+- macOS alpha : userData mkdir error on first launch.
+
 ### TODO
 - comment each and every line of JS
 - create an interactive scroller/flowchart tutorial for pandorae
