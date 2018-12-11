@@ -512,6 +512,10 @@ switch (commandInput || cliInput) {
           location.reload();
           break;
 
+    case  'reload core':
+          pandoratio = 0;
+          break;
+
 /*
     case  'link regex':
           logInject("Enter regular expression to be looked for");
@@ -561,10 +565,10 @@ document.getElementById("field").value = commandReturn;
 
 var pump = {};
 
-const pulse = (status,rhythm,clear) => {
+const pulse = (status,coeff,rhythm,clear) => {
 
 let rate = (number) => {
-  status = status+=0.1;
+  status = status+=(0.1*coeff);
   let pulseValue = 0.05 + (0.05*Math.sin(number));
   pandoratio = pulseValue;
 };
