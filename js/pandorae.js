@@ -328,8 +328,7 @@ ipcRenderer.on('coreSignal', (event,fluxAction,fluxArgs, message) => {
       try{
       document.getElementById("field").value = message;
       console.log(fluxArgs);
-
-      transfection();
+      pulse(0,10);
     } catch (err){
       document.getElementById("field").value = err;
       console.log(err);
@@ -340,7 +339,7 @@ ipcRenderer.on('coreSignal', (event,fluxAction,fluxArgs, message) => {
 
 ipcRenderer.on('chaeros-success', (event,message,action) => {
   document.getElementById("field").value = message;
-  if (action==="detransfect") {detransfect();}
+  if (action==="detransfect") {pulse(0,10,false);}
 });
 
 ipcRenderer.on('chaeros-failure', (event,message) => {
@@ -529,14 +528,8 @@ switch (commandInput || cliInput) {
           break;
 */
 
-
-    case  'transfect':
-          commandReturn = "transfection process initiated";
-          transfection();
-          break;
-
     case  'detransfect':
-          detransfect();
+          pulse(0,10,false);
           break;
 
     case  'chromium console':
@@ -566,27 +559,26 @@ document.getElementById("field").value = commandReturn;
 
 }
 
-function transfection() {
-  var reach = true
-      increment = 0.0004
-      ceiling = 1;
+var pump = {};
 
-    function condense() {
-      if (reach == true && pandoratio < ceiling) {
-        pandoratio += increment
+const pulse = (status,rhythm,clear) => {
 
-        if (pandoratio === ceiling) {
-          reach = false;
-        }
-    }
-    else {
-        reach = false;
-        }
-  }
-  setInterval(condense, 1);
+let rate = (number) => {
+  status = status+=0.1;
+  let pulseValue = 0.05 + (0.05*Math.sin(number));
+  pandoratio = pulseValue;
+};
+
+      if (clear){
+          clearInterval(pump);
+          detransfect();
+      } else {
+          pump = setInterval(()=>{rate(status)},rhythm);
+      }
+
 }
 
-function detransfect() {
+const detransfect = () => {
   var reach = true
       decrement = 0.0004
       floor = 0;
@@ -606,7 +598,8 @@ function detransfect() {
   setInterval(decondense, 1);
 }
 
-// Window MANAGEMENT
+
+// Window management
 
 const closeWindow = () => {
        remote.getCurrentWindow().close();
