@@ -15,7 +15,7 @@ const fs = require('fs');
 const d3 = require('d3');
 const wordTokenizer = require('talisman/tokenizers/words');
 const carryStemmer = require('talisman/stemmers/french/carry');
-const multiSet = require('mnemonist/multi-set')
+const MultiSet = require('mnemonist/multi-set')
 const userDataPath = remote.app.getPath('userData');
 
 //========== scopusConverter ==========
@@ -112,7 +112,7 @@ for (var i=0; i<(article.length-1); i++){                           // For loop 
    }
  }
 
-let cityRequests = multiSet.from(totalCityArray);      // Create a multiset from city Array to prevent duplicate requests
+let cityRequests = MultiSet.from(totalCityArray);      // Create a multiset from city Array to prevent duplicate requests
 
 let cities = [];
 
@@ -702,36 +702,50 @@ finally{
 
 const lexicAnalysis = (data,dataset) => {
 
-var totalText = "";                                                 // totalText will the total amount of material
+//var totalText = "";                                                 // totalText will the total amount of material
+
+var totalFreqs = new MultiSet();
 
 data.forEach(d=>{
-  d.tokens = "";
+
     for (let i=0; i<d.contributions.length;i++) {                   // Generate total text, though this is capco spec
-        d.text = d.text + d.contributions[i].contributions_title + d.contributions[i].contributions_bodyText;
+        d.text += d.contributions[i].contributions_title +" "+ d.contributions[i].contributions_bodyText;
       }
     for (let j=0; j<d.args.length;j++) {
-        d.text = d.text + d.args[j].contributions_arguments_body;
+        d.text += d.args[j].contributions_arguments_body;
       }
-    totalText = totalText+d.text;
-    d.tokens = wordTokenizer(d.text);                             // Generate tokens
-    d.carryStemmed = d.tokens.map(word => carryStemmer(word.replace("undefined","")));    // CarryStem tokens (for FR)
-    d.freqs = multiSet.from(d.carryStemmed);                      // Make a multiset out of that
-    delete d.tokens;                                              // Data cleanup
-    delete d.carryStemmed;
+  //  totalText = totalText+d.text;
+    let tokens = wordTokenizer(d.text);                             // Generate tokens
+    let carryStemmed = tokens.map(word => carryStemmer(word.replace("undefined","")));    // CarryStem tokens (for FR)
+    d.freqs = MultiSet.from(carryStemmed);                      // Make a multiset out of that
+    d.freqs.forEachMultiplicity((count,key)=>{
+      totalFreqs.add(key);
+    })
     delete d.text;
 })
 
+totalFreqs.forEachMultiplicity((count,key) => {
+  //let editedKey = key.replace('undefined','');
+  let editedCount = Math.log10(data.length/count);
+  if (key.length>3){
+        totalFreqs.set(key,editedCount);
+      } else {
+        totalFreqs.delete(key);
+      }
+});
+
+/*
 totalText = totalText.replace("undefined","");                    // Data cleanup
 
 var totalTextArray = wordTokenizer(totalText);                   // Tokenize total text
 
 var totalTextStemmedArray = totalTextArray.map(word => carryStemmer(word)); // Stem total text
 
-var totalFreqs = new multiSet();
+var totalFreqs = new MultiSet();
 
 const frequencyBuilder = (stemmedTokens) => {       // Create IDF (inverted document frequency)
 
-var buff = multiSet.from(stemmedTokens);
+var buff = MultiSet.from(stemmedTokens);
 
         buff.forEachMultiplicity((count,key) => {
           let editedKey = key.replace('undefined','');
@@ -742,13 +756,13 @@ var buff = multiSet.from(stemmedTokens);
     });
 }
 frequencyBuilder(totalTextStemmedArray);
-
+*/
 var idf = totalFreqs.top(totalFreqs.dimension);         // Order freqs for dev purpose
 
-var communitySet = new multiSet();
+var communitySet = new MultiSet();
 
 data.forEach(d=>{                                                    // Do TF then TF-IDF for each term
-  d.realFreqs = new multiSet();
+  d.realFreqs = new MultiSet();
   d.freqs.forEachMultiplicity((count,key) => {
     let editedKey = key.replace('undefined','');
     let editedCount = 1+(count/d.freqs.dimension);
@@ -886,8 +900,8 @@ const zoteroCollectionBuilder = (collectionName,zoteroUser,path) => {
 ipcRenderer.send('console-logs',"Building collection" + collectionName + " for user " + zoteroUser +" in path "+path);
 
   fs.readFile(userDataPath + path,'utf8', (err, data) => {                // Read the designated datafile
-    if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};                                              // Throw an error if readFile fails
-    try {                                                            // If the file is valid, do the following:
+    if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};      // Throw an error if readFile fails
+    try {                                                                 // If the file is valid, do the following:
         let file = JSON.parse(data);
 
     const limiter = new bottleneck({
