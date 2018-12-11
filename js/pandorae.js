@@ -328,7 +328,7 @@ ipcRenderer.on('coreSignal', (event,fluxAction,fluxArgs, message) => {
       try{
       document.getElementById("field").value = message;
       console.log(fluxArgs);
-      pulse(0,10);
+      pulse(1,1,10);
     } catch (err){
       document.getElementById("field").value = err;
       console.log(err);
@@ -339,7 +339,7 @@ ipcRenderer.on('coreSignal', (event,fluxAction,fluxArgs, message) => {
 
 ipcRenderer.on('chaeros-success', (event,message,action) => {
   document.getElementById("field").value = message;
-  if (action==="detransfect") {pulse(0,10,false);}
+  if (action==="detransfect") {pulse(1,1,10,true);}
 });
 
 ipcRenderer.on('chaeros-failure', (event,message) => {
