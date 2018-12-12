@@ -63,7 +63,7 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset);
                 (err) => {if (err)                                               // On error
                 ipcRenderer.send('chaeros-failure', err);                        // Send error to main process for dispatch
                 ipcRenderer.send('console-logs',JSON.stringify(err));
-                win.hide();
+                win.close();
             })
          }
      })
@@ -159,7 +159,7 @@ for (var j=0; j<(article.length-1); j++){                                       
 
     ipcRenderer.send('chaeros-success', 'Success: Geolocation added');              //Send success message to main process
     ipcRenderer.send('console-logs',"scopusGeolocate successfully added geolocations on " + dataset);
-    win.hide();
+    win.close();
         }  )
       })
   }))
@@ -249,7 +249,7 @@ Promise.all(dataPromises)                                // Submit requests
         output.on("finish", function () {                 // When the stream emits "finish" event
             ipcRenderer.send('chaeros-success', 'Success: Scopus API data retrieved'); // signal success to main process
             ipcRenderer.send('console-logs',"Scopus dataset on " + query + " for user "+ user +" have been successfully retrieved.");
-            win.hide();                                   // Close Chaeros
+            win.close();                                   // Close Chaeros
             }
         );
     })
@@ -689,7 +689,7 @@ finally{
           });
     ipcRenderer.send('console-logs',"CapCo " + dataFile + " links has been successfully written.");
           ipcRenderer.send('chaeros-success', 'Success: dataset rebuilt');
-          win.hide();
+          win.close();
         }
   });
 }
@@ -887,7 +887,7 @@ for (let j = 0; j < collections.length; j++) {                                  
       })
   })
     ipcRenderer.send('console-logs',"Retrieval successful.");
-    win.hide();
+    win.close();
   })
 }) // closing Keytar
 }
@@ -963,7 +963,7 @@ let collectionCode = {"code":""};
 
    }))
 ipcRenderer.send('console-logs',"Collection "+collectionName+" build.");
-win.hide();
+win.close();
 }); //end of keytar
 
 })    } catch(e) {
