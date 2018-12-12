@@ -734,29 +734,6 @@ totalFreqs.forEachMultiplicity((count,key) => {
       }
 });
 
-/*
-totalText = totalText.replace("undefined","");                    // Data cleanup
-
-var totalTextArray = wordTokenizer(totalText);                   // Tokenize total text
-
-var totalTextStemmedArray = totalTextArray.map(word => carryStemmer(word)); // Stem total text
-
-var totalFreqs = new MultiSet();
-
-const frequencyBuilder = (stemmedTokens) => {       // Create IDF (inverted document frequency)
-
-var buff = MultiSet.from(stemmedTokens);
-
-        buff.forEachMultiplicity((count,key) => {
-          let editedKey = key.replace('undefined','');
-          let editedCount = Math.log10(data.length/count);
-          if (editedKey.length>3){
-                totalFreqs.add(editedKey,editedCount);
-        }
-    });
-}
-frequencyBuilder(totalTextStemmedArray);
-*/
 var idf = totalFreqs.top(totalFreqs.dimension);         // Order freqs for dev purpose
 
 var communitySet = new MultiSet();
@@ -963,11 +940,14 @@ let collectionCode = {"code":""};
 
    }))
 ipcRenderer.send('console-logs',"Collection "+collectionName+" build.");
-win.close();
+
 }); //end of keytar
 
 })    } catch(e) {
         ipcRenderer.send('console-logs',e);
+      }
+      finally{
+        ipcRenderer.send('chaeros-success', 'Success: Zotero collection created');
       }
   })
 }
