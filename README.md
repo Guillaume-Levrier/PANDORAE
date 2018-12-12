@@ -7,6 +7,7 @@ License issues : some package/code license issues might still be around after th
 ### TODO
 - comment each and every line of JS
 - create an interactive scroller/flowchart tutorial
+- enable displaying slides/photos/videos in main canvas
 
 ##### Flux
 - design a specific flux landing page
