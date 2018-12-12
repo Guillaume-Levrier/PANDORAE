@@ -54,12 +54,12 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset);
 
       } catch(err) {
         ipcRenderer.send('chaeros-failure', err);                               // On failure, send error to main process
-        ipcRenderer.send('console-logs',JSON.stringify(err));
+        ipcRenderer.send('console-logs',JSON.stringify(err));                   // On failure, send error to console
       }
         finally {
           let data = JSON.stringify(convertedDataset);                           // Prepare data to be written
             fs.writeFile(                                                        // Write data
-              userDataPath +'/datasets/zotero/csl-json/csl-'+dataset,data,'utf8',     // Path/name, data, format
+              userDataPath +'/datasets/zotero/csl-json/csl-'+dataset,data,'utf8',// Path/name, data, format
                 (err) => {if (err)                                               // On error
                 ipcRenderer.send('chaeros-failure', err);                        // Send error to main process for dispatch
                 ipcRenderer.send('console-logs',JSON.stringify(err));
@@ -79,7 +79,7 @@ const scopusGeolocate = (dataset,user) => {
 ipcRenderer.send('console-logs',"Started scopusGeolocate on " + dataset);
 
 fs.readFile(userDataPath +'/datasets/scopus/scopusDatasets/' + dataset,      // Read the dataset passed as option
-                              'utf8', (err, data) => {                  // It should be encoded as UTF-8
+                              'utf8', (err, data) => {                       // It should be encoded as UTF-8
   if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
 
 
@@ -530,13 +530,13 @@ data.forEach(d => {                                                         // F
 scoreBuilder();                                                            // Trigger score function
 
 const opinionBuilder = () => {                                             // Build an opinion Score
-//In this function, a score whose limit is -∞ is considered "c" (conservative) and a score whose limit is +∞ is
-//considered "l" (liberal). The absolute value of the score isn't qualitative but quantitative, which means it doesn't
-//show how conservative/liberal the person is on a value spectrum, but rather on which side of the debate the person
-//falls when making the sum of all its interactions with the available material. That means abscissa data gets more
-//and more interesting and relevant as its related ordinate data increases, and/or it is significantly deviating from 0.
-//Its main limit is that it is binary: you're either going towards A or towards B. This doesn't allow for more precise
-//belonging to a cluster.
+// In this function, a score whose limit is -∞ is considered "c" (conservative) and a score whose limit is +∞ is
+// considered "l" (liberal). The absolute value of the score isn't qualitative but quantitative, which means it doesn't
+// show how conservative/liberal the person is on a value spectrum, but rather on which side of the debate the person
+// falls when making the sum of all its interactions with the available material. That means abscissa data gets more
+// and more interesting and relevant as its related ordinate data increases, and/or it is significantly deviating from 0.
+// Its main limit is that it is binary: you're either going towards A or towards B. This doesn't allow for more precise
+// belonging to a cluster.
 
   data.forEach(d => {                                                      // For each author object
 
@@ -565,7 +565,7 @@ const opinionBuilder = () => {                                             // Bu
            link.source = argSource.contributions_arguments_author_id;
            link.target = contribTarget.contributions_author_id;
            link.type = argSource.contributions_arguments_type;
-            link.opacity = 0.01;                                                      // Opacity starts low
+           link.opacity = 0.01;                                                       // Opacity starts low
            if (link.source !== link.target){                                          // If source != target
             if (links.length===0) { links.push(link);}                                // If first link, push it
             else if (links.length>0) {                                                // If it isn't
@@ -653,7 +653,7 @@ let bestScore = () => {                                                    // Es
       topOne.id = data[i].author_id;                                       // Store its author_id
     }
   }
-  ipcRenderer.send('console-logs',topOne);                                                     // Useful for visualisation calibration
+  ipcRenderer.send('console-logs',topOne);                                 // Useful for visualisation calibration
   for (let i=0; i<data.length; i++){
     if (data[i].author_id===topOne.id){
       data[i].score.totalScore = -200;
@@ -715,68 +715,67 @@ data.forEach(d=>{
         d.text += d.args[j].contributions_arguments_body;
       }
   //  totalText = totalText+d.text;
-    let tokens = wordTokenizer(d.text);                             // Generate tokens
+    let tokens = wordTokenizer(d.text);                                                   // Generate tokens
     let carryStemmed = tokens.map(word => carryStemmer(word.replace("undefined","")));    // CarryStem tokens (for FR)
-    d.freqs = MultiSet.from(carryStemmed);                      // Make a multiset out of that
-    d.freqs.forEachMultiplicity((count,key)=>{
-      totalFreqs.add(key);
+    d.freqs = MultiSet.from(carryStemmed);                                                // Make a multiset out of that
+    d.freqs.forEachMultiplicity((count,key)=>{                                            // For each stem
+      totalFreqs.add(key);                                                                // Add to totalText
     })
-    delete d.text;
+    delete d.text;                                                                        // Remove text property
 })
 
-totalFreqs.forEachMultiplicity((count,key) => {
-  //let editedKey = key.replace('undefined','');
-  let editedCount = Math.log10(data.length/count);
-  if (key.length>3){
-        totalFreqs.set(key,editedCount);
+totalFreqs.forEachMultiplicity((count,key) => {                         // For each totalFreqs item (key AND count)
+  let editedCount = Math.log10(data.length/count);                      // Apply IDF formula (using log10)
+  if (key.length>3){                                                    // Only if radical is longer than 3 characters
+        totalFreqs.set(key,editedCount);                                // Replace item's count by IDF count
       } else {
-        totalFreqs.delete(key);
+        totalFreqs.delete(key);                                         // Else delete item
       }
 });
 
-var idf = totalFreqs.top(totalFreqs.dimension);         // Order freqs for dev purpose
+var idf = totalFreqs.top(totalFreqs.dimension);                         // Order freqs for dev purpose
 
-var communitySet = new MultiSet();
+var communitySet = new MultiSet();                                      // Create communitySet
 
-data.forEach(d=>{                                                    // Do TF then TF-IDF for each term
-  d.realFreqs = new MultiSet();
-  d.freqs.forEachMultiplicity((count,key) => {
-    let editedKey = key.replace('undefined','');
-    let editedCount = 1+(count/d.freqs.dimension);
-    if (editedKey.length>3){
-          d.realFreqs.add(editedKey,editedCount);
+data.forEach(d=>{                                                       // For each "person"
+  d.realFreqs = new MultiSet();                                         // Create realFreqs multiset
+  d.freqs.forEachMultiplicity((count,key) => {                          // For each freqs item
+    let editedKey = key.replace('undefined','');                        // Remove undefineds (shouldn't exist)
+    let editedCount = 1+(count/d.freqs.dimension);                      // Edit count (TF)
+    if (editedKey.length>3){                                            // If radical is longer than 3 characters
+          d.realFreqs.add(editedKey,editedCount);                       // Add to realFreqs
       }
     })
 
-    delete d.freqs;
+    delete d.freqs;                                                     // Remove freqs
+    d.terms = [];                                                       // Create terms
 
-    d.terms = [];
-    totalFreqs.forEachMultiplicity((count,key) => {
-            d.realFreqs.forEachMultiplicity((realCount, realKey)=>{
-              if (realKey===key){
-                let item = {"value":"","count":"","tfIdf":""};
+    totalFreqs.forEachMultiplicity((count,key) => {                     // For each item in the total radical corpus
+            d.realFreqs.forEachMultiplicity((realCount, realKey)=>{     // For each radical in this person
+              if (realKey===key){                                       // If their is a match
+                let item = {"value":"","count":"","tfIdf":""};          // Create item and fill it
                 item.value = realKey;
                 item.count = realCount;
                 item.tfIdf = realCount*count;
-                d.terms.push(item);
+                d.terms.push(item);                                     // Push term in the "terms" array
                 }
             })
         })
-    delete d.realFreqs;
+    delete d.realFreqs;                                                 // Remove realFreqs, since terms exist
 
-    d.terms.sort((a,b)=>b.tfIdf-a.tfIdf);
+    d.terms.sort((a,b)=>b.tfIdf-a.tfIdf);                               // Sort terms by tfidf "score"
 
-    d.topTerms = [];
+    d.topTerms = [];                                                    // Create top terms array
 
-    if (d.terms.length > 4){
-        for (var i = 0; i < 5; i++) {
-          communitySet.add(d.terms[i].value);
-          d.topTerms.push(d.terms[i].value);
+    if (d.terms.length > 4){                                            // If the radical is longer than 3 characters
+        for (var i = 0; i < 5; i++) {                                   // For the top 5 radicals
+          communitySet.add(d.terms[i].value);                           // Add to community MultiSet
+          d.topTerms.push(d.terms[i].value);                            // Add to topTerms
           }
   }
     });
 
-var communitySet = communitySet.top(50)
+var communitySet = communitySet.top(50);                                // Limit community MultiSet to the top 50 terms
 
       console.log("writing...");
       data = JSON.stringify(data);
@@ -879,52 +878,55 @@ ipcRenderer.send('console-logs',"Building collection" + collectionName + " for u
   fs.readFile(userDataPath + path,'utf8', (err, data) => {                // Read the designated datafile
     if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};      // Throw an error if readFile fails
     try {                                                                 // If the file is valid, do the following:
-        let file = JSON.parse(data);
 
-    const limiter = new bottleneck({
-      maxConcurrent: 1,
-      minTime: 150
+    let file = JSON.parse(data);                                          // Parse data as JSON array
+
+    const limiter = new bottleneck({                                      // Create a bottleneck to prevent API rate limit
+      maxConcurrent: 1,                                                   // Only one request at once
+      minTime: 150                                                        // Every 150 milliseconds
     });
 
-keytar.getPassword("Zotero", zoteroUser).then((zoteroApiKey) => {   // Open keytar
+keytar.getPassword("Zotero", zoteroUser).then((zoteroApiKey) => {         // Retrieve password through keytar
 
 // URL Building blocks
 var rootUrl = "https://api.zotero.org/groups/";
 var collectionCreationUrl = rootUrl + zoteroUser + "/collections?&v=3&key="+zoteroApiKey;
-var collectionItem = [{"name" : "","parentCollection" : ""}];
+
+var collectionItem = [{"name" : "","parentCollection" : ""}];             // Create the Collection item to be sent
 collectionItem[0].name = collectionName;
 
-var optionsCollectionCreation = {                                  // Prepare options for the Request-Promise-Native Package
-    method: 'POST',
+var optionsCollectionCreation = {                                // Prepare options for the Request-Promise-Native Package
+    method: 'POST',                                              // Use POST method
     uri: collectionCreationUrl,                                  // URI to be accessed
-    headers: {'User-Agent': 'Request-Promise'},
-    body: collectionItem,
-    json: true                                                  // Automatically parses the JSON string in the response
+    headers: {'User-Agent': 'Request-Promise'},                  // Headers (some options can be added here)
+    body: collectionItem,                                        // Bundle the Collection Item with the request
+    json: true                                                   // Automatically parses the JSON string in the response
   };
 
 let collectionCode = {"code":""};
 
-    rpn(optionsCollectionCreation).then((collectionName) => {
-    collectionCode.code =collectionName.success['0']
+    rpn(optionsCollectionCreation).then((collectionName) => {    // Send the request through RPN
 
-    let fileArrays = [];
+    collectionCode.code =collectionName.success['0'];            // Retrieve name from the response
 
-    file.forEach(file=>{
-      file.collections = [];
-      file.collections.push(collectionCode.code);
+    let fileArrays = [];                                         // Create empty array
+
+    file.forEach(file=>{                                         // For each file object
+      file.collections = [];                                     // Create a "collections" property
+      file.collections.push(collectionCode.code);                // Push the collection code attributed by Zotero
     })
-          for (let i=0; i<file.length; i+=50){
-            let subArray = {"items":[]};
-            let limit = i+50;
-            for (let j=i; j<limit; j++){
-              subArray.items.push(file[j]);
+          for (let i=0; i<file.length; i+=50){                   // Only 50 items can be sent per request
+            let subArray = {"items":[]};                         // Create subArray item
+            let limit = i+50;                                    // The upper limit is start + 50 items
+            for (let j=i; j<limit; j++){                         // Iterate on items to be sent
+              subArray.items.push(file[j]);                      // Push files in subarray
             }
-            fileArrays.push(subArray);
+            fileArrays.push(subArray);                           // Push subArray in fileArrays
           }
 
-    Promise.all(fileArrays.forEach((d)=>{
+    Promise.all(fileArrays.forEach((d)=>{                        // Send all requests as promises (bottlenecked)
 
-        let subArrayUpload = {
+        let subArrayUpload = {                                   // Designing promises
             method: 'POST',
             uri: rootUrl + zoteroUser + "/items?&v=3&key="+zoteroApiKey,
             headers: {'User-Agent': 'Request-Promise'},
@@ -932,14 +934,14 @@ let collectionCode = {"code":""};
             json: true
           };
 
-        return limiter.schedule(rpn,subArrayUpload).then((res) => {
-                if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
+        return limiter.schedule(rpn,subArrayUpload).then((res) => {                   // Enforce bottleneck
+                if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};      // Send error to console
 
         })
 
 
    }))
-ipcRenderer.send('console-logs',"Collection "+collectionName+" build.");
+ipcRenderer.send('console-logs',"Collection "+collectionName+" build.");              // Send success message to console
 
 }); //end of keytar
 
@@ -947,7 +949,7 @@ ipcRenderer.send('console-logs',"Collection "+collectionName+" build.");
         ipcRenderer.send('console-logs',e);
       }
       finally{
-        ipcRenderer.send('chaeros-success', 'Success: Zotero collection created');
+        ipcRenderer.send('chaeros-success', 'Success: Zotero collection created');   // Send success message to main Display
       }
   })
 }
