@@ -290,13 +290,13 @@ let optionsRequest = {                             // Prepare options for the Re
     // Extract relevant metadata
     let searchTerms = firstResponse["search-results"]["opensearch:Query"]["@searchTerms"];
     let totalResults = firstResponse['search-results']['opensearch:totalResults'];
-    let requestAmount = () => {if (totalResults>200) {return parseInt(totalResults/200)+1} else {return 2}};
+    let requestAmount = (totalResults) => {if (totalResults>200) {return parseInt(totalResults/200)+1} else {return 2}};
     let date = new Date();
 
     // Display metadata in a div
     let dataBasicPreview = "<strong>"+ searchTerms+"</strong>"+
                            "<br>Expected results at request time : " + totalResults+
-                           "<br>Amount of requests needed to retrieve full response : " + requestAmount +
+                           "<br>Amount of requests needed to retrieve full response : " + requestAmount(totalResults) +
                            "<br>Query date: "+ date+"<br>[Reload this window to submit a different query.]<br><br>";
 
     document.getElementById('scopus-basic-previewer').innerHTML = dataBasicPreview;
