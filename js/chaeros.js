@@ -863,7 +863,7 @@ for (let j = 0; j < collections.length; j++) {                                  
       })
   })
     ipcRenderer.send('console-logs',"Retrieval successful.");
-    win.close();
+    win.hide();
   })
 }) // closing Keytar
 }
