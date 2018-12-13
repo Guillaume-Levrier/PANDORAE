@@ -422,5 +422,5 @@ document.getElementById("option-icon").addEventListener("click",reloadList);
        gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
      };
 
-
+ipcRenderer.send('console-logs',"Starting topotype");          
 }

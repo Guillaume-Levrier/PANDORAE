@@ -18,6 +18,9 @@ const fs = require('fs');                                             // FileSys
 const userDataPath = remote.app.getPath('userData');
 const {ipcRenderer} = require('electron');                            // ipcRenderer manages messages with Main Process
 
+//========== STARTING FLUX ==========
+ipcRenderer.send('console-logs',"Opening Flux");           // Starting Chronotype
+
 //========== fluxDisplay ==========
 // Display relevant tab when called according to the tab's id.
 const fluxDisplay = (tab,button) => {
@@ -49,6 +52,8 @@ const fluxDisplay = (tab,button) => {
 // - the flux  modal window is closed
 
 const powerValve = (fluxAction,item) => {                                  // powerValve main function
+
+ipcRenderer.send('console-logs',"Actioning powerValve on " +JSON.stringify(item.name)+ " through the " +fluxAction+ " procedure.");
 
 let fluxArgs = {};                                                         // Arguments are stored in an object
 let message = "";                                                          // Creating the default message variable
@@ -122,7 +127,7 @@ case 'altmetricRetriever' : fluxArgs.altmetricRetriever = {"path":""};
 }
 
 // Send a carbon-copy of the orders sent to chaeros to the logs
-ipcRenderer.send('console-logs',"Sending to CHÆROS action "+fluxAction+ " with arguments "+fluxArgs+" "+message);
+ipcRenderer.send('console-logs',"Sending to CHÆROS action "+fluxAction+ " with arguments "+JSON.stringify(fluxArgs)+" "+message);
 
 ipcRenderer.send('dataFlux',fluxAction,fluxArgs,message);                         // Send request to main process
 
@@ -290,13 +295,13 @@ let optionsRequest = {                             // Prepare options for the Re
     // Extract relevant metadata
     let searchTerms = firstResponse["search-results"]["opensearch:Query"]["@searchTerms"];
     let totalResults = firstResponse['search-results']['opensearch:totalResults'];
-    let requestAmount = () => {if (totalResults>200) {return parseInt(totalResults/200)+1} else {return 2}};
+    let requestAmount = (totalResults) => {if (totalResults>200) {return parseInt(totalResults/200)+1} else {return 2}};
     let date = new Date();
 
     // Display metadata in a div
     let dataBasicPreview = "<strong>"+ searchTerms+"</strong>"+
                            "<br>Expected results at request time : " + totalResults+
-                           "<br>Amount of requests needed to retrieve full response : " + requestAmount +
+                           "<br>Amount of requests needed to retrieve full response : " + requestAmount(totalResults) +
                            "<br>Query date: "+ date+"<br>[Reload this window to submit a different query.]<br><br>";
 
     document.getElementById('scopus-basic-previewer').innerHTML = dataBasicPreview;

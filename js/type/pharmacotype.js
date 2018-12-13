@@ -128,4 +128,5 @@ function zoomed() {
      gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
    }
 
+ipcRenderer.send('console-logs',"Starting pharmacotype");         
 }

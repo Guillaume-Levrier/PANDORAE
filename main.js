@@ -104,7 +104,7 @@ let date = new Date().toJSON().replace(/:/g,"-");                 // Create a ti
 var dataLog =  "PANDORÆ Log - "+date;
 
   ipcMain.on('console-logs', (event,message) => {
-    let newLine = "\r\n"+new Date().toLocaleTimeString('fr-FR')+" - "+message;
+    let newLine = "\r\n"+new Date().toLocaleTimeString('fr-FR')+" ~ "+message;
     dataLog = dataLog + newLine;
     mainWindow.webContents.send('console-messages',newLine);           // send it to requester
   })
