@@ -9,7 +9,7 @@
 
 // ============ VERSION ===========
 const msg = '      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ\n\n';
-const version ='ALPHA/DEV-V0.0.88';
+const version ='ALPHA/DEV-V0.0.89';
 
 // =========== NODE - NPM ===========
 const {remote, ipcRenderer} = require('electron');
@@ -328,8 +328,7 @@ ipcRenderer.on('coreSignal', (event,fluxAction,fluxArgs, message) => {
       try{
       document.getElementById("field").value = message;
       console.log(fluxArgs);
-
-      transfection();
+      pulse(1,1,10);
     } catch (err){
       document.getElementById("field").value = err;
       console.log(err);
@@ -340,7 +339,7 @@ ipcRenderer.on('coreSignal', (event,fluxAction,fluxArgs, message) => {
 
 ipcRenderer.on('chaeros-success', (event,message,action) => {
   document.getElementById("field").value = message;
-  if (action==="detransfect") {detransfect();}
+  if (action==="detransfect") {pulse(1,1,10,true);}
 });
 
 ipcRenderer.on('chaeros-failure', (event,message) => {
@@ -403,7 +402,7 @@ const selectOption = (type,kind,item,path) => {
             selected.path = path;
             options.push(path);
         document.getElementById(item).style.backgroundColor = "darkgrey";
-        ipcRenderer.send('console-logs',selected);
+        ipcRenderer.send('console-logs',"Selecting dataset: " + JSON.stringify(selected));
 }
 
 const loadType = () => {
@@ -428,7 +427,6 @@ const mainDisplay = (type,options) =>{
                         document.getElementById('secMenTopTab').innerHTML = "<strong>Select Chronotype Data</strong><br><br>Select a bibliography and links and then click <strong><a onclick='chronotype(options[0],options[1])'>Start</a></strong>";
                         ipcRenderer.send('datalist',{"type":"chronotype","kind":"biblio"});
                         ipcRenderer.send('datalist',{"type":"chronotype","kind":"links"});
-                        //ipcRenderer.send('datalist',{"type":"zotero","kind":"zoteroCollections"});
                         break;
 
       case 'anthropotype': toggleSecondaryMenu();
@@ -463,7 +461,7 @@ const cmdinput = () => {
 let commandInput = document.getElementById("field").value;
 let cliInput = document.getElementById("cli-field").value;
 
-ipcRenderer.send('console-logs',"~ local$ "+ commandInput + cliInput);
+ipcRenderer.send('console-logs'," user$ "+ commandInput + cliInput);
 
 const loadingType = () => commandReturn = "loading " + commandInput;
 
@@ -513,30 +511,26 @@ switch (commandInput || cliInput) {
           location.reload();
           break;
 
+    case  'reload core':
+          pandoratio = 0;
+          break;
+
 /*
     case  'link regex':
-          logInject("Enter regular expression to be looked for");
           const addRegexLink = () =>{
           let linktoadd = document.getElementById('regfield').value;
           if (linktoadd == null || linktoadd == "") { localReturn = 'no link added';}
           else {
               chronoLinksKeywords.push(linktoadd);
               localReturn = '"' + linktoadd  + '" added';
-              logInject(localReturn);
             }
           }
           commandReturn = '';
           break;
 */
 
-
-    case  'transfect':
-          commandReturn = "transfection process initiated";
-          transfection();
-          break;
-
     case  'detransfect':
-          detransfect();
+          pulse(0,10,false);
           break;
 
     case  'chromium console':
@@ -566,27 +560,26 @@ document.getElementById("field").value = commandReturn;
 
 }
 
-function transfection() {
-  var reach = true
-      increment = 0.0004
-      ceiling = 1;
+var pump = {};
 
-    function condense() {
-      if (reach == true && pandoratio < ceiling) {
-        pandoratio += increment
+const pulse = (status,coeff,rhythm,clear) => {
 
-        if (pandoratio === ceiling) {
-          reach = false;
-        }
-    }
-    else {
-        reach = false;
-        }
-  }
-  setInterval(condense, 1);
+let rate = (number) => {
+  status = status+=(0.1*coeff);
+  let pulseValue = 0.05 + (0.05*Math.sin(number));
+  pandoratio = pulseValue;
+};
+
+      if (clear){
+          clearInterval(pump);
+          detransfect();
+      } else {
+          pump = setInterval(()=>{rate(status)},rhythm);
+      }
+
 }
 
-function detransfect() {
+const detransfect = () => {
   var reach = true
       decrement = 0.0004
       floor = 0;
@@ -606,7 +599,8 @@ function detransfect() {
   setInterval(decondense, 1);
 }
 
-// Window MANAGEMENT
+
+// Window management
 
 const closeWindow = () => {
        remote.getCurrentWindow().close();

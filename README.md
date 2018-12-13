@@ -16,6 +16,7 @@ If you'd rather test the dev branch, clone the repo, cd into it, and use 'npm i'
 ### TODO
 - comment each and every line of JS
 - create an interactive scroller/flowchart tutorial
+- enable displaying slides/photos/videos in main canvas
 
 ##### Flux
 - design a specific flux landing page

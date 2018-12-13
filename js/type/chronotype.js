@@ -20,7 +20,7 @@ function resetted() {                                // Going back to origin pos
      d3.select("#xtypeSVG")                          // Selecting the relevant svg element in webpage
         .transition().duration(2000)                 // Resetting takes some time
         .call(zoom.transform, d3.zoomIdentity);      // Using "zoomIdentity", go back to initial position
-    logInject("Resetting chronotype to initial position"); // Send message in the "console"
+    ipcRenderer.send('console-logs',"Resetting chronotype to initial position.");// Send message in the "console"
 }
 
 //========== X & Y AXIS  ============
@@ -299,8 +299,7 @@ function CellSelect(d) {
                 return Math.log(k * n / Math.PI);});                  // Formula used to compute radius
             regroup(d);                                               // Trigger node regrouping function
             setTimeout(function(){thisCluster.raise();}, 500);        // Put it above the rest (links)
-            let logInjection = "Closing chronotype cluster " + d.code;
-            logInject(logInjection);
+            ipcRenderer.send('console-logs',"Closing chronotype cluster " + d.code);// Send message in the "console"
           }
     else {                                                            // Else expand the node
       d3.select(this)                                                 // Apply the following to this selected object
@@ -313,8 +312,7 @@ function CellSelect(d) {
       expand(d);                                                      // Trigger node expanding funciton
       listDisplay(d);                                                 // Opening cluster lists all its nodes' titles
       d3.select(this).on("mouseover", listDisplay);                   // Hovering cluster does the same
-      let logInjection = "Opening chronotype cluster " + d.code;
-      logInject(logInjection);
+      ipcRenderer.send('console-logs',"Opening chronotype cluster " + d.code);// Send message in the "console"
       }
 }
 
@@ -567,6 +565,8 @@ var HighLightandDisplay = (opacity) => {
       d.URL+'">'+
       d.URL+'</a>');
 
+ipcRenderer.send('console-logs',"Hovering " + JSON.stringify(d));// Send message in the "console"
+
 // check all other nodes to see if they're connected
       node.style("opacity", function(o) {
           thisOpacity = isConnected(d, o) ? 1 : opacity;
@@ -613,4 +613,5 @@ function zoomed() {
      gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
    }
 
+ipcRenderer.send('console-logs',"Starting chronotype");           // Starting Chronotype
 }                                                                 // Close Chronotype function

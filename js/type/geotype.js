@@ -285,4 +285,6 @@ function zoomed() {view.style('transform', 'scale(' + d3.event.transform.k + ')'
 
       }
         loadType();
+
+ipcRenderer.send('console-logs',"Starting geotype");          
 }
