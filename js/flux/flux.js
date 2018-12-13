@@ -18,6 +18,9 @@ const fs = require('fs');                                             // FileSys
 const userDataPath = remote.app.getPath('userData');
 const {ipcRenderer} = require('electron');                            // ipcRenderer manages messages with Main Process
 
+//========== STARTING FLUX ==========
+ipcRenderer.send('console-logs',"Opening Flux");           // Starting Chronotype
+
 //========== fluxDisplay ==========
 // Display relevant tab when called according to the tab's id.
 const fluxDisplay = (tab,button) => {
@@ -49,6 +52,8 @@ const fluxDisplay = (tab,button) => {
 // - the flux  modal window is closed
 
 const powerValve = (fluxAction,item) => {                                  // powerValve main function
+
+ipcRenderer.send('console-logs',"Actioning powerValve on " +JSON.stringify(item.name)+ " through the " +fluxAction+ " procedure.");
 
 let fluxArgs = {};                                                         // Arguments are stored in an object
 let message = "";                                                          // Creating the default message variable
@@ -122,7 +127,7 @@ case 'altmetricRetriever' : fluxArgs.altmetricRetriever = {"path":""};
 }
 
 // Send a carbon-copy of the orders sent to chaeros to the logs
-ipcRenderer.send('console-logs',"Sending to CHÆROS action "+fluxAction+ " with arguments "+fluxArgs+" "+message);
+ipcRenderer.send('console-logs',"Sending to CHÆROS action "+fluxAction+ " with arguments "+JSON.stringify(fluxArgs)+" "+message);
 
 ipcRenderer.send('dataFlux',fluxAction,fluxArgs,message);                         // Send request to main process
 

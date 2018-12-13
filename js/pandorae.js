@@ -402,7 +402,7 @@ const selectOption = (type,kind,item,path) => {
             selected.path = path;
             options.push(path);
         document.getElementById(item).style.backgroundColor = "darkgrey";
-        ipcRenderer.send('console-logs',selected);
+        ipcRenderer.send('console-logs',"Selecting dataset: " + JSON.stringify(selected));
 }
 
 const loadType = () => {
@@ -427,7 +427,6 @@ const mainDisplay = (type,options) =>{
                         document.getElementById('secMenTopTab').innerHTML = "<strong>Select Chronotype Data</strong><br><br>Select a bibliography and links and then click <strong><a onclick='chronotype(options[0],options[1])'>Start</a></strong>";
                         ipcRenderer.send('datalist',{"type":"chronotype","kind":"biblio"});
                         ipcRenderer.send('datalist',{"type":"chronotype","kind":"links"});
-                        //ipcRenderer.send('datalist',{"type":"zotero","kind":"zoteroCollections"});
                         break;
 
       case 'anthropotype': toggleSecondaryMenu();
@@ -462,7 +461,7 @@ const cmdinput = () => {
 let commandInput = document.getElementById("field").value;
 let cliInput = document.getElementById("cli-field").value;
 
-ipcRenderer.send('console-logs',"~ local$ "+ commandInput + cliInput);
+ipcRenderer.send('console-logs'," user$ "+ commandInput + cliInput);
 
 const loadingType = () => commandReturn = "loading " + commandInput;
 
@@ -518,14 +517,12 @@ switch (commandInput || cliInput) {
 
 /*
     case  'link regex':
-          logInject("Enter regular expression to be looked for");
           const addRegexLink = () =>{
           let linktoadd = document.getElementById('regfield').value;
           if (linktoadd == null || linktoadd == "") { localReturn = 'no link added';}
           else {
               chronoLinksKeywords.push(linktoadd);
               localReturn = '"' + linktoadd  + '" added';
-              logInject(localReturn);
             }
           }
           commandReturn = '';

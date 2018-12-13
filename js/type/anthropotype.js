@@ -205,4 +205,6 @@ function zoomed() {
    view.attr("transform", d3.event.transform);
    }
 
+
+ipcRenderer.send('console-logs',"Starting anthropotype");           
 }
