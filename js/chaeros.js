@@ -961,7 +961,7 @@ ipcRenderer.send('console-logs',"Collection "+collectionName+" build.");        
 
 const chaerosSwitch = (fluxAction,fluxArgs) => {
 
-ipcRenderer.send('console-logs',"CHÆROS started a "+ fluxAction +" process.");
+ipcRenderer.send('console-logs',"CHÆROS started a "+ fluxAction +" process with the following arguments : " + JSON.stringify(fluxArgs));
 
       switch (fluxAction) {
 
