@@ -9,7 +9,7 @@
 
 // ============ VERSION ===========
 const msg = '      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ\n\n';
-const version ='ALPHA/DEV-V0.0.88';
+const version ='ALPHA/DEV-V0.0.89';
 
 // =========== NODE - NPM ===========
 const {remote, ipcRenderer} = require('electron');
