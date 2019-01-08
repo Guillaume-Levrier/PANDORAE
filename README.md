@@ -6,11 +6,11 @@ License issues : some package/code license issues might still be around after th
 
 ### TODO
 - comment each and every line of JS
-- create an interactive scroller/flowchart tutorial
+- create an interactive scroller/flowchart tutorial (work on tracegraph)
 - enable displaying slides/photos/videos in main canvas
 
 ##### Flux
-- design a specific flux landing page
+- design a specific flux landing page (using an approximate tracetrout+tracegraph viz that would start requesting on boot?)
 
 ##### Next version
 - implement FETCH altmetric requests
