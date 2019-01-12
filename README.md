@@ -12,5 +12,8 @@ License issues : some package/code license issues might still be around after th
 ##### Flux
 - design a specific flux landing page (using an approximate tracetrout+tracegraph viz that would start requesting on boot?)
 
+##### Chaeros
+- Transmit error messages from each service to the console log.
+
 ##### Next version
 - implement FETCH altmetric requests
