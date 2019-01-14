@@ -452,6 +452,11 @@ const mainDisplay = (type,options) =>{
                         ipcRenderer.send('datalist',{"type":"publicdebate","kind":"links"});
                         break;
 
+      case 'gazouillotype':toggleSecondaryMenu();
+                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Gazouilloire Data</strong><br><br>Select a dataset and then click <strong><a onclick='gazouillotype(options[0])'>Start</a></strong>";
+                        ipcRenderer.send('datalist',{"type":"gazouillotype","kind":"datasets"});
+                        break;
+
     }
 
 }
