@@ -133,8 +133,8 @@ button:focus{
 }
 
 p {
-  padding-left: 2em;
-  font-size: 0.8em;
+  padding: 5px;
+  font-size: 12px;
   text-align: justify;
 }
 

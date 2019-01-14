@@ -1,4 +1,4 @@
-const gazouillotype = (dataset) => {                          // When called, draw the chronotype
+const gazouillotype = (dataset,query) => {                          // When called, draw the gazouillotype
 
 console.log(dataset);
 
@@ -11,8 +11,7 @@ var view = svg.append("g")                                            // Appendi
               .attr("class", "view");                                 // CSS viewfinder properties
 
 var zoom = d3.zoom()
-             .scaleExtent([1, 20])                                    // Extent to which one can zoom in or out
-             .translateExtent([[0,0], [width-(0.3*width), height*height]]) // Extent to which one can go up/down/left/right
+             .scaleExtent([-5, 10])                                    // Extent to which one can zoom in or out
              .on("zoom", zoomed);                                     // Trigger the actual zooming function
 
 //============ RESET ============
@@ -22,45 +21,120 @@ function resetted() {                                // Going back to origin pos
      d3.select("#xtypeSVG")                          // Selecting the relevant svg element in webpage
         .transition().duration(2000)                 // Resetting takes some time
         .call(zoom.transform, d3.zoomIdentity);      // Using "zoomIdentity", go back to initial position
-    ipcRenderer.send('console-logs',"Resetting chronotype to initial position.");// Send message in the "console"
+    ipcRenderer.send('console-logs',"Resetting gazouillotype to initial position.");// Send message in the "console"
 }
 
 //========== X & Y AXIS  ============
-var x = d3.scaleTime()                               // Y axis scale
-    .domain([Past, Future])                          // First shows a range from minus one year to plus one year
-    .range([height, 0]);                             // Size on screen is full height of client
+var x = d3.scaleTime().range([0,width*2]);
 
-var xAxis = d3.axisBottom(x)                         // Actual X axis
-    .scale(x)                                        // Scale has been declared just above
-    .ticks(12)                                       // Amount of ticks displayed
-    .tickSize(0)                                     // 0 = no vertical lines ; height = vertical lines
-    .tickFormat("");                                 // No legend
+var xAxis = d3.axisBottom(x).ticks(d3.timeMinute.every(60)).tickFormat(multiFormat);
 
-var y = d3.scaleLinear()                             // X axis scale (each area has its own attributed value)
-    .domain([-.3,1.3])
-    .range([0, width-(0.3*width)]);                  // Graph size is 0.7 times the client width (0.3 -> tooltip)
+var y = d3.scaleLinear().range([height*1.5,0]);
 
-var yAxis = d3.axisRight(y)                          // Actual Y axis
-    .scale(y)                                        // Scale is declared just above
-    .ticks(20)                                       // 20 ticks are displayed
-    .tickSize(width)                                 // Ticks are horizontal lines
-    .tickPadding(10 - width)                         // Ticks start and end out of the screen
-    .tickFormat(multiFormat);                        // Custom legend declared in a different file
-
-//========= LINES & INFO ============
-
-
-
-var color = d3.scaleOrdinal()                                                  // Line colors
-              .domain([0,1])
-              .range(["#08154a","#490027","#5c7a38","#4f4280","#6f611b","#5b7abd","#003f13","#b479a9","#3a2e00","#017099","#845421","#008b97","#460d00","#62949e","#211434","#af8450","#30273c","#bd7b70","#005b5c","#c56883","#a68199"]);
+var yAxis = d3.axisRight(y);
 
 //======== DATA CALL & SORT =========
-  Promise.all([                                            // Loading data through promises
-     d3.csv(dataset, {credentials: 'include'})])     // Loading documents
-          .then(datajson => {
 
-console.log(datajson)
+Promise.all([                                            // Loading data through promises
+   d3.csv(dataset, {credentials: 'include'}),        // Loading clusters
+   d3.json(query, {credentials: 'include'})])     // Loading documents
+        .then(datajson => {
+
+var data = datajson[0];
+var keywords = datajson[1].keywords;
+console.log(keywords);
+
+var meanRetweetsArray = [];
+
+data.forEach(d=>{
+          d.date = new Date(d.created_at);
+          d.timespan = new Date(Math.round(d.date.getTime()/600000)*600000);
+          meanRetweetsArray.push(d.retweet_count);
+          keywords.forEach(e => {
+            if (d.text.indexOf(e)>-1){
+              let target = new RegExp(e,'gi');
+              d.text = d.text.replace(target,'<mark>'+e+'</mark>');
+            }
+            if (d.from_user_name.indexOf(e)>-1){
+              let target = new RegExp(e,'gi');
+              d.from_user_name = d.from_user_name.replace(target,'<mark>'+e+'</mark>');
+            }
+            if (d.links.indexOf(e)>-1){
+              let target = new RegExp(e,'gi');
+              d.links = d.links.replace(target,'<mark>'+e+'</mark>');
+            }
+          })
+  })
+
+  meanRetweetsArray.sort((a, b) => a - b);
+  let lowMiddle = Math.floor((meanRetweetsArray.length - 1) / 2);
+  let highMiddle = Math.ceil((meanRetweetsArray.length - 1) / 2);
+  let median = (meanRetweetsArray[lowMiddle] + meanRetweetsArray[highMiddle]) / 2;
+
+  var color = d3.scaleSequential(d3.interpolateBlues)
+                .domain([0,median*10]);
+
+
+  var dataNest = d3.nest()
+                    .key(d => {return d.timespan;})
+                    .entries(data);
+
+const piler = () => {
+    for (i = 0; i < dataNest.length; i++) {
+      let j = dataNest[i].values.length + 1;
+        for (k = 0; k < dataNest[i].values.length; k++) {
+          dataNest[i].values[k].indexPosition = j-1;
+          j--;
+        }
+    }
+  }
+
+  piler();
+
+x.domain(d3.extent(data, d => d.timespan));
+y.domain(d3.extent(data, d => d.indexPosition));
+
+console.log(data)
+console.log(dataNest)
+
+var circle = view.selectAll("circle")
+              .data(data)
+              .enter().append("circle")
+                 .style('fill',d => color(d.retweet_count))
+                 .attr("r", d=> 2)
+                 .attr("cx", d => x(d.timespan))
+                 .attr("cy", d => y(d.indexPosition))
+                   .on("click", function(d) {
+                        d3.select(this).style("cursor", "pointer");
+                        d3.select("#tooltip").html(
+                         '<p class="legend"><strong><a target="_blank" href="https://mobile.twitter.com/'+
+                         d.from_user_name+'">' +
+                         d.from_user_name + '</a></strong> <br/><div style="border:1px solid black;"><p>' +
+                         d.text + "</p></div><br><br> Language: " +
+                         d.lang+"<br>Date: "+
+                         d.date+ "<br> Favorite count: " + d.favorite_count + "<br>Reply count: "+
+                         d.reply_count + "<br>Retweet count: "+
+                         d.retweet_count + "<br>Links: <a target='_blank' href='"+
+                         d.links+"'>"+
+                         d.links+"</a><br> Hashtags: " +
+                         d.hashtags+"<br> Mentionned user names: "+
+                         d.mentionned_user_names+"<br> Source: "+
+                         d.source_name+"<br>Tweet id: <a target='_blank' href='https://mobile.twitter.com/"+d.from_user_name+"/status/"+d.id+"'>"+d.id+"</a><br> Possibly sensitive: "+
+                         d.possibly_sensitive+"<br><br> Embeded media<br><img src='"+
+                         d.medias_urls+"' width='300' ><br><br><strong>Location</strong><br/>City: "+
+                         d.location+"<br> Latitude:"+
+                         d.lat+"<br>Longitude: "+
+                         d.lng+"<br><br><strong>User info</strong><br><img src='"+
+                         d.from_user_profile_image_url+"' max-width='300'><br><br>Account creation date: "+
+                         d.from_user_created_at+"<br> Account name: "+
+                         d.from_user_name+"<br> User id: "+
+                         d.from_user_id  +"<br> User description: "+
+                         d.from_user_description + "<br> User follower count: "+
+                         d.from_user_followercount+"<br> User friend count: "+
+                         d.from_user_friendcount+"<br> User tweet count: "+
+                         d.from_user_tweetcount+""+
+                       '<br><br><br><br><br><br><br><br><br><br>&nbsp;</p>')});
+
 
 loadType();
 
@@ -70,10 +144,12 @@ loadType();
 //======== ZOOM & RESCALE ===========
 var gX = svg.append("g")                                          // Make X axis rescalable
             .attr("class", "axis axis--x")
+            .attr("transform", "translate(0,"+ (height - 50) +")")
             .call(xAxis);
 
 var gY = svg.append("g")                                          // Make Y axis rescalable
             .attr("class", "axis axis--y")
+            .attr("transform", "translate(" + (width -420 )+ ",0)")
             .call(yAxis);
 
 svg.call(zoom).on("dblclick.zoom", null);                         // Zoom and deactivate doubleclick zooming
@@ -84,5 +160,5 @@ function zoomed() {
      gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
    }
 
-ipcRenderer.send('console-logs',"Starting gazouillotype");           // Starting Chronotype
-}                                                                 // Close Chronotype function
+ipcRenderer.send('console-logs',"Starting gazouillotype");           // Starting gazouillotype
+}                                                                 // Close gazouillotype function
