@@ -75,7 +75,9 @@ var dirTree = [
   "/datasets/scopus/scopusDatasets",
   "/datasets/zotero",
   "/datasets/zotero/csl-json",
-  "/datasets/zotero/csl-zoteroCollections"
+  "/datasets/zotero/csl-zoteroCollections",
+  "/datasets/gazouillotype",
+  "/datasets/gazouillotype/datasets"
 ]
 
 const userDataDirTree = (path,dirTree) => {
@@ -113,6 +115,8 @@ var dataLog =  "PANDORÆ Log - "+date;
 
 const availableDatasets = (datasets) => {
 
+console.log(datasets)
+
     let dataList = [];
 
 fs.readdir(userDataPath+'/datasets/',{withFileTypes: true}, (err, files) => {      // list dataset subfolders
@@ -130,7 +134,6 @@ fs.readdir(userDataPath+'/datasets/',{withFileTypes: true}, (err, files) => {   
             let type = files[i];
             let path = userDataPath+'/datasets/'+ files[i]+'/'+folderOne[j]+'/'+item;
               mainWindow.webContents.send('datalist',type,kind,item,path);           // send it to requester
-
                     };
                  });
               }
