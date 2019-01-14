@@ -25,11 +25,11 @@ function resetted() {                                // Going back to origin pos
 }
 
 //========== X & Y AXIS  ============
-var x = d3.scaleTime().range([0,width*2]);
+var x = d3.scaleTime().range([0,width]);
 
 var xAxis = d3.axisBottom(x).ticks(d3.timeMinute.every(60)).tickFormat(multiFormat);
 
-var y = d3.scaleLinear().range([height*1.5,0]);
+var y = d3.scaleLinear().range([height,0]);
 
 var yAxis = d3.axisRight(y);
 
@@ -49,7 +49,7 @@ var meanRetweetsArray = [];
 data.forEach(d=>{
           d.date = new Date(d.created_at);
           d.timespan = new Date(Math.round(d.date.getTime()/600000)*600000);
-          meanRetweetsArray.push(d.retweet_count);
+          if (d.retweet_count>0) {meanRetweetsArray.push(d.retweet_count)};
           keywords.forEach(e => {
             if (d.text.indexOf(e)>-1){
               let target = new RegExp(e,'gi');
@@ -66,10 +66,12 @@ data.forEach(d=>{
           })
   })
 
+console.log(meanRetweetsArray)
+
   meanRetweetsArray.sort((a, b) => a - b);
-  let lowMiddle = Math.floor((meanRetweetsArray.length - 1) / 2);
-  let highMiddle = Math.ceil((meanRetweetsArray.length - 1) / 2);
-  let median = (meanRetweetsArray[lowMiddle] + meanRetweetsArray[highMiddle]) / 2;
+  var median = meanRetweetsArray[parseInt(meanRetweetsArray.length/2)];
+
+  console.log(median)
 
   var color = d3.scaleSequential(d3.interpolateBlues)
                 .domain([0,median*10]);
@@ -91,8 +93,11 @@ const piler = () => {
 
   piler();
 
-x.domain(d3.extent(data, d => d.timespan));
-y.domain(d3.extent(data, d => d.indexPosition));
+var firstDate = new Date(dataNest[0].key);
+var twoDaysLater = new Date(firstDate.getTime()+1.728e+8);
+
+x.domain([firstDate,twoDaysLater]);
+y.domain([0,200]);
 
 console.log(data)
 console.log(dataNest)
@@ -101,7 +106,7 @@ var circle = view.selectAll("circle")
               .data(data)
               .enter().append("circle")
                  .style('fill',d => color(d.retweet_count))
-                 .attr("r", d=> 2)
+                 .attr("r", d=> 1.5)
                  .attr("cx", d => x(d.timespan))
                  .attr("cy", d => y(d.indexPosition))
                    .on("click", function(d) {
