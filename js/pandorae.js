@@ -302,7 +302,7 @@ const localeZH = d3.timeFormatLocale({
 const formatMillisecond = locale.format(".%L"),
     formatSecond = locale.format(":%S"),
     formatMinute = locale.format("%I:%M"),
-    formatHour = locale.format("%I %p"),
+    formatHour = locale.format("%H"),
     formatDay = locale.format("%d %B %Y"),
     formatWeek = locale.format("%d %b %Y"),
     formatMonth = locale.format("%B %Y"),
@@ -453,8 +453,9 @@ const mainDisplay = (type,options) =>{
                         break;
 
       case 'gazouillotype':toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Gazouilloire Data</strong><br><br>Select a dataset and then click <strong><a onclick='gazouillotype(options[0])'>Start</a></strong>";
+                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Gazouilloire Data</strong><br><br>Select a dataset and then click <strong><a onclick='gazouillotype(options[0],options[1])'>Start</a></strong>";
                         ipcRenderer.send('datalist',{"type":"gazouillotype","kind":"datasets"});
+                        ipcRenderer.send('datalist',{"type":"gazouillotype","kind":"query"});
                         break;
 
     }

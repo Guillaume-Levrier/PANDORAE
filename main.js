@@ -77,6 +77,7 @@ var dirTree = [
   "/datasets/zotero/csl-json",
   "/datasets/zotero/csl-zoteroCollections",
   "/datasets/gazouillotype",
+  "/datasets/gazouillotype/query",
   "/datasets/gazouillotype/datasets"
 ]
 
@@ -114,8 +115,6 @@ var dataLog =  "PANDORÆ Log - "+date;
 //FLUX
 
 const availableDatasets = (datasets) => {
-
-console.log(datasets)
 
     let dataList = [];
 
