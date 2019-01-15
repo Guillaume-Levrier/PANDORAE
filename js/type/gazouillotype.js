@@ -12,7 +12,8 @@ var view = svg.append("g")                                            // Appendi
 
 var zoom = d3.zoom()
              .scaleExtent([-5, 10])                                    // Extent to which one can zoom in or out
-             .on("zoom", zoomed);                                     // Trigger the actual zooming function
+            .translateExtent([[-200, -height], [Infinity, height+100]])
+            .on("zoom", zoomed);                                     // Trigger the actual zooming function
 
 //============ RESET ============
 d3.select("#reset").on("click", resetted);           // Clicking the button "reset" triggers the "resetted" function
@@ -74,8 +75,8 @@ console.log(meanRetweetsArray)
   console.log(median)
 
   var color = d3.scaleSequential(d3.interpolateBlues)
+                .clamp(true)
                 .domain([0,median*10]);
-
 
   var dataNest = d3.nest()
                     .key(d => {return d.timespan;})
@@ -109,8 +110,8 @@ var circle = view.selectAll("circle")
                  .attr("r", d=> 1.5)
                  .attr("cx", d => x(d.timespan))
                  .attr("cy", d => y(d.indexPosition))
+                   .on("mouseover", function(d) {d3.select(this).style("cursor", "pointer")})
                    .on("click", function(d) {
-                        d3.select(this).style("cursor", "pointer");
                         d3.select("#tooltip").html(
                          '<p class="legend"><strong><a target="_blank" href="https://mobile.twitter.com/'+
                          d.from_user_name+'">' +
