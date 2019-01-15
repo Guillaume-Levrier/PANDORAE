@@ -15,11 +15,14 @@ If you'd rather test the dev branch, clone the repo, cd into it, and use 'npm i'
 
 ### TODO
 - comment each and every line of JS
-- create an interactive scroller/flowchart tutorial
+- create an interactive scroller/flowchart tutorial (work on tracegraph)
 - enable displaying slides/photos/videos in main canvas
 
 ##### Flux
-- design a specific flux landing page
+- design a specific flux landing page (using an approximate tracetrout+tracegraph viz that would start requesting on boot?)
+
+##### Chaeros
+- Transmit error messages from each service to the console log.
 
 ##### Next version
 - implement FETCH altmetric requests

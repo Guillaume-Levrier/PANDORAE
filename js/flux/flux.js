@@ -435,7 +435,7 @@ console.log(uploadPath)
 
 let targetted = document.getElementById("localSelector").options[document.getElementById("localSelector").options.selectedIndex].value;
 
-    let targetFolder = "datasets/" + targetted + '/' + uploadedFile[0].name;      // Prepare its destination path
+    let targetFolder = userDataPath+ "/datasets/" + targetted + '/' + uploadedFile[0].name;      // Prepare its destination path
 console.log(targetFolder)
   fs.copyFile(uploadPath, targetFolder, (err) => {                                // Copy the file
     if (err) throw err;
