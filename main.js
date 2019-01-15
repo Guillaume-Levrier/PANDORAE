@@ -12,7 +12,10 @@ function createWindow () {
      fullscreenable:true,
      backgroundColor: 'white',
      titleBarStyle: 'hidden',
-     frame: true
+     frame: true,
+     webPreferences: {
+         nodeIntegrationInWorker: true
+       }
    })
 
   mainWindow.loadFile('index.html')
