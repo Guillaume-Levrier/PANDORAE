@@ -453,7 +453,7 @@ const mainDisplay = (type,options) =>{
                         break;
 
       case 'gazouillotype':toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Gazouilloire Data</strong><br><br>Select a dataset and then click <strong><a onclick='gazouillotype(options[0],options[1])'>Start</a></strong>";
+                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Gazouilloire Data</strong><br><br>Select a dataset, a query file, and then click <strong><a onclick='gazouillotype(options[0],options[1])'>Start</a></strong>";
                         ipcRenderer.send('datalist',{"type":"gazouillotype","kind":"datasets"});
                         ipcRenderer.send('datalist',{"type":"gazouillotype","kind":"query"});
                         break;

@@ -28,7 +28,7 @@ function resetted() {                                // Going back to origin pos
 //========== X & Y AXIS  ============
 var x = d3.scaleTime().range([0,width]);
 
-var xAxis = d3.axisBottom(x).ticks(d3.timeMinute.every(60)).tickFormat(multiFormat);
+var xAxis = d3.axisBottom(x).tickFormat(multiFormat);
 
 var y = d3.scaleLinear().range([height,0]);
 
@@ -72,11 +72,13 @@ console.log(meanRetweetsArray)
   meanRetweetsArray.sort((a, b) => a - b);
   var median = meanRetweetsArray[parseInt(meanRetweetsArray.length/2)];
 
+
   console.log(median)
+
 
   var color = d3.scaleSequential(d3.interpolateBlues)
                 .clamp(true)
-                .domain([0,median*10]);
+                .domain([-median*2,median*10]);
 
   var dataNest = d3.nest()
                     .key(d => {return d.timespan;})
