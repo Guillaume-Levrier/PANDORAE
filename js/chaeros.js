@@ -116,6 +116,8 @@ let cityRequests = MultiSet.from(totalCityArray);      // Create a multiset from
 
 let cities = [];
 
+console.log(cityRequests);
+
 Promise.all(cityRequests.forEachMultiplicity((count, key) => {                  // Generate requests per city (=> key)
 
     let options = {
@@ -123,9 +125,11 @@ Promise.all(cityRequests.forEachMultiplicity((count, key) => {                  
         headers: {'User-Agent': 'Request-Promise'},
         json: true
     };
-
+console.log(options);
     return limiter.schedule(rpn,options).then((res) => {                        // Enforce bottleneck through limiter
             if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
+
+console.log(res);
 
 for (var j=0; j<(article.length-1); j++){                                       // For each article (last is a stop signal)
   if (article[j].hasOwnProperty('affiliation')){                                // If it has affiliations
@@ -166,6 +170,7 @@ for (var j=0; j<(article.length-1); j++){                                       
 })
       } catch(e) {
         ipcRenderer.send('chaeros-failure', e);
+        ipcRenderer.send('console-logs', e);
       }
       finally{
 
@@ -941,7 +946,7 @@ let collectionCode = {"code":""};
 
 
    }))
-ipcRenderer.send('console-logs',"Collection "+collectionName+" build.");              // Send success message to console
+ipcRenderer.send('console-logs',"Collection "+JSON.stringify(collectionName)+" built.");              // Send success message to console
 
 }); //end of keytar
 
