@@ -20,7 +20,8 @@
 		"request": "^2.88.0",
 		"request-promise-native": "^1.0.0",
 		"talisman": "^0.21.0",
-		"three": "^0.94.0"
+		"three": "^0.94.0",
+		"@hownetworks/tracegraph": "^0.3.0"
 	},
 	"devDependencies": {
 		"electron": "^2.0.14",
