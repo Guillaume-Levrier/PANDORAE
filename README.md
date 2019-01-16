@@ -1,7 +1,9 @@
 # PANDORÆ Roadmap
 
 Download Alpha-90 version :
+- [windows](https://anthropos-ecosystems.com/pandorae/PANDORAE-win32-x64.zip)
 - [macOS](https://anthropos-ecosystems.com/pandorae/PANDORAE-macOS.zip)
+- [linux](https://anthropos-ecosystems.com/pandorae/PANDORAE-linux-x64.zip)
 
 If you'd rather test the dev branch, clone the repo, cd into it, and use 'npm i', './node_modules/.bin/electron-rebuild' then 'npm start'.
 
