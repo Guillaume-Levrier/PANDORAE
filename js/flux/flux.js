@@ -328,7 +328,7 @@ const zoteroCollectionRetriever = () => {
 
 let zoteroUser = document.getElementById("zoterouserinput").value;               // Get the Zotero user code to request
 
-ipcRenderer.send('console-logs',"Retrieving collections for user "+ zoteroUser); // Log collection request
+ipcRenderer.send('console-logs',"Retrieving collections for Zotero id "+ zoteroUser); // Log collection request
 
 // Ask keytar for zotero API key
 keytar.getPassword("Zotero",zoteroUser).then((zoteroApiKey) => {
@@ -389,7 +389,7 @@ fluxButtonAction ("zotcolret",true,"Zotero Collections Successfully Retrieved","
     )
     .catch(function (err) {
       fluxButtonAction ("zotcolret",false,"Zotero Collections Successfully Retrieved",err);
-      ipcRenderer.send('console-logs',"Error in retrieving collections for user "+ zoteroUser + " : "+err); // Log error
+      ipcRenderer.send('console-logs',"Error in retrieving collections for Zotero id "+ zoteroUser + " : "+err); // Log error
     });
   })
 }
