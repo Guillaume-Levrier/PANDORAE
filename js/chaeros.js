@@ -867,7 +867,8 @@ for (let j = 0; j < collections.length; j++) {                                  
          }
       })
   })
-    ipcRenderer.send('console-logs',"Retrieval successful.");
+    ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " zotero dataset imported in "+path);
+    ipcRenderer.send('chaeros-success', 'Zotero dataset imported');
     win.hide();
   })
 }) // closing Keytar
