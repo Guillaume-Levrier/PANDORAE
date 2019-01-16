@@ -13,13 +13,164 @@
 // but it could technically be reopened once Chæros is done processing the powerValve request. As it can be frustrating for // advanced user, this feature isn't currently enforced.
 
 //========== REQUIRED MODULES ==========
+const tg = require("@hownetworks/tracegraph");
 const rpn = require('request-promise-native');                        // RPN enables to generate requests to various APIs
 const fs = require('fs');                                             // FileSystem reads/writes files and directories
 const userDataPath = remote.app.getPath('userData');
 const {ipcRenderer} = require('electron');                            // ipcRenderer manages messages with Main Process
+const d3 = require("d3");
 
 //========== STARTING FLUX ==========
-ipcRenderer.send('console-logs',"Opening Flux");           // Starting Chronotype
+ipcRenderer.send('console-logs',"Opening Flux");           // Sending notification to console
+
+//========== Tracegraph ==========
+
+let traces = [
+  {"hops": [{"root": true},{"info": {"city": "Hop n°1","continent": {"code": "EU",  "name": "Europe"},"country": {"code": "DE","name": "Germany"}},"ip": "Server 1","ttl": 1},
+ {"info": {"city": "Toronto","continent": {"code": "NA","name": "North America"},"country": { "code": "CA", "name": "Canada"}},"ip": "Server 2","ttl": 2}, {"info": {"continent": {"code":"NA","name": "North America"},"country": {"code": "US", "name": "United States"}},   "ip": "Server 3","ttl": 3}]},
+ {"hops": [{"root": true},{"info": {"city": "Hop n°1","continent": {"code": "EU",  "name": "Europe"},"country": {"code": "DE","name": "Germany"}},"ip": "Server 1","ttl": 1},
+{"info": {"city": "Toronto","continent": {"code": "NA","name": "North America"},"country": { "code": "CA", "name": "Canada"}},"ip": "Server 2","ttl": 2}, {"info": {"continent": {"code":"NA","name": "North America"},"country": {"code": "US", "name": "United States"}},   "ip": "Server 3","ttl": 3}]},
+{"hops": [{"root": true},{"info": {"city": "Hop n°1","continent": {"code": "EU",  "name": "Europe"},"country": {"code": "DE","name": "Germany"}},"ip": "Server 1","ttl": 1},
+{"info": {"city": "Toronto","continent": {"code": "NA","name": "North America"},"country": { "code": "CA", "name": "Canada"}},"ip": "Server 2","ttl": 2}, {"info": {"continent": {"code":"NA","name": "North America"},"country": {"code": "US", "name": "United States"}},   "ip": "Server 3","ttl": 3}]}
+];
+
+console.log(traces)
+
+
+function draw (svg, traces, horizontal, showTexts) {
+  function makeText(selection) {
+   return selection
+     .append("text")
+     .attr("font-family", "sans-serif")
+     .attr("font-size", 12);
+ }
+
+ const tmpSvg = d3.select("body").append("svg");
+ const tmpText = makeText(tmpSvg);
+
+ const graph = tg
+   .tracegraph()
+   .horizontal(horizontal)
+   .nodeSize(node => {
+     const ip = node.hops[0].ip;
+     if (showTexts && ip) {
+      const bbox = {};
+      tmpText.text(ip).node().getBBox();
+      return [bbox.width + 14, bbox.height + 8];
+     }
+     return ip || node.hops[0].root ? [30, 30] : [10, 10];
+   })
+   .levelMargin(10)
+   .hopDefined(hop => hop.ip || hop.root)
+   .traceWidth(6)
+   .nodeId((hop, hopIndex, trace, traceIndex) => {
+     return (
+       hop.ip || (hop.root && "root") || `empty-${traceIndex}-${hopIndex}`
+     );
+   });
+ const layout = graph(traces);
+ tmpSvg.remove();
+
+ const vb = layout.bounds.expanded(4);
+
+console.log(layout);
+
+ svg
+   //.attr("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`)
+   .attr("width", 450)
+   .attr("height", 450);
+
+/* const gradients = layout.nodes.map(() => tg.genUID());
+
+ svg
+   .append("defs")
+   .selectAll("linearGradient")
+   .data(layout.nodes.map(tg.nodeGradient))
+   .enter()
+   .append("linearGradient")
+   .attr("id", (d, i) => gradients[i].id)
+   .attr("gradientUnits", d => d.gradientUnits)
+   .attr("x1", d => d.x1)
+   .attr("y1", d => d.y1)
+   .attr("x2", d => d.x2)
+   .attr("y2", d => d.y2)
+   .selectAll("stop")
+   .data(d => d.stops)
+   .enter()
+   .append("stop")
+   .attr("offset", d => d.offset)
+   .attr(
+     "stop-color",
+     d => d3.schemeSet2[d.traceIndex % d3.schemeSet2.length]
+   );
+*/
+ const traceGroup = svg
+   .selectAll(".trace")
+   .data(layout.traces)
+   .enter()
+   .append("g")
+   .attr("class", "trace")
+   .attr("fill", "none");
+
+ traceGroup
+   .filter(segment => segment.defined)
+   .append("path")
+   .attr("stroke-width", d => d.width - 2)
+   .attr("stroke", "white")
+   .attr("d", tg.traceCurve());
+
+ traceGroup
+   .append("path")
+   .attr("stroke-width", d => (d.defined ? d.width - 4.5 : d.width - 5))
+   .attr("stroke", "black")
+   .attr("stroke-dasharray", segment => (segment.defined ? "" : "4 2"))
+   .attr("d", tg.traceCurve());
+
+ const nodeGroup = svg
+   .selectAll(".node")
+   .data(layout.nodes)
+   .enter()
+   .append("g")
+   .attr("class", "node")
+   .attr("stroke", "black")
+   .attr("stroke-width", 2)
+   .attr("fill", "white");
+
+ const textNodes = nodeGroup
+   .filter(d => showTexts && d.hops[0].ip)
+   .datum(d => ({ ...d, bounds: d.bounds.expanded(-2.5) }));
+
+ textNodes
+   .append("rect")
+   .attr("rx", 2)
+   .attr("ry", 2)
+   .attr("x", d => d.bounds.x)
+   .attr("y", d => d.bounds.y)
+   .attr("width", d => d.bounds.width)
+   .attr("height", d => d.bounds.height);
+
+ makeText(textNodes)
+   .attr("x", d => d.bounds.cx)
+   .attr("y", d => d.bounds.cy)
+   .attr("stroke", "none")
+   .attr("fill", "#666")
+   .attr("alignment-baseline", "central")
+   .attr("text-anchor", "middle")
+   .text(d => d.hops[0].ip);
+
+ nodeGroup
+   .filter(d => !(showTexts && d.hops[0].ip))
+   .append("circle")
+   .attr("r", d => Math.min(d.bounds.width, d.bounds.height) / 2)
+   .attr("cx", d => d.bounds.cx)
+   .attr("cy", d => d.bounds.cy);
+
+console.log(svg)
+}
+
+const svg = d3.select("svg");
+
+draw(svg, traces, true, true);
 
 //========== fluxDisplay ==========
 // Display relevant tab when called according to the tab's id.
