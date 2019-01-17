@@ -51,20 +51,18 @@ data.forEach(d=>{
           d.date = new Date(d.created_at);
           d.timespan = new Date(Math.round(d.date.getTime()/600000)*600000);
           if (d.retweet_count>0) {meanRetweetsArray.push(d.retweet_count)};
-          keywords.forEach(e => {
-            if (d.text.indexOf(e)>-1){
-              let target = new RegExp(e,'gi');
+        /*  keywords.forEach(e => {
+            let target = new RegExp(e,'gi');
+            if (target.test(d.text)){
               d.text = d.text.replace(target,'<mark>'+e+'</mark>');
             }
-            if (d.from_user_name.indexOf(e)>-1){
-              let target = new RegExp(e,'gi');
+            if (target.test(d.from_user_name)){
               d.from_user_name = d.from_user_name.replace(target,'<mark>'+e+'</mark>');
             }
-            if (d.links.indexOf(e)>-1){
-              let target = new RegExp(e,'gi');
+            if (target.test(d.links)){
               d.links = d.links.replace(target,'<mark>'+e+'</mark>');
             }
-          })
+          })*/
   })
 
 console.log(meanRetweetsArray)
@@ -102,8 +100,6 @@ var twoDaysLater = new Date(firstDate.getTime()+1.728e+8);
 x.domain([firstDate,twoDaysLater]);
 y.domain([0,200]);
 
-console.log(data)
-console.log(dataNest)
 
 var circle = view.selectAll("circle")
               .data(data)
@@ -114,6 +110,19 @@ var circle = view.selectAll("circle")
                  .attr("cy", d => y(d.indexPosition))
                    .on("mouseover", function(d) {d3.select(this).style("cursor", "pointer")})
                    .on("click", function(d) {
+                           keywords.reduce((res,val) => res.concat(val.split(/ AND /)),[])
+                           .forEach(e => {
+                            let target = new RegExp('\\b'+e+'\\b','gi');
+                             if (target.test(d.text)){
+                               d.text = d.text.replace(target,'<mark>'+e+'</mark>');
+                             }
+                             if (target.test(d.from_user_name)){
+                               d.from_user_name = d.from_user_name.replace(target,'<mark>'+e+'</mark>');
+                             }
+                             if (target.test(d.links)){
+                               d.links = d.links.replace(target,'<mark>'+e+'</mark>');
+                             }
+                           })
                         d3.select("#tooltip").html(
                          '<p class="legend"><strong><a target="_blank" href="https://mobile.twitter.com/'+
                          d.from_user_name+'">' +
