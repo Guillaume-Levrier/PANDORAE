@@ -29,7 +29,7 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset);
 
   let convertedDataset = [];                                         // Create relevant array
 
-  fs.readFile(userDataPath +'/datasets/scopus/scopusDatasets/' + dataset, // Read the designated datafile
+  fs.readFile(userDataPath +'/datasets/7scopus/2scopusDatasets/' + dataset, // Read the designated datafile
                                 'utf8', (err, data) => {             // Additional options for readFile
     if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};                                              // Throw an error if readFile fails
     try {                                                            // If the file is valid, do the following:
@@ -59,7 +59,7 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset);
         finally {
           let data = JSON.stringify(convertedDataset);                           // Prepare data to be written
             fs.writeFile(                                                        // Write data
-              userDataPath +'/datasets/zotero/csl-json/csl-'+dataset,data,'utf8',// Path/name, data, format
+              userDataPath +'/datasets/8zotero/1csl-json/csl-'+dataset,data,'utf8',// Path/name, data, format
                 (err) => {if (err)                                               // On error
                 ipcRenderer.send('chaeros-failure', err);                        // Send error to main process for dispatch
                 ipcRenderer.send('console-logs',JSON.stringify(err));
@@ -78,7 +78,7 @@ const scopusGeolocate = (dataset,user) => {
 
 ipcRenderer.send('console-logs',"Started scopusGeolocate on " + dataset);
 
-fs.readFile(userDataPath +'/datasets/scopus/scopusDatasets/' + dataset,      // Read the dataset passed as option
+fs.readFile(userDataPath +'/datasets/7scopus/2scopusDatasets/' + dataset,      // Read the dataset passed as option
                               'utf8', (err, data) => {                       // It should be encoded as UTF-8
   if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
 
@@ -158,7 +158,7 @@ for (var j=0; j<(article.length-1); j++){                                       
       let docstring=JSON.stringify(doc);                                          // Stringify to write
 
           fs.writeFile(                                                                  // Write data
-            userDataPath +'/datasets/scopus/scopusDatasets/geoloc-'+dataset,docstring,'utf8',
+            userDataPath +'/datasets/7scopus/2scopusDatasets/geoloc-'+dataset,docstring,'utf8',
               (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
 
     ipcRenderer.send('chaeros-success', 'Success: Geolocation added');              //Send success message to main process
@@ -211,7 +211,7 @@ rpn(optionsRequest)                                 // RPN stands for Request-pr
 
     let docAmount = firstResponse['search-results']['opensearch:totalResults']; // Get the total amount of docs
 
-    let output = fs.createWriteStream(userDataPath+'/datasets/scopus/scopusDatasets/scopus-data-'+ scopusQuery +'.json'); // Start the stream
+    let output = fs.createWriteStream(userDataPath+'/datasets/7scopus/2scopusDatasets/scopus-data-'+ scopusQuery +'.json'); // Start the stream
 
 // Create the output document's properties
     let date = new Date().toJSON();                 // Create a timestamp
@@ -274,8 +274,8 @@ const capcoRebuilder = (dataFile,dataMatch) => {
 
 ipcRenderer.send('console-logs',"Rebuilding Capco dataset " + dataFile + " with matching file "+ dataMatch);
 
-Promise.all([d3.csv(userDataPath+"/datasets/publicdebate/capco/"+dataFile, {credentials: 'include'}),     // Load the main datafile
-             d3.csv(userDataPath+"/datasets/publicdebate/matching/"+dataMatch, {credentials: 'include'})  // Load secondary datafile with prop eval
+Promise.all([d3.csv(userDataPath+"/datasets/6publicdebate/1capco/"+dataFile, {credentials: 'include'}),     // Load the main datafile
+             d3.csv(userDataPath+"/datasets/6publicdebate/3matching/"+dataMatch, {credentials: 'include'})  // Load secondary datafile with prop eval
           ]).then(datajson => {                                             // Then with the response array
           const rawData = datajson[0];                                      // First array/datafile is rawData var
           const opinionData = datajson[1];                                  // Second is opinionData (-> prop eval)
@@ -679,7 +679,7 @@ finally{
       console.log("writing...");
       let dataset = JSON.stringify(data);
         fs.writeFile(
-          userDataPath+'/datasets/publicdebate/pubdeb/'+dataFile.substring(0,dataFile.length-4)+'.json',
+          userDataPath+'/datasets/6publicdebate/4pubdeb/'+dataFile.substring(0,dataFile.length-4)+'.json',
           dataset,
           'utf8',
           (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
@@ -689,7 +689,7 @@ finally{
 
         let datalink = JSON.stringify(links);
           fs.writeFile(
-            userDataPath +'/datasets/publicdebate/links/'+dataMatch.substring(0,dataMatch.length-4)+'.json',datalink,'utf8',
+            userDataPath +'/datasets/6publicdebate/2links/'+dataMatch.substring(0,dataMatch.length-4)+'.json',datalink,'utf8',
               (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
           });
     ipcRenderer.send('console-logs',"CapCo " + dataFile + " links has been successfully written.");
@@ -785,14 +785,14 @@ var communitySet = communitySet.top(50);                                // Limit
       console.log("writing...");
       data = JSON.stringify(data);
         fs.writeFile(
-          userDataPath+'/datasets/publicdebate/pubdeb/lexi-'+dataset+".json",
+          userDataPath+'/datasets/6publicdebate/4pubdeb/lexi-'+dataset+".json",
           data,
           'utf8',
           (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
         });
         communitySet = JSON.stringify(communitySet);
           fs.writeFile(
-            userDataPath+'/datasets/publicdebate/pubdeb/commun-'+dataset+".json",
+            userDataPath+'/datasets/6publicdebate/4pubdeb/commun-'+dataset+".json",
             communitySet,
             'utf8',
             (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};

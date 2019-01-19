@@ -54,34 +54,34 @@ var dirTree = [
   "/logs",
   "/userID",
   "/datasets",
-  "/datasets/altmetric",
-  "/datasets/altmetric/requests",
-  "/datasets/altmetric/results",
-  "/datasets/anthropotype",
-  "/datasets/anthropotype/affiliations",
-  "/datasets/anthropotype/humans",
-  "/datasets/anthropotype/links",
-  "/datasets/chronotype",
-  "/datasets/chronotype/biblio",
-  "/datasets/chronotype/links",
-  "/datasets/geotype",
-  "/datasets/geotype/locations",
-  "/datasets/pharmacotype",
-  "/datasets/pharmacotype/trials",
-  "/datasets/publicdebate",
-  "/datasets/publicdebate/capco",
-  "/datasets/publicdebate/links",
-  "/datasets/publicdebate/matching",
-  "/datasets/publicdebate/pubdeb",
-  "/datasets/scopus",
-  "/datasets/scopus/csl-json",
-  "/datasets/scopus/scopusDatasets",
-  "/datasets/zotero",
-  "/datasets/zotero/csl-json",
-  "/datasets/zotero/csl-zoteroCollections",
-  "/datasets/gazouillotype",
-  "/datasets/gazouillotype/query",
-  "/datasets/gazouillotype/datasets"
+  "/datasets/1altmetric",
+  "/datasets/1altmetric/1requests",
+  "/datasets/1altmetric/2results",
+  "/datasets/2anthropotype",
+  "/datasets/2anthropotype/1affiliations",
+  "/datasets/2anthropotype/2humans",
+  "/datasets/2anthropotype/3links",
+  "/datasets/3chronotype",
+  "/datasets/3chronotype/1biblio",
+  "/datasets/3chronotype/2links",
+  "/datasets/4geotype",
+  "/datasets/4geotype/1locations",
+  "/datasets/5pharmacotype",
+  "/datasets/5pharmacotype/1trials",
+  "/datasets/6publicdebate",
+  "/datasets/6publicdebate/1capco",
+  "/datasets/6publicdebate/2links",
+  "/datasets/6publicdebate/3matching",
+  "/datasets/6publicdebate/4pubdeb",
+  "/datasets/7scopus",
+  "/datasets/7scopus/1csl-json",
+  "/datasets/7scopus/2scopusDatasets",
+  "/datasets/8zotero",
+  "/datasets/8zotero/1csl-json",
+  "/datasets/8zotero/2csl-zoteroCollections",
+  "/datasets/9gazouillotype",
+  "/datasets/9gazouillotype/1datasets",
+  "/datasets/9gazouillotype/2query"
 ]
 
 const userDataDirTree = (path,dirTree) => {
@@ -127,9 +127,10 @@ fs.readdir(userDataPath+'/datasets/',{withFileTypes: true}, (err, files) => {   
         fs.readdir(userDataPath+'/datasets/'+files[i],{withFileTypes: true}, (err, folderOne) => { // read its content
 
   for (let j = 0;j<folderOne.length;j++){
-    if (datasets.kind===folderOne[j]){                                 // if this is the relevant subsubfolder
-      fs.readdir(userDataPath+'/datasets/'+files[i]+'/'+folderOne[j], (err, folderTwo) => {     // read its content
 
+    if (datasets.kind===parseInt(folderOne[j][0])){                                 // if this is the relevant subsubfolder
+      fs.readdir(userDataPath+'/datasets/'+files[i]+'/'+folderOne[j], (err, folderTwo) => {     // read its content
+console.log("FolderTwo: "+folderTwo);
           for (let k = 0;k<folderTwo.length;k++){           // loop on each object
             let item = folderTwo[k];
             let kind = folderOne[j];
@@ -138,7 +139,11 @@ fs.readdir(userDataPath+'/datasets/',{withFileTypes: true}, (err, files) => {   
               mainWindow.webContents.send('datalist',type,kind,item,path);           // send it to requester
                     };
                  });
-              }
+              } else {
+
+                // Send OK signal for Worker activation
+
+               }
             };
           })
         };
