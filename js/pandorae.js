@@ -402,6 +402,13 @@ const selectOption = (type,kind,item,path) => {
             selected.path = path;
             options.push(path);
         document.getElementById(item).style.backgroundColor = "darkgrey";
+        toggleTertiaryMenu();
+        // FS Stats
+        fs.stat(path, (err, d) => {
+          
+          //document.getElementById("thirdmenu").innerHTML= "<p>"+JSON.stringify(statList)+"</p>"
+
+        });
         ipcRenderer.send('console-logs',"Selecting dataset: " + JSON.stringify(selected));
 }
 
@@ -454,8 +461,8 @@ const mainDisplay = (type,options) =>{
 
       case 'gazouillotype':toggleSecondaryMenu();
                         document.getElementById('secMenTopTab').innerHTML = "<strong>Select Gazouilloire Data</strong><br><br>Select a dataset, a query file, and then click <strong><a onclick='gazouillotype(options[0],options[1])'>Start</a></strong>";
-                        ipcRenderer.send('datalist',{"type":"gazouillotype","kind":"datasets"});
-                        ipcRenderer.send('datalist',{"type":"gazouillotype","kind":"query"});
+                        ipcRenderer.send('datalist',{"type":"9gazouillotype","kind":1});
+                        //ipcRenderer.send('datalist',{"type":"gazouillotype","kind":"query"});
                         break;
 
     }
