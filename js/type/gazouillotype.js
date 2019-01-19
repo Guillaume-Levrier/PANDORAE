@@ -1,9 +1,9 @@
 const gazouillotype = (dataset,query) => {                          // When called, draw the gazouillotype
 
-console.log(dataset);
-
 //========== SVG VIEW =============
 var svg = d3.select(xtype).append("svg").attr("id","xtypeSVG");       // Creating the SVG node
+
+var keywordsTooltip = d3.select("#tooltip").append("div").attr("id","keywords");
 
 svg.attr("width", width-(0.3*width)).attr("height", height);          // Attributing width and height to svg
 
@@ -11,19 +11,9 @@ var view = svg.append("g")                                            // Appendi
               .attr("class", "view");                                 // CSS viewfinder properties
 
 var zoom = d3.zoom()
-             .scaleExtent([-5, 10])                                    // Extent to which one can zoom in or out
-            .translateExtent([[-200, -height], [Infinity, height+100]])
+            .scaleExtent([0.6, 10])                                    // Extent to which one can zoom in or out
+            .translateExtent([[-200, -Infinity], [Infinity, height+100]])
             .on("zoom", zoomed);                                     // Trigger the actual zooming function
-
-//============ RESET ============
-d3.select("#reset").on("click", resetted);           // Clicking the button "reset" triggers the "resetted" function
-
-function resetted() {                                // Going back to origin position function
-     d3.select("#xtypeSVG")                          // Selecting the relevant svg element in webpage
-        .transition().duration(2000)                 // Resetting takes some time
-        .call(zoom.transform, d3.zoomIdentity);      // Using "zoomIdentity", go back to initial position
-    ipcRenderer.send('console-logs',"Resetting gazouillotype to initial position.");// Send message in the "console"
-}
 
 //========== X & Y AXIS  ============
 var x = d3.scaleTime().range([0,width]);
@@ -43,7 +33,6 @@ Promise.all([                                            // Loading data through
 
 var data = datajson[0];
 var keywords = datajson[1].keywords;
-console.log(keywords);
 
 var meanRetweetsArray = [];
 
@@ -51,28 +40,10 @@ data.forEach(d=>{
           d.date = new Date(d.created_at);
           d.timespan = new Date(Math.round(d.date.getTime()/600000)*600000);
           if (d.retweet_count>0) {meanRetweetsArray.push(d.retweet_count)};
-        /*  keywords.forEach(e => {
-            let target = new RegExp(e,'gi');
-            if (target.test(d.text)){
-              d.text = d.text.replace(target,'<mark>'+e+'</mark>');
-            }
-            if (target.test(d.from_user_name)){
-              d.from_user_name = d.from_user_name.replace(target,'<mark>'+e+'</mark>');
-            }
-            if (target.test(d.links)){
-              d.links = d.links.replace(target,'<mark>'+e+'</mark>');
-            }
-          })*/
   })
-
-console.log(meanRetweetsArray)
 
   meanRetweetsArray.sort((a, b) => a - b);
   var median = meanRetweetsArray[parseInt(meanRetweetsArray.length/2)];
-
-
-  console.log(median)
-
 
   var color = d3.scaleSequential(d3.interpolateBlues)
                 .clamp(true)
@@ -97,9 +68,12 @@ const piler = () => {
 var firstDate = new Date(dataNest[0].key);
 var twoDaysLater = new Date(firstDate.getTime()+1.728e+8);
 
+
+
 x.domain([firstDate,twoDaysLater]);
 y.domain([0,200]);
 
+d3.select("#tooltip").html("<p>"+JSON.stringify(keywords)+"</p>");
 
 var circle = view.selectAll("circle")
               .data(data)
@@ -153,7 +127,23 @@ var circle = view.selectAll("circle")
                        '<br><br><br><br><br><br><br><br><br><br>&nbsp;</p>')});
 
 
+function narrative(focused) {                                                     // Experimental narrative function
+     d3.select("#xtypeSVG")
+        .transition().duration(5000)
+        .call(zoom.transform, d3.zoomIdentity
+            .translate(width / 2, height / 2)
+            .scale(8)
+            .translate(-x(focused.timespan), -y(focused.indexPosition)));
+}
+
+narrative(data[0]);
+
+const reset = () => narrative(data[0]);
+
+d3.select("#option-icon").on("click", reset);           // Clicking the button "reset" triggers the "resetted" function
+
 loadType();
+
 
 });  //======== END OF DATA CALL (PROMISES) ===========
 
