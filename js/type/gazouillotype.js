@@ -10,23 +10,33 @@ var view = svg.append("g")                                            // Appendi
 
 var brushHeight = 150;
 
+svg.append("rect")                                   // Putting a rectangle above the grid to make dates easier to read
+    .attr("x", 0).attr("y", height-brushHeight)                       // Rectangle starts at top left
+    .attr("width", width).attr("height", brushHeight)         // Rectangle dimensions
+    .style("fill", "white")     // Rectangle background color and opacity
+    .style("stroke-width","0");                      // Invisible borders
+
+
 var context = svg.append("g")
     .attr("class", "context")
+    .style("pointer-event","none")
     .attr("transform", "translate(0,"+(height-brushHeight-50)+")");
 
 var zoom = d3.zoom()
-            .scaleExtent([0.6, 10])                                    // Extent to which one can zoom in or out
+            .scaleExtent([0.6, Infinity])                                    // Extent to which one can zoom in or out
             .translateExtent([[-200, -Infinity], [Infinity, height+brushHeight]])
             .on("zoom", zoomed);                                     // Trigger the actual zooming function
 
 var brush = d3.brushX()
     .extent([[0, 0], [width, brushHeight-50]]);
-//    .on("brush end", brushed);
+    //.on("brush end", brushed);
 
 //========== X & Y AXIS  ============
 var x = d3.scaleTime().range([0,width-(0.3*width)]),
     x2 = d3.scaleTime().range([0,width-(0.3*width)]);
+
 var xAxis = d3.axisBottom(x).tickFormat(multiFormat);
+var xAxis2 = d3.axisBottom(x2).tickFormat(multiFormat);
 
 var y = d3.scaleLinear().range([height-brushHeight,0]),
     y2 = d3.scaleLinear().range([brushHeight,0]);
@@ -39,6 +49,7 @@ var area = d3.area()
     .y0(brushHeight)
     .y1(d =>y2(d.indexPosition));
 
+var domainDates = [];
 
 //======== DATA CALL & SORT =========
 
@@ -69,6 +80,8 @@ data.forEach(d=>{
                     .key(d => {return d.timespan;})
                     .entries(data);
 
+
+
 const piler = () => {
     for (i = 0; i < dataNest.length; i++) {
       let j = dataNest[i].values.length + 1;
@@ -79,17 +92,20 @@ const piler = () => {
     }
   }
 
-  piler();
+piler();
 
 var firstDate = new Date(dataNest[0].key);
-var twoDaysLater = new Date(firstDate.getTime()+1.728e+8);
 var lastDate = new Date(dataNest[dataNest.length-1].key);
+domainDates.push(firstDate,lastDate);
 
-x.domain([firstDate,twoDaysLater]);
-y.domain([0,200]);
+var totalPiles = (domainDates[1].getTime()-domainDates[0].getTime())/600000;
 
-x2.domain([firstDate,lastDate]);
+x.domain(domainDates);
+y.domain([0,totalPiles/1.2]);
+
+x2.domain(domainDates);
 y2.domain([0, d3.max(data, d=> d.indexPosition)]);
+
 
 
 const keywordsDisplay = () => {
@@ -105,22 +121,25 @@ context.append("g")
       .attr("class", "brush")
       .attr("transform", "translate(0,"+(50)+")")
       .call(brush)
-      .call(brush.move, x.range());
+      .call(brush.move, x.range())
+      .style("cursor","not-allowed");
 
-/*
-svg.append("rect")                                   // Putting a rectangle above the grid to make dates easier to read
-    .attr("x", 0).attr("y", height-brushHeight)                       // Rectangle starts at top left
-    .attr("width", width).attr("height", brushHeight)         // Rectangle dimensions
-    .style("fill", "white")     // Rectangle background color and opacity
-    .style("stroke-width","0");                      // Invisible borders
-*/
+let radius = 0;
+
+for (var i = 0; i < data.length; i++) {
+  if (data[i].timespan.getTime()===data[i+1].timespan.getTime()){
+    radius = (y(data[i+1].indexPosition)-y(data[i].indexPosition))/3;
+ break;
+  }
+}
+
 
 var circle = view.selectAll("circle")
               .data(data)
               .enter().append("circle")
                   .attr("class", "circle")
                  .style('fill',d => color(d.retweet_count))
-                 .attr("r", d=> 1.3)
+                 .attr("r", radius)
                  .attr("cx", d => x(d.timespan))
                  .attr("cy", d => y(d.indexPosition))
                    .on("mouseover", function(d) {d3.select(this).style("cursor", "pointer")})
@@ -179,6 +198,8 @@ function narrative(focused) {                                                   
 
 narrative(data[0]);
 
+console.log(data[0]);
+
 const reset = () => narrative(data[0]);
 
 d3.select("#option-icon").on("click", reset);           // Clicking the button "reset" triggers the "resetted" function
@@ -187,16 +208,27 @@ loadType();
 
 keywordsDisplay();
 
-x.domain([firstDate,lastDate]);
-
+/*
+svg.append("rect")
+    .attr("class", "zoom")
+    .style("fill","none")
+    .attr("width", width)
+    .attr("height", height)
+    .call(zoom);
+*/
 });  //======== END OF DATA CALL (PROMISES) ===========
 
 
 //======== ZOOM & RESCALE ===========
 var gX = svg.append("g")                                          // Make X axis rescalable
             .attr("class", "axis axis--x")
-            .attr("transform", "translate(0,"+ (height - 50) +")")
+            .attr("transform", "translate(0,"+ (height - 180) +")")
             .call(xAxis);
+
+var gX2 = svg.append("g")                                          // Make X axis rescalable
+            .attr("class", "axis axis--x")
+            .attr("transform", "translate(0,"+ (height - 50) +")")
+            .call(xAxis2);
 
 var gY = svg.append("g")                                          // Make Y axis rescalable
             .attr("class", "axis axis--y")
@@ -208,24 +240,21 @@ svg.call(zoom).on("dblclick.zoom", null);                         // Zoom and de
 function zoomed() {
   if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
   var t = d3.event.transform;
-  //view.select(".circle").attr("d", circle);
-
   context.select(".brush").call(brush.move, x2.range().map(t.invertX, t));
-   view.attr("transform", d3.event.transform);
+   view.attr("transform", t);
      gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
      gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
-  //   x.domain(t.rescaleX(x2).domain());
    }
 
 function brushed() {
   if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-  //var s = d3.event.selection || x2.range();
-  //x.domain(s.map(x2.invert, x2));
-  //view.select(".circle").attr("d", circle);
-  //gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
-  //view.call(zoom.transform, d3.zoomIdentity
-  //    .scale(width / (s[1] - s[0]))
-  //    .translate(-s[0], 0));
+/*var s = d3.event.selection || x2.range();
+  x.domain(s.map(x2.invert, x2));
+  console.log(x.domain())
+  view.select(".axis--x").call(xAxis);
+  view.call(zoom.transform, d3.zoomIdentity
+      .scale(width / (s[1] - s[0]))
+      .translate(-s[0], y(1)));*/
 }
 
 function type(d) {
