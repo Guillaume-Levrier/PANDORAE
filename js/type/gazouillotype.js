@@ -198,7 +198,7 @@ function narrative(focused) {                                                   
 
 narrative(data[0]);
 
-console.log(data[0]);
+
 
 const reset = () => narrative(data[0]);
 

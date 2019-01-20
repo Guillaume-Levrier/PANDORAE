@@ -68,11 +68,10 @@ let toggledMenu = false;
 const purgeMenuItems = (menu) => {
   let menuContent = document.getElementById(menu);
   while (menuContent.firstChild) {menuContent.removeChild(menuContent.firstChild);}
-  while(options.length > 0) {options.pop();}
 }
 
 const toggleMenu = () => {
-  while(options.length > 0) {options.pop();}
+  //while(options.length > 0) {options.pop();}
   if (toggledMenu) {
     if (toggledSecondaryMenu) {toggleSecondaryMenu();toggleMenu();}
     else if (toggledTertiaryMenu) {toggleTertiaryMenu();toggleSecondaryMenu();toggleMenu();}
@@ -397,32 +396,103 @@ const purgeCore = () => {
 var options = [];
 
 const start = (type,options) => {
-  console.log(type);
-  console.log(options);
-  console.log(options.length);
 
 let argLength = 99;
 
   switch (type) {
-            case '3chronotype':argLength = 1;break;
-            case '1anthropotype': argLength = 3; break;
-            case '4geotype': argLength = 1; break;
-            case '5pharmacotype': argLength = 1; break;
-            case '6topotype': argLength = 2; break;
-            case '9gazouillotype': argLength = 2; break;
+            case '3chronotype':argLength = 1;
+            if (options.length === argLength) {
+              toggleMenu();
+              document.getElementById("field").style.pointerEvents = "all";
+              document.getElementById("field").value = "start chronotype";
+              document.getElementById("field").addEventListener("click", ()=>{
+                  chronotype(options[0]);
+                  toggleMenu();
+                  document.getElementById("field").removeEventListener("click", ()=>
+                        chronotype(options[0]));
+                  document.getElementById("field").style.pointerEvents = "none";
+              }
+            );
+          }
+          break;
+            case '1anthropotype': argLength = 3;
+            if (options.length === argLength) {
+              toggleMenu();
+              document.getElementById("field").style.pointerEvents = "all";
+              document.getElementById("field").value = "start anthropotype";
+              document.getElementById("field").addEventListener("click", ()=>{
+                  anthropotype(options[0],options[1],options[2]);
+                  toggleMenu();
+                  document.getElementById("field").removeEventListener("click", ()=>
+                        anthropotype(options[0],options[1],options[2]));
+                  document.getElementById("field").style.pointerEvents = "none";
+              }
+            );
+          }
+            break;
+            case '4geotype': argLength = 1;
+            if (options.length === argLength) {
+              toggleMenu();
+              document.getElementById("field").style.pointerEvents = "all";
+              document.getElementById("field").value = "start geotype";
+              document.getElementById("field").addEventListener("click", ()=>{
+                  geotype(options[0]);
+                  toggleMenu();
+                  document.getElementById("field").removeEventListener("click", ()=>
+                        geotype(options[0]));
+                  document.getElementById("field").style.pointerEvents = "none";
+              }
+            );
+          }
+          break;
+            case '5pharmacotype': argLength = 1;
+            if (options.length === argLength) {
+              toggleMenu();
+              document.getElementById("field").style.pointerEvents = "all";
+              document.getElementById("field").value = "start pharmacotype";
+              document.getElementById("field").addEventListener("click", ()=>{
+                  pharmacotype(options[0]);
+                  toggleMenu();
+                  document.getElementById("field").removeEventListener("click", ()=>
+                        pharmacotype(options[0]));
+                  document.getElementById("field").style.pointerEvents = "none";
+              }
+            );
+          }
+            break;
+            case '6topotype': argLength = 2;
+            if (options.length === argLength) {
+              toggleMenu();
+              document.getElementById("field").style.pointerEvents = "all";
+              document.getElementById("field").value = "start topotype";
+              document.getElementById("field").addEventListener("click", ()=>{
+                  topotype(options[0],options[1]);
+                  toggleMenu();
+                  document.getElementById("field").removeEventListener("click", ()=>
+                        topotype(options[0],options[1]));
+                  document.getElementById("field").style.pointerEvents = "none";
+              }
+            );
+          }
+            break;
+            case '9gazouillotype': argLength = 2;
+            if (options.length === argLength) {
+              toggleMenu();
+              document.getElementById("field").style.pointerEvents = "all";
+              document.getElementById("field").value = "start gazouillotype";
+              document.getElementById("field").addEventListener("click", ()=>{
+                  gazouillotype(options[0],options[1]);
+                  toggleMenu();
+                  document.getElementById("field").removeEventListener("click", ()=>
+                        gazouillotype(options[0],options[1]));
+                  document.getElementById("field").style.pointerEvents = "none";
+              }
+            );
+          }
+             break;
           }
 
-console.log(argLength);
 
-  if (options.length === argLength) {
-    let starter = document.createElement("button");
-    starter.type = "submit";
-    starter.innerHTML = "Start";
-    starter.className = "flux-button";
-    starter.style.margin = "0px 25px";
-    starter.addEventListener("click",window[type.substr(1)](options[0],options[1],options[2]));
-    secMenContent.appendChild(starter);
-  }
 
 
 };
@@ -456,7 +526,6 @@ const selectOption = (type,kind,item,path) => {
 
         let  optionPush = () => {
             options.push(path);
-            console.log(options);
             toggleTertiaryMenu();
             nextOption(type,kind,item,path);
             ipcRenderer.send('console-logs',"Selecting dataset: " + JSON.stringify(selected));
@@ -566,37 +635,32 @@ const mainDisplay = (type,options) =>{
     switch (type) {
 
       case 'chronotype':toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Chronotype Data</strong><br><br>Select a bibliography and links and then click <strong><a onclick='chronotype(options[0],options[1])'>Start</a></strong>";
-                        ipcRenderer.send('datalist',{"type":"chronotype","kind":"biblio"});
-                        ipcRenderer.send('datalist',{"type":"chronotype","kind":"links"});
+                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Chronotype Data</strong><br><br>";
+                        ipcRenderer.send('datalist',{"type":"3chronotype","kind":1});
                         break;
 
       case 'anthropotype': toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Anthropotype Data</strong><br><br>Select humans, institutions and links and then click <strong><a onclick='anthropotype(options[0],options[1],options[2])'>Start</a></strong>";
-                        ipcRenderer.send('datalist',{"type":"anthropotype","kind":"humans"});
-                        ipcRenderer.send('datalist',{"type":"anthropotype","kind":"affiliations"});
-                        ipcRenderer.send('datalist',{"type":"anthropotype","kind":"links"});
+                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Anthropotype Data</strong><br><br>";
+                        ipcRenderer.send('datalist',{"type":"2anthropotype","kind":1});
                         break;
 
       case 'geotype': toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Geotype Data</strong><br><br>Select locations and then click <strong><a onclick='geotype(options[0])'>Start</a></strong>";
-                        ipcRenderer.send('datalist',{"type":"geotype","kind":"locations"});
+                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Geotype Data</strong><br><br>";
+                        ipcRenderer.send('datalist',{"type":"4geotype","kind":1});
                         break;
 
       case 'pharmacotype':toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Clinical Trials Data</strong><br><br>Select trials and then click <strong><a onclick='pharmacotype(options[0])'>Start</a></strong>";
-                        ipcRenderer.send('datalist',{"type":"pharmacotype","kind":"trials"});
+                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Clinical Trials Data</strong><br><br>";
+                        ipcRenderer.send('datalist',{"type":"5pharmacotype","kind":1});
                         break;
 
       case 'topotype': toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Topotype Data</strong><br><br>Select (lexi) public debate, matching data and community keywords and then click <strong><a onclick='topotype(options[0],options[1],options[2])'>Start</a></strong>";
-                        ipcRenderer.send('datalist',{"type":"publicdebate","kind":"pubdeb"});
-                        ipcRenderer.send('datalist',{"type":"publicdebate","kind":"links"});
+                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Topotype Data</strong><br><br>";
+                        ipcRenderer.send('datalist',{"type":"6publicdebate","kind":1});
                         break;
 
       case 'gazouillotype':toggleSecondaryMenu();
                         document.getElementById('secMenTopTab').innerHTML = "<strong>Select Gazouilloire Data</strong><br><br>";
-                        //Select a dataset, a query file, and then click <strong><a onclick='gazouillotype(options[0],options[1])'>Start</a></strong>";
                         ipcRenderer.send('datalist',{"type":"9gazouillotype","kind":1});
                         break;
 
