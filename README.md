@@ -11,7 +11,6 @@ If you'd rather test the dev branch, clone the repo, cd into it, and use 'npm i'
 - comment each and every line of JS
 - create an interactive scroller/flowchart tutorial (work on tracegraph)
 - enable displaying slides/photos/videos in main canvas
-- rebuild menu
 - enable gazouillotype brush
 - multithread visualisations
 
