@@ -88,6 +88,15 @@ const toggleMenu = () => {
     }
   }
     else {
+
+      if (xtypeExists) {
+        document.body.style.animation="fadeout 0.5s";
+        setTimeout(()=>{
+          document.body.remove();
+          remote.getCurrentWindow().reload();
+        }, 450);
+      }
+      else {
       logostatus();
       document.getElementById("menu").style.left = "0px";
       document.getElementById("console").style.left = "150px";
@@ -97,6 +106,7 @@ const toggleMenu = () => {
           var menuItems = document.getElementsByClassName("menu-item");
           for (let i = 0; i < menuItems.length; i++) {menuItems[i].style.left = "0";}
       toggledMenu = true;
+      }
   }
 }
 
