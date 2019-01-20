@@ -20,6 +20,7 @@ const fs = require('fs');
 const d3 = require("d3");
 const THREE = require('three');
 const userDataPath = remote.app.getPath('userData');
+const QRCode = require('qrcode');
 
 // =========== MAIN DISPLAY ===========
 console.log(msg+version);
@@ -104,6 +105,7 @@ let toggledSecondaryMenu = false;
 
 const toggleSecondaryMenu = () => {
   purgeMenuItems("secMenContent");
+  purgeMenuItems("thirdMenuContent");
   if (toggledSecondaryMenu) {
     document.getElementById("secmenu").style.left = "-150px";
     document.getElementById("console").style.left = "150px";
@@ -394,22 +396,155 @@ const purgeCore = () => {
 
 var options = [];
 
+const start = (type,options) => {
+  console.log(type);
+  console.log(options);
+  console.log(options.length);
+
+let argLength = 99;
+
+  switch (type) {
+            case '3chronotype':argLength = 1;break;
+            case '1anthropotype': argLength = 3; break;
+            case '4geotype': argLength = 1; break;
+            case '5pharmacotype': argLength = 1; break;
+            case '6topotype': argLength = 2; break;
+            case '9gazouillotype': argLength = 2; break;
+          }
+
+console.log(argLength);
+
+  if (options.length === argLength) {
+    let starter = document.createElement("button");
+    starter.type = "submit";
+    starter.innerHTML = "Start";
+    starter.className = "flux-button";
+    starter.style.margin = "0px 25px";
+    starter.addEventListener("click",window[type.substr(1)](options[0],options[1],options[2]));
+    secMenContent.appendChild(starter);
+  }
+
+
+};
+
 const selectOption = (type,kind,item,path) => {
         let selected = {"type":"","kind":"","item":"","path":""};
             selected.type = type;
             selected.kind = kind;
             selected.item = item;
             selected.path = path;
-            options.push(path);
-        document.getElementById(item).style.backgroundColor = "darkgrey";
-        toggleTertiaryMenu();
-        // FS Stats
-        fs.stat(path, (err, d) => {
-          
-          //document.getElementById("thirdmenu").innerHTML= "<p>"+JSON.stringify(statList)+"</p>"
 
-        });
-        ipcRenderer.send('console-logs',"Selecting dataset: " + JSON.stringify(selected));
+        document.getElementById(item).style.backgroundColor = "darkgrey";
+
+        toggleTertiaryMenu();
+
+        var thirdMenu = document.getElementById("thirdMenuContent");
+
+        const metaGen = (path,count,metaStats) => {
+
+        var qrCanvas = document.createElement("canvas");
+        QRCode.toCanvas(qrCanvas, JSON.stringify(metaStats),{width:120}, function (error) {
+          if (error) console.error(error)
+        })
+        qrCanvas.style.padding = "10px";
+        thirdMenuContent.appendChild(qrCanvas);
+
+
+        var metaData = document.createElement("div");
+        metaData.style['overflow-wrap']= "break-word";
+        metaData.innerHTML =  "<p>"+ count + fileStats;
+
+        let  optionPush = () => {
+            options.push(path);
+            console.log(options);
+            toggleTertiaryMenu();
+            nextOption(type,kind,item,path);
+            ipcRenderer.send('console-logs',"Selecting dataset: " + JSON.stringify(selected));
+            start(type,options);
+          };
+
+        var optionSelector = document.createElement("button");
+        optionSelector.type = "submit";
+        optionSelector.innerHTML = "Select dataset";
+        optionSelector.className = "flux-button";
+        optionSelector.style.margin = "0px 25px";
+        optionSelector.addEventListener("click",optionPush);
+
+        thirdMenuContent.appendChild(optionSelector);
+        thirdMenuContent.appendChild(metaData);
+        }
+
+        const fileMetadata = (path) => {
+          let count = "";
+          let metaStats = {};
+          fs.stat(path, (err, d) => {
+            metaStats.size = d.size;
+            metaStats.birthtime = d.birthtime;
+            fileStats =
+            "<br><br><strong>Document size</strong><br>"+ d.size +" bits" +
+            "<br><br><strong>Last accessed</strong><br>"+ d.atime +
+            "<br><br><strong>Last modified</strong><br>"+ d.mtime +
+            "<br><br><strong>Created</strong><br>"+ d.birthtime +
+            "<br><br><strong>Owned by</strong><br>"+ d.uid +
+            "<br><br><strong>On device</strong><br>"+ d.dev +
+            "<br><br><strong>Path</strong><br> <a target='_blank' href='"+path+"'>"+ path +"</a>"+
+            "</p>"
+          });
+          if (path.slice(-4)===".csv"){
+          return new Promise((resolve, reject) => {
+          let lineCount = 0;
+          fs.createReadStream(path)
+            .on("data", (buffer) => {
+              let idx = -1;
+              lineCount--; // Because the loop will run once for idx=-1
+              do {
+                idx = buffer.indexOf(10, idx+1);
+                lineCount++;
+              } while (idx !== -1);
+            }).on("end", () => {
+              resolve(lineCount);
+
+              count = "<strong>CSV line count: </strong>" + lineCount;
+              metaStats.fileType = "csv";
+              metaStats.lineCount = lineCount;
+
+              metaGen(path,count,metaStats);
+
+            })
+          })
+        }
+        else if (path.slice(-5)===".json"){
+          return new Promise((resolve, reject) => {
+          let arrayCount = 0;
+          fs.createReadStream(path)
+            .on("data", (buffer) => {
+              arrayCount = buffer.length;
+            }).on("end", () => {
+              resolve(arrayCount);
+              count = "<strong>JSON array object count:</strong> " + arrayCount;
+              metaStats.fileType = "json";
+              metaStats.lineCount = arrayCount;
+
+              metaGen(path,count,metaStats);
+            })
+
+          })
+        }
+      };
+
+        fileMetadata(path);
+
+        ipcRenderer.send('console-logs',"Checking dataset: " + JSON.stringify(selected));
+
+}
+
+const nextOption = (type,kind) => {
+
+let newKind = parseInt(kind.slice(0,1))+1;
+
+ipcRenderer.send('datalist',{"type":type,"kind":newKind});
+
+
 }
 
 const loadType = () => {
@@ -460,9 +595,9 @@ const mainDisplay = (type,options) =>{
                         break;
 
       case 'gazouillotype':toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Gazouilloire Data</strong><br><br>Select a dataset, a query file, and then click <strong><a onclick='gazouillotype(options[0],options[1])'>Start</a></strong>";
+                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Gazouilloire Data</strong><br><br>";
+                        //Select a dataset, a query file, and then click <strong><a onclick='gazouillotype(options[0],options[1])'>Start</a></strong>";
                         ipcRenderer.send('datalist',{"type":"9gazouillotype","kind":1});
-                        //ipcRenderer.send('datalist',{"type":"gazouillotype","kind":"query"});
                         break;
 
     }

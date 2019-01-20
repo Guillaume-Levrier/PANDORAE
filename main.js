@@ -130,7 +130,6 @@ fs.readdir(userDataPath+'/datasets/',{withFileTypes: true}, (err, files) => {   
 
     if (datasets.kind===parseInt(folderOne[j][0])){                                 // if this is the relevant subsubfolder
       fs.readdir(userDataPath+'/datasets/'+files[i]+'/'+folderOne[j], (err, folderTwo) => {     // read its content
-console.log("FolderTwo: "+folderTwo);
           for (let k = 0;k<folderTwo.length;k++){           // loop on each object
             let item = folderTwo[k];
             let kind = folderOne[j];
