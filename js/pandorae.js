@@ -370,9 +370,10 @@ const xtypeDisplay = () => {
 };
 
 const purgeXtype = () => {
-  if (xtypeExists) {
+  if (document.getElementById("xtypeSVG")) {
     document.getElementById("xtype").style.zIndex = "-2"                      // Send the XTYPE div to back
-    document.getElementById("xtypeSVG").remove();                             // Remove the SVG with the current type
+    document.getElementById("xtype").removeChild(document.getElementById("xtypeSVG"));
+    //document.getElementById("xtypeSVG").remove();                             // Remove the SVG with the current type
     removeTooltip();
   }
 };
@@ -397,6 +398,8 @@ var options = [];
 
 const start = (type,options) => {
 
+console.log(options);
+
 let argLength = 99;
 
   switch (type) {
@@ -407,10 +410,10 @@ let argLength = 99;
               document.getElementById("field").value = "start chronotype";
               document.getElementById("field").addEventListener("click", ()=>{
                   chronotype(options[0]);
-                  toggleMenu();
                   document.getElementById("field").removeEventListener("click", ()=>
                         chronotype(options[0]));
                   document.getElementById("field").style.pointerEvents = "none";
+
               }
             );
           }
@@ -422,10 +425,10 @@ let argLength = 99;
               document.getElementById("field").value = "start anthropotype";
               document.getElementById("field").addEventListener("click", ()=>{
                   anthropotype(options[0],options[1],options[2]);
-                  toggleMenu();
                   document.getElementById("field").removeEventListener("click", ()=>
                         anthropotype(options[0],options[1],options[2]));
                   document.getElementById("field").style.pointerEvents = "none";
+
               }
             );
           }
@@ -437,10 +440,10 @@ let argLength = 99;
               document.getElementById("field").value = "start geotype";
               document.getElementById("field").addEventListener("click", ()=>{
                   geotype(options[0]);
-                  toggleMenu();
                   document.getElementById("field").removeEventListener("click", ()=>
                         geotype(options[0]));
                   document.getElementById("field").style.pointerEvents = "none";
+
               }
             );
           }
@@ -452,10 +455,10 @@ let argLength = 99;
               document.getElementById("field").value = "start pharmacotype";
               document.getElementById("field").addEventListener("click", ()=>{
                   pharmacotype(options[0]);
-                  toggleMenu();
                   document.getElementById("field").removeEventListener("click", ()=>
                         pharmacotype(options[0]));
                   document.getElementById("field").style.pointerEvents = "none";
+
               }
             );
           }
@@ -467,10 +470,10 @@ let argLength = 99;
               document.getElementById("field").value = "start topotype";
               document.getElementById("field").addEventListener("click", ()=>{
                   topotype(options[0],options[1]);
-                  toggleMenu();
                   document.getElementById("field").removeEventListener("click", ()=>
                         topotype(options[0],options[1]));
                   document.getElementById("field").style.pointerEvents = "none";
+
               }
             );
           }
@@ -482,16 +485,15 @@ let argLength = 99;
               document.getElementById("field").value = "start gazouillotype";
               document.getElementById("field").addEventListener("click", ()=>{
                   gazouillotype(options[0],options[1]);
-                  toggleMenu();
                   document.getElementById("field").removeEventListener("click", ()=>
                         gazouillotype(options[0],options[1]));
                   document.getElementById("field").style.pointerEvents = "none";
+
               }
             );
           }
              break;
           }
-
 
 
 
@@ -617,18 +619,19 @@ ipcRenderer.send('datalist',{"type":type,"kind":newKind});
 }
 
 const loadType = () => {
-  toggleMenu();
   xtypeDisplay();
   purgeCore();
   xtypeExists = true;
   coreExists = false;
   document.getElementById("field").value = "";
+  while(options.length > 0) {options.pop();}
 }
 
 const mainDisplay = (type,options) =>{
 
-  displayCore();
 
+  displayCore();
+  purgeXtype();
   document.getElementById("field").value = "preparing " + type;
   ipcRenderer.send('console-logs',"Preparing " + type);
 
