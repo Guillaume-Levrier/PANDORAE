@@ -27,16 +27,24 @@ ipcRenderer.send('console-logs',"Opening Flux");           // Sending notificati
 
 let traces = [
     {"hops":
-          [{"root":true},{"info":{"city":"Frankfurt am Main","continent":{"code":"EU","name":"Europe"},"country":{"code":"DE","name":"Germany"}},"ip":"IPADDRESS","ttl":1},{"info":{"city":"Toronto","continent":{"code":"NA","name":"North America"},"country":{"code":"CA","name":"Canada"}},"ip":"IPADDRESS","ttl":2},{"info":{"continent":{"code":"EU","name":"Europe"}},"ip":"IPADDRESS","ttl":3},{"timeout":true,"ttl":4},{"timeout":true,"ttl":5},{"timeout":true,"ttl":6},{"timeout":true,"ttl":7},{"timeout":true,"ttl":8},{"info":{"city":"Chancelade","continent":{"code":"EU","name":"Europe"},"country":{"code":"FR","name":"France"}},"ip":"IPADDRESS","ttl":9}]},
+          [{"root":true},
+          {"info":{"city":"Frankfurt am Main","continent":{"code":"EU","name":"Europe"},"country":{"code":"DE","name":"Germany"}},"ip":"IPADDRESS","ttl":1},{"info":{"city":"Toronto","continent":{"code":"NA","name":"North America"},"country":{"code":"CA","name":"Canada"}},"ip":"IPADDRESS","ttl":2},{"info":{"continent":{"code":"EU","name":"Europe"}},"ip":"IPADDRESS","ttl":3},{"timeout":true,"ttl":4},{"timeout":true,"ttl":5},{"timeout":true,"ttl":6},{"timeout":true,"ttl":7},{"timeout":true,"ttl":8},{"info":{"city":"Chancelade","continent":{"code":"EU","name":"Europe"},"country":{"code":"FR","name":"France"}},"ip":"IPADDRESS","ttl":9}]},
     {"hops":
-          [{"root":false},{"info":{"city":"Frankfurt am Main","continent":{"code":"EU","name":"Europe"},"country":{"code":"DE","name":"Germany"}},"ip":"IPADDRESS","ttl":1},{"info":{"city":"Toronto","continent":{"code":"NA","name":"North America"},"country":{"code":"CA","name":"Canada"}},"ip":"IPADDRESS","ttl":2},{"info":{"continent":{"code":"EU","name":"Europe"}},"ip":"IPADDRESS","ttl":3},{"timeout":true,"ttl":4},{"timeout":true,"ttl":5},{"timeout":true,"ttl":6},{"timeout":true,"ttl":7},{"timeout":true,"ttl":8},{"info":{"city":"Chancelade","continent":{"code":"EU","name":"Europe"},"country":{"code":"FR","name":"France"}},"ip":"IPADDRESS","ttl":9}]},
+          [{"root":true},
+          {"info":{"city":"Frankfurt am Main","continent":{"code":"EU","name":"Europe"},"country":{"code":"DE","name":"Germany"}},"ip":"IPADDRESS","ttl":1},{"info":{"city":"Toronto","continent":{"code":"NA","name":"North America"},"country":{"code":"CA","name":"Canada"}},"ip":"IPADDRESS","ttl":2},{"info":{"continent":{"code":"EU","name":"Europe"}},"ip":"IPADDRESS","ttl":3},{"timeout":true,"ttl":4},{"timeout":true,"ttl":5},{"timeout":true,"ttl":6},{"timeout":true,"ttl":7},{"timeout":true,"ttl":8},{"info":{"city":"Chancelade","continent":{"code":"EU","name":"Europe"},"country":{"code":"FR","name":"France"}},"ip":"IPADDRESS","ttl":9}]},
     {"hops":
-          [{"root":false},{"info":{"city":"Frankfurt am Main","continent":{"code":"EU","name":"Europe"},"country":{"code":"DE","name":"Germany"}},"ip":"IPADDRESS","ttl":1},{"info":{"city":"Toronto","continent":{"code":"NA","name":"North America"},"country":{"code":"CA","name":"Canada"}},"ip":"IPADDRESS","ttl":2},{"info":{"continent":{"code":"EU","name":"Europe"}},"ip":"IPADDRESS","ttl":3},{"timeout":true,"ttl":4},{"timeout":true,"ttl":5},{"timeout":true,"ttl":6},{"timeout":true,"ttl":7},{"timeout":true,"ttl":8},{"info":{"city":"Chancelade","continent":{"code":"EU","name":"Europe"},"country":{"code":"FR","name":"France"}},"ip":"IPADDRESS","ttl":9}]},
+          [{"root":true},
+          {"info":{"city":"Frankfurt am Main","continent":{"code":"EU","name":"Europe"},"country":{"code":"DE","name":"Germany"}},"ip":"IPADDRESS","ttl":1},{"info":{"city":"Toronto","continent":{"code":"NA","name":"North America"},"country":{"code":"CA","name":"Canada"}},"ip":"IPADDRESS","ttl":2},{"info":{"continent":{"code":"EU","name":"Europe"}},"ip":"IPADDRESS","ttl":3},{"timeout":true,"ttl":4},{"timeout":true,"ttl":5},{"timeout":true,"ttl":6},{"timeout":true,"ttl":7},{"timeout":true,"ttl":8},{"info":{"city":"Chancelade","continent":{"code":"EU","name":"Europe"},"country":{"code":"FR","name":"France"}},"ip":"IPADDRESS","ttl":9}]},
     {"hops":
-          [{"root":false},{"info":{"city":"Frankfurt am Main","continent":{"code":"EU","name":"Europe"},"country":{"code":"DE","name":"Germany"}},"ip":"IPADDRESS","ttl":1},{"info":{"city":"Toronto","continent":{"code":"NA","name":"North America"},"country":{"code":"CA","name":"Canada"}},"ip":"IPADDRESS","ttl":2},{"info":{"continent":{"code":"EU","name":"Europe"}},"ip":"IPADDRESS","ttl":3},{"timeout":true,"ttl":4},{"timeout":true,"ttl":5},{"timeout":true,"ttl":6},{"timeout":true,"ttl":7},{"timeout":true,"ttl":8},{"info":{"city":"Chancelade","continent":{"code":"EU","name":"Europe"},"country":{"code":"FR","name":"France"}},"ip":"IPADDRESS","ttl":9}]}
+          [{"root":true},
+          {"info":{"city":"Frankfurt am Main","continent":{"code":"EU","name":"Europe"},"country":{"code":"DE","name":"Germany"}},"ip":"IPADDRESS","ttl":1},{"info":{"city":"Toronto","continent":{"code":"NA","name":"North America"},"country":{"code":"CA","name":"Canada"}},"ip":"IPADDRESS","ttl":2},{"info":{"continent":{"code":"EU","name":"Europe"}},"ip":"IPADDRESS","ttl":3},{"timeout":true,"ttl":4},{"timeout":true,"ttl":5},{"timeout":true,"ttl":6},{"timeout":true,"ttl":7},{"timeout":true,"ttl":8},
+          {"info":
+              {"city":"Chancelade","continent":
+                    {"code":"EU","name":"Europe"},
+                    "country":{"code":"FR","name":"France"}
+                  },
+              "ip":"IPADDRESS","ttl":9}]}
 ];
-
-console.log(traces)
 
 function draw (svg, traces, horizontal, showTexts) {
   function makeText(selection) {
@@ -76,9 +84,9 @@ const graph = tg
 
  const layout = graph(traces);
 
- tmpSvg.remove();
-
 console.log(layout);
+
+ tmpSvg.remove();
 
  const vb = layout.bounds.expanded(4);
 
@@ -86,29 +94,6 @@ console.log(layout);
    .attr("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`)
    .attr("width", 450)
    .attr("height", 450);
-
- const gradients = layout.nodes.map(() => tg.genUID());
- svg
-     .append("defs")
-     .selectAll("linearGradient")
-     .data(layout.nodes.map(tg.nodeGradient))
-     .enter()
-     .append("linearGradient")
-     .attr("id", (d, i) => gradients[i].id)
-     .attr("gradientUnits", d => d.gradientUnits)
-     .attr("x1", d => d.x1)
-     .attr("y1", d => d.y1)
-     .attr("x2", d => d.x2)
-     .attr("y2", d => d.y2)
-     .selectAll("stop")
-     .data(d => d.stops)
-     .enter()
-     .append("stop")
-     .attr("offset", d => d.offset)
-     .attr(
-       "stop-color",
-       d => d3.schemeSet2[d.traceIndex % d3.schemeSet2.length]
-     );
 
    const traceGroup = svg
      .selectAll(".trace")
@@ -126,10 +111,7 @@ console.log(layout);
    traceGroup
      .append("path")
      .attr("stroke-width", d => (d.defined ? d.width - 4.5 : d.width - 5))
-     .attr(
-       "stroke",
-       segment => d3.schemeSet2[segment.index % d3.schemeSet2.length]
-     )
+     .attr("stroke","black")
      .attr("stroke-dasharray", segment => (segment.defined ? "" : "4 2"))
      .attr("d", tg.traceCurve());
 
@@ -138,7 +120,6 @@ console.log(layout);
      .data(layout.nodes)
      .enter()
      .append("g")
-     .attr("class", "node")
      .attr("stroke-width", 2)
      .attr("fill", "white");
 
@@ -151,12 +132,12 @@ console.log(layout);
      .attr("ry", 2)
      .attr("x", d => d.bounds.x)
      .attr("y", d => d.bounds.y)
-     .attr("stroke", (d, i) => gradients[i])
+     .attr("stroke", "black")
      .attr("width", d => d.bounds.width)
      .attr("height", d => d.bounds.height)
-     .on("mouseover", d => {
-        
-      });
+     .on("mouseover", function() {d3.select(this).attr("fill", "black")})
+     .on("mouseout", function() {d3.select(this).attr("fill", "white")});
+
    makeText(textNodes)
      .attr("x", d => d.bounds.cx)
      .attr("y", d => d.bounds.cy)
@@ -164,7 +145,8 @@ console.log(layout);
      .attr("fill", "black")
      .attr("alignment-baseline", "central")
      .attr("text-anchor", "middle")
-     .text(d => d.hops[0].ip);
+     .attr("font-size", 10)
+     .text(d => d.hops[0].info.city);
 
    nodeGroup
      .filter(d => !(showTexts && d.hops[0].ip))
@@ -172,7 +154,7 @@ console.log(layout);
      .attr("r", d => Math.min(d.bounds.width, d.bounds.height) / 2)
      .attr("cx", d => d.bounds.cx)
      .attr("cy", d => d.bounds.cy)
-     .attr("stroke", (d, i) => gradients[i]);
+     .attr("stroke", "black");
  }
 
 const svg = d3.select("svg");

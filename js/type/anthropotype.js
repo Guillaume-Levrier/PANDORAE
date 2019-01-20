@@ -206,5 +206,5 @@ function zoomed() {
    }
 
 
-ipcRenderer.send('console-logs',"Starting anthropotype");           
+ipcRenderer.send('console-logs',"Starting anthropotype");
 }
