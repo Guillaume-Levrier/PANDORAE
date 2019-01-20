@@ -116,6 +116,7 @@ const toggleSecondaryMenu = () => {
   purgeMenuItems("secMenContent");
   purgeMenuItems("thirdMenuContent");
   if (toggledSecondaryMenu) {
+    if (toggledTertiaryMenu) {toggleTertiaryMenu();}
     document.getElementById("secmenu").style.left = "-150px";
     document.getElementById("console").style.left = "150px";
     document.getElementById("menu-icon").style.left = "175px";
@@ -541,6 +542,15 @@ const selectOption = (type,kind,item,path) => {
             toggleTertiaryMenu();
             nextOption(type,kind,item,path);
             ipcRenderer.send('console-logs',"Selecting dataset: " + JSON.stringify(selected));
+
+            let availTabs = document.getElementsByClassName("secContentTabs");
+
+            for (var i = 0; i < availTabs.length; i++) {
+              if (availTabs[i].id != item) {
+                availTabs[i].remove();
+              }
+            }
+
             start(type,options);
           };
 
