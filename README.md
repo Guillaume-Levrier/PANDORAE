@@ -13,12 +13,10 @@ If you'd rather test the dev branch, clone the repo, cd into it, and use 'npm i'
 - enable displaying slides/photos/videos in main canvas
 - enable gazouillotype brush
 - multithread visualisations
+- solve errors in affiliation coordinates (check city then country before choosing, instead of taking the first guess)
 
 ##### Flux
-- design a specific flux landing page (using an approximate tracetrout+tracegraph viz that would start requesting on boot?)
-
-##### Chaeros
-- Transmit error messages from each service to the console log.
+- design a specific flux landing page (under way)
 
 ##### Next version
 - implement FETCH altmetric requests
