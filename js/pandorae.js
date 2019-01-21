@@ -474,15 +474,15 @@ let argLength = 99;
             );
           }
             break;
-            case '6topotype': argLength = 2;
+            case '6publicdebate': argLength = 3;
             if (options.length === argLength) {
               toggleMenu();
               document.getElementById("field").style.pointerEvents = "all";
               document.getElementById("field").value = "start topotype";
               document.getElementById("field").addEventListener("click", ()=>{
-                  topotype(options[0],options[1]);
+                  topotype(options[0],options[1],options[2]);
                   document.getElementById("field").removeEventListener("click", ()=>
-                        topotype(options[0],options[1]));
+                        topotype(options[0],options[1],options[2]));
                   document.getElementById("field").style.pointerEvents = "none";
 
               }
@@ -546,11 +546,13 @@ const selectOption = (type,kind,item,path) => {
             let availTabs = document.getElementsByClassName("secContentTabs");
 
             for (var i = 0; i < availTabs.length; i++) {
-              if (availTabs[i].id != item) {
-                availTabs[i].remove();
+              if (availTabs[i].id === item) {
+                  availTabs[i].selected = true;
               }
+              if (availTabs[i].selected === false) {
+              availTabs[i].remove();
             }
-
+          }
             start(type,options);
           };
 
@@ -679,7 +681,7 @@ const mainDisplay = (type,options) =>{
 
       case 'topotype': toggleSecondaryMenu();
                         document.getElementById('secMenTopTab').innerHTML = "<strong>Select Topotype Data</strong><br><br>";
-                        ipcRenderer.send('datalist',{"type":"6publicdebate","kind":1});
+                        ipcRenderer.send('datalist',{"type":"6publicdebate","kind":3});
                         break;
 
       case 'gazouillotype':toggleSecondaryMenu();

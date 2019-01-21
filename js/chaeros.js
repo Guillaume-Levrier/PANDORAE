@@ -270,7 +270,7 @@ const capcoRebuilder = (dataFile,dataMatch) => {
 ipcRenderer.send('console-logs',"Rebuilding Capco dataset " + dataFile + " with matching file "+ dataMatch);
 
 Promise.all([d3.csv(userDataPath+"/datasets/6publicdebate/1capco/"+dataFile, {credentials: 'include'}),     // Load the main datafile
-             d3.csv(userDataPath+"/datasets/6publicdebate/3matching/"+dataMatch, {credentials: 'include'})  // Load secondary datafile with prop eval
+             d3.csv(userDataPath+"/datasets/6publicdebate/2matching/"+dataMatch, {credentials: 'include'})  // Load secondary datafile with prop eval
           ]).then(datajson => {                                             // Then with the response array
           const rawData = datajson[0];                                      // First array/datafile is rawData var
           const opinionData = datajson[1];                                  // Second is opinionData (-> prop eval)
@@ -673,7 +673,7 @@ ipcRenderer.send('console-logs',"lexicAnalysis has been performed on " + dataFil
 finally{
       let dataset = JSON.stringify(data);
         fs.writeFile(
-          userDataPath+'/datasets/6publicdebate/4pubdeb/'+dataFile.substring(0,dataFile.length-4)+'.json',
+          userDataPath+'/datasets/6publicdebate/3pubdeb/'+dataFile.substring(0,dataFile.length-4)+'.json',
           dataset,
           'utf8',
           (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
@@ -683,7 +683,7 @@ finally{
 
         let datalink = JSON.stringify(links);
           fs.writeFile(
-            userDataPath +'/datasets/6publicdebate/2links/'+dataMatch.substring(0,dataMatch.length-4)+'.json',datalink,'utf8',
+            userDataPath +'/datasets/6publicdebate/4links/'+dataMatch.substring(0,dataMatch.length-4)+'.json',datalink,'utf8',
               (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
           });
     ipcRenderer.send('console-logs',"CapCo " + dataFile + " links has been successfully written.");
@@ -778,14 +778,14 @@ var communitySet = communitySet.top(50);                                // Limit
 
       data = JSON.stringify(data);
         fs.writeFile(
-          userDataPath+'/datasets/6publicdebate/4pubdeb/lexi-'+dataset+".json",
+          userDataPath+'/datasets/6publicdebate/3pubdeb/lexi-'+dataset+".json",
           data,
           'utf8',
           (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
         });
         communitySet = JSON.stringify(communitySet);
           fs.writeFile(
-            userDataPath+'/datasets/6publicdebate/4pubdeb/commun-'+dataset+".json",
+            userDataPath+'/datasets/6publicdebate/5commun/commun-'+dataset+".json",
             communitySet,
             'utf8',
             (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
