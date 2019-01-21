@@ -668,8 +668,7 @@ let bestScore = () => {                                                    // Es
 
 bestScore();
 
-console.log("data sent to lexicAnalysis")
-console.log(data)
+
 
 lexicAnalysis(data,dataFile.substring(0,dataFile.length-4));
 
@@ -677,17 +676,6 @@ ipcRenderer.send('console-logs',"lexicAnalysis has been performed on " + dataFil
 }
 
 finally{
-  /*
-      let dataset = JSON.stringify(data);
-        fs.writeFile(
-          userDataPath+'/datasets/6publicdebate/3pubdeb/'+dataFile.substring(0,dataFile.length-4)+'.json',
-          dataset,
-          'utf8',
-          (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
-        });
-
-    ipcRenderer.send('console-logs',"CapCo " + dataFile + " main file has been successfully rewritten.");
-*/
         let datalink = JSON.stringify(links);
           fs.writeFile(
             userDataPath +'/datasets/6publicdebate/4links/'+dataMatch.substring(0,dataMatch.length-4)+'.json',datalink,'utf8',
@@ -695,7 +683,7 @@ finally{
           });
     ipcRenderer.send('console-logs',"CapCo " + dataFile + " links has been successfully written.");
           ipcRenderer.send('chaeros-success', 'Success: dataset rebuilt');
-          //win.close();
+          win.close();
         }
   });
 }
@@ -707,10 +695,6 @@ finally{
 // belonging to a group using TF-IDF.
 
 const lexicAnalysis = (data,dataset) => {
-
-console.log("Data recieved by lexicAnalysis function:");
-console.log(data)
-console.log(dataset)
 
 var totalFreqs = new MultiSet();
 
@@ -786,8 +770,7 @@ data.forEach(d=>{                                                       // For e
 var communitySet = communitySet.top(50);                                // Limit community MultiSet to the top 50 terms
 
     var dataToWrite = JSON.stringify(data);
-console.log("data written by lexicAnalysis")
-console.log(dataToWrite)
+
         fs.writeFile(
           userDataPath+'/datasets/6publicdebate/3pubdeb/lexi-'+dataset+".json",
           dataToWrite,
@@ -796,8 +779,6 @@ console.log(dataToWrite)
         });
 
         communitySet = JSON.stringify(communitySet);
-console.log("communitySet written by lexicAnalysis")
-console.log(communitySet)
 
           fs.writeFile(
             userDataPath+'/datasets/6publicdebate/5commun/commun-'+dataset+".json",
