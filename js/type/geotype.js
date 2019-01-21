@@ -59,7 +59,7 @@ Promise.all([
 var geoData = datajson[0];
 
 var data = datajson[1][0].items;
-
+console.log(datajson[1]);
 const links = [];
 
 var linksBuffer =[]
@@ -160,8 +160,7 @@ const affilFinder = (city) => {
           if (city.values[k].affiliation[l].affilname===city.affiliations[j]) {
             let link = {}
             if (institution.papers.findIndex(paper => paper === city.values[k].title)<0) {
-              institution.papers.push(city.values[k].title)
-
+              institution.papers.push({"title":city.values[k].title,"DOI":city.values[k].DOI});
             }
          }
        }
@@ -172,11 +171,11 @@ const affilFinder = (city) => {
      }
 
     let totalList="";
-
+    console.log(institutions);
     institutions.forEach(e=>{
         let localList= "<strong>"+e.name+"</strong><ul>";
             for (var i = 0; i < e.papers.length; i++) {
-              localList = localList+ "<li>"+e.papers[i]+"</li>"
+              localList = localList+ "<li><a target='blank' href='https://dx.doi.org/"+e.papers[i].DOI+"'>"+e.papers[i].title+"</a></li>"
             }
         totalList= totalList+localList+ "</ul>";
     })
@@ -286,5 +285,5 @@ function zoomed() {view.style('transform', 'scale(' + d3.event.transform.k + ')'
       }
         loadType();
 
-ipcRenderer.send('console-logs',"Starting geotype");          
+ipcRenderer.send('console-logs',"Starting geotype");
 }
