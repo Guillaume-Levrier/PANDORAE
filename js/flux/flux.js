@@ -540,7 +540,7 @@ const pubDebDatasetLoader = () => {
 
 let uploadedFile = document.getElementById("load-local-pubdeb").files;
 let uploadPath = uploadedFile[0].path;
-let targetFolder = userDataPath+"/datasets/publicdebate/capco/" + uploadedFile[0].name;
+let targetFolder = userDataPath+"/datasets/6publicdebate/1capco/" + uploadedFile[0].name;
 
 ipcRenderer.send('console-logs',"Loading file "+ uploadedFile + " in "+targetFolder);
 
@@ -556,7 +556,7 @@ const pubDeblinkDatasetLoader = () => {
 
 let uploadedFile = document.getElementById("load-local-links").files;
 let uploadPath = uploadedFile[0].path;
-let targetFolder = userDataPath+"/datasets/publicdebate/matching/" + uploadedFile[0].name;
+let targetFolder = userDataPath+"/datasets/6publicdebate/2matching/" + uploadedFile[0].name;
 ipcRenderer.send('console-logs',"Loading file "+ uploadedFile + " in "+targetFolder);
   fs.copyFile(uploadPath, targetFolder, (err) => {
     if (err) throw err;
