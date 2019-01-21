@@ -339,11 +339,9 @@ d3.select("xtype").append("text").data(legend).attr("class","legende").attr("x",
 ipcRenderer.on('coreSignal', (event,fluxAction,fluxArgs, message) => {
       try{
       document.getElementById("field").value = message;
-      console.log(fluxArgs);
       pulse(1,1,10);
     } catch (err){
       document.getElementById("field").value = err;
-      console.log(err);
     } finally{
 
   }
@@ -409,7 +407,6 @@ var options = [];
 
 const start = (type,options) => {
 
-console.log(options);
 
 let argLength = 99;
 
