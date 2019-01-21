@@ -269,6 +269,9 @@ const capcoRebuilder = (dataFile,dataMatch) => {
 
 ipcRenderer.send('console-logs',"Rebuilding Capco dataset " + dataFile + " with matching file "+ dataMatch);
 
+ipcRenderer.send('console-logs',"Filepath: " + userDataPath +"/datasets/6publicdebate/");
+
+
 Promise.all([d3.csv(userDataPath+"/datasets/6publicdebate/1capco/"+dataFile, {credentials: 'include'}),     // Load the main datafile
              d3.csv(userDataPath+"/datasets/6publicdebate/2matching/"+dataMatch, {credentials: 'include'})  // Load secondary datafile with prop eval
           ]).then(datajson => {                                             // Then with the response array
@@ -665,12 +668,16 @@ let bestScore = () => {                                                    // Es
 
 bestScore();
 
+console.log("data sent to lexicAnalysis")
+console.log(data)
+
 lexicAnalysis(data,dataFile.substring(0,dataFile.length-4));
 
 ipcRenderer.send('console-logs',"lexicAnalysis has been performed on " + dataFile);
 }
 
 finally{
+  /*
       let dataset = JSON.stringify(data);
         fs.writeFile(
           userDataPath+'/datasets/6publicdebate/3pubdeb/'+dataFile.substring(0,dataFile.length-4)+'.json',
@@ -680,7 +687,7 @@ finally{
         });
 
     ipcRenderer.send('console-logs',"CapCo " + dataFile + " main file has been successfully rewritten.");
-
+*/
         let datalink = JSON.stringify(links);
           fs.writeFile(
             userDataPath +'/datasets/6publicdebate/4links/'+dataMatch.substring(0,dataMatch.length-4)+'.json',datalink,'utf8',
@@ -688,7 +695,7 @@ finally{
           });
     ipcRenderer.send('console-logs',"CapCo " + dataFile + " links has been successfully written.");
           ipcRenderer.send('chaeros-success', 'Success: dataset rebuilt');
-          win.close();
+          //win.close();
         }
   });
 }
@@ -701,7 +708,9 @@ finally{
 
 const lexicAnalysis = (data,dataset) => {
 
-//var totalText = "";                                                 // totalText will the total amount of material
+console.log("Data recieved by lexicAnalysis function:");
+console.log(data)
+console.log(dataset)
 
 var totalFreqs = new MultiSet();
 
@@ -776,14 +785,20 @@ data.forEach(d=>{                                                       // For e
 
 var communitySet = communitySet.top(50);                                // Limit community MultiSet to the top 50 terms
 
-      data = JSON.stringify(data);
+    var dataToWrite = JSON.stringify(data);
+console.log("data written by lexicAnalysis")
+console.log(dataToWrite)
         fs.writeFile(
           userDataPath+'/datasets/6publicdebate/3pubdeb/lexi-'+dataset+".json",
-          data,
+          dataToWrite,
           'utf8',
           (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
         });
+
         communitySet = JSON.stringify(communitySet);
+console.log("communitySet written by lexicAnalysis")
+console.log(communitySet)
+
           fs.writeFile(
             userDataPath+'/datasets/6publicdebate/5commun/commun-'+dataset+".json",
             communitySet,
