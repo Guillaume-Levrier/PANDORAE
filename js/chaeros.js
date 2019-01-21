@@ -76,6 +76,7 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset);
 
 const scopusGeolocate = (dataset,user) => {
 
+
 ipcRenderer.send('console-logs',"Started scopusGeolocate on " + dataset);
 
 fs.readFile(userDataPath +'/datasets/7scopus/2scopusDatasets/' + dataset,      // Read the dataset passed as option
@@ -116,8 +117,6 @@ let cityRequests = MultiSet.from(totalCityArray);      // Create a multiset from
 
 let cities = [];
 
-console.log(cityRequests);
-
 Promise.all(cityRequests.forEachMultiplicity((count, key) => {                  // Generate requests per city (=> key)
 
     let options = {
@@ -125,11 +124,9 @@ Promise.all(cityRequests.forEachMultiplicity((count, key) => {                  
         headers: {'User-Agent': 'Request-Promise'},
         json: true
     };
-console.log(options);
     return limiter.schedule(rpn,options).then((res) => {                        // Enforce bottleneck through limiter
             if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
 
-console.log(res);
 
 for (var j=0; j<(article.length-1); j++){                                       // For each article (last is a stop signal)
   if (article[j].hasOwnProperty('affiliation')){                                // If it has affiliations
@@ -151,12 +148,10 @@ for (var j=0; j<(article.length-1); j++){                                       
     }
   }
 }
-}).then(()=>{                                                                     // When all locations have been added
 
       doc[Object.keys(doc)[0]][1].articleGeoloc = true;                           // Mark file as geolocated
 
       let docstring=JSON.stringify(doc);                                          // Stringify to write
-
           fs.writeFile(                                                                  // Write data
             userDataPath +'/datasets/7scopus/2scopusDatasets/geoloc-'+dataset,docstring,'utf8',
               (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
@@ -676,7 +671,6 @@ ipcRenderer.send('console-logs',"lexicAnalysis has been performed on " + dataFil
 }
 
 finally{
-      console.log("writing...");
       let dataset = JSON.stringify(data);
         fs.writeFile(
           userDataPath+'/datasets/6publicdebate/4pubdeb/'+dataFile.substring(0,dataFile.length-4)+'.json',
@@ -782,7 +776,6 @@ data.forEach(d=>{                                                       // For e
 
 var communitySet = communitySet.top(50);                                // Limit community MultiSet to the top 50 terms
 
-      console.log("writing...");
       data = JSON.stringify(data);
         fs.writeFile(
           userDataPath+'/datasets/6publicdebate/4pubdeb/lexi-'+dataset+".json",
