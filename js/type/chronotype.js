@@ -71,7 +71,6 @@ const clusters = [];
 const links = [];                                                  // Declaring links as empty array
 const nodeDocs = [];
 var codeFreq = {};
-
 const csl_material = {'paper-conference': 'event', 'NA2': 'dns', 'personal_communication': 'mail', 'article-magazine': 'chrome_reader_mode', 'report': 'tab', 'broadcast': 'radio', 'chapter': 'list', 'webpage': 'web', 'map': 'map', 'manuscript': 'receipt', 'entry-dictionary': 'format_list_numbered', 'entry-encyclopedia': 'art_track', 'NA5': 'add_to_queue', 'NA4': 'video_label', 'NA3': 'question_answer', 'NA1': 'markunread_mailbox', 'interview': 'speaker_notes', 'legal_case': 'announcement', 'thesis': 'note', 'graphic': 'edit', 'motion_picture': 'videocam', 'article-journal': 'timeline', 'article-newspaper': 'dashboard', 'article': 'description', 'post-weblog': 'content_paste', 'speech': 'subtitles', 'patent': 'card_membership', 'song': 'mic', 'book': 'developer_board', 'legislation': 'assignment', 'bill': 'account_balance'};
 
 const dataSorter = () => {
@@ -252,7 +251,6 @@ var circle = view.selectAll("circle")                               // Clusters 
 function listDisplay(d) {                           // Expanding a cluster displays the list of docs it contains
 
   function listToNode() {};                            // Hovering a title highlights the corresponding node
-
   function listToDoc() {                               // Clicking a title displays the doc's info in tooltip
       for (var i = nodeData.length-1; i >= 0; i--) {                  // Iterating on the potential docs' data
         if (this.id === nodeData[i].title) {                          // Looking for the index of the relevant title
@@ -265,18 +263,18 @@ function listDisplay(d) {                           // Expanding a cluster displ
             formatTime(nodeData[i].date) + '<br/>' +
             nodeData[i].category + ' | ' +
             nodeData[i].type +'<br/><i class="material-icons">'+
-            nodeData[i].num+'</i><br/>' +
-            nodeData[i].desc + '<br/><br/>' +
-            nodeData[i].DOI + '<br/>' +
-            'Source: <a target="_blank" href="'+
-            nodeData[i].URL+'">'+
-            nodeData[i].URL+'</a>');
+            nodeData[i].num+'</i><br/>' //+
+          //  nodeData[i].desc + '<br/><br/>' +
+          //  nodeData[i].DOI + '<br/>' +
+          //  'Source: <a target="_blank" href="'+
+          //  nodeData[i].URL+'">'+
+          //  nodeData[i].URL+'</a>'
+              );
             }
       }
   }
 
 var docTitles = titlesIndex[d.code];
-
   d3.select("#tooltip").style("display", "block")
      .html('<ul>' +
      docTitles.map(title => '<li id="'+ title +'" class="doc">' + title + '</li>').join('\n') + '</ul>'
@@ -559,11 +557,13 @@ var HighLightandDisplay = (opacity) => {
       d.category + ' | ' +
       d.type +'<br/><i class="material-icons">'+
       d.num+'</i><br/>' +
-      d.desc + '<br/><br/>' +
-      d.DOI + '<br/>' +
-      'Source: <a target="_blank" href="'+
-      d.URL+'">'+
-      d.URL+'</a>');
+      //d.desc + '<br/><br/>' +
+      d.DOI + '<br/>'
+      // +
+      //'Source: <a target="_blank" href="'+
+      //d.URL+'">'+
+      //d.URL+'</a>'
+    );
 
 ipcRenderer.send('console-logs',"Hovering " + JSON.stringify(d));// Send message in the "console"
 
