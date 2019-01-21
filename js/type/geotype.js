@@ -59,7 +59,7 @@ Promise.all([
 var geoData = datajson[0];
 
 var data = datajson[1][0].items;
-console.log(datajson[1]);
+
 const links = [];
 
 var linksBuffer =[]
@@ -171,7 +171,6 @@ const affilFinder = (city) => {
      }
 
     let totalList="";
-    console.log(institutions);
     institutions.forEach(e=>{
         let localList= "<strong>"+e.name+"</strong><ul>";
             for (var i = 0; i < e.papers.length; i++) {
