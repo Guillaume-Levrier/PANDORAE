@@ -12,7 +12,7 @@ const msg = '      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  
 const version ='ALPHA/DEV-V0.0.90';
 
 // =========== NODE - NPM ===========
-const {remote, ipcRenderer} = require('electron');
+const {remote, ipcRenderer, shell} = require('electron');
 const Request = require('request');
 const rpn = require('request-promise-native');
 const events = require('events');
@@ -216,7 +216,6 @@ const openModal = (modalFile) => {
 
 const toggleOptions = () => {openRegular("options");}
 const toggleFlux = () => {toggleMenu();displayCore();openModal("flux");}
-const toggleSettings = () => {openModal("settings");}
 const toggleHelp = () => {window.open("help.html","_blank");}
 
 // =========== CONSOLE ===========
@@ -539,7 +538,6 @@ const selectOption = (type,kind,item,path) => {
         qrCanvas.style.padding = "10px";
         thirdMenuContent.appendChild(qrCanvas);
 
-
         var metaData = document.createElement("div");
         metaData.style['overflow-wrap']= "break-word";
         metaData.innerHTML =  "<p>"+ count + fileStats;
@@ -587,7 +585,7 @@ const selectOption = (type,kind,item,path) => {
             "<br><br><strong>Created</strong><br>"+ d.birthtime +
             "<br><br><strong>Owned by</strong><br>"+ d.uid +
             "<br><br><strong>On device</strong><br>"+ d.dev +
-            "<br><br><strong>Path</strong><br> <a target='_blank' href='"+path+"'>"+ path +"</a>"+
+            "<br><br><strong>Path</strong><br> <a target='_blank' onClick='shell.showItemInFolder("+JSON.stringify(path)+");'>"+ path +"</a>"+
             "</p>"
           });
           if (path.slice(-4)===".csv"){
@@ -783,6 +781,18 @@ switch (commandInput || cliInput) {
           ipcRenderer.send('console-logs',"Opening chromium console.");
           break;
 
+    case  'unlock menu':
+          document.getElementById("menu-icon").onclick = toggleMenu;
+          document.getElementById("menu-icon").style.cursor = "pointer";
+          document.getElementById("option-icon").style.cursor = "pointer";
+          document.getElementById("field").removeEventListener("click", ()=>{
+              openModal("tutorial");
+            })
+            break;
+
+    case  'start tutorial':
+          openModal("tutorial");
+          break;
     case 'undefined':
           commandReturn = "";
           break;
@@ -857,3 +867,26 @@ const refreshWindow = () => {
 const reframeMainWindow = () => {
         remote.mainWindow({frame: true})
 }
+
+// Tutorial - Uncomment to force tutorial on boot if no user name defined
+/*
+fs.readFile(userDataPath +'/userID/user-id.json',                          // Read the designated datafile
+                              'utf8', (err, data) => {              // Additional options for readFile
+  if (err) throw err;
+  let user = JSON.parse(data);
+
+if (user.UserName === "Enter your name") {
+  document.getElementById("menu-icon").style.cursor = "not-allowed";
+  document.getElementById("option-icon").style.cursor = "not-allowed";
+  document.getElementById("field").value = "start tutorial";
+  document.getElementById("field").style.pointerEvents = "all";
+  document.getElementById("field").addEventListener("click", ()=>{
+      openModal("tutorial");
+    })
+  } else{
+    document.getElementById("menu-icon").onclick = toggleMenu;
+    document.getElementById("menu-icon").style.cursor = "all";
+    document.getElementById("option-icon").style.cursor = "all";
+  }
+});
+*/
