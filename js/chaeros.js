@@ -281,7 +281,13 @@ Promise.all([d3.csv(userDataPath+"/datasets/6publicdebate/1capco/"+dataFile, {cr
 var data = [];
 var links= [];
 
-try{
+ipcRenderer.send('console-logs',"Files loaded");
+
+
+//try{
+
+  ipcRenderer.send('console-logs',"Cleaning and re-arranging data...");
+
 
 // Nest all arrays in the main datafile by author_id.
 var contributions = d3.nest().key(d => {return d.contributions_author_id;}).entries(rawData),
@@ -323,6 +329,8 @@ const authDirectory = () => {                                                // 
      }
 
  }
+
+  ipcRenderer.send('console-logs',"Creating authors directory...");
 
 authDirectory();                                                             // Run this function (comment out to prevent)
 
@@ -479,6 +487,8 @@ reportBuilder();
 sourceBuilder();
 }
 
+ipcRenderer.send('console-logs',"Pushing content in directory...");
+
 contentPusher();                                                            // Run function
 
 const scoreBuilder = () => {                                                // Build an impact score for each author_id
@@ -530,6 +540,7 @@ data.forEach(d => {                                                         // F
 
 }
 
+ipcRenderer.send('console-logs',"Building score...");
 scoreBuilder();                                                            // Trigger score function
 
 const opinionBuilder = () => {                                             // Build an opinion Score
@@ -626,6 +637,9 @@ const opinionBuilder = () => {                                             // Bu
     d.opinionSpectrum.score = d.opinionSpectrum.contribOpinionScore + d.opinionSpectrum.contribArgScore;
   });
 }
+
+ipcRenderer.send('console-logs',"Building opinion...");
+
 opinionBuilder();
 
 const amountCalc = (e,f) => {                                   // Create a function to compute the total amount of items
@@ -667,27 +681,6 @@ let bestScore = () => {                                                    // Es
 }
 
 bestScore();
-
-
-
-lexicAnalysis(data,dataFile.substring(0,dataFile.length-4));
-
-ipcRenderer.send('console-logs',"lexicAnalysis has been performed on " + dataFile);
-}
-
-finally{
-        let datalink = JSON.stringify(links);
-          fs.writeFile(
-            userDataPath +'/datasets/6publicdebate/4links/'+dataMatch.substring(0,dataMatch.length-4)+'.json',datalink,'utf8',
-              (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
-          });
-    ipcRenderer.send('console-logs',"CapCo " + dataFile + " links has been successfully written.");
-          ipcRenderer.send('chaeros-success', 'Success: dataset rebuilt');
-          win.close();
-        }
-  });
-}
-
 
 //========== lexicAnalysis ==========
 // lexicAnalysis is a way to generate keywords (tokens) used by the participants of a qualitative survey
@@ -770,14 +763,14 @@ data.forEach(d=>{                                                       // For e
 var communitySet = communitySet.top(50);                                // Limit community MultiSet to the top 50 terms
 
     var dataToWrite = JSON.stringify(data);
-
+console.log(data)
         fs.writeFile(
           userDataPath+'/datasets/6publicdebate/3pubdeb/lexi-'+dataset+".json",
           dataToWrite,
           'utf8',
           (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
         });
-
+console.log(communitySet)
         communitySet = JSON.stringify(communitySet);
 
           fs.writeFile(
@@ -787,6 +780,28 @@ var communitySet = communitySet.top(50);                                // Limit
             (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
           });
 }
+
+ipcRenderer.send('console-logs',"Starting lexical analysis...");
+
+lexicAnalysis(data,dataFile.substring(0,dataFile.length-4));
+
+ipcRenderer.send('console-logs',"Lexical analysis on " + dataFile + "complete. Writing files ...");
+//}
+//finally{
+console.log(links)
+        let datalink = JSON.stringify(links);
+          fs.writeFile(
+            userDataPath +'/datasets/6publicdebate/4links/'+dataMatch.substring(0,dataMatch.length-4)+'.json',datalink,'utf8',
+              (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
+          });
+    ipcRenderer.send('console-logs',"CapCo " + dataFile + " links has been successfully written.");
+          ipcRenderer.send('chaeros-success', 'Success: dataset rebuilt');
+        //  win.close();
+        //}
+  });
+}
+
+
 
 
 //========== zoteroItemsRetriever ==========
