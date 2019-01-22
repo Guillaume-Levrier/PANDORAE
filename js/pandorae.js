@@ -869,13 +869,15 @@ const reframeMainWindow = () => {
 }
 
 // Tutorial - Uncomment to force tutorial on boot if no user name defined
-/*
+
 fs.readFile(userDataPath +'/userID/user-id.json',                          // Read the designated datafile
                               'utf8', (err, data) => {              // Additional options for readFile
   if (err) throw err;
   let user = JSON.parse(data);
 
-if (user.UserName === "Enter your name") {
+if (false
+//  user.UserName === "Enter your name"
+) {
   document.getElementById("menu-icon").style.cursor = "not-allowed";
   document.getElementById("option-icon").style.cursor = "not-allowed";
   document.getElementById("field").value = "start tutorial";
@@ -889,4 +891,3 @@ if (user.UserName === "Enter your name") {
     document.getElementById("option-icon").style.cursor = "all";
   }
 });
-*/
