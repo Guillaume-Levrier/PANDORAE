@@ -1,0 +1,36 @@
+<!DOCTYPE html><html><meta charset="UTF-8">
+<title>PANDORÆ-FLUX</title>
+
+<style>
+input{
+width: 80%;
+border:none;
+border-bottom:1px solid #141414;
+height: 20px;
+}
+
+input:hover{
+  background-color: #141414;
+  color: white;
+}
+
+input:focus{
+  outline:none;
+}
+
+label:hover{
+outline: 1px solid black;
+}
+
+body{cursor: default;}
+</style>
+
+<div style="padding:5px; position:absolute;top:0;right:0;z-index:20;">
+<i class="material-icons dialog-buttons" onclick="refreshWindow();">refresh</i>
+<i class="material-icons dialog-buttons" onclick="closeWindow();">close</i>
+</div>
+
+
+<link rel="stylesheet" type="text/css" href="css/pandorae.css">
+<link rel="icon" type="image/png" href="img/AE-favicon.png"/>
+<script src="js/window-management.js"></script>
