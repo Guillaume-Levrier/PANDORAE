@@ -28,7 +28,10 @@ function createWindow () {
         Object.assign(options, {
             modal: true,
             parent: mainWindow,
-            frame: true
+            frame: true,
+            webPreferences: {
+                nodeIntegrationInWorker: true
+              }
         })
 
         event.newGuest = new BrowserWindow(options)
@@ -193,7 +196,10 @@ const chaerosCalculator = () =>  {
     height: 10,
     frame: false,
     transparent: true,
-    show: false
+    show: false,
+    webPreferences: {
+        nodeIntegrationInWorker: true
+      }
   });
 
   chaerosWindow.loadFile('chaeros.html')

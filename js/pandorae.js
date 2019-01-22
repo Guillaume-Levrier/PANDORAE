@@ -21,7 +21,17 @@ const d3 = require("d3");
 const THREE = require('three');
 const userDataPath = remote.app.getPath('userData');
 const QRCode = require('qrcode');
+//const worker = require('worker_threads');
 
+// =========== SHARED WORKER ===========
+if (!!window.SharedWorker) {
+var multiThreader = new SharedWorker("multithreader.js");
+console.log(multiThreader);
+multiThreader.port.postMessage("test");
+multiThreader.port.onmessage = function(e) {
+  console.log('Message received from worker: '+e);
+}
+}
 // =========== MAIN DISPLAY ===========
 console.log(msg+version);
 let coreLogoArchive = "";
