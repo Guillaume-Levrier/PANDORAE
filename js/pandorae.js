@@ -928,10 +928,9 @@ ipcRenderer.on('tutorial', (event,message) => {
               {"background-color": "white","color":"#141414"}];
 
     switch (message) {
-      case "openFlux": blinker("menu-icon");
+      case "openFlux": openRegular('tutorialHelper');
+                       blinker("menu-icon");
                        blinker("fluxMenu");
-                       document.getElementById("fluxMenu").addEventListener("click", openRegular('tutorialHelper'))
-
 
         break;
       default:
