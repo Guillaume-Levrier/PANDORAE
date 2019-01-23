@@ -892,14 +892,46 @@ if (false
   }
 });
 
-ipcRenderer.on('tutorial', (message) => {
+const blinker = (item) => {
+
+let blinking;
+let blinking2;
+
+function blink () {
+  blinking = setInterval( function(){
+          document.getElementById(item).style.backgroundColor = "#141414";
+          document.getElementById(item).style.color = "white";
+        }, 500);
+  blinking2 = setInterval(function(){ document.getElementById(item).style.backgroundColor = "white";
+        document.getElementById(item).style.color = "#141414"; },1000);
+};
+
+blink();
+
+        document.getElementById(item).addEventListener('click', function(){
+          clearInterval(blinking);
+          clearInterval(blinking2);
+          document.getElementById(item).style.backgroundColor = "white";
+          document.getElementById(item).style.color = "#141414";
+        });
+
+
+};
+
+
+
+ipcRenderer.on('tutorial', (event,message) => {
   document.getElementById("menu-icon").onclick = toggleMenu;
   document.getElementById("menu-icon").style.cursor = "all";
   document.getElementById("option-icon").style.cursor = "all";
-console.log(message);
+  let blink = [{"background-color": "#141414","color":"white"},
+              {"background-color": "white","color":"#141414"}];
+
     switch (message) {
-      case "openFlux":
-          toggleMenu();
+      case "openFlux": blinker("menu-icon");
+                       blinker("fluxMenu");
+                       document.getElementById("fluxMenu").addEventListener("click", openRegular('tutorialHelper'))
+
 
         break;
       default:
