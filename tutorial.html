@@ -1,22 +1,10 @@
 <!DOCTYPE html><html><meta charset="UTF-8">
 <title>PANDORÆ-FLUX</title>
-
+<link rel="stylesheet" type="text/css" href="css/pandorae.css">
 <style>
-@import url('https://fonts.googleapis.com/css?family=Noto+Sans');
-@import url('https://fonts.googleapis.com/earlyaccess/notosanssc.css');
-@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
-
-head, body{
-  width:100%;
-  height:100%;
-  top:0;
-  left:0;
-  margin:0;
-  padding:0;
-  display: block;
-  font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
+body{
+  overflow: scroll;
 }
-
 #tutorialSections {
   padding: 40px;
 }
@@ -32,12 +20,20 @@ head, body{
 }
 
 .step {
-  margin-bottom: 200px;
+  margin-bottom: 600px;
 font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
   font-size: 16px;
   line-height: 26px;
   color: black;
-  height: 80%;
+}
+
+.centerStep{
+  text-align:center;
+}
+
+a {
+text-decoration: underline;
+
 }
 
 sections .title {
@@ -49,73 +45,82 @@ font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
   line-height: 1.2em;
 }
 
-a {
-  color: black;
-  background-color: #a3fff5;
-}
-
-a:visited {
-  color: black;
-  text-decoration: none;
-}
-
-a:hover {
-  background-color: #141414;
-  color: #FFF;
-  text-decoration: none;
-}
-
-.dialog-buttons {
-  position: absolute;
-  background-color: white;
-  font-size: 16px;
-  color: #141414;
-  z-index: 5;
-}
-
-.dialog-buttons:hover {
-  background-color: #141414;
-  color: #FFF;
-  cursor: pointer;
-  z-index: 5;
+#dialogDiv{
+  position:sticky;
+  z-index:20;
+  padding: 5px;
+  left: 100%;
+  width:40px;
 }
 
 ::-webkit-scrollbar {
     display: none;
 }
 
+.arrowDown{
+text-align: center;
+text-decoration: none;
+}
+
 </style>
 <body>
+  <div id="dialogDiv">
+  <i class="material-icons dialog-buttons" onclick="refreshWindow();">refresh</i>
+  <i class="material-icons dialog-buttons" onclick="closeWindow();">close</i>
+  </div>
+
 <div id='tutorialSections'>
-     <section class="step">
-       <div class="title"><span style="text-align:center;font-weight: bold;display:block;margin:auto;font-size:36px;">
+     <section class="step centerStep">
+       <div class="title"><span style="font-size:36px;font-weight: bold;">
          &nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;<br>
          Welcome to PANDORÆ<br>&nbsp;<br>
-         <i class="material-icons"><a onclick="smoothScrollTo(Summary)">arrow_downward</a></i>
+         <i class="material-icons arrowDown"><a class="arrowDown" onclick="smoothScrollTo('slide2')">arrow_downward</a></i>
        </span></div>
      </section>
-     <section id="first" class="step">
-       <div class="title">Summary</div>
-       Content
+     <section id="slide2" class="step centerStep">
+       <div class="title">This brief tutorial will show you what PANDORÆ does.</div><br>
+       It will allow you to see the extent of what it does not do.&nbsp;<br>&nbsp;<br>
+       <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('slide3')">arrow_downward</a></i>
      </section>
-     <section class="step">
-       <div class="title">Step two</div>
-       Menu
-       <ul style="list-style-type: none;">
-       <li><a onclick="smoothScrollTo(Chapter 1)">Chapter 1</a></li>
-       <li><a onclick="smoothScrollTo(Chapter 2)">Chapter2</a></li>
-       <li><a onclick="smoothScrollTo(Chapter 3)">Chapter 3</a></li>
-       </ul>
+     <section id="slide3" class="step centerStep">
+       <div class="title">PANDORÆ is a <strong>data exploration tool.</strong></div><br>
+        It has been designed to investigate how <strong>science</strong> sometimes changes <strong>humans</strong>.&nbsp;<br>&nbsp;<br>
+        It can even be used to show that science often doesn't.<br>&nbsp;<br>
+      <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('slide4')">arrow_downward</a></i>
+     </section>
+     <section id="slide4" class="step centerStep">
+       <div class="title">PANDORÆ  allows you to perform three main operations:</div><br>
+    <a onclick="smoothScrollTo('Chapter1')">Load data</a><br>
+       <a onclick="smoothScrollTo('Chapter2')">Enrich data</a><br>
+    <a onclick="smoothScrollTo('Chapter3')">Explore data</a><br>
+        <br>&nbsp;<br>
+  <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('Chapter1')">arrow_downward</a></i>
+     </section>
+     <section id="Chapter1" class="step">
+       <div class="title"><strong>Chapter 1: Loading data</strong></div><br>
+PANDORÆ enables you to <strong>load data from different types of sources</strong>.<br><br>
+Those sources can be online databases which aggregate documents such as <a onclick="smoothScrollTo('scienceArticles')">scientific articles</a>.<br> <br>You can also use <a onclick="smoothScrollTo('bibliography')">any kind of documents</a> published by States, Institutions, Newspapers or even a blog post, <a onclick="smoothScrollTo('altmetrics')">related or unrelated</a> to a scientific article.<br> <br>PANDORÆ also supports some specific <a onclick="smoothScrollTo('pubdeb')">online public debate platforms</a>, and <a onclick="smoothScrollTo('socialmedia')">social-media data</a>.
+        <br>&nbsp;<br>
+      <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('flux')">arrow_downward</a></i></div>
+     </section>
+     <section id="flux" class="step">
+       <div class="title"><strong>Using Flux</strong></div><br>
+First of all, loading data happens in the <strong>Flux</strong> tab of PANDORÆ's menu.<br><br>
+Click <a onclick="tutoFlux();">here</a> to navigate to and open Flux.
+        <br>&nbsp;<br>
+      <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('')">arrow_downward</a></i></div>
      </section>
 </div>
 
-<div style="padding:5px; position:absolute;top:0;right:20;z-index:20;">
-<i class="material-icons dialog-buttons" onclick="refreshWindow();">refresh</i>
-<i class="material-icons dialog-buttons" onclick="closeWindow();">close</i>
-</div>
-
+<!--
+<ul style="list-style-type: none;">
+<li><a onclick="smoothScrollTo('Chapter1')">Chapter 1</a></li>
+<li><a onclick="smoothScrollTo('Chapter2')">Chapter2</a></li>
+<li><a onclick="smoothScrollTo('Chapter3')">Chapter 3</a></li>
+</ul>-->
 
 <link rel="icon" type="image/png" href="img/AE-favicon.png"/>
 <script src="js/window-management.js"></script>
 <script src="js/tutorial/scroller.js"></script>
+<script src="js/tutorial/tutorial.js"></script>
 </body>

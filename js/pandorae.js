@@ -891,3 +891,18 @@ if (false
     document.getElementById("option-icon").style.cursor = "all";
   }
 });
+
+ipcRenderer.on('tutorial', (message) => {
+  document.getElementById("menu-icon").onclick = toggleMenu;
+  document.getElementById("menu-icon").style.cursor = "all";
+  document.getElementById("option-icon").style.cursor = "all";
+console.log(message);
+    switch (message) {
+      case "openFlux":
+          toggleMenu();
+
+        break;
+      default:
+
+    }
+});
