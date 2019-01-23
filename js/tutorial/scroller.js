@@ -69,8 +69,6 @@ function scroller() {
   return scroll;
 }
 
-let Summary = "Summary", Mapping = "Mapping", PornVsReality = "PornVsReality", NationBuilder =  "NationBuilder", MeToo ="MeToo", Cash = "Cash", third = "third", second = "second", first = "first", Final = "final";
-
 function smoothScrollTo(target){
   document.getElementById(target).scrollIntoView({ behavior: 'smooth' });
 };

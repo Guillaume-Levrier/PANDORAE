@@ -219,3 +219,14 @@ if (err) throw err;
   app.quit()
 });
 })
+
+// Tutorial
+
+ipcMain.on('tutorial', (event,message) => {
+  switch (message) {
+    case 'flux': console.log("starting Flux presentation")
+                mainWindow.webContents.send('tutorial','openFlux');
+      break;
+
+  }
+})
