@@ -230,3 +230,13 @@ ipcMain.on('tutorial', (event,message) => {
 
   }
 })
+
+ipcMain.on('tutoslide', (event,slide) => {
+console.log(slide);
+  switch (slide) {
+    case 'flux': mainWindow.webContents.send('tutorial','openTutorial');
+    tutorial.webContents.on('did-finish-load', function () {mainWindow.webContents.send('tutorial',["gotoslide","flux"]);});
+      break;
+
+  }
+})

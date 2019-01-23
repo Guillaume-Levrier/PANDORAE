@@ -933,6 +933,9 @@ ipcRenderer.on('tutorial', (event,message) => {
                        blinker("fluxMenu");
 
         break;
+
+        case "openFlux": openModal('tutorial');
+                         break;
       default:
 
     }

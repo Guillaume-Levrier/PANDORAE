@@ -17,7 +17,20 @@ body{
 <div id="content"></div>
 
 <script>
-  let fluxDesc = "You can now use the menu.<br><br> Click on the blinking menu button to do so.<br><br>Select the 'Flux' tab to open Flux.<br><br> You can explore the different options by clicking on the tabs on the left of flux.<br><br>Once you are done exploring, click <a onClick="">here</a> to go back to the tutorial and learn more about those."
+  const {remote, ipcRenderer} = require('electron');
+
+
+
+
+const goBack = (slide) => {
+  ipcRenderer.send("tutoslide",slide)
+  remote.getCurrentWindow().close();
+}
+
+  let fluxDesc = "You can now use the menu.<br><br>"+
+                  " Click on the blinking menu button to do so.<br><br>"+
+                  "Select the 'Flux' tab to open Flux.<br><br> You can explore the different options by clicking on the tabs on the left of flux.<br><br>"+
+                  "Once you are done exploring, click <a onClick='goBack('"+"flux"+"')'>here</a> to go back to the tutorial and learn more about those.";
 
 document.getElementById("content").innerHTML = fluxDesc;
 </script>
