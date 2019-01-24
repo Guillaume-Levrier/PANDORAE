@@ -187,13 +187,20 @@ lifelines.attr("class","lifelinerror")
 
 }
 
+let screenWidth = remote.screen.getPrimaryDisplay().workAreaSize.width;
+let screenHeight = remote.screen.getPrimaryDisplay().workAreaSize.height;
+
 const openRegular = (regularFile) => {
   let win = new remote.BrowserWindow({
     parent: remote.getCurrentWindow(),
     backgroundColor: 'white',
     resizable: false,
     width: 350,
-    height: 700
+    height: 700,
+    alwaysOnTop:true,
+    autoHideMenuBar : true,
+    x:screenWidth-350,
+    y:100
   })
   win.once('ready-to-show', () => {
   win.show()
@@ -934,7 +941,7 @@ ipcRenderer.on('tutorial', (event,message) => {
 
         break;
 
-        case "openFlux": openModal('tutorial');
+        case "openTutorial": openModal('tutorial');
                          break;
       default:
 
