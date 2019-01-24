@@ -26,6 +26,7 @@ text-decoration: underline;
 const goBack = (slide) => {
   ipcRenderer.send("tutoslide",slide)
   remote.getCurrentWindow().close();
+    ipcRenderer.send("window-manager","closeWindow","flux")
 };
 
 let flux = "flux";

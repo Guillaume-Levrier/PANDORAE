@@ -54,7 +54,7 @@ app.on('activate',  () => { if (mainWindow === null) { createWindow() } })
 
 
 const openHelper = (helperFile) => {
-  
+
   let screenWidth = electron.screen.getPrimaryDisplay().workAreaSize.width;
   let screenHeight = electron.screen.getPrimaryDisplay().workAreaSize.height;
 
@@ -96,7 +96,7 @@ switch (type) {
   case "openModal": openModal(file);
     break;
   case "closeWindow":
-      mainWindow.webContents.send('window-manager',"close "+file);           // send it to requester
+      mainWindow.webContents.send('window-manager',file,"closeWindow");           // send it to requester
     break;
 }
 
