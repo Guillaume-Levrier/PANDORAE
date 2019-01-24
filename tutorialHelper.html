@@ -26,10 +26,9 @@ const {remote, ipcRenderer} = require('electron');
 ipcRenderer.send("window-ids","tutorialHelper",remote.getCurrentWindow().id);
 
 const goBack = (slide) => {
-  ipcRenderer.send("tutoslide",slide)
     ipcRenderer.send("window-manager","closeWindow","flux")
-  remote.getCurrentWindow().close();
-
+    ipcRenderer.send("window-manager","openModal","tutorial",slide)
+    remote.getCurrentWindow().close();
 };
 
 let flux = "flux";
