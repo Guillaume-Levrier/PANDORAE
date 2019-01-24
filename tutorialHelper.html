@@ -21,12 +21,15 @@ text-decoration: underline;
 <div id="content"></div>
 
 <script>
-  const {remote, ipcRenderer} = require('electron');
+const {remote, ipcRenderer} = require('electron');
+
+ipcRenderer.send("window-ids","tutorialHelper",remote.getCurrentWindow().id);
 
 const goBack = (slide) => {
   ipcRenderer.send("tutoslide",slide)
-  remote.getCurrentWindow().close();
     ipcRenderer.send("window-manager","closeWindow","flux")
+  remote.getCurrentWindow().close();
+
 };
 
 let flux = "flux";

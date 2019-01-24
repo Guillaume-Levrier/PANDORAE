@@ -907,7 +907,7 @@ ipcRenderer.on('tutorial', (event,message) => {
               {"background-color": "white","color":"#141414"}];
 
     switch (message) {
-      case "openFlux": openRegular('tutorialHelper');
+      case "openFlux": openHelper('tutorialHelper');
                        blinker("menu-icon");
                        blinker("fluxMenu");
 
@@ -918,4 +918,8 @@ ipcRenderer.on('tutorial', (event,message) => {
       default:
 
     }
+});
+
+ipcRenderer.on('window-close', (event,message) => {
+  console.log("Closing "+message);
 });
