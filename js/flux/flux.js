@@ -22,7 +22,7 @@ const d3 = require("d3");
 
 //========== STARTING FLUX ==========
 ipcRenderer.send('console-logs',"Opening Flux");           // Sending notification to console
-ipcRenderer.on('tutorial', (event,message)=>{
+ipcRenderer.on('tutorial', (event,message) => {
   console.log(message)
 switch (message) {
   case "closeFlux": closeWindow();
