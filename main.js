@@ -60,8 +60,7 @@ var windowIds = [
 
 
 ipcMain.on('window-ids', (event,window,id) => {
-windowIds.forEach(d=>{if (d.name === window) { d.id = id};})
-console.log(windowIds)
+    windowIds.forEach(d=>{if (d.name === window) { d.id = id};})
 });
 
 
@@ -71,7 +70,6 @@ const openHelper = (helperFile) => {
   let screenHeight = electron.screen.getPrimaryDisplay().workAreaSize.height;
 
   let win = new BrowserWindow({
-  //parent: remote.getCurrentWindow(),
     backgroundColor: 'white',
     resizable: false,
     width: 350,
@@ -88,20 +86,24 @@ const openHelper = (helperFile) => {
   win.loadURL(path);
 }
 
-const openModal = (modalFile) => {
+const openModal = (modalFile,scrollTo) => {
   let win = new BrowserWindow({
-    //parent: remote.getCurrentWindow(),
     backgroundColor: 'white',
     modal: true,
     frame: false,
-    resizable: false
+    resizable: false,
+    show: false
   })
   var path = 'file://' + __dirname + '/'+ modalFile +'.html';
   win.loadURL(path);
+  win.once('ready-to-show', () => {
+  win.show();
+  win.webContents.send('scroll-to',scrollTo);
+})
 }
 
-ipcMain.on('window-manager', (event,type,file) => {
-
+ipcMain.on('window-manager', (event,type,file,scrollTo) => {
+console.log(type,file,scrollTo)
 let win = {};
 
 for (var i = 0; i < windowIds.length; i++) {
@@ -112,7 +114,7 @@ for (var i = 0; i < windowIds.length; i++) {
 switch (type) {
   case "openHelper": openHelper(file);
     break;
-  case "openModal": openModal(file);
+  case "openModal": openModal(file,scrollTo);
     break;
   case "closeWindow":
      win.webContents.send('window-close','close');
@@ -297,17 +299,6 @@ ipcMain.on('tutorial', (event,message) => {
   switch (message) {
     case 'flux': console.log("starting Flux presentation")
                 mainWindow.webContents.send('tutorial','openFlux');
-      break;
-
-  }
-})
-
-ipcMain.on('tutoslide', (event,slide) => {
-console.log(slide);
-  switch (slide) {
-    case 'flux': mainWindow.webContents.send('tutorial','openTutorial');
-    mainWindow.webContents.send('tutorial','closeFlux');
-
       break;
 
   }
