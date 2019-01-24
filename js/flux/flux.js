@@ -22,20 +22,11 @@ const d3 = require("d3");
 
 //========== STARTING FLUX ==========
 ipcRenderer.send('console-logs',"Opening Flux");           // Sending notification to console
-ipcRenderer.on('window-manager', (event,file,option) => {
-if (file==="flux") {
-  switch (option) {
-  case "closeWindow": closeWindow();
-    break;
-}
-})
-ipcRenderer.on('tutorial', (event,message) => {
-  console.log(message)
-switch (message) {
-  case "closeFlux": closeWindow();
-    break;
-}
-})
+ipcRenderer.send("window-ids","flux",remote.getCurrentWindow().id)
+ipcRenderer.on('window-close', (event,message) => {
+  closeWindow();
+});
+
 //========== Tracegraph ==========
 
 let traces = [

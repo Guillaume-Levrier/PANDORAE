@@ -52,6 +52,18 @@ app.on('ready', ()=>{
 
 app.on('activate',  () => { if (mainWindow === null) { createWindow() } })
 
+var windowIds = [
+{name:"flux",id:0},
+{name:"tutorialHelper",id:0},
+{name:"tutorial",id:0}
+]
+
+
+ipcMain.on('window-ids', (event,window,id) => {
+windowIds.forEach(d=>{if (d.name === window) { d.id = id};})
+console.log(windowIds)
+});
+
 
 const openHelper = (helperFile) => {
 
@@ -89,14 +101,21 @@ const openModal = (modalFile) => {
 }
 
 ipcMain.on('window-manager', (event,type,file) => {
-console.log(type, file)
+
+let win = {};
+
+for (var i = 0; i < windowIds.length; i++) {
+  if (windowIds[i].name === file) {
+    win = BrowserWindow.fromId(windowIds[i].id)}
+}
+
 switch (type) {
   case "openHelper": openHelper(file);
     break;
   case "openModal": openModal(file);
     break;
   case "closeWindow":
-      mainWindow.webContents.send('window-manager',file,"closeWindow");           // send it to requester
+     win.webContents.send('window-close','close');
     break;
 }
 
