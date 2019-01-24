@@ -1,4 +1,5 @@
-const {app, BrowserWindow, ipcMain} = require('electron');
+const electron = require('electron')
+const {app, BrowserWindow, ipcMain} = electron;
 const fs = require('fs');
 const userDataPath = app.getPath('userData');
 
@@ -46,9 +47,60 @@ function createWindow () {
 
 app.on('ready', ()=>{
     createWindow();
+
 })
 
 app.on('activate',  () => { if (mainWindow === null) { createWindow() } })
+
+
+const openHelper = (helperFile) => {
+  
+  let screenWidth = electron.screen.getPrimaryDisplay().workAreaSize.width;
+  let screenHeight = electron.screen.getPrimaryDisplay().workAreaSize.height;
+
+  let win = new BrowserWindow({
+  //parent: remote.getCurrentWindow(),
+    backgroundColor: 'white',
+    resizable: false,
+    width: 350,
+    height: 700,
+    alwaysOnTop:true,
+    autoHideMenuBar : true,
+    x:screenWidth-350,
+    y:100
+  })
+  win.once('ready-to-show', () => {
+  win.show()
+})
+  var path = 'file://' + __dirname + '/'+ helperFile +'.html';
+  win.loadURL(path);
+}
+
+const openModal = (modalFile) => {
+  let win = new BrowserWindow({
+    //parent: remote.getCurrentWindow(),
+    backgroundColor: 'white',
+    modal: true,
+    frame: false,
+    resizable: false
+  })
+  var path = 'file://' + __dirname + '/'+ modalFile +'.html';
+  win.loadURL(path);
+}
+
+ipcMain.on('window-manager', (event,type,file) => {
+console.log(type, file)
+switch (type) {
+  case "openHelper": openHelper(file);
+    break;
+  case "openModal": openModal(file);
+    break;
+  case "closeWindow":
+      mainWindow.webContents.send('window-manager',"close "+file);           // send it to requester
+    break;
+}
+
+});
 
 //FileSystem
 var pandoDir = userDataPath;
@@ -236,7 +288,7 @@ console.log(slide);
   switch (slide) {
     case 'flux': mainWindow.webContents.send('tutorial','openTutorial');
     mainWindow.webContents.send('tutorial','closeFlux');
-    /*mainWindow.webContents.on('did-finish-load', function () {mainWindow.webContents.send('tutorial',["gotoslide","flux"]);});*/
+
       break;
 
   }

@@ -187,40 +187,12 @@ lifelines.attr("class","lifelinerror")
 
 }
 
-let screenWidth = remote.screen.getPrimaryDisplay().workAreaSize.width;
-let screenHeight = remote.screen.getPrimaryDisplay().workAreaSize.height;
-
-const openRegular = (regularFile) => {
-  let win = new remote.BrowserWindow({
-    parent: remote.getCurrentWindow(),
-    backgroundColor: 'white',
-    resizable: false,
-    width: 350,
-    height: 700,
-    alwaysOnTop:true,
-    autoHideMenuBar : true,
-    x:screenWidth-350,
-    y:100
-  })
-  win.once('ready-to-show', () => {
-  win.show()
-})
-  var path = 'file://' + __dirname + '/'+ regularFile +'.html';
-  win.loadURL(path);
+const openHelper = (helperFile) => {
+  ipcRenderer.send('window-manager',"openHelper",helperFile);
 }
-
 const openModal = (modalFile) => {
-  let win = new remote.BrowserWindow({
-    parent: remote.getCurrentWindow(),
-    backgroundColor: 'white',
-    modal: true,
-    frame: false,
-    resizable: false
-  })
-  var path = 'file://' + __dirname + '/'+ modalFile +'.html';
-  win.loadURL(path);
+  ipcRenderer.send('window-manager',"openModal",modalFile);
 }
-
 const toggleOptions = () => {openRegular("options");}
 const toggleFlux = () => {toggleMenu();displayCore();openModal("flux");}
 const toggleHelp = () => {window.open("help.html","_blank");}
