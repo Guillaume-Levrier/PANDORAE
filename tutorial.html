@@ -4,6 +4,7 @@
 <style>
 body{
   overflow: scroll;
+  text-align: justify;
 }
 #tutorialSections {
   padding: 40px;
@@ -79,7 +80,7 @@ text-decoration: none;
      </section>
      <section id="slide2" class="step centerStep">
        <div class="title">This brief tutorial will show you what PANDORÆ does.</div><br>
-       It will allow you to see the extent of what it doesn't do (yet).&nbsp;<br>&nbsp;<br>
+       And what it doesn't do.&nbsp;<br>&nbsp;<br>
        <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('slide3')">arrow_downward</a></i>
      </section>
      <section id="slide3" class="step centerStep">
@@ -109,16 +110,58 @@ Those sources can be online databases that aggregate documents such as <a onclic
 Loading data happens in the <strong>Flux</strong> tab of PANDORÆ's menu.<br><br>
 Click <a onclick="tutoFlux();">here</a> to navigate to and open Flux.
         <br>&nbsp;<br>
-      <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('')">arrow_downward</a></i></div>
+      <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('flux2')">arrow_downward</a></i></div>
      </section>
+     <section id="flux2" class="step">
+       <div class="title"><strong>Flux sections</strong></div><br>
+Flux has different sections. Each section has its own purpose, and relies on different services:
+<ul style="list-style-type: square;">
+<li><a onclick="smoothScrollTo('')">Flux manager</a> displays available services</li>
+<li><a onclick="smoothScrollTo('')">User credentials</a> loads your service API keys and credentials</li>
+<li><a onclick="smoothScrollTo('')">Scopus</a> allows you to request science articles, preview the amount of results, trigger the actual request, geolocate each paper's affiliations, and export the resulting dataset in csl-json.</li>
+<li><a onclick="smoothScrollTo('')">Public debate</a> loads files extracted from an online public debate platform and rekindles the data to build a cartography of opinion groups involved in the debate.</li>
+<li><a onclick="smoothScrollTo('')">Altmetric</a> retrieves media articles, blog posts and social-media content linked to scholarly publications.</li>
+<li><a onclick="smoothScrollTo('')">Local</a> allows you to load datasets directly in a visualisation directory (advanced users).</li>
+</ul>
+      Click on a section name to learn more about that section, or click on the arrow to jump to <strong>Chapter 2</strong>.   <br>&nbsp;<br>
+      <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('Chapter2')">arrow_downward</a></i></div>
+     </section>
+     <section id="Chapter2" class="step">
+       <div class="title"><strong>Chapter 2: Enriching data</strong></div><br>
+    <strong>Flux</strong> enables you do retrieve data from different kinds of databases. Articles retrieved through <a  onclick="smoothScrollTo('')">Scopus</a> can be put on a map by geolocating their affiliation thanks to MapTiler. Their impact on society can be assessed through <a  onclick="smoothScrollTo('')">Altmetric</a>. And so on, and so forth.<br><br>
+    None of those techniques is perfect. At each step, your "signal", the core content of what you're looking for, will be obscured by "noise", data that might not be completely irrelevant but still doesn't qualify to your criteria either.<br><br>
+    In order to curate your data and enrich its content by hand, PANDORÆ allows you to send your datasets to <strong>Zotero</strong> and download them back into the system when you're done.
+        <br>&nbsp;<br>
+      <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('Zotero1')">arrow_downward</a></i></div>
+     </section>
+     <section id="Zotero1" class="step">
+     <div class="title"><strong>Zotero</strong></div><br>
+  <strong>Zotero</strong> is an open-source software designed to manage bibliographic data and references. It supports CSL-JSON datasets.       <br>&nbsp;<br>
+  PANDORÆ converts data retrieved from <a onclick="smoothScrollTo('Chapter1')">data sources</a> to this format.     <br>&nbsp;<br>
+  Using Zotero, you can explore, edit and curate those datasets.
+
+      <br>&nbsp;<br>
+    <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('Zotero2')">arrow_downward</a></i></div>
+   </section>
+   <section id="Zotero2" class="step">
+   <div class="title"><strong>Creating a Zotero account</strong></div><br>
+You can create a free zotero account at <a onclick="shell.openExternal('https://www.zotero.org/')">https://www.zotero.org/</a>. <br>&nbsp;<br>
+Once that is done, you will need to set up a <a onclick="shell.openExternal('https://www.zotero.org/groups/')">group library</a> and retrieve a read/write API key.
+When you have those, you can enter them in <a onclick="tutoFlux('zoteroCredentials');">Flux</a>.
+
+
+
+    <br>&nbsp;<br>
+  <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('Zotero1')">arrow_downward</a></i></div>
+ </section>
+
 </div>
 
 <!--
-<ul style="list-style-type: none;">
-<li><a onclick="smoothScrollTo('Chapter1')">Chapter 1</a></li>
-<li><a onclick="smoothScrollTo('Chapter2')">Chapter2</a></li>
-<li><a onclick="smoothScrollTo('Chapter3')">Chapter 3</a></li>
-</ul>-->
+
+<li><a onclick="smoothScrollTo('')">Zotero</a> connects you with your Zotero group library, which you will need to check and edit the content of your datasets.</li>
+
+-->
 
 <link rel="icon" type="image/png" href="img/AE-favicon.png"/>
 <script src="js/window-management.js"></script>
