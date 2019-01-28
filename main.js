@@ -103,7 +103,7 @@ const openModal = (modalFile,scrollTo) => {
 }
 
 ipcMain.on('window-manager', (event,type,file,scrollTo) => {
-console.log(type,file,scrollTo)
+
 let win = {};
 
 for (var i = 0; i < windowIds.length; i++) {
