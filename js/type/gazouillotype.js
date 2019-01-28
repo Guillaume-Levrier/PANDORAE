@@ -61,6 +61,28 @@ Promise.all([                                            // Loading data through
 var data = datajson[0];
 var keywords = datajson[1].keywords;
 
+// Convert dataset if it comes from scraping instead of a proper API request
+
+const scrapToApiFormat = (data) => {
+if(data[0].hasOwnProperty('username')) {
+  data.forEach(d=>{
+    d.from_user_name = d.username;
+    d.created_at = d.date;
+    d.retweet_count = d.retweets;
+    d.favorite_count = d.favorites;
+    delete d.username;
+    delete d.date;
+    delete d.retweets;
+    delete d.favorites;
+    })
+    data.reverse();
+  }
+}
+
+scrapToApiFormat(data);
+
+
+
 var meanRetweetsArray = [];
 
 data.forEach(d=>{
@@ -126,13 +148,22 @@ context.append("g")
 
 let radius = 0;
 
-for (var i = 0; i < data.length; i++) {
-  if (data[i].timespan.getTime()===data[i+1].timespan.getTime()){
-    radius = (y(data[i+1].indexPosition)-y(data[i].indexPosition))/3;
- break;
+const radiusCalculator = () => {
+for (var i = 0; i < dataNest.length; i++) {
+  if (dataNest[i].values.length>2) {
+  radius = (y(dataNest[i].values[1].indexPosition)-y(dataNest[i].values[0].indexPosition))/3;
+break;
+    }
   }
 }
 
+radiusCalculator();
+
+
+console.log(radius);
+
+console.log(data);
+console.log(dataNest);
 
 var circle = view.selectAll("circle")
               .data(data)
