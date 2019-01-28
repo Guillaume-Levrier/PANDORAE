@@ -1,26 +1,25 @@
-const gazouillotype = (dataset,query) => {                          // When called, draw the gazouillotype
+const gazouillotype = (dataset,query) => {                             // When called, draw the gazouillotype
 
 //========== SVG VIEW =============
 var svg = d3.select(xtype).append("svg").attr("id","xtypeSVG");       // Creating the SVG node
 
-svg.attr("width",width).attr("height", height);          // Attributing width and height to svg
+svg.attr("width",width).attr("height", height);                       // Attributing width and height to svg
 
 var view = svg.append("g")                                            // Appending a group to SVG
               .attr("class", "view");
 
-var brushHeight = 150;
+var brushHeight = 150;                                                // Hardcoding brush height
 
-svg.append("rect")                                   // Putting a rectangle above the grid to make dates easier to read
+svg.append("rect")                                    // Inserting a rectangle below the brush to make it easier to read
     .attr("x", 0).attr("y", height-brushHeight)                       // Rectangle starts at top left
-    .attr("width", width).attr("height", brushHeight)         // Rectangle dimensions
-    .style("fill", "white")     // Rectangle background color and opacity
-    .style("stroke-width","0");                      // Invisible borders
+    .attr("width", width).attr("height", brushHeight)                 // Rectangle dimensions
+    .style("fill", "white")                                           // Rectangle background color
+      .style("stroke-width","0");                                     // Invisible borders
 
-
-var context = svg.append("g")
-    .attr("class", "context")
+var context = svg.append("g")                                         // Creating the "context" SVG group
+    .attr("class", "context")                                         // Giving it a CSS/SVG class
     .style("pointer-event","none")
-    .attr("transform", "translate(0,"+(height-brushHeight-50)+")");
+    .attr("transform", "translate(0,"+(height-brushHeight-50)+")");   // Placing it in the dedicated "brush" area
 
 var zoom = d3.zoom()
             .scaleExtent([0.6, Infinity])                                    // Extent to which one can zoom in or out
@@ -29,9 +28,9 @@ var zoom = d3.zoom()
 
 var brush = d3.brushX()
     .extent([[0, 0], [width, brushHeight-50]]);
-    //.on("brush end", brushed);
+    //.on("brush",brushed);
 
-//========== X & Y AXIS  ============
+//========== X & Y AXIS  ============                                // Creating two arrays of scales (graph + brush)
 var x = d3.scaleTime().range([0,width-(0.3*width)]),
     x2 = d3.scaleTime().range([0,width-(0.3*width)]);
 
@@ -43,7 +42,7 @@ var y = d3.scaleLinear().range([height-brushHeight,0]),
 
 var yAxis = d3.axisRight(y);
 
-var area = d3.area()
+var area = d3.area()                                                // Brush content is a single object (area)
     .curve(d3.curveMonotoneX)
     .x(d =>x2(d.timespan))
     .y0(brushHeight)
@@ -53,35 +52,32 @@ var domainDates = [];
 
 //======== DATA CALL & SORT =========
 
-Promise.all([                                            // Loading data through promises
-   d3.csv(dataset, {credentials: 'include'}),        // Loading clusters
-   d3.json(query, {credentials: 'include'})])     // Loading documents
+Promise.all([                                                     // Loading data through promises
+   d3.csv(dataset, {credentials: 'include'}),                     // Loading dataset
+   d3.json(query, {credentials: 'include'})])                     // Loading keywords
         .then(datajson => {
 
 var data = datajson[0];
 var keywords = datajson[1].keywords;
 
 // Convert dataset if it comes from scraping instead of a proper API request
-
 const scrapToApiFormat = (data) => {
-if(data[0].hasOwnProperty('username')) {
-  data.forEach(d=>{
-    d.from_user_name = d.username;
-    d.created_at = d.date;
-    d.retweet_count = d.retweets;
-    d.favorite_count = d.favorites;
-    delete d.username;
-    delete d.date;
-    delete d.retweets;
-    delete d.favorites;
-    })
-    data.reverse();
-  }
+    if(data[0].hasOwnProperty('username')) {
+          data.forEach(d=>{
+            d.from_user_name = d.username;
+            d.created_at = d.date;
+            d.retweet_count = d.retweets;
+            d.favorite_count = d.favorites;
+            delete d.username;
+            delete d.date;
+            delete d.retweets;
+            delete d.favorites;
+            })
+        data.reverse();
+      }
 }
 
 scrapToApiFormat(data);
-
-
 
 var meanRetweetsArray = [];
 
@@ -101,8 +97,6 @@ data.forEach(d=>{
   var dataNest = d3.nest()
                     .key(d => {return d.timespan;})
                     .entries(data);
-
-
 
 const piler = () => {
     for (i = 0; i < dataNest.length; i++) {
@@ -158,12 +152,6 @@ break;
 }
 
 radiusCalculator();
-
-
-console.log(radius);
-
-console.log(data);
-console.log(dataNest);
 
 var circle = view.selectAll("circle")
               .data(data)
@@ -239,14 +227,15 @@ loadType();
 
 keywordsDisplay();
 
-/*
 svg.append("rect")
-    .attr("class", "zoom")
-    .style("fill","none")
-    .attr("width", width)
-    .attr("height", height)
-    .call(zoom);
-*/
+      .attr("class", "zoom")
+      .attr("width", width)
+      .attr("height", height-brushHeight)
+      .style("fill","none")
+      .style("pointer-events","all")
+      .attr("transform", "translate(0,0)")
+      .call(zoom);
+
 });  //======== END OF DATA CALL (PROMISES) ===========
 
 
@@ -277,16 +266,22 @@ function zoomed() {
      gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
    }
 
+/*
 function brushed() {
   if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-/*var s = d3.event.selection || x2.range();
+var s = d3.event.selection || x2.range();
   x.domain(s.map(x2.invert, x2));
-  console.log(x.domain())
-  view.select(".axis--x").call(xAxis);
-  view.call(zoom.transform, d3.zoomIdentity
-      .scale(width / (s[1] - s[0]))
-      .translate(-s[0], y(1)));*/
+  let target = x.domain();
+
+function medianDate(target) {return new Date(target[0].getTime()+(target[1].getTime()-target[0].getTime())/2)}
+console.log(medianDate(target));
+
+   svg.call(zoom.transform, d3.zoomIdentity
+       .scale(8)
+       .translate(-x(medianDate(target)), -y(10)));
+
 }
+*/
 
 function type(d) {
   d.date = new Date(d.created_at);
