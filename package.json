@@ -11,7 +11,7 @@
 	},
 	"dependencies": {
 		"bottleneck": "^2.13.2",
-		"d3": "^5.7.0",
+		"d3": "^5.8.0",
 		"electron-debug": "^2.0.0",
 		"events": "^3.0.0",
 		"keytar": "^4.3.0",
