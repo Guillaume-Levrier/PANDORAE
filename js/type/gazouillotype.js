@@ -226,7 +226,7 @@ d3.select("#option-icon").on("click", reset);           // Clicking the button "
 loadType();
 
 keywordsDisplay();
-
+/*
 svg.append("rect")
       .attr("class", "zoom")
       .attr("width", width)
@@ -235,7 +235,7 @@ svg.append("rect")
       .style("pointer-events","all")
       .attr("transform", "translate(0,0)")
       .call(zoom);
-
+*/
 });  //======== END OF DATA CALL (PROMISES) ===========
 
 
