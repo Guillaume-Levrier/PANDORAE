@@ -90,6 +90,7 @@ const openModal = (modalFile,scrollTo) => {
   let win = new BrowserWindow({
     backgroundColor: 'white',
     modal: true,
+    alwaysOnTop:true,
     frame: false,
     resizable: false,
     show: false
