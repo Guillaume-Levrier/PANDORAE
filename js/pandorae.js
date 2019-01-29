@@ -729,7 +729,11 @@ switch (commandInput || cliInput) {
           break;
 
     case  'reload':
-          location.reload();
+            document.body.style.animation="fadeout 0.5s";
+            setTimeout(()=>{
+              document.body.remove();
+              remote.getCurrentWindow().reload();
+            }, 450);
           break;
 
     case  'reload core':
@@ -750,8 +754,13 @@ switch (commandInput || cliInput) {
           break;
 */
 
+
+    case  'transfect':
+            pulse(1,1,10);
+          break;
+
     case  'detransfect':
-          pulse(0,10,false);
+          pulse(1,1,10,true);
           break;
 
     case  'chromium console':
