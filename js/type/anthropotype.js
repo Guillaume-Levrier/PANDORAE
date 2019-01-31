@@ -1,4 +1,4 @@
-function anthropotype(humans,affiliations,links){                 // When called, draw the anthropotype
+function anthropotype(affiliations,humans,links){                 // When called, draw the anthropotype
 
 //========== SVG VIEW =============
 var svg = d3.select(xtype).append("svg").attr("id","xtypeSVG");   // Creating the SVG DOM node
@@ -15,12 +15,12 @@ var zoom = d3.zoom()                                      // Zoom ability
 
 //======== DATA CALL & SORT =========
 Promise.all([                                             // Load data as promises
-        d3.json(humans, {credentials: 'include'}),
         d3.json(affiliations, {credentials: 'include'}),
+        d3.json(humans, {credentials: 'include'}),
         d3.json(links,  {credentials: 'include'})])
     .then(datajson => {
 
-const humans = datajson[0].concat(datajson[1]);          // Humans and institutions are both graph nodes, merging them makes sense
+const data = datajson[0].concat(datajson[1]);          // Humans and institutions are both graph nodes, merging them makes sense
 const links = datajson[2];
 
 //========== FORCE GRAPH ============
@@ -42,6 +42,7 @@ var link = view.selectAll("link")                               // Creatin the l
                        .attr("class", d => d.type);             // Their class is defined in their "type" property
 
 //============== NODES ==============
+/*
 var nodeImage = view.selectAll("nodeImage")                     // Create nodeImage variable
   .data(humans)                                                 // Using the "humans" variable data
   .enter().append("image")                                      // Append images
@@ -57,7 +58,29 @@ var nodeImage = view.selectAll("nodeImage")                     // Create nodeIm
             .style("display", "block");
           d3.select("#tooltip").html(
           '<strong>' + d.given +' '+ d.family +
-          '</strong> <br/> <img class="headshots" src="img/anthropo/'+d.img+'">' +
+          //'</strong> <br/> <img class="headshots" src="img/anthropo/'+d.img+'">' +
+          d.descEN);})
+    .on("mouseenter", HighLight(.2))
+    .on("mouseout", mouseOut)
+    .call(d3.drag()
+        .on("start", forcedragstarted)
+        .on("drag", forcedragged)
+        .on("end", forcedragended));
+*/
+
+var nodeImage = view.selectAll("nodeImage")                     // Create nodeImage variable
+  .data(data)                                                 // Using the "humans" variable data
+  .enter().append("circle")                                      // Append images
+          .style("fill","lightblue")
+          .attr("r", 6)
+          .style("opacity", d => d.opacity/100)                 // Opacity based on object property
+          .style('cursor', 'context-menu')                      // Give a specific cursor
+    .on("mouseover", d => {
+          d3.select("#tooltip").transition()
+            .duration(200)
+            .style("display", "block");
+          d3.select("#tooltip").html(
+          '<strong>' + d.given +' '+ d.family +
           d.descEN);})
     .on("mouseenter", HighLight(.2))
     .on("mouseout", mouseOut)
@@ -70,7 +93,7 @@ nodeImage.append("title")
     .text(d => d.family);
 
 var family = view.selectAll("family")
-        .data(humans)
+        .data(data)
         .enter().append("text")
         .attr("pointer-events", "none")
         .attr("class", "humans")
@@ -81,7 +104,7 @@ var family = view.selectAll("family")
         .on("mouseout", mouseOut);
 
 var given = view.selectAll("givens")
-      .data(humans)
+      .data(data)
           .enter().append("text")
           .attr("pointer-events", "none")
           .attr("class", "humans")
@@ -93,16 +116,16 @@ var given = view.selectAll("givens")
 
 function isolate(force, filter) {
   var initialize = force.initialize;
-  force.initialize = function() { initialize.call(force, humans.filter(filter)); };
+  force.initialize = function() { initialize.call(force, data.filter(filter)); };
   return force;
 }
 
 //country-specific relative positions
-simulation.force("countriesCollide", isolate(d3.forceCollide(150), d => d.type === "book"));
+//simulation.force("countriesCollide", isolate(d3.forceCollide(150), d => d.type === "book"));
 
 //starting simulation
 simulation
-    .nodes(humans)
+    .nodes(data)
     .on("tick", ticked);
 
 simulation
@@ -116,6 +139,11 @@ function ticked() {
       .attr("x2", d => d.target.x)
       .attr("y2", d => d.target.y);
 
+
+  nodeImage
+  .attr("cx", d => d.x)
+  .attr("cy", d => d.y);
+
   given
   .attr("x", d => d.x)
   .attr("y", d => d.y);
@@ -124,9 +152,10 @@ function ticked() {
   .attr("x", d => d.x)
   .attr("y", d => d.y);
 
-  nodeImage
-  .attr("x", d => d.x - 6)
-  .attr("y", d => d.y - 6);
+// If actual images and not circles
+//  nodeImage
+//  .attr("x", d => d.x - 6)
+//  .attr("y", d => d.y - 6);
 
 }
 

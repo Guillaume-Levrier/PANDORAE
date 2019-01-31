@@ -414,7 +414,7 @@ let argLength = 99;
             );
           }
           break;
-            case '1anthropotype': argLength = 3;
+            case '2anthropotype': argLength = 3;
             if (options.length === argLength) {
               toggleMenu();
               document.getElementById("field").style.pointerEvents = "all";
