@@ -14,6 +14,7 @@ If you'd rather test the dev branch, clone the repo, cd into it, and use 'npm i'
 - enable gazouillotype brush
 - multithread visualisations
 - solve errors in affiliation coordinates (check city then country before choosing, instead of taking the first guess)
+- filter out null island on geotype
 
 ##### Flux
 - design a specific flux landing page (under way)

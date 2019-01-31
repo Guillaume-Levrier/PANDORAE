@@ -114,7 +114,6 @@ for (var i=0; i<(article.length-1); i++){                           // For loop 
  }
 
 let cityRequests = MultiSet.from(totalCityArray);      // Create a multiset from city Array to prevent duplicate requests
-
 let cities = [];
 
 Promise.all(cityRequests.forEachMultiplicity((count, key) => {                  // Generate requests per city (=> key)
@@ -865,15 +864,17 @@ for (let j = 0; j < collections.length; j++) {                                  
            response[i].items.forEach(d=>f.items.push(d))
            fs.writeFile(                                                 // Write data
              userDataPath+path+importName+'-'+stamp+'.json',JSON.stringify(zoteroItemsResponse),'utf8',         // Options
-               (err) => {if (err)
+               (err) => {if (err) {
                ipcRenderer.send('chaeros-failure', err);                 // On failure, send error to main process
+             }
+             ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " zotero dataset imported in "+path);
+             ipcRenderer.send('chaeros-success', 'Zotero dataset imported');
+             win.hide();
            })
          }
       })
   })
-    ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " zotero dataset imported in "+path);
-    ipcRenderer.send('chaeros-success', 'Zotero dataset imported');
-    win.hide();
+
   })
 }) // closing Keytar
 }
