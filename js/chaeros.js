@@ -157,7 +157,7 @@ for (var j=0; j<(article.length-1); j++){                                       
 
     ipcRenderer.send('chaeros-success', 'Success: Geolocation added');              //Send success message to main process
     ipcRenderer.send('console-logs',"scopusGeolocate successfully added geolocations on " + dataset);
-    win.close();
+    //win.close();
         }  )
       })
   }))
