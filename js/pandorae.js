@@ -414,15 +414,15 @@ let argLength = 99;
             );
           }
           break;
-            case '2anthropotype': argLength = 3;
+            case '2anthropotype': argLength = 1;
             if (options.length === argLength) {
               toggleMenu();
               document.getElementById("field").style.pointerEvents = "all";
               document.getElementById("field").value = "start anthropotype";
               document.getElementById("field").addEventListener("click", ()=>{
-                  anthropotype(options[0],options[1],options[2]);
+                  anthropotype(options[0]);
                   document.getElementById("field").removeEventListener("click", ()=>
-                        anthropotype(options[0],options[1],options[2]));
+                        anthropotype(options[0]));
                   document.getElementById("field").style.pointerEvents = "none";
 
               }

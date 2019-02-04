@@ -1,4 +1,4 @@
-function anthropotype(affiliations,humans,links){                 // When called, draw the anthropotype
+function anthropotype(datasetAT){                 // When called, draw the anthropotype
 
 //========== SVG VIEW =============
 var svg = d3.select(xtype).append("svg").attr("id","xtypeSVG");   // Creating the SVG DOM node
@@ -14,14 +14,21 @@ var zoom = d3.zoom()                                      // Zoom ability
     .on("zoom", zoomed);                                  // Trigger the "zoomed" function on "zoom" behaviour
 
 //======== DATA CALL & SORT =========
-Promise.all([                                             // Load data as promises
-        d3.json(affiliations, {credentials: 'include'}),
-        d3.json(humans, {credentials: 'include'}),
-        d3.json(links,  {credentials: 'include'})])
+Promise.all([d3.json(datasetAT, {credentials: 'include'})])
     .then(datajson => {
 
-const data = datajson[0].concat(datajson[1]);          // Humans and institutions are both graph nodes, merging them makes sense
-const links = datajson[2];
+const data = datajson[0][0].items;          // Humans and institutions are both graph nodes, merging them makes sense
+const links = [];
+
+data.forEach(d=>{
+  if (d.title.indexOf("/ Twitter")>0){
+    let cleanString = d.title.substring(0,d.title.indexOf(" / Twitter"));
+    d.twitterName = cleanString.substring(0,cleanString.indexOf(" (@"));
+    d.twitterHandle = cleanString.substring(cleanString.indexOf("(@"),cleanString.length);
+  }
+})
+
+console.log(data);
 
 //========== FORCE GRAPH ============
 var simulation = d3.forceSimulation()                           // Start the force graph
@@ -30,19 +37,20 @@ var simulation = d3.forceSimulation()                           // Start the for
     .force("link",d3.forceLink()                                // Links has specific properties
                     .strength(0.1)                              // Defining non-standard strength value
                     .distance(30)                               // Defining a minimum distance
-                    .id(d => d.family))                         // Defining an ID (used to compute link data)
+                    .id(d => d.twitterHandle))                         // Defining an ID (used to compute link data)
     .force('collision', d3.forceCollide(25)                     // Nodes collide with each other (they don't overlap)
                           .iterations(3))                       // More iterations = more constraints (but more cost)
     .force("charge", d3.forceManyBody(-20))                     // Adding ManyBody to repel nodes from each other
     .force("center", d3.forceCenter(width/2, height/2));        // The graph tends towards the center of the svg
 
+/*
 var link = view.selectAll("link")                               // Creatin the link variable
                .data(links)                                     // Link data is stored in the "links" variable
                .enter().append("line")                          // Links are SVG lines
                        .attr("class", d => d.type);             // Their class is defined in their "type" property
-
+*/
 //============== NODES ==============
-/*
+/*  TO BE REMOVED
 var nodeImage = view.selectAll("nodeImage")                     // Create nodeImage variable
   .data(humans)                                                 // Using the "humans" variable data
   .enter().append("image")                                      // Append images
@@ -57,7 +65,7 @@ var nodeImage = view.selectAll("nodeImage")                     // Create nodeIm
             .duration(200)
             .style("display", "block");
           d3.select("#tooltip").html(
-          '<strong>' + d.given +' '+ d.family +
+          '<strong>' + d.twitterName +' '+ d.twitterHandle +
           //'</strong> <br/> <img class="headshots" src="img/anthropo/'+d.img+'">' +
           d.descEN);})
     .on("mouseenter", HighLight(.2))
@@ -73,14 +81,14 @@ var nodeImage = view.selectAll("nodeImage")                     // Create nodeIm
   .enter().append("circle")                                      // Append images
           .style("fill","lightblue")
           .attr("r", 6)
-          .style("opacity", d => d.opacity/100)                 // Opacity based on object property
+    //      .style("opacity", d => d.opacity/100)                 // Opacity based on object property
           .style('cursor', 'context-menu')                      // Give a specific cursor
     .on("mouseover", d => {
           d3.select("#tooltip").transition()
             .duration(200)
             .style("display", "block");
           d3.select("#tooltip").html(
-          '<strong>' + d.given +' '+ d.family +
+          '<strong>' + d.twitterName +' '+ d.twitterHandle +
           d.descEN);})
     .on("mouseenter", HighLight(.2))
     .on("mouseout", mouseOut)
@@ -89,29 +97,29 @@ var nodeImage = view.selectAll("nodeImage")                     // Create nodeIm
         .on("drag", forcedragged)
         .on("end", forcedragended));
 
-nodeImage.append("title")
-    .text(d => d.family);
+// nodeImage.append("title").text(d => d.twitterHandle);
 
-var family = view.selectAll("family")
+
+var handle = view.selectAll("family")
         .data(data)
         .enter().append("text")
         .attr("pointer-events", "none")
         .attr("class", "humans")
         .attr("dx", 10)
-        .attr("dy", -2)
+        .attr("dy", 2)
         .style('fill', 'black')
-        .text(d => d.family)
+        .text(d => d.twitterHandle)
         .on("mouseout", mouseOut);
 
-var given = view.selectAll("givens")
+var name = view.selectAll("givens")
       .data(data)
           .enter().append("text")
           .attr("pointer-events", "none")
           .attr("class", "humans")
           .attr("dx", 10)
-          .attr("dy", 2)
+          .attr("dy", -2)
           .style('fill', 'black')
-          .text(d => d.given)
+          .text(d => d.twitterName)
           .on("mouseout", mouseOut);
 
 function isolate(force, filter) {
@@ -127,28 +135,30 @@ function isolate(force, filter) {
 simulation
     .nodes(data)
     .on("tick", ticked);
-
+/*
 simulation
     .force("link")
     .links(links);
+*/
 
 function ticked() {
+  /*
   link
       .attr("x1", d => d.source.x)
       .attr("y1", d => d.source.y)
       .attr("x2", d => d.target.x)
       .attr("y2", d => d.target.y);
-
+*/
 
   nodeImage
   .attr("cx", d => d.x)
   .attr("cy", d => d.y);
 
-  given
+  name
   .attr("x", d => d.x)
   .attr("y", d => d.y);
 
-  family
+  handle
   .attr("x", d => d.x)
   .attr("y", d => d.y);
 
@@ -187,8 +197,9 @@ function narrative(focused) {
 }
 
 //============== HOVER ==============
-links.forEach(d => {linkedByIndex[d.source.index + "," + d.target.index] = 1;});
-    // fade nodes on hover
+//links.forEach(d => {linkedByIndex[d.source.index + "," + d.target.index] = 1;});
+
+// fade nodes on hover
     function HighLight(opacity) {
         return function(d) {
 
@@ -197,28 +208,29 @@ links.forEach(d => {linkedByIndex[d.source.index + "," + d.target.index] = 1;});
                 return thisOpacity;
             });
 
-            given.style("opacity", function(o) {
+            handle.style("opacity", function(o) {
                 thisOpacity = isConnected(d, o) ? 1 : opacity;
                 return thisOpacity;
             });
-            family.style("opacity", function(o) {
+            name.style("opacity", function(o) {
                 thisOpacity = isConnected(d, o) ? 1 : opacity;
                 return thisOpacity;
             });
 
-            link.style("stroke-opacity", function(o) {
+        /*    link.style("stroke-opacity", function(o) {
                 return o.source === d || o.target === d ? 1 : opacity;
             });
+            */
         };
     }
 
     function mouseOut() {
         nodeImage.style("stroke-opacity", 1);
         nodeImage.style("opacity", 1);
-        link.style("stroke-opacity", 1);
-        link.style("stroke", "#ddd");
-        given.style("opacity", 1);
-        family.style("opacity", 1);
+    //    link.style("stroke-opacity", 1);
+    //    link.style("stroke", "#ddd");
+        handle.style("opacity", 1);
+        name.style("opacity", 1);
         d3.select("#tooltip").style("display","none");
         }
 
