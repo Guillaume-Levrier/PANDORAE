@@ -50,7 +50,7 @@ var link = view.selectAll("link")                               // Creatin the l
                        .attr("class", d => d.type);             // Their class is defined in their "type" property
 */
 //============== NODES ==============
-/*  TO BE REMOVED
+/*  SWITCH BACK TO IT ONCE IMAGE ISSUE IS SOLVED
 var nodeImage = view.selectAll("nodeImage")                     // Create nodeImage variable
   .data(humans)                                                 // Using the "humans" variable data
   .enter().append("image")                                      // Append images
@@ -82,7 +82,7 @@ var nodeImage = view.selectAll("nodeImage")                     // Create nodeIm
           .style("fill","lightblue")
           .attr("r", 6)
     //      .style("opacity", d => d.opacity/100)                 // Opacity based on object property
-          .style('cursor', 'context-menu')                      // Give a specific cursor
+          .style('cursor', 'pointer')                      // Give a specific cursor
     .on("mouseover", d => {
           d3.select("#tooltip").transition()
             .duration(200)
@@ -91,6 +91,7 @@ var nodeImage = view.selectAll("nodeImage")                     // Create nodeIm
             '<strong>' + d.twitterName +'<br>'+ d.twitterHandle +'</strong>');
           })
     .on("mouseenter", HighLight(.2))
+    .on('click', d => {window.open(d.URL,"_blank");})   // On click, open url in new tab
     .on("mouseout", mouseOut)
     .call(d3.drag()
         .on("start", forcedragstarted)
