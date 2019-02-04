@@ -101,7 +101,7 @@ var nodeImage = view.selectAll("nodeImage")                     // Create nodeIm
 // nodeImage.append("title").text(d => d.twitterHandle);
 
 
-var handle = view.selectAll("family")
+var handle = view.selectAll("handle")
         .data(data)
         .enter().append("text")
         .attr("pointer-events", "none")
@@ -112,7 +112,7 @@ var handle = view.selectAll("family")
         .text(d => d.twitterHandle)
         .on("mouseout", mouseOut);
 
-var name = view.selectAll("givens")
+var name = view.selectAll("name")
       .data(data)
           .enter().append("text")
           .attr("pointer-events", "none")
