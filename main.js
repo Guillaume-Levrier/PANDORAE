@@ -135,9 +135,7 @@ var dirTree = [
   "/datasets/1altmetric/1requests",
   "/datasets/1altmetric/2results",
   "/datasets/2anthropotype",
-  "/datasets/2anthropotype/1affiliations",
-  "/datasets/2anthropotype/2humans",
-  "/datasets/2anthropotype/3links",
+  "/datasets/2anthropotype/1datasetsAT",
   "/datasets/3chronotype",
   "/datasets/3chronotype/1biblio",
   "/datasets/3chronotype/2links",
@@ -247,7 +245,7 @@ ipcMain.on('dataFlux', (event,fluxAction,fluxArgs,message) => {
   chaerosCalculator();
 })
 
-ipcMain.on('test', (event,message) => { console.log(message); })
+//ipcMain.on('test', (event,message) => { console.log(message); })
 
 ipcMain.on('chaeros-failure', (event,message) => {
       mainWindow.webContents.send('chaeros-failure',message);
