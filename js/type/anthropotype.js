@@ -88,8 +88,8 @@ var nodeImage = view.selectAll("nodeImage")                     // Create nodeIm
             .duration(200)
             .style("display", "block");
           d3.select("#tooltip").html(
-          '<strong>' + d.twitterName +' '+ d.twitterHandle +
-          d.descEN);})
+            '<strong>' + d.twitterName +'<br>'+ d.twitterHandle +'</strong>');
+          })
     .on("mouseenter", HighLight(.2))
     .on("mouseout", mouseOut)
     .call(d3.drag()
