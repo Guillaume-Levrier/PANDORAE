@@ -33,11 +33,21 @@ body{cursor: default;}
   <button class="tabflux" onclick="fluxDisplay('scopus',this)">Scopus</button><br>
   <button class="tabflux" onclick="fluxDisplay('PubDeb',this)">Public debate</button><br>
   <button class="tabflux" onclick="fluxDisplay('altmetric',this)">Altmetric</button><br>
+  <button class="tabflux" onclick="fluxDisplay('twitter',this)">Twitter</button><br>
   <button class="tabflux" onclick="fluxDisplay('zotero',this)">Zotero</button><br>
   <button class="tabflux" onclick="fluxDisplay('local-loader',this)">Local</button><br>
 </div>
 <div id="flux-manager" class="fluxTabs">
 <svg></svg>
+</div>
+<div id="twitter" style="display:none;" class="fluxTabs">
+<form id="twitter-form" autocomplete="off">
+  Enrich twitter dataset.
+  <div id="twitter-dataset-preview" style="position:relative;">Click on a dataset to display its features.</div>
+  <button type="submit" class="flux-button" id="twitter-display" onclick="datasetDisplay('/datasets/7twitter/2scopusDatasets','twitter-dataset-list','twitter-dataset');return false">Display Twitter dataset list</button>
+
+  <br><br><br><br>
+</form>
 </div>
 <div id="user-data" style="display:none;" class="fluxTabs">
 <form id="user-data-form" autocomplete="off">

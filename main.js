@@ -157,7 +157,9 @@ var dirTree = [
   "/datasets/8zotero/2csl-zoteroCollections",
   "/datasets/9gazouillotype",
   "/datasets/9gazouillotype/1datasets",
-  "/datasets/9gazouillotype/2query"
+  "/datasets/9gazouillotype/2query",
+  "/datasets/10twitter/1anthropo",
+  "/datasets/10twitter/2gazouill"
 ]
 
 const userDataDirTree = (path,dirTree) => {
