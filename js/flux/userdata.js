@@ -17,6 +17,7 @@ const getUserData = () => {
           document.getElementById("zoterokeyinput").value = keytar.getPassword("Zotero",zoteroUser);
           document.getElementById("scopuskeyinput").value = keytar.getPassword("Scopus",userName);
           document.getElementById("altmetrickeyinput").value = keytar.getPassword("Altmetric",userName);
+          document.getElementById("twitterkeyinput").value = keytar.getPassword("Twitter",userName);
           document.getElementById("geocodinginput").value = keytar.getPassword("Geocoding",userName);
 
     });
@@ -30,19 +31,20 @@ const updateUserData = () => {
       let zoteroApiKey = document.getElementById("zoterokeyinput").value;
       let scopusApiKey = document.getElementById("scopuskeyinput").value;
       let altmetricApiKey = document.getElementById("altmetrickeyinput").value;
+      let twitterApiKey = document.getElementById("twitterkeyinput").value;
       let geocodingApiKey = document.getElementById("geocodinginput").value;
 
 
 //Zotero
 keytar.setPassword("Zotero",zoteroUser,zoteroApiKey);
 
-//Scopus
 keytar.setPassword("Scopus",userName,scopusApiKey);
 
-//Scopus
 keytar.setPassword("Altmetric",userName,altmetricApiKey);
 
 keytar.setPassword("Geocoding",userName,geocodingApiKey);
+
+keytar.setPassword("Twitter",userName,twitterApiKey);
 
 var user = {"UserName" : userName, "UserMail" : userMail, "ZoteroID" : zoteroUser};
 var data = JSON.stringify(user);
