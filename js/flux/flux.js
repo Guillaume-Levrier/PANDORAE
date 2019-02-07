@@ -380,13 +380,12 @@ switch (prevId) {
 
                 break;
 
-
           case 'csl-json-dataset-preview':
-                  dataPreview = "<strong>"+ filename +"</strong><br>Items amount : " + doc.length;
+                  dataPreview = "<strong>"+ filename +"</strong><br>Items amount : " + doc[0].items.length;
                   document.getElementById(prevId).innerHTML = dataPreview;
                   document.getElementById(prevId).name = filePath;
                   document.getElementById(buttonId).style.display = "inline-flex";
-
+                  console.log(doc);
                 break
 
           case 'almetric-request-dataset-preview':
@@ -398,6 +397,7 @@ switch (prevId) {
                   document.getElementById(buttonId).style.display = "inline-flex";
 
                 break
+
                   }
               }
   catch(error) {                                                // If it fails at one point

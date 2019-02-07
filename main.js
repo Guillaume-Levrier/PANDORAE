@@ -158,8 +158,10 @@ var dirTree = [
   "/datasets/9gazouillotype",
   "/datasets/9gazouillotype/1datasets",
   "/datasets/9gazouillotype/2query",
-  "/datasets/10twitter/1anthropo",
-  "/datasets/10twitter/2gazouill"
+  "/datasets/10twitter",
+  "/datasets/10twitter/1zotero",
+  "/datasets/10twitter/2gazouilloire",
+  "/datasets/10twitter/3scraping"
 ]
 
 const userDataDirTree = (path,dirTree) => {
