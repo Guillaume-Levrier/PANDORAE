@@ -958,3 +958,6 @@ stroke-width: 1px;
   height: 10px;
   width : 10px;
 }
+.flux-subsection{
+  border: 1px dashed black;
+}

@@ -40,15 +40,7 @@ body{cursor: default;}
 <div id="flux-manager" class="fluxTabs">
 <svg></svg>
 </div>
-<div id="twitter" style="display:none;" class="fluxTabs">
-<form id="twitter-form" autocomplete="off">
-  Enrich twitter dataset.
-  <div id="twitter-dataset-preview" style="position:relative;">Click on a dataset to display its features.</div>
-  <button type="submit" class="flux-button" id="twitter-display" onclick="datasetDisplay('/datasets/7twitter/2scopusDatasets','twitter-dataset-list','twitter-dataset');return false">Display Twitter dataset list</button>
 
-  <br><br><br><br>
-</form>
-</div>
 <div id="user-data" style="display:none;" class="fluxTabs">
 <form id="user-data-form" autocomplete="off">
   Name:<br> <input spellcheck="false" id="userNameInput" type="text" value="Enter your name"><br><br>
@@ -139,6 +131,16 @@ body{cursor: default;}
 
 <button type="submit" class="flux-button" id="load-local" onclick="datasetLoader(this);return false">Upload local  datasets</button><select id="localSelector" required></select>
 <input id="dataset-upload" type="file" onclick="datasetsSubdirList('localSelector')" accept=".json,.csv" multiple/><br><br>
+</div>
+<div id="twitter" style="display:none;" class="fluxTabs">
+<form id="twitter-form" autocomplete="off">
+  Enrich Twitter datasets.<br><br>
+  <div id="Twitter-Zotero" class="flux-subsection">
+  <button type="submit" class="flux-button" id="twitter-display" onclick="datasetDisplay('/datasets/10twitter/1zotero','twitter-dataset-list','csl-json-dataset');return false">Display Zotero Twitter cartography dataset list</button>
+  <div id="csl-json-dataset-preview" style="position:relative;">Click on a dataset to display its features.</div>
+  <div id="twitter-dataset-list"  style="position:relative;">No dataset loaded yet.</div></div>
+  <br><br><br><br>
+</form>
 </div>
 
 <div style="padding:5px; position:absolute;top:0;right:0;z-index:20;">
