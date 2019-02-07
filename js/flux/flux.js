@@ -30,25 +30,18 @@ ipcRenderer.on('window-close', (event,message) => {
 //========== Tracegraph ==========
 
 let traces = [
-    {"hops":
-          [{"root":true},
-          {"info":{"city":"Frankfurt am Main","continent":{"code":"EU","name":"Europe"},"country":{"code":"DE","name":"Germany"}},"ip":"IPADDRESS","ttl":5}]},
-    {"hops":
-          [{"root":true},
-          {"info":{"city":"Toronto","continent":{"code":"NA","name":"North America"},"country":{"code":"CA","name":"Canada"}},"ip":"IPADDRESS","ttl":2},{"info":{"continent":{"code":"EU","name":"Europe"}},"ip":"IPADDRESS","ttl":3},{"timeout":true,"ttl":4},{"timeout":true,"ttl":5},{"timeout":true,"ttl":6},{"timeout":true,"ttl":7},{"timeout":true,"ttl":8},{"info":{"city":"Chancelade","continent":{"code":"EU","name":"Europe"},"country":{"code":"FR","name":"France"}},"ip":"IPADDRESS","ttl":9}]},
-    {"hops":
-          [{"root":true},
-          {"info":{"continent":{"code":"EU","name":"Europe"}},"ip":"IPADDRESS","ttl":3},{"timeout":true,"ttl":4},{"timeout":true,"ttl":5},{"timeout":true,"ttl":6},{"timeout":true,"ttl":7},{"timeout":true,"ttl":8},{"info":{"city":"Chancelade","continent":{"code":"EU","name":"Europe"},"country":{"code":"FR","name":"France"}},"ip":"IPADDRESS","ttl":9}]},
-    {"hops":
-          [{"root":true},
-          {"info":{"city":"Frankfurt am Main","continent":{"code":"EU","name":"Europe"},"country":{"code":"DE","name":"Germany"}},"ip":"IPADDRESS","ttl":1},{"info":{"city":"Toronto","continent":{"code":"NA","name":"North America"},"country":{"code":"CA","name":"Canada"}},"ip":"IPADDRESS","ttl":2},{"info":{"continent":{"code":"EU","name":"Europe"}},"ip":"IPADDRESS","ttl":3},{"timeout":true,"ttl":4},{"timeout":true,"ttl":5},{"timeout":true,"ttl":6},{"timeout":true,"ttl":7},{"timeout":true,"ttl":8},
-          {"info":
-              {"city":"Chancelade","continent":
-                    {"code":"EU","name":"Europe"},
-                    "country":{"code":"FR","name":"France"}
-                  },
-              "ip":"IPADDRESS","ttl":9}]}
+{"hops":
+  [{"root":true},
+  {"info":{"name":"LOCAL"}}]},
+  {"hops":
+  [{"root":true},
+  {"info":{"name":"DATABASES"}},{"info":{"name":"SCOPUS"}},{"info":{"name":"ALTMETRIC"}},{"info":{"name":"TWITTER"}}]},
+  {"hops":
+  [{"root":true},
+  {"info":{"name":"ZOTERO"}}]}
 ];
+
+console.log(traces)
 
 function draw (svg, traces, horizontal, showTexts) {
   function makeText(selection) {
@@ -66,31 +59,28 @@ const graph = tg
   .tracegraph()
   .horizontal(horizontal)
   .nodeSize(node => {
-    const ip = node.hops[0].ip;
-    if (showTexts && ip) {
+    const name = node.hops[0].name;
+    if (showTexts && name) {
       const bbox = tmpText
-        .text(ip)
+        .text(name)
         .node()
         .getBBox();
       return [bbox.width + 14, bbox.height + 8];
     }
-    return ip || node.hops[0].root ? [30, 30] : [10, 10];
+    return name || node.hops[0].root ? [30, 30] : [10, 10];
   })
   .levelMargin(10)
-  .hopDefined(hop => hop.ip || hop.root)
+  .hopDefined(hop => hop.name || hop.root)
   .traceWidth(6)
   .nodeId((hop, hopIndex, trace, traceIndex) => {
     return (
-      hop.ip || (hop.root && "root") || `empty-${traceIndex}-${hopIndex}`
+      hop.name || (hop.root && "root") || `empty-${traceIndex}-${hopIndex}`
     );
   });
 
+const layout = graph(traces);
 
- const layout = graph(traces);
-
-console.log(layout);
-
- tmpSvg.remove();
+tmpSvg.remove();
 
  const vb = layout.bounds.expanded(4);
 
@@ -128,7 +118,7 @@ console.log(layout);
      .attr("fill", "white");
 
    const textNodes = nodeGroup
-     .filter(d => showTexts && d.hops[0].ip)
+     .filter(d => showTexts && d.hops[0].name)
      .datum(d => ({ ...d, bounds: d.bounds.expanded(-2.5) }));
    textNodes
      .append("rect")
@@ -150,10 +140,10 @@ console.log(layout);
      .attr("alignment-baseline", "central")
      .attr("text-anchor", "middle")
      .attr("font-size", 10)
-     .text(d => d.hops[0].info.city);
+     .text(d => d.hops[0].info.name);
 
    nodeGroup
-     .filter(d => !(showTexts && d.hops[0].ip))
+     .filter(d => !(showTexts && d.hops[0].name))
      .append("circle")
      .attr("r", d => Math.min(d.bounds.width, d.bounds.height) / 2)
      .attr("cx", d => d.bounds.cx)
