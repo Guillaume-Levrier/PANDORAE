@@ -1,5 +1,5 @@
 const electron = require('electron')
-const {app, BrowserWindow, ipcMain} = electron;
+const {app, BrowserWindow, ipcMain, shell} = electron;
 const fs = require('fs');
 const userDataPath = app.getPath('userData');
 
