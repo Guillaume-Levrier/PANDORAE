@@ -25,12 +25,7 @@ const QRCode = require('qrcode');
 // =========== SHARED WORKER ===========
 if (!!window.SharedWorker) {
 var multiThreader = new SharedWorker("js/type/mul[type]threader.js");
-multiThreader.onerror = () => {console.log("Worker error")};
-console.log(multiThreader);
-}
-
-multiThreader.port.onmessage = (res) => {
-  console.log(res.data);
+    multiThreader.onerror = () => {console.log("Worker error")};
 }
 
 // =========== MAIN DISPLAY ===========

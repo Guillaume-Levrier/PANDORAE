@@ -58,8 +58,7 @@ Promise.all([                                                     // Loading dat
         .then(datajson => {
 
 // =========== SHARED WORKER ===========
-let typeRequest = {kind:"gazouillotype",data:undefined};
-typeRequest.data = datajson;
+let typeRequest = {kind:"gazouillotype",data:datajson};
 multiThreader.port.postMessage(typeRequest);
 
   multiThreader.port.onmessage = (res) => {
