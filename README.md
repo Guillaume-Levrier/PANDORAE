@@ -8,16 +8,14 @@ If you'd rather test the dev branch, clone the repo, cd into it, and use 'npm i'
 **License issues :** some package/code license issues might still be around after the pre-upload cleanup. If you find one or more, please reach out on Twitter (@Li_Guilong) and I'll try to make it right.
 
 ### TODO
-- comment each and every line of JS
-- create an interactive scroller/flowchart tutorial (work on tracegraph)
-- enable displaying slides/photos/videos in main canvas
-- enable gazouillotype brush
-- multithread visualisations
+- comment each and every line of JS (under way)
+- create an interactive scroller/flowchart tutorial (under way)
+- enable gazouillotype brush (next version)
+- multithread visualisations (under way)
 - solve errors in affiliation coordinates (check city then country before choosing, instead of taking the first guess)
-- filter out null island on geotype
 
 ##### Flux
-- design a specific flux landing page (under way)
+- revamp the whole flux thing
 
 ##### Next version
 - implement FETCH altmetric requests
