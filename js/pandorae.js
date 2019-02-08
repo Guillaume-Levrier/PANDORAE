@@ -29,6 +29,10 @@ multiThreader.onerror = () => {console.log("Worker error")};
 console.log(multiThreader);
 }
 
+multiThreader.port.onmessage = (res) => {
+  console.log(res.data);
+}
+
 // =========== MAIN DISPLAY ===========
 console.log(msg+version);
 let coreLogoArchive = "";
