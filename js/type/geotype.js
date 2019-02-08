@@ -122,8 +122,6 @@ data.forEach(d=>{if (d.hasOwnProperty('affiliation')){}else{data.splice(d.index,
 
 var cities =  d3.nest().key(d => d['affiliation-city']).entries(dataArray);
 
-
-
 cities.forEach(d=>{
   d.lon = d.values[0].lon;
   d.lat = d.values[0].lat;
@@ -197,7 +195,7 @@ var collaborations = view.selectAll("lines")
     .attr("d", path);
 
 var locations = view.selectAll("locations")
-							  .data(cities)
+							  .data(cities.filter(d=>{return d.lon != undefined})) // filtering out null island
 							  .enter().append("path")
                 .attr("id", d => d.id)
 								.attr("class", "locations");
@@ -219,9 +217,6 @@ var locations = view.selectAll("locations")
                                         }
                                       }
                                     });
-
-
-
 
 
 /*
