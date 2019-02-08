@@ -24,11 +24,10 @@ const QRCode = require('qrcode');
 
 // =========== SHARED WORKER ===========
 if (!!window.SharedWorker) {
-var multiThreader = new SharedWorker("js/multithreader.js");
-}
+var multiThreader = new SharedWorker("js/type/mul[type]threader.js");
+multiThreader.onerror = () => {console.log("Worker error")};
 console.log(multiThreader);
-multiThreader.port.onmessage = function(e) {}
-
+}
 
 // =========== MAIN DISPLAY ===========
 console.log(msg+version);
@@ -403,7 +402,7 @@ let argLength = 99;
               document.getElementById("field").style.pointerEvents = "all";
               document.getElementById("field").value = "start chronotype";
               document.getElementById("field").addEventListener("click", ()=>{
-                  chronotype(options[0]);
+                        chronotype(options[0]);
                   document.getElementById("field").removeEventListener("click", ()=>
                         chronotype(options[0]));
                   document.getElementById("field").style.pointerEvents = "none";
@@ -418,7 +417,7 @@ let argLength = 99;
               document.getElementById("field").style.pointerEvents = "all";
               document.getElementById("field").value = "start anthropotype";
               document.getElementById("field").addEventListener("click", ()=>{
-                  anthropotype(options[0]);
+                        anthropotype(options[0]);
                   document.getElementById("field").removeEventListener("click", ()=>
                         anthropotype(options[0]));
                   document.getElementById("field").style.pointerEvents = "none";
@@ -433,7 +432,7 @@ let argLength = 99;
               document.getElementById("field").style.pointerEvents = "all";
               document.getElementById("field").value = "start geotype";
               document.getElementById("field").addEventListener("click", ()=>{
-                  geotype(options[0]);
+                        geotype(options[0]);
                   document.getElementById("field").removeEventListener("click", ()=>
                         geotype(options[0]));
                   document.getElementById("field").style.pointerEvents = "none";
@@ -448,7 +447,7 @@ let argLength = 99;
               document.getElementById("field").style.pointerEvents = "all";
               document.getElementById("field").value = "start pharmacotype";
               document.getElementById("field").addEventListener("click", ()=>{
-                  pharmacotype(options[0]);
+                        pharmacotype(options[0]);
                   document.getElementById("field").removeEventListener("click", ()=>
                         pharmacotype(options[0]));
                   document.getElementById("field").style.pointerEvents = "none";
@@ -463,7 +462,7 @@ let argLength = 99;
               document.getElementById("field").style.pointerEvents = "all";
               document.getElementById("field").value = "start topotype";
               document.getElementById("field").addEventListener("click", ()=>{
-                  topotype(options[0],options[1],options[2]);
+                        topotype(options[0],options[1],options[2]);
                   document.getElementById("field").removeEventListener("click", ()=>
                         topotype(options[0],options[1],options[2]));
                   document.getElementById("field").style.pointerEvents = "none";
@@ -478,7 +477,7 @@ let argLength = 99;
               document.getElementById("field").style.pointerEvents = "all";
               document.getElementById("field").value = "start gazouillotype";
               document.getElementById("field").addEventListener("click", ()=>{
-                  gazouillotype(options[0],options[1]);
+                        gazouillotype(options[0],options[1]);
                   document.getElementById("field").removeEventListener("click", ()=>
                         gazouillotype(options[0],options[1]));
                   document.getElementById("field").style.pointerEvents = "none";
