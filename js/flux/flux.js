@@ -371,12 +371,18 @@ switch (prevId) {
                 break;
 
           case 'csl-json-dataset-preview':
-                  dataPreview = "<strong>"+ filename +"</strong><br>Items amount : " + doc[0].items.length;
-                  document.getElementById(prevId).innerHTML = dataPreview;
+                  dataPreview = "<strong>"+ filename +"</strong><br>Items amount : " + doc.length;                  document.getElementById(prevId).innerHTML = dataPreview;
                   document.getElementById(prevId).name = filePath;
                   document.getElementById(buttonId).style.display = "inline-flex";
-                  console.log(doc);
                 break
+          
+                
+          case 'zotero-dataset-preview':
+              dataPreview = "<strong>"+ filename +"</strong><br>Items amount : " + doc[0].items.length;
+              document.getElementById(prevId).innerHTML = dataPreview;
+              document.getElementById(prevId).name = filePath;
+              document.getElementById(buttonId).style.display = "inline-flex";
+        break
 
           case 'almetric-request-dataset-preview':
 
