@@ -1,16 +1,20 @@
 onconnect = (e) => {
   var port = e.ports[0];
 
-  import * as d3 from "./node_modules/d3";
+ importScripts("../../node_modules/d3/dist/d3.min.js");    
 
+
+  
   port.onmessage = (typeRequest) => {
     let type = typeRequest.data.kind;
     let datajson = typeRequest.data.data;
-    
+
+
     switch (type) {
       case 'gazouillotype':
-                  
+                 
             var data = datajson[0];
+         
 
             // Convert dataset if it comes from scraping instead of a proper API request
             const scrapToApiFormat = (data) => {
@@ -42,10 +46,6 @@ onconnect = (e) => {
               meanRetweetsArray.sort((a, b) => a - b);
               var median = meanRetweetsArray[parseInt(meanRetweetsArray.length/2)];
 
-              var color = d3.scaleSequential(d3.interpolateBlues)
-                            .clamp(true)
-                            .domain([-median*2,median*10]);
-
               var dataNest = d3.nest()
                                 .key(d => {return d.timespan;})
                                 .entries(data);
@@ -62,42 +62,14 @@ onconnect = (e) => {
 
             piler();
 
-            var firstDate = new Date(dataNest[0].key);
-            var lastDate = new Date(dataNest[dataNest.length-1].key);
-            domainDates.push(firstDate,lastDate);
-
-            var totalPiles = (domainDates[1].getTime()-domainDates[0].getTime())/600000;
-
-            x.domain(domainDates);
-            y.domain([0,totalPiles/1.2]);
-
-            x2.domain(domainDates);
-            y2.domain([0, d3.max(data, d=> d.indexPosition)]);
-
-
-            let radius = 0;
-
-            const radiusCalculator = () => {
-            for (var i = 0; i < dataNest.length; i++) {
-              if (dataNest[i].values.length>2) {
-              radius = (y(dataNest[i].values[1].indexPosition)-y(dataNest[i].values[0].indexPosition))/3;
-            break;
-                }
-              }
-            }
-
-            radiusCalculator();
             let res = {};
-            res.data = data;
-            res.radius = radius;
+            res.dataNest = dataNest;
+            res.editedData = data;
+            res.median = median;
       port.postMessage(res);
         break;
     }
 
-
-
-
-
-
   }
+  
 }

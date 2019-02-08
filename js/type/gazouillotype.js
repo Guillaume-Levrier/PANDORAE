@@ -60,15 +60,42 @@ Promise.all([                                                     // Loading dat
 // =========== SHARED WORKER ===========
 let typeRequest = {kind:"gazouillotype",data:undefined};
 typeRequest.data = datajson;
-console.log(typeRequest)
 multiThreader.port.postMessage(typeRequest);
 
   multiThreader.port.onmessage = (res) => {
-console.log(res);
 
-var data = res.data.data;
-var radius = res.data.radius;
+var dataNest = res.data.dataNest;
+var data = res.data.editedData;
+var median = res.data.median;
 var keywords = datajson[1].keywords;
+
+var color = d3.scaleSequential(d3.interpolateBlues)
+.clamp(true)
+.domain([-median*2,median*10]);
+
+  var firstDate = new Date(dataNest[0].key);
+  var lastDate = new Date(dataNest[dataNest.length-1].key);
+  domainDates.push(firstDate,lastDate);
+
+  var totalPiles = (domainDates[1].getTime()-domainDates[0].getTime())/600000;
+
+  x.domain(domainDates);
+  y.domain([0,totalPiles/1.2]);
+
+  x2.domain(domainDates);
+  y2.domain([0, d3.max(data, d=> d.indexPosition)]);
+
+  let radius = 0;
+  const radiusCalculator = () => {
+  for (var i = 0; i < dataNest.length; i++) {
+    if (dataNest[i].values.length>2) {
+    radius = (y(dataNest[i].values[1].indexPosition)-y(dataNest[i].values[0].indexPosition))/3;
+  break;
+      }
+    }
+  }
+
+  radiusCalculator();
 
 const keywordsDisplay = () => {
   document.getElementById("tooltip").innerHTML ="<p> Request content:<br> "+JSON.stringify(keywords)+"</p>";
