@@ -17,21 +17,19 @@ const Request = require('request');
 const rpn = require('request-promise-native');
 const events = require('events');
 const fs = require('fs');
-const d3 = require("d3");
+const d3 = require('d3');
 const THREE = require('three');
 const userDataPath = remote.app.getPath('userData');
 const QRCode = require('qrcode');
-//const worker = require('worker_threads');
 
 // =========== SHARED WORKER ===========
 if (!!window.SharedWorker) {
-var multiThreader = new SharedWorker("multithreader.js");
+var multiThreader = new SharedWorker("js/multithreader.js");
+}
 console.log(multiThreader);
-multiThreader.port.postMessage("test");
-multiThreader.port.onmessage = function(e) {
-  console.log('Message received from worker: '+e);
-}
-}
+multiThreader.port.onmessage = function(e) {}
+
+
 // =========== MAIN DISPLAY ===========
 console.log(msg+version);
 let coreLogoArchive = "";
