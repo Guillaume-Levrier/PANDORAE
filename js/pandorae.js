@@ -477,6 +477,7 @@ let argLength = 99;
               document.getElementById("field").value = "start gazouillotype";
               document.getElementById("field").addEventListener("click", ()=>{
                         gazouillotype(options[0],options[1]);
+                        pulse(1,1,10);
                   document.getElementById("field").removeEventListener("click", ()=>
                         gazouillotype(options[0],options[1]));
                   document.getElementById("field").style.pointerEvents = "none";
