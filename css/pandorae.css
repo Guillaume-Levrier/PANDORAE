@@ -925,9 +925,9 @@ stroke-width: 1px;
 
 .fluxTabs{
   font-size: 12px;
-  margin-left: 100px;
-  width: 450px;
-  height: 500px;
+  padding: 5%;
+  width: 90%;
+  height: 90%;
   overflow-y: auto;
   overflow-x: hidden;
 }

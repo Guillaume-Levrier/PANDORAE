@@ -25,23 +25,11 @@ outline: 1px solid black;
 body{cursor: default;}
 </style>
 
-
-<div id="flux-div">
-  <div class="flux-tabs">
-  <button class="tabflux" onclick="fluxDisplay('flux-manager',this)">Flux Manager</button><br>
-  <button class="tabflux" onclick="fluxDisplay('user-data',this)" id="defaultOpen">User Credentials</button><br>
-  <button class="tabflux" onclick="fluxDisplay('scopus',this)">Scopus</button><br>
-  <button class="tabflux" onclick="fluxDisplay('PubDeb',this)">Public debate</button><br>
-  <button class="tabflux" onclick="fluxDisplay('altmetric',this)">Altmetric</button><br>
-  <button class="tabflux" onclick="fluxDisplay('twitter',this)">Twitter</button><br>
-  <button class="tabflux" onclick="fluxDisplay('zotero',this)">Zotero</button><br>
-  <button class="tabflux" onclick="fluxDisplay('local-loader',this)">Local</button><br>
-</div>
 <div id="flux-manager" class="fluxTabs">
 <svg></svg>
 </div>
 
-<div id="user-data" style="display:none;" class="fluxTabs">
+<div id="user" style="display:none;" class="fluxTabs">
 <form id="user-data-form" autocomplete="off">
   Name:<br> <input spellcheck="false" id="userNameInput" type="text" value="Enter your name"><br><br>
   Email:<br> <input spellcheck="false" id="userMailInput" type="text" value="Enter your email"><br><br>
@@ -75,7 +63,7 @@ body{cursor: default;}
 <div id="scopus-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
 </div>
 
-<div id="PubDeb" style="display:none;" class="fluxTabs">
+<div id="capco" style="display:none;" class="fluxTabs">
 <form id="pubdeb-import-form" autocomplete="off">
 
 <br><br>
@@ -127,11 +115,13 @@ body{cursor: default;}
 
 </div>
 
-<div id="local-loader" style="display:none;" class="fluxTabs">
+<div id="local" style="display:none;" class="fluxTabs">
 
 <button type="submit" class="flux-button" id="load-local" onclick="datasetLoader(this);return false">Upload local  datasets</button><select id="localSelector" required></select>
 <input id="dataset-upload" type="file" onclick="datasetsSubdirList('localSelector')" accept=".json,.csv" multiple/><br><br>
 </div>
+
+
 <div id="twitter" style="display:none;" class="fluxTabs">
 <form id="twitter-form" autocomplete="off">
   Enrich Twitter datasets.<br><br>
@@ -144,6 +134,7 @@ body{cursor: default;}
 </div>
 
 <div style="padding:5px; position:absolute;top:0;right:0;z-index:20;">
+<i class="material-icons  dialog-buttons" onclick="fluxDisplay('flux-manager');">arrow_back</i>
 <i class="material-icons dialog-buttons" onclick="refreshWindow();">refresh</i>
 <i class="material-icons dialog-buttons" onclick="closeWindow();">close</i>
 </div>
