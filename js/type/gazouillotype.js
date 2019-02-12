@@ -51,26 +51,23 @@ var area = d3.area()                                                // Brush con
 var domainDates = [];
 
 //======== DATA CALL & SORT =========
-
+/*
 Promise.all([                                                     // Loading data through promises
    d3.csv(dataset, {credentials: 'include'}),                     // Loading dataset
    d3.json(query, {credentials: 'include'})])                     // Loading keywords
    .then(datajson => {
-
-    console.time("serialization");
-    JSON.stringify(datajson);
-    console.timeEnd("serialization");
-    
-    // =========== SHARED WORKER ===========
-    let typeRequest = {kind:"gazouillotype",data:datajson};
+*/
+// =========== SHARED WORKER ===========
+let typeRequest = {kind:"gazouillotype",dataset:dataset, query:query};
     multiThreader.port.postMessage(typeRequest);
     
-      multiThreader.port.onmessage = (res) => {
+multiThreader.port.onmessage = (res) => {
         console.log("retour des données")
+        console.log(res)
 var dataNest = res.data.dataNest;
 var data = res.data.editedData;
 var median = res.data.median;
-var keywords = datajson[1].keywords;
+var keywords = res.data.keywords.keywords;
 
 var color = d3.scaleSequential(d3.interpolateBlues)
 .clamp(true)
@@ -201,7 +198,7 @@ svg.append("rect")
       .call(zoom);
 */
 }
-});  //======== END OF DATA CALL (PROMISES) ===========
+//});  //======== END OF DATA CALL (PROMISES) ===========
 
 
 //======== ZOOM & RESCALE ===========

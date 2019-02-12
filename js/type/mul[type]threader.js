@@ -32,7 +32,12 @@ onconnect = (e) => {
       break;
 
       case 'gazouillotype':
-                 
+          
+Promise.all([                                                     // Loading data through promises
+   d3.csv(typeRequest.data.dataset, {credentials: 'include'}),                     // Loading dataset
+   d3.json(typeRequest.data.query, {credentials: 'include'})])                     // Loading keywords
+   .then(datajson => {
+
             var data = datajson[0];
          
 
@@ -86,10 +91,13 @@ onconnect = (e) => {
             res.dataNest = dataNest;
             res.editedData = data;
             res.median = median;
+            res.keywords = datajson[1];
+            port.postMessage(res);
+            });
         break;
     }
 
-    port.postMessage(res);
+    
 
   }
   
