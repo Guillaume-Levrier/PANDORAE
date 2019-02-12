@@ -32,17 +32,20 @@ ipcRenderer.on('window-close', (event,message) => {
 
 let traces = [
   {"hops":
-  [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"},{"info":{"name":"viz"}}]},
+  [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
 
-  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"SCOPUS"},"name":"SCOPUS"},{"info":{"name":"ALTMETRIC"},"name":"ALTMETRIC"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"},{"info":{"name":"viz"}}]},
-  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"ALTMETRIC"},"name":"ALTMETRIC"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"},{"info":{"name":"viz"}}]},
-  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"},{"info":{"name":"viz"}}]},
-
-  {"hops":
-  [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"},{"info":{"name":"viz"}}]},
+  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"SCOPUS"},"name":"SCOPUS"},{"info":{"name":"ALTMETRIC"},"name":"ALTMETRIC"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"ALTMETRIC"},"name":"ALTMETRIC"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
 
   {"hops":
-  [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"CAPCO"},"name":"CAPCO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"},{"info":{"name":"viz"}}]}
+  [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+
+  {"hops":
+  [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"CAPCO"},"name":"CAPCO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+  {"hops":
+  [{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]}
+  
 ];
 
 
@@ -116,7 +119,6 @@ tmpSvg.remove();
        d => d3.schemeSet2[d.traceIndex % d3.schemeSet2.length]
      );
  
-
    const traceGroup = svg
      .selectAll(".trace")
      .data(layout.traces)
@@ -159,9 +161,7 @@ tmpSvg.remove();
      .attr("x", d => d.bounds.x)
      .attr("y", d => d.bounds.y)
      .attr("width", d => d.bounds.width)
-     .attr("height", d => d.bounds.height)
-     .on("mouseover", () => {return d3.select(this).style.fontWeight="900"})
-     .on("click", d => {fluxDisplay(d.hops[0].name.toLowerCase())});
+     .attr("height", d => d.bounds.height);
 
    makeText(textNodes)
      .attr("x", d => d.bounds.cx)
@@ -170,17 +170,33 @@ tmpSvg.remove();
      .attr("fill", "black")
      .attr("alignment-baseline", "central")
      .attr("text-anchor", "middle")
+     .style("cursor","pointer")
      .attr("font-size", 10)
-     .text(d => d.hops[0].info.name);
+     .text(d => d.hops[0].info.name)
+     .on("mouseenter", d => {
+      nodeGroup.style("opacity",0.4);
+      traceGroup.style("stroke-opacity",0.4);
+      console.log(d);
+      let selectedTraces = [];
+      traces.forEach(f => {
+        
+      });
+      nodeGroup.filter(e => e === d).style("opacity",1);
+      traceGroup.filter(e => e === d).style("stroke-opacity",1);
+     })
+     .on("mouseout", d => {
+      nodeGroup.style("opacity",1);
+      traceGroup.style("stroke-opacity",1);
+     })
+     .on("click", d => {fluxDisplay(d.hops[0].name.toLowerCase())});
 
    nodeGroup
      .filter(d => !(showTexts && d.hops[0].name))
      .append("circle")
      .attr("r", d => Math.min(d.bounds.width, d.bounds.height) / 2)
      .attr("cx", d => d.bounds.cx)
-     .attr("cy", d => d.bounds.cy)
-     //.attr("stroke", "black")
-     ;
+     .attr("cy", d => d.bounds.cy);
+
  }
 
 const svg = d3.select("svg");
