@@ -27,23 +27,26 @@ ipcRenderer.on('window-close', (event,message) => {
   closeWindow();
 });
 
+
 //========== Tracegraph ==========
 
 let traces = [
-{"hops":
-  [{"root":true},
-  {"info":{"name":"LOCAL"}}]},
   {"hops":
-  [{"root":true},
-  {"info":{"name":"DATABASES"}},{"info":{"name":"SCOPUS"}},{"info":{"name":"ALTMETRIC"}},{"info":{"name":"TWITTER"}}]},
+  [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"},{"info":{"name":"viz"}}]},
+
+  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"SCOPUS"},"name":"SCOPUS"},{"info":{"name":"ALTMETRIC"},"name":"ALTMETRIC"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"},{"info":{"name":"viz"}}]},
+  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"ALTMETRIC"},"name":"ALTMETRIC"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"},{"info":{"name":"viz"}}]},
+  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"},{"info":{"name":"viz"}}]},
+
   {"hops":
-  [{"root":true},
-  {"info":{"name":"ZOTERO"}}]}
+  [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"},{"info":{"name":"viz"}}]},
+
+  {"hops":
+  [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"CAPCO"},"name":"CAPCO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"},{"info":{"name":"viz"}}]}
 ];
 
-console.log(traces)
 
-function draw (svg, traces, horizontal, showTexts) {
+const drawFlux = (svg, traces, horizontal, showTexts) => {
   function makeText(selection) {
    return selection
      .append("text")
@@ -51,7 +54,7 @@ function draw (svg, traces, horizontal, showTexts) {
      .attr("font-size", 12);
  }
 
- const tmpSvg = d3.select("body").append("svg").attr("width", 450).attr("height", 450);
+ const tmpSvg = d3.select("body").append("svg").attr("width", 650).attr("height", 500);
 
  const tmpText = makeText(tmpSvg);
 
@@ -86,8 +89,33 @@ tmpSvg.remove();
 
  svg
    .attr("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`)
-   .attr("width", 450)
-   .attr("height", 450);
+   .attr("width", 650)
+   .attr("height", 500);
+
+   const gradients = layout.nodes.map(() => tg.genUID());
+
+   svg
+     .append("defs")
+     .selectAll("linearGradient")
+     .data(layout.nodes.map(tg.nodeGradient))
+     .enter()
+     .append("linearGradient")
+     .attr("id", (d, i) => gradients[i].id)
+     .attr("gradientUnits", d => d.gradientUnits)
+     .attr("x1", d => d.x1)
+     .attr("y1", d => d.y1)
+     .attr("x2", d => d.x2)
+     .attr("y2", d => d.y2)
+     .selectAll("stop")
+     .data(d => d.stops)
+     .enter()
+     .append("stop")
+     .attr("offset", d => d.offset)
+     .attr(
+       "stop-color",
+       d => d3.schemeSet2[d.traceIndex % d3.schemeSet2.length]
+     );
+ 
 
    const traceGroup = svg
      .selectAll(".trace")
@@ -105,7 +133,10 @@ tmpSvg.remove();
    traceGroup
      .append("path")
      .attr("stroke-width", d => (d.defined ? d.width - 4.5 : d.width - 5))
-     .attr("stroke","black")
+     .attr(
+      "stroke",
+      segment => d3.schemeSet2[segment.index % d3.schemeSet2.length]
+    )
      .attr("stroke-dasharray", segment => (segment.defined ? "" : "4 2"))
      .attr("d", tg.traceCurve());
 
@@ -114,6 +145,7 @@ tmpSvg.remove();
      .data(layout.nodes)
      .enter()
      .append("g")
+     .attr("stroke", (d, i) => gradients[i])
      .attr("stroke-width", 2)
      .attr("fill", "white");
 
@@ -126,11 +158,10 @@ tmpSvg.remove();
      .attr("ry", 2)
      .attr("x", d => d.bounds.x)
      .attr("y", d => d.bounds.y)
-     .attr("stroke", "black")
      .attr("width", d => d.bounds.width)
      .attr("height", d => d.bounds.height)
-     .on("mouseover", function() {d3.select(this).attr("fill", "black")})
-     .on("mouseout", function() {d3.select(this).attr("fill", "white")});
+     .on("mouseover", () => {return d3.select(this).style.fontWeight="900"})
+     .on("click", d => {fluxDisplay(d.hops[0].name.toLowerCase())});
 
    makeText(textNodes)
      .attr("x", d => d.bounds.cx)
@@ -148,27 +179,18 @@ tmpSvg.remove();
      .attr("r", d => Math.min(d.bounds.width, d.bounds.height) / 2)
      .attr("cx", d => d.bounds.cx)
      .attr("cy", d => d.bounds.cy)
-     .attr("stroke", "black");
+     //.attr("stroke", "black")
+     ;
  }
 
 const svg = d3.select("svg");
 
-draw(svg, traces, false, true);
+drawFlux(svg, traces, false, true);
 
 
 //========== fluxDisplay ==========
 // Display relevant tab when called according to the tab's id.
-const fluxDisplay = (tab,button) => {
-
-  let buttons = document.getElementsByClassName("tabflux");           // Get all tabs by their common class
-
-      for (let j = 0; j < buttons.length; j++) {                      // Loop on buttons
-        buttons[j].style.backgroundColor = "white";                   // Make their backgtound white
-        buttons[j].style.color = "#141414";                           // Make the font color dark
-      }
-
-    button.style.backgroundColor = "#141414";                         // Make selected button background dark
-    button.style.color = "white";                                     // Make selected button font color dark
+const fluxDisplay = (tab) => {
 
     let tabs = document.getElementsByClassName("fluxTabs");           // Get all content DIVs by their common class
 
@@ -371,7 +393,8 @@ switch (prevId) {
                 break;
 
           case 'csl-json-dataset-preview':
-                  dataPreview = "<strong>"+ filename +"</strong><br>Item amount : " + doc.length;                  document.getElementById(prevId).innerHTML = dataPreview;
+                  dataPreview = "<strong>"+ filename +"</strong><br>Item amount : " + doc.length;                  
+                  document.getElementById(prevId).innerHTML = dataPreview;
                   document.getElementById(prevId).name = filePath;
                   document.getElementById(buttonId).style.display = "inline-flex";
                 break

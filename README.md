@@ -9,7 +9,7 @@ If you'd rather test the dev branch, clone the repo, cd into it, and use 'npm i'
 
 ### TODO
 - comment each and every line of JS (under way)
-- create an interactive scroller/flowchart tutorial (under way)
+- create an interactive tutorial (under way)
 - enable gazouillotype brush (next version)
 - multithread visualisations (under way)
 - solve errors in affiliation coordinates (check city then country before choosing, instead of taking the first guess)
