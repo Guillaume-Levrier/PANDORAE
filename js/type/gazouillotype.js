@@ -50,20 +50,12 @@ var area = d3.area()                                                // Brush con
 
 var domainDates = [];
 
-//======== DATA CALL & SORT =========
-/*
-Promise.all([                                                     // Loading data through promises
-   d3.csv(dataset, {credentials: 'include'}),                     // Loading dataset
-   d3.json(query, {credentials: 'include'})])                     // Loading keywords
-   .then(datajson => {
-*/
 // =========== SHARED WORKER ===========
 let typeRequest = {kind:"gazouillotype",dataset:dataset, query:query};
     multiThreader.port.postMessage(typeRequest);
     
 multiThreader.port.onmessage = (res) => {
-        console.log("retour des données")
-        console.log(res)
+
 var dataNest = res.data.dataNest;
 var data = res.data.editedData;
 var median = res.data.median;
@@ -165,7 +157,6 @@ var circle = view.selectAll("circle")
                          d.from_user_friendcount+"<br> User tweet count: "+
                          d.from_user_tweetcount+""+
                        '<br><br>Request content:<br> '+JSON.stringify(keywords)+'<br><br><br><br><br><br><br><br>&nbsp;</p>')});
-
 
 function narrative(focused) {                                                     // Experimental narrative function
      d3.select("#xtypeSVG")

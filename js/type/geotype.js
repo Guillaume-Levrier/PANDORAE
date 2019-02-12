@@ -200,7 +200,7 @@ var locations = view.selectAll("locations")
                 .attr("id", d => d.id)
 								.attr("class", "locations");
 
-      locations.datum(d => d3.geoCircle().center([ d.lon, d.lat ]).radius(.5)())
+      locations.datum(d => d3.geoCircle().center([ d.lon, d.lat ]).radius(.3)())
                 .attr("d", path);
 
 			locations.on("mouseover", d => {
