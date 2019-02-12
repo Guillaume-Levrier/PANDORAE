@@ -55,34 +55,18 @@ var domainDates = [];
 Promise.all([                                                     // Loading data through promises
    d3.csv(dataset, {credentials: 'include'}),                     // Loading dataset
    d3.json(query, {credentials: 'include'})])                     // Loading keywords
-        .then(datajson => {
+   .then(datajson => {
 
-// =========== SHARED WORKER ===========
-
-console.log('creation array')
-
-var dataSharedArray = new SharedArrayBuffer(datajson.length);
-
-for (let i = 0; i < datajson.length; i++) {
-  dataSharedArray[i] = datajson[i];
-}
-
-console.log(datajson, dataSharedArray)
-console.log('lancement')
-
-//let typeRequest = {dataSharedArray};
-multiThreader.port.postMessage(dataSharedArray);
-
-// multiThreader.port.onmessage = (message) => console.log(message);
-
-multiThreader.port.onmessage = (res) => {
-console.log(res);
-  if (res.action === "error") {
-    console.log('oui error webworker');
-    console.error(res.error);
-    return;
-  }
-
+    console.time("serialization");
+    JSON.stringify(datajson);
+    console.timeEnd("serialization");
+    
+    // =========== SHARED WORKER ===========
+    let typeRequest = {kind:"gazouillotype",data:datajson};
+    multiThreader.port.postMessage(typeRequest);
+    
+      multiThreader.port.onmessage = (res) => {
+        console.log("retour des données")
 var dataNest = res.data.dataNest;
 var data = res.data.editedData;
 var median = res.data.median;
