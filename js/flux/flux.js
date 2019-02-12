@@ -176,18 +176,16 @@ tmpSvg.remove();
      .on("mouseenter", d => {
       nodeGroup.style("opacity",0.2);
       traceGroup.style("stroke-opacity",0.2);
-      console.log(d);
-      console.log(d.hops[0].name);
       let selectedTraces = [];
-      /*
       traces.forEach(f => {
-        for (let i = 0; i < hops.length; i++) {
+        for (let i = 0; i < f.hops.length; i++) {
           if (f.hops[i].name === d.hops[0].name) {
             selectedTraces.push(f)
           }
         }
-      })*/
+      })
       console.log(selectedTraces);
+    //Write a thread hilight function here
       nodeGroup.filter(e => e === d).style("opacity",1);
       traceGroup.filter(e => e === d).style("stroke-opacity",1);
      })
