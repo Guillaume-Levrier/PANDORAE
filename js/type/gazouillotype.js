@@ -58,10 +58,30 @@ Promise.all([                                                     // Loading dat
         .then(datajson => {
 
 // =========== SHARED WORKER ===========
-let typeRequest = {kind:"gazouillotype",data:datajson};
-multiThreader.port.postMessage(typeRequest);
 
-  multiThreader.port.onmessage = (res) => {
+console.log('creation array')
+
+var dataSharedArray = new SharedArrayBuffer(datajson.length);
+
+for (let i = 0; i < datajson.length; i++) {
+  dataSharedArray[i] = datajson[i];
+}
+
+console.log(datajson, dataSharedArray)
+console.log('lancement')
+
+//let typeRequest = {dataSharedArray};
+multiThreader.port.postMessage(dataSharedArray);
+
+// multiThreader.port.onmessage = (message) => console.log(message);
+
+multiThreader.port.onmessage = (res) => {
+console.log(res);
+  if (res.action === "error") {
+    console.log('oui error webworker');
+    console.error(res.error);
+    return;
+  }
 
 var dataNest = res.data.dataNest;
 var data = res.data.editedData;
