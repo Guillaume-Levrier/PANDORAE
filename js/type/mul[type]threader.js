@@ -4,6 +4,10 @@ onconnect = (e) => {
  importScripts("../../node_modules/d3/dist/d3.min.js");    
 
   port.onmessage = (typeRequest) => {
+    
+
+    
+/*    
     let type = typeRequest.data.kind;
     let datajson = typeRequest.data.data;
 
@@ -32,9 +36,12 @@ onconnect = (e) => {
       break;
 
       case 'gazouillotype':
-                 
-            var data = datajson[0];
-         
+        */
+       try{
+      
+        //var data = datajson[0];
+            var data = typeRequest.data;
+            port.postMessage(typeRequest);
 
             // Convert dataset if it comes from scraping instead of a proper API request
             const scrapToApiFormat = (data) => {
@@ -86,11 +93,12 @@ onconnect = (e) => {
             res.dataNest = dataNest;
             res.editedData = data;
             res.median = median;
-        break;
-    }
-
-    port.postMessage(res);
-
+//        break;
+ //   }
+ port.postMessage(res);
+} catch(e) {
+    port.postMessage({action: 'error', error: e});
+  }
   }
   
 }
