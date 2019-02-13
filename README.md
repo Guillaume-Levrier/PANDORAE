@@ -7,15 +7,10 @@ If you'd rather test the dev branch, clone the repo, cd into it, and use 'npm i'
 
 **License issues :** some package/code license issues might still be around after the pre-upload cleanup. If you find one or more, please reach out on Twitter (@Li_Guilong) and I'll try to make it right.
 
-### TODO
+### TODO FOR BETA RELEASE
 - comment each and every line of JS (under way)
 - create an interactive tutorial (under way)
 - enable gazouillotype brush (next version)
-- multithread visualisations (under way)
 - solve errors in affiliation coordinates (check city then country before choosing, instead of taking the first guess)
-
-##### Flux
-- revamp the whole flux thing
-
-##### Next version
+- Flux menu is working, write description for each panel.
 - implement FETCH altmetric requests

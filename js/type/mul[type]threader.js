@@ -10,26 +10,6 @@ onconnect = (e) => {
     let res = {};
 
     switch (type) {
-      case 'topotype':
-
-      let nodes = datajson.nodes;
-      let links = datajson.links;
-
-      var simulation = d3.forceSimulation(data)
-      .force('link',d3.forceLink(links).id(d=>d.author_id).strength(0))
-      .force('collision', d3.forceCollide(0))
-      .force('x', d3.forceX().x(d => x(d.opinionSpectrum.score)))
-      .force('y', d3.forceY().y(d => y(d.score.totalScore)))
-      .stop();
-
-      for (var i = 0, n = Math.ceil(Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay())); i < n; ++i) {
-        simulation.tick();
-      }
-     
-      res.nodes = nodes;
-      res.links = links;
- 
-      break;
 
       case 'gazouillotype':
           

@@ -174,8 +174,9 @@ tmpSvg.remove();
      .attr("font-size", 10)
      .text(d => d.hops[0].info.name)
      .on("mouseenter", d => {
-      nodeGroup.style("opacity",0.2);
-      traceGroup.style("stroke-opacity",0.2);
+       
+      //NODEGROUP STYLE
+      nodeGroup.transition().duration(200).style("opacity",0.15);
       let selectedTraces = [];
       traces.forEach(f => {
         for (let i = 0; i < f.hops.length; i++) {
@@ -184,14 +185,32 @@ tmpSvg.remove();
           }
         }
       })
-      console.log(selectedTraces);
-    //Write a thread hilight function here
-      nodeGroup.filter(e => e === d).style("opacity",1);
-      traceGroup.filter(e => e === d).style("stroke-opacity",1);
+      for (let k = 0; k < selectedTraces.length; k++) {
+        for (let u = 0; u < selectedTraces[k].hops.length; u++) {
+          nodeGroup.filter(d => d.hops[0].name===selectedTraces[k].hops[u].name).transition().duration(250).style("opacity",0.65);
+        }
+      }
+
+      nodeGroup.filter(e => e===d).transition().duration(300).style("opacity",1);
+
+      //Tracegroup
+      traceGroup.transition().duration(200).style("stroke-opacity",0.15);
+      selectedTraces.forEach(signal => {
+        for (let i = 0; i < traceGroup._groups[0].length; i++) {
+          if (traceGroup._groups[0][i].__data__.hops[0] === signal.hops[0]){
+           console.log(traceGroup._groups[0][i]);
+          d3.select(traceGroup._groups[0][i]).transition().duration(250).style("stroke-opacity",0.65);
+          }
+         }
+      } )
+
+
+
+
      })
      .on("mouseout", d => {
-      nodeGroup.style("opacity",1);
-      traceGroup.style("stroke-opacity",1);
+      nodeGroup.transition().duration(200).style("opacity",1);
+      traceGroup.transition().duration(200).style("stroke-opacity",1);
      })
      .on("click", d => {fluxDisplay(d.hops[0].name.toLowerCase())});
 
