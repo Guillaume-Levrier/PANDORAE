@@ -131,6 +131,7 @@ var dirTree = [
   "/logs",
   "/userID",
   "/datasets",
+  "/datasets/buffer",
   "/datasets/1altmetric",
   "/datasets/1altmetric/1requests",
   "/datasets/1altmetric/2results",
@@ -288,10 +289,21 @@ const chaerosCalculator = () =>  {
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
+// Write log
   fs.writeFile(                                                        // Write data
     userDataPath +'/logs/log-'+date+".txt",dataLog,'utf8',     // Path/name, data, format
     (err) => {
 if (err) throw err;
+
+//Purge Buffer
+if( fs.existsSync(userDataPath+"/datasets/buffer") ) {
+  fs.readdirSync(userDataPath+"/datasets/buffer").forEach(function(file,index){
+    var curPath = userDataPath+"/datasets/buffer/" + file;
+      fs.unlinkSync(curPath);
+  });
+  fs.rmdirSync(userDataPath+"/datasets/buffer");
+}
+
   app.quit()
 });
 })
