@@ -31,14 +31,15 @@ body{cursor: default;}
 
 <div id="user" style="display:none;" class="fluxTabs">
 <form id="user-data-form" autocomplete="off">
-  Name:<br> <input spellcheck="false" id="userNameInput" type="text" value="Enter your name"><br><br>
-  Email:<br> <input spellcheck="false" id="userMailInput" type="text" value="Enter your email"><br><br>
-  Zotero group id:<br> <input spellcheck="false" id="zoterouserinput" type="text" value="Enter your zotero group code"><br><br>
-  Zotero API key:<br> <input spellcheck="false" id="zoterokeyinput" type="password" value="Enter your Zotero API key"><br><br>
-  Scopus API key:<br> <input spellcheck="false" id="scopuskeyinput" type="password" value=""><br><br>
-  Altmetric API key:<br> <input spellcheck="false" id="altmetrickeyinput" type="password" value=""><br><br>
-  Twitter API key:<br> <input spellcheck="false" id="twitterkeyinput" type="password" value=""><br><br>
-  MapTiler Geocoding API key:<br> <input spellcheck="false" id="geocodinginput" type="password" value=""><br><br>
+  
+ <div class="credential"> Name:<br> <input spellcheck="false" id="userNameInput" type="text" value="Enter your name"><br><br></div>
+ <div class="credential"> Email:<br> <input spellcheck="false" id="userMailInput" type="text" value="Enter your email"><br><br></div>
+ <div class="credential"><i class="material-icons validation" onclick="checkKey(this.id)" id="zoteroGroupValidation">help_outline</i> Zotero group id:<br> <input spellcheck="false" id="zoterouserinput" type="text" value="Enter your zotero group code"><br><br></div>
+ <div class="credential"><i class="material-icons validation" onclick="checkKey(this.id)" id="zoteroAPIValidation">help_outline</i> Zotero API key:<br> <input spellcheck="false" id="zoterokeyinput" type="password" value="Enter your Zotero API key"> <br><br></div>
+ <div class="credential"><i class="material-icons validation" onclick="checkKey(this.id)" id="scopusValidation">help_outline</i> Scopus API key:<br> <input spellcheck="false" id="scopuskeyinput" type="password" value=""><br><br></div>
+ <div class="credential"><i class="material-icons validation" onclick="checkKey(this.id)" id="altmetricValidation">help_outline</i> Altmetric API key:<br> <input spellcheck="false" id="altmetrickeyinput" type="password" value=""><br><br></div>
+ <div class="credential"><i class="material-icons validation" onclick="checkKey(this.id)" id="twitterValidation">help_outline</i> Twitter API key:<br> <input spellcheck="false" id="twitterkeyinput" type="password" value=""><br><br></div>
+ <div class="credential"><i class="material-icons validation" onclick="checkKey(this.id)" id="mapTilerValidation">help_outline</i>MapTiler Geocoding API key:<br> <input spellcheck="false" id="geocodinginput" type="password" value=""><br><br></div>
 
 
   <button type="submit" id="user-button" class="flux-button" onclick="updateUserData();return false">Update User Credentials</button><br><br><br><br>

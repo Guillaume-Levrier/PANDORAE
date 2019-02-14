@@ -961,3 +961,15 @@ stroke-width: 1px;
 .flux-subsection{
   border: 1px dashed black;
 }
+
+.credential{
+  padding-left: 40px;
+}
+
+.validation{
+  position: absolute;
+  font-size: 22px;
+  margin-left: -35px;
+  margin-top: 10px;
+  cursor: pointer;
+  }

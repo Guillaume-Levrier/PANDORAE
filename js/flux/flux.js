@@ -198,7 +198,6 @@ tmpSvg.remove();
       selectedTraces.forEach(signal => {
         for (let i = 0; i < traceGroup._groups[0].length; i++) {
           if (traceGroup._groups[0][i].__data__.hops[0] === signal.hops[0]){
-           console.log(traceGroup._groups[0][i]);
           d3.select(traceGroup._groups[0][i]).transition().duration(250).style("stroke-opacity",0.65);
           }
          }
@@ -394,8 +393,6 @@ const datasetDisplay = (folderPath,divId,kind) => {              // This functio
 
 const datasetDetail = (filePath,prevId,buttonId,filename) => {   // This function provides info on a specific dataset
 
-console.log(filePath,prevId,buttonId,filename);
-
   fs.readFile(
     userDataPath+filePath, 'utf8', (err, data) => {                   // read this particular dataset
     try {                                                        // If the file is valid, do the following:
@@ -471,9 +468,9 @@ switch (prevId) {
 // rough idea of how big (and therefore how many requests) the response represents. The user is then offered to proceed
 // with the actual request, which will then be channeled to Chæros.
 
-const scopusBasicRetriever = () => {
+const scopusBasicRetriever = (checker) => {
 
-document.getElementById("scopus-basic-query").innerText = "Loading ...";
+//document.getElementById("scopus-basic-query").innerText = "Loading ...";
 
 let scopusQuery = document.getElementById("scopuslocalqueryinput").value;             // Request Content
 
@@ -495,6 +492,14 @@ let optionsRequest = {                             // Prepare options for the Re
 
     rpn(optionsRequest)                            // RPN stands for Request-promise-native (Request + Promise)
             .then(function (firstResponse) {       // Then, once the response is retrieved
+       console.log(firstResponse)
+              if (checker) {
+                if (firstResponse["search-results"]){
+                  checkKey("scopusValidation",true)
+                } else {
+                  checkKey("scopusValidation",false)
+                }
+              } else {
 
     // Extract relevant metadata
     let searchTerms = firstResponse["search-results"]["opensearch:Query"]["@searchTerms"];
@@ -515,11 +520,12 @@ let optionsRequest = {                             // Prepare options for the Re
 
     // Display next step option: send full request to Chæros
     document.getElementById("scopus-query").style.display = "block";
-
+          }
         })
         .catch(function(e) {
-            fluxButtonAction ("scopus-basic-query",false,"Query Basic Info Retrieved",e.message);
+            fluxButtonAction ("scopus-basic-query",false,"Query Basic Info Error",e.message);
             ipcRenderer.send('console-logs',"Query error : "+e); // Log error
+          
         });
     })
 }
@@ -584,6 +590,9 @@ fluxButtonAction ("zotcolret",true,"Zotero Collections Successfully Retrieved","
 
       datasetsSubdirList("zotColSelector");                                   // Display available dataset directories
 
+      checkKey("zoteroGroupValidation",true);
+      checkKey("zoteroAPIValidation",true);
+
         let selector = document.getElementById("zotColSelector");
         selector.addEventListener("input",()=>{
               document.getElementById("zotitret").name =
@@ -635,12 +644,10 @@ const datasetLoader = (item) => {
 
 let uploadedFile = document.getElementById("dataset-upload").files;               // Uploaded file as a variable
 let uploadPath = uploadedFile[0].path;                                            // Extract its absolute path
-console.log(uploadPath)
 
 let targetted = document.getElementById("localSelector").options[document.getElementById("localSelector").options.selectedIndex].value;
 
     let targetFolder = userDataPath+ "/datasets/" + targetted + '/' + uploadedFile[0].name;      // Prepare its destination path
-console.log(targetFolder)
   fs.copyFile(uploadPath, targetFolder, (err) => {                                // Copy the file
     if (err) throw err;
   });
@@ -677,3 +684,27 @@ const datasetsSubdirList = (dirListId) => {
     }
     document.getElementById(dirListId).innerHTML = datasetDirList;           // The string is a <ul> list
 }
+
+
+//========== scopusGeolocate ==========
+// scopusGeolocate gets cities/countries from a given scopus Dataset and send them to the OSM Geolocate API function.
+
+const geoTest = () => {
+
+  ipcRenderer.send('console-logs',"Testing geocoder API");
+  
+  keytar.getPassword("Geocoding",document.getElementById("userNameInput").value).then((geocodingApiKey) => {    // Retrieve the stored geocoding API key
+  
+  let options = {
+    uri: "https://geocoder.tilehosting.com/q/paris.js?key="+geocodingApiKey,
+    headers: {'User-Agent': 'Request-Promise'},
+    json: true }
+      
+    rpn(options).then((res) => {                        // Enforce bottleneck through limiter
+              checkKey("mapTilerValidation",true)
+        }) .catch(function (err) {
+          checkKey("mapTilerValidation",false)
+        })
+  })
+}
+  
