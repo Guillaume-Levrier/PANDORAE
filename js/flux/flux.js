@@ -706,3 +706,51 @@ const geoTest = () => {
   })
 }
   
+
+//========== bufferZone ==========
+const bufferUpdate = () => {
+
+let folderPath = "/datasets/buffer";
+
+  try {                                                          // Try the following block
+    let datasets = [];                                           // Start from an empty array
+
+    fs.readdir(userDataPath+folderPath, (err, files) => {             // Read the  directory to list files
+      files.forEach(file => {                                    // For each file in the directory
+        let fileName = "'"+file+"'";                             // Create a string from the name of the file
+        if (file !==".gitignore"){                               // If the file isn't a .gitignore
+        datasets.push(                                           // Push the file in the array
+          "<li onclick=displayBufferOptions('"+folderPath+"/"+file+"');>"+file+"</li>"                 // A file is an HTML bullet point in a list
+        )
+      }
+    });
+
+  var datasetList = "";                                          // Create the list as a string
+
+  for (var i=0; i<datasets.length; ++i){                         // For each element of the array
+      datasetList = datasetList + datasets[i];                   // Add it to the string
+    }
+
+    document.getElementById("bufferDatasets").innerHTML = '<ul>'+datasetList+'</ul>';         // The string is a <ul> list
+  })
+
+    } catch(err){
+          document.getElementById(divId).innerHTML = err;        // Display error in the result div
+        }
+}
+
+const displayBufferOptions = (file) => {
+
+  let types = ['chronotype','anthropotype','geotype','topotype','pharmatype','gazouillotype']
+  let options = [];
+  types.forEach(option => {
+    options.push('<input type="checkbox" id="'+option+'" value="'+option+'"><label for="'+option+'">'+option+'</label>')
+  })
+  var optionList = "";                                          // Create the list as a string
+
+  for (var i=0; i<options.length; ++i){                         // For each element of the array
+    optionList = optionList + options[i];                       // Add it to the string
+    }
+
+    document.getElementById("types").innerHTML = optionList;    // The string is a <ul> list
+}

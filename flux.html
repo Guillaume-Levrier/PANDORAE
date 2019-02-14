@@ -158,11 +158,11 @@ body{cursor: default;}
 
 <div id="system" style="display:none;" class="fluxTabs">
     <span class="flux-title">SYSTEM</span><br><br>
-
-      Load datasets in the system<br><br>
-
-      You have loaded the following datasets in Flux's buffer zone. Plug each of those in the relevant visualisation types. The buffer zone is cleared every time PANDORÆ is closed.
-     
+      Once you have loaded the following datasets in Flux's buffer zone. Plug each of those in the relevant visualisation types. The buffer zone is cleared every time PANDORÆ is closed. <br><br>
+      <button type="submit" class="flux-button" id="buffer-display" onclick="bufferUpdate();return false">Display buffer content</button><br><br>
+    <div id="bufferDatasets" style="width:50%;"></div>
+    <form  id="types" style="width:50%;margin-left:50%;">
+    </form>
     </div>
 
 <div style="padding:5px; position:absolute;top:0;right:0;z-index:20;">
