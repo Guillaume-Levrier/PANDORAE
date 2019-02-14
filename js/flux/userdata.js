@@ -63,3 +63,59 @@ document.getElementById("user-button").innerText = "User credentials updated";
 
 getUserData();
 }
+
+const checkKey = (service,status) => {
+
+console.log(service)
+console.log(status)
+
+let success = false;
+
+switch (service) {
+  case "zoteroGroupValidation":
+      if (status === undefined) {
+        zoteroCollectionRetriever();
+        
+      }
+    break;
+
+    case "zoteroAPIValidation":
+      if (status === undefined) {
+        zoteroCollectionRetriever();
+        
+      }
+    break;
+  
+    case "scopusValidation":
+    if (status === undefined) {
+        scopusBasicRetriever(true)
+    }
+
+    break;
+    case "altmetricValidation":
+    
+    break;
+
+    case "twitterValidation":
+    
+    break;
+  
+    case "mapTilerValidation":
+    if (status === undefined) {
+      geoTest()
+  }
+    break;
+
+}
+
+success = status;
+
+if (success){
+  document.getElementById(service).style.color = "green";
+  document.getElementById(service).innerHTML = "check_circle_outline";
+} else {
+  document.getElementById(service).style.color = "red";
+  document.getElementById(service).innerHTML = "highlight_off";
+}
+
+}
