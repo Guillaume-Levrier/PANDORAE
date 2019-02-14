@@ -22,6 +22,7 @@ const THREE = require('three');
 const userDataPath = remote.app.getPath('userData');
 const QRCode = require('qrcode');
 
+
 // =========== SHARED WORKER ===========
 if (!!window.SharedWorker) {
 var multiThreader = new SharedWorker("js/type/mul[type]threader.js");
