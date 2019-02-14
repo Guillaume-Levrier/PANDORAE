@@ -21,8 +21,12 @@ const d3 = require('d3');
 const THREE = require('three');
 const userDataPath = remote.app.getPath('userData');
 const QRCode = require('qrcode');
+const Dexie = require('dexie');
 
-
+// =========== DATABASE ===========
+    Dexie.debug = true;
+ 
+    let pandodb = new Dexie("PandoraeDatabase");
 // =========== SHARED WORKER ===========
 if (!!window.SharedWorker) {
 var multiThreader = new SharedWorker("js/type/mul[type]threader.js");
