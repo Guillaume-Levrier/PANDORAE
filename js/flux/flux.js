@@ -492,7 +492,6 @@ let optionsRequest = {                             // Prepare options for the Re
 
     rpn(optionsRequest)                            // RPN stands for Request-promise-native (Request + Promise)
             .then(function (firstResponse) {       // Then, once the response is retrieved
-       console.log(firstResponse)
               if (checker) {
                 if (firstResponse["search-results"]){
                   checkKey("scopusValidation",true)
@@ -590,7 +589,6 @@ fluxButtonAction ("zotcolret",true,"Zotero Collections Successfully Retrieved","
 
       datasetsSubdirList("zotColSelector");                                   // Display available dataset directories
 
-      checkKey("zoteroGroupValidation",true);
       checkKey("zoteroAPIValidation",true);
 
         let selector = document.getElementById("zotColSelector");

@@ -973,3 +973,22 @@ stroke-width: 1px;
   margin-top: 10px;
   cursor: pointer;
   }
+
+  .updateCredentials{
+    position: absolute;
+    font-size: 20px;
+    margin-left: 15px;
+    margin-top: -5px;
+    cursor: pointer;
+    }
+  
+    #user-button{
+      margin-left:50px;
+      margin-bottom: 25px;
+    }
+
+    .flux-title {
+      font-size: 20px;
+      font-weight: 400;
+      margin-left : -10px;
+    }

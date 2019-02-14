@@ -30,23 +30,36 @@ body{cursor: default;}
 </div>
 
 <div id="user" style="display:none;" class="fluxTabs">
+    <span class="flux-title">USER</span><br><br>
+
 <form id="user-data-form" autocomplete="off">
   
  <div class="credential"> Name:<br> <input spellcheck="false" id="userNameInput" type="text" value="Enter your name"><br><br></div>
  <div class="credential"> Email:<br> <input spellcheck="false" id="userMailInput" type="text" value="Enter your email"><br><br></div>
- <div class="credential"><i class="material-icons validation" onclick="checkKey(this.id)" id="zoteroGroupValidation">help_outline</i> Zotero group id:<br> <input spellcheck="false" id="zoterouserinput" type="text" value="Enter your zotero group code"><br><br></div>
- <div class="credential"><i class="material-icons validation" onclick="checkKey(this.id)" id="zoteroAPIValidation">help_outline</i> Zotero API key:<br> <input spellcheck="false" id="zoterokeyinput" type="password" value="Enter your Zotero API key"> <br><br></div>
- <div class="credential"><i class="material-icons validation" onclick="checkKey(this.id)" id="scopusValidation">help_outline</i> Scopus API key:<br> <input spellcheck="false" id="scopuskeyinput" type="password" value=""><br><br></div>
- <div class="credential"><i class="material-icons validation" onclick="checkKey(this.id)" id="altmetricValidation">help_outline</i> Altmetric API key:<br> <input spellcheck="false" id="altmetrickeyinput" type="password" value=""><br><br></div>
- <div class="credential"><i class="material-icons validation" onclick="checkKey(this.id)" id="twitterValidation">help_outline</i> Twitter API key:<br> <input spellcheck="false" id="twitterkeyinput" type="password" value=""><br><br></div>
- <div class="credential"><i class="material-icons validation" onclick="checkKey(this.id)" id="mapTilerValidation">help_outline</i>MapTiler Geocoding API key:<br> <input spellcheck="false" id="geocodinginput" type="password" value=""><br><br></div>
+ <div class="credential"> Zotero group id:<br> <input spellcheck="false" id="zoterouserinput" type="text" value="Enter your zotero group code"><br><br></div>
+ <button type="submit" id="user-button" class="flux-button" onclick="basicUserData();return false">Update User Credentials</button><br>
+ <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="zoteroAPIValidation">help_outline</i> Zotero API key:<br> <input spellcheck="false" id="zoterokeyinput" type="password" value="Enter your Zotero API key"><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Zotero">cached</i> <br><br></div>
+ <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="scopusValidation">help_outline</i> Scopus API key:<br> <input spellcheck="false" id="scopuskeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Scopus">cached</i><br><br></div>
+ <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="altmetricValidation">help_outline</i> Altmetric API key:<br> <input spellcheck="false" id="altmetrickeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Altmetric">cached</i><br><br></div>
+ <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="twitterValidation">help_outline</i> Twitter API key:<br> <input spellcheck="false" id="twitterkeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Twitter">cached</i><br><br></div>
+ <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="mapTilerValidation">help_outline</i>MapTiler Geocoding API key:<br> <input spellcheck="false" id="geocodinginput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Geocoding">cached</i><br><br></div>
 
 
-  <button type="submit" id="user-button" class="flux-button" onclick="updateUserData();return false">Update User Credentials</button><br><br><br><br>
 </form>
 </div>
 
+
+<div id="db/api" style="display:none;" class="fluxTabs">
+  <span class="flux-title">DB/API</span><br><br>
+    Flux can interrogate for you a series of databases :
+    <li onclick="fluxDisplay(this.innerText)">scopus</li>
+    <li onclick="fluxDisplay(this.innerText)">altmetric</li>
+    <li onclick="fluxDisplay(this.innerText)">twitter</li>
+   
+  </div>
+
 <div id="scopus" style="display:none;" class="fluxTabs">
+    <span class="flux-title">SCOPUS</span><br><br>
   <form id="scopus-form" autocomplete="off">
   Scopus Query:<br> <input spellcheck="false" id="scopuslocalqueryinput" type="text" value="Enter your Scopus Query"><br><br>
     <button type="submit" class="flux-button" id="scopus-basic-query" onclick="scopusBasicRetriever();return false">Retrieve basic info</button>&nbsp;&nbsp;<button style="display:none;" type="submit" class="flux-button" id="scopus-query" onclick="powerValve('scopusRetriever',this);return false">Submit Scopus Query</button><br><br>
@@ -65,6 +78,8 @@ body{cursor: default;}
 </div>
 
 <div id="capco" style="display:none;" class="fluxTabs">
+    <span class="flux-title">CAPCO</span><br><br>
+
 <form id="pubdeb-import-form" autocomplete="off">
 
 <br><br>
@@ -76,6 +91,8 @@ body{cursor: default;}
 
 
 <div id="altmetric" style="display:none;" class="fluxTabs">
+    <span class="flux-title">ALTMETRIC</span><br><br>
+
 <form id="altmetric-import-form" autocomplete="off">
   <button type="submit" class="flux-button" id="scopus-display" onclick="datasetDisplay('/datasets/altmetric/requests','almetric-request-dataset-list','almetric-request-dataset');return false">Update datasets available for altmetric request list </button>
 <br>
@@ -91,6 +108,8 @@ body{cursor: default;}
 </div>
 
 <div id="zotero" style="display:none;" class="fluxTabs">
+    <span class="flux-title">ZOTERO</span><br><br>
+
 <form id="zotero-export-form" autocomplete="off">
 <div id="selectedCollection">
 </div>
@@ -117,6 +136,7 @@ body{cursor: default;}
 </div>
 
 <div id="local" style="display:none;" class="fluxTabs">
+    <span class="flux-title">LOCAL</span><br><br>
 
 <button type="submit" class="flux-button" id="load-local" onclick="datasetLoader(this);return false">Upload local  datasets</button><select id="localSelector" required></select>
 <input id="dataset-upload" type="file" onclick="datasetsSubdirList('localSelector')" accept=".json,.csv" multiple/><br><br>
@@ -124,6 +144,8 @@ body{cursor: default;}
 
 
 <div id="twitter" style="display:none;" class="fluxTabs">
+    <span class="flux-title">TWITTER</span><br><br>
+
 <form id="twitter-form" autocomplete="off">
   Enrich Twitter datasets.<br><br>
   <div id="Twitter-Zotero" class="flux-subsection">
@@ -133,6 +155,15 @@ body{cursor: default;}
   <br><br><br><br>
 </form>
 </div>
+
+<div id="system" style="display:none;" class="fluxTabs">
+    <span class="flux-title">SYSTEM</span><br><br>
+
+      Load datasets in the system<br><br>
+
+      You have loaded the following datasets in Flux's buffer zone. Plug each of those in the relevant visualisation types.
+     
+    </div>
 
 <div style="padding:5px; position:absolute;top:0;right:0;z-index:20;">
 <i class="material-icons  dialog-buttons" onclick="fluxDisplay('flux-manager');">arrow_back</i>
