@@ -27,6 +27,24 @@ const Dexie = require('dexie');
     Dexie.debug = true;
  
     let pandodb = new Dexie("PandoraeDatabase");
+
+    let structureV1 = "datasetKind,datasetName,uploadDate";
+
+    pandodb.version(1).stores({
+      altmetric: structureV1,
+      scopus: structureV1,
+      zotero: structureV1,
+      twitter: structureV1,
+      anthropotype: structureV1,
+      chronotype: structureV1,
+      geotype: structureV1,
+      pharmacotype: structureV1,
+      publicdebate: structureV1,
+      gazouillotype: structureV1
+  });
+  
+  console.log(pandodb)
+    
 // =========== SHARED WORKER ===========
 if (!!window.SharedWorker) {
 var multiThreader = new SharedWorker("js/type/mul[type]threader.js");
