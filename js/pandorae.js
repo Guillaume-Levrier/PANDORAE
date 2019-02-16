@@ -5,7 +5,7 @@
 //       / /  ∖ ∖__
 //      /_/    ∖___|           PANDORÆ
 //
-//   LICENSE : GPLv3
+//   LICENSE : MIT
 
 // ============ VERSION ===========
 const msg = '      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ\n\n';

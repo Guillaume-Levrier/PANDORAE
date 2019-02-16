@@ -7,31 +7,31 @@
 //redispatched to the index's "coreCanvas" and "field", which subsequently impacts the core animation and the field's
 //value.
 
-const {remote, ipcRenderer} = require('electron');
-const keytar = require('keytar');
-const rpn = require('request-promise-native');
-const bottleneck = require('bottleneck');
-const fs = require('fs');
-const d3 = require('d3');
-const wordTokenizer = require('talisman/tokenizers/words');
-const carryStemmer = require('talisman/stemmers/french/carry');
-const MultiSet = require('mnemonist/multi-set')
-const userDataPath = remote.app.getPath('userData');
+const {remote, ipcRenderer} = require('electron');                    // Load ipc to communicate with main process
+const userDataPath = remote.app.getPath('userData');                  // Find userData folder Path
+const keytar = require('keytar');                                     // Load keytar to manage user API keys
+const rpn = require('request-promise-native');                        // Load RPN to manage promises
+const bottleneck = require('bottleneck');                             // Load bottleneck to manage API request limits
+const fs = require('fs');                                             // Load filesystem to manage flatfiles
+const d3 = require('d3');                                             // Load d3 to manage data structures
+const wordTokenizer = require('talisman/tokenizers/words');           // Load Talisman to manage language processing
+const carryStemmer = require('talisman/stemmers/french/carry');       // idem
+const MultiSet = require('mnemonist/multi-set')                       // Load Mnemonist to manage other data structures
 
 //========== scopusConverter ==========
-//scopusConverter is only available once scopusDatasetDetail has been called. If triggerred, it creates a new
+//scopusConverter is only available once scopusDatasetDetail has been called. If triggered, it creates a new
 //CSL-JSON file from the selected dataset and puts it in json/csl-json. This CSL-JSON file should then be ready
 //to be imported to Zotero.
 
-const scopusConverter = (dataset) => {                               // dataset is the chosen file to be converted
+const scopusConverter = (dataset) => {                               // [dataset] is the file to be converted
 
-ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset);
+ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // Notify console conversion started
 
   let convertedDataset = [];                                         // Create relevant array
 
   fs.readFile(userDataPath +'/datasets/7scopus/2scopusDatasets/' + dataset, // Read the designated datafile
-                                'utf8', (err, data) => {             // Additional options for readFile
-    if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};                                              // Throw an error if readFile fails
+                                'utf8', (err, data) => {             // utf8 ecoding - start function
+    if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))}; // Send error to log if readFile fails
     try {                                                            // If the file is valid, do the following:
         let doc = JSON.parse(data);                                  // Parse the file as a JSON object
         let readDataset = doc[Object.keys(doc)[0]];                  // Select relevant array
@@ -39,7 +39,16 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset);
 
         for (var i=0; i<articles.length; ++i){                       // For each article of the array
             let pushedArticle =                                      // Zotero journalArticle format
-             {"itemType":"journalArticle","title":"","creators":[{"creatorType":"author","firstName":"","lastName":""}],"abstractNote":"","publicationTitle":"","volume":"","issue":"","pages":"","date":"","series":"","seriesTitle":"","seriesText":"","journalAbbreviation":"","language":"","DOI":"","ISSN":"","shortTitle":"","url":"","accessDate":"","archive":"","archiveLocation":"","libraryCatalog":"","callNumber":"","rights":"","extra":"","tags":[],"collections":[],"relations":{}};
+             {"itemType":"journalArticle",
+             "title":"",
+             "creators":[{"creatorType":"author","firstName":"","lastName":""}],
+             "abstractNote":"","publicationTitle":"","volume":"","issue":"","pages":"","date":"","series":"","seriesTitle":"","seriesText":"","journalAbbreviation":"",
+             "language":"",
+             "DOI":"",
+             "ISSN":"",
+             "shortTitle":"",
+             "url":"",
+             "accessDate":"","archive":"","archiveLocation":"","libraryCatalog":"","callNumber":"","rights":"","extra":"","tags":[],"collections":[],"relations":{}};
 
             // Fill the article with the relevant properties
             pushedArticle.itemType = "journalArticle";
@@ -76,17 +85,16 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset);
 
 const scopusGeolocate = (dataset,user) => {
 
-
 ipcRenderer.send('console-logs',"Started scopusGeolocate on " + dataset);
 
-fs.readFile(userDataPath +'/datasets/7scopus/2scopusDatasets/' + dataset,      // Read the dataset passed as option
+fs.readFile(userDataPath +'/datasets/7scopus/2scopusDatasets/' + dataset,    // Read the dataset passed as option
                               'utf8', (err, data) => {                       // It should be encoded as UTF-8
   if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
 
 
-  const limiter = new bottleneck({                                      // Create a bottleneck
-    maxConcurrent: 1,                                                   // Send one request at a time
-    minTime: 200                                                        // Every 200 milliseconds
+  const limiter = new bottleneck({                                  // Create a bottleneck
+    maxConcurrent: 1,                                               // Send one request at a time
+    minTime: 200                                                    // Every 200 milliseconds
   });
 
   var doc = JSON.parse(data);                                       // Parse the file as a JSON object

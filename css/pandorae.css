@@ -992,3 +992,20 @@ stroke-width: 1px;
       font-weight: 400;
       margin-left : -10px;
     }
+
+    .fluxInput{
+      width: 80%;
+      border:none;
+      border-bottom:1px solid #141414;
+      height: 20px;
+      }
+      
+      .fluxInput:hover{
+        background-color: #141414;
+        color: white;
+      }
+      
+      .fluxInput:focus{
+        outline:none;
+      }
+      
