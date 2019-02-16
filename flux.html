@@ -2,27 +2,7 @@
 <title>PANDORÆ-FLUX</title>
 
 <style>
-input{
-width: 80%;
-border:none;
-border-bottom:1px solid #141414;
-height: 20px;
-}
 
-input:hover{
-  background-color: #141414;
-  color: white;
-}
-
-input:focus{
-  outline:none;
-}
-
-label:hover{
-outline: 1px solid black;
-}
-
-body{cursor: default;}
 </style>
 
 <div id="flux-manager" class="fluxTabs">
@@ -34,15 +14,15 @@ body{cursor: default;}
 
 <form id="user-data-form" autocomplete="off">
   
- <div class="credential"> Name:<br> <input spellcheck="false" id="userNameInput" type="text" value="Enter your name"><br><br></div>
- <div class="credential"> Email:<br> <input spellcheck="false" id="userMailInput" type="text" value="Enter your email"><br><br></div>
- <div class="credential"> Zotero group id:<br> <input spellcheck="false" id="zoterouserinput" type="text" value="Enter your zotero group code"><br><br></div>
+ <div class="credential"> Name:<br> <input class="fluxInput" spellcheck="false" id="userNameInput" type="text" value="Enter your name"><br><br></div>
+ <div class="credential"> Email:<br> <input class="fluxInput" spellcheck="false" id="userMailInput" type="text" value="Enter your email"><br><br></div>
+ <div class="credential"> Zotero group id:<br> <input class="fluxInput" spellcheck="false" id="zoterouserinput" type="text" value="Enter your zotero group code"><br><br></div>
  <button type="submit" id="user-button" class="flux-button" onclick="basicUserData();return false">Update User Credentials</button><br>
- <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="zoteroAPIValidation">help_outline</i> Zotero API key:<br> <input spellcheck="false" id="zoterokeyinput" type="password" value="Enter your Zotero API key"><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Zotero">cached</i> <br><br></div>
- <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="scopusValidation">help_outline</i> Scopus API key:<br> <input spellcheck="false" id="scopuskeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Scopus">cached</i><br><br></div>
- <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="altmetricValidation">help_outline</i> Altmetric API key:<br> <input spellcheck="false" id="altmetrickeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Altmetric">cached</i><br><br></div>
- <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="twitterValidation">help_outline</i> Twitter API key:<br> <input spellcheck="false" id="twitterkeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Twitter">cached</i><br><br></div>
- <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="mapTilerValidation">help_outline</i>MapTiler Geocoding API key:<br> <input spellcheck="false" id="geocodinginput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Geocoding">cached</i><br><br></div>
+ <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="zoteroAPIValidation">help_outline</i> Zotero API key:<br> <input class="fluxInput" spellcheck="false" id="zoterokeyinput" type="password" value="Enter your Zotero API key"><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Zotero">cached</i> <br><br></div>
+ <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="scopusValidation">help_outline</i> Scopus API key:<br> <input class="fluxInput" spellcheck="false" id="scopuskeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Scopus">cached</i><br><br></div>
+ <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="altmetricValidation">help_outline</i> Altmetric API key:<br> <input class="fluxInput" spellcheck="false" id="altmetrickeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Altmetric">cached</i><br><br></div>
+ <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="twitterValidation">help_outline</i> Twitter API key:<br> <input class="fluxInput" spellcheck="false" id="twitterkeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Twitter">cached</i><br><br></div>
+ <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="mapTilerValidation">help_outline</i>MapTiler Geocoding API key:<br> <input class="fluxInput" spellcheck="false" id="geocodinginput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Geocoding">cached</i><br><br></div>
 
 
 </form>
@@ -61,7 +41,7 @@ body{cursor: default;}
 <div id="scopus" style="display:none;" class="fluxTabs">
     <span class="flux-title">SCOPUS</span><br><br>
   <form id="scopus-form" autocomplete="off">
-  Scopus Query:<br> <input spellcheck="false" id="scopuslocalqueryinput" type="text" value="Enter your Scopus Query"><br><br>
+  Scopus Query:<br> <input class="fluxInput" spellcheck="false" id="scopuslocalqueryinput" type="text" value="Enter your Scopus Query"><br><br>
     <button type="submit" class="flux-button" id="scopus-basic-query" onclick="scopusBasicRetriever();return false">Retrieve basic info</button>&nbsp;&nbsp;<button style="display:none;" type="submit" class="flux-button" id="scopus-query" onclick="powerValve('scopusRetriever',this);return false">Submit Scopus Query</button><br><br>
     <div id="scopus-basic-previewer" style="position:relative;"></div>
 
@@ -83,8 +63,8 @@ body{cursor: default;}
 <form id="pubdeb-import-form" autocomplete="off">
 
 <br><br>
-<p>Select CapCo dataset <br><input id="load-local-pubdeb" type="file" accept="all"/></p>
-<p>Select Matching dataset<br> <input id="load-local-links" type="file" accept="all"/></p>
+<p>Select CapCo dataset <br><input class="fluxInput" id="load-local-pubdeb" type="file" accept="all"/></p>
+<p>Select Matching dataset<br> <input class="fluxInput" id="load-local-links" type="file" accept="all"/></p>
 <button type="submit" class="flux-button" id="" onclick='powerValve("capcoRebuilder",this);return false'>Rebuild CapCo Dataset</button>
 </form>
 </div>
@@ -118,7 +98,7 @@ body{cursor: default;}
 <button type="submit" class="flux-button" id="cslcolret" onclick="datasetDisplay('/datasets/8zotero/1csl-json','userCsljsonCollections','csl-json-dataset');return false">Display/update available csljson files</button><br>
 <div id="csl-json-dataset-preview"></div>
 <div id="csl-json-dataset-buttons"style="display:none;">
-  <input spellcheck="false" class="sendToZotero" id="zoteroCollecName"  type="text" value="Enter collection name">
+  <input class="fluxInput" spellcheck="false" class="sendToZotero" id="zoteroCollecName"  type="text" value="Enter collection name">
 
   <button type="submit" class="flux-button sendToZotero" id="zoteroCollecBuild" onclick="powerValve('zoteroCollectionBuilder',this);return false">Create a new Zotero Collection</button>
 </div>
@@ -127,7 +107,7 @@ body{cursor: default;}
 
 
 <button type="submit" class="flux-button" id="zotcolret" onclick="zoteroCollectionRetriever();return false">Display/update user collections</button><br>
-<input spellcheck="false" id="zoteroImportName" style="display:none;" type="text" value="Enter import name">
+<input class="fluxInput" spellcheck="false" id="zoteroImportName" style="display:none;" type="text" value="Enter import name">
 <select id="zotColSelector" style="display:none;" required></select>
 <button type="submit" class="flux-button" style="display:none;" id="zotitret" onclick="powerValve('zoteroItemsRetriever',this);return false">Import selected collections</button><br>
 </form>
@@ -139,7 +119,7 @@ body{cursor: default;}
     <span class="flux-title">LOCAL</span><br><br>
 
 <button type="submit" class="flux-button" id="load-local" onclick="datasetLoader(this);return false">Upload local  datasets</button><select id="localSelector" required></select>
-<input id="dataset-upload" type="file" onclick="datasetsSubdirList('localSelector')" accept=".json,.csv" multiple/><br><br>
+<input class="fluxInput" id="dataset-upload" type="file" onclick="datasetsSubdirList('localSelector')" accept=".json,.csv" multiple/><br><br>
 </div>
 
 
