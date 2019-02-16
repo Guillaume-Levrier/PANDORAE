@@ -21,13 +21,22 @@ window.onload = reloadCore();
            //var w = window.innerWidth;
            //var h = window.innerHeight;
 
-           var w = document.getElementById("core-modal").innerWidth;
-           var h = document.getElementById("core-modal").innerHeight;
+           var w = 700;
+           var h = 500;
 
            renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
            renderer.setSize( w,h );
            renderer.setClearColor( 0xFFFFFF , 1 );
+           
+           //document.getElementById("core-container").appendChild(renderer.domElement);
+           
            document.body.appendChild(renderer.domElement);
+
+           var vignette = document.createElement("div");
+           vignette.id = "vignette";
+           
+           document.body.appendChild(vignette);
+           
 
            scene = new THREE.Scene();
            camera = new THREE.PerspectiveCamera(60,w/h, 1,1000 );
@@ -112,11 +121,12 @@ window.onload = reloadCore();
        }
        function onResize()
        {
-           var w = window.innerWidth;
-           var h = window.innerHeight;
+          /*  var w = 700;
+            var h = 500;
            renderer.setSize(w,h);
            camera.aspect = w/h;
            camera.updateProjectionMatrix();
+           document.getElementById("core-container").style.marginTop = parseInt((window.innerHeight/2)-250);*/
        }
        function update()
        {

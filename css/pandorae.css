@@ -99,7 +99,7 @@
 
 /* ============ GENERAL =========== */
 
-head, body{
+head, body, html{
   width:100%;
   height:100%;
   overflow: hidden;
@@ -470,35 +470,31 @@ li:active {
 
 /* ============ CORE =========== */
 
-#core-modal{
-display: none;
-margin: auto;
-width:600px;
-height: 450px;
-}
 
 #vignette{
-  position: absolute;
-  left:50%;
-  margin-left:-300px;
-  top:50%;
-  margin-top:-225px;
+  width:700px;
+  height:500px;
   box-shadow: inset 0 0 100px rgba(0,0,0,0.15);
-  width: 600px;
-  height: 450px;
   z-index: 14;
   background-color: rgba(60, 107, 107, 0.05);
+  position: absolute;
+  top: 50%;
+  margin-top: -250px;
+  left: 50%;
+  margin-left: -350px;
 }
 
 #coreCanvas{
-  width: 800px;
-  height: 600px;
-  overflow: hidden;
+  position: absolute;
   display: block;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%); 
+  overflow: hidden;
   margin:auto;
   padding:0;
   cursor: crosshair;
-  display: block;
   z-index: 0;
   animation: fadein 0.7s;
 }
