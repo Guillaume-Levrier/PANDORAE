@@ -1,5 +1,6 @@
 var scene, camera, renderer, controls;
-       var simulationShader, automatic;
+var simulationShader, automatic;
+var zoomFactor = 0.6;
 
 const reloadCore = () => {
            var sl = new ShaderLoader();
@@ -17,12 +18,15 @@ window.onload = reloadCore();
        {
 
 
-           var w = window.innerWidth;
-           var h = window.innerHeight;
+           //var w = window.innerWidth;
+           //var h = window.innerHeight;
+
+           var w = document.getElementById("core-modal").innerWidth;
+           var h = document.getElementById("core-modal").innerHeight;
 
            renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
            renderer.setSize( w,h );
-           renderer.setClearColor( 0xFFFFFF );
+           renderer.setClearColor( 0xFFFFFF , 1 );
            document.body.appendChild(renderer.domElement);
 
            scene = new THREE.Scene();
@@ -30,11 +34,13 @@ window.onload = reloadCore();
 
            controls = new THREE.OrbitControls(camera);
            camera.position.z =
-           controls.minDistance =
+           controls.minDistance = 
            controls.maxDistance = 400;
 
-           var width  = 512;
-           var height = 512;
+           camera.zoom = zoomFactor;
+
+           var width  = 256;
+           var height = 256;
 
            //first model
            var dataA = getSphere( width * height, 128 );
