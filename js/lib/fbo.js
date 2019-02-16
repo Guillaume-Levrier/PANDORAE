@@ -5,7 +5,7 @@ var FBO = function(exports){
     var scene, orthoCamera, rtt;
     exports.init = function( width, height, renderer, simulationMaterial, renderMaterial ){
       renderer.domElement.id = 'coreCanvas';
-
+      
         var gl = renderer.getContext();
 
         //1 we need FLOAT Textures to store positions
