@@ -99,7 +99,7 @@
 
 /* ============ GENERAL =========== */
 
-head, body, html{
+body{
   width:100%;
   height:100%;
   overflow: hidden;
@@ -470,46 +470,46 @@ li:active {
 
 /* ============ CORE =========== */
 
-
-#vignette{
-  width:700px;
-  height:500px;
-  box-shadow: inset 0 0 100px rgba(0,0,0,0.15);
-  z-index: 14;
-  background-color: rgba(60, 107, 107, 0.05);
-  position: absolute;
-  top: 50%;
-  margin-top: -250px;
-  left: 50%;
-  margin-left: -350px;
-}
-
 #coreCanvas{
+  top:0;
+  left:0;
   position: absolute;
   display: block;
-  top: 50%;
-  left: 50%;
-  margin-right: -50%;
-  transform: translate(-50%, -50%); 
   overflow: hidden;
   margin:auto;
   padding:0;
   cursor: crosshair;
-  z-index: 0;
+  z-index: 1;
   animation: fadein 0.7s;
-}
+} 
 
 #core-logo{
   position: absolute;
-  width: 500px;
-  top:45%;
+  width: 800px;
+  top:40%;
   left:50%;
   font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
-  font-weight: 800;
-  letter-spacing: 5px;
-  font-size: 30px;
-  margin-left:-250px;
+  font-weight: 700;
+  letter-spacing: 7px;
+  font-size: 45px;
+  margin-left:-400px;
   text-align: center;
+  pointer-events: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  z-index: 2;
+  animation: fadein 0.7s;
+}
+
+#version{
+  position: absolute;
+  top: calc(45% + 20px);
+  left:70%;
+  font-size: 0.8em;
+  font-weight: bolder;
   pointer-events: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -580,21 +580,7 @@ li:active {
   animation: fadein 0.7s;
 }
 */
-#version{
-  position: absolute;
-  top: calc(45% + 40px);
-  left:60%;
-  font-size: 0.6em;
-  font-weight: bolder;
-  pointer-events: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  z-index: 2;
-  animation: fadein 0.7s;
-}
+
 
 .infobox{
   display: none;
@@ -640,7 +626,7 @@ td {
   padding: 7px;
   background: transparent;
   color: #000;
-  z-index: 1;
+  z-index: 3;
 }
 
 #field:focus {
