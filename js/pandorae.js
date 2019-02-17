@@ -952,3 +952,80 @@ ipcRenderer.on('tutorial', (event,message) => {
 ipcRenderer.on('window-close', (event,message) => {
   console.log("Closing "+message);
 });
+
+
+// ========= THEMES =======
+const normalTheme =
+{"theme-name":"normal",
+ "theme-type":"basic",
+ "theme-background":"img/blank.png",
+ "coreCanvas": {"position": "absolute","display": "block","width": "100%","height": "100%","top": "0px","left": "0px","overflow": "hidden","margin":"auto","padding":"0","cursor": "crosshair","z-index": "3","animation": "fadein 0.7s"},
+ "screenMachine": {"display": "none"},
+ "vignette": {  "display": "none"},
+
+ "core-logo":{"position": "absolute","width": "800px","top":"40%","left":"50%","font-family": "'Noto Sans', 'Noto Sans SC', sans-serif","font-weight": "700","letter-spacing": "7px","font-size": "45px","margin-left":-"400px","text-align": "center","pointer-events": "none","-webkit-user-select": "none","-khtml-user-select": "none","-moz-user-select": "none","-ms-user-select": "none","user-select": "none","z-index": "6","animation": "fadein 0.7s"},
+
+"version":{"position": "absolute","top": "calc(45% + 20px)","left":"70%","font-size": "0.8em","font-weight": "bolder","pointer-events": "none","-webkit-user-select": "none","-khtml-user-select": "none","-moz-user-select": "none","-ms-user-select": "none","user-select": "none","z-index":"6","animation": "fadein 0.7s"},
+
+"field":{"position": "absolute","width":"80%","top":"50%","left":"50%","margin-left":"-40%","border": "0","pointer-events": "none","font-family": "'Noto Sans', 'Noto Sans SC', sans-serif","letter-spacing": "0.15em","font-variant": "small-caps","font-size": "2.4em","height": "2.5em","text-align": "center","padding": "7px","background": "transparent","color": "#000","z-index": "6"},
+"coreDefW":512,
+"coreDefH":512
+}
+
+
+const minitelMagisTheme = 
+{"theme-name":"minitel-magis",
+ "theme-type":"cinemagraph",
+ "theme-background":"img/minitel-magis.png",
+ "screenMachine": {"position": "absolute","display": "block","z-index":3,"top":0,"left":0},
+ "coreCanvas": {"position": "absolute","display": "block","width": "290px","height": "220px","top": "85px","left": "800px","overflow": "hidden","margin":"auto","padding":"0","cursor": "crosshair","z-index": "1","animation": "fadein 0.7s"},
+ "vignette": {  "width": "290px","height": "220px","top": "85px","left": "800px","box-shadow": "inset 0 0 50px rgba(0,0,0,0.65)","z-index": 2,"background-color": "rgba(60, 107, 107, 0.10)","position": "absolute"},
+
+ "core-logo":{"position": "absolute","width": "250px","top":"160px","left":"1220px","font-family": "'Noto Sans', 'Noto Sans SC', sans-serif","font-weight": "700","letter-spacing": "3px","font-size": "10px","text-align": "center","pointer-events": "none","-webkit-user-select": "none","-khtml-user-select": "none","-moz-user-select": "none","-ms-user-select": "none","user-select": "none","z-index": 7,"animation": "fadein 0.7s"},
+
+ "version":{"position": "absolute","top": "175px","left":"870px","font-size": "4px","font-weight": "bolder","pointer-events": "none","-webkit-user-select": "none","-khtml-user-select": "none","-moz-user-select": "none","-ms-user-select": "none","user-select": "none","z-index":7,"animation": "fadein 0.7s"},
+ 
+ "field":{"position": "absolute","width":"80%","top":"50%","left":"50%","margin-left":"-40%","border": "0","pointer-events": "none","font-family": "'Noto Sans', 'Noto Sans SC', sans-serif","letter-spacing": "0.15em","font-variant": "small-caps","font-size": "2.4em","height": "2.5em","text-align": "center","padding": "7px","background": "transparent","color": "#000","z-index": "3"},
+ "coreDefW":256,
+"coreDefH":256,
+"zoom":{"transform-origin":"top right","transform":"scale(2.3,2.3)"},
+
+}
+
+
+
+var coreCanvasW = window.innerWidth;
+var coreCanvasH = window.innerHeight;
+
+var coreDefW = 512;
+var coreDefH = 512;
+
+const loadTheme = (theme) => {
+  Array.from(document.getElementsByClassName("screenThemeZoom")).forEach(d=>{
+    Object.assign(document.getElementById(d.id).style, theme[d.id]);
+  })
+  Object.assign(document.getElementById("coreCanvas").style, theme.coreCanvas);
+
+  document.getElementById("screenMachine").src = theme["theme-background"];
+
+
+  
+  
+
+  coreDefW = theme.coreDefW;
+  coreDefH = theme.coreDefH;
+  
+  }
+
+let screenZoomToggle = false;
+
+  const zoomThemeScreen = (theme) => {
+    if (screenZoomToggle) {
+      d3.select("body").transition().duration(2000).style("transform","scale(1,1)");
+      screenZoomToggle = false;
+  } else {
+    d3.select("body").style("transform-origin","top right");
+    d3.select("body").transition().duration(2000).style("transform","scale(2,2)");
+    screenZoomToggle = true;
+  }
+  }

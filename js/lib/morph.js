@@ -1,6 +1,6 @@
 var scene, camera, renderer, controls;
 var simulationShader, automatic;
-var zoomFactor = 0.6;
+var zoomFactor = 1;
 
 const reloadCore = () => {
            var sl = new ShaderLoader();
@@ -18,25 +18,17 @@ window.onload = reloadCore();
        {
 
 
-           //var w = window.innerWidth;
-           //var h = window.innerHeight;
+           var w = coreCanvasW;
+           var h = coreCanvasH;
 
-           var w = 700;
-           var h = 500;
-
+        
            renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
            renderer.setSize( w,h );
            renderer.setClearColor( 0xFFFFFF , 1 );
-           
-           //document.getElementById("core-container").appendChild(renderer.domElement);
-           
-           document.body.appendChild(renderer.domElement);
+           renderer.className +="screenThemeZoom";
+                      
+           document.body.insertBefore(renderer.domElement,document.getElementById("canvasSignal"));
 
-           var vignette = document.createElement("div");
-           vignette.id = "vignette";
-           
-           document.body.appendChild(vignette);
-           
 
            scene = new THREE.Scene();
            camera = new THREE.PerspectiveCamera(60,w/h, 1,1000 );
@@ -48,8 +40,8 @@ window.onload = reloadCore();
 
            camera.zoom = zoomFactor;
 
-           var width  = 256;
-           var height = 256;
+           var width  = 512;
+           var height = 512;
 
            //first model
            var dataA = getSphere( width * height, 128 );
@@ -121,12 +113,11 @@ window.onload = reloadCore();
        }
        function onResize()
        {
-          /*  var w = 700;
-            var h = 500;
+        var w = coreCanvasW;
+        var h = coreCanvasH;
            renderer.setSize(w,h);
            camera.aspect = w/h;
            camera.updateProjectionMatrix();
-           document.getElementById("core-container").style.marginTop = parseInt((window.innerHeight/2)-250);*/
        }
        function update()
        {
