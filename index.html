@@ -14,18 +14,16 @@ html{
 <video autoplay loop class="screenThemeZoom" id="screenMachine" type="video/mp4" >
 </video>
 
-<div class="screenThemeZoom" id="core-logo"></div>
+<div class="screenThemeZoom" id="core-logo" ></div>
 <div class="screenThemeZoom" id="vignette"></div>
 <div class="screenThemeZoom" id="version"></div>
-<div><form autocomplete="off"><input class="screenThemeZoom" spellcheck="false" type="text" maxlength="36" id="field" value=""><button type="submit" onclick="cmdinput();return false" id="submit-invisible"></button></form>
+<div><form autocomplete="off"><input class="screenThemeZoom" spellcheck="false" type="text" maxlength="36" id="field" value=""><button type="submit" onclick="cmdinput(document.getElementById('field').value);return false" id="submit-invisible"></button></form>
 </div>
 
 <img class="screenThemeZoom" id="mask" >
 
-
-
 <div id="menu-icon"><i  class="material-icons">menu</i></div>
-<div id="option-icon"><i class="material-icons">code</i></div>
+<div id="option-icon" ><i class="material-icons">code</i></div>
 
 <div id="menu">
   <img id="aelogo" class="menu-item" width="100%" onClick="displayCore();" src="svg/pandorae-app-logo.svg">
@@ -61,7 +59,7 @@ html{
 <div id="settings"></div>
 
 <div id="console"><div id="log"></div>
-<div id="cli">$PANDORÆ~:<form autocomplete="off"><input spellcheck="false" type="text" id="cli-field" value=""><button type="submit" onclick="cmdinput();return false" id="cli-submit-invisible"></button></form></div>
+<div id="cli">$PANDORÆ~:<form autocomplete="off"><input spellcheck="false" type="text" id="cli-field" value=""><button type="submit" onclick="cmdinput(document.getElementById('cli-field').value);return false" id="cli-submit-invisible"></button></form></div>
 <div id="console-options"></div>
 </div>
 
