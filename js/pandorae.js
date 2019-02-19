@@ -405,6 +405,12 @@ const displayCore = () => {
 const purgeCore = () => {
   if (coreExists) {
     d3.select("canvas").remove();
+    document.body.removeChild(document.getElementById("core-logo"));
+    document.body.removeChild(document.getElementById("vignette"));
+    document.body.removeChild(document.getElementById("version"));
+    document.body.removeChild(document.getElementById("mask"));
+    document.body.removeChild(document.getElementById("screenMachine"));
+    document.getElementById("field").style.display = "none";
     ipcRenderer.send('console-logs',"Purging core");
   }
 
@@ -697,20 +703,35 @@ const mainDisplay = (type,options) =>{
 
 }
 
-const cmdinput = () => {
+const cmdinput = (input) => {
 
-let commandInput = document.getElementById("field").value;
-let cliInput = document.getElementById("cli-field").value;
-
-ipcRenderer.send('console-logs'," user$ "+ commandInput + cliInput);
+ipcRenderer.send('console-logs'," user$ "+ input);
 
 const loadingType = () => commandReturn = "loading " + commandInput;
 
-switch (commandInput || cliInput) {
+if (input.substring(0, 13) === "change theme ") {
+  
+  document.body.style.animation="fadeout 0.5s";
+            setTimeout(()=>{
+              document.body.remove();
+              ipcRenderer.send('change-theme',input.substring(13,input.length));
+              remote.getCurrentWindow().reload();
+            }, 450);
+} else {
+
+switch (input) {
 
     case 'test':
           loadingType();
           break;
+
+    case 'zoom':
+          zoomThemeScreen(activeTheme)
+    break;
+
+    case 'unzoom':
+          zoomThemeScreen(activeTheme)
+    break;
 
     case 'toggle console':
             toggleConsole();
@@ -817,7 +838,7 @@ switch (commandInput || cliInput) {
           commandReturn = "command not found";
           break;
         }
-
+      }
 document.getElementById("field").value = commandReturn;
 
 }
@@ -955,46 +976,13 @@ ipcRenderer.on('window-close', (event,message) => {
 
 
 // ========= THEMES =======
-const normalTheme =
-{"theme-name":"normal",
- "theme-type":"basic",
- "theme-background":"img/blank.png",
- "coreCanvas": {"position": "absolute","display": "block","width": "100%","height": "100%","top": "0px","left": "0px","overflow": "hidden","margin":"auto","padding":"0","cursor": "crosshair","z-index": "3","animation": "fadein 0.7s"},
- "screenMachine": {"display": "none"},
- "vignette": {  "display": "none"},
 
- "core-logo":{"position": "absolute","width": "800px","top":"40%","left":"50%","font-family": "'Noto Sans', 'Noto Sans SC', sans-serif","font-weight": "700","letter-spacing": "7px","font-size": "45px","margin-left":-"400px","text-align": "center","pointer-events": "none","-webkit-user-select": "none","-khtml-user-select": "none","-moz-user-select": "none","-ms-user-select": "none","user-select": "none","z-index": "6","animation": "fadein 0.7s"},
+ipcRenderer.on('change-theme', (event,theme) => {
+  loadTheme(theme);
+});
 
-"version":{"position": "absolute","top": "calc(45% + 20px)","left":"70%","font-size": "0.8em","font-weight": "bolder","pointer-events": "none","-webkit-user-select": "none","-khtml-user-select": "none","-moz-user-select": "none","-ms-user-select": "none","user-select": "none","z-index":"6","animation": "fadein 0.7s"},
-
-"field":{"position": "absolute","width":"80%","top":"50%","left":"50%","margin-left":"-40%","border": "0","pointer-events": "none","font-family": "'Noto Sans', 'Noto Sans SC', sans-serif","letter-spacing": "0.15em","font-variant": "small-caps","font-size": "2.4em","height": "2.5em","text-align": "center","padding": "7px","background": "transparent","color": "#000","z-index": "6"},
-"coreDefW":512,
-"coreDefH":512
-}
-
-const minitelMagisTheme = 
-{"theme-name":"minitel-magis",
- "theme-type":"cinemagraph",
- "theme-background":"mp4/testBG.mp4",
- "theme-mask":"img/masque.png",
- "screenMachine": {"position": "absolute","display": "block","z-index":1,"top":0,"right":0,"height":"800px"},
- "coreCanvas": {"position": "absolute","display": "block","width": "255px","height": "185px","top": "95px","left": "855px","overflow": "hidden","margin":"auto","padding":"0","cursor": "crosshair","z-index": 2,"animation": "fadein 0.7s","transform": "rotate(3deg) skewX(-2deg)"},
- "vignette": {  "width": "255px","height": "185px","top": "95px","left": "855px","box-shadow": "inset 0 0 50px rgba(0,0,0,0.65)","z-index": 2,"background-color": "rgba(60, 107, 107, 0.10)","position": "absolute","transform": "rotate(3deg) skewX(-2deg)"},
-
- "core-logo":{"position": "absolute","width": "200px","top":"160px","left":"1280px","font-family": "'Noto Sans', 'Noto Sans SC', sans-serif","font-weight": "700","letter-spacing": "3px","font-size": "10px","text-align": "center","pointer-events": "none","-webkit-user-select": "none","-khtml-user-select": "none","-moz-user-select": "none","-ms-user-select": "none","user-select": "none","z-index": 7,"animation": "fadein 0.7s","transform": "rotate(3deg) skewX(-2deg)"},
-
- "version":{"position": "absolute","top": "185px","left":"980px","font-size": "4px","font-weight": "bolder","pointer-events": "none","-webkit-user-select": "none","-khtml-user-select": "none","-moz-user-select": "none","-ms-user-select": "none","user-select": "none","z-index":7,"animation": "fadein 0.7s","transform": "rotate(3deg) skewX(-2deg)"},
-
- "mask":{"display": "block","position": "absolute","top": "0px","left": "0px","z-index": 3,"width": "1200px","height":"800px"},
- 
- "field":{"position": "absolute","width":"80%","top":"50%","left":"50%","margin-left":"-40%","border": "0","pointer-events": "none","font-family": "'Noto Sans', 'Noto Sans SC', sans-serif","letter-spacing": "0.15em","font-variant": "small-caps","font-size": "2.4em","height": "2.5em","text-align": "center","padding": "7px","background": "transparent","color": "#000","z-index": "3","transform": "rotate(3deg) skewX(-2deg)"},
- "coreDefW":256,
-"coreDefH":256,
-"zoom":{"transform-origin":"top right","transform":"scale(2.3,2.3)"},
-
-}
-
-
+var activeTheme;
+var fullscreenable;
 
 var coreCanvasW = window.innerWidth;
 var coreCanvasH = window.innerHeight;
@@ -1002,7 +990,10 @@ var coreCanvasH = window.innerHeight;
 var coreDefW = 512;
 var coreDefH = 512;
 
+
+
 const loadTheme = (theme) => {
+  activeTheme = theme;
   Array.from(document.getElementsByClassName("screenThemeZoom")).forEach(d=>{
     Object.assign(document.getElementById(d.id).style, theme[d.id]);
   })
@@ -1010,14 +1001,10 @@ const loadTheme = (theme) => {
 
   document.getElementById("screenMachine").src = theme["theme-background"];
   document.getElementById("mask").src = theme["theme-mask"];
-  
-
-
-  
-  
 
   coreDefW = theme.coreDefW;
   coreDefH = theme.coreDefH;
+  fullscreenable = theme.fullscreenable;
   
   }
 
@@ -1026,10 +1013,24 @@ let screenZoomToggle = false;
   const zoomThemeScreen = (theme) => {
     if (screenZoomToggle) {
       d3.select("body").transition().duration(2000).style("transform","scale(1,1)");
+      document.getElementById("screenMachine").play(); 
       screenZoomToggle = false;
-  } else {
-    d3.select("body").style("transform-origin","top right");
-    d3.select("body").transition().duration(2000).style("transform","scale(2,2)");
-    screenZoomToggle = true;
+  } else { 
+    if (theme.hasOwnProperty("zoom")) {
+        d3.select("body").style("transform-origin",theme.zoom["transform-origin"]);
+        d3.select("body").transition().duration(2000).style("transform",theme.zoom["transform"]);
+        document.getElementById("screenMachine").pause(); 
+        screenZoomToggle = true;
+    } else {
+        document.getElementById("field").value = "this theme doesn't support zooming";
+    }
   }
   }
+
+  fs.readFile(userDataPath +'/themes/themes.json',                          // Read the designated datafile
+                              'utf8', (err, activeThemeData) => {              // Additional options for readFile
+  if (err) throw err;
+  let activateTheme = JSON.parse(activeThemeData);
+
+  ipcRenderer.send('change-theme',activateTheme.activeTheme);
+});

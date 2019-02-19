@@ -5,6 +5,56 @@ const userDataPath = app.getPath('userData');
 
 let mainWindow
 
+const basePath = app.getAppPath();
+// themes
+let activeTheme;
+
+fs.copyFileSync(basePath+"/json/themes.json", userDataPath +"/themes/themes.json");
+
+const changeTheme = () => {
+
+fs.readFile(basePath+"/json/themes.json", // Read the designated datafile
+                                'utf8', (err, theme) => {             // utf8 ecoding - start function
+  
+
+let themeData = JSON.parse(theme);
+
+activeTheme = themeData.activeTheme;
+
+for (let i = 0; i < themeData.themes.length; i++) {
+  if (themeData.themes[i]["theme-name"]===activeTheme) {
+    
+     mainWindow.webContents.send('change-theme',themeData.themes[i]);     
+  }
+  }
+});
+};
+
+const themeChangeTrigger = (theme) => {
+
+  fs.readFile(basePath +'/json/themes.json', // Read the designated datafile
+  'utf8', (err, newThemeData) => {             // utf8 ecoding - start function
+    let changeThemedata = JSON.parse(newThemeData);
+    changeThemedata.activeTheme = theme;
+
+    fs.writeFile(basePath+"/json/themes.json",JSON.stringify(changeThemedata),'utf8',
+      (err) => {if (err) throw err;}
+    );
+
+    fs.writeFile(userDataPath +"/themes/themes.json",JSON.stringify(changeThemedata),'utf8',
+      (err) => {if (err) throw err;}
+    );
+   
+    changeTheme();
+
+})
+
+};
+
+ipcMain.on('change-theme', (event,theme) => {
+  themeChangeTrigger(theme);
+})
+
 function createWindow () {
 
   mainWindow = new BrowserWindow({
@@ -21,7 +71,7 @@ function createWindow () {
    })
 
   mainWindow.loadFile('index.html')
-
+  mainWindow['enter-full-screen'] = (e) => {themeChangeTrigger("normal")};
   mainWindow.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures) => {
 
       if (frameName === 'modal') {
@@ -42,16 +92,19 @@ function createWindow () {
 
   mainWindow.setMenu(null);
   mainWindow.webContents.openDevTools();
+  
   mainWindow.on('closed', () => { mainWindow = null })
 
 }
 
 app.on('ready', ()=>{
     createWindow();
+    
 
 })
 
 app.on('activate',  () => { if (mainWindow === null) { createWindow() } })
+
 
 var windowIds = [
 {name:"flux",id:0},
@@ -131,6 +184,7 @@ var pandoDir = userDataPath;
 var dirTree = [
   "/logs",
   "/userID",
+  "/themes",
   "/datasets",
   "/datasets/buffer",
   "/datasets/1altmetric",
@@ -318,4 +372,7 @@ ipcMain.on('tutorial', (event,message) => {
       break;
 
   }
-})
+});
+
+
+

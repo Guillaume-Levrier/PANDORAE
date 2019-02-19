@@ -463,18 +463,12 @@ li:active {
   height: 100%;
 }
 
-#version {
-  width: 20%;
-  height: 100%;
-}
-
 /* ============ CORE =========== */
 
 #coreCanvas{
   top:0;
-  left:0;
   position: absolute;
-  display: block;
+  display: none;
   overflow: hidden;
   margin:auto;
   padding:0;
@@ -484,6 +478,7 @@ li:active {
 } 
 
 #core-logo{
+  display: none;
   position: absolute;
   width: 800px;
   top:40%;
@@ -505,6 +500,7 @@ li:active {
 }
 
 #version{
+  display: none;
   position: absolute;
   top: calc(45% + 20px);
   left:70%;
