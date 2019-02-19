@@ -113,13 +113,13 @@ window.onload = reloadCore();
        }
        function onResize()
        { 
-           if (fullscreenable) {
+           
             var w = window.innerWidth;
             var h = window.innerHeight;
            renderer.setSize(w,h);
            camera.aspect = w/h;
            camera.updateProjectionMatrix();        
-           }
+           
        }
        function update()
        {

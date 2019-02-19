@@ -16,7 +16,6 @@ const changeTheme = () => {
 fs.readFile(basePath+"/json/themes.json", // Read the designated datafile
                                 'utf8', (err, theme) => {             // utf8 ecoding - start function
   
-
 let themeData = JSON.parse(theme);
 
 activeTheme = themeData.activeTheme;
@@ -28,6 +27,7 @@ for (let i = 0; i < themeData.themes.length; i++) {
   }
   }
 });
+
 };
 
 const themeChangeTrigger = (theme) => {
@@ -71,7 +71,11 @@ function createWindow () {
    })
 
   mainWindow.loadFile('index.html')
-  mainWindow['enter-full-screen'] = (e) => {themeChangeTrigger("normal")};
+
+  mainWindow.addListener("enter-full-screen",(e) => {
+    themeChangeTrigger("normal");
+  });
+  
   mainWindow.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures) => {
 
       if (frameName === 'modal') {

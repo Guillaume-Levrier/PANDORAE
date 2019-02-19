@@ -709,7 +709,7 @@ ipcRenderer.send('console-logs'," user$ "+ input);
 
 const loadingType = () => commandReturn = "loading " + commandInput;
 
-if (input.substring(0, 13) === "change theme ") {
+if (input.substring(0, 13) === "change theme " && remote.getCurrentWindow().isFullScreen() === false) {
   
   document.body.style.animation="fadeout 0.5s";
             setTimeout(()=>{
@@ -990,8 +990,6 @@ var coreCanvasH = window.innerHeight;
 var coreDefW = 512;
 var coreDefH = 512;
 
-
-
 const loadTheme = (theme) => {
   activeTheme = theme;
   Array.from(document.getElementsByClassName("screenThemeZoom")).forEach(d=>{
@@ -1005,6 +1003,7 @@ const loadTheme = (theme) => {
   coreDefW = theme.coreDefW;
   coreDefH = theme.coreDefH;
   fullscreenable = theme.fullscreenable;
+
   
   }
 
@@ -1024,7 +1023,7 @@ let screenZoomToggle = false;
     } else {
         document.getElementById("field").value = "this theme doesn't support zooming";
     }
-  }
+   }
   }
 
   fs.readFile(userDataPath +'/themes/themes.json',                          // Read the designated datafile
