@@ -25,7 +25,7 @@ window.onload = reloadCore();
            renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
            renderer.setSize( w,h );
            renderer.setClearColor( 0xFFFFFF , 1 );
-           renderer.className +="screenThemeZoom";
+           renderer.className +="themeCustom";
                       
            document.body.insertBefore(renderer.domElement,document.getElementById("canvasSignal"));
 
