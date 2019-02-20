@@ -20,8 +20,10 @@ const fs = require('fs');
 const d3 = require('d3');
 const THREE = require('three');
 const userDataPath = remote.app.getPath('userData');
+const appPath = remote.app.getAppPath();
 const QRCode = require('qrcode');
 const Dexie = require('dexie');
+
 
 // =========== DATABASE ===========
     Dexie.debug = true;
@@ -1004,6 +1006,15 @@ const loadTheme = (theme) => {
   coreDefH = theme.coreDefH;
   fullscreenable = theme.fullscreenable;
 
+  if (theme.script.length>0) { 
+    console.log(appPath+"/themes/"+theme["theme-name"]+"/"+theme.script)
+    const themeScripts = require(appPath+"/themes/"+theme["theme-name"]+"/"+theme.script);
+    //const themeScripts = require('./themes/chaeros');
+    console.log(themeScripts)
+    themeScripts.sun();
+    themeScripts.voronoiBackground();
+    themeScripts.cityScape();
+  }
   
   }
 
