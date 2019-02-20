@@ -407,15 +407,21 @@ const displayCore = () => {
 const purgeCore = () => {
   if (coreExists) {
     d3.select("canvas").remove();
+    
     document.body.removeChild(document.getElementById("core-logo"));
     document.body.removeChild(document.getElementById("vignette"));
     document.body.removeChild(document.getElementById("version"));
     document.body.removeChild(document.getElementById("mask"));
     document.body.removeChild(document.getElementById("screenMachine"));
     document.getElementById("field").style.display = "none";
+    Array.from(document.getElementsByClassName("purgeable")).forEach(d=>{
+      document.body.removeChild(document.getElementById(d.id));
+      
+      d3.select(d.id).remove();
+    });
     ipcRenderer.send('console-logs',"Purging core");
   }
-
+//Object.assign(document.getElementById(d.id).style.display, "none");
 };
 
 var options = [];
@@ -1007,10 +1013,10 @@ const loadTheme = (theme) => {
   fullscreenable = theme.fullscreenable;
 
   if (theme.script.length>0) { 
-    console.log(appPath+"/themes/"+theme["theme-name"]+"/"+theme.script)
+    
     const themeScripts = require(appPath+"/themes/"+theme["theme-name"]+"/"+theme.script);
-    //const themeScripts = require('./themes/chaeros');
-    console.log(themeScripts)
+    //load all available scripts
+    //put a tag to purge all added DOM on purgeCore.
     themeScripts.sun();
     themeScripts.voronoiBackground();
     themeScripts.cityScape();
