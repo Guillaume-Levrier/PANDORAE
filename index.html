@@ -11,24 +11,24 @@ html{
 
 <div id="canvasSignal"></div>
 <!--Core-->
-<video autoplay loop class="screenThemeZoom" id="screenMachine" type="video/mp4" >
+<video autoplay loop class="themeCustom" id="screenMachine" type="video/mp4" >
 </video>
 
 <canvas id="spaceVoronoi"></canvas>
 <canvas id="allgone-noescape3"></canvas>
 
-<div class="screenThemeZoom" id="core-logo" ></div>
-<div class="screenThemeZoom" id="vignette"></div>
-<div class="screenThemeZoom" id="version"></div>
-<div><form autocomplete="off"><input class="screenThemeZoom" spellcheck="false" type="text" maxlength="36" id="field" value=""><button type="submit" onclick="cmdinput(document.getElementById('field').value);return false" id="submit-invisible"></button></form>
+<div class="themeCustom" id="core-logo" ></div>
+<div class="themeCustom" id="vignette"></div>
+<div class="themeCustom" id="version"></div>
+<div><form autocomplete="off"><input class="themeCustom" spellcheck="false" type="text" maxlength="36" id="field" value=""><button type="submit" onclick="cmdinput(document.getElementById('field').value);return false" id="submit-invisible"></button></form>
 </div>
 
-<img class="screenThemeZoom" id="mask" >
+<img class="themeCustom" id="mask" >
 
 <div id="menu-icon"><i  class="material-icons">menu</i></div>
 <div id="option-icon" ><i class="material-icons">code</i></div>
 
-<div id="menu">
+<div id="menu" class="themeCustom">
   <img id="aelogo" class="menu-item" width="100%" onClick="displayCore();" src="svg/pandorae-app-logo.svg">
   <div id="fluxMenu" class="tabs menu-item" onClick="toggleFlux();">flux</div>
   <div class="tabs menu-item" onClick="mainDisplay('chronotype');">chronotype</div>
@@ -41,14 +41,14 @@ html{
   <div class="tabs menu-item" onClick="closeWindow();">quit</div>
 </div>
 
-<div id="secmenu">
+<div id="secmenu" class="themeCustom">
   <div id="secMenTopTab" class="secMenuTabs">
   </div>
   <div id="secMenContent">
   </div>
 </div>
 
-<div id="thirdmenu">
+<div id="thirdmenu" class="themeCustom">
   <div id="thirdMenuContent">
   </div>
 </div>

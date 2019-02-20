@@ -994,7 +994,7 @@ var coreDefH = 512;
 
 const loadTheme = (theme) => {
   activeTheme = theme;
-  Array.from(document.getElementsByClassName("screenThemeZoom")).forEach(d=>{
+  Array.from(document.getElementsByClassName("themeCustom")).forEach(d=>{
     Object.assign(document.getElementById(d.id).style, theme[d.id]);
   })
   Object.assign(document.getElementById("coreCanvas").style, theme.coreCanvas);
