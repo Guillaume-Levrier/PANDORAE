@@ -713,6 +713,8 @@ const mainDisplay = (type,options) =>{
 
 const cmdinput = (input) => {
 
+input = input.toLowerCase();
+
 ipcRenderer.send('console-logs'," user$ "+ input);
 
 const loadingType = () => commandReturn = "loading " + commandInput;
@@ -1012,15 +1014,9 @@ const loadTheme = (theme) => {
   coreDefH = theme.coreDefH;
   fullscreenable = theme.fullscreenable;
 
-  if (theme.script.length>0) { 
-    
-    const themeScripts = require(appPath+"/themes/"+theme["theme-name"]+"/"+theme.script);
-    //load all available scripts
-    //put a tag to purge all added DOM on purgeCore.
-    themeScripts.sun();
-    themeScripts.voronoiBackground();
-    themeScripts.cityScape();
-  }
+      if (theme.hasOwnProperty("script")) { 
+          var themeScripts = require(appPath+"/themes/"+theme["theme-name"]+"/"+theme.script)();
+      }
   
   }
 
