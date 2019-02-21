@@ -1002,6 +1002,12 @@ var coreDefH = 512;
 
 const loadTheme = (theme) => {
   activeTheme = theme;
+
+  if (theme.hasOwnProperty("script")) { 
+    var themeScripts = require(appPath+"/themes/"+theme["theme-name"]+"/"+theme.script)();
+}
+
+setTimeout(()=>{      // Give the process enough time to create the relevant DOM elements
   Array.from(document.getElementsByClassName("themeCustom")).forEach(d=>{
     Object.assign(document.getElementById(d.id).style, theme[d.id]);
   })
@@ -1013,10 +1019,8 @@ const loadTheme = (theme) => {
   coreDefW = theme.coreDefW;
   coreDefH = theme.coreDefH;
   fullscreenable = theme.fullscreenable;
-
-      if (theme.hasOwnProperty("script")) { 
-          var themeScripts = require(appPath+"/themes/"+theme["theme-name"]+"/"+theme.script)();
-      }
+},100);
+      
   
   }
 
