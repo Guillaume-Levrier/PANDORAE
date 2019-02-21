@@ -2,7 +2,6 @@
 *.txt
 img/*
 mp4/*
-themes/*
 node_modules/*
 package-lock.json
 !package.json
