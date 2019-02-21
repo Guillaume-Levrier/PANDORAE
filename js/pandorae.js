@@ -23,6 +23,7 @@ const userDataPath = remote.app.getPath('userData');
 const appPath = remote.app.getAppPath();
 const QRCode = require('qrcode');
 const Dexie = require('dexie');
+const types = require('./js/type/types');
 
 
 // =========== DATABASE ===========
@@ -437,8 +438,11 @@ let argLength = 99;
               toggleMenu();
               document.getElementById("field").style.pointerEvents = "all";
               document.getElementById("field").value = "start chronotype";
+              let datasets={};
+              datasets.bibliography=options[0];
+              datasets.links={};
               document.getElementById("field").addEventListener("click", ()=>{
-                        chronotype(options[0]);
+                  types.typeSwitch("chronotype",datasets);
                   document.getElementById("field").removeEventListener("click", ()=>
                         chronotype(options[0]));
                   document.getElementById("field").style.pointerEvents = "none";
@@ -452,10 +456,13 @@ let argLength = 99;
               toggleMenu();
               document.getElementById("field").style.pointerEvents = "all";
               document.getElementById("field").value = "start anthropotype";
+              let datasets={};
+              datasets.datasetAT=options[0];
               document.getElementById("field").addEventListener("click", ()=>{
-                        anthropotype(options[0]);
+                types.typeSwitch("anthropotype",datasets);
                   document.getElementById("field").removeEventListener("click", ()=>
-                        anthropotype(options[0]));
+                  types.typeSwitch("anthropotype",datasets)
+                  );
                   document.getElementById("field").style.pointerEvents = "none";
 
               }
@@ -467,10 +474,14 @@ let argLength = 99;
               toggleMenu();
               document.getElementById("field").style.pointerEvents = "all";
               document.getElementById("field").value = "start geotype";
+              let datasets={};
+              datasets.locations=options[0];
               document.getElementById("field").addEventListener("click", ()=>{
-                        geotype(options[0]);
+                types.typeSwitch("geotype",datasets);
+                        
                   document.getElementById("field").removeEventListener("click", ()=>
-                        geotype(options[0]));
+                  types.typeSwitch("geotype",datasets)
+                );
                   document.getElementById("field").style.pointerEvents = "none";
 
               }
@@ -482,10 +493,12 @@ let argLength = 99;
               toggleMenu();
               document.getElementById("field").style.pointerEvents = "all";
               document.getElementById("field").value = "start pharmacotype";
+              let datasets={};
+              datasets.trials=options[0];
               document.getElementById("field").addEventListener("click", ()=>{
-                        pharmacotype(options[0]);
+                types.typeSwitch("pharmacotype",datasets);
                   document.getElementById("field").removeEventListener("click", ()=>
-                        pharmacotype(options[0]));
+                  types.typeSwitch("pharmacotype",datasets));
                   document.getElementById("field").style.pointerEvents = "none";
 
               }
@@ -497,10 +510,14 @@ let argLength = 99;
               toggleMenu();
               document.getElementById("field").style.pointerEvents = "all";
               document.getElementById("field").value = "start topotype";
+              let datasets={};
+              datasets.pubdeb=options[0];
+              datasets.matching=options[1];
+              datasets.commun=options[2];
               document.getElementById("field").addEventListener("click", ()=>{
-                        topotype(options[0],options[1],options[2]);
+                types.typeSwitch("topotype",datasets);
                   document.getElementById("field").removeEventListener("click", ()=>
-                        topotype(options[0],options[1],options[2]));
+                  types.typeSwitch("topotype",datasets));
                   document.getElementById("field").style.pointerEvents = "none";
 
               }
@@ -512,11 +529,14 @@ let argLength = 99;
               toggleMenu();
               document.getElementById("field").style.pointerEvents = "all";
               document.getElementById("field").value = "start gazouillotype";
+              let datasets={};
+              datasets.tweets=options[0];
+              datasets.query=options[1];
               document.getElementById("field").addEventListener("click", ()=>{
-                        gazouillotype(options[0],options[1]);
+                types.typeSwitch("gazouillotype",datasets);
                         pulse(1,1,10);
                   document.getElementById("field").removeEventListener("click", ()=>
-                        gazouillotype(options[0],options[1]));
+                    types.typeSwitch("gazouillotype",datasets));
                   document.getElementById("field").style.pointerEvents = "none";
 
               }
