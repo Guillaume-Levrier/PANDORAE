@@ -6,6 +6,61 @@ const userDataPath = app.getPath('userData');
 let mainWindow
 
 const basePath = app.getAppPath();
+
+
+//FileSystem
+var pandoDir = userDataPath;
+
+var dirTree = [
+  "/logs",
+  "/userID",
+  "/themes",
+  "/datasets",
+  "/datasets/buffer",
+  "/datasets/1altmetric",
+  "/datasets/1altmetric/1requests",
+  "/datasets/1altmetric/2results",
+  "/datasets/2anthropotype",
+  "/datasets/2anthropotype/1datasetsAT",
+  "/datasets/3chronotype",
+  "/datasets/3chronotype/1biblio",
+  "/datasets/3chronotype/2links",
+  "/datasets/4geotype",
+  "/datasets/4geotype/1locations",
+  "/datasets/5pharmacotype",
+  "/datasets/5pharmacotype/1trials",
+  "/datasets/6publicdebate",
+  "/datasets/6publicdebate/1capco",
+  "/datasets/6publicdebate/2matching",
+  "/datasets/6publicdebate/3pubdeb",
+  "/datasets/6publicdebate/4links",
+  "/datasets/6publicdebate/5commun",
+  "/datasets/7scopus",
+  "/datasets/7scopus/1csl-json",
+  "/datasets/7scopus/2scopusDatasets",
+  "/datasets/8zotero",
+  "/datasets/8zotero/1csl-json",
+  "/datasets/8zotero/2csl-zoteroCollections",
+  "/datasets/9gazouillotype",
+  "/datasets/9gazouillotype/1datasets",
+  "/datasets/9gazouillotype/2query",
+  "/datasets/10twitter",
+  "/datasets/10twitter/1zotero",
+  "/datasets/10twitter/2gazouilloire",
+  "/datasets/10twitter/3scraping"
+]
+
+const userDataDirTree = (path,dirTree) => {
+    dirTree.forEach(d=>{
+        if (!fs.existsSync(path+d)){
+          fs.mkdirSync(path+d, { recursive: true }, (err) => {
+                if (err) throw err;
+              })
+          }
+    })
+}
+
+userDataDirTree(pandoDir,dirTree);
 // themes
 let activeTheme;
 
@@ -182,59 +237,6 @@ switch (type) {
 
 });
 
-//FileSystem
-var pandoDir = userDataPath;
-
-var dirTree = [
-  "/logs",
-  "/userID",
-  "/themes",
-  "/datasets",
-  "/datasets/buffer",
-  "/datasets/1altmetric",
-  "/datasets/1altmetric/1requests",
-  "/datasets/1altmetric/2results",
-  "/datasets/2anthropotype",
-  "/datasets/2anthropotype/1datasetsAT",
-  "/datasets/3chronotype",
-  "/datasets/3chronotype/1biblio",
-  "/datasets/3chronotype/2links",
-  "/datasets/4geotype",
-  "/datasets/4geotype/1locations",
-  "/datasets/5pharmacotype",
-  "/datasets/5pharmacotype/1trials",
-  "/datasets/6publicdebate",
-  "/datasets/6publicdebate/1capco",
-  "/datasets/6publicdebate/2matching",
-  "/datasets/6publicdebate/3pubdeb",
-  "/datasets/6publicdebate/4links",
-  "/datasets/6publicdebate/5commun",
-  "/datasets/7scopus",
-  "/datasets/7scopus/1csl-json",
-  "/datasets/7scopus/2scopusDatasets",
-  "/datasets/8zotero",
-  "/datasets/8zotero/1csl-json",
-  "/datasets/8zotero/2csl-zoteroCollections",
-  "/datasets/9gazouillotype",
-  "/datasets/9gazouillotype/1datasets",
-  "/datasets/9gazouillotype/2query",
-  "/datasets/10twitter",
-  "/datasets/10twitter/1zotero",
-  "/datasets/10twitter/2gazouilloire",
-  "/datasets/10twitter/3scraping"
-]
-
-const userDataDirTree = (path,dirTree) => {
-    dirTree.forEach(d=>{
-        if (!fs.existsSync(path+d)){
-          fs.mkdirSync(path+d, { recursive: true }, (err) => {
-                if (err) throw err;
-              })
-          }
-    })
-}
-
-userDataDirTree(pandoDir,dirTree);
 
 let userID = {"UserName":"Enter your name","UserMail":"Enter your e-mail (not required)","ZoteroID":"Enter your Zotero ID (required to use Flux features)"};
 
