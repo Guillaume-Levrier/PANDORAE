@@ -71,18 +71,18 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // No
               userDataPath +'/datasets/8zotero/1csl-json/csl-'+dataset,data,'utf8',// Path/name, data, format
                 (err) => {if (err)                                               // On error
                 ipcRenderer.send('chaeros-failure', err);                        // Send error to main process for dispatch
-                ipcRenderer.send('console-logs',JSON.stringify(err));
-                win.close();
+                ipcRenderer.send('console-logs',JSON.stringify(err));            // Keep a log of the error
+                win.close();                                                     // Close the Chaeros window
             })
          }
      })
-     ipcRenderer.send('chaeros-success', 'Success: Scopus dataset converted');   // Else send message to main process
-     ipcRenderer.send('console-logs',"scopusConverter successfully converted " + dataset);
+     ipcRenderer.send('chaeros-success', 'Success: Scopus dataset converted');   // Else send a success message
+     ipcRenderer.send('console-logs',"scopusConverter successfully converted " + dataset); // Log success
 }
 
 //========== scopusGeolocate ==========
 // scopusGeolocate gets cities/countries from a given scopus Dataset and send them to the OSM Geolocate API function.
-
+// To be rewritten soon
 const scopusGeolocate = (dataset,user) => {
 
 ipcRenderer.send('console-logs',"Started scopusGeolocate on " + dataset);
@@ -141,6 +141,7 @@ for (var j=0; j<(article.length-1); j++){                                       
         for (var k=0; k<article[j].affiliation.length; k++){                    // Loop on available item's affiliations
 
           let localKey = article[j].affiliation[k]['affiliation-city'];           // Extract affiliation city
+          let checkState = article[j].affiliation[k]['affiliation-country'];           // Extract affiliation city
 
           if (typeof localKey === "object") {localKey = JSON.stringify(localKey)} // Stringify to allow for comparison
           if (typeof key === "object") {key = JSON.stringify(key)}                // Stringify to allow for comparison
@@ -149,9 +150,14 @@ for (var j=0; j<(article.length-1); j++){                                       
           key = key.replace(/%20/g,"");                                           // Remove URL encoding
 
           if(localKey===key){                                                     // If affiliation city has been resolved
+            //check for country
+
             article[j].affiliation[k].lon = res.results[0].lon;                   // Add longitude
             article[j].affiliation[k].lat = res.results[0].lat;                   // Add latitude
-        }
+        
+        
+        
+          }
     }
   }
 }
@@ -189,7 +195,7 @@ for (var j=0; j<(article.length-1); j++){                                       
 
 const scopusRetriever = (user, query) => {                          // user argument is passed to get keytar pass
 
-ipcRenderer.send('console-logs',"Started scopusRetriever on " + query + " for user "+ user);
+ipcRenderer.send('console-logs',"Started scopusRetriever on " + query + " for user "+ user); // Log the process
 
 let scopusQuery = query;                                            // query argument is the actual query
 
@@ -770,14 +776,14 @@ data.forEach(d=>{                                                       // For e
 var communitySet = communitySet.top(50);                                // Limit community MultiSet to the top 50 terms
 
     var dataToWrite = JSON.stringify(data);
-console.log(data)
+
         fs.writeFile(
           userDataPath+'/datasets/6publicdebate/3pubdeb/lexi-'+dataset+".json",
           dataToWrite,
           'utf8',
           (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
         });
-console.log(communitySet)
+
         communitySet = JSON.stringify(communitySet);
 
           fs.writeFile(
@@ -793,9 +799,7 @@ ipcRenderer.send('console-logs',"Starting lexical analysis...");
 lexicAnalysis(data,dataFile.substring(0,dataFile.length-4));
 
 ipcRenderer.send('console-logs',"Lexical analysis on " + dataFile + "complete. Writing files ...");
-//}
-//finally{
-console.log(links)
+
         let datalink = JSON.stringify(links);
           fs.writeFile(
             userDataPath +'/datasets/6publicdebate/4links/'+dataMatch.substring(0,dataMatch.length-4)+'.json',datalink,'utf8',
@@ -803,8 +807,8 @@ console.log(links)
           });
     ipcRenderer.send('console-logs',"CapCo " + dataFile + " links has been successfully written.");
           ipcRenderer.send('chaeros-success', 'Success: dataset rebuilt');
-        //  win.close();
-        //}
+         win.close();
+
   });
 }
 
