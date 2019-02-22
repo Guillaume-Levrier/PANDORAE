@@ -14,15 +14,17 @@ const THREE = require('three');
 const userDataPath = remote.app.getPath('userData');
 const Dexie = require('dexie');
 
-// =========== SHARED WORKER ===========
-// Some datasets can be very large, and the data rekindling necessary before display that 
-// couldn't be done in Chaeros can be long. In order not to freeze the user's mainWindow,
-// most of the math to be done is sent to a Shared Worker which loads the data and sends
-// back to Types only what it needs to know.
-if (!!window.SharedWorker) {
-var multiThreader = new SharedWorker("js/type/mul[type]threader.js");
-    multiThreader.onerror = () => {console.log("Worker error")};
+// =========== LOADTYPE ===========
+
+const loadType = () => {
+  xtypeDisplay();
+  purgeCore();
+  xtypeExists = true;
+  coreExists = false;
+  document.getElementById("field").value = "";
+  while(options.length > 0) {options.pop();}
 }
+
 
 // =========== LINKS ===========
 const links = {};
@@ -805,7 +807,7 @@ const chronotype = (bibliography,links) => {                          // When ca
   }
   
   //========= LINKS BUILDER ===========
-  const linksBuilder = () => {                                                      // links are generated directly in JS
+  /* const linksBuilder = () => {                                                      // links are generated directly in JS
   
   var dataLink = [];                                                                // Storage variable
   
@@ -842,8 +844,9 @@ const chronotype = (bibliography,links) => {                          // When ca
   
   // linksBuilder is triggered everytime the chronotype is drawn. Links purging and storing functions are needed.
   linksBuilder();
-  
-  var link = view.selectAll("link")                                                 // Create links
+   */
+
+   var link = view.selectAll("link")                                                 // Create links
         .data(links)                                                                // With data created above
         .enter().append("line")                                                     // Links are SVG lines
           .attr("stroke-width", 0.15)                                               // Links stroke width

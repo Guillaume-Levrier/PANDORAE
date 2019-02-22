@@ -6,12 +6,17 @@
 //      /_/    ∖___|           PANDORÆ
 //
 //   LICENSE : MIT
+// pandorae.js is the main JS file managing what happens in the mainWindow. It communicates with the Main process
+// and with other windows through the Main process (by ipc channels). Visualisations are loaded in the Main window
+// through the "type" module, itself computing complex operations in a dedicated SharedWorker. 
 
 // ============ VERSION ===========
 const msg = '      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ\n\n';
 const version ='ALPHA/DEV-V0.0.90';
+console.log(msg+version);
 
 // =========== NODE - NPM ===========
+// Loading all relevant modules
 const {remote, ipcRenderer, shell} = require('electron');
 const Request = require('request');
 const rpn = require('request-promise-native');
@@ -27,13 +32,13 @@ const types = require('./js/type/types');
 
 
 // =========== DATABASE ===========
-    Dexie.debug = true;
- 
-    let pandodb = new Dexie("PandoraeDatabase");
+Dexie.debug = true;
 
-    let structureV1 = "datasetKind,datasetName,uploadDate";
+let pandodb = new Dexie("PandoraeDatabase");
 
-    pandodb.version(1).stores({
+let structureV1 = "datasetKind,datasetName,uploadDate";
+
+pandodb.version(1).stores({
       altmetric: structureV1,
       scopus: structureV1,
       zotero: structureV1,
@@ -45,17 +50,23 @@ const types = require('./js/type/types');
       publicdebate: structureV1,
       gazouillotype: structureV1
   });
-  
-  console.log(pandodb)
-    
+      
 // =========== SHARED WORKER ===========
+// Some datasets can be very large, and the data rekindling necessary before display that 
+// couldn't be done in Chaeros can be long. In order not to freeze the user's mainWindow,
+// most of the math to be done is sent to a Shared Worker which loads the data and sends
+// back to Types only what it needs to know.
 if (!!window.SharedWorker) {
-var multiThreader = new SharedWorker("js/type/mul[type]threader.js");
-    multiThreader.onerror = () => {console.log("Worker error")};
-}
+    var multiThreader = new SharedWorker("js/type/mul[type]threader.js");
+    ipcRenderer.send('console-logs',"Multithreading enabled.");
+        multiThreader.onerror = () => {
+                console.log("Worker error");
+                ipcRenderer.send('console-logs',"Worker failed to start.");
+              };
+};
 
-// =========== MAIN DISPLAY ===========
-console.log(msg+version);
+// =========== MAIN LOGO ===========
+// Main logo is a text that can be changed through the nameDisplay function
 let coreLogoArchive = "";
 
 document.getElementById("version").innerHTML = version;
@@ -82,11 +93,12 @@ coreLogoArchive = name;
 
 nameDisplay(coreLogo);
 
+// clicking the pandorae menu logo reloads the mainWindow. So does typing "reload" in the main field.
 aelogo.addEventListener('dblclick', ()=>{location.reload()});
 
 // =========== Global Variables ===========
 var pandoratio = 0;                         // Used in three.js transitions (from one shape to another)
-var chronoLinksKeywords = [];               // Create an array of keywords to be looked for (converted back to Regexp)
+
 
 // =========== XTYPE ===========
 const xtype = document.getElementById("xtype");             // xtype is a div containing each (-type) visualisation
@@ -252,98 +264,6 @@ const removeTooltip = () => {
   document.getElementById("xtype").removeChild(tooltip);
 }
 
-// =========== LINKS ===========
-var links = {};
-var linkedByIndex = {};
-const isConnected = (a, b) => linkedByIndex[a.index + "," + b.index] || linkedByIndex[b.index + "," + a.index] || a.index == b.index;
-
-// =========== DRAG =========
-function dragged(d) {
-  d3.select(this)
-      .attr("cx", d.zone = d3.event.x)
-      .attr("x", d.zone = d3.event.x);
-    }
-
-// ========== TIME ===========
-const currentTime = new Date();                           // Precise time when the page has loaded
-const Past = d3.timeYear.offset(currentTime,-1);          // Precise time minus one year
-const Future = d3.timeYear.offset(currentTime,1);         // Precise time plus one year
-
-// =========== TIME MANAGEMENT ===========
-//Parsing and formatting dates
-const parseTime = d3.timeParse("%Y-%m-%d");
-const formatTime = d3.timeFormat("%d/%m/%Y");
-
-//locales
-const locale = d3.timeFormatLocale({
-"dateTime": "%A, le %e %B %Y, %X",
- "date": "%d/%m/%Y",
- "time": "%H:%M:%S",
- "periods": ["AM", "PM"],
- "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
- "Saturday"],
- "shortDays": ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."],
- "months": ["January", "February", "March", "April", "May", "June", "July","August", "September", "October", "November", "December"],
- "shortMonths": ["Jan.", "Feb.", "Mar", "Avr.", "May", "June", "Jul.","Aug.", "Sept.", "Oct.", "Nov.", "Dec."]
-});
-
-const localeFR = d3.timeFormatLocale({
-  "dateTime": "%A, le %e %B %Y, %X",
-   "date": "%d/%m/%Y",
-   "time": "%H:%M:%S",
-   "periods": ["AM", "PM"],
-   "days": ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi","samedi"],
-   "shortDays": ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."],
-   "months": ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet","Août", "Septembre", "Octobre", "Novembre", "Décembre"],
-   "shortMonths": ["Janv.", "Févr.", "Mars", "Avr.", "Mai", "Juin", "Juil.","Août", "Sept.", "Oct.", "Nov.", "Déc."]
-  });
-
-const localeEN = d3.timeFormatLocale({
-"dateTime": "%A, le %e %B %Y, %X",
- "date": "%d/%m/%Y",
- "time": "%H:%M:%S",
- "periods": ["AM", "PM"],
- "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
- "Saturday"],
- "shortDays": ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."],
- "months": ["January", "February", "March", "April", "May", "June", "July","August", "September", "October", "November", "December"],
- "shortMonths": ["Jan.", "Feb.", "Mar", "Avr.", "May", "June", "Jul.","Aug.", "Sept.", "Oct.", "Nov.", "Dec."]
-});
-
-const localeZH = d3.timeFormatLocale({
-  "dateTime": "%A, le %e %B %Y, %X",
-   "date": "%d/%m/%Y",
-   "time": "%H:%M:%S",
-   "periods": ["AM", "PM"],
-   "days": ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五","星期六"],
-   "shortDays": ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
-   "months": ["一月", "二月", "三月", "四月", "五月", "六月", "七月","八月", "九月", "十月", "十一月", "十二月"],
-   "shortMonths": ["一月", "二月", "三月", "四月", "五月", "六月", "七月","八月", "九月", "十月", "十一月", "十二月"]
-  });
-
-const formatMillisecond = locale.format(".%L"),
-    formatSecond = locale.format(":%S"),
-    formatMinute = locale.format("%I:%M"),
-    formatHour = locale.format("%H"),
-    formatDay = locale.format("%d %B %Y"),
-    formatWeek = locale.format("%d %b %Y"),
-    formatMonth = locale.format("%B %Y"),
-    formatYear = locale.format("%Y");
-
-const multiFormat = (date) =>
-      (d3.timeSecond(date) < date ? formatMillisecond
-      : d3.timeMinute(date) < date ? formatSecond
-      : d3.timeHour(date) < date ? formatMinute
-      : d3.timeDay(date) < date ? formatHour
-      : d3.timeMonth(date) < date ? (d3.timeWeek(date) < date ? formatDay : formatWeek)
-      : d3.timeYear(date) < date ? formatMonth
-      : formatYear)(date);
-
-// ========== LEGEND ===========
-const legend = [{"legendtitle":"PANDORÆ","legendtitleEN":"PANDORÆ","legendtitleFR":"PANDORÆ","legendtitleZH":"PANDORÆ","Chinaname":"China","USname":"US","Francename":"France","UKname":"UK","Globalname":"Global","Europename":"Europe","ChinanameEN":"China","USnameCM":"US","FrancenameCM":"France","UKnameCM":"UK","GlobalnameCM":"Global","EuropenameCM":"Europe","ChinanameFR":"Chine","USnameZH":"美国","FrancenameZH":"法国","ChinanameZH":"中国","UKnameZH":"英国","GlobalnameZH":"全球","EuropenameZH":"欧洲"}];
-
-d3.select("xtype").append("text").data(legend).attr("class","legende").attr("x", 65).attr("y", 35).attr("style", "font-size: 0.9em;").text("legendtitle");
-
 // ========== CORE SIGNALS ===========
 
 ipcRenderer.on('coreSignal', (event,fluxAction,fluxArgs, message) => {
@@ -422,7 +342,7 @@ const purgeCore = () => {
     });
     ipcRenderer.send('console-logs',"Purging core");
   }
-//Object.assign(document.getElementById(d.id).style.display, "none");
+
 };
 
 var options = [];
@@ -544,8 +464,6 @@ let argLength = 99;
           }
              break;
           }
-
-
 
 };
 
@@ -678,14 +596,7 @@ ipcRenderer.send('datalist',{"type":type,"kind":newKind});
 
 }
 
-const loadType = () => {
-  xtypeDisplay();
-  purgeCore();
-  xtypeExists = true;
-  coreExists = false;
-  document.getElementById("field").value = "";
-  while(options.length > 0) {options.pop();}
-}
+// ========== main menu options ========
 
 const mainDisplay = (type,options) =>{
 
@@ -765,6 +676,11 @@ switch (input) {
 
     case 'toggle console':
             toggleConsole();
+            break;
+
+    case 'hypercore':
+            nameDisplay("PANDORÆ - HYPERCORE");
+            commandReturn = "unlocked error bypass";
             break;
 
     case 'toggle menu':
