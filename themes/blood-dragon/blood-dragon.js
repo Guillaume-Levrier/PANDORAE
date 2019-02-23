@@ -512,6 +512,7 @@ const cityScape = () =>
         baseImg.attr("id","heightmap");
         document.getElementById('heightmap').className +="purgeable";
         baseImg.attr("src",imageURI);
+        baseImg.style("display","none");
 
         let canvas = document.createElement("CANVAS");
         canvas.id ="allgone-noescape3";
