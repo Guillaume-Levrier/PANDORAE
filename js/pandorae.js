@@ -947,7 +947,10 @@ setTimeout(()=>{      // Give the process enough time to create the relevant DOM
   Array.from(document.getElementsByClassName("themeCustom")).forEach(d=>{
     Object.assign(document.getElementById(d.id).style, theme[d.id]);
   })
+
+  if (document.getElementById("coreCanvas")!=null) {
   Object.assign(document.getElementById("coreCanvas").style, theme.coreCanvas);
+}
 
   document.getElementById("screenMachine").src = theme["theme-background"];
   document.getElementById("mask").src = theme["theme-mask"];

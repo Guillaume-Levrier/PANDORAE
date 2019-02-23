@@ -68,6 +68,8 @@ fs.copyFileSync(basePath+"/json/themes.json", userDataPath +"/themes/themes.json
 
 const changeTheme = () => {
 
+console.log(basePath+"/json/themes.json")
+
 fs.readFile(basePath+"/json/themes.json", // Read the designated datafile
                                 'utf8', (err, theme) => {             // utf8 ecoding - start function
   
