@@ -2093,7 +2093,8 @@ const topotype = (pubdeb,matching,commun) => {                               // 
 
 const typeSwitch = (type,datasets) => {
 
-ipcRenderer.send('console-logs',"typesSwitch started a "+ type +" process using the following dataset(s) : " + JSON.stringify(datasets));
+
+  document.getElementById("field").value = "loading " + type;
 
 
       switch (type) {
@@ -2123,6 +2124,8 @@ ipcRenderer.send('console-logs',"typesSwitch started a "+ type +" process using 
             topotype(datasets.pubdeb,datasets.matching,datasets.commun);
           break;
       }
+
+      ipcRenderer.send('console-logs',"typesSwitch started a "+ type +" process using the following dataset(s) : " + JSON.stringify(datasets));
 
 }
 
