@@ -9,6 +9,7 @@
 
 const {remote, ipcRenderer} = require('electron');                    // Load ipc to communicate with main process
 const userDataPath = remote.app.getPath('userData');                  // Find userData folder Path
+const appPath = remote.app.getAppPath();
 const keytar = require('keytar');                                     // Load keytar to manage user API keys
 const rpn = require('request-promise-native');                        // Load RPN to manage promises
 const bottleneck = require('bottleneck');                             // Load bottleneck to manage API request limits
@@ -91,7 +92,103 @@ fs.readFile(userDataPath +'/datasets/7scopus/2scopusDatasets/' + dataset,    // 
                               'utf8', (err, data) => {                       // It should be encoded as UTF-8
   if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
 
+  var doc = JSON.parse(data);                                       // Parse the file as a JSON object
 
+
+  fs.readFile(appPath +'/json/cities.json',    // Read the dataset passed as option
+                              'utf8', (err, locatedCities) => {                       // It should be encoded as UTF-8
+
+  var coordinates = JSON.parse(locatedCities);
+
+  let article = doc[Object.keys(doc)[0]][3].entries;                // Find relevant objects in the parsed dataset
+  var datasetDetail = {};                                           // Prepare an empty object
+  let totalCityArray = [];                                          // Prepare an empty array
+   
+
+for (var i=0; i<(article.length-1); i++){                           // For loop to generate list of cities to be requested
+  if (article[i].hasOwnProperty('affiliation') && article[i].affiliation.length>0){ // If item has at least an affiliation
+      for (let j=0; j<article[i].affiliation.length; j++){        // Iterate on item's available affiliation
+          if (article[i].affiliation[j].hasOwnProperty('affiliation-country')) {       // If affiliation has a city
+            let location = {};
+            location.country = article[i].affiliation[j]['affiliation-country'];
+            location.city = article[i].affiliation[j]['affiliation-city'];               // Extract city name
+            totalCityArray.push(JSON.stringify(location));         
+          }
+   }
+ }
+}
+let cityRequests = MultiSet.from(totalCityArray);      // Create a multiset from city Array to prevent duplicate requests
+                  
+let cityIndex = [];
+
+cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key));});
+
+  cityIndex.forEach(d=>{
+    for (let l = 0; l < coordinates.length; l++) {
+          if (d.country === coordinates[l].country){
+            if(d.city === coordinates[l].name){
+              d.lon = coordinates[l].lon;
+              d.lat = coordinates[l].lat;
+            }
+          }
+        }
+    })
+    article.forEach(d=>{
+      for (let l = 0; l < cityIndex.length; l++) {
+        if (d.hasOwnProperty('affiliation')){ 
+        for (var k=0; k<d.affiliation.length; k++){                    // Loop on available item's affiliations
+
+        let city = d.affiliation[k]['affiliation-city'];           // Extract affiliation city
+        let country = d.affiliation[k]['affiliation-country'];           // Extract affiliation city
+
+        if (typeof city === "object") {city = JSON.stringify(city)} // Stringify to allow for comparison
+        if (typeof country === "object") {country = JSON.stringify(country)}                // Stringify to allow for comparison
+        
+        if (country === cityIndex[l].country){
+                  if(city === cityIndex[l].city){
+                   
+                        d.affiliation[k].lon = cityIndex[l].lon;
+                        d.affiliation[k].lat = cityIndex[l].lat;
+                  }
+                }
+             }
+           }
+        }
+     });
+
+     doc[Object.keys(doc)[0]][1].articleGeoloc = true;                           // Mark file as geolocated
+
+      let docstring=JSON.stringify(doc);                                          // Stringify to write
+          fs.writeFile(                                                                  // Write data
+            userDataPath +'/datasets/7scopus/2scopusDatasets/geoloc-'+dataset,docstring,'utf8',
+              (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
+
+    ipcRenderer.send('chaeros-success', 'Success: Geolocation added');              //Send success message to main process
+    ipcRenderer.send('console-logs',"scopusGeolocate successfully added geolocations on " + dataset);
+    win.close();
+              
+  })
+  /*
+for (var j=0; j<(article.length-1); j++){                                       // For each article (last is a stop signal)
+  if (article[j].hasOwnProperty('affiliation')){                                // If it has affiliations
+
+        for (var k=0; k<article[j].affiliation.length; k++){                    // Loop on available item's affiliations
+
+          let city = article[j].affiliation[k]['affiliation-city'];           // Extract affiliation city
+          let country = article[j].affiliation[k]['affiliation-country'];           // Extract affiliation city
+
+          if (typeof city === "object") {localKey = JSON.stringify(city)} // Stringify to allow for comparison
+          if (typeof country === "object") {key = JSON.stringify(country)}                // Stringify to allow for comparison
+
+
+       
+    }
+  }
+}
+  */
+
+
+/*
   const limiter = new bottleneck({                                  // Create a bottleneck
     maxConcurrent: 1,                                               // Send one request at a time
     minTime: 200                                                    // Every 200 milliseconds
@@ -183,7 +280,10 @@ for (var j=0; j<(article.length-1); j++){                                       
       finally{
 
       }
+        */
+      })
   })
+
 }
 
 

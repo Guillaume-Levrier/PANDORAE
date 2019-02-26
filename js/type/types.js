@@ -1133,6 +1133,7 @@ const geotype = (locations) => {
           }
         }
       }
+      
   })
   
   for (var i = 0; i < cities.length; i++) { cities[i].id = i;};  // id = item index
@@ -1188,8 +1189,10 @@ const geotype = (locations) => {
       .attr("class", "arc")
       .attr("d", path);
   
+console.log(cities);
+
   var locations = view.selectAll("locations")
-                  .data(cities.filter(d=>{return d.lon != undefined})) // filtering out null island
+                  .data(cities)
                   .enter().append("path")
                   .attr("id", d => d.id)
                   .attr("class", "locations");
@@ -1212,7 +1215,7 @@ const geotype = (locations) => {
                                         }
                                       });
   
-  
+  console.log(locations);
   /*
     //============ NARRATIVE ============
     function narrative(focused) {
