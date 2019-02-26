@@ -6,9 +6,6 @@ To test the dev branch, clone the repo, cd into it, and use 'npm i', './node_mod
 
 ### TODO FOR BETA RELEASE
 - create an interactive tutorial (under way)
-- solve errors in affiliation coordinates (check city then country before choosing, instead of taking the first guess)
-- or even better, switch altogether to a custom local OSMNames file
-- put a better (more precise) world-json file
 - implement FETCH altmetric requests
 - switch from flatfile to indexedDB through Dexie
 

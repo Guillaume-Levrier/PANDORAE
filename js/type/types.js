@@ -1217,7 +1217,7 @@ console.log(cities);
                                         }
                                       });
   
-  console.log(locations);
+
   /*
     //============ NARRATIVE ============
     function narrative(focused) {
