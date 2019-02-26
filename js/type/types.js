@@ -1074,12 +1074,14 @@ const geotype = (locations) => {
       let link = {"DOI":"","points":[]}
       link.DOI = d.DOI;
       for (var k = 0; k < d.affiliation.length; k++) {
-        dataArray.push(d.affiliation[k]);
-        let thisCity = {"cityname":"","lon":"","lat":""}
-        thisCity.cityname = d.affiliation[k]['affiliation-city'];
-        thisCity.lon = d.affiliation[k].lon;
-        thisCity.lat = d.affiliation[k].lat;
-        link.points.push(thisCity);
+      if(d.affiliation[k].lon!=undefined){
+              dataArray.push(d.affiliation[k]);
+              let thisCity = {"cityname":"","lon":"","lat":""}
+              thisCity.cityname = d.affiliation[k]['affiliation-city'];
+              thisCity.lon = d.affiliation[k].lon;
+              thisCity.lat = d.affiliation[k].lat;
+              link.points.push(thisCity);
+        }
       }
       linksBuffer.push(link);
     }
