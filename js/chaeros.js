@@ -146,7 +146,6 @@ cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key))
         
         if (country === cityIndex[l].country){
                   if(city === cityIndex[l].city){
-                   
                         d.affiliation[k].lon = cityIndex[l].lon;
                         d.affiliation[k].lat = cityIndex[l].lat;
                   }
@@ -155,6 +154,18 @@ cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key))
            }
         }
      });
+
+     let unlocatedCities = [];
+  
+     article.forEach(d=>{
+       d.affiliation.forEach(e=>{
+        if (typeof country != "string"){
+          unlocatedCities.push(e);
+          }
+       })
+     })
+
+     ipcRenderer.send('console-logs',"Unable to locale the following cities " + JSON.stringify(unlocatedCities));
 
      doc[Object.keys(doc)[0]][1].articleGeoloc = true;                           // Mark file as geolocated
 
@@ -165,122 +176,8 @@ cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key))
 
     ipcRenderer.send('chaeros-success', 'Success: Geolocation added');              //Send success message to main process
     ipcRenderer.send('console-logs',"scopusGeolocate successfully added geolocations on " + dataset);
-    win.close();
-              
-  })
-  /*
-for (var j=0; j<(article.length-1); j++){                                       // For each article (last is a stop signal)
-  if (article[j].hasOwnProperty('affiliation')){                                // If it has affiliations
-
-        for (var k=0; k<article[j].affiliation.length; k++){                    // Loop on available item's affiliations
-
-          let city = article[j].affiliation[k]['affiliation-city'];           // Extract affiliation city
-          let country = article[j].affiliation[k]['affiliation-country'];           // Extract affiliation city
-
-          if (typeof city === "object") {localKey = JSON.stringify(city)} // Stringify to allow for comparison
-          if (typeof country === "object") {key = JSON.stringify(country)}                // Stringify to allow for comparison
-
-
-       
-    }
-  }
-}
-  */
-
-
-/*
-  const limiter = new bottleneck({                                  // Create a bottleneck
-    maxConcurrent: 1,                                               // Send one request at a time
-    minTime: 200                                                    // Every 200 milliseconds
-  });
-
-  var doc = JSON.parse(data);                                       // Parse the file as a JSON object
-  let article = doc[Object.keys(doc)[0]][3].entries;                // Find relevant objects in the parsed dataset
-  var datasetDetail = {};                                           // Prepare an empty object
-  let totalCityArray = [];                                          // Prepare an empty array
-
-try{                                                                // Try requesting the locations
-
-keytar.getPassword("Geocoding",user).then((geocodingApiKey) => {    // Retrieve the stored geocoding API key
-
-    let dataPromises = [];                                          // Prepare empty array to store promises to be sent
-
-for (var i=0; i<(article.length-1); i++){                           // For loop to generate list of cities to be requested
-    if (article[i].hasOwnProperty('affiliation') && article[i].affiliation.length>0){ // If item has at least an affiliation
-        for (let j=0; j<article[i].affiliation.length; j++){        // Iterate on item's available affiliation
-            if (article[i].affiliation[j].hasOwnProperty('affiliation-city')) {       // If affiliation has a city
-              let city = article[i].affiliation[j]['affiliation-city'];               // Extract city name
-              if (typeof city === "string"){                                          // Making sure it isn't null or undef
-              totalCityArray.push(city.replace(/\s/g,"%20"))                          // URL encode and push
-              }
-            }
-     }
-   }
- }
-
-let cityRequests = MultiSet.from(totalCityArray);      // Create a multiset from city Array to prevent duplicate requests
-let cities = [];
-
-Promise.all(cityRequests.forEachMultiplicity((count, key) => {                  // Generate requests per city (=> key)
-
-    let options = {
-        uri: "https://geocoder.tilehosting.com/q/"+key+".js?key="+geocodingApiKey,
-        headers: {'User-Agent': 'Request-Promise'},
-        json: true
-    };
-    return limiter.schedule(rpn,options).then((res) => {                        // Enforce bottleneck through limiter
-            if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
-
-
-for (var j=0; j<(article.length-1); j++){                                       // For each article (last is a stop signal)
-  if (article[j].hasOwnProperty('affiliation')){                                // If it has affiliations
-
-        for (var k=0; k<article[j].affiliation.length; k++){                    // Loop on available item's affiliations
-
-          let localKey = article[j].affiliation[k]['affiliation-city'];           // Extract affiliation city
-          let checkState = article[j].affiliation[k]['affiliation-country'];           // Extract affiliation city
-
-          if (typeof localKey === "object") {localKey = JSON.stringify(localKey)} // Stringify to allow for comparison
-          if (typeof key === "object") {key = JSON.stringify(key)}                // Stringify to allow for comparison
-
-          localKey = localKey.replace(/\s/g,"");                                  // Remove space
-          key = key.replace(/%20/g,"");                                           // Remove URL encoding
-
-          if(localKey===key){                                                     // If affiliation city has been resolved
-            //check for country
-
-            article[j].affiliation[k].lon = res.results[0].lon;                   // Add longitude
-            article[j].affiliation[k].lat = res.results[0].lat;                   // Add latitude
-        
-        
-        
-          }
-    }
-  }
-}
-
-      doc[Object.keys(doc)[0]][1].articleGeoloc = true;                           // Mark file as geolocated
-
-      let docstring=JSON.stringify(doc);                                          // Stringify to write
-          fs.writeFile(                                                                  // Write data
-            userDataPath +'/datasets/7scopus/2scopusDatasets/geoloc-'+dataset,docstring,'utf8',
-              (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
-
-    ipcRenderer.send('chaeros-success', 'Success: Geolocation added');              //Send success message to main process
-    ipcRenderer.send('console-logs',"scopusGeolocate successfully added geolocations on " + dataset);
-    //win.close();
-        }  )
-      })
-  }))
-})
-      } catch(e) {
-        ipcRenderer.send('chaeros-failure', e);
-        ipcRenderer.send('console-logs', e);
-      }
-      finally{
-
-      }
-        */
+    //win.close();            
+          })
       })
   })
 
