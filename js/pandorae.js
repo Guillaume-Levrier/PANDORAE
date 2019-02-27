@@ -349,51 +349,33 @@ var options = [];
 
 const start = (type,options) => {
 
-
+  toggleMenu();
+  let datasets={};
 let argLength = 99;
 
   switch (type) {
-            case 'chronotype':argLength = 1;
-            if (options.length === argLength) {
-              toggleMenu();
-              document.getElementById("field").style.pointerEvents = "all";
-              document.getElementById("field").value = "start chronotype";
-              let datasets={};
+            case 'chronotype':
               datasets.bibliography=options[0];
               document.getElementById("field").addEventListener("click", ()=>{
                   types.typeSwitch("chronotype",datasets);
                   document.getElementById("field").removeEventListener("click", ()=>
                   types.typeSwitch("chronotype",datasets));
-                  document.getElementById("field").style.pointerEvents = "none";
-
               }
             );
-          }
+          
           break;
-            case 'anthropotype': argLength = 1;
-            if (options.length === argLength) {
-              toggleMenu();
-              document.getElementById("field").style.pointerEvents = "all";
-              document.getElementById("field").value = "start anthropotype";
-              let datasets={};
+            case 'anthropotype': 
               datasets.datasetAT=options[0];
               document.getElementById("field").addEventListener("click", ()=>{
                 types.typeSwitch("anthropotype",datasets);
                   document.getElementById("field").removeEventListener("click", ()=>
                   types.typeSwitch("anthropotype",datasets)
                   );
-                  document.getElementById("field").style.pointerEvents = "none";
 
               }
             );
-          }
             break;
-            case 'geotype': argLength = 1;
-            if (options.length === argLength) {
-              toggleMenu();
-              document.getElementById("field").style.pointerEvents = "all";
-              document.getElementById("field").value = "start geotype";
-              let datasets={};
+            case 'geotype': 
               datasets.locations=options[0];
               document.getElementById("field").addEventListener("click", ()=>{
                 types.typeSwitch("geotype",datasets);
@@ -401,13 +383,11 @@ let argLength = 99;
                   document.getElementById("field").removeEventListener("click", ()=>
                   types.typeSwitch("geotype",datasets)
                 );
-                  document.getElementById("field").style.pointerEvents = "none";
 
               }
             );
-          }
-          break;
-            case '5pharmacotype': argLength = 1;
+            break;
+            case 'pharmacotype': argLength = 1;
             if (options.length === argLength) {
               toggleMenu();
               document.getElementById("field").style.pointerEvents = "all";
@@ -463,7 +443,9 @@ let argLength = 99;
           }
              break;
           }
-
+          document.getElementById("field").style.pointerEvents = "all";
+          document.getElementById("field").style.cursor = "pointer";
+          document.getElementById("field").value = "start "+type;
 };
 
 const selectOption = (type,id) => {

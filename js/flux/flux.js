@@ -259,12 +259,12 @@ switch (fluxAction) {                                                      // Ac
 
   case 'lexicAnalysis' : fluxArgs.lexicAnalysis = {"dataset":""};
                            fluxArgs.lexicAnalysis.dataset = item;
-                           message = "lexicAnalysis" ;
+                           message = "Starting lexical analysis" ;
                            break;
 
   case 'scopusConverter' : fluxArgs.scopusConverter = {"dataset":""};
                            fluxArgs.scopusConverter.dataset = itemname;
-                           message = "Converting Scopus Dataset to CSL-JSON" ;
+                           message = "Converting to CSL-JSON" ;
                            break;
 
   case 'scopusGeolocate' : fluxArgs.scopusGeolocate = {"dataset":""};
@@ -276,7 +276,7 @@ switch (fluxAction) {                                                      // Ac
   case 'scopusRetriever' : fluxArgs.scopusRetriever = {"user":"","query":""};
                            fluxArgs.scopusRetriever.user = document.getElementById("userNameInput").value;
                            fluxArgs.scopusRetriever.query = document.getElementById("scopuslocalqueryinput").value;
-                           message = "Retrieving data from Scopus API" ;
+                           message = "Retrieving data from Scopus" ;
                            break;
 
   case 'capcoRebuilder' : fluxArgs.capcoRebuilder = {"dataFile":"","dataMatch":""};
@@ -313,7 +313,7 @@ case 'zoteroItemsRetriever' :  if (document.getElementById("zotitret").name ==="
                           fluxArgs.zoteroItemsRetriever.zoteroUser = document.getElementById("zoterouserinput").value;
                           fluxArgs.zoteroItemsRetriever.importName = document.getElementById("zoteroImportName").value.replace(/\s/g,"");
                          // fluxArgs.zoteroItemsRetriever.path = "/datasets/"+document.getElementById("zotitret").name+"/";
-                          message = "Retrieve user collections from Zotero database" ;
+                          message = "Retrieving user collections" ;
                           }                        
                           break;
 
