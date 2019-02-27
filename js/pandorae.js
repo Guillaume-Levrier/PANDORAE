@@ -36,7 +36,7 @@ Dexie.debug = true;
 
 let pandodb = new Dexie("PandoraeDatabase");
 
-let structureV1 = "kind,name,uploadDate";
+let structureV1 = "date,name";
 
 pandodb.version(1).stores({
       altmetric: structureV1,

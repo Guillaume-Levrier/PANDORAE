@@ -26,7 +26,7 @@ Dexie.debug = true;
 
 let pandodb = new Dexie("PandoraeDatabase");
 
-let structureV1 = "kind,name,uploadDate";
+let structureV1 = "date,name";
 
 pandodb.version(1).stores({
       altmetric: structureV1,
@@ -842,12 +842,13 @@ ipcRenderer.send('console-logs',"Lexical analysis on " + dataFile + "complete. W
 // zoteroItemsRetriever retrieves all the documents from one or more zotero collections. A zotero API request can only
 // retrieve 100 items, which can easily trigger the rate limiting.
 
-const zoteroItemsRetriever = (collections,zoteroUser,importName,kind) => {
+const zoteroItemsRetriever = (collections,zoteroUser,importName,destination) => {
 
-  ipcRenderer.send('console-logs',"Started retrieving collections " + collections + "for user "+zoteroUser+" under the import name "+ importName + " and under the path "+path);
+  ipcRenderer.send('console-logs',"Started retrieving collections " + collections + "for user "+zoteroUser+" under the import name "+ importName + " towards: " +JSON.stringify(destination));
 
 let zoteroPromises = [];
 
+let zoteroItemsResponse;
 
 keytar.getPassword("Zotero", zoteroUser).then((zoteroApiKey) => {                 // Open keytar
 
@@ -869,7 +870,8 @@ for (let j = 0; j < collections.length; j++) {                                  
   }
 
   Promise.all(zoteroPromises)
-      .then((zoteroItemsResponse)=>{
+      .then((res)=>{
+        zoteroItemsResponse = res;
 
         zoteroItemsResponse.forEach(f=>{
 
@@ -896,22 +898,17 @@ for (let j = 0; j < collections.length; j++) {                                  
        Promise.all(itemRequests).then((response)=> {
          for (var i = 0; i < response.length; i++) {
            response[i].items.forEach(d=>f.items.push(d))
-           /* fs.writeFile(                                                 // Write data
-             userDataPath+path+importName+'-'+stamp+'.json',JSON.stringify(zoteroItemsResponse),'utf8',         // Options
-               (err) => {if (err) {
-               ipcRenderer.send('chaeros-failure', err);                 // On failure, send error to main process
-             } */
-          
-          // })
+                pandodb.open();
+                destination.forEach(d=>{
+                  let table = pandodb[d];
+                    table.add({"date":date,"name":importName,"content":zoteroItemsResponse});
+                    ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " zotero dataset imported in "+d);
+                })
+                ipcRenderer.send('chaeros-success', 'Zotero dataset imported');
+                win.hide();
          }
       })
   })
-
-  pandodb.open();
-  pandodb.zotero.add({"name":importName,"kind":kind,"date":date,"content":zoteroItemsResponse});
-  ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " zotero dataset imported in "+path);
-  ipcRenderer.send('chaeros-success', 'Zotero dataset imported');
-  win.hide();
   })
 }) // closing Keytar
 }
@@ -1009,7 +1006,7 @@ ipcRenderer.send('console-logs',"Collection "+JSON.stringify(collectionName)+" b
 
 const chaerosSwitch = (fluxAction,fluxArgs) => {
 
-ipcRenderer.send('console-logs',"CHÆROS started a "+ fluxAction +" process with the following arguments : " + JSON.stringify(fluxArgs));
+  ipcRenderer.send('console-logs',"CHÆROS started a "+ fluxAction +" process with the following arguments : " + JSON.stringify(fluxArgs));
 
       switch (fluxAction) {
 
@@ -1028,7 +1025,8 @@ ipcRenderer.send('console-logs',"CHÆROS started a "+ fluxAction +" process with
           case 'capcoRebuilder' : capcoRebuilder(fluxArgs.capcoRebuilder.dataFile,fluxArgs.capcoRebuilder.dataMatch);
           break;
 
-          case 'zoteroItemsRetriever' : zoteroItemsRetriever(fluxArgs.zoteroItemsRetriever.collections,fluxArgs.zoteroItemsRetriever.zoteroUser,fluxArgs.zoteroItemsRetriever.importName,fluxArgs.zoteroItemsRetriever.path);
+          case 'zoteroItemsRetriever' : zoteroItemsRetriever(fluxArgs.zoteroItemsRetriever.collections,fluxArgs.zoteroItemsRetriever.zoteroUser,fluxArgs.zoteroItemsRetriever.importName,fluxArgs.zoteroItemsRetriever.destination);
+          
           break;
 
           case 'zoteroCollectionBuilder' : zoteroCollectionBuilder(fluxArgs.zoteroCollectionBuilder.collectionName,fluxArgs.zoteroCollectionBuilder.zoteroUser,fluxArgs.zoteroCollectionBuilder.path);
