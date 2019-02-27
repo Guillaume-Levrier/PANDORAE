@@ -14,40 +14,7 @@ var pandoDir = userDataPath;
 var dirTree = [
   "/logs",
   "/userID",
-  "/themes",
-  "/datasets",
-  "/datasets/buffer",
-  "/datasets/1altmetric",
-  "/datasets/1altmetric/1requests",
-  "/datasets/1altmetric/2results",
-  "/datasets/2anthropotype",
-  "/datasets/2anthropotype/1datasetsAT",
-  "/datasets/3chronotype",
-  "/datasets/3chronotype/1biblio",
-  "/datasets/3chronotype/2links",
-  "/datasets/4geotype",
-  "/datasets/4geotype/1locations",
-  "/datasets/5pharmacotype",
-  "/datasets/5pharmacotype/1trials",
-  "/datasets/6publicdebate",
-  "/datasets/6publicdebate/1capco",
-  "/datasets/6publicdebate/2matching",
-  "/datasets/6publicdebate/3pubdeb",
-  "/datasets/6publicdebate/4links",
-  "/datasets/6publicdebate/5commun",
-  "/datasets/7scopus",
-  "/datasets/7scopus/1csl-json",
-  "/datasets/7scopus/2scopusDatasets",
-  "/datasets/8zotero",
-  "/datasets/8zotero/1csl-json",
-  "/datasets/8zotero/2csl-zoteroCollections",
-  "/datasets/9gazouillotype",
-  "/datasets/9gazouillotype/1datasets",
-  "/datasets/9gazouillotype/2query",
-  "/datasets/10twitter",
-  "/datasets/10twitter/1zotero",
-  "/datasets/10twitter/2gazouilloire",
-  "/datasets/10twitter/3scraping"
+  "/themes"
 ]
 
 const userDataDirTree = (path,dirTree) => {
@@ -70,8 +37,14 @@ const changeTheme = () => {
 
 fs.readFile(basePath+"/json/themes.json", // Read the designated datafile
                                 'utf8', (err, theme) => {             // utf8 ecoding - start function
-  
-let themeData = JSON.parse(theme);
+
+let themedata;
+
+try {
+  themeData = JSON.parse(theme);
+} catch (error) {
+  //console.log(error);             //Often fails at parsing 
+}
 
 activeTheme = themeData.activeTheme;
 
@@ -341,7 +314,7 @@ const chaerosCalculator = () =>  {
   chaerosWindow.loadFile('chaeros.html')
 
   chaerosWindow.webContents.on('did-finish-load', function () {
-    chaerosWindow.webContents.openDevTools();
+  //  chaerosWindow.webContents.openDevTools();
   });
 
 }

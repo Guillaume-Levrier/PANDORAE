@@ -871,7 +871,7 @@ for (let j = 0; j < collections.length; j++) {                                  
       .then((res)=>{
         zoteroItemsResponse = res;
 
-let timer = 0;
+let timer = 1000;
 
       zoteroItemsResponse.forEach(f=>{
         timer = timer + (parseInt(f.meta.numItems)*5);

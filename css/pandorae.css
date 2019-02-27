@@ -326,6 +326,7 @@ h1 {
   background-color: transparent;
   border-bottom: 1px solid rgba(192,192,192,0.3);
   padding: 10px;
+  word-wrap: break-word;
 }
 .secContentTabs:hover {
   background-color: black;
