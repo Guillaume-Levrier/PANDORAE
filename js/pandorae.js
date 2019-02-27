@@ -364,8 +364,6 @@ let argLength = 99;
               document.getElementById("field").value = "start chronotype";
               let datasets={};
               datasets.bibliography=options[0];
-              datasets.links={};
-              console.log(datasets);
               document.getElementById("field").addEventListener("click", ()=>{
                   types.typeSwitch("chronotype",datasets);
                   document.getElementById("field").removeEventListener("click", ()=>
@@ -376,7 +374,7 @@ let argLength = 99;
             );
           }
           break;
-            case '2anthropotype': argLength = 1;
+            case 'anthropotype': argLength = 1;
             if (options.length === argLength) {
               toggleMenu();
               document.getElementById("field").style.pointerEvents = "all";

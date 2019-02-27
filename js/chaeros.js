@@ -873,9 +873,12 @@ for (let j = 0; j < collections.length; j++) {                                  
   Promise.all(zoteroPromises)
       .then((res)=>{
         zoteroItemsResponse = res;
+console.log(zoteroItemsResponse);
 
-        zoteroItemsResponse.forEach(f=>{
+let timer = 0;
 
+      zoteroItemsResponse.forEach(f=>{
+        timer = timer + (parseInt(f.meta.numItems)*5);
         f.name = f.data.name;
         f.items = [];
 
@@ -899,20 +902,31 @@ for (let j = 0; j < collections.length; j++) {                                  
        Promise.all(itemRequests).then((response)=> {
          for (var i = 0; i < response.length; i++) {
            response[i].items.forEach(d=>f.items.push(d))
-                pandodb.open();
-                destination.forEach(d=>{
-                  let table = pandodb[d];
-                  let id = importName+date; 
-                    table.add({"id":id,"date":date,"name":importName,"content":zoteroItemsResponse});
-                    ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " zotero dataset imported in "+d);
-                })
-                ipcRenderer.send('chaeros-success', 'Zotero dataset imported');
-                win.hide();
          }
       })
   })
+  console.log(timer);
+setTimeout(()=>dataWriter(destination,importName,zoteroItemsResponse),timer);
+
   })
+
+  
+
 }) // closing Keytar
+
+}
+
+const dataWriter = (destination,importName,content) => {
+  pandodb.open();
+  destination.forEach(d=>{
+    let table = pandodb[d];
+    let id = importName+date; 
+      table.add({"id":id,"date":date,"name":importName,"content":content});
+      ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " was imported in "+d);
+  })
+  ipcRenderer.send('chaeros-success', 'Zotero dataset imported');
+  win.hide();
+
 }
 
 //========== zoteroCollectionBuilder ==========
