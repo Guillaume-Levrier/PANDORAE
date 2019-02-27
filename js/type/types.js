@@ -154,7 +154,7 @@ const anthropotype = (datasetAT) => {                 // When called, draw the a
   //======== DATA CALL & SORT =========
 
 pandodb.anthropotype.get(datasetAT).then(datajson => {
-  console.log(datajson);
+
   const data = datajson.content[0].items;          // Humans and institutions are both graph nodes, merging them makes sense
   const links = [];
   
@@ -165,8 +165,6 @@ pandodb.anthropotype.get(datasetAT).then(datajson => {
       d.twitterHandle = cleanString.substring(cleanString.indexOf("(@"),cleanString.length);
     }
   })
-  
-  console.log(data);
   
   //========== FORCE GRAPH ============
   var simulation = d3.forceSimulation()                           // Start the force graph
@@ -458,8 +456,6 @@ const chronotype = (bibliography,links) => {                          // When ca
 //======== DATA CALL & SORT =========
   pandodb.chronotype.get(bibliography).then(datajson=> {
 
-    console.log(datajson);
-
       var docs = datajson.content;                                          // Second array is the documents (docs)
       const clusters = [];
       const links = [];                                                  // Declaring links as empty array
@@ -516,7 +512,6 @@ const chronotype = (bibliography,links) => {                          // When ca
     }
   }
 
-console.log(nodeDocs);
 
   dataSorter();
 
@@ -1075,9 +1070,6 @@ pandodb.geotype.get(locations).then(locations => {
 
 var geoData = geo[0];
 
-console.log(data);
-console.log(geoData);
-
   const links = [];
   
   var linksBuffer =[]
@@ -1141,8 +1133,6 @@ console.log(geoData);
   data.forEach(d=>{if (d.hasOwnProperty('affiliation')){}else{data.splice(d.index,1)}});
   
   var cities =  d3.nest().key(d => d['affiliation-city']).entries(dataArray);
-  
-console.log(cities);
 
   cities.forEach(d=>{
     d.lon = d.values[0].lon;
