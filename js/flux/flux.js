@@ -584,8 +584,9 @@ fluxButtonAction ("zotcolret",true,"Zotero Collections Successfully Retrieved","
 
 // Preparing and showing additional options
       document.getElementById("zotitret").style.display = "inline-flex";
-      document.getElementById("zotColSelector").style.display = "inline-flex";
+      document.getElementById("zoteroResults").style.display = "flex";
       document.getElementById("zoteroImportName").style.display = "inline-flex";
+      document.getElementById("zoteroImportInstruction").style.display = "inline-flex";
 
       datasetsSubdirList("zotColSelector");                                   // Display available dataset directories
 

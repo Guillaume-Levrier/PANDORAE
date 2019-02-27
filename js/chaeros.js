@@ -18,6 +18,29 @@ const d3 = require('d3');                                             // Load d3
 const wordTokenizer = require('talisman/tokenizers/words');           // Load Talisman to manage language processing
 const carryStemmer = require('talisman/stemmers/french/carry');       // idem
 const MultiSet = require('mnemonist/multi-set')                       // Load Mnemonist to manage other data structures
+const Dexie = require('dexie');
+
+const date = new Date().toJSON().replace(/:/g, '-');  
+
+Dexie.debug = true;
+
+let pandodb = new Dexie("PandoraeDatabase");
+
+let structureV1 = "kind,name,uploadDate";
+
+pandodb.version(1).stores({
+      altmetric: structureV1,
+      scopus: structureV1,
+      zotero: structureV1,
+      twitter: structureV1,
+      anthropotype: structureV1,
+      chronotype: structureV1,
+      geotype: structureV1,
+      pharmacotype: structureV1,
+      publicdebate: structureV1,
+      gazouillotype: structureV1
+  });
+
 
 //========== scopusConverter ==========
 //scopusConverter is only available once scopusDatasetDetail has been called. If triggered, it creates a new
@@ -67,14 +90,17 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // No
         ipcRenderer.send('console-logs',JSON.stringify(err));                   // On failure, send error to console
       }
         finally {
-          let data = JSON.stringify(convertedDataset);                           // Prepare data to be written
+          pandodb.open();
+          pandodb.scopus.add({"name":dataset,"kind":"csl-json","date":date,"content":convertedDataset});
+          //pandodb.close();
+          /* let data = JSON.stringify(convertedDataset);                           // Prepare data to be written
             fs.writeFile(                                                        // Write data
               userDataPath +'/datasets/8zotero/1csl-json/csl-'+dataset,data,'utf8',// Path/name, data, format
                 (err) => {if (err)                                               // On error
                 ipcRenderer.send('chaeros-failure', err);                        // Send error to main process for dispatch
                 ipcRenderer.send('console-logs',JSON.stringify(err));            // Keep a log of the error
                 win.close();                                                     // Close the Chaeros window
-            })
+            }) */
          }
      })
      ipcRenderer.send('chaeros-success', 'Success: Scopus dataset converted');   // Else send a success message
@@ -816,13 +842,12 @@ ipcRenderer.send('console-logs',"Lexical analysis on " + dataFile + "complete. W
 // zoteroItemsRetriever retrieves all the documents from one or more zotero collections. A zotero API request can only
 // retrieve 100 items, which can easily trigger the rate limiting.
 
-const zoteroItemsRetriever = (collections,zoteroUser,importName,path) => {
+const zoteroItemsRetriever = (collections,zoteroUser,importName,kind) => {
 
   ipcRenderer.send('console-logs',"Started retrieving collections " + collections + "for user "+zoteroUser+" under the import name "+ importName + " and under the path "+path);
 
 let zoteroPromises = [];
 
-let stamp = new Date().toJSON().replace(/:/g, '-');                               // Prepare a timestamp
 
 keytar.getPassword("Zotero", zoteroUser).then((zoteroApiKey) => {                 // Open keytar
 
@@ -871,19 +896,22 @@ for (let j = 0; j < collections.length; j++) {                                  
        Promise.all(itemRequests).then((response)=> {
          for (var i = 0; i < response.length; i++) {
            response[i].items.forEach(d=>f.items.push(d))
-           fs.writeFile(                                                 // Write data
+           /* fs.writeFile(                                                 // Write data
              userDataPath+path+importName+'-'+stamp+'.json',JSON.stringify(zoteroItemsResponse),'utf8',         // Options
                (err) => {if (err) {
                ipcRenderer.send('chaeros-failure', err);                 // On failure, send error to main process
-             }
-             ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " zotero dataset imported in "+path);
-             ipcRenderer.send('chaeros-success', 'Zotero dataset imported');
-             win.hide();
-           })
+             } */
+          
+          // })
          }
       })
   })
 
+  pandodb.open();
+  pandodb.zotero.add({"name":importName,"kind":kind,"date":date,"content":zoteroItemsResponse});
+  ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " zotero dataset imported in "+path);
+  ipcRenderer.send('chaeros-success', 'Zotero dataset imported');
+  win.hide();
   })
 }) // closing Keytar
 }

@@ -68,8 +68,6 @@ fs.copyFileSync(basePath+"/json/themes.json", userDataPath +"/themes/themes.json
 
 const changeTheme = () => {
 
-console.log(basePath+"/json/themes.json")
-
 fs.readFile(basePath+"/json/themes.json", // Read the designated datafile
                                 'utf8', (err, theme) => {             // utf8 ecoding - start function
   
@@ -313,8 +311,6 @@ ipcMain.on('dataFlux', (event,fluxAction,fluxArgs,message) => {
   chaerosCalculator();
 })
 
-//ipcMain.on('test', (event,message) => { console.log(message); })
-
 ipcMain.on('chaeros-failure', (event,message) => {
       mainWindow.webContents.send('chaeros-failure',message);
     });
@@ -375,7 +371,7 @@ if( fs.existsSync(userDataPath+"/datasets/buffer") ) {
 
 ipcMain.on('tutorial', (event,message) => {
   switch (message) {
-    case 'flux': console.log("starting Flux presentation")
+    case 'flux': 
                 mainWindow.webContents.send('tutorial','openFlux');
       break;
 

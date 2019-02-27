@@ -1191,7 +1191,6 @@ const geotype = (locations) => {
       .attr("class", "arc")
       .attr("d", path);
   
-console.log(cities);
 
   var locations = view.selectAll("locations")
                   .data(cities)
