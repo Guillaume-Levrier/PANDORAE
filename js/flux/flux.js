@@ -290,7 +290,7 @@ case 'zoteroItemsRetriever' :  if (document.getElementById("zotitret").name ==="
                           }
                           else {
 
-                            fluxArgs.zoteroItemsRetriever = {"collections" : []};
+                            fluxArgs.zoteroItemsRetriever = {"collections" : [],"destination":[]};
                           var collecs = document.getElementsByClassName('zotColCheck');
                           for (let i =0; i<collecs.length; i++){
                             if (collecs[i].checked)
@@ -300,12 +300,21 @@ case 'zoteroItemsRetriever' :  if (document.getElementById("zotitret").name ==="
                                )
                              }
                           }
+                          var dest = document.getElementsByClassName('zotDestCheck');
+                          for (let i =0; i<dest.length; i++){
+                            if (dest[i].checked)
+                             {
+                               fluxArgs.zoteroItemsRetriever.destination.push(
+                                dest[i].value
+                               )
+                             }
+                          }
 
                           fluxArgs.zoteroItemsRetriever.zoteroUser = document.getElementById("zoterouserinput").value;
                           fluxArgs.zoteroItemsRetriever.importName = document.getElementById("zoteroImportName").value.replace(/\s/g,"");
-                          fluxArgs.zoteroItemsRetriever.path = "/datasets/"+document.getElementById("zotitret").name+"/";
+                         // fluxArgs.zoteroItemsRetriever.path = "/datasets/"+document.getElementById("zotitret").name+"/";
                           message = "Retrieve user collections from Zotero database" ;
-                          }
+                          }                        
                           break;
 
 case 'zoteroCollectionBuilder' : fluxArgs.zoteroCollectionBuilder = {"path":"","collectionName":""};
@@ -588,15 +597,15 @@ fluxButtonAction ("zotcolret",true,"Zotero Collections Successfully Retrieved","
       document.getElementById("zoteroImportName").style.display = "inline-flex";
       document.getElementById("zoteroImportInstruction").style.display = "inline-flex";
 
-      datasetsSubdirList("zotColSelector");                                   // Display available dataset directories
+     // datasetsSubdirList("zotColSelector");                                   // Display available dataset directories
 
       checkKey("zoteroAPIValidation",true);
 
-        let selector = document.getElementById("zotColSelector");
+ /*        let selector = document.getElementById("zotColSelector");
         selector.addEventListener("input",()=>{
               document.getElementById("zotitret").name =
               selector.options[selector.options.selectedIndex].value;
-            });
+            }); */
         }
     )
     .catch(function (err) {
@@ -607,6 +616,7 @@ fluxButtonAction ("zotcolret",true,"Zotero Collections Successfully Retrieved","
 }
 
 //========== pubDebDatasetLoader ==========
+/* 
 const pubDebDatasetLoader = () => {
 
 let uploadedFile = document.getElementById("load-local-pubdeb").files;
@@ -620,7 +630,7 @@ ipcRenderer.send('console-logs',"Loading file "+ uploadedFile + " in "+targetFol
   });
   return uploadedFile[0].name;
 
-}
+} */
 
 //========== pubDebLinksLoader ==========
 const pubDeblinkDatasetLoader = () => {
