@@ -836,9 +836,6 @@ ipcRenderer.send('console-logs',"Lexical analysis on " + dataFile + "complete. W
   });
 }
 
-
-
-
 //========== zoteroItemsRetriever ==========
 // zoteroItemsRetriever retrieves all the documents from one or more zotero collections. A zotero API request can only
 // retrieve 100 items, which can easily trigger the rate limiting.
@@ -873,7 +870,6 @@ for (let j = 0; j < collections.length; j++) {                                  
   Promise.all(zoteroPromises)
       .then((res)=>{
         zoteroItemsResponse = res;
-console.log(zoteroItemsResponse);
 
 let timer = 0;
 
@@ -905,7 +901,7 @@ let timer = 0;
          }
       })
   })
-  console.log(timer);
+
 setTimeout(()=>dataWriter(destination,importName,zoteroItemsResponse),timer);
 
   })

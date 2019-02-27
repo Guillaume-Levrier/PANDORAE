@@ -51,10 +51,6 @@ pandodb.version(1).stores({
       gazouillotype: structureV1
   });
 
-
- 
-  console.log(pandodb);
-
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that 
 // couldn't be done in Chaeros can be long. In order not to freeze the user's mainWindow,
