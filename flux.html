@@ -22,9 +22,6 @@
  <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="scopusValidation">help_outline</i> Scopus API key:<br> <input class="fluxInput" spellcheck="false" id="scopuskeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Scopus">cached</i><br><br></div>
  <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="altmetricValidation">help_outline</i> Altmetric API key:<br> <input class="fluxInput" spellcheck="false" id="altmetrickeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Altmetric">cached</i><br><br></div>
  <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="twitterValidation">help_outline</i> Twitter API key:<br> <input class="fluxInput" spellcheck="false" id="twitterkeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Twitter">cached</i><br><br></div>
- <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="mapTilerValidation">help_outline</i>MapTiler Geocoding API key:<br> <input class="fluxInput" spellcheck="false" id="geocodinginput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Geocoding">cached</i><br><br></div>
-
-
 </form>
 </div>
 
@@ -95,7 +92,7 @@
 </div>
 
 <br><br>
-<button type="submit" class="flux-button" id="cslcolret" onclick="datasetDisplay('/datasets/8zotero/1csl-json','userCsljsonCollections','csl-json-dataset');return false">Display/update available csljson files</button><br>
+<button type="submit" class="flux-button" id="cslcolret" onclick="datasetDisplay('/datasets/8zotero/1csl-json','userCsljsonCollections','csl-json-dataset');return false">Display available csljson files</button><br>
 <div id="csl-json-dataset-preview"></div>
 <div id="csl-json-dataset-buttons"style="display:none;">
   <input class="fluxInput" spellcheck="false" class="sendToZotero" id="zoteroCollecName"  type="text" value="Enter collection name">
@@ -103,15 +100,38 @@
   <button type="submit" class="flux-button sendToZotero" id="zoteroCollecBuild" onclick="powerValve('zoteroCollectionBuilder',this);return false">Create a new Zotero Collection</button>
 </div>
 <div id="userCsljsonCollections"></div>
+</form>
+<br><br>
+<form id="zotero-import-form" autocomplete="off"></form>
+<button type="submit" class="flux-button" id="zotcolret" onclick="zoteroCollectionRetriever();return false">Display user collections</button><br><br>
+<span id="zoteroImportInstruction" style="display:none;">Select the relevant datasets from your Zotero library (left) and their intended destination (right).</span><br><br>
 
+<div id="zoteroResults" style="display:none;">
+<div id="userZoteroCollections" style="flex:auto"></div>
+<div id="availableDestinations" style="flex:auto">
+  <div style="border: 1px solid grey">General<br>
+  <input class='zotDestCheck' value='chronotype' name='chronotype' type='checkbox'/><label>chronotype</label><br>
+  <input class='zotDestCheck' value='geotype' name='geotype' type='checkbox'/><label>geotype</label><br>
+  <input class='zotDestCheck' value='anthropotype' name='anthropotype' type='checkbox'/><label>anthropotype</label><br>
+  <input class='zotDestCheck' value='pharmatype' name='pharmatype' type='checkbox'/><label>pharmatype</label><br>
+  </div>
+  <div style="border: 1px solid grey">Public Debate<br>
+    <input class='zotDestCheck' value='lexi' name='lexi' type='checkbox'/><label>lexi</label><br>
+    <input class='zotDestCheck' value='matching' name='matching' type='checkbox'/><label>matching</label><br>
+    <input class='zotDestCheck' value='commun' name='commun' type='checkbox'/><label>commun</label><br>
+  </div>
+  <div style="border: 1px solid grey">Twitter Data<br>
+    <input class='zotDestCheck' value='tweets' name='lexi' type='checkbox'/><label>tweets</label><br>
+    <input class='zotDestCheck' value='query' name='matching' type='checkbox'/><label>query</label><br>
+  </div>
 
-
-<button type="submit" class="flux-button" id="zotcolret" onclick="zoteroCollectionRetriever();return false">Display/update user collections</button><br>
+</div>
+</div>
+<br><br><br>
 <input class="fluxInput" spellcheck="false" id="zoteroImportName" style="display:none;" type="text" value="Enter import name">
-<select id="zotColSelector" style="display:none;" required></select>
 <button type="submit" class="flux-button" style="display:none;" id="zotitret" onclick="powerValve('zoteroItemsRetriever',this);return false">Import selected collections</button><br>
 </form>
-<div id="userZoteroCollections"></div>
+
 
 </div>
 

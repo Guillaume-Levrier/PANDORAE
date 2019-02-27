@@ -36,7 +36,7 @@ Dexie.debug = true;
 
 let pandodb = new Dexie("PandoraeDatabase");
 
-let structureV1 = "datasetKind,datasetName,uploadDate";
+let structureV1 = "kind,name,uploadDate";
 
 pandodb.version(1).stores({
       altmetric: structureV1,
@@ -50,7 +50,11 @@ pandodb.version(1).stores({
       publicdebate: structureV1,
       gazouillotype: structureV1
   });
-      
+
+
+ 
+  console.log(pandodb);
+
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that 
 // couldn't be done in Chaeros can be long. In order not to freeze the user's mainWindow,
