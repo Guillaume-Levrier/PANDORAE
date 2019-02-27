@@ -20,13 +20,13 @@ const carryStemmer = require('talisman/stemmers/french/carry');       // idem
 const MultiSet = require('mnemonist/multi-set')                       // Load Mnemonist to manage other data structures
 const Dexie = require('dexie');
 
-const date = new Date().toJSON().replace(/:/g, '-');  
+const date = new Date().toLocaleDateString() +"-"+ new Date().toLocaleTimeString();  
 
 Dexie.debug = true;
 
 let pandodb = new Dexie("PandoraeDatabase");
 
-let structureV1 = "date,name";
+let structureV1 = "id,date,name";
 
 pandodb.version(1).stores({
       altmetric: structureV1,
@@ -41,6 +41,7 @@ pandodb.version(1).stores({
       gazouillotype: structureV1
   });
 
+  pandodb.open();
 
 //========== scopusConverter ==========
 //scopusConverter is only available once scopusDatasetDetail has been called. If triggered, it creates a new
@@ -90,7 +91,7 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // No
         ipcRenderer.send('console-logs',JSON.stringify(err));                   // On failure, send error to console
       }
         finally {
-          pandodb.open();
+         
           pandodb.scopus.add({"name":dataset,"kind":"csl-json","date":date,"content":convertedDataset});
           //pandodb.close();
           /* let data = JSON.stringify(convertedDataset);                           // Prepare data to be written
@@ -901,7 +902,8 @@ for (let j = 0; j < collections.length; j++) {                                  
                 pandodb.open();
                 destination.forEach(d=>{
                   let table = pandodb[d];
-                    table.add({"date":date,"name":importName,"content":zoteroItemsResponse});
+                  let id = importName+date; 
+                    table.add({"id":id,"date":date,"name":importName,"content":zoteroItemsResponse});
                     ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " zotero dataset imported in "+d);
                 })
                 ipcRenderer.send('chaeros-success', 'Zotero dataset imported');

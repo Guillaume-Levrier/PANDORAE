@@ -14,6 +14,25 @@ const THREE = require('three');
 const userDataPath = remote.app.getPath('userData');
 const Dexie = require('dexie');
 
+Dexie.debug = true;
+
+let pandodb = new Dexie("PandoraeDatabase");
+
+let structureV1 = "id,date,name";
+
+pandodb.version(1).stores({
+      altmetric: structureV1,
+      scopus: structureV1,
+      zotero: structureV1,
+      twitter: structureV1,
+      anthropotype: structureV1,
+      chronotype: structureV1,
+      geotype: structureV1,
+      pharmacotype: structureV1,
+      publicdebate: structureV1,
+      gazouillotype: structureV1
+  });
+  pandodb.open();
 // =========== LOADTYPE ===========
 
 const loadType = () => {
@@ -432,20 +451,20 @@ const chronotype = (bibliography,links) => {                          // When ca
   var color = d3.scaleOrdinal()                                                  // Line colors
                 .domain([0,1])
                 .range(["#08154a","#490027","#5c7a38","#4f4280","#6f611b","#5b7abd","#003f13","#b479a9","#3a2e00","#017099","#845421","#008b97","#460d00","#62949e","#211434","#af8450","#30273c","#bd7b70","#005b5c","#c56883","#a68199"]);
-  
-  //======== DATA CALL & SORT =========
-    Promise.all([                                            // Loading data through promises
-    //   d3.json(clusters, {credentials: 'include'}),        // Loading clusters
-       d3.json(bibliography, {credentials: 'include'})])     // Loading documents
-            .then(datajson => {
-  
-  var docs = datajson[0];                                          // Second array is the documents (docs)
-  const clusters = [];
-  const links = [];                                                  // Declaring links as empty array
-  const nodeDocs = [];
-  var codeFreq = {};
-  const csl_material = {'paper-conference': 'event', 'NA2': 'dns', 'personal_communication': 'mail', 'article-magazine': 'chrome_reader_mode', 'report': 'tab', 'broadcast': 'radio', 'chapter': 'list', 'webpage': 'web', 'map': 'map', 'manuscript': 'receipt', 'entry-dictionary': 'format_list_numbered', 'entry-encyclopedia': 'art_track', 'NA5': 'add_to_queue', 'NA4': 'video_label', 'NA3': 'question_answer', 'NA1': 'markunread_mailbox', 'interview': 'speaker_notes', 'legal_case': 'announcement', 'thesis': 'note', 'graphic': 'edit', 'motion_picture': 'videocam', 'article-journal': 'timeline', 'article-newspaper': 'dashboard', 'article': 'description', 'post-weblog': 'content_paste', 'speech': 'subtitles', 'patent': 'card_membership', 'song': 'mic', 'book': 'developer_board', 'legislation': 'assignment', 'bill': 'account_balance'};
-  
+
+
+
+
+//======== DATA CALL & SORT =========
+  pandodb.chronotype.get(bibliography).then(datajson=> {
+    console.log(datajson);
+      var docs = datajson.content;                                          // Second array is the documents (docs)
+      const clusters = [];
+      const links = [];                                                  // Declaring links as empty array
+      const nodeDocs = [];
+      var codeFreq = {};
+      const csl_material = {'paper-conference': 'event', 'NA2': 'dns', 'personal_communication': 'mail', 'article-magazine': 'chrome_reader_mode', 'report': 'tab', 'broadcast': 'radio', 'chapter': 'list', 'webpage': 'web', 'map': 'map', 'manuscript': 'receipt', 'entry-dictionary': 'format_list_numbered', 'entry-encyclopedia': 'art_track', 'NA5': 'add_to_queue', 'NA4': 'video_label', 'NA3': 'question_answer', 'NA1': 'markunread_mailbox', 'interview': 'speaker_notes', 'legal_case': 'announcement', 'thesis': 'note', 'graphic': 'edit', 'motion_picture': 'videocam', 'article-journal': 'timeline', 'article-newspaper': 'dashboard', 'article': 'description', 'post-weblog': 'content_paste', 'speech': 'subtitles', 'patent': 'card_membership', 'song': 'mic', 'book': 'developer_board', 'legislation': 'assignment', 'bill': 'account_balance'};
+      
   const dataSorter = () => {
   
   for (let i=0; i<docs.length; i++){                    // loop on main array
@@ -494,9 +513,9 @@ const chronotype = (bibliography,links) => {                          // When ca
       })
     }
   }
-  
+
   dataSorter();
-  
+
   const clustersNest = d3.nest()                                         // Sorting clusters
                          .key(d => d.category)                           // Sorting them by category
                          .entries(clusters);                             // Selecting relevant data
@@ -1044,16 +1063,17 @@ const geotype = (locations) => {
       .attr("height", height)
       .attr("d", path);
   
-  //Calling data
-  Promise.all([
-          d3.json("json/world-countries.json", {credentials: 'include'}),
-          d3.json(locations,  {credentials: 'include'})])
-      .then(datajson => {
-  
-  var geoData = datajson[0];
-  
-  var data = datajson[1][0].items;
-  
+//Calling data
+pandodb.geotype.get(locations).then(locations => {
+  var data = locations.content[0].items;
+        Promise.all([d3.json("json/world-countries.json")])                
+            .then(geo => {
+
+var geoData = geo[0];
+
+console.log(data);
+console.log(geoData);
+
   const links = [];
   
   var linksBuffer =[]
@@ -1118,6 +1138,8 @@ const geotype = (locations) => {
   
   var cities =  d3.nest().key(d => d['affiliation-city']).entries(dataArray);
   
+console.log(cities);
+
   cities.forEach(d=>{
     d.lon = d.values[0].lon;
     d.lat = d.values[0].lat;
@@ -1234,7 +1256,7 @@ const geotype = (locations) => {
   
     d3.select("#reset").on("click", narrative(data[3]));
   */
-  
+})
   });
   
   //the globe can be dragged

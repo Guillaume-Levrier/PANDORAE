@@ -36,7 +36,7 @@ Dexie.debug = true;
 
 let pandodb = new Dexie("PandoraeDatabase");
 
-let structureV1 = "date,name";
+let structureV1 = "id,date,name";
 
 pandodb.version(1).stores({
       altmetric: structureV1,
@@ -357,7 +357,7 @@ const start = (type,options) => {
 let argLength = 99;
 
   switch (type) {
-            case '3chronotype':argLength = 1;
+            case 'chronotype':argLength = 1;
             if (options.length === argLength) {
               toggleMenu();
               document.getElementById("field").style.pointerEvents = "all";
@@ -365,10 +365,11 @@ let argLength = 99;
               let datasets={};
               datasets.bibliography=options[0];
               datasets.links={};
+              console.log(datasets);
               document.getElementById("field").addEventListener("click", ()=>{
                   types.typeSwitch("chronotype",datasets);
                   document.getElementById("field").removeEventListener("click", ()=>
-                        chronotype(options[0]));
+                  types.typeSwitch("chronotype",datasets));
                   document.getElementById("field").style.pointerEvents = "none";
 
               }
@@ -393,7 +394,7 @@ let argLength = 99;
             );
           }
             break;
-            case '4geotype': argLength = 1;
+            case 'geotype': argLength = 1;
             if (options.length === argLength) {
               toggleMenu();
               document.getElementById("field").style.pointerEvents = "all";
@@ -471,19 +472,22 @@ let argLength = 99;
 
 };
 
-const selectOption = (type,kind,item,path) => {
-        let selected = {"type":"","kind":"","item":"","path":""};
-            selected.type = type;
-            selected.kind = kind;
-            selected.item = item;
-            selected.path = path;
+const selectOption = (type,id) => {
+       
 
-        document.getElementById(item).style.backgroundColor = "darkgrey";
+        document.getElementById(id).style.backgroundColor = "darkgrey";
 
         toggleTertiaryMenu();
 
         var thirdMenu = document.getElementById("thirdMenuContent");
 
+        var options = [];
+
+        options.push(id);
+
+        start(type,options);
+
+        /* 
         const metaGen = (path,count,metaStats) => {
 
         var qrCanvas = document.createElement("canvas");
@@ -586,8 +590,8 @@ const selectOption = (type,kind,item,path) => {
       };
 
         fileMetadata(path);
-
-        ipcRenderer.send('console-logs',"Checking dataset: " + JSON.stringify(selected));
+ */
+        ipcRenderer.send('console-logs',"Checking dataset: " + JSON.stringify(id));
 
 }
 
@@ -602,18 +606,35 @@ ipcRenderer.send('datalist',{"type":type,"kind":newKind});
 
 // ========== main menu options ========
 
-const mainDisplay = (type,options) =>{
+const mainDisplay = (type) =>{
 
+  const listTableDatasets = (table) => {
+    let targetType = pandodb[table];
+    targetType.toArray().then( e=> {
+      e.forEach(d=>{
+          let dataset = document.createElement("div");
+          dataset.className = "secContentTabs";
+          dataset.id = d.id;
+          dataset.innerHTML = "<span><strong>"+d.name+"</strong><br>"+d.date+"</span>";
+          dataset.onclick = function () {selectOption(type,d.id)};
+          document.getElementById("secMenContent").appendChild(dataset);
+        }) 
+      });
+  }
 
   displayCore();
   purgeXtype();
   document.getElementById("field").value = "preparing " + type;
   ipcRenderer.send('console-logs',"Preparing " + type);
 
-    switch (type) {
+  toggleSecondaryMenu();
+  listTableDatasets(type);
+
+    /* switch (type) {
 
       case 'chronotype':toggleSecondaryMenu();
                         document.getElementById('secMenTopTab').innerHTML = "<strong>Select Chronotype Data</strong><br><br>";
+                        
                         ipcRenderer.send('datalist',{"type":"3chronotype","kind":1});
                         break;
 
@@ -642,7 +663,7 @@ const mainDisplay = (type,options) =>{
                         ipcRenderer.send('datalist',{"type":"9gazouillotype","kind":1});
                         break;
 
-    }
+    } */
 
 }
 
