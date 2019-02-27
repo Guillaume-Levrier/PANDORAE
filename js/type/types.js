@@ -152,10 +152,10 @@ const anthropotype = (datasetAT) => {                 // When called, draw the a
       .on("zoom", zoomed);                                  // Trigger the "zoomed" function on "zoom" behaviour
   
   //======== DATA CALL & SORT =========
-  Promise.all([d3.json(datasetAT, {credentials: 'include'})])
-      .then(datajson => {
-  
-  const data = datajson[0][0].items;          // Humans and institutions are both graph nodes, merging them makes sense
+
+pandodb.anthropotype.get(datasetAT).then(datajson => {
+  console.log(datajson);
+  const data = datajson.content[0].items;          // Humans and institutions are both graph nodes, merging them makes sense
   const links = [];
   
   data.forEach(d=>{
@@ -457,7 +457,9 @@ const chronotype = (bibliography,links) => {                          // When ca
 
 //======== DATA CALL & SORT =========
   pandodb.chronotype.get(bibliography).then(datajson=> {
+
     console.log(datajson);
+
       var docs = datajson.content;                                          // Second array is the documents (docs)
       const clusters = [];
       const links = [];                                                  // Declaring links as empty array
@@ -513,6 +515,8 @@ const chronotype = (bibliography,links) => {                          // When ca
       })
     }
   }
+
+console.log(nodeDocs);
 
   dataSorter();
 
