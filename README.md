@@ -7,7 +7,7 @@ To test the dev branch, clone the repo, cd into it, and use 'npm i', './node_mod
 ### TODO FOR BETA RELEASE
 - create an interactive tutorial (under way)
 - implement FETCH altmetric requests
-- switch from flatfile to indexedDB through Dexie
+- Dexie operational for Zotero, now aiming at porting Pubdeb and tweets to Dexie.
 
 ### ONCE IN BETA
 - enable gazouillotype brush & link it to dynamic node display (only generate nodes in the current brush, enforce a max brush width)

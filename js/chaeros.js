@@ -104,7 +104,7 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // No
             }) */
          }
      })
-     ipcRenderer.send('chaeros-success', 'Success: Scopus dataset converted');   // Else send a success message
+     ipcRenderer.send('chaeros-success', 'Dataset converted');   // Else send a success message
      ipcRenderer.send('console-logs',"scopusConverter successfully converted " + dataset); // Log success
 }
 
@@ -201,7 +201,7 @@ cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key))
             userDataPath +'/datasets/7scopus/2scopusDatasets/geoloc-'+dataset,docstring,'utf8',
               (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
 
-    ipcRenderer.send('chaeros-success', 'Success: Geolocation added');              //Send success message to main process
+    ipcRenderer.send('chaeros-success', 'Affiliations geolocated');              //Send success message to main process
     ipcRenderer.send('console-logs',"scopusGeolocate successfully added geolocations on " + dataset);
     //win.close();            
           })
@@ -284,7 +284,7 @@ Promise.all(dataPromises)                                // Submit requests
         output.write('{}]},{"documentComplete":true}]}'); // Add a signal object and close the "entries" array
         output.end();                                     // Close the stream
         output.on("finish", function () {                 // When the stream emits "finish" event
-            ipcRenderer.send('chaeros-success', 'Success: Scopus API data retrieved'); // signal success to main process
+            ipcRenderer.send('chaeros-success', 'Scopus API data retrieved'); // signal success to main process
             ipcRenderer.send('console-logs',"Scopus dataset on " + query + " for user "+ user +" have been successfully retrieved.");
             win.close();                                   // Close Chaeros
             }
@@ -830,7 +830,7 @@ ipcRenderer.send('console-logs',"Lexical analysis on " + dataFile + "complete. W
               (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
           });
     ipcRenderer.send('console-logs',"CapCo " + dataFile + " links has been successfully written.");
-          ipcRenderer.send('chaeros-success', 'Success: dataset rebuilt');
+          ipcRenderer.send('chaeros-success', 'Dataset rebuilt');
          win.close();
 
   });
@@ -920,7 +920,7 @@ const dataWriter = (destination,importName,content) => {
       table.add({"id":id,"date":date,"name":importName,"content":content});
       ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " was imported in "+d);
   })
-  ipcRenderer.send('chaeros-success', 'Zotero dataset imported');
+  ipcRenderer.send('chaeros-success', 'Dataset successfully imported');
   win.hide();
 
 }
@@ -1006,7 +1006,7 @@ ipcRenderer.send('console-logs',"Collection "+JSON.stringify(collectionName)+" b
         ipcRenderer.send('console-logs',e);
       }
       finally{
-        ipcRenderer.send('chaeros-success', 'Success: Zotero collection created');   // Send success message to main Display
+        ipcRenderer.send('chaeros-success', 'Collection created');   // Send success message to main Display
       }
   })
 }
