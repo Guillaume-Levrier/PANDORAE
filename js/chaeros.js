@@ -205,7 +205,7 @@ cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key))
 
     ipcRenderer.send('chaeros-success', 'Affiliations geolocated');              //Send success message to main process
     ipcRenderer.send('console-logs',"scopusGeolocate successfully added geolocations on " + dataset);
-    //win.close();            
+    win.close();            
           })
       })
   })
@@ -923,7 +923,7 @@ const dataWriter = (destination,importName,content) => {
       ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " was imported in "+d);
   })
   ipcRenderer.send('chaeros-success', 'Dataset successfully imported');
-  win.hide();
+  win.close();
 
 }
 
@@ -1009,6 +1009,7 @@ ipcRenderer.send('console-logs',"Collection "+JSON.stringify(collectionName)+" b
       }
       finally{
         ipcRenderer.send('chaeros-success', 'Collection created');   // Send success message to main Display
+        win.close();
       }
   })
 }
@@ -1024,8 +1025,8 @@ const chaerosSwitch = (fluxAction,fluxArgs) => {
 
       switch (fluxAction) {
 
-          case 'lexicAnalysis' : lexicAnalysis(fluxArgs.lexicAnalysis.dataset);
-          break;
+        /*   case 'lexicAnalysis' : lexicAnalysis(fluxArgs.lexicAnalysis.dataset);
+          break; */
 
           case 'scopusConverter' : scopusConverter(fluxArgs.scopusConverter.dataset);
           break;
@@ -1048,6 +1049,6 @@ const chaerosSwitch = (fluxAction,fluxArgs) => {
 
       }
 
-}
+    }
 
 module.exports = {chaerosSwitch: chaerosSwitch};                            // Export the switch as a module
