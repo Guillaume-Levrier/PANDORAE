@@ -38,13 +38,13 @@ const changeTheme = () => {
 fs.readFile(basePath+"/json/themes.json", // Read the designated datafile
                                 'utf8', (err, theme) => {             // utf8 ecoding - start function
 
-let themedata;
+var themeData;
 
 try {
   themeData = JSON.parse(theme);
 } catch (error) {
-  //console.log(error);             //Often fails at parsing 
-}
+  console.log(error);             //Often fails at parsing 
+} finally {
 
 activeTheme = themeData.activeTheme;
 
@@ -54,6 +54,7 @@ for (let i = 0; i < themeData.themes.length; i++) {
      mainWindow.webContents.send('change-theme',themeData.themes[i]);     
   }
   }
+}
 });
 
 };

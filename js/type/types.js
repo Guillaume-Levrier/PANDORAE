@@ -1233,6 +1233,8 @@ var geoData = geo[0];
                                       });
   
 
+// rotate globe
+
   /*
     //============ NARRATIVE ============
     function narrative(focused) {
@@ -1262,9 +1264,19 @@ var geoData = geo[0];
             .domain([0, height])
             .range([90, -90]);
   
+ var timer = d3.timer(elapsed=>{                                //Rotate globe on start
+              projection.rotate([.01 * elapsed, 0])
+              view.selectAll("path").attr("d", path)
+            })
+ 
+
+
   var drag = d3.drag().subject(()=>{
   
+  timer.stop();
+
   var r = projection.rotate();
+
             return {
                 x: λ.invert(r[0]),
                 y: φ.invert(r[1])
@@ -1291,6 +1303,9 @@ var geoData = geo[0];
   function zoomed() {view.style('transform', 'scale(' + d3.event.transform.k + ')');
   
         }
+
+
+
           loadType();
   
   ipcRenderer.send('console-logs',"Starting geotype");
