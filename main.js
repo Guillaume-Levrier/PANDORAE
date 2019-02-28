@@ -66,11 +66,11 @@ const themeChangeTrigger = (theme) => {
     let changeThemedata = JSON.parse(newThemeData);
     changeThemedata.activeTheme = theme;
 
-    fs.writeFile(basePath+"/json/themes.json",JSON.stringify(changeThemedata),'utf8',
+    fs.writeFileSync(basePath+"/json/themes.json",JSON.stringify(changeThemedata),'utf8',
       (err) => {if (err) throw err;}
     );
 
-    fs.writeFile(userDataPath +"/themes/themes.json",JSON.stringify(changeThemedata),'utf8',
+    fs.writeFileSync(userDataPath +"/themes/themes.json",JSON.stringify(changeThemedata),'utf8',
       (err) => {if (err) throw err;}
     );
    
