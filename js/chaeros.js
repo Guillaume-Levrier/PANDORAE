@@ -185,12 +185,14 @@ cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key))
      let unlocatedCities = [];
   
      article.forEach(d=>{
-       d.affiliation.forEach(e=>{
-        if (typeof country != "string"){
-          unlocatedCities.push(e);
+       if (d.hasOwnProperty("affiliation")) {
+       for (let i = 0; i < d.affiliation.length; i++) {
+        if (typeof d.affiliation[i].country != "string"){
+          unlocatedCities.push(d.affiliation[i]);
           }
-       })
-     })
+       }
+      }
+     });
 
      ipcRenderer.send('console-logs',"Unable to locale the following cities " + JSON.stringify(unlocatedCities));
 
