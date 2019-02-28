@@ -92,16 +92,16 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // No
       }
         finally {
          
-          pandodb.scopus.add({"name":dataset,"kind":"csl-json","date":date,"content":convertedDataset});
+        //  pandodb.scopus.add({"name":dataset,"kind":"csl-json","date":date,"content":convertedDataset});
           //pandodb.close();
-          /* let data = JSON.stringify(convertedDataset);                           // Prepare data to be written
+           let data = JSON.stringify(convertedDataset);                           // Prepare data to be written
             fs.writeFile(                                                        // Write data
               userDataPath +'/datasets/8zotero/1csl-json/csl-'+dataset,data,'utf8',// Path/name, data, format
                 (err) => {if (err)                                               // On error
                 ipcRenderer.send('chaeros-failure', err);                        // Send error to main process for dispatch
                 ipcRenderer.send('console-logs',JSON.stringify(err));            // Keep a log of the error
                 win.close();                                                     // Close the Chaeros window
-            }) */
+            }) 
          }
      })
      ipcRenderer.send('chaeros-success', 'Dataset converted');   // Else send a success message
