@@ -7,15 +7,10 @@ let mainWindow
 
 const basePath = app.getAppPath();
 
-
 //FileSystem
 var pandoDir = userDataPath;
 
-var dirTree = [
-  "/logs",
-  "/userID",
-  "/themes"
-]
+var dirTree = ["/logs","/userID","/themes"];
 
 const userDataDirTree = (path,dirTree) => {
     dirTree.forEach(d=>{
@@ -28,56 +23,41 @@ const userDataDirTree = (path,dirTree) => {
 }
 
 userDataDirTree(pandoDir,dirTree);
-// themes
+
+// Themes
 let activeTheme;
 
 fs.copyFileSync(basePath+"/json/themes.json", userDataPath +"/themes/themes.json");
 
 const changeTheme = () => {
 
-fs.readFile(basePath+"/json/themes.json", // Read the designated datafile
-                                'utf8', (err, theme) => {             // utf8 ecoding - start function
+    fs.readFile(basePath+"/json/themes.json",                // Read the designated datafile
+                      'utf8', (err, theme) => {             // utf8 encoding - start function
+        var themeData;
 
-var themeData;
-
-try {
-  themeData = JSON.parse(theme);
-} catch (error) {
-  console.log(error);             //Often fails at parsing 
-} finally {
-
-activeTheme = themeData.activeTheme;
-
-for (let i = 0; i < themeData.themes.length; i++) {
-  if (themeData.themes[i]["theme-name"]===activeTheme) {
-    
-     mainWindow.webContents.send('change-theme',themeData.themes[i]);     
-  }
-  }
-}
-});
-
+        try {
+              themeData = JSON.parse(theme);
+            } catch (error) {
+                console.log(error);             //Often fails at parsing 
+            } finally {
+                activeTheme = themeData.activeTheme;
+                for (let i = 0; i < themeData.themes.length; i++) {
+                      if (themeData.themes[i]["theme-name"]===activeTheme) {
+                          mainWindow.webContents.send('change-theme',themeData.themes[i]);     
+                      } 
+            }
+          }
+     });
 };
 
 const themeChangeTrigger = (theme) => {
-
-  fs.readFile(basePath +'/json/themes.json', // Read the designated datafile
-  'utf8', (err, newThemeData) => {             // utf8 ecoding - start function
-    let changeThemedata = JSON.parse(newThemeData);
-    changeThemedata.activeTheme = theme;
-
-    fs.writeFileSync(basePath+"/json/themes.json",JSON.stringify(changeThemedata),'utf8',
-      (err) => {if (err) throw err;}
-    );
-
-    fs.writeFileSync(userDataPath +"/themes/themes.json",JSON.stringify(changeThemedata),'utf8',
-      (err) => {if (err) throw err;}
-    );
-   
-    changeTheme();
-
-})
-
+    fs.readFile(basePath +'/json/themes.json','utf8', (err, newThemeData) => {             
+      let changeThemedata = JSON.parse(newThemeData);
+      changeThemedata.activeTheme = theme;
+      fs.writeFileSync(basePath+"/json/themes.json",JSON.stringify(changeThemedata),'utf8',(err) => {if (err) throw err;});
+      fs.writeFileSync(userDataPath +"/themes/themes.json",JSON.stringify(changeThemedata),'utf8',(err) => {if (err) throw err;});
+      changeTheme();
+    })
 };
 
 ipcMain.on('change-theme', (event,theme) => {
@@ -125,31 +105,22 @@ function createWindow () {
 
   mainWindow.setMenu(null);
   mainWindow.webContents.openDevTools();
-  
   mainWindow.on('closed', () => { mainWindow = null })
-
 }
 
-app.on('ready', ()=>{
-    createWindow();
-    
+app.on('ready', ()=>{createWindow()});
 
-})
-
-app.on('activate',  () => { if (mainWindow === null) { createWindow() } })
-
+app.on('activate',  () => { if (mainWindow === null) { createWindow() } });
 
 var windowIds = [
 {name:"flux",id:0},
 {name:"tutorialHelper",id:0},
 {name:"tutorial",id:0}
-]
-
+];
 
 ipcMain.on('window-ids', (event,window,id) => {
     windowIds.forEach(d=>{if (d.name === window) { d.id = id};})
 });
-
 
 const openHelper = (helperFile) => {
 
@@ -231,42 +202,6 @@ var dataLog =  "PANDORÆ Log - "+date;
     mainWindow.webContents.send('console-messages',newLine);           // send it to requester
   })
 
-//FLUX
-
-const availableDatasets = (datasets) => {
-
-    let dataList = [];
-
-fs.readdir(userDataPath+'/datasets/',{withFileTypes: true}, (err, files) => {      // list dataset subfolders
-    for (let i = 0;i<files.length;i++){                              // loop on available subfolders
-      if (datasets.type===files[i]){                                 // if this is the relevant subfolder
-        fs.readdir(userDataPath+'/datasets/'+files[i],{withFileTypes: true}, (err, folderOne) => { // read its content
-
-  for (let j = 0;j<folderOne.length;j++){
-
-    if (datasets.kind===parseInt(folderOne[j][0])){                                 // if this is the relevant subsubfolder
-      fs.readdir(userDataPath+'/datasets/'+files[i]+'/'+folderOne[j], (err, folderTwo) => {     // read its content
-          for (let k = 0;k<folderTwo.length;k++){           // loop on each object
-            let item = folderTwo[k];
-            let kind = folderOne[j];
-            let type = files[i];
-            let path = userDataPath+'/datasets/'+ files[i]+'/'+folderOne[j]+'/'+item;
-              mainWindow.webContents.send('datalist',type,kind,item,path);           // send it to requester
-                    };
-                 });
-              } else {
-
-                // Send OK signal for Worker activation
-
-               }
-            };
-          })
-        };
-      }
-    })
-};
-
-ipcMain.on('datalist', (event,message) => { availableDatasets(message) });
 
 // CHAEROS
 const powerValveArgsArray = [];
@@ -328,21 +263,7 @@ app.on('window-all-closed', function () {
     (err) => {
 if (err) throw err;
 
-//Purge Buffer
-if( fs.existsSync(userDataPath+"/datasets/buffer") ) {
-  fs.readdirSync(userDataPath+"/datasets/buffer").forEach(function(file,index){
-    var curPath = userDataPath+"/datasets/buffer/" + file;
-      fs.unlinkSync(curPath);
-  });
-  fs.rmdirSync(userDataPath+"/datasets/buffer");
-}
-
-  app.quit()
-});
-})
-
 // Tutorial
-
 ipcMain.on('tutorial', (event,message) => {
   switch (message) {
     case 'flux': 

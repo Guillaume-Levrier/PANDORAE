@@ -41,6 +41,7 @@ let structureV1 = "id,date,name";
 pandodb.version(1).stores({
       altmetric: structureV1,
       scopus: structureV1,
+      csljson: structureV1,
       zotero: structureV1,
       twitter: structureV1,
       anthropotype: structureV1,
@@ -312,7 +313,6 @@ const purgeXtype = () => {
   if (document.getElementById("xtypeSVG")) {
     document.getElementById("xtype").style.zIndex = "-2"                      // Send the XTYPE div to back
     document.getElementById("xtype").removeChild(document.getElementById("xtypeSVG"));
-    //document.getElementById("xtypeSVG").remove();                             // Remove the SVG with the current type
     removeTooltip();
   }
 };
@@ -450,7 +450,6 @@ let argLength = 99;
 
 const selectOption = (type,id) => {
        
-
         document.getElementById(id).style.backgroundColor = "darkgrey";
 
         toggleTertiaryMenu();
@@ -463,110 +462,6 @@ const selectOption = (type,id) => {
 
         start(type,options);
 
-        /* 
-        const metaGen = (path,count,metaStats) => {
-
-        var qrCanvas = document.createElement("canvas");
-        QRCode.toCanvas(qrCanvas, JSON.stringify(metaStats),{width:120}, function (error) {
-          if (error) console.error(error)
-        })
-        qrCanvas.style.padding = "10px";
-        thirdMenuContent.appendChild(qrCanvas);
-
-        var metaData = document.createElement("div");
-        metaData.style['overflow-wrap']= "break-word";
-        metaData.innerHTML =  "<p>"+ count + fileStats;
-
-        let  optionPush = () => {
-            options.push(path);
-            toggleTertiaryMenu();
-            nextOption(type,kind,item,path);
-            ipcRenderer.send('console-logs',"Selecting dataset: " + JSON.stringify(selected));
-
-            let availTabs = document.getElementsByClassName("secContentTabs");
-
-            for (var i = 0; i < availTabs.length; i++) {
-              if (availTabs[i].id === item) {
-                  availTabs[i].selected = true;
-              }
-              if (availTabs[i].selected === false) {
-              availTabs[i].remove();
-            }
-          }
-            start(type,options);
-          };
-
-        var optionSelector = document.createElement("button");
-        optionSelector.type = "submit";
-        optionSelector.innerHTML = "Select dataset";
-        optionSelector.className = "flux-button";
-        optionSelector.style.margin = "0px 25px";
-        optionSelector.addEventListener("click",optionPush);
-
-        thirdMenuContent.appendChild(optionSelector);
-        thirdMenuContent.appendChild(metaData);
-        }
-
-        const fileMetadata = (path) => {
-          let count = "";
-          let metaStats = {};
-          fs.stat(path, (err, d) => {
-            metaStats.size = d.size;
-            metaStats.birthtime = d.birthtime;
-            fileStats =
-            "<br><br><strong>Document size</strong><br>"+ d.size +" bits" +
-            "<br><br><strong>Last accessed</strong><br>"+ d.atime +
-            "<br><br><strong>Last modified</strong><br>"+ d.mtime +
-            "<br><br><strong>Created</strong><br>"+ d.birthtime +
-            "<br><br><strong>Owned by</strong><br>"+ d.uid +
-            "<br><br><strong>On device</strong><br>"+ d.dev +
-            "<br><br><strong>Path</strong><br> <a target='_blank' onClick='shell.showItemInFolder("+JSON.stringify(path)+");'>"+ path +"</a>"+
-            "</p>"
-          });
-          if (path.slice(-4)===".csv"){
-          return new Promise((resolve, reject) => {
-          let lineCount = 0;
-          fs.createReadStream(path)
-            .on("data", (buffer) => {
-              let idx = -1;
-              lineCount--; // Because the loop will run once for idx=-1
-              do {
-                idx = buffer.indexOf(10, idx+1);
-                lineCount++;
-              } while (idx !== -1);
-            }).on("end", () => {
-              resolve(lineCount);
-
-              count = "<strong>CSV line count: </strong>" + lineCount;
-              metaStats.fileType = "csv";
-              metaStats.lineCount = lineCount;
-
-              metaGen(path,count,metaStats);
-
-            })
-          })
-        }
-        else if (path.slice(-5)===".json"){
-          return new Promise((resolve, reject) => {
-          let arrayCount = 0;
-          fs.createReadStream(path)
-            .on("data", (buffer) => {
-              arrayCount = buffer.length;
-            }).on("end", () => {
-              resolve(arrayCount);
-              count = "<strong>JSON array object count:</strong> " + arrayCount;
-              metaStats.fileType = "json";
-              metaStats.lineCount = arrayCount;
-
-              metaGen(path,count,metaStats);
-            })
-
-          })
-        }
-      };
-
-        fileMetadata(path);
- */
         ipcRenderer.send('console-logs',"Checking dataset: " + JSON.stringify(id));
 
 }
@@ -605,41 +500,6 @@ const mainDisplay = (type) =>{
 
   toggleSecondaryMenu();
   listTableDatasets(type);
-
-    /* switch (type) {
-
-      case 'chronotype':toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Chronotype Data</strong><br><br>";
-                        
-                        ipcRenderer.send('datalist',{"type":"3chronotype","kind":1});
-                        break;
-
-      case 'anthropotype': toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Anthropotype Data</strong><br><br>";
-                        ipcRenderer.send('datalist',{"type":"2anthropotype","kind":1});
-                        break;
-
-      case 'geotype': toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Geotype Data</strong><br><br>";
-                        ipcRenderer.send('datalist',{"type":"4geotype","kind":1});
-                        break;
-
-      case 'pharmacotype':toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Clinical Trials Data</strong><br><br>";
-                        ipcRenderer.send('datalist',{"type":"5pharmacotype","kind":1});
-                        break;
-
-      case 'topotype': toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Topotype Data</strong><br><br>";
-                        ipcRenderer.send('datalist',{"type":"6publicdebate","kind":3});
-                        break;
-
-      case 'gazouillotype':toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Gazouilloire Data</strong><br><br>";
-                        ipcRenderer.send('datalist',{"type":"9gazouillotype","kind":1});
-                        break;
-
-    } */
 
 }
 

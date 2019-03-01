@@ -2,7 +2,7 @@
 <title>PANDORÆ-FLUX</title>
 
 <style>
-
+/* Overflow issues to be solved */
 </style>
 
 <div id="flux-manager" class="fluxTabs">
@@ -49,7 +49,7 @@
     <button type="submit" class="flux-button"  id="geolocate-button" onclick="powerValve('scopusGeolocate',this);return false">Geolocate Affiliations</button>
     <button type="submit" class="flux-button" id="convert-button" onclick="powerValve('scopusConverter',this);return false">Convert to CSL</button></div>
     <br><br>
-      <button type="submit" class="flux-button" id="scopus-display" onclick="datasetDisplay('/datasets/7scopus/2scopusDatasets','scopus-dataset-list','scopus-dataset');return false">Update Scopus Dataset list</button>
+      <button type="submit" class="flux-button" id="scopus-display" onclick="datasetDisplay('scopus-dataset-list','scopus');return false">Update Scopus Dataset list</button>
 </form>
 <div id="scopus-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
 </div>
@@ -92,9 +92,9 @@
 </div>
 
 <br><br>
-<button type="submit" class="flux-button" id="cslcolret" onclick="datasetDisplay('/datasets/8zotero/1csl-json','userCsljsonCollections','csl-json-dataset');return false">Display available csljson files</button><br>
-<div id="csl-json-dataset-preview"></div>
-<div id="csl-json-dataset-buttons"style="display:none;">
+<button type="submit" class="flux-button" id="cslcolret" onclick="datasetDisplay('userCsljsonCollections','csljson');return false">Display available csljson files</button><br>
+<div id="csljson-dataset-preview"></div>
+<div id="csljson-dataset-buttons"style="display:none;">
   <input class="fluxInput" spellcheck="false" class="sendToZotero" id="zoteroCollecName"  type="text" value="Enter collection name">
 
   <button type="submit" class="flux-button sendToZotero" id="zoteroCollecBuild" onclick="powerValve('zoteroCollectionBuilder',this);return false">Create a new Zotero Collection</button>
