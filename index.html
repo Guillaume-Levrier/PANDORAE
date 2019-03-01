@@ -9,8 +9,8 @@ html{
 }
 </style>
 
+<!--Core/Theme-->
 <div id="canvasSignal"></div>
-<!--Core-->
 <video autoplay loop class="themeCustom" id="screenMachine" type="video/mp4" >
 </video>
 
@@ -25,6 +25,7 @@ html{
 
 <img class="themeCustom" id="mask" >
 
+<!--Menu-->
 <div id="menu-icon"><i  class="material-icons">menu</i></div>
 <div id="option-icon" ><i onclick="toggleConsole();" class="material-icons">code</i></div>
 
@@ -52,18 +53,15 @@ html{
   </div>
 </div>
 
+<!--Sources-->
+<div id="xtype"><div id="source">Datasets :</div></div>
 
-<div id="xtype">
-<div id="source">Datasets :</div>
-
-</div>
-
-<div id="settings"></div>
-
+<!--Console-->
 <div id="console"><div id="log"></div>
 <div id="cli">$PANDORÆ~:<form autocomplete="off"><input spellcheck="false" type="text" id="cli-field" value=""><button type="submit" onclick="cmdinput(document.getElementById('cli-field').value);return false" id="cli-submit-invisible"></button></form></div>
 <div id="console-options"></div>
 </div>
 
+<!--Scripts-->
 <script src="js/pandorae.js"></script>
 <script src="js/lib/OrbitControls.js"></script>

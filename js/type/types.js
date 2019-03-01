@@ -23,6 +23,7 @@ let structureV1 = "id,date,name";
 pandodb.version(1).stores({
       altmetric: structureV1,
       scopus: structureV1,
+      csljson:structureV1,
       zotero: structureV1,
       twitter: structureV1,
       anthropotype: structureV1,

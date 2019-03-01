@@ -19,6 +19,28 @@ const fs = require('fs');                                             // FileSys
 const userDataPath = remote.app.getPath('userData');
 const {ipcRenderer} = require('electron');                            // ipcRenderer manages messages with Main Process
 const d3 = require("d3");
+const Dexie = require('dexie');
+
+Dexie.debug = true;
+
+let pandodb = new Dexie("PandoraeDatabase");
+
+let structureV1 = "id,date,name";
+
+pandodb.version(1).stores({
+      altmetric: structureV1,
+      scopus: structureV1,
+      csljson:structureV1,
+      zotero: structureV1,
+      twitter: structureV1,
+      anthropotype: structureV1,
+      chronotype: structureV1,
+      geotype: structureV1,
+      pharmacotype: structureV1,
+      publicdebate: structureV1,
+      gazouillotype: structureV1
+  });
+  pandodb.open();
 
 //========== STARTING FLUX ==========
 ipcRenderer.send('console-logs',"Opening Flux");           // Sending notification to console
@@ -317,11 +339,11 @@ case 'zoteroItemsRetriever' :  if (document.getElementById("zotitret").name ==="
                           }                        
                           break;
 
-case 'zoteroCollectionBuilder' : fluxArgs.zoteroCollectionBuilder = {"path":"","collectionName":""};
-            fluxArgs.zoteroCollectionBuilder.path = document.getElementById("csl-json-dataset-preview").name;
-            fluxArgs.zoteroCollectionBuilder.collectionName = document.getElementById("zoteroCollecName").value;
-            fluxArgs.zoteroCollectionBuilder.zoteroUser = document.getElementById("zoterouserinput").value;
-                          break;
+case 'zoteroCollectionBuilder' : fluxArgs.zoteroCollectionBuilder = {};
+                                 fluxArgs.zoteroCollectionBuilder.id = document.getElementById("csljson-dataset-preview").name;
+                                 fluxArgs.zoteroCollectionBuilder.collectionName = document.getElementById("zoteroCollecName").value;
+                                 fluxArgs.zoteroCollectionBuilder.zoteroUser = document.getElementById("zoterouserinput").value;
+                                 break;
 
 
 case 'altmetricRetriever' : fluxArgs.altmetricRetriever = {"path":""};
@@ -336,7 +358,7 @@ ipcRenderer.send('console-logs',"Sending to CHÆROS action "+fluxAction+ " with 
 
 ipcRenderer.send('dataFlux',fluxAction,fluxArgs,message);                         // Send request to main process
 
-remote.getCurrentWindow().hide();                                                 // Close flux modal window
+remote.getCurrentWindow().close();                                                 // Close flux modal window
 
 }
 
@@ -366,19 +388,15 @@ const fluxButtonAction = (buttonID,success,successPhrase,errorPhrase) => {
 //========== datasetDisplay ==========
 // datasetDisplay shows the datasets (usually JSON or CSV files) available in the relevant /datasets/ subdirectory.
 
-const datasetDisplay = (folderPath,divId,kind) => {              // This function displays the available datasets
+const datasetDisplay = (divId,kind) => {              // This function displays the available datasets
 
   try {                                                          // Try the following block
     let datasets = [];                                           // Start from an empty array
-
-    fs.readdir(userDataPath+folderPath, (err, files) => {             // Read the  directory to list files
-      files.forEach(file => {                                    // For each file in the directory
-        let fileName = "'"+file+"'";                             // Create a string from the name of the file
-        if (file !==".gitignore"){                               // If the file isn't a .gitignore
+   pandodb[kind].toArray(files=>{
+       files.forEach(file => {                                    // For each file in the directory                               
         datasets.push(                                           // Push the file in the array
-          "<li onclick=datasetDetail('"+folderPath+"/"+file+"','"+kind+"-preview','"+kind+"-buttons',"+fileName+");>"+file+"</li>"                 // A file is an HTML bullet point in a list
+          "<li onclick=datasetDetail('"+kind+"-dataset-preview','"+kind+"',"+JSON.stringify(file.id)+",'"+kind+"-dataset-buttons');>"+file.name+" - "+file.date+"</li>"                 // A file is an HTML bullet point in a list
         )
-      }
     });
 
   var datasetList = "";                                          // Create the list as a string
@@ -386,10 +404,8 @@ const datasetDisplay = (folderPath,divId,kind) => {              // This functio
   for (var i=0; i<datasets.length; ++i){                         // For each element of the array
       datasetList = datasetList + datasets[i];                   // Add it to the string
     }
-
     document.getElementById(divId).innerHTML = '<ul>'+datasetList+'</ul>';         // The string is a <ul> list
   })
-
     } catch(err){
           document.getElementById(divId).innerHTML = err;        // Display error in the result div
         }
@@ -400,29 +416,26 @@ const datasetDisplay = (folderPath,divId,kind) => {              // This functio
 // Clicking on a dataset displayed by the previous function displays some of its metadata and allows for further actions
 // to be triggered (such as sending a larger request to Chæros).
 
-const datasetDetail = (filePath,prevId,buttonId,filename) => {   // This function provides info on a specific dataset
+const datasetDetail = (prevId,kind,id,buttonId) => {   // This function provides info on a specific dataset
+console.log(prevId)
+  var datasetDetail = {};                                  // Create the dataDetail object
+  let dataPreview = "";                                    // Created dataPreview variable
 
-  fs.readFile(
-    userDataPath+filePath, 'utf8', (err, data) => {                   // read this particular dataset
-    try {                                                        // If the file is valid, do the following:
-        let doc = JSON.parse(data);                              // Parse the file as a JSON object
-        var datasetDetail = {};                                  // Create the dataDetail object
-        let dataPreview = "";                                    // Created dataPreview variable
+try {
+  pandodb[kind].get(id).then(doc=>{
+console.log(doc);
 
+switch (kind) {
 
-switch (prevId) {
+          case 'scopus' :
 
-          case 'scopus-dataset-preview' :
+                datasetDetail.searchTerms = doc.content.query;
+                datasetDetail.totalResults = doc.content.entries.length;
+                datasetDetail.queryDate = doc.date;
+                datasetDetail.articleGeoloc = doc.content.articleGeoloc;
+                datasetDetail.documentComplete = true;
 
-                let readDataset = doc[Object.keys(doc)[0]];      // Scopus response object format
-
-                datasetDetail.searchTerms = readDataset[2]["search-results"]["opensearch:Query"]["@searchTerms"];
-                datasetDetail.totalResults = readDataset[2]['search-results']['opensearch:totalResults'];
-                datasetDetail.queryDate = readDataset[0].queryDate;
-                datasetDetail.articleGeoloc = readDataset[1].articleGeoloc;
-                datasetDetail.documentComplete = readDataset[4].documentComplete;
-
-                dataPreview = "<strong>"+ filename +"</strong>"+ // dataPreview is the displayed information in the div
+                dataPreview = "<strong>"+ doc.name +"</strong>"+ // dataPreview is the displayed information in the div
                 "<br>Scopus query: " + datasetDetail.searchTerms+
                 "<br>Total results: " + datasetDetail.totalResults+
                 "<br>Query date: "+ datasetDetail.queryDate+
@@ -432,28 +445,28 @@ switch (prevId) {
                   document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
                   document.getElementById(buttonId).style.display = "block";
                   document.getElementById("geolocate-button").style.display = "inline-flex";
-                  document.getElementById("geolocate-button").name = filename;
+                  document.getElementById("geolocate-button").name = doc.id;
                   document.getElementById("convert-button").style.display = "inline-flex";
-                  document.getElementById("convert-button").name = filename;
+                  document.getElementById("convert-button").name = doc.id;
 
                 break;
 
-          case 'csl-json-dataset-preview':
-                  dataPreview = "<strong>"+ filename +"</strong><br>Item amount : " + doc.length;                  
+          case 'csljson':
+                  dataPreview = "<strong>"+ doc.name +"</strong><br>Item amount : " + doc.content.length;                  
                   document.getElementById(prevId).innerHTML = dataPreview;
-                  document.getElementById(prevId).name = filePath;
+                  document.getElementById(prevId).name = doc.id;
                   document.getElementById(buttonId).style.display = "inline-flex";
                 break
           
                 
-          case 'zotero-dataset-preview':
+          case 'zotero':
               dataPreview = "<strong>"+ filename +"</strong><br>Item amount : " + doc[0].items.length;
               document.getElementById(prevId).innerHTML = dataPreview;
               document.getElementById(prevId).name = filePath;
               //document.getElementById(buttonId).style.display = "inline-flex";
         break
 
-          case 'almetric-request-dataset-preview':
+          case 'almetric':
 
                   dataPreview = "<strong>"+ filename +"</strong><br>Items amount : " + doc[0].items.length;
 
@@ -464,12 +477,16 @@ switch (prevId) {
                 break
 
                   }
+                   
+  })
+                  
               }
+              
   catch(error) {                                                // If it fails at one point
-          document.getElementById(prevId).innerHTML =  error;   // Display error message
-          ipcRenderer.send('console-logs',error);               // Log error
-            }
-  });
+        document.getElementById(prevId).innerHTML =  error;   // Display error message
+        ipcRenderer.send('console-logs',error);               // Log error
+      }
+
 }
 
 //========== scopusBasicRetriever ==========

@@ -31,6 +31,7 @@ let structureV1 = "id,date,name";
 pandodb.version(1).stores({
       altmetric: structureV1,
       scopus: structureV1,
+      csljson: structureV1,
       zotero: structureV1,
       twitter: structureV1,
       anthropotype: structureV1,
@@ -53,14 +54,12 @@ const scopusConverter = (dataset) => {                               // [dataset
 ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // Notify console conversion started
 
   let convertedDataset = [];                                         // Create relevant array
+  
+  pandodb.scopus.get(dataset).then(doc=>{
 
-  fs.readFile(userDataPath +'/datasets/7scopus/2scopusDatasets/' + dataset, // Read the designated datafile
-                                'utf8', (err, data) => {             // utf8 ecoding - start function
-    if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))}; // Send error to log if readFile fails
-    try {                                                            // If the file is valid, do the following:
-        let doc = JSON.parse(data);                                  // Parse the file as a JSON object
-        let readDataset = doc[Object.keys(doc)[0]];                  // Select relevant array
-        let articles = readDataset[3].entries;                       // Select articles
+  try {                                                            // If the file is valid, do the following:
+        
+        let articles = doc.content.entries;                       // Select articles
 
         for (var i=0; i<articles.length; ++i){                       // For each article of the array
             let pushedArticle =                                      // Zotero journalArticle format
@@ -87,47 +86,38 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // No
             }
 
       } catch(err) {
-        ipcRenderer.send('chaeros-failure', err);                               // On failure, send error to main process
+        ipcRenderer.send('chaeros-failure', JSON.stringify(err));                               // On failure, send error to main process
         ipcRenderer.send('console-logs',JSON.stringify(err));                   // On failure, send error to console
       }
-        finally {
-         
-        //  pandodb.scopus.add({"name":dataset,"kind":"csl-json","date":date,"content":convertedDataset});
-          //pandodb.close();
-           let data = JSON.stringify(convertedDataset);                           // Prepare data to be written
-            fs.writeFile(                                                        // Write data
-              userDataPath +'/datasets/8zotero/1csl-json/csl-'+dataset,data,'utf8',// Path/name, data, format
-                (err) => {if (err)                                               // On error
-                ipcRenderer.send('chaeros-failure', err);                        // Send error to main process for dispatch
-                ipcRenderer.send('console-logs',JSON.stringify(err));            // Keep a log of the error
-                win.close();                                                     // Close the Chaeros window
-            }) 
+        finally {  
+          pandodb.open();
+          let id = dataset+date;
+          pandodb.csljson.add({"id":id,"date":date,"name":dataset,"content":convertedDataset}); 
          }
      })
+     
      ipcRenderer.send('chaeros-success', 'Dataset converted');   // Else send a success message
      ipcRenderer.send('console-logs',"scopusConverter successfully converted " + dataset); // Log success
-}
+     setTimeout(()=>{win.close()},500);
+};
+
+
 
 //========== scopusGeolocate ==========
-// scopusGeolocate gets cities/countries from a given scopus Dataset and send them to the OSM Geolocate API function.
-// To be rewritten soon
-const scopusGeolocate = (dataset,user) => {
+// scopusGeolocate gets cities/countries from a given scopus Dataset.
 
+const scopusGeolocate = (dataset) => {
+console.log(dataset)
 ipcRenderer.send('console-logs',"Started scopusGeolocate on " + dataset);
 
-fs.readFile(userDataPath +'/datasets/7scopus/2scopusDatasets/' + dataset,    // Read the dataset passed as option
-                              'utf8', (err, data) => {                       // It should be encoded as UTF-8
-  if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
-
-  var doc = JSON.parse(data);                                       // Parse the file as a JSON object
-
-
+ pandodb.scopus.get(dataset).then(doc => {
+console.log(doc)
   fs.readFile(appPath +'/json/cities.json',    // Read the dataset passed as option
                               'utf8', (err, locatedCities) => {                       // It should be encoded as UTF-8
 
   var coordinates = JSON.parse(locatedCities);
 
-  let article = doc[Object.keys(doc)[0]][3].entries;                // Find relevant objects in the parsed dataset
+  let article = doc.content.entries;                // Find relevant objects in the parsed dataset
   var datasetDetail = {};                                           // Prepare an empty object
   let totalCityArray = [];                                          // Prepare an empty array
    
@@ -160,6 +150,7 @@ cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key))
           }
         }
     })
+
     article.forEach(d=>{
       for (let l = 0; l < cityIndex.length; l++) {
         if (d.hasOwnProperty('affiliation')){ 
@@ -196,17 +187,12 @@ cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key))
 
      ipcRenderer.send('console-logs',"Unable to locale the following cities " + JSON.stringify(unlocatedCities));
 
-     doc[Object.keys(doc)[0]][1].articleGeoloc = true;                           // Mark file as geolocated
+     doc.content.articleGeoloc = true;                           // Mark file as geolocated
 
-      let docstring=JSON.stringify(doc);                                          // Stringify to write
-          fs.writeFile(                                                                  // Write data
-            userDataPath +'/datasets/7scopus/2scopusDatasets/geoloc-'+dataset,docstring,'utf8',
-              (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
-
-    ipcRenderer.send('chaeros-success', 'Affiliations geolocated');              //Send success message to main process
-    ipcRenderer.send('console-logs',"scopusGeolocate successfully added geolocations on " + dataset);
-    win.close();            
-          })
+     pandodb.scopus.put(doc);
+     ipcRenderer.send('chaeros-success', 'Affiliations geolocated');              //Send success message to main process
+     ipcRenderer.send('console-logs',"scopusGeolocate successfully added geolocations on " + dataset);
+     setTimeout(()=>{win.close()},500);
       })
   })
 
@@ -223,8 +209,14 @@ const scopusRetriever = (user, query) => {                          // user argu
 
 ipcRenderer.send('console-logs',"Started scopusRetriever on " + query + " for user "+ user); // Log the process
 
-let scopusQuery = query;                                            // query argument is the actual query
+let scopusQuery = query;        // query argument is the actual query
 
+var content = {"type":"Scopus-dataset",
+                query:scopusQuery,
+                "queryDate":date,
+                "articleGeoloc":false,
+                "entries":[]};
+                                
 keytar.getPassword("Scopus",user).then((scopusApiKey) => {          // Get the password through keytar
 
 // URL Building blocks
@@ -243,17 +235,7 @@ let optionsRequest = {                              // Prepare options for the R
 rpn(optionsRequest)                                 // RPN stands for Request-promise-native (Request + Promise)
               .then(function (firstResponse) {      // Once you get the response
 
-    let docAmount = firstResponse['search-results']['opensearch:totalResults']; // Get the total amount of docs
-
-    let output = fs.createWriteStream(userDataPath+'/datasets/7scopus/2scopusDatasets/scopus-data-'+ scopusQuery +'.json'); // Start the stream
-
-// Create the output document's properties
-    let date = new Date().toJSON();                 // Create a timestamp
-    output.write('{"Scopus-dataset-'+scopusQuery+   // Start the stream with ID info
-    '":[{"queryDate":"'+date+
-    '"},{"articleGeoloc":false},');
-    output.write(JSON.stringify(firstResponse));    // Add the first response (can provide context info)
-    output.write(',{"entries":[');                  // Open entries(=docs) array to be filled
+let docAmount = firstResponse['search-results']['opensearch:totalResults']; // Get the total amount of docs
 
 var dataPromises = [];                              // Create empty array for the promises to come
 
@@ -277,23 +259,22 @@ Promise.all(dataPromises)                                // Submit requests
             let retrievedDocuments = scopusResponse[i]['search-results']['entry']; // Select the docs it contains
 
             for(let j = 0; j < retrievedDocuments.length; j++){ // For each document
-                      output.write(JSON.stringify(retrievedDocuments[j])+",");  // Write it in the "entries" array
+                      content.entries.push(retrievedDocuments[j]);  // Write it in the "entries" array
                     }
         }
         return
       })
-    .then(function(){                                     // Once all entries/documents have been written
-        output.write('{}]},{"documentComplete":true}]}'); // Add a signal object and close the "entries" array
-        output.end();                                     // Close the stream
-        output.on("finish", function () {                 // When the stream emits "finish" event
-            ipcRenderer.send('chaeros-success', 'Scopus API data retrieved'); // signal success to main process
-            ipcRenderer.send('console-logs',"Scopus dataset on " + query + " for user "+ user +" have been successfully retrieved.");
-            win.close();                                   // Close Chaeros
-            }
-        );
+    .then(()=>{                                     // Once all entries/documents have been written
+
+      pandodb.open();
+      let id = query+date;
+      pandodb.scopus.add({"id":id,"date":date,"name":query,"content":content});
+      ipcRenderer.send('chaeros-success', 'Scopus API data retrieved'); // signal success to main process
+      ipcRenderer.send('console-logs',"Scopus dataset on " + query + " for user "+ user +" have been successfully retrieved.");
+      setTimeout(()=>{win.close()},500);                                   // Close Chaeros
     })
       })
-      .catch(function(e) {
+      .catch((e) => {
         ipcRenderer.send('chaeros-failure', e);           // Send error to main process
         })
     })
@@ -833,7 +814,7 @@ ipcRenderer.send('console-logs',"Lexical analysis on " + dataFile + "complete. W
           });
     ipcRenderer.send('console-logs',"CapCo " + dataFile + " links has been successfully written.");
           ipcRenderer.send('chaeros-success', 'Dataset rebuilt');
-         win.close();
+          setTimeout(()=>{win.close()},500);
 
   });
 }
@@ -923,23 +904,22 @@ const dataWriter = (destination,importName,content) => {
       ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " was imported in "+d);
   })
   ipcRenderer.send('chaeros-success', 'Dataset successfully imported');
-  win.close();
+  setTimeout(()=>{win.close()},500);
 
 }
 
 //========== zoteroCollectionBuilder ==========
 // zoteroCollectionBuilder creates a new collection from a CSL-JSON dataset.
 
-const zoteroCollectionBuilder = (collectionName,zoteroUser,path) => {
+const zoteroCollectionBuilder = (collectionName,zoteroUser,id) => {
 
-ipcRenderer.send('console-logs',"Building collection" + collectionName + " for user " + zoteroUser +" in path "+path);
+ipcRenderer.send('console-logs',"Building collection" + collectionName + " for user " + zoteroUser +" in path "+id);
 
-  fs.readFile(userDataPath + path,'utf8', (err, data) => {                // Read the designated datafile
-    if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};      // Throw an error if readFile fails
+ pandodb.csljson.get(id).then(data=>{
+
+var file = data.content;
+
     try {                                                                 // If the file is valid, do the following:
-
-    let file = JSON.parse(data);                                          // Parse data as JSON array
-
     const limiter = new bottleneck({                                      // Create a bottleneck to prevent API rate limit
       maxConcurrent: 1,                                                   // Only one request at once
       minTime: 150                                                        // Every 150 milliseconds
@@ -970,9 +950,9 @@ let collectionCode = {"code":""};
 
     let fileArrays = [];                                         // Create empty array
 
-    file.forEach(file=>{                                         // For each file object
-      file.collections = [];                                     // Create a "collections" property
-      file.collections.push(collectionCode.code);                // Push the collection code attributed by Zotero
+    file.forEach(d=>{                                         // For each file object
+      d.collections = [];                                     // Create a "collections" property
+      d.collections.push(collectionCode.code);                // Push the collection code attributed by Zotero
     })
           for (let i=0; i<file.length; i+=50){                   // Only 50 items can be sent per request
             let subArray = {"items":[]};                         // Create subArray item
@@ -983,7 +963,7 @@ let collectionCode = {"code":""};
             fileArrays.push(subArray);                           // Push subArray in fileArrays
           }
 
-    Promise.all(fileArrays.forEach((d)=>{                        // Send all requests as promises (bottlenecked)
+  Promise.all(fileArrays.map(d=>{                        // Send all requests as promises (bottlenecked)
 
         let subArrayUpload = {                                   // Designing promises
             method: 'POST',
@@ -993,11 +973,15 @@ let collectionCode = {"code":""};
             json: true
           };
 
-        return limiter.schedule(rpn,subArrayUpload).then((res) => {                   // Enforce bottleneck
-                if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};      // Send error to console
+         return limiter.schedule(rpn,subArrayUpload).then((res) => {                   // Enforce bottleneck
+          console.log(res);
+               /*  if (error) {
+                  console.log(error)                                                   // Send error to console
+                  ipcRenderer.send('console-logs',JSON.stringify(error))               // Send error to console
+                };      */
 
         })
-
+ 
 
    }))
 ipcRenderer.send('console-logs',"Collection "+JSON.stringify(collectionName)+" built.");              // Send success message to console
@@ -1009,7 +993,7 @@ ipcRenderer.send('console-logs',"Collection "+JSON.stringify(collectionName)+" b
       }
       finally{
         ipcRenderer.send('chaeros-success', 'Collection created');   // Send success message to main Display
-        win.close();
+        setTimeout(()=>{win.close()},500);
       }
   })
 }
@@ -1024,9 +1008,6 @@ const chaerosSwitch = (fluxAction,fluxArgs) => {
   ipcRenderer.send('console-logs',"CHÆROS started a "+ fluxAction +" process with the following arguments : " + JSON.stringify(fluxArgs));
 
       switch (fluxAction) {
-
-        /*   case 'lexicAnalysis' : lexicAnalysis(fluxArgs.lexicAnalysis.dataset);
-          break; */
 
           case 'scopusConverter' : scopusConverter(fluxArgs.scopusConverter.dataset);
           break;
@@ -1044,9 +1025,9 @@ const chaerosSwitch = (fluxAction,fluxArgs) => {
           
           break;
 
-          case 'zoteroCollectionBuilder' : zoteroCollectionBuilder(fluxArgs.zoteroCollectionBuilder.collectionName,fluxArgs.zoteroCollectionBuilder.zoteroUser,fluxArgs.zoteroCollectionBuilder.path);
+          case 'zoteroCollectionBuilder' : zoteroCollectionBuilder(fluxArgs.zoteroCollectionBuilder.collectionName,fluxArgs.zoteroCollectionBuilder.zoteroUser,fluxArgs.zoteroCollectionBuilder.id);
+          
           break;
-
       }
 
     }

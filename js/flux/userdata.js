@@ -18,7 +18,6 @@ const getUserData = () => {
           document.getElementById("scopuskeyinput").value =     keytar.getPassword("Scopus",userName);
           document.getElementById("altmetrickeyinput").value =  keytar.getPassword("Altmetric",userName);
           document.getElementById("twitterkeyinput").value =    keytar.getPassword("Twitter",userName);
-          document.getElementById("geocodinginput").value =     keytar.getPassword("Geocoding",userName);
 
     });
 }
