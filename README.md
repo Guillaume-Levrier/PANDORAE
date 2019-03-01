@@ -5,13 +5,12 @@ To test the dev branch, clone the repo, cd into it, and use 'npm i', './node_mod
 **License issues :** some package/code license issues might still be around after the pre-upload cleanup. If you find one or more, please reach out on Twitter (@Li_Guilong) and I'll try to make it right.
 
 ### TODO FOR BETA RELEASE
-- create an interactive tutorial (under way).
-- implement FETCH altmetric requests.
-- importing scrapped/API tweets in Dexie ?
+- interactive tutorial
+- FETCH altmetric requests.
 
 ### ONCE IN BETA
-- enable gazouillotype brush & link it to dynamic node display (only generate nodes in the current brush, enforce a max brush width)
-- chronotype could use a Ybrush as well
-- comment each and every line of JS (under way)
-- add a zotero connector 
-- write the API documentation
+- Gazouillotype brush/dynamic node display/max node amount
+- Chronotype Ybrush
+- Twitter data (API/scrap) connector
+- Zotero connector 
+- API documentation

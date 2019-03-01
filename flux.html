@@ -126,8 +126,17 @@
 <div id="local" style="display:none;" class="fluxTabs">
     <span class="flux-title">LOCAL</span><br><br>
 
-<button type="submit" class="flux-button" id="load-local" onclick="datasetLoader(this);return false">Upload local  datasets</button><select id="localSelector" required></select>
-<input class="fluxInput" id="dataset-upload" type="file" onclick="datasetsSubdirList('localSelector')" accept=".json,.csv" multiple/><br><br>
+    This feature is currently disabled for security reasons.<br><br>
+
+<input class="fluxInput" id="dataset-upload" type="file" accept=".json,.csv" multiple/><br><br>
+
+<div id="availableDestinations" style="flex:auto">
+  <input class='locDestCheck' value='geotype' name='geotype' type='checkbox'/><label>geotype</label><br>
+  <input class='locDestCheck' value='anthropotype' name='anthropotype' type='checkbox'/><label>anthropotype</label><br>
+  <input class='locDestCheck' value='pharmatype' name='pharmatype' type='checkbox'/><label>pharmatype</label><br>
+  <input class='locDestCheck' value='chronotype' name='chronotype' type='checkbox'/><label>chronotype</label><br>
+</div>
+<button type="submit" class="flux-button" id="load-local" onclick="datasetLoader();return false" disabled>Upload local  datasets</button>
 </div>
 
 
