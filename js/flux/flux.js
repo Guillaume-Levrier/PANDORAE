@@ -632,77 +632,52 @@ fluxButtonAction ("zotcolret",true,"Zotero Collections Successfully Retrieved","
   })
 }
 
-//========== pubDebDatasetLoader ==========
-/* 
-const pubDebDatasetLoader = () => {
-
-let uploadedFile = document.getElementById("load-local-pubdeb").files;
-let uploadPath = uploadedFile[0].path;
-let targetFolder = userDataPath+"/datasets/6publicdebate/1capco/" + uploadedFile[0].name;
-
-ipcRenderer.send('console-logs',"Loading file "+ uploadedFile + " in "+targetFolder);
-
-  fs.copyFile(uploadPath, targetFolder, (err) => {
-    if (err) throw err;
-  });
-  return uploadedFile[0].name;
-
-} */
-
-//========== pubDebLinksLoader ==========
-const pubDeblinkDatasetLoader = () => {
-
-let uploadedFile = document.getElementById("load-local-links").files;
-let uploadPath = uploadedFile[0].path;
-let targetFolder = userDataPath+"/datasets/6publicdebate/2matching/" + uploadedFile[0].name;
-ipcRenderer.send('console-logs',"Loading file "+ uploadedFile + " in "+targetFolder);
-  fs.copyFile(uploadPath, targetFolder, (err) => {
-    if (err) throw err;
-  });
-return uploadedFile[0].name;
-}
-
-
 //========== datasetLoader ==========
 // datasetLoader allows user to load datasets from a local directory into a PANDORAE target subdirectory.
 
-const datasetLoader = (item) => {
+const datasetLoader = () => {
 
-let uploadedFile = document.getElementById("dataset-upload").files;               // Uploaded file as a variable
-let uploadPath = uploadedFile[0].path;                                            // Extract its absolute path
+let uploadedFiles = document.getElementById("dataset-upload").files;               // Uploaded file as a variable
 
-let targetted = document.getElementById("localSelector").options[document.getElementById("localSelector").options.selectedIndex].value;
+let targets=[];
 
-    let targetFolder = userDataPath+ "/datasets/" + targetted + '/' + uploadedFile[0].name;      // Prepare its destination path
-  fs.copyFile(uploadPath, targetFolder, (err) => {                                // Copy the file
-    if (err) throw err;
-  });
-  fluxButtonAction ("load-local",true,"Item successfully uploaded","");
-  ipcRenderer.send('console-logs',"Dataset "+ uploadedFile + " loaded in "+uploadPath); // Log action
+var dest = document.getElementsByClassName('locDestCheck');
+
+for (let i =0; i<dest.length; i++){
+  if (dest[i].checked) {
+    targets.push(
+      dest[i].value
+     )
+   }
 }
+
+  try {
+        uploadedFiles.forEach(dataset=>{
+          targets.forEach(target=>{
+            console.log(target);
+            console.log(dataset.name);
+              pandodb[target].put(dataset);
+              ipcRenderer.send('console-logs',"Dataset "+ dataset.name + " loaded in "+JSON.stringify(target)+"."); // Log action
+            });
+        });
+  } catch(e) {
+        ipcRenderer.send('console-logs',e); // Log error
+  }finally{
+        fluxButtonAction ("load-local",true,"Uploaded","");
+      }
+
+};
 
 //========== datasetsSubdirList ==========
 // List available directories for the user to upload the datasets in.
-const datasetsSubdirList = (dirListId) => {
+const datasetsSubdirList = (kind,dirListId) => {
   let datasetDirArray = [];
-  let datasets = {};
 
-  var walkDirectory = function(path, obj) {
-    var dir = fs.readdirSync(path);
-    for (var i = 0; i < dir.length; i++) {
-      var name = dir[i];
-      var target = path + '/' + name;
-      var stats = fs.statSync(target);
-       if (stats.isDirectory()) {
-         let datasetDirectory = target.slice(userDataPath.length+10,target.length);
-        datasetDirArray.push("<option value="+datasetDirectory+">"+datasetDirectory+"</option>");
-        obj[name] = {};
-        walkDirectory(target, obj[name]);
-      }
-    }
-  };
-
-  walkDirectory(userDataPath+'/datasets', datasets);
+if (kind="local") {
+  datasetDirArray = ['altmetric','scopus','csljson','zotero','twitter','anthropotype','chronotype','geotype','pharmacotype','publicdebate','gazouillotype'];
+} else{
+  datasetDirArray = kind;
+}
 
   var datasetDirList = "";                                                   // Create the list as a string
   for (var i=0; i<datasetDirArray.length; ++i){                              // For each element of the array
@@ -710,7 +685,6 @@ const datasetsSubdirList = (dirListId) => {
     }
     document.getElementById(dirListId).innerHTML = datasetDirList;           // The string is a <ul> list
 }
-
 
 //========== scopusGeolocate ==========
 // scopusGeolocate gets cities/countries from a given scopus Dataset and send them to the OSM Geolocate API function.
@@ -732,53 +706,4 @@ const geoTest = () => {
           checkKey("mapTilerValidation",false)
         })
   })
-}
-  
-
-//========== bufferZone ==========
-const bufferUpdate = () => {
-
-let folderPath = "/datasets/buffer";
-
-  try {                                                          // Try the following block
-    let datasets = [];                                           // Start from an empty array
-
-    fs.readdir(userDataPath+folderPath, (err, files) => {             // Read the  directory to list files
-      files.forEach(file => {                                    // For each file in the directory
-        let fileName = "'"+file+"'";                             // Create a string from the name of the file
-        if (file !==".gitignore"){                               // If the file isn't a .gitignore
-        datasets.push(                                           // Push the file in the array
-          "<li onclick=displayBufferOptions('"+folderPath+"/"+file+"');>"+file+"</li>"                 // A file is an HTML bullet point in a list
-        )
-      }
-    });
-
-  var datasetList = "";                                          // Create the list as a string
-
-  for (var i=0; i<datasets.length; ++i){                         // For each element of the array
-      datasetList = datasetList + datasets[i];                   // Add it to the string
-    }
-
-    document.getElementById("bufferDatasets").innerHTML = '<ul>'+datasetList+'</ul>';         // The string is a <ul> list
-  })
-
-    } catch(err){
-          document.getElementById(divId).innerHTML = err;        // Display error in the result div
-        }
-}
-
-const displayBufferOptions = (file) => {
-
-  let types = ['chronotype','anthropotype','geotype','topotype','pharmatype','gazouillotype']
-  let options = [];
-  types.forEach(option => {
-    options.push('<input type="checkbox" id="'+option+'" value="'+option+'"><label for="'+option+'">'+option+'</label>')
-  })
-  var optionList = "";                                          // Create the list as a string
-
-  for (var i=0; i<options.length; ++i){                         // For each element of the array
-    optionList = optionList + options[i];                       // Add it to the string
-    }
-
-    document.getElementById("types").innerHTML = optionList;    // The string is a <ul> list
 }

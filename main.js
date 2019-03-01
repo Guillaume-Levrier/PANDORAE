@@ -262,6 +262,9 @@ app.on('window-all-closed', function () {
     userDataPath +'/logs/log-'+date+".txt",dataLog,'utf8',     // Path/name, data, format
     (err) => {
 if (err) throw err;
+setTimeout(()=>{app.quit()},100);
+    })
+  });
 
 // Tutorial
 ipcMain.on('tutorial', (event,message) => {
@@ -272,6 +275,3 @@ ipcMain.on('tutorial', (event,message) => {
 
   }
 });
-
-
-
