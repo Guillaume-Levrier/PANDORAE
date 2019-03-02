@@ -6,7 +6,6 @@ To test the dev branch, clone the repo, cd into it, and use 'npm i', './node_mod
 
 ### TODO FOR BETA RELEASE
 - interactive tutorial
-- FETCH altmetric requests.
 
 ### ONCE IN BETA
 - Gazouillotype brush/dynamic node display/max node amount

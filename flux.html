@@ -71,15 +71,15 @@
     <span class="flux-title">ALTMETRIC</span><br><br>
 
 <form id="altmetric-import-form" autocomplete="off">
-  <button type="submit" class="flux-button" id="scopus-display" onclick="datasetDisplay('/datasets/altmetric/requests','almetric-request-dataset-list','almetric-request-dataset');return false">Update datasets available for altmetric request list </button>
+  <button type="submit" class="flux-button" id="scopus-display" onclick="datasetDisplay('altmetric-dataset-list','altmetric');return false">Update datasets available for altmetric request list </button>
 <br>
 
-<div id="almetric-request-dataset-preview"></div>
-<div id="almetric-request-dataset-buttons"style="display:none;">
-<button type="submit" class="flux-button" onclick='powerValve("altmetricRetriever",this);return false'>Retrieve Almetric Data</button>
+<div id="altmetric-dataset-preview"></div>
+<div id="altmetric-dataset-buttons"style="display:none;">
+<button type="submit" class="flux-button" onclick='powerValve("altmetricRetriever",this);return false'>Enrich with Altmetric Data</button>
 </div>
 
-<div id="almetric-request-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
+<div id="altmetric-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
 
 </form>
 </div>
@@ -113,6 +113,8 @@
   <input class='zotDestCheck' value='geotype' name='geotype' type='checkbox'/><label>geotype</label><br>
   <input class='zotDestCheck' value='anthropotype' name='anthropotype' type='checkbox'/><label>anthropotype</label><br>
   <input class='zotDestCheck' value='pharmatype' name='pharmatype' type='checkbox'/><label>pharmatype</label><br>
+  <input class='zotDestCheck' value='altmetric' name='altmetric' type='checkbox'/><label>altmetric</label><br>
+
 </div>
 </div>
 <br><br><br>
