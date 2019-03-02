@@ -346,9 +346,10 @@ case 'zoteroCollectionBuilder' : fluxArgs.zoteroCollectionBuilder = {};
                                  break;
 
 
-case 'altmetricRetriever' : fluxArgs.altmetricRetriever = {"path":""};
-                            fluxArgs.altmetricRetriever.path = itemname;
-                          break;
+case 'altmetricRetriever' : fluxArgs.altmetricRetriever = {};
+                            fluxArgs.altmetricRetriever.id = document.getElementById("altmetric-dataset-preview").name;
+                            fluxArgs.altmetricRetriever.user = document.getElementById("userNameInput").value;
+                            break;
 
 
 }
@@ -417,13 +418,12 @@ const datasetDisplay = (divId,kind) => {              // This function displays 
 // to be triggered (such as sending a larger request to Chæros).
 
 const datasetDetail = (prevId,kind,id,buttonId) => {   // This function provides info on a specific dataset
-console.log(prevId)
+
   var datasetDetail = {};                                  // Create the dataDetail object
   let dataPreview = "";                                    // Created dataPreview variable
 
 try {
   pandodb[kind].get(id).then(doc=>{
-console.log(doc);
 
 switch (kind) {
 
@@ -452,26 +452,18 @@ switch (kind) {
                 break;
 
           case 'csljson':
-                  dataPreview = "<strong>"+ doc.name +"</strong><br>Item amount : " + doc.content.length;                  
+                  dataPreview = "<strong>"+ doc.name +"</strong><br>Item amount : " + doc.content.length;         
                   document.getElementById(prevId).innerHTML = dataPreview;
                   document.getElementById(prevId).name = doc.id;
                   document.getElementById(buttonId).style.display = "inline-flex";
                 break
           
                 
-          case 'zotero':
-              dataPreview = "<strong>"+ filename +"</strong><br>Item amount : " + doc[0].items.length;
-              document.getElementById(prevId).innerHTML = dataPreview;
-              document.getElementById(prevId).name = filePath;
-              //document.getElementById(buttonId).style.display = "inline-flex";
-        break
+          case 'altmetric':
 
-          case 'almetric':
-
-                  dataPreview = "<strong>"+ filename +"</strong><br>Items amount : " + doc[0].items.length;
-
+                  dataPreview = "<strong>"+ doc.name +"</strong><br>Items amount : " + doc.content[0].items.length;
                   document.getElementById(prevId).innerHTML = dataPreview;
-                  document.getElementById(prevId).name = filePath;
+                  document.getElementById(prevId).name = doc.id;
                   document.getElementById(buttonId).style.display = "inline-flex";
 
                 break

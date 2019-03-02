@@ -974,14 +974,7 @@ let collectionCode = {"code":""};
           };
 
          return limiter.schedule(rpn,subArrayUpload).then((res) => {                   // Enforce bottleneck
-          console.log(res);
-               /*  if (error) {
-                  console.log(error)                                                   // Send error to console
-                  ipcRenderer.send('console-logs',JSON.stringify(error))               // Send error to console
-                };      */
-
         })
- 
 
    }))
 ipcRenderer.send('console-logs',"Collection "+JSON.stringify(collectionName)+" built.");              // Send success message to console
@@ -997,6 +990,66 @@ ipcRenderer.send('console-logs',"Collection "+JSON.stringify(collectionName)+" b
       }
   })
 }
+
+//========== altmetricRetriever ==========
+// FETCH altmetric documents through the Altmetric API.
+
+const altmetricRetriever = (user,id) => {
+
+  pandodb.altmetric.get(id).then(doc=>{
+    keytar.getPassword("altmetric", user).then((altmetricAPIkey) => {         // Retrieve password through keytar
+    
+      var timer = 500;
+
+      try {
+
+        const limiter = new bottleneck({                                      // Create a bottleneck to prevent API rate limit
+          maxConcurrent: 1,                                                   // Only one request at once
+          minTime: 100                                                        // Every 150 milliseconds
+        });
+
+        var DOIs = [];
+        files = doc.content[0].items;
+
+        files.forEach(f=>{
+          if (f.hasOwnProperty("DOI")) {
+            DOIs.push(f.DOI);
+            timer = timer+100;
+            console.log(timer);
+          }
+        })
+
+              Promise.all(DOIs.map(d=>{
+
+                var altmetricRequestOptions = {                                // Prepare options for the Request-Promise-Native Package
+                  uri: "https://api.altmetric.com/v1/doi/"+d,//+"?key="+altmetricAPIkey,
+                  headers: {'User-Agent': 'Request-Promise'},                  // Headers (some options can be added here)
+                  json: true                                                   // Automatically parses the JSON string in the response
+                };
+
+                return limiter.schedule(rpn,altmetricRequestOptions).then((res) => {                   // Enforce bottleneck
+                  files.forEach(file=>{
+                    file.altmetricData = res;
+                    console.log(file);
+                  })
+                })
+              })
+           )    
+
+      } catch (error) {
+          ipcRenderer.send('console-logs',error);
+      } finally {
+        doc.altmetricEnriched = true;
+        setTimeout(()=>{pandodb.altmetric.put(doc)},timer);
+        ipcRenderer.send('chaeros-success', 'Altmetric enrichment successful');   // Send success message to main Display
+        ipcRenderer.send('console-logs',"Altmetric enrichment of "+id+" successful.");
+        setTimeout(()=>{win.close()},500);
+      }
+  
+    
+    }); // End of Keytar
+  }); // End of pandodb request
+}; // End of altmetricRetriever function
 
 
 
@@ -1022,12 +1075,12 @@ const chaerosSwitch = (fluxAction,fluxArgs) => {
           break;
 
           case 'zoteroItemsRetriever' : zoteroItemsRetriever(fluxArgs.zoteroItemsRetriever.collections,fluxArgs.zoteroItemsRetriever.zoteroUser,fluxArgs.zoteroItemsRetriever.importName,fluxArgs.zoteroItemsRetriever.destination);
-          
           break;
 
           case 'zoteroCollectionBuilder' : zoteroCollectionBuilder(fluxArgs.zoteroCollectionBuilder.collectionName,fluxArgs.zoteroCollectionBuilder.zoteroUser,fluxArgs.zoteroCollectionBuilder.id);
-          
           break;
+
+          case 'altmetricRetriever' : altmetricRetriever(fluxArgs.altmetricRetriever.user,fluxArgs.altmetricRetriever.id);
       }
 
     }
