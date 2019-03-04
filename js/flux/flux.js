@@ -54,19 +54,23 @@ ipcRenderer.on('window-close', (event,message) => {
 
 let traces = [
   {"hops":
-  [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+  [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"DB/API"},"name":"DB/API"}]},
 
-  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"SCOPUS"},"name":"SCOPUS"},{"info":{"name":"ALTMETRIC"},"name":"ALTMETRIC"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
-  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"ALTMETRIC"},"name":"ALTMETRIC"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
-  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"SCOPUS"},"name":"SCOPUS"},{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"}]},
+  
+  {"hops":[{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"},{"info":{"name":"OPEN-ACCESS"},"name":"OPEN-ACCESS"},{"info":{"name":"ALTMETRIC"},"name":"ALTMETRIC"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+
+
+  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
 
   {"hops":
   [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
 
   {"hops":
   [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"CAPCO"},"name":"CAPCO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+
   {"hops":
-  [{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]}
+  [{"info":{"name":"CAPCO"},"name":"CAPCO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]}
   
 ];
 
@@ -258,8 +262,10 @@ const fluxDisplay = (tab) => {
           for (let i = 0; i < tabs.length; i++) {                     // Loop on DIVs
              tabs[i].style.display = "none";                          // Hide the DIVs
           }
-
-    document.getElementById(tab).style.display = "block";             // Display the div corresponding to the clicked button
+          console.log(tab)
+          console.log(document.getElementById(tab))
+          document.getElementById(tab).style.display = "block";             // Display the div corresponding to the clicked button
+  
   }
 
 //========== powerValve ==========
