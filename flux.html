@@ -47,11 +47,25 @@
     <div id="scopus-dataset-preview" style="position:relative;">Click on a dataset to display its features. </div>
     <div id="scopus-dataset-buttons" style="display:none;">
     <button type="submit" class="flux-button"  id="geolocate-button" onclick="powerValve('scopusGeolocate',this);return false">Geolocate Affiliations</button>
-    <button type="submit" class="flux-button" id="convert-button" onclick="powerValve('scopusConverter',this);return false">Convert to CSL</button></div>
     <br><br>
       <button type="submit" class="flux-button" id="scopus-display" onclick="datasetDisplay('scopus-dataset-list','scopus');return false">Update Scopus Dataset list</button>
 </form>
 <div id="scopus-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
+</div>
+</div>
+
+<div id="csl-json" style="display:none;" class="fluxTabs">
+  <span class="flux-title">CSL-JSON</span><br><br>
+<form autocomplete="off">
+
+
+  <div id="scopus-dataset-preview" style="position:relative;">Click on a dataset to display its features. </div>
+  <div id="scopus-dataset-buttons" style="display:none;">
+  <button type="submit" class="flux-button" id="convert-button" onclick="powerValve('scopusConverter',this);return false">Convert to CSL</button></div>
+  <br><br>
+    <button type="submit" class="flux-button" id="scopus-display" onclick="datasetDisplay('csl-json-dataset-list','scopus');return false">Update available dataset list</button>
+</form>
+<div id="csl-json-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
 </div>
 
 <div id="capco" style="display:none;" class="fluxTabs">
@@ -66,6 +80,22 @@
 </form>
 </div>
 
+<div id="open-access" style="display:none;" class="fluxTabs">
+  <span class="flux-title">OPEN-ACCESS</span><br><br>
+
+<form id="open-access-import-form" autocomplete="off">
+<button type="submit" class="flux-button" id="open-access-display" onclick="datasetDisplay('open-access-dataset-list','csljson');return false">Check for CSL-JSON datasets</button>
+<br>
+
+<div id="open-access-dataset-preview"></div>
+<div id="open-access-dataset-buttons"style="display:none;">
+<button type="submit" class="flux-button" onclick='powerValve("openAccessCheck",this);return false'>Check Open Access availability</button>
+</div>
+
+<div id="open-access-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
+
+</form>
+</div>
 
 <div id="altmetric" style="display:none;" class="fluxTabs">
     <span class="flux-title">ALTMETRIC</span><br><br>
