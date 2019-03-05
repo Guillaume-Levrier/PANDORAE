@@ -18,6 +18,8 @@ const getUserData = () => {
           document.getElementById("scopuskeyinput").value =     keytar.getPassword("Scopus",userName);
           document.getElementById("altmetrickeyinput").value =  keytar.getPassword("Altmetric",userName);
           document.getElementById("twitterkeyinput").value =    keytar.getPassword("Twitter",userName);
+          document.getElementById("OAbutton").value =    keytar.getPassword("OAbutton",userName);
+
 
     });
 }
@@ -70,9 +72,9 @@ keytar.setPassword("Twitter",userName,document.getElementById("twitterkeyinput")
   checkKey("twitterValidation");
 break;
 
-case "Geocoding":
-keytar.setPassword("Geocoding",userName,document.getElementById("geocodinginput").value);
-  checkKey("mapTilerValidation");
+case "OAbutton":
+keytar.setPassword("OAbutton",userName,document.getElementById("OAbutton").value);
+  checkKey("openAccessValidation");
 break;
 
 }
@@ -81,8 +83,6 @@ getUserData();
 }
 
 const checkKey = (service,status) => {
-
-
 
 let success = false;
 
@@ -108,10 +108,8 @@ switch (service) {
     
     break;
   
-    case "mapTilerValidation":
-    if (status === undefined) {
-      geoTest()
-  }
+    case "openAccessValidation":
+
     break;
 
 }

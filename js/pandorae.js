@@ -39,7 +39,7 @@ let pandodb = new Dexie("PandoraeDatabase");
 let structureV1 = "id,date,name";
 
 pandodb.version(1).stores({
-      altmetric: structureV1,
+  enriched: structureV1,
       scopus: structureV1,
       csljson: structureV1,
       zotero: structureV1,
