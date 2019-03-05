@@ -58,19 +58,19 @@ let traces = [
 
   {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"SCOPUS"},"name":"SCOPUS"},{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"}]},
   
-  {"hops":[{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"},{"info":{"name":"OPEN-ACCESS"},"name":"OPEN-ACCESS"},{"info":{"name":"ALTMETRIC"},"name":"ALTMETRIC"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+  {"hops":[{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"},{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
 
 
-  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"}]},
 
   {"hops":
   [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
 
   {"hops":
-  [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"CAPCO"},"name":"CAPCO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+  [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
 
   {"hops":
-  [{"info":{"name":"CAPCO"},"name":"CAPCO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]}
+  [{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"CAPCO"},"name":"CAPCO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]}
   
 ];
 
@@ -262,12 +262,9 @@ const fluxDisplay = (tab) => {
           for (let i = 0; i < tabs.length; i++) {                     // Loop on DIVs
              tabs[i].style.display = "none";                          // Hide the DIVs
           }
-          console.log(tab)
-          console.log(document.getElementById(tab))
           document.getElementById(tab).style.display = "block";             // Display the div corresponding to the clicked button
   
   }
-
 //========== powerValve ==========
 // Some of the flux functions are not instantaneous because they can require data streams from remote services (such as
 // online databases APIs), or because they are CPU intensive (data management). In order not to freeze the flux modal
@@ -434,7 +431,7 @@ try {
 switch (kind) {
 
           case 'scopus' :
-
+          console.log("tick");
                 datasetDetail.searchTerms = doc.content.query;
                 datasetDetail.totalResults = doc.content.entries.length;
                 datasetDetail.queryDate = doc.date;
@@ -442,12 +439,12 @@ switch (kind) {
                 datasetDetail.documentComplete = true;
 
                 dataPreview = "<strong>"+ doc.name +"</strong>"+ // dataPreview is the displayed information in the div
-                "<br>Scopus query: " + datasetDetail.searchTerms+
-                "<br>Total results: " + datasetDetail.totalResults+
-                "<br>Query date: "+ datasetDetail.queryDate+
-                "<br>Geolocated data: "+ datasetDetail.articleGeoloc+
-                "<br>Document complete: "+ datasetDetail.documentComplete;
-
+                "<br>Scopus query: " + doc.content.query+
+                "<br>Total results: " + doc.content.entries.length+
+                "<br>Query date: "+ doc.date+
+                "<br>Geolocated data: "+ doc.content.articleGeoloc;
+                console.log(dataPreview)
+                console.log(prevId, buttonId)
                   document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
                   document.getElementById(buttonId).style.display = "block";
                   document.getElementById("geolocate-button").style.display = "inline-flex";
@@ -458,6 +455,7 @@ switch (kind) {
                 break;
 
           case 'csljson':
+                 
                   dataPreview = "<strong>"+ doc.name +"</strong><br>Item amount : " + doc.content.length;         
                   document.getElementById(prevId).innerHTML = dataPreview;
                   document.getElementById(prevId).name = doc.id;
