@@ -60,7 +60,7 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // No
 
   let convertedDataset = [];                                         // Create relevant array
   
-  pandodb.scopus.get(dataset).then(doc=>{
+  pandodb.enriched.get(dataset).then(doc=>{
 
   try {                                                            // If the file is valid, do the following:
         
@@ -913,7 +913,7 @@ const dataWriter = (destination,importName,content) => {
       ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " was imported in "+d);
   })
   ipcRenderer.send('chaeros-success', 'Dataset successfully imported');
- // setTimeout(()=>{win.close()},500);
+  setTimeout(()=>{win.close()},500);
 
 }
 
