@@ -1078,9 +1078,8 @@ var geoData = geo[0];
   const dataArray = [];
   
   data.forEach(d=>{
-      if (d.hasOwnProperty('shortTitle')){
-      d.affiliation=JSON.parse(d.shortTitle);
-      delete d.shortTitle;
+      if (d.hasOwnProperty('enrichment')&&d.enrichment.hasOwnProperty('affiliations')){
+
       d.authors = [];
       if (d.hasOwnProperty('author')){
           for (let j=0;j<d.author.length;j++){
@@ -1090,13 +1089,13 @@ var geoData = geo[0];
       }
       let link = {"DOI":"","points":[]}
       link.DOI = d.DOI;
-      for (var k = 0; k < d.affiliation.length; k++) {
-      if(d.affiliation[k].lon!=undefined){
-              dataArray.push(d.affiliation[k]);
+      for (var k = 0; k < d.enrichment.affiliations.length; k++) {
+      if(d.enrichment.affiliations[k].lon!=undefined){
+              dataArray.push(d.enrichment.affiliations[k]);
               let thisCity = {"cityname":"","lon":"","lat":""}
-              thisCity.cityname = d.affiliation[k]['affiliation-city'];
-              thisCity.lon = d.affiliation[k].lon;
-              thisCity.lat = d.affiliation[k].lat;
+              thisCity.cityname = d.enrichment.affiliations[k]['affiliation-city'];
+              thisCity.lon = d.enrichment.affiliations[k].lon;
+              thisCity.lat = d.enrichment.affiliations[k].lat;
               link.points.push(thisCity);
         }
       }

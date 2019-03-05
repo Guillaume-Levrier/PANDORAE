@@ -81,7 +81,8 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // No
             pushedArticle.date = articles[i]['prism:coverDate'];
             pushedArticle.DOI = articles[i]['prism:doi'];
             pushedArticle.publicationTitle = articles[i]['prism:publicationName'];
-            pushedArticle.shortTitle = JSON.stringify(articles[i].affiliation);
+            let enrichment = {affiliations:articles[i].affiliation};
+            pushedArticle.shortTitle= JSON.stringify(enrichment);
             convertedDataset.push(pushedArticle);
             }
 
@@ -107,11 +108,9 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // No
 // scopusGeolocate gets cities/countries from a given scopus Dataset.
 
 const scopusGeolocate = (dataset) => {
-console.log(dataset)
 ipcRenderer.send('console-logs',"Started scopusGeolocate on " + dataset);
 
  pandodb.scopus.get(dataset).then(doc => {
-console.log(doc)
   fs.readFile(appPath +'/json/cities.json',    // Read the dataset passed as option
                               'utf8', (err, locatedCities) => {                       // It should be encoded as UTF-8
 
@@ -880,7 +879,12 @@ let timer = 1000;
           }
        Promise.all(itemRequests).then((response)=> {
          for (var i = 0; i < response.length; i++) {
-           response[i].items.forEach(d=>f.items.push(d))
+           
+           response[i].items.forEach(d=> {
+            var enrichment = JSON.parse(d.shortTitle);
+            d.enrichment = enrichment;
+            f.items.push(d);
+          })
          }
       })
   })
@@ -904,7 +908,7 @@ const dataWriter = (destination,importName,content) => {
       ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " was imported in "+d);
   })
   ipcRenderer.send('chaeros-success', 'Dataset successfully imported');
-  setTimeout(()=>{win.close()},500);
+ // setTimeout(()=>{win.close()},500);
 
 }
 
@@ -974,6 +978,7 @@ let collectionCode = {"code":""};
           };
 
          return limiter.schedule(rpn,subArrayUpload).then((res) => {                   // Enforce bottleneck
+          console.log(res);
         })
 
    }))
@@ -986,7 +991,7 @@ ipcRenderer.send('console-logs',"Collection "+JSON.stringify(collectionName)+" b
       }
       finally{
         ipcRenderer.send('chaeros-success', 'Collection created');   // Send success message to main Display
-        setTimeout(()=>{win.close()},500);
+        setTimeout(()=>{win.close()},2000);
       }
   })
 }
@@ -1015,7 +1020,6 @@ const altmetricRetriever = (user,id) => {
           if (f.hasOwnProperty("DOI")) {
             DOIs.push(f.DOI);
             timer = timer+100;
-            console.log(timer);
           }
         })
 
@@ -1030,7 +1034,6 @@ const altmetricRetriever = (user,id) => {
                 return limiter.schedule(rpn,altmetricRequestOptions).then((res) => {                   // Enforce bottleneck
                   files.forEach(file=>{
                     file.altmetricData = res;
-                    console.log(file);
                   })
                 })
               })
