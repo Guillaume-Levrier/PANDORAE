@@ -53,27 +53,14 @@ ipcRenderer.on('window-close', (event,message) => {
 //========== Tracegraph ==========
 
 let traces = [
-  {"hops":
-  [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"DB/API"},"name":"DB/API"}]},
-
+  {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"DB/API"},"name":"DB/API"}]},
   {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"SCOPUS"},"name":"SCOPUS"},{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"}]},
-  
   {"hops":[{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"},{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
-
-
   {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"}]},
-
-  {"hops":
-  [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
-
-  {"hops":
-  [{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
-
-  {"hops":
-  [{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"CAPCO"},"name":"CAPCO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]}
-  
+  {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+  {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+  {"hops":[{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"CAPCO"},"name":"CAPCO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]}
 ];
-
 
 const drawFlux = (svg, traces, horizontal, showTexts) => {
   function makeText(selection) {
@@ -431,31 +418,21 @@ try {
 switch (kind) {
 
           case 'scopus' :
-          console.log("tick");
-                datasetDetail.searchTerms = doc.content.query;
-                datasetDetail.totalResults = doc.content.entries.length;
-                datasetDetail.queryDate = doc.date;
-                datasetDetail.articleGeoloc = doc.content.articleGeoloc;
-                datasetDetail.documentComplete = true;
-
                 dataPreview = "<strong>"+ doc.name +"</strong>"+ // dataPreview is the displayed information in the div
-                "<br>Scopus query: " + doc.content.query+
+                "<br>Origin: Scopus" +
+                "<br>Query: " + doc.content.query+
                 "<br>Total results: " + doc.content.entries.length+
-                "<br>Query date: "+ doc.date+
-                "<br>Geolocated data: "+ doc.content.articleGeoloc;
-                console.log(dataPreview)
-                console.log(prevId, buttonId)
+                "<br>Query date: "+ doc.date;
+                
                   document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
                   document.getElementById(buttonId).style.display = "block";
-                  document.getElementById("geolocate-button").style.display = "inline-flex";
-                  document.getElementById("geolocate-button").name = doc.id;
+          
                   document.getElementById("convert-button").style.display = "inline-flex";
                   document.getElementById("convert-button").name = doc.id;
 
                 break;
 
           case 'csljson':
-                 
                   dataPreview = "<strong>"+ doc.name +"</strong><br>Item amount : " + doc.content.length;         
                   document.getElementById(prevId).innerHTML = dataPreview;
                   document.getElementById(prevId).name = doc.id;
@@ -463,12 +440,14 @@ switch (kind) {
                 break
           
                 
-          case 'altmetric':
+          case 'enrichment':
 
                   dataPreview = "<strong>"+ doc.name +"</strong><br>Items amount : " + doc.content[0].items.length;
                   document.getElementById(prevId).innerHTML = dataPreview;
                   document.getElementById(prevId).name = doc.id;
                   document.getElementById(buttonId).style.display = "inline-flex";
+                  document.getElementById("geolocate-button").style.display = "inline-flex";
+                  document.getElementById("geolocate-button").name = doc.id;
 
                 break
 
