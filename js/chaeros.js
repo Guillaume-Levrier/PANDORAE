@@ -129,12 +129,12 @@ const scopusGeolocate = (dataset) => {
   let totalCityArray = [];                                          // Prepare an empty array
    
 for (var i=0; i<(article.length-1); i++){                           // For loop to generate list of cities to be requested
-  if (article[i].hasOwnProperty('affiliation') && article[i].enrichment.affiliations.length>0){ // If item has at least an affiliation
-      for (let j=0; j<article[i].enrichment.affiliations.length; j++){        // Iterate on item's available affiliation
-          if (article[i].enrichment.affiliations[j].hasOwnProperty('affiliation-country')) {       // If affiliation has a city
+  if (article[i].hasOwnProperty('affiliation') && article[i].affiliation.length>0){ // If item has at least an affiliation
+      for (let j=0; j<article[i].affiliation.length; j++){        // Iterate on item's available affiliation
+          if (article[i].affiliation[j].hasOwnProperty('affiliation-country')) {       // If affiliation has a city
             let location = {};
-            location.country = article[i].enrichment.affiliations[j]['affiliation-country'];
-            location.city = article[i].enrichment.affiliations[j]['affiliation-city'];               // Extract city name
+            location.country = article[i].affiliation[j]['affiliation-country'];
+            location.city = article[i].affiliation[j]['affiliation-city'];               // Extract city name
             totalCityArray.push(JSON.stringify(location));         
           }
    }
@@ -160,18 +160,18 @@ cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key))
     article.forEach(d=>{
       for (let l = 0; l < cityIndex.length; l++) {
         if (d.hasOwnProperty('affiliation')){ 
-        for (var k=0; k<d.enrichment.affiliations.length; k++){                    // Loop on available item's affiliations
+        for (var k=0; k<d.affiliation.length; k++){                    // Loop on available item's affiliations
 
-        let city = d.enrichment.affiliations[k]['affiliation-city'];           // Extract affiliation city
-        let country = d.enrichment.affiliations[k]['affiliation-country'];           // Extract affiliation city
+        let city = d.affiliation[k]['affiliation-city'];           // Extract affiliation city
+        let country = d.affiliation[k]['affiliation-country'];           // Extract affiliation city
 
         if (typeof city === "object") {city = JSON.stringify(city)} // Stringify to allow for comparison
         if (typeof country === "object") {country = JSON.stringify(country)}                // Stringify to allow for comparison
         
         if (country === cityIndex[l].country){
                   if(city === cityIndex[l].city){
-                        d.enrichment.affiliations[k].lon = cityIndex[l].lon;
-                        d.enrichment.affiliations[k].lat = cityIndex[l].lat;
+                        d.affiliation[k].lon = cityIndex[l].lon;
+                        d.affiliation[k].lat = cityIndex[l].lat;
                   }
                 }
              }
@@ -183,21 +183,17 @@ cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key))
   
      article.forEach(d=>{
        if (d.hasOwnProperty('enrichment') && d.enrichment.hasOwnProperty("affiliation")) {
-       for (let i = 0; i < d.enrichment.affiliations.length; i++) {
-        if (typeof d.enrichment.affiliations[i].country != "string"){
-          unlocatedCities.push(d.enrichment.affiliations[i]);
+       for (let i = 0; i < d.affiliation.length; i++) {
+        if (typeof d.affiliation[i].country != "string"){
+          unlocatedCities.push(d.affiliation[i]);
           }
        }
       }
     });
 
-console.log(doc);
-
      ipcRenderer.send('console-logs',"Unable to locale the following cities " + JSON.stringify(unlocatedCities));
-
      doc.content.articleGeoloc = true;                           // Mark file as geolocated
-
-     pandodb.scopus.put(doc);
+     pandodb.enriched.put(doc);
      ipcRenderer.send('chaeros-success', 'Affiliations geolocated');              //Send success message to main process
      ipcRenderer.send('console-logs',"scopusGeolocate successfully added geolocations on " + dataset);
      setTimeout(()=>{geolocationActive = false},1000);
@@ -1012,21 +1008,21 @@ const altmetricRetriever = (id,user) => {
 
   altmetricActive = true;
 
-  pandodb.altmetric.get(id).then(doc=>{
-    keytar.getPassword("altmetric", user).then((altmetricAPIkey) => {         // Retrieve password through keytar
+  pandodb.scopus.get(id).then(doc=>{
+    //keytar.getPassword("altmetric", user).then((altmetricAPIkey) => {         // Retrieve password through keytar
     
       var timer = 500;
 
       try {
-
         const limiter = new bottleneck({                                      // Create a bottleneck to prevent API rate limit
           maxConcurrent: 1,                                                   // Only one request at once
           minTime: 100                                                        // Every 150 milliseconds
         });
 
         var DOIs = [];
-        files = doc.content[0].items;
-
+        var files = doc.content[0].items;
+        
+        
         files.forEach(f=>{
           if (f.hasOwnProperty("DOI")) {
             DOIs.push(f.DOI);
@@ -1035,7 +1031,6 @@ const altmetricRetriever = (id,user) => {
         })
 
               Promise.all(DOIs.map(d=>{
-
                 var altmetricRequestOptions = {                                // Prepare options for the Request-Promise-Native Package
                   uri: "https://api.altmetric.com/v1/doi/"+d,//+"?key="+altmetricAPIkey,
                   headers: {'User-Agent': 'Request-Promise'},                  // Headers (some options can be added here)
@@ -1045,6 +1040,7 @@ const altmetricRetriever = (id,user) => {
                 return limiter.schedule(rpn,altmetricRequestOptions).then((res) => {                   // Enforce bottleneck
                   files.forEach(file=>{
                     file.altmetricData = res;
+                    console.log(res);
                   })
                 })
               })
@@ -1053,15 +1049,20 @@ const altmetricRetriever = (id,user) => {
       } catch (error) {
           ipcRenderer.send('console-logs',error);
       } finally {
-        doc.altmetricEnriched = true;
-        setTimeout(()=>{pandodb.csljson.put(doc)},timer);
-        ipcRenderer.send('chaeros-success', 'Altmetric enrichment successful');   // Send success message to main Display
-        ipcRenderer.send('console-logs',"Altmetric enrichment of "+id+" successful.");
+
+        doc.content.altmetricEnriched = true;
+      
+        setTimeout(()=>{
+          pandodb.enriched.put(doc);
+          ipcRenderer.send('chaeros-success', 'Altmetric enrichment successful');   // Send success message to main Display
+          ipcRenderer.send('console-logs',"Altmetric enrichment of "+id+" successful.");
         setTimeout(()=>{altmetricActive = false;},1000);
-      }
+      },timer);
+
+      };
   
     
-    }); // End of Keytar
+   // }); // End of Keytar
   }); // End of pandodb request
 }; // End of altmetricRetriever function
 
@@ -1080,26 +1081,22 @@ const chaerosSwitch = (fluxAction,fluxArgs) => {
           break;
 
           case 'datasetEnrichment' : 
-          console.log(fluxArgs); 
                   const enrichDataset = (fluxArgs) => {
                       if (fluxArgs.datasetEnricher.geolocate === true) {
                         scopusGeolocate(fluxArgs.datasetEnricher.dataset,fluxArgs.user);
-                        geolocationActive = true;
                       };
 
-                      if (fluxArgs.checkOA === true) {
+                      if (fluxArgs.datasetEnricher.checkOA === true) {
                         checkOA(fluxArgs.datasetEnricher.dataset,fluxArgs.user);
-                        checkOAActive = true;
                       };
 
-                      if (fluxArgs.altmetric === true) {
+                      if (fluxArgs.datasetEnricher.altmetric === true) {
                         altmetricRetriever(fluxArgs.datasetEnricher.dataset,fluxArgs.user);
-                        altmetricActive = true;
                       };
 
                       setInterval(()=>{
                         if(geolocationActive===false && checkOAActive === false && altmetricActive === false) {
-                         // setTimeout(()=>{win.close()},1000);
+                         setTimeout(()=>{win.close()},1000);
                         }
                       },2000)
                   };

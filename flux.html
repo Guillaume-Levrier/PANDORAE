@@ -60,9 +60,9 @@
         <div id="scopus-dataset-preview" style="position:relative;">Click on a dataset to display its features. </div>
         <div id="scopus-dataset-buttons" style="display:none;">
             <input class='EnrichCheck' value='geolocate' type='checkbox'/><label>Geolocate Affiliations</label><br>
-            <input class='EnrichCheck' value='checkOA'type='checkbox'/><label>Check Open Access availability</label><br>
-            <input class='EnrichCheck' value='altmetric'type='checkbox'/><label>Enrich with Altmetric Data</label><br>
-            <button type="submit" class="flux-button" id="enrichmentButton" onclick='powerValve("datasetEnrichment",this);return false'>Enrich dataset</button>
+            <input class='EnrichCheck' value='checkOA'type='checkbox' disabled/><label>Check Open Access availability</label><br>
+            <input class='EnrichCheck' value='altmetric'type='checkbox' disabled/><label>Enrich with Altmetric Data</label><br>
+            <button type="submit" class="flux-button" id="enrich-button" onclick='powerValve("datasetEnrichment",this);return false'>Enrich dataset</button>
         </div>
         <br><br>
         <button type="submit" class="flux-button" id="csljson-display" onclick="datasetDisplay('scopus-dataset-list','scopus');return false">Update available dataset list</button>
@@ -76,7 +76,7 @@
     <form autocomplete="off">
       <div id="enriched-dataset-preview" style="position:relative;">Click on a dataset to display its features. </div>
       <div id="enriched-dataset-buttons" style="display:none;">
-        <button type="submit" class="flux-button" id="convert-button" onclick="powerValve('scopusConverter',this);return false">Convert to CSL</button>
+        <button type="submit" class="flux-button" id="convert-csl" onclick="powerValve('scopusConverter',this);return false">Convert to CSL</button>
       </div><br><br>
       <button type="submit" class="flux-button" id="scopus-display" onclick="datasetDisplay('enriched-dataset-list','enriched');return false">Update available dataset list</button>
     </form>
