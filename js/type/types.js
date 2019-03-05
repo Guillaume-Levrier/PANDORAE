@@ -1130,7 +1130,7 @@ var geoData = geo[0];
   
   for (var i = 0; i < data.length; i++) { data[i].index = i;};  // id = item index
   
-  data.forEach(d=>{if (d.hasOwnProperty('affiliation')){}else{data.splice(d.index,1)}});
+  data.forEach(d=>{if (d.hasOwnProperty('enrichment') && d.enrichment.hasOwnProperty('affiliations')){}else{data.splice(d.index,1)}});
   
   var cities =  d3.nest().key(d => d['affiliation-city']).entries(dataArray);
 
@@ -1142,10 +1142,10 @@ var geoData = geo[0];
     d.values = [];
   
     for (var j = 0; j < data.length; j++) {
-      if (data[j].hasOwnProperty("affiliation")){
-          for (var k = 0; k < data[j].affiliation.length; k++) {
-          if (data[j].affiliation[k]['affiliation-city']===d.key){
-            d.affiliations.push(data[j].affiliation[k].affilname);
+      if (data[j].hasOwnProperty('enrichment') && data[j].enrichment.hasOwnProperty("affiliations")){
+          for (var k = 0; k < data[j].enrichment.affiliations.length; k++) {
+          if (data[j].enrichment.affiliations[k]['affiliation-city']===d.key){
+            d.affiliations.push(data[j].enrichment.affiliations[k].affilname);
             d.values.push(data[j]);
           }
           }
@@ -1167,8 +1167,8 @@ var geoData = geo[0];
           institution.name = city.affiliations[j];
   
           for (var k = 0; k < city.values.length; k++) {
-            for (var l = 0; l < city.values[k].affiliation.length; l++) {
-            if (city.values[k].affiliation[l].affilname===city.affiliations[j]) {
+            for (var l = 0; l < city.values[k].enrichment.affiliations.length; l++) {
+            if (city.values[k].enrichment.affiliations[l].affilname===city.affiliations[j]) {
               let link = {}
               if (institution.papers.findIndex(paper => paper === city.values[k].title)<0) {
                 institution.papers.push({"title":city.values[k].title,"DOI":city.values[k].DOI});
