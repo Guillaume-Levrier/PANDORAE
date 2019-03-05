@@ -49,6 +49,17 @@ pandodb.version(1).stores({
  var checkOAActive = false;
  var altmetricActive = false;
 
+var csljsonModel =   {"itemType":"journalArticle",
+                      "title":"",
+                      "creators":[{"creatorType":"author","firstName":"","lastName":""}],
+                      "abstractNote":"","publicationTitle":"","volume":"","issue":"","pages":"","date":"","series":"","seriesTitle":"","seriesText":"","journalAbbreviation":"",
+                      "language":"",
+                      "DOI":"",
+                      "ISSN":"",
+                      "shortTitle":"",
+                      "url":"",
+                      "accessDate":"","archive":"","archiveLocation":"","libraryCatalog":"","callNumber":"","rights":"","extra":"","tags":[],"collections":[],"relations":{}};
+
 //========== scopusConverter ==========
 //scopusConverter is only available once scopusDatasetDetail has been called. If triggered, it creates a new
 //CSL-JSON file from the selected dataset and puts it in json/csl-json. This CSL-JSON file should then be ready
@@ -67,21 +78,13 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // No
         let articles = doc.content.entries;                       // Select articles
 
         for (var i=0; i<articles.length; ++i){                       // For each article of the array
-            let pushedArticle =                                      // Zotero journalArticle format
-             {"itemType":"journalArticle",
-             "title":"",
-             "creators":[{"creatorType":"author","firstName":"","lastName":""}],
-             "abstractNote":"","publicationTitle":"","volume":"","issue":"","pages":"","date":"","series":"","seriesTitle":"","seriesText":"","journalAbbreviation":"",
-             "language":"",
-             "DOI":"",
-             "ISSN":"",
-             "shortTitle":"",
-             "url":"",
-             "accessDate":"","archive":"","archiveLocation":"","libraryCatalog":"","callNumber":"","rights":"","extra":"","tags":[],"collections":[],"relations":{}};
+            let pushedArticle = csljsonModel;                                     // Zotero journalArticle format
+            
 
             // Fill the article with the relevant properties
             pushedArticle.itemType = "journalArticle";
             pushedArticle.title = articles[i]['dc:title'];
+            pushedArticle.url = articles[i]['url'];
             pushedArticle.creators[0].lastName = articles[i]['dc:creator'];
             pushedArticle.date = articles[i]['prism:coverDate'];
             pushedArticle.DOI = articles[i]['prism:doi'];
@@ -913,7 +916,7 @@ const dataWriter = (destination,importName,content) => {
       ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " was imported in "+d);
   })
   ipcRenderer.send('chaeros-success', 'Dataset successfully imported');
-  setTimeout(()=>{win.close()},500);
+ setTimeout(()=>{win.close()},500);
 
 }
 
@@ -1063,6 +1066,73 @@ const altmetricRetriever = (id,user) => {
   
     
    // }); // End of Keytar
+  }); // End of pandodb request
+}; // End of altmetricRetriever function
+
+
+//========== checkOA ==========
+// FETCH altmetric documents through the Altmetric API.
+
+const checkOA = (id,user) => {
+
+  checkOAActive = true;
+
+  pandodb.scopus.get(id).then(doc=>{
+    keytar.getPassword("OAbutton", user).then((OAbuttonAPIkey) => {         // Retrieve password through keytar
+    
+      var timer = 500;
+
+      try {
+        const limiter = new bottleneck({                                      // Create a bottleneck to prevent API rate limit
+          maxConcurrent: 1,                                                   // Only one request at once
+          minTime: 200                                                        // Every 150 milliseconds
+        });
+
+        var DOIs = [];
+        var files = doc.content[0].items;
+        
+        
+        files.forEach(f=>{
+          if (f.hasOwnProperty("DOI")) {
+            DOIs.push(f.DOI);
+            timer = timer+100;
+          }
+        })
+
+              Promise.all(DOIs.map(d=>{
+                var altmetricRequestOptions = {                                // Prepare options for the Request-Promise-Native Package
+                  uri: "https://api.openaccessbutton.org/availability?doi="+d+"?key="+OAbuttonAPIkey,
+                  headers: {'User-Agent': 'Request-Promise'},                  // Headers (some options can be added here)
+                  json: true                                                   // Automatically parses the JSON string in the response
+                };
+
+                return limiter.schedule(rpn,altmetricRequestOptions).then((res) => {                   // Enforce bottleneck
+                  files.forEach(file=>{
+                    if (res.data.availability.length>0) {
+                    file.url = res.availability[0].url;
+                  }
+                  })
+                })
+              })
+           )    
+
+      } catch (error) {
+          ipcRenderer.send('console-logs',error);
+      } finally {
+
+        doc.content.altmetricEnriched = true;
+      
+        setTimeout(()=>{
+          pandodb.enriched.put(doc);
+          ipcRenderer.send('chaeros-success', 'OA enrichment successful');   // Send success message to main Display
+          ipcRenderer.send('console-logs',"OA enrichment of "+id+" successful.");
+        setTimeout(()=>{  checkOAActive = false;},1000);
+      },timer);
+
+      };
+  
+    
+    }); // End of Keytar
   }); // End of pandodb request
 }; // End of altmetricRetriever function
 

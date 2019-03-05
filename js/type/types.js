@@ -1076,7 +1076,7 @@ var geoData = geo[0];
   var linksBuffer =[]
   
   const dataArray = [];
-  
+
   data.forEach(d=>{
       if (d.hasOwnProperty('enrichment')&&d.enrichment.hasOwnProperty('affiliations')){
 
@@ -1171,7 +1171,7 @@ var geoData = geo[0];
             if (city.values[k].enrichment.affiliations[l].affilname===city.affiliations[j]) {
               let link = {}
               if (institution.papers.findIndex(paper => paper === city.values[k].title)<0) {
-                institution.papers.push({"title":city.values[k].title,"DOI":city.values[k].DOI});
+                institution.papers.push({"title":city.values[k].title,"DOI":city.values[k].DOI,"url":city.values[k].URL});
               }
            }
          }
@@ -1185,8 +1185,12 @@ var geoData = geo[0];
       institutions.forEach(e=>{
           let localList= "<strong>"+e.name+"</strong><ul>";
               for (var i = 0; i < e.papers.length; i++) {
+                if (e.papers[i].hasOwnProperty('url') && e.papers[i].url.length>0) { // If it has a URL, then it is open access button provided
+                  localList = localList+ "<li><img src='././svg/OAlogo.svg' height='16px'/>&nbsp;<a target='blank' href='"+e.papers[i].url+"'>"+e.papers[i].title+"</a></li>"
+                } else {  // else just resolve DOI
                 localList = localList+ "<li><a target='blank' href='https://dx.doi.org/"+e.papers[i].DOI+"'>"+e.papers[i].title+"</a></li>"
               }
+            }
           totalList= totalList+localList+ "</ul>";
       })
   
