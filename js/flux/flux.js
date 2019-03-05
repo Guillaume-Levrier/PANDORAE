@@ -295,11 +295,11 @@ switch (fluxAction) {                                                      // Ac
                            message = "Enriching Dataset";
                            break;
 
-  case 'scopusGeolocate' : fluxArgs.scopusGeolocate = {"dataset":""};
+/*   case 'scopusGeolocate' : fluxArgs.scopusGeolocate = {"dataset":""};
                            fluxArgs.scopusGeolocate.dataset = itemname;
                            fluxArgs.scopusGeolocate.user = document.getElementById("userNameInput").value;
                            message = "Geolocating Affiliations";
-                           break;
+                           break; */
 
   case 'scopusRetriever' : fluxArgs.scopusRetriever = {"user":"","query":""};
                            fluxArgs.scopusRetriever.user = document.getElementById("userNameInput").value;
@@ -439,18 +439,25 @@ switch (kind) {
                   document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
                   document.getElementById(buttonId).style.display = "block";
           
-                  document.getElementById("convert-button").style.display = "inline-flex";
-                  document.getElementById("convert-button").name = doc.id;
+                  document.getElementById("enrich-button").style.display = "inline-flex";
+                  document.getElementById("enrich-button").name = doc.id;
 
                 break;
 
-          case 'csljson':
-                  dataPreview = "<strong>"+ doc.name +"</strong><br>Item amount : " + doc.content.length;         
+          case 'enriched':
+                  dataPreview = "<strong>"+ doc.name +"</strong>";         
                   document.getElementById(prevId).innerHTML = dataPreview;
-                  document.getElementById("enrichmentButton").name = doc.id;
-                  document.getElementById(buttonId).style.display = "table";
+                  document.getElementById(buttonId).style.display = "block";
+                  document.getElementById("convert-csl").style.display = "inline-flex";
+                  document.getElementById("convert-csl").name = doc.id;
                 break;
 
+            case 'csljson':
+                dataPreview = "<strong>"+ doc.name +"</strong><br>Item amount : " + doc.content.length;         
+                document.getElementById(prevId).innerHTML = dataPreview;
+                document.getElementById(prevId).name = doc.id;
+                document.getElementById(buttonId).style.display = "inline-flex";
+              break
                   }
                    
   })
