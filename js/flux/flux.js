@@ -28,7 +28,7 @@ let pandodb = new Dexie("PandoraeDatabase");
 let structureV1 = "id,date,name";
 
 pandodb.version(1).stores({
-      altmetric: structureV1,
+      enriched: structureV1,
       scopus: structureV1,
       csljson:structureV1,
       zotero: structureV1,
@@ -54,9 +54,9 @@ ipcRenderer.on('window-close', (event,message) => {
 
 let traces = [
   {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"DB/API"},"name":"DB/API"}]},
-  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"SCOPUS"},"name":"SCOPUS"},{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"}]},
-  {"hops":[{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"},{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
-  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"}]},
+  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"SCOPUS"},"name":"SCOPUS"},{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"}]},
+  {"hops":[{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"},{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"}]},
   {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
   {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
   {"hops":[{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"CAPCO"},"name":"CAPCO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]}
@@ -269,14 +269,30 @@ let itemname = item.name;                                                  // it
 
 switch (fluxAction) {                                                      // According to function name ...
 
-  case 'lexicAnalysis' : fluxArgs.lexicAnalysis = {"dataset":""};
+/*   case 'lexicAnalysis' : fluxArgs.lexicAnalysis = {"dataset":""};
                            fluxArgs.lexicAnalysis.dataset = item;
                            message = "Starting lexical analysis" ;
-                           break;
+                           break; */
+
+  /* case 'altmetricRetriever' : fluxArgs.altmetricRetriever = {};
+  fluxArgs.altmetricRetriever.id = document.getElementById("altmetric-dataset-preview").name;
+  fluxArgs.altmetricRetriever.user = document.getElementById("userNameInput").value;
+  break; */
 
   case 'scopusConverter' : fluxArgs.scopusConverter = {"dataset":""};
                            fluxArgs.scopusConverter.dataset = itemname;
                            message = "Converting to CSL-JSON" ;
+                           break; 
+
+  case 'datasetEnrichment' : 
+                           fluxArgs.datasetEnricher = {"dataset":"",geolocate:false,checkOA:false,altmetric:false};
+                           fluxArgs.datasetEnricher.dataset = itemname;
+                           fluxArgs.datasetEnricher.user = document.getElementById("userNameInput").value;
+                           let enrichOptions = document.getElementsByClassName('EnrichCheck');
+                           for (let i =0; i<enrichOptions.length; i++){
+                             if (enrichOptions[i].checked) {fluxArgs.datasetEnricher[enrichOptions[i].value] = true};
+                          }
+                           message = "Enriching Dataset";
                            break;
 
   case 'scopusGeolocate' : fluxArgs.scopusGeolocate = {"dataset":""};
@@ -324,7 +340,6 @@ case 'zoteroItemsRetriever' :  if (document.getElementById("zotitret").name ==="
 
                           fluxArgs.zoteroItemsRetriever.zoteroUser = document.getElementById("zoterouserinput").value;
                           fluxArgs.zoteroItemsRetriever.importName = document.getElementById("zoteroImportName").value.replace(/\s/g,"");
-                         // fluxArgs.zoteroItemsRetriever.path = "/datasets/"+document.getElementById("zotitret").name+"/";
                           message = "Retrieving user collections" ;
                           }                        
                           break;
@@ -336,10 +351,7 @@ case 'zoteroCollectionBuilder' : fluxArgs.zoteroCollectionBuilder = {};
                                  break;
 
 
-case 'altmetricRetriever' : fluxArgs.altmetricRetriever = {};
-                            fluxArgs.altmetricRetriever.id = document.getElementById("altmetric-dataset-preview").name;
-                            fluxArgs.altmetricRetriever.user = document.getElementById("userNameInput").value;
-                            break;
+
 
 
 }
@@ -386,7 +398,7 @@ const datasetDisplay = (divId,kind) => {              // This function displays 
    pandodb[kind].toArray(files=>{
        files.forEach(file => {                                    // For each file in the directory                               
         datasets.push(                                           // Push the file in the array
-          "<li onclick=datasetDetail('"+kind+"-dataset-preview','"+kind+"',"+JSON.stringify(file.id)+",'"+kind+"-dataset-buttons');>"+file.name+" - "+file.date+"</li>"                 // A file is an HTML bullet point in a list
+          "<li onclick=datasetDetail('"+kind+"-dataset-preview','"+kind+"',"+JSON.stringify(file.id)+",'"+kind+"-dataset-buttons');>"+file.name+"</li>"                 // A file is an HTML bullet point in a list
         )
     });
 
@@ -435,21 +447,9 @@ switch (kind) {
           case 'csljson':
                   dataPreview = "<strong>"+ doc.name +"</strong><br>Item amount : " + doc.content.length;         
                   document.getElementById(prevId).innerHTML = dataPreview;
-                  document.getElementById(prevId).name = doc.id;
-                  document.getElementById(buttonId).style.display = "inline-flex";
-                break
-          
-                
-          case 'enrichment':
-
-                  dataPreview = "<strong>"+ doc.name +"</strong><br>Items amount : " + doc.content[0].items.length;
-                  document.getElementById(prevId).innerHTML = dataPreview;
-                  document.getElementById(prevId).name = doc.id;
-                  document.getElementById(buttonId).style.display = "inline-flex";
-                  document.getElementById("geolocate-button").style.display = "inline-flex";
-                  document.getElementById("geolocate-button").name = doc.id;
-
-                break
+                  document.getElementById("enrichmentButton").name = doc.id;
+                  document.getElementById(buttonId).style.display = "table";
+                break;
 
                   }
                    

@@ -16,6 +16,7 @@
       <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="scopusValidation">help_outline</i> Scopus API key:<br> <input class="fluxInput" spellcheck="false" id="scopuskeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Scopus">cached</i><br><br></div>
       <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="altmetricValidation">help_outline</i> Altmetric API key:<br> <input class="fluxInput" spellcheck="false" id="altmetrickeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Altmetric">cached</i><br><br></div>
       <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="twitterValidation">help_outline</i> Twitter API key:<br> <input class="fluxInput" spellcheck="false" id="twitterkeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Twitter">cached</i><br><br></div>
+      <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="openAccessValidation">help_outline</i> OAbutton API key:<br> <input class="fluxInput" spellcheck="false" id="OAbutton" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="OAbutton">cached</i><br><br></div>
     </form>
 </div>
 
@@ -51,84 +52,36 @@
     </form>
 </div>
 
+<!-- ENRICHMENT TAB -->
+<div id="enrichment" style="display:none;" class="fluxTabs">
+    <span class="flux-title">DATA ENRICHMENT</span><br><br>
+    This tab will allow you to geolocate your documents, check if they are available through an Open Access licence, and return their Altmetric score and identity.<br><br>  
+      <form autocomplete="off">
+        <div id="scopus-dataset-preview" style="position:relative;">Click on a dataset to display its features. </div>
+        <div id="scopus-dataset-buttons" style="display:none;">
+            <input class='EnrichCheck' value='geolocate' type='checkbox'/><label>Geolocate Affiliations</label><br>
+            <input class='EnrichCheck' value='checkOA'type='checkbox'/><label>Check Open Access availability</label><br>
+            <input class='EnrichCheck' value='altmetric'type='checkbox'/><label>Enrich with Altmetric Data</label><br>
+            <button type="submit" class="flux-button" id="enrichmentButton" onclick='powerValve("datasetEnrichment",this);return false'>Enrich dataset</button>
+        </div>
+        <br><br>
+        <button type="submit" class="flux-button" id="csljson-display" onclick="datasetDisplay('scopus-dataset-list','scopus');return false">Update available dataset list</button>
+      </form>
+    <div id="scopus-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
+  </div> 
+
 <!-- CSL JSON TAB -->
 <div id="csl-json" style="display:none;" class="fluxTabs">
   <span class="flux-title">CSL-JSON</span><br><br>
     <form autocomplete="off">
-      <div id="scopus-dataset-preview" style="position:relative;">Click on a dataset to display its features. </div>
-      <div id="scopus-dataset-buttons" style="display:none;">
+      <div id="enriched-dataset-preview" style="position:relative;">Click on a dataset to display its features. </div>
+      <div id="enriched-dataset-buttons" style="display:none;">
         <button type="submit" class="flux-button" id="convert-button" onclick="powerValve('scopusConverter',this);return false">Convert to CSL</button>
       </div><br><br>
-      <button type="submit" class="flux-button" id="scopus-display" onclick="datasetDisplay('csl-json-dataset-list','scopus');return false">Update available dataset list</button>
+      <button type="submit" class="flux-button" id="scopus-display" onclick="datasetDisplay('enriched-dataset-list','enriched');return false">Update available dataset list</button>
     </form>
-  <div id="csl-json-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
+  <div id="enriched-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
 </div> 
-
-<!-- ENRICHMENT TAB -->
-<div id="enrichment" style="display:none;" class="fluxTabs">
-  <span class="flux-title">DATA ENRICHMENT</span><br><br>
-  This tab will allow you to geolocate your documents, check if they are available through an Open Access licence, and return their Altmetric score and identity.<br><br>  
-    <form autocomplete="off">
-      <div id="csl-json-dataset-preview" style="position:relative;">Click on a dataset to display its features. </div>
-      <div id="csl-json-dataset-buttons" style="display:none;">
-      <button type="submit" class="flux-button" id="convert-button" onclick="powerValve('scopusConverter',this);return false">Convert to CSL</button></div>
-      <br><br>
-      <button type="submit" class="flux-button" id="scopus-display" onclick="datasetDisplay('csl-json-dataset-list','csljson');return false">Update available dataset list</button>
-    </form>
-  <div id="csl-json-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
-</div> 
-
-<!-- <div id="geolocate" style="display:none;" class="fluxTabs">
-  <button type="submit" class="flux-button" id="scopus-display" onclick="datasetDisplay('geolocate-dataset-list','scopus');return false">Update Scopus Dataset list</button>
-
-<form>
-<div id="scopus-dataset-preview" style="position:relative;">Click on a dataset to display its features. </div>
-<div id="scopus-dataset-buttons" style="display:none;">
-<button type="submit" class="flux-button"  id="geolocate-button" onclick="powerValve('scopusGeolocate',this);return false">Geolocate Affiliations</button>
-<br><br>
-</form>
-<div id="geolocate-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
-</div>
-</div>
- -->
-
-
-<!-- 
-<div id="open-access" style="display:none;" class="fluxTabs">
-  <span class="flux-title">OPEN-ACCESS</span><br><br>
-
-<form id="open-access-import-form" autocomplete="off">
-<button type="submit" class="flux-button" id="open-access-display" onclick="datasetDisplay('open-access-dataset-list','csljson');return false">Check for CSL-JSON datasets</button>
-<br>
-
-<div id="open-access-dataset-preview"></div>
-<div id="open-access-dataset-buttons"style="display:none;">
-<button type="submit" class="flux-button" onclick='powerValve("openAccessCheck",this);return false'>Check Open Access availability</button>
-</div>
-
-<div id="open-access-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
-
-</form>
-</div> -->
-
-
-<!-- ALTMETRIC TAB -->
-<!-- <div id="altmetric" style="display:none;" class="fluxTabs">
-    <span class="flux-title">ALTMETRIC</span><br><br>
-
-<form id="altmetric-import-form" autocomplete="off">
-  <button type="submit" class="flux-button" id="scopus-display" onclick="datasetDisplay('altmetric-dataset-list','altmetric');return false">Update datasets available for altmetric request list </button>
-<br>
-
-<div id="altmetric-dataset-preview"></div>
-<div id="altmetric-dataset-buttons"style="display:none;">
-<button type="submit" class="flux-button" onclick='powerValve("altmetricRetriever",this);return false'>Enrich with Altmetric Data</button>
-</div>
-
-<div id="altmetric-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
-
-</form>
-</div> -->
 
 <!-- ZOTERO TAB -->
 <div id="zotero" style="display:none;" class="fluxTabs">

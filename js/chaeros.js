@@ -29,7 +29,7 @@ let pandodb = new Dexie("PandoraeDatabase");
 let structureV1 = "id,date,name";
 
 pandodb.version(1).stores({
-      altmetric: structureV1,
+  enriched: structureV1,
       scopus: structureV1,
       csljson: structureV1,
       zotero: structureV1,
@@ -43,6 +43,11 @@ pandodb.version(1).stores({
   });
 
   pandodb.open();
+
+
+ var geolocationActive = false;
+ var checkOAActive = false;
+ var altmetricActive = false;
 
 //========== scopusConverter ==========
 //scopusConverter is only available once scopusDatasetDetail has been called. If triggered, it creates a new
@@ -92,7 +97,7 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // No
       }
         finally {  
           pandodb.open();
-          let id = dataset+date;
+          let id = dataset;
           pandodb.csljson.add({"id":id,"date":date,"name":dataset,"content":convertedDataset}); 
          }
      })
@@ -108,7 +113,10 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // No
 // scopusGeolocate gets cities/countries from a given scopus Dataset.
 
 const scopusGeolocate = (dataset) => {
-ipcRenderer.send('console-logs',"Started scopusGeolocate on " + dataset);
+
+  geolocationActive = true;
+
+  ipcRenderer.send('console-logs',"Started scopusGeolocate on " + dataset);
 
  pandodb.scopus.get(dataset).then(doc => {
   fs.readFile(appPath +'/json/cities.json',    // Read the dataset passed as option
@@ -120,14 +128,13 @@ ipcRenderer.send('console-logs',"Started scopusGeolocate on " + dataset);
   var datasetDetail = {};                                           // Prepare an empty object
   let totalCityArray = [];                                          // Prepare an empty array
    
-
 for (var i=0; i<(article.length-1); i++){                           // For loop to generate list of cities to be requested
-  if (article[i].hasOwnProperty('affiliation') && article[i].affiliation.length>0){ // If item has at least an affiliation
-      for (let j=0; j<article[i].affiliation.length; j++){        // Iterate on item's available affiliation
-          if (article[i].affiliation[j].hasOwnProperty('affiliation-country')) {       // If affiliation has a city
+  if (article[i].hasOwnProperty('affiliation') && article[i].enrichment.affiliations.length>0){ // If item has at least an affiliation
+      for (let j=0; j<article[i].enrichment.affiliations.length; j++){        // Iterate on item's available affiliation
+          if (article[i].enrichment.affiliations[j].hasOwnProperty('affiliation-country')) {       // If affiliation has a city
             let location = {};
-            location.country = article[i].affiliation[j]['affiliation-country'];
-            location.city = article[i].affiliation[j]['affiliation-city'];               // Extract city name
+            location.country = article[i].enrichment.affiliations[j]['affiliation-country'];
+            location.city = article[i].enrichment.affiliations[j]['affiliation-city'];               // Extract city name
             totalCityArray.push(JSON.stringify(location));         
           }
    }
@@ -153,18 +160,18 @@ cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key))
     article.forEach(d=>{
       for (let l = 0; l < cityIndex.length; l++) {
         if (d.hasOwnProperty('affiliation')){ 
-        for (var k=0; k<d.affiliation.length; k++){                    // Loop on available item's affiliations
+        for (var k=0; k<d.enrichment.affiliations.length; k++){                    // Loop on available item's affiliations
 
-        let city = d.affiliation[k]['affiliation-city'];           // Extract affiliation city
-        let country = d.affiliation[k]['affiliation-country'];           // Extract affiliation city
+        let city = d.enrichment.affiliations[k]['affiliation-city'];           // Extract affiliation city
+        let country = d.enrichment.affiliations[k]['affiliation-country'];           // Extract affiliation city
 
         if (typeof city === "object") {city = JSON.stringify(city)} // Stringify to allow for comparison
         if (typeof country === "object") {country = JSON.stringify(country)}                // Stringify to allow for comparison
         
         if (country === cityIndex[l].country){
                   if(city === cityIndex[l].city){
-                        d.affiliation[k].lon = cityIndex[l].lon;
-                        d.affiliation[k].lat = cityIndex[l].lat;
+                        d.enrichment.affiliations[k].lon = cityIndex[l].lon;
+                        d.enrichment.affiliations[k].lat = cityIndex[l].lat;
                   }
                 }
              }
@@ -175,14 +182,16 @@ cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key))
      let unlocatedCities = [];
   
      article.forEach(d=>{
-       if (d.hasOwnProperty("affiliation")) {
-       for (let i = 0; i < d.affiliation.length; i++) {
-        if (typeof d.affiliation[i].country != "string"){
-          unlocatedCities.push(d.affiliation[i]);
+       if (d.hasOwnProperty('enrichment') && d.enrichment.hasOwnProperty("affiliation")) {
+       for (let i = 0; i < d.enrichment.affiliations.length; i++) {
+        if (typeof d.enrichment.affiliations[i].country != "string"){
+          unlocatedCities.push(d.enrichment.affiliations[i]);
           }
        }
       }
-     });
+    });
+
+console.log(doc);
 
      ipcRenderer.send('console-logs',"Unable to locale the following cities " + JSON.stringify(unlocatedCities));
 
@@ -191,7 +200,7 @@ cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key))
      pandodb.scopus.put(doc);
      ipcRenderer.send('chaeros-success', 'Affiliations geolocated');              //Send success message to main process
      ipcRenderer.send('console-logs',"scopusGeolocate successfully added geolocations on " + dataset);
-     setTimeout(()=>{win.close()},500);
+     setTimeout(()=>{geolocationActive = false},1000);
       })
   })
 
@@ -999,7 +1008,9 @@ ipcRenderer.send('console-logs',"Collection "+JSON.stringify(collectionName)+" b
 //========== altmetricRetriever ==========
 // FETCH altmetric documents through the Altmetric API.
 
-const altmetricRetriever = (user,id) => {
+const altmetricRetriever = (id,user) => {
+
+  altmetricActive = true;
 
   pandodb.altmetric.get(id).then(doc=>{
     keytar.getPassword("altmetric", user).then((altmetricAPIkey) => {         // Retrieve password through keytar
@@ -1043,10 +1054,10 @@ const altmetricRetriever = (user,id) => {
           ipcRenderer.send('console-logs',error);
       } finally {
         doc.altmetricEnriched = true;
-        setTimeout(()=>{pandodb.altmetric.put(doc)},timer);
+        setTimeout(()=>{pandodb.csljson.put(doc)},timer);
         ipcRenderer.send('chaeros-success', 'Altmetric enrichment successful');   // Send success message to main Display
         ipcRenderer.send('console-logs',"Altmetric enrichment of "+id+" successful.");
-        setTimeout(()=>{win.close()},500);
+        setTimeout(()=>{altmetricActive = false;},1000);
       }
   
     
@@ -1068,8 +1079,33 @@ const chaerosSwitch = (fluxAction,fluxArgs) => {
           case 'scopusConverter' : scopusConverter(fluxArgs.scopusConverter.dataset);
           break;
 
-          case 'scopusGeolocate' : scopusGeolocate(fluxArgs.scopusGeolocate.dataset,fluxArgs.scopusGeolocate.user);
-          break;
+          case 'datasetEnrichment' : 
+          console.log(fluxArgs); 
+                  const enrichDataset = (fluxArgs) => {
+                      if (fluxArgs.datasetEnricher.geolocate === true) {
+                        scopusGeolocate(fluxArgs.datasetEnricher.dataset,fluxArgs.user);
+                        geolocationActive = true;
+                      };
+
+                      if (fluxArgs.checkOA === true) {
+                        checkOA(fluxArgs.datasetEnricher.dataset,fluxArgs.user);
+                        checkOAActive = true;
+                      };
+
+                      if (fluxArgs.altmetric === true) {
+                        altmetricRetriever(fluxArgs.datasetEnricher.dataset,fluxArgs.user);
+                        altmetricActive = true;
+                      };
+
+                      setInterval(()=>{
+                        if(geolocationActive===false && checkOAActive === false && altmetricActive === false) {
+                         // setTimeout(()=>{win.close()},1000);
+                        }
+                      },2000)
+                  };
+                  enrichDataset(fluxArgs);
+          
+                    break;
 
           case 'scopusRetriever' : scopusRetriever(fluxArgs.scopusRetriever.user,fluxArgs.scopusRetriever.query);
           break;
@@ -1083,7 +1119,6 @@ const chaerosSwitch = (fluxAction,fluxArgs) => {
           case 'zoteroCollectionBuilder' : zoteroCollectionBuilder(fluxArgs.zoteroCollectionBuilder.collectionName,fluxArgs.zoteroCollectionBuilder.zoteroUser,fluxArgs.zoteroCollectionBuilder.id);
           break;
 
-          case 'altmetricRetriever' : altmetricRetriever(fluxArgs.altmetricRetriever.user,fluxArgs.altmetricRetriever.id);
       }
 
     }
