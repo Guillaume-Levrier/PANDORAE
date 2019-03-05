@@ -75,7 +75,8 @@ function createWindow () {
      frame: true,
      resizable:false,
      webPreferences: {
-         nodeIntegrationInWorker: true
+         nodeIntegrationInWorker: true,
+         plugins: true
        }
    })
 
