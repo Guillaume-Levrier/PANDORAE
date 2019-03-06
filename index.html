@@ -2,61 +2,66 @@
 <title>PANDORÆ-CORE</title>
 <link rel="stylesheet" type="text/css" href="css/pandorae.css">
 <link rel="icon" type="image/png" href="img/AE-favicon.png"/>
+<style>
+html{
+  width:100%;
+  height:100%; 
+}
+</style>
 
-<div><form autocomplete="off"><input spellcheck="false" type="text" maxlength="36" id="field" value=""><button type="submit" onclick="cmdinput();return false" id="submit-invisible"></button></form>
+<!--Core/Theme-->
+<div id="canvasSignal"></div>
+<video autoplay loop class="themeCustom" id="screenMachine" type="video/mp4" >
+</video>
+
+<canvas id="spaceVoronoi"></canvas>
+<canvas id="allgone-noescape3"></canvas>
+
+<div class="themeCustom" id="core-logo" ></div>
+<div class="themeCustom" id="vignette"></div>
+<div class="themeCustom" id="version"></div>
+<div><form autocomplete="off"><input class="themeCustom" spellcheck="false" type="text" maxlength="36" id="field" value=""><button type="submit" onclick="cmdinput(document.getElementById('field').value);return false" id="submit-invisible"></button></form>
 </div>
 
-<div id="core-logo"></div>
-<div id="version"></div>
-<i id="menu-icon" class="material-icons" onclick="toggleMenu();">menu</i>
-<i id="option-icon" class="material-icons">code</i>
+<img class="themeCustom" id="mask" >
 
-<div id="menu">
+<!--Menu-->
+<div id="menu-icon"><i  class="material-icons">menu</i></div>
+<div id="option-icon" ><i onclick="toggleConsole();" class="material-icons">code</i></div>
+
+<div id="menu" class="themeCustom">
   <img id="aelogo" class="menu-item" width="100%" onClick="displayCore();" src="svg/pandorae-app-logo.svg">
-  <div class="tabs menu-item" onClick="toggleFlux();">flux</div>
+  <div id="fluxMenu" class="tabs menu-item" onClick="toggleFlux();">flux</div>
   <div class="tabs menu-item" onClick="mainDisplay('chronotype');">chronotype</div>
   <div class="tabs menu-item" onClick="mainDisplay('anthropotype');">anthropotype</div>
   <div class="tabs menu-item" onClick="mainDisplay('geotype');">geotype</div>
   <div class="tabs menu-item" onClick="mainDisplay('topotype');">topotype</div>
   <div class="tabs menu-item" onClick="mainDisplay('pharmacotype');">pharmatype</div>
   <div class="tabs menu-item" onClick="mainDisplay('gazouillotype');">gazouillotype</div>
-  <div class="tabs menu-item" onClick="toggleConsole();">console</div>
   <div class="tabs menu-item" onClick="closeWindow();">quit</div>
 </div>
 
-<div id="secmenu">
-  <div id="secMenTopTab" class="secMenuTabs">
+<div id="secmenu" class="themeCustom">
+  <div id="secMenTopTab" class="secMenuTabs">Select Dataset
   </div>
   <div id="secMenContent">
   </div>
 </div>
 
-<div id="thirdmenu">
+<div id="thirdmenu" class="themeCustom">
   <div id="thirdMenuContent">
   </div>
 </div>
 
+<!--Sources-->
+<div id="xtype"><div id="source">Datasets :</div></div>
 
-<div id="xtype">
-<div id="source">Datasets :</div>
-
-</div>
-
-<div id="settings"></div>
-
+<!--Console-->
 <div id="console"><div id="log"></div>
-<div id="cli">$PANDORÆ~:<form autocomplete="off"><input spellcheck="false" type="text" id="cli-field" value=""><button type="submit" onclick="cmdinput();return false" id="cli-submit-invisible"></button></form></div>
+<div id="cli">$PANDORÆ~:<form autocomplete="off"><input spellcheck="false" type="text" id="cli-field" value=""><button type="submit" onclick="cmdinput(document.getElementById('cli-field').value);return false" id="cli-submit-invisible"></button></form></div>
 <div id="console-options"></div>
 </div>
 
+<!--Scripts-->
 <script src="js/pandorae.js"></script>
 <script src="js/lib/OrbitControls.js"></script>
-<script src="js/lib/ShaderLoader.js"></script>
-<script src="js/lib/fbo.js"></script>
-<script src="js/lib/morph.js"></script>
-<script src="js/type/chronotype.js"></script>
-<script src="js/type/topotype.js"></script>
-<script src="js/type/anthropotype.js"></script>
-<script src="js/type/geotype.js"></script>
-<script src="js/type/pharmacotype.js"></script>
-<script src="js/type/gazouillotype.js"></script>

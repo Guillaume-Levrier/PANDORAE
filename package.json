@@ -11,7 +11,7 @@
 	},
 	"dependencies": {
 		"bottleneck": "^2.13.2",
-		"d3": "^5.7.0",
+		"d3": "^5.8.0",
 		"electron-debug": "^2.0.0",
 		"events": "^3.0.0",
 		"keytar": "^4.3.0",
@@ -20,7 +20,10 @@
 		"request": "^2.88.0",
 		"request-promise-native": "^1.0.0",
 		"talisman": "^0.21.0",
-		"three": "^0.94.0"
+		"three": "^0.94.0",
+		"@hownetworks/tracegraph": "^0.3.0",
+		"qrcode": "^1.3.3",
+		"dexie": "^2.0.4"
 	},
 	"devDependencies": {
 		"electron": "^2.0.14",
