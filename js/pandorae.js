@@ -12,7 +12,7 @@
 
 // ============ VERSION ===========
 const msg = '      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ\n\n';
-const version ='ALPHA/DEV-V0.0.90';
+const version ='ALPHA/DEV-V0.0.94';
 console.log(msg+version);
 
 // =========== NODE - NPM ===========
@@ -61,7 +61,6 @@ if (!!window.SharedWorker) {
     var multiThreader = new SharedWorker("js/type/mul[type]threader.js");
     ipcRenderer.send('console-logs',"Multithreading enabled.");
         multiThreader.onerror = () => {
-                console.log("Worker error");
                 ipcRenderer.send('console-logs',"Worker failed to start.");
               };
 };
@@ -776,11 +775,6 @@ ipcRenderer.on('tutorial', (event,message) => {
 
     }
 });
-
-ipcRenderer.on('window-close', (event,message) => {
-  console.log("Closing "+message);
-});
-
 
 // ========= THEMES =======
 

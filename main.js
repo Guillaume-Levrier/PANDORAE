@@ -38,7 +38,6 @@ const changeTheme = () => {
         try {
               themeData = JSON.parse(theme);
             } catch (error) {
-                console.log(error);             //Often fails at parsing 
             } finally {
                 activeTheme = themeData.activeTheme;
                 for (let i = 0; i < themeData.themes.length; i++) {
@@ -105,7 +104,7 @@ function createWindow () {
     })
 
   mainWindow.setMenu(null);
-  //mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
   mainWindow.on('closed', () => { mainWindow = null })
 }
 
