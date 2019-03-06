@@ -13,37 +13,245 @@
 // but it could technically be reopened once Chæros is done processing the powerValve request. As it can be frustrating for // advanced user, this feature isn't currently enforced.
 
 //========== REQUIRED MODULES ==========
+const tg = require("@hownetworks/tracegraph");
 const rpn = require('request-promise-native');                        // RPN enables to generate requests to various APIs
 const fs = require('fs');                                             // FileSystem reads/writes files and directories
 const userDataPath = remote.app.getPath('userData');
 const {ipcRenderer} = require('electron');                            // ipcRenderer manages messages with Main Process
+const d3 = require("d3");
+const Dexie = require('dexie');
+
+Dexie.debug = true;
+
+let pandodb = new Dexie("PandoraeDatabase");
+
+let structureV1 = "id,date,name";
+
+pandodb.version(1).stores({
+      enriched: structureV1,
+      scopus: structureV1,
+      csljson:structureV1,
+      zotero: structureV1,
+      twitter: structureV1,
+      anthropotype: structureV1,
+      chronotype: structureV1,
+      geotype: structureV1,
+      pharmacotype: structureV1,
+      publicdebate: structureV1,
+      gazouillotype: structureV1
+  });
+  pandodb.open();
 
 //========== STARTING FLUX ==========
-ipcRenderer.send('console-logs',"Opening Flux");           // Starting Chronotype
+ipcRenderer.send('console-logs',"Opening Flux");           // Sending notification to console
+ipcRenderer.send("window-ids","flux",remote.getCurrentWindow().id)
+ipcRenderer.on('window-close', (event,message) => {
+  closeWindow();
+});
+
+
+//========== Tracegraph ==========
+
+let traces = [
+  {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"DB/API"},"name":"DB/API"}]},
+  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"SCOPUS"},"name":"SCOPUS"},{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"}]},
+  {"hops":[{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"},{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"}]},
+  {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+  {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+  {"hops":[{"info":{"name":"LOCAL"},"name":"LOCAL"},{"info":{"name":"CAPCO"},"name":"CAPCO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]}
+];
+
+const drawFlux = (svg, traces, horizontal, showTexts) => {
+  function makeText(selection) {
+   return selection
+     .append("text")
+     .attr("font-family", "sans-serif")
+     .attr("font-size", 12);
+ }
+
+ const tmpSvg = d3.select("body").append("svg").attr("width", 650).attr("height", 500);
+
+ const tmpText = makeText(tmpSvg);
+
+const graph = tg
+  .tracegraph()
+  .horizontal(horizontal)
+  .nodeSize(node => {
+    const name = node.hops[0].name;
+    if (showTexts && name) {
+      const bbox = tmpText
+        .text(name)
+        .node()
+        .getBBox();
+      return [bbox.width + 14, bbox.height + 8];
+    }
+    return name || node.hops[0].root ? [30, 30] : [10, 10];
+  })
+  .levelMargin(10)
+  .hopDefined(hop => hop.name || hop.root)
+  .traceWidth(6)
+  .nodeId((hop, hopIndex, trace, traceIndex) => {
+    return (
+      hop.name || (hop.root && "root") || `empty-${traceIndex}-${hopIndex}`
+    );
+  });
+
+const layout = graph(traces);
+
+tmpSvg.remove();
+
+ const vb = layout.bounds.expanded(4);
+
+ svg
+   .attr("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`)
+   .attr("width", 650)
+   .attr("height", 500);
+
+   const gradients = layout.nodes.map(() => tg.genUID());
+
+   svg
+     .append("defs")
+     .selectAll("linearGradient")
+     .data(layout.nodes.map(tg.nodeGradient))
+     .enter()
+     .append("linearGradient")
+     .attr("id", (d, i) => gradients[i].id)
+     .attr("gradientUnits", d => d.gradientUnits)
+     .attr("x1", d => d.x1)
+     .attr("y1", d => d.y1)
+     .attr("x2", d => d.x2)
+     .attr("y2", d => d.y2)
+     .selectAll("stop")
+     .data(d => d.stops)
+     .enter()
+     .append("stop")
+     .attr("offset", d => d.offset)
+     .attr(
+       "stop-color",
+       d => d3.schemeSet2[d.traceIndex % d3.schemeSet2.length]
+     );
+ 
+   const traceGroup = svg
+     .selectAll(".trace")
+     .data(layout.traces)
+     .enter()
+     .append("g")
+     .attr("class", "trace")
+     .attr("fill", "none");
+   traceGroup
+     .filter(segment => segment.defined)
+     .append("path")
+     .attr("stroke-width", d => d.width - 2)
+     .attr("stroke", "white")
+     .attr("d", tg.traceCurve());
+   traceGroup
+     .append("path")
+     .attr("stroke-width", d => (d.defined ? d.width - 4.5 : d.width - 5))
+     .attr(
+      "stroke",
+      segment => d3.schemeSet2[segment.index % d3.schemeSet2.length]
+    )
+     .attr("stroke-dasharray", segment => (segment.defined ? "" : "4 2"))
+     .attr("d", tg.traceCurve());
+
+   const nodeGroup = svg
+     .selectAll(".node")
+     .data(layout.nodes)
+     .enter()
+     .append("g")
+     .attr("stroke", (d, i) => gradients[i])
+     .attr("stroke-width", 2)
+     .attr("fill", "white");
+
+   const textNodes = nodeGroup
+     .filter(d => showTexts && d.hops[0].name)
+     .datum(d => ({ ...d, bounds: d.bounds.expanded(-2.5) }));
+   textNodes
+     .append("rect")
+     .attr("rx", 2)
+     .attr("ry", 2)
+     .attr("x", d => d.bounds.x)
+     .attr("y", d => d.bounds.y)
+     .attr("width", d => d.bounds.width)
+     .attr("height", d => d.bounds.height);
+
+   makeText(textNodes)
+     .attr("x", d => d.bounds.cx)
+     .attr("y", d => d.bounds.cy)
+     .attr("stroke", "none")
+     .attr("fill", "black")
+     .attr("alignment-baseline", "central")
+     .attr("text-anchor", "middle")
+     .style("cursor","pointer")
+     .attr("font-size", 10)
+     .text(d => d.hops[0].info.name)
+     .on("mouseenter", d => {
+       
+      //NODEGROUP STYLE
+      nodeGroup.transition().duration(200).style("opacity",0.15);
+      let selectedTraces = [];
+      traces.forEach(f => {
+        for (let i = 0; i < f.hops.length; i++) {
+          if (f.hops[i].name === d.hops[0].name) {
+            selectedTraces.push(f)
+          }
+        }
+      })
+      for (let k = 0; k < selectedTraces.length; k++) {
+        for (let u = 0; u < selectedTraces[k].hops.length; u++) {
+          nodeGroup.filter(d => d.hops[0].name===selectedTraces[k].hops[u].name).transition().duration(250).style("opacity",0.65);
+        }
+      }
+
+      nodeGroup.filter(e => e===d).transition().duration(300).style("opacity",1);
+
+      //Tracegroup
+      traceGroup.transition().duration(200).style("stroke-opacity",0.15);
+      selectedTraces.forEach(signal => {
+        for (let i = 0; i < traceGroup._groups[0].length; i++) {
+          if (traceGroup._groups[0][i].__data__.hops[0] === signal.hops[0]){
+          d3.select(traceGroup._groups[0][i]).transition().duration(250).style("stroke-opacity",0.65);
+          }
+         }
+      } )
+
+
+
+
+     })
+     .on("mouseout", d => {
+      nodeGroup.transition().duration(200).style("opacity",1);
+      traceGroup.transition().duration(200).style("stroke-opacity",1);
+     })
+     .on("click", d => {fluxDisplay(d.hops[0].name.toLowerCase())});
+
+   nodeGroup
+     .filter(d => !(showTexts && d.hops[0].name))
+     .append("circle")
+     .attr("r", d => Math.min(d.bounds.width, d.bounds.height) / 2)
+     .attr("cx", d => d.bounds.cx)
+     .attr("cy", d => d.bounds.cy);
+
+ }
+
+const svg = d3.select("svg");
+
+drawFlux(svg, traces, false, true);
+
 
 //========== fluxDisplay ==========
 // Display relevant tab when called according to the tab's id.
-const fluxDisplay = (tab,button) => {
-
-  let buttons = document.getElementsByClassName("tabflux");           // Get all tabs by their common class
-
-      for (let j = 0; j < buttons.length; j++) {                      // Loop on buttons
-        buttons[j].style.backgroundColor = "white";                   // Make their backgtound white
-        buttons[j].style.color = "#141414";                           // Make the font color dark
-      }
-
-    button.style.backgroundColor = "#141414";                         // Make selected button background dark
-    button.style.color = "white";                                     // Make selected button font color dark
+const fluxDisplay = (tab) => {
 
     let tabs = document.getElementsByClassName("fluxTabs");           // Get all content DIVs by their common class
 
           for (let i = 0; i < tabs.length; i++) {                     // Loop on DIVs
              tabs[i].style.display = "none";                          // Hide the DIVs
           }
-
-    document.getElementById(tab).style.display = "block";             // Display the div corresponding to the clicked button
+          document.getElementById(tab).style.display = "block";             // Display the div corresponding to the clicked button
+  
   }
-
 //========== powerValve ==========
 // Some of the flux functions are not instantaneous because they can require data streams from remote services (such as
 // online databases APIs), or because they are CPU intensive (data management). In order not to freeze the flux modal
@@ -61,26 +269,25 @@ let itemname = item.name;                                                  // it
 
 switch (fluxAction) {                                                      // According to function name ...
 
-  case 'lexicAnalysis' : fluxArgs.lexicAnalysis = {"dataset":""};
-                           fluxArgs.lexicAnalysis.dataset = item;
-                           message = "lexicAnalysis" ;
-                           break;
+   case 'altmetricRetriever' : fluxArgs.altmetricRetriever = {};
+                                fluxArgs.altmetricRetriever.id = document.getElementById("altmetricRetriever").name;
+                                fluxArgs.altmetricRetriever.user = document.getElementById("userNameInput").value;
+                                break; 
 
   case 'scopusConverter' : fluxArgs.scopusConverter = {"dataset":""};
                            fluxArgs.scopusConverter.dataset = itemname;
-                           message = "Converting Scopus Dataset to CSL-JSON" ;
-                           break;
+                           message = "Converting to CSL-JSON" ;
+                           break; 
 
-  case 'scopusGeolocate' : fluxArgs.scopusGeolocate = {"dataset":""};
+   case 'scopusGeolocate' : fluxArgs.scopusGeolocate = {};
                            fluxArgs.scopusGeolocate.dataset = itemname;
-                           fluxArgs.scopusGeolocate.user = document.getElementById("userNameInput").value;
                            message = "Geolocating Affiliations";
-                           break;
+                           break; 
 
   case 'scopusRetriever' : fluxArgs.scopusRetriever = {"user":"","query":""};
                            fluxArgs.scopusRetriever.user = document.getElementById("userNameInput").value;
                            fluxArgs.scopusRetriever.query = document.getElementById("scopuslocalqueryinput").value;
-                           message = "Retrieving data from Scopus API" ;
+                           message = "Retrieving data from Scopus" ;
                            break;
 
   case 'capcoRebuilder' : fluxArgs.capcoRebuilder = {"dataFile":"","dataMatch":""};
@@ -94,7 +301,7 @@ case 'zoteroItemsRetriever' :  if (document.getElementById("zotitret").name ==="
                           }
                           else {
 
-                            fluxArgs.zoteroItemsRetriever = {"collections" : []};
+                            fluxArgs.zoteroItemsRetriever = {"collections" : [],"destination":[]};
                           var collecs = document.getElementsByClassName('zotColCheck');
                           for (let i =0; i<collecs.length; i++){
                             if (collecs[i].checked)
@@ -104,25 +311,27 @@ case 'zoteroItemsRetriever' :  if (document.getElementById("zotitret").name ==="
                                )
                              }
                           }
+                          var dest = document.getElementsByClassName('zotDestCheck');
+                          for (let i =0; i<dest.length; i++){
+                            if (dest[i].checked)
+                             {
+                               fluxArgs.zoteroItemsRetriever.destination.push(
+                                dest[i].value
+                               )
+                             }
+                          }
 
                           fluxArgs.zoteroItemsRetriever.zoteroUser = document.getElementById("zoterouserinput").value;
                           fluxArgs.zoteroItemsRetriever.importName = document.getElementById("zoteroImportName").value.replace(/\s/g,"");
-                          fluxArgs.zoteroItemsRetriever.path = "/datasets/"+document.getElementById("zotitret").name+"/";
-                          message = "Retrieve user collections from Zotero database" ;
-                          }
+                          message = "Retrieving user collections" ;
+                          }                        
                           break;
 
-case 'zoteroCollectionBuilder' : fluxArgs.zoteroCollectionBuilder = {"path":"","collectionName":""};
-            fluxArgs.zoteroCollectionBuilder.path = document.getElementById("csl-json-dataset-preview").name;
-            fluxArgs.zoteroCollectionBuilder.collectionName = document.getElementById("zoteroCollecName").value;
-            fluxArgs.zoteroCollectionBuilder.zoteroUser = document.getElementById("zoterouserinput").value;
-                          break;
-
-
-case 'altmetricRetriever' : fluxArgs.altmetricRetriever = {"path":""};
-                            fluxArgs.altmetricRetriever.path = itemname;
-                          break;
-
+case 'zoteroCollectionBuilder' : fluxArgs.zoteroCollectionBuilder = {};
+                                 fluxArgs.zoteroCollectionBuilder.id = document.getElementById("csljson-dataset-preview").name;
+                                 fluxArgs.zoteroCollectionBuilder.collectionName = document.getElementById("zoteroCollecName").value;
+                                 fluxArgs.zoteroCollectionBuilder.zoteroUser = document.getElementById("zoterouserinput").value;
+                                 break;
 
 }
 
@@ -130,8 +339,8 @@ case 'altmetricRetriever' : fluxArgs.altmetricRetriever = {"path":""};
 ipcRenderer.send('console-logs',"Sending to CHÆROS action "+fluxAction+ " with arguments "+JSON.stringify(fluxArgs)+" "+message);
 
 ipcRenderer.send('dataFlux',fluxAction,fluxArgs,message);                         // Send request to main process
-
-remote.getCurrentWindow().hide();                                                 // Close flux modal window
+console.log(fluxAction,fluxArgs,message)
+remote.getCurrentWindow().close();                                                 // Close flux modal window
 
 }
 
@@ -161,19 +370,15 @@ const fluxButtonAction = (buttonID,success,successPhrase,errorPhrase) => {
 //========== datasetDisplay ==========
 // datasetDisplay shows the datasets (usually JSON or CSV files) available in the relevant /datasets/ subdirectory.
 
-const datasetDisplay = (folderPath,divId,kind) => {              // This function displays the available datasets
+const datasetDisplay = (divId,kind) => {              // This function displays the available datasets
 
   try {                                                          // Try the following block
     let datasets = [];                                           // Start from an empty array
-
-    fs.readdir(userDataPath+folderPath, (err, files) => {             // Read the  directory to list files
-      files.forEach(file => {                                    // For each file in the directory
-        let fileName = "'"+file+"'";                             // Create a string from the name of the file
-        if (file !==".gitignore"){                               // If the file isn't a .gitignore
+   pandodb[kind].toArray(files=>{
+       files.forEach(file => {                                    // For each file in the directory                               
         datasets.push(                                           // Push the file in the array
-          "<li onclick=datasetDetail('"+folderPath+"/"+file+"','"+kind+"-preview','"+kind+"-buttons',"+fileName+");>"+file+"</li>"                 // A file is an HTML bullet point in a list
+          "<li onclick=datasetDetail('"+kind+"-dataset-preview','"+kind+"',"+JSON.stringify(file.id)+",'"+kind+"-dataset-buttons');>"+file.name+"</li>"                 // A file is an HTML bullet point in a list
         )
-      }
     });
 
   var datasetList = "";                                          // Create the list as a string
@@ -181,10 +386,8 @@ const datasetDisplay = (folderPath,divId,kind) => {              // This functio
   for (var i=0; i<datasets.length; ++i){                         // For each element of the array
       datasetList = datasetList + datasets[i];                   // Add it to the string
     }
-
     document.getElementById(divId).innerHTML = '<ul>'+datasetList+'</ul>';         // The string is a <ul> list
   })
-
     } catch(err){
           document.getElementById(divId).innerHTML = err;        // Display error in the result div
         }
@@ -195,71 +398,61 @@ const datasetDisplay = (folderPath,divId,kind) => {              // This functio
 // Clicking on a dataset displayed by the previous function displays some of its metadata and allows for further actions
 // to be triggered (such as sending a larger request to Chæros).
 
-const datasetDetail = (filePath,prevId,buttonId,filename) => {   // This function provides info on a specific dataset
+const datasetDetail = (prevId,kind,id,buttonId) => {   // This function provides info on a specific dataset
 
-console.log(filePath,prevId,buttonId,filename);
+  var datasetDetail = {};                                  // Create the dataDetail object
+  let dataPreview = "";                                    // Created dataPreview variable
 
-  fs.readFile(
-    userDataPath+filePath, 'utf8', (err, data) => {                   // read this particular dataset
-    try {                                                        // If the file is valid, do the following:
-        let doc = JSON.parse(data);                              // Parse the file as a JSON object
-        var datasetDetail = {};                                  // Create the dataDetail object
-        let dataPreview = "";                                    // Created dataPreview variable
+try {
+  pandodb[kind].get(id).then(doc=>{
 
+switch (kind) {
 
-switch (prevId) {
-
-          case 'scopus-dataset-preview' :
-
-                let readDataset = doc[Object.keys(doc)[0]];      // Scopus response object format
-
-                datasetDetail.searchTerms = readDataset[2]["search-results"]["opensearch:Query"]["@searchTerms"];
-                datasetDetail.totalResults = readDataset[2]['search-results']['opensearch:totalResults'];
-                datasetDetail.queryDate = readDataset[0].queryDate;
-                datasetDetail.articleGeoloc = readDataset[1].articleGeoloc;
-                datasetDetail.documentComplete = readDataset[4].documentComplete;
-
-                dataPreview = "<strong>"+ filename +"</strong>"+ // dataPreview is the displayed information in the div
-                "<br>Scopus query: " + datasetDetail.searchTerms+
-                "<br>Total results: " + datasetDetail.totalResults+
-                "<br>Query date: "+ datasetDetail.queryDate+
-                "<br>Geolocated data: "+ datasetDetail.articleGeoloc+
-                "<br>Document complete: "+ datasetDetail.documentComplete;
-
+          case 'scopus' :
+                dataPreview = "<strong>"+ doc.name +"</strong>"+ // dataPreview is the displayed information in the div
+                "<br>Origin: Scopus" +
+                "<br>Query: " + doc.content.query+
+                "<br>Total results: " + doc.content.entries.length+
+                "<br>Query date: "+ doc.date;
+                
                   document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
-                  document.getElementById(buttonId).style.display = "block";
-                  document.getElementById("geolocate-button").style.display = "inline-flex";
-                  document.getElementById("geolocate-button").name = filename;
-                  document.getElementById("convert-button").style.display = "inline-flex";
-                  document.getElementById("convert-button").name = filename;
+                  document.getElementById(buttonId).style.display = "block";            
+                  document.getElementById("scopusGeolocate").name = doc.id;
+                  document.getElementById("altmetricRetriever").name = doc.id;
 
                 break;
 
-
-          case 'csl-json-dataset-preview':
-                  dataPreview = "<strong>"+ filename +"</strong><br>Items amount : " + doc.length;
+          case 'enriched':
+                  dataPreview = "<strong>"+ doc.name +"</strong>"+ // dataPreview is the displayed information in the div
+                  "<br>Origin: Scopus" +
+                  "<br>Query: " + doc.content.query+
+                  "<br>Total results: " + doc.content.entries.length+
+                  "<br>Query date: "+ doc.date+
+                  "<br>Affiliations geolocated: " + doc.content.articleGeoloc+
+                  "<br>Altmetric metadata retrieved: " + doc.content.altmetricEnriched;     
                   document.getElementById(prevId).innerHTML = dataPreview;
-                  document.getElementById(prevId).name = filePath;
-                  document.getElementById(buttonId).style.display = "inline-flex";
+                  document.getElementById(buttonId).style.display = "block";
+                  document.getElementById("convert-csl").style.display = "inline-flex";
+                  document.getElementById("convert-csl").name = doc.id;
+                break;
 
-                break
-
-          case 'almetric-request-dataset-preview':
-
-                  dataPreview = "<strong>"+ filename +"</strong><br>Items amount : " + doc[0].items.length;
-
-                  document.getElementById(prevId).innerHTML = dataPreview;
-                  document.getElementById(prevId).name = filePath;
-                  document.getElementById(buttonId).style.display = "inline-flex";
-
-                break
+            case 'csljson':
+                dataPreview = "<strong>"+ doc.name +"</strong><br>Item amount : " + doc.content.length;         
+                document.getElementById(prevId).innerHTML = dataPreview;
+                document.getElementById(prevId).name = doc.id;
+                document.getElementById(buttonId).style.display = "inline-flex";
+              break
                   }
+                   
+  })
+                  
               }
+              
   catch(error) {                                                // If it fails at one point
-          document.getElementById(prevId).innerHTML =  error;   // Display error message
-          ipcRenderer.send('console-logs',error);               // Log error
-            }
-  });
+        document.getElementById(prevId).innerHTML =  error;   // Display error message
+        ipcRenderer.send('console-logs',error);               // Log error
+      }
+
 }
 
 //========== scopusBasicRetriever ==========
@@ -267,9 +460,9 @@ switch (prevId) {
 // rough idea of how big (and therefore how many requests) the response represents. The user is then offered to proceed
 // with the actual request, which will then be channeled to Chæros.
 
-const scopusBasicRetriever = () => {
+const scopusBasicRetriever = (checker) => {
 
-document.getElementById("scopus-basic-query").innerText = "Loading ...";
+//document.getElementById("scopus-basic-query").innerText = "Loading ...";
 
 let scopusQuery = document.getElementById("scopuslocalqueryinput").value;             // Request Content
 
@@ -291,6 +484,13 @@ let optionsRequest = {                             // Prepare options for the Re
 
     rpn(optionsRequest)                            // RPN stands for Request-promise-native (Request + Promise)
             .then(function (firstResponse) {       // Then, once the response is retrieved
+              if (checker) {
+                if (firstResponse["search-results"]){
+                  checkKey("scopusValidation",true)
+                } else {
+                  checkKey("scopusValidation",false)
+                }
+              } else {
 
     // Extract relevant metadata
     let searchTerms = firstResponse["search-results"]["opensearch:Query"]["@searchTerms"];
@@ -311,11 +511,12 @@ let optionsRequest = {                             // Prepare options for the Re
 
     // Display next step option: send full request to Chæros
     document.getElementById("scopus-query").style.display = "block";
-
+          }
         })
         .catch(function(e) {
-            fluxButtonAction ("scopus-basic-query",false,"Query Basic Info Retrieved",e.message);
+            fluxButtonAction ("scopus-basic-query",false,"Query Basic Info Error",e.message);
             ipcRenderer.send('console-logs',"Query error : "+e); // Log error
+          
         });
     })
 }
@@ -328,7 +529,7 @@ const zoteroCollectionRetriever = () => {
 
 let zoteroUser = document.getElementById("zoterouserinput").value;               // Get the Zotero user code to request
 
-ipcRenderer.send('console-logs',"Retrieving collections for user "+ zoteroUser); // Log collection request
+ipcRenderer.send('console-logs',"Retrieving collections for Zotero id "+ zoteroUser); // Log collection request
 
 // Ask keytar for zotero API key
 keytar.getPassword("Zotero",zoteroUser).then((zoteroApiKey) => {
@@ -375,101 +576,98 @@ fluxButtonAction ("zotcolret",true,"Zotero Collections Successfully Retrieved","
 
 // Preparing and showing additional options
       document.getElementById("zotitret").style.display = "inline-flex";
-      document.getElementById("zotColSelector").style.display = "inline-flex";
+      document.getElementById("zoteroResults").style.display = "flex";
       document.getElementById("zoteroImportName").style.display = "inline-flex";
+      document.getElementById("zoteroImportInstruction").style.display = "inline-flex";
 
-      datasetsSubdirList("zotColSelector");                                   // Display available dataset directories
+     // datasetsSubdirList("zotColSelector");                                   // Display available dataset directories
 
-        let selector = document.getElementById("zotColSelector");
+      checkKey("zoteroAPIValidation",true);
+
+ /*        let selector = document.getElementById("zotColSelector");
         selector.addEventListener("input",()=>{
               document.getElementById("zotitret").name =
               selector.options[selector.options.selectedIndex].value;
-            });
+            }); */
         }
     )
     .catch(function (err) {
       fluxButtonAction ("zotcolret",false,"Zotero Collections Successfully Retrieved",err);
-      ipcRenderer.send('console-logs',"Error in retrieving collections for user "+ zoteroUser + " : "+err); // Log error
+      ipcRenderer.send('console-logs',"Error in retrieving collections for Zotero id "+ zoteroUser + " : "+err); // Log error
     });
   })
 }
 
-//========== pubDebDatasetLoader ==========
-const pubDebDatasetLoader = () => {
-
-let uploadedFile = document.getElementById("load-local-pubdeb").files;
-let uploadPath = uploadedFile[0].path;
-let targetFolder = userDataPath+"/datasets/publicdebate/capco/" + uploadedFile[0].name;
-
-ipcRenderer.send('console-logs',"Loading file "+ uploadedFile + " in "+targetFolder);
-
-  fs.copyFile(uploadPath, targetFolder, (err) => {
-    if (err) throw err;
-  });
-  return uploadedFile[0].name;
-
-}
-
-//========== pubDebLinksLoader ==========
-const pubDeblinkDatasetLoader = () => {
-
-let uploadedFile = document.getElementById("load-local-links").files;
-let uploadPath = uploadedFile[0].path;
-let targetFolder = userDataPath+"/datasets/publicdebate/matching/" + uploadedFile[0].name;
-ipcRenderer.send('console-logs',"Loading file "+ uploadedFile + " in "+targetFolder);
-  fs.copyFile(uploadPath, targetFolder, (err) => {
-    if (err) throw err;
-  });
-return uploadedFile[0].name;
-}
-
-
 //========== datasetLoader ==========
 // datasetLoader allows user to load datasets from a local directory into a PANDORAE target subdirectory.
 
-const datasetLoader = (item) => {
+const datasetLoader = () => {
 
-let uploadedFile = document.getElementById("dataset-upload").files;               // Uploaded file as a variable
-let uploadPath = uploadedFile[0].path;                                            // Extract its absolute path
-console.log(uploadPath)
+let uploadedFiles = document.getElementById("dataset-upload").files;               // Uploaded file as a variable
 
-let targetted = document.getElementById("localSelector").options[document.getElementById("localSelector").options.selectedIndex].value;
+let targets=[];
 
-    let targetFolder = userDataPath+ "/datasets/" + targetted + '/' + uploadedFile[0].name;      // Prepare its destination path
-console.log(targetFolder)
-  fs.copyFile(uploadPath, targetFolder, (err) => {                                // Copy the file
-    if (err) throw err;
-  });
-  fluxButtonAction ("load-local",true,"Item successfully uploaded","");
-  ipcRenderer.send('console-logs',"Dataset "+ uploadedFile + " loaded in "+uploadPath); // Log action
+var dest = document.getElementsByClassName('locDestCheck');
+
+for (let i =0; i<dest.length; i++){
+  if (dest[i].checked) {
+    targets.push(
+      dest[i].value
+     )
+   }
 }
+
+  try {
+        uploadedFiles.forEach(dataset=>{
+          targets.forEach(target=>{
+              pandodb[target].put(dataset);
+              ipcRenderer.send('console-logs',"Dataset "+ dataset.name + " loaded in "+JSON.stringify(target)+"."); // Log action
+            });
+        });
+  } catch(e) {
+        ipcRenderer.send('console-logs',e); // Log error
+  }finally{
+        fluxButtonAction ("load-local",true,"Uploaded","");
+      }
+
+};
 
 //========== datasetsSubdirList ==========
 // List available directories for the user to upload the datasets in.
-const datasetsSubdirList = (dirListId) => {
+const datasetsSubdirList = (kind,dirListId) => {
   let datasetDirArray = [];
-  let datasets = {};
 
-  var walkDirectory = function(path, obj) {
-    var dir = fs.readdirSync(path);
-    for (var i = 0; i < dir.length; i++) {
-      var name = dir[i];
-      var target = path + '/' + name;
-      var stats = fs.statSync(target);
-       if (stats.isDirectory()) {
-         let datasetDirectory = target.slice(userDataPath.length+10,target.length);
-        datasetDirArray.push("<option value="+datasetDirectory+">"+datasetDirectory+"</option>");
-        obj[name] = {};
-        walkDirectory(target, obj[name]);
-      }
-    }
-  };
-
-  walkDirectory(userDataPath+'/datasets', datasets);
+if (kind="local") {
+  datasetDirArray = ['altmetric','scopus','csljson','zotero','twitter','anthropotype','chronotype','geotype','pharmacotype','publicdebate','gazouillotype'];
+} else{
+  datasetDirArray = kind;
+}
 
   var datasetDirList = "";                                                   // Create the list as a string
   for (var i=0; i<datasetDirArray.length; ++i){                              // For each element of the array
       datasetDirList = datasetDirList + datasetDirArray[i];                  // Add it to the string
     }
     document.getElementById(dirListId).innerHTML = datasetDirList;           // The string is a <ul> list
+}
+
+//========== scopusGeolocate ==========
+// scopusGeolocate gets cities/countries from a given scopus Dataset and send them to the OSM Geolocate API function.
+
+const geoTest = () => {
+
+  ipcRenderer.send('console-logs',"Testing geocoder API");
+  
+  keytar.getPassword("Geocoding",document.getElementById("userNameInput").value).then((geocodingApiKey) => {    // Retrieve the stored geocoding API key
+  
+  let options = {
+    uri: "https://geocoder.tilehosting.com/q/paris.js?key="+geocodingApiKey,
+    headers: {'User-Agent': 'Request-Promise'},
+    json: true }
+      
+    rpn(options).then((res) => {                        // Enforce bottleneck through limiter
+              checkKey("mapTilerValidation",true)
+        }) .catch(function (err) {
+          checkKey("mapTilerValidation",false)
+        })
+  })
 }

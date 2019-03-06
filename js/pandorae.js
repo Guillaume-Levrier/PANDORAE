@@ -5,29 +5,74 @@
 //       / /  ∖ ∖__
 //      /_/    ∖___|           PANDORÆ
 //
-//   LICENSE : GPLv3
+//   LICENSE : MIT
+// pandorae.js is the main JS file managing what happens in the mainWindow. It communicates with the Main process
+// and with other windows through the Main process (by ipc channels). Visualisations are loaded in the Main window
+// through the "type" module, itself computing complex operations in a dedicated SharedWorker. 
 
 // ============ VERSION ===========
 const msg = '      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ\n\n';
 const version ='ALPHA/DEV-V0.0.90';
+console.log(msg+version);
 
 // =========== NODE - NPM ===========
-const {remote, ipcRenderer} = require('electron');
+// Loading all relevant modules
+const {remote, ipcRenderer, shell} = require('electron');
 const Request = require('request');
 const rpn = require('request-promise-native');
 const events = require('events');
 const fs = require('fs');
-const d3 = require("d3");
+const d3 = require('d3');
 const THREE = require('three');
 const userDataPath = remote.app.getPath('userData');
+const appPath = remote.app.getAppPath();
+const QRCode = require('qrcode');
+const Dexie = require('dexie');
+const types = require('./js/type/types');
 
-// =========== MAIN DISPLAY ===========
-console.log(msg+version);
+
+// =========== DATABASE ===========
+Dexie.debug = true;
+
+let pandodb = new Dexie("PandoraeDatabase");
+
+let structureV1 = "id,date,name";
+
+pandodb.version(1).stores({
+  enriched: structureV1,
+      scopus: structureV1,
+      csljson: structureV1,
+      zotero: structureV1,
+      twitter: structureV1,
+      anthropotype: structureV1,
+      chronotype: structureV1,
+      geotype: structureV1,
+      pharmacotype: structureV1,
+      publicdebate: structureV1,
+      gazouillotype: structureV1
+  });
+
+// =========== SHARED WORKER ===========
+// Some datasets can be very large, and the data rekindling necessary before display that 
+// couldn't be done in Chaeros can be long. In order not to freeze the user's mainWindow,
+// most of the math to be done is sent to a Shared Worker which loads the data and sends
+// back to Types only what it needs to know.
+if (!!window.SharedWorker) {
+    var multiThreader = new SharedWorker("js/type/mul[type]threader.js");
+    ipcRenderer.send('console-logs',"Multithreading enabled.");
+        multiThreader.onerror = () => {
+                console.log("Worker error");
+                ipcRenderer.send('console-logs',"Worker failed to start.");
+              };
+};
+
+// =========== MAIN LOGO ===========
+// Main logo is a text that can be changed through the nameDisplay function
 let coreLogoArchive = "";
 
 document.getElementById("version").innerHTML = version;
 
-let coreLogo = ["P","&nbsp;","A","&nbsp;","N","&nbsp;","D","&nbsp;","O","&nbsp;","R","&nbsp;","<div id='A-e' style='margin-left:410px;'>A</div><div id='a-E' style='margin-left:420px;'>E</div>","&nbsp;","&nbsp;"," ","-"," ","&nbsp;","C","&nbsp;","O","&nbsp;","R","&nbsp;","E"];
+let coreLogo = ["P","&nbsp;","A","&nbsp;","N","&nbsp;","D","&nbsp;","O","&nbsp;","R","&nbsp;","Æ","&nbsp;","&nbsp;"," ","-"," ","&nbsp;","C","&nbsp;","O","&nbsp;","R","&nbsp;","E"];
 
 let chaeros = ["C","H","&nbsp;","&nbsp;","&nbsp;","<div id='A-e' style='margin-left:240px;'>A</div><div id='a-E' style='margin-left:250px;'>E</div>","R","O","S"," ","-"," ","D","I","S","T","A","N","T"];
 
@@ -49,11 +94,12 @@ coreLogoArchive = name;
 
 nameDisplay(coreLogo);
 
+// clicking the pandorae menu logo reloads the mainWindow. So does typing "reload" in the main field.
 aelogo.addEventListener('dblclick', ()=>{location.reload()});
 
 // =========== Global Variables ===========
 var pandoratio = 0;                         // Used in three.js transitions (from one shape to another)
-var chronoLinksKeywords = [];               // Create an array of keywords to be looked for (converted back to Regexp)
+
 
 // =========== XTYPE ===========
 const xtype = document.getElementById("xtype");             // xtype is a div containing each (-type) visualisation
@@ -67,11 +113,10 @@ let toggledMenu = false;
 const purgeMenuItems = (menu) => {
   let menuContent = document.getElementById(menu);
   while (menuContent.firstChild) {menuContent.removeChild(menuContent.firstChild);}
-  while(options.length > 0) {options.pop();}
 }
 
 const toggleMenu = () => {
-  while(options.length > 0) {options.pop();}
+  //while(options.length > 0) {options.pop();}
   if (toggledMenu) {
     if (toggledSecondaryMenu) {toggleSecondaryMenu();toggleMenu();}
     else if (toggledTertiaryMenu) {toggleTertiaryMenu();toggleSecondaryMenu();toggleMenu();}
@@ -88,6 +133,15 @@ const toggleMenu = () => {
     }
   }
     else {
+
+      if (xtypeExists) {
+        document.body.style.animation="fadeout 0.5s";
+        setTimeout(()=>{
+          document.body.remove();
+          remote.getCurrentWindow().reload();
+        }, 450);
+      }
+      else {
       logostatus();
       document.getElementById("menu").style.left = "0px";
       document.getElementById("console").style.left = "150px";
@@ -97,6 +151,7 @@ const toggleMenu = () => {
           var menuItems = document.getElementsByClassName("menu-item");
           for (let i = 0; i < menuItems.length; i++) {menuItems[i].style.left = "0";}
       toggledMenu = true;
+      }
   }
 }
 
@@ -104,7 +159,9 @@ let toggledSecondaryMenu = false;
 
 const toggleSecondaryMenu = () => {
   purgeMenuItems("secMenContent");
+  purgeMenuItems("thirdMenuContent");
   if (toggledSecondaryMenu) {
+    if (toggledTertiaryMenu) {toggleTertiaryMenu();}
     document.getElementById("secmenu").style.left = "-150px";
     document.getElementById("console").style.left = "150px";
     document.getElementById("menu-icon").style.left = "175px";
@@ -165,36 +222,14 @@ lifelines.attr("class","lifelinerror")
 
 }
 
-const openRegular = (regularFile) => {
-  let win = new remote.BrowserWindow({
-    parent: remote.getCurrentWindow(),
-    backgroundColor: 'white',
-    resizable: false,
-    width: 350,
-    height: 700
-  })
-  win.once('ready-to-show', () => {
-  win.show()
-})
-  var path = 'file://' + __dirname + '/'+ regularFile +'.html';
-  win.loadURL(path);
+const openHelper = (helperFile) => {
+  ipcRenderer.send('window-manager',"openHelper",helperFile);
 }
-
 const openModal = (modalFile) => {
-  let win = new remote.BrowserWindow({
-    parent: remote.getCurrentWindow(),
-    backgroundColor: 'white',
-    modal: true,
-    frame: false,
-    resizable: false
-  })
-  var path = 'file://' + __dirname + '/'+ modalFile +'.html';
-  win.loadURL(path);
+  ipcRenderer.send('window-manager',"openModal",modalFile);
 }
-
 const toggleOptions = () => {openRegular("options");}
 const toggleFlux = () => {toggleMenu();displayCore();openModal("flux");}
-const toggleSettings = () => {openModal("settings");}
 const toggleHelp = () => {window.open("help.html","_blank");}
 
 // =========== CONSOLE ===========
@@ -230,114 +265,20 @@ const removeTooltip = () => {
   document.getElementById("xtype").removeChild(tooltip);
 }
 
-// =========== LINKS ===========
-var links = {};
-var linkedByIndex = {};
-const isConnected = (a, b) => linkedByIndex[a.index + "," + b.index] || linkedByIndex[b.index + "," + a.index] || a.index == b.index;
-
-// =========== DRAG =========
-function dragged(d) {
-  d3.select(this)
-      .attr("cx", d.zone = d3.event.x)
-      .attr("x", d.zone = d3.event.x);
-    }
-
-// ========== TIME ===========
-const currentTime = new Date();                           // Precise time when the page has loaded
-const Past = d3.timeYear.offset(currentTime,-1);          // Precise time minus one year
-const Future = d3.timeYear.offset(currentTime,1);         // Precise time plus one year
-
-// =========== TIME MANAGEMENT ===========
-//Parsing and formatting dates
-const parseTime = d3.timeParse("%Y-%m-%d");
-const formatTime = d3.timeFormat("%d/%m/%Y");
-
-//locales
-const locale = d3.timeFormatLocale({
-"dateTime": "%A, le %e %B %Y, %X",
- "date": "%d/%m/%Y",
- "time": "%H:%M:%S",
- "periods": ["AM", "PM"],
- "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
- "Saturday"],
- "shortDays": ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."],
- "months": ["January", "February", "March", "April", "May", "June", "July","August", "September", "October", "November", "December"],
- "shortMonths": ["Jan.", "Feb.", "Mar", "Avr.", "May", "June", "Jul.","Aug.", "Sept.", "Oct.", "Nov.", "Dec."]
-});
-
-const localeFR = d3.timeFormatLocale({
-  "dateTime": "%A, le %e %B %Y, %X",
-   "date": "%d/%m/%Y",
-   "time": "%H:%M:%S",
-   "periods": ["AM", "PM"],
-   "days": ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi","samedi"],
-   "shortDays": ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."],
-   "months": ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet","Août", "Septembre", "Octobre", "Novembre", "Décembre"],
-   "shortMonths": ["Janv.", "Févr.", "Mars", "Avr.", "Mai", "Juin", "Juil.","Août", "Sept.", "Oct.", "Nov.", "Déc."]
-  });
-
-const localeEN = d3.timeFormatLocale({
-"dateTime": "%A, le %e %B %Y, %X",
- "date": "%d/%m/%Y",
- "time": "%H:%M:%S",
- "periods": ["AM", "PM"],
- "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
- "Saturday"],
- "shortDays": ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."],
- "months": ["January", "February", "March", "April", "May", "June", "July","August", "September", "October", "November", "December"],
- "shortMonths": ["Jan.", "Feb.", "Mar", "Avr.", "May", "June", "Jul.","Aug.", "Sept.", "Oct.", "Nov.", "Dec."]
-});
-
-const localeZH = d3.timeFormatLocale({
-  "dateTime": "%A, le %e %B %Y, %X",
-   "date": "%d/%m/%Y",
-   "time": "%H:%M:%S",
-   "periods": ["AM", "PM"],
-   "days": ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五","星期六"],
-   "shortDays": ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
-   "months": ["一月", "二月", "三月", "四月", "五月", "六月", "七月","八月", "九月", "十月", "十一月", "十二月"],
-   "shortMonths": ["一月", "二月", "三月", "四月", "五月", "六月", "七月","八月", "九月", "十月", "十一月", "十二月"]
-  });
-
-const formatMillisecond = locale.format(".%L"),
-    formatSecond = locale.format(":%S"),
-    formatMinute = locale.format("%I:%M"),
-    formatHour = locale.format("%H"),
-    formatDay = locale.format("%d %B %Y"),
-    formatWeek = locale.format("%d %b %Y"),
-    formatMonth = locale.format("%B %Y"),
-    formatYear = locale.format("%Y");
-
-const multiFormat = (date) =>
-      (d3.timeSecond(date) < date ? formatMillisecond
-      : d3.timeMinute(date) < date ? formatSecond
-      : d3.timeHour(date) < date ? formatMinute
-      : d3.timeDay(date) < date ? formatHour
-      : d3.timeMonth(date) < date ? (d3.timeWeek(date) < date ? formatDay : formatWeek)
-      : d3.timeYear(date) < date ? formatMonth
-      : formatYear)(date);
-
-// ========== LEGEND ===========
-const legend = [{"legendtitle":"PANDORÆ","legendtitleEN":"PANDORÆ","legendtitleFR":"PANDORÆ","legendtitleZH":"PANDORÆ","Chinaname":"China","USname":"US","Francename":"France","UKname":"UK","Globalname":"Global","Europename":"Europe","ChinanameEN":"China","USnameCM":"US","FrancenameCM":"France","UKnameCM":"UK","GlobalnameCM":"Global","EuropenameCM":"Europe","ChinanameFR":"Chine","USnameZH":"美国","FrancenameZH":"法国","ChinanameZH":"中国","UKnameZH":"英国","GlobalnameZH":"全球","EuropenameZH":"欧洲"}];
-
-d3.select("xtype").append("text").data(legend).attr("class","legende").attr("x", 65).attr("y", 35).attr("style", "font-size: 0.9em;").text("legendtitle");
-
 // ========== CORE SIGNALS ===========
 
 ipcRenderer.on('coreSignal', (event,fluxAction,fluxArgs, message) => {
       try{
       document.getElementById("field").value = message;
-      console.log(fluxArgs);
       pulse(1,1,10);
     } catch (err){
       document.getElementById("field").value = err;
-      console.log(err);
     } finally{
 
   }
 })
 
-ipcRenderer.on('chaeros-success', (event,message,action) => {
+ipcRenderer.on('chaeros-notification', (event,message,action) => {
   document.getElementById("field").value = message;
   if (action==="detransfect") {pulse(1,1,10,true);}
 });
@@ -369,9 +310,9 @@ const xtypeDisplay = () => {
 };
 
 const purgeXtype = () => {
-  if (xtypeExists) {
+  if (document.getElementById("xtypeSVG")) {
     document.getElementById("xtype").style.zIndex = "-2"                      // Send the XTYPE div to back
-    document.getElementById("xtypeSVG").remove();                             // Remove the SVG with the current type
+    document.getElementById("xtype").removeChild(document.getElementById("xtypeSVG"));
     removeTooltip();
   }
 };
@@ -387,6 +328,18 @@ const displayCore = () => {
 const purgeCore = () => {
   if (coreExists) {
     d3.select("canvas").remove();
+    
+    document.body.removeChild(document.getElementById("core-logo"));
+    document.body.removeChild(document.getElementById("vignette"));
+    document.body.removeChild(document.getElementById("version"));
+    document.body.removeChild(document.getElementById("mask"));
+    document.body.removeChild(document.getElementById("screenMachine"));
+    document.getElementById("field").style.display = "none";
+    Array.from(document.getElementsByClassName("purgeable")).forEach(d=>{
+      document.body.removeChild(document.getElementById(d.id));
+      
+      d3.select(d.id).remove();
+    });
     ipcRenderer.send('console-logs',"Purging core");
   }
 
@@ -394,91 +347,201 @@ const purgeCore = () => {
 
 var options = [];
 
-const selectOption = (type,kind,item,path) => {
-        let selected = {"type":"","kind":"","item":"","path":""};
-            selected.type = type;
-            selected.kind = kind;
-            selected.item = item;
-            selected.path = path;
-            options.push(path);
-        document.getElementById(item).style.backgroundColor = "darkgrey";
-        ipcRenderer.send('console-logs',"Selecting dataset: " + JSON.stringify(selected));
-}
+const start = (type,options) => {
 
-const loadType = () => {
   toggleMenu();
-  xtypeDisplay();
-  purgeCore();
-  xtypeExists = true;
-  coreExists = false;
-  document.getElementById("field").value = "";
+  let datasets={};
+let argLength = 99;
+
+  switch (type) {
+            case 'chronotype':
+              datasets.bibliography=options[0];
+              document.getElementById("field").addEventListener("click", ()=>{
+                  types.typeSwitch("chronotype",datasets);
+                  document.getElementById("field").removeEventListener("click", ()=>
+                  types.typeSwitch("chronotype",datasets));
+              }
+            );
+          
+          break;
+            case 'anthropotype': 
+              datasets.datasetAT=options[0];
+              document.getElementById("field").addEventListener("click", ()=>{
+                types.typeSwitch("anthropotype",datasets);
+                  document.getElementById("field").removeEventListener("click", ()=>
+                  types.typeSwitch("anthropotype",datasets)
+                  );
+
+              }
+            );
+            break;
+            case 'geotype': 
+              datasets.locations=options[0];
+              document.getElementById("field").addEventListener("click", ()=>{
+                types.typeSwitch("geotype",datasets);
+                        
+                  document.getElementById("field").removeEventListener("click", ()=>
+                  types.typeSwitch("geotype",datasets)
+                );
+
+              }
+            );
+            break;
+            case 'pharmacotype': argLength = 1;
+            if (options.length === argLength) {
+              toggleMenu();
+              document.getElementById("field").style.pointerEvents = "all";
+              document.getElementById("field").value = "start pharmacotype";
+              let datasets={};
+              datasets.trials=options[0];
+              document.getElementById("field").addEventListener("click", ()=>{
+                types.typeSwitch("pharmacotype",datasets);
+                  document.getElementById("field").removeEventListener("click", ()=>
+                  types.typeSwitch("pharmacotype",datasets));
+                  document.getElementById("field").style.pointerEvents = "none";
+
+              }
+            );
+          }
+            break;
+            case '6publicdebate': argLength = 3;
+            if (options.length === argLength) {
+              toggleMenu();
+              document.getElementById("field").style.pointerEvents = "all";
+              document.getElementById("field").value = "start topotype";
+              let datasets={};
+              datasets.pubdeb=options[0];
+              datasets.matching=options[1];
+              datasets.commun=options[2];
+              document.getElementById("field").addEventListener("click", ()=>{
+                types.typeSwitch("topotype",datasets);
+                  document.getElementById("field").removeEventListener("click", ()=>
+                  types.typeSwitch("topotype",datasets));
+                  document.getElementById("field").style.pointerEvents = "none";
+
+              }
+            );
+          }
+            break;
+            case '9gazouillotype': argLength = 2;
+            if (options.length === argLength) {
+              toggleMenu();
+              document.getElementById("field").style.pointerEvents = "all";
+              document.getElementById("field").value = "start gazouillotype";
+              let datasets={};
+              datasets.tweets=options[0];
+              datasets.query=options[1];
+              document.getElementById("field").addEventListener("click", ()=>{
+                types.typeSwitch("gazouillotype",datasets);
+                        pulse(1,1,10);
+                  document.getElementById("field").removeEventListener("click", ()=>
+                    types.typeSwitch("gazouillotype",datasets));
+                  document.getElementById("field").style.pointerEvents = "none";
+
+              }
+            );
+          }
+             break;
+          }
+          document.getElementById("field").style.pointerEvents = "all";
+          document.getElementById("field").style.cursor = "pointer";
+          document.getElementById("field").value = "start "+type;
+};
+
+const selectOption = (type,id) => {
+       
+        document.getElementById(id).style.backgroundColor = "darkgrey";
+
+        toggleTertiaryMenu();
+
+        var thirdMenu = document.getElementById("thirdMenuContent");
+
+        var options = [];
+
+        options.push(id);
+
+        start(type,options);
+
+        ipcRenderer.send('console-logs',"Checking dataset: " + JSON.stringify(id));
+
 }
 
-const mainDisplay = (type,options) =>{
+const nextOption = (type,kind) => {
+
+let newKind = parseInt(kind.slice(0,1))+1;
+
+ipcRenderer.send('datalist',{"type":type,"kind":newKind});
+
+
+}
+
+// ========== main menu options ========
+
+const mainDisplay = (type) =>{
+
+  const listTableDatasets = (table) => {
+    let targetType = pandodb[table];
+    targetType.toArray().then( e=> {
+      e.forEach(d=>{
+          let dataset = document.createElement("div");
+          dataset.className = "secContentTabs";
+          dataset.id = d.id;
+          dataset.innerHTML = "<span><strong>"+d.name+"</strong><br>"+d.date+"</span>";
+          dataset.onclick = function () {selectOption(type,d.id)};
+          document.getElementById("secMenContent").appendChild(dataset);
+        }) 
+      });
+  }
 
   displayCore();
-
+  purgeXtype();
   document.getElementById("field").value = "preparing " + type;
   ipcRenderer.send('console-logs',"Preparing " + type);
 
-    switch (type) {
-
-      case 'chronotype':toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Chronotype Data</strong><br><br>Select a bibliography and links and then click <strong><a onclick='chronotype(options[0],options[1])'>Start</a></strong>";
-                        ipcRenderer.send('datalist',{"type":"chronotype","kind":"biblio"});
-                        ipcRenderer.send('datalist',{"type":"chronotype","kind":"links"});
-                        break;
-
-      case 'anthropotype': toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Anthropotype Data</strong><br><br>Select humans, institutions and links and then click <strong><a onclick='anthropotype(options[0],options[1],options[2])'>Start</a></strong>";
-                        ipcRenderer.send('datalist',{"type":"anthropotype","kind":"humans"});
-                        ipcRenderer.send('datalist',{"type":"anthropotype","kind":"affiliations"});
-                        ipcRenderer.send('datalist',{"type":"anthropotype","kind":"links"});
-                        break;
-
-      case 'geotype': toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Geotype Data</strong><br><br>Select locations and then click <strong><a onclick='geotype(options[0])'>Start</a></strong>";
-                        ipcRenderer.send('datalist',{"type":"geotype","kind":"locations"});
-                        break;
-
-      case 'pharmacotype':toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Clinical Trials Data</strong><br><br>Select trials and then click <strong><a onclick='pharmacotype(options[0])'>Start</a></strong>";
-                        ipcRenderer.send('datalist',{"type":"pharmacotype","kind":"trials"});
-                        break;
-
-      case 'topotype': toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Topotype Data</strong><br><br>Select (lexi) public debate, matching data and community keywords and then click <strong><a onclick='topotype(options[0],options[1],options[2])'>Start</a></strong>";
-                        ipcRenderer.send('datalist',{"type":"publicdebate","kind":"pubdeb"});
-                        ipcRenderer.send('datalist',{"type":"publicdebate","kind":"links"});
-                        break;
-
-      case 'gazouillotype':toggleSecondaryMenu();
-                        document.getElementById('secMenTopTab').innerHTML = "<strong>Select Gazouilloire Data</strong><br><br>Select a dataset, a query file, and then click <strong><a onclick='gazouillotype(options[0],options[1])'>Start</a></strong>";
-                        ipcRenderer.send('datalist',{"type":"gazouillotype","kind":"datasets"});
-                        ipcRenderer.send('datalist',{"type":"gazouillotype","kind":"query"});
-                        break;
-
-    }
+  toggleSecondaryMenu();
+  listTableDatasets(type);
 
 }
 
-const cmdinput = () => {
+const cmdinput = (input) => {
 
-let commandInput = document.getElementById("field").value;
-let cliInput = document.getElementById("cli-field").value;
+input = input.toLowerCase();
 
-ipcRenderer.send('console-logs'," user$ "+ commandInput + cliInput);
+ipcRenderer.send('console-logs'," user$ "+ input);
 
 const loadingType = () => commandReturn = "loading " + commandInput;
 
-switch (commandInput || cliInput) {
+if (input.substring(0, 13) === "change theme " && remote.getCurrentWindow().isFullScreen() === false) {
+  
+  document.body.style.animation="fadeout 0.5s";
+            setTimeout(()=>{
+              document.body.remove();
+              ipcRenderer.send('change-theme',input.substring(13,input.length));
+              remote.getCurrentWindow().reload();
+            }, 450);
+} else {
+
+switch (input) {
 
     case 'test':
           loadingType();
           break;
 
+    case 'zoom':
+          zoomThemeScreen(activeTheme)
+    break;
+
+    case 'unzoom':
+          zoomThemeScreen(activeTheme)
+    break;
+
     case 'toggle console':
             toggleConsole();
+            break;
+
+    case 'hypercore':
+            nameDisplay("PANDORÆ - HYPERCORE");
+            commandReturn = "unlocked error bypass";
             break;
 
     case 'toggle menu':
@@ -514,7 +577,11 @@ switch (commandInput || cliInput) {
           break;
 
     case  'reload':
-          location.reload();
+            document.body.style.animation="fadeout 0.5s";
+            setTimeout(()=>{
+              document.body.remove();
+              remote.getCurrentWindow().reload();
+            }, 450);
           break;
 
     case  'reload core':
@@ -535,8 +602,13 @@ switch (commandInput || cliInput) {
           break;
 */
 
+
+    case  'transfect':
+            pulse(1,1,10);
+          break;
+
     case  'detransfect':
-          pulse(0,10,false);
+          pulse(1,1,10,true);
           break;
 
     case  'chromium console':
@@ -545,6 +617,18 @@ switch (commandInput || cliInput) {
           ipcRenderer.send('console-logs',"Opening chromium console.");
           break;
 
+    case  'unlock menu':
+          document.getElementById("menu-icon").onclick = toggleMenu;
+          document.getElementById("menu-icon").style.cursor = "pointer";
+          document.getElementById("option-icon").style.cursor = "pointer";
+          document.getElementById("field").removeEventListener("click", ()=>{
+              openModal("tutorial");
+            })
+            break;
+
+    case  'start tutorial':
+          openModal("tutorial");
+          break;
     case 'undefined':
           commandReturn = "";
           break;
@@ -561,7 +645,7 @@ switch (commandInput || cliInput) {
           commandReturn = "command not found";
           break;
         }
-
+      }
 document.getElementById("field").value = commandReturn;
 
 }
@@ -619,3 +703,150 @@ const refreshWindow = () => {
 const reframeMainWindow = () => {
         remote.mainWindow({frame: true})
 }
+
+// Tutorial - Uncomment to force tutorial on boot if no user name defined
+
+fs.readFile(userDataPath +'/userID/user-id.json',                          // Read the designated datafile
+                              'utf8', (err, data) => {              // Additional options for readFile
+  if (err) throw err;
+  let user = JSON.parse(data);
+
+if (false
+//  user.UserName === "Enter your name"
+) {
+  document.getElementById("menu-icon").style.cursor = "not-allowed";
+  document.getElementById("option-icon").style.cursor = "not-allowed";
+  document.getElementById("field").value = "start tutorial";
+  document.getElementById("field").style.pointerEvents = "all";
+  document.getElementById("field").addEventListener("click", ()=>{
+      openModal("tutorial");
+    })
+  } else{
+    document.getElementById("menu-icon").onclick = toggleMenu;
+    document.getElementById("menu-icon").style.cursor = "all";
+    document.getElementById("option-icon").style.cursor = "all";
+  }
+});
+
+const blinker = (item) => {
+
+let blinking;
+let blinking2;
+
+function blink () {
+  blinking = setInterval( function(){
+          document.getElementById(item).style.backgroundColor = "#141414";
+          document.getElementById(item).style.color = "white";
+        }, 500);
+  blinking2 = setInterval(function(){ document.getElementById(item).style.backgroundColor = "white";
+        document.getElementById(item).style.color = "#141414"; },1000);
+};
+
+blink();
+
+        document.getElementById(item).addEventListener('click', function(){
+          clearInterval(blinking);
+          clearInterval(blinking2);
+          document.getElementById(item).style.backgroundColor = "white";
+          document.getElementById(item).style.color = "#141414";
+        });
+
+
+};
+
+
+
+ipcRenderer.on('tutorial', (event,message) => {
+  document.getElementById("menu-icon").onclick = toggleMenu;
+  document.getElementById("menu-icon").style.cursor = "all";
+  document.getElementById("option-icon").style.cursor = "all";
+  let blink = [{"background-color": "#141414","color":"white"},
+              {"background-color": "white","color":"#141414"}];
+
+    switch (message) {
+      case "openFlux": openHelper('tutorialHelper');
+                       blinker("menu-icon");
+                       blinker("fluxMenu");
+
+        break;
+
+        case "openTutorial": openModal('tutorial');
+                         break;
+      default:
+
+    }
+});
+
+ipcRenderer.on('window-close', (event,message) => {
+  console.log("Closing "+message);
+});
+
+
+// ========= THEMES =======
+
+ipcRenderer.on('change-theme', (event,theme) => {
+  loadTheme(theme);
+});
+
+var activeTheme;
+var fullscreenable;
+
+var coreCanvasW = window.innerWidth;
+var coreCanvasH = window.innerHeight;
+
+var coreDefW = 512;
+var coreDefH = 512;
+
+const loadTheme = (theme) => {
+  activeTheme = theme;
+
+  if (theme.hasOwnProperty("script")) { 
+    var themeScripts = require(appPath+"/themes/"+theme["theme-name"]+"/"+theme.script)();
+}
+
+setTimeout(()=>{      // Give the process enough time to create the relevant DOM elements
+  Array.from(document.getElementsByClassName("themeCustom")).forEach(d=>{
+    Object.assign(document.getElementById(d.id).style, theme[d.id]);
+  })
+
+  if (document.getElementById("coreCanvas")!=null) {
+  Object.assign(document.getElementById("coreCanvas").style, theme.coreCanvas);
+}
+
+  document.getElementById("screenMachine").src = theme["theme-background"];
+  document.getElementById("mask").src = theme["theme-mask"];
+
+  coreDefW = theme.coreDefW;
+  coreDefH = theme.coreDefH;
+  fullscreenable = theme.fullscreenable;
+},100);
+      
+  
+  }
+
+let screenZoomToggle = false;
+
+  const zoomThemeScreen = (theme) => {
+    if (screenZoomToggle) {
+      d3.select("body").transition().duration(2000).style("transform","scale(1,1)");
+      document.getElementById("screenMachine").play(); 
+      screenZoomToggle = false;
+  } else { 
+    if (theme.hasOwnProperty("zoom")) {
+        d3.select("body").style("transform-origin",theme.zoom["transform-origin"]);
+        d3.select("body").transition().duration(2000).style("transform",theme.zoom["transform"]);
+        document.getElementById("screenMachine").pause(); 
+        screenZoomToggle = true;
+    } else {
+        document.getElementById("field").value = "this theme doesn't support zooming";
+    }
+   }
+  }
+
+  fs.readFile(userDataPath +'/themes/themes.json',                          // Read the designated datafile
+                              'utf8', (err, activeThemeData) => {              // Additional options for readFile
+  if (err) throw err;
+  let activateTheme = JSON.parse(activeThemeData);
+
+  ipcRenderer.send('change-theme',activateTheme.activeTheme);
+});

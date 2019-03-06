@@ -7,176 +7,202 @@
 //redispatched to the index's "coreCanvas" and "field", which subsequently impacts the core animation and the field's
 //value.
 
-const {remote, ipcRenderer} = require('electron');
-const keytar = require('keytar');
-const rpn = require('request-promise-native');
-const bottleneck = require('bottleneck');
-const fs = require('fs');
-const d3 = require('d3');
-const wordTokenizer = require('talisman/tokenizers/words');
-const carryStemmer = require('talisman/stemmers/french/carry');
-const MultiSet = require('mnemonist/multi-set')
-const userDataPath = remote.app.getPath('userData');
+const {remote, ipcRenderer} = require('electron');                    // Load ipc to communicate with main process
+const userDataPath = remote.app.getPath('userData');                  // Find userData folder Path
+const appPath = remote.app.getAppPath();
+const keytar = require('keytar');                                     // Load keytar to manage user API keys
+const rpn = require('request-promise-native');                        // Load RPN to manage promises
+const bottleneck = require('bottleneck');                             // Load bottleneck to manage API request limits
+const fs = require('fs');                                             // Load filesystem to manage flatfiles
+const d3 = require('d3');                                             // Load d3 to manage data structures
+const wordTokenizer = require('talisman/tokenizers/words');           // Load Talisman to manage language processing
+const carryStemmer = require('talisman/stemmers/french/carry');       // idem
+const MultiSet = require('mnemonist/multi-set')                       // Load Mnemonist to manage other data structures
+const Dexie = require('dexie');
+
+const date = new Date().toLocaleDateString() +"-"+ new Date().toLocaleTimeString();  
+
+Dexie.debug = true;
+
+let pandodb = new Dexie("PandoraeDatabase");
+
+let structureV1 = "id,date,name";
+
+pandodb.version(1).stores({
+  enriched: structureV1,
+      scopus: structureV1,
+      csljson: structureV1,
+      zotero: structureV1,
+      twitter: structureV1,
+      anthropotype: structureV1,
+      chronotype: structureV1,
+      geotype: structureV1,
+      pharmacotype: structureV1,
+      publicdebate: structureV1,
+      gazouillotype: structureV1
+  });
+
+  pandodb.open();
+
+ var currentDoc={};
+
+ var geolocationActive = false;
+ var altmetricActive = false;
 
 //========== scopusConverter ==========
-//scopusConverter is only available once scopusDatasetDetail has been called. If triggerred, it creates a new
+//scopusConverter is only available once scopusDatasetDetail has been called. If triggered, it creates a new
 //CSL-JSON file from the selected dataset and puts it in json/csl-json. This CSL-JSON file should then be ready
 //to be imported to Zotero.
 
-const scopusConverter = (dataset) => {                               // dataset is the chosen file to be converted
+const scopusConverter = (dataset) => {                               // [dataset] is the file to be converted
 
-ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset);
+ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // Notify console conversion started
 
   let convertedDataset = [];                                         // Create relevant array
+  
+  pandodb.enriched.get(dataset).then(doc=>{
 
-  fs.readFile(userDataPath +'/datasets/scopus/scopusDatasets/' + dataset, // Read the designated datafile
-                                'utf8', (err, data) => {             // Additional options for readFile
-    if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};                                              // Throw an error if readFile fails
-    try {                                                            // If the file is valid, do the following:
-        let doc = JSON.parse(data);                                  // Parse the file as a JSON object
-        let readDataset = doc[Object.keys(doc)[0]];                  // Select relevant array
-        let articles = readDataset[3].entries;                       // Select articles
-
+  try {                                                            // If the file is valid, do the following:
+        
+        let articles = doc.content.entries;                       // Select articles
+ 
         for (var i=0; i<articles.length; ++i){                       // For each article of the array
-            let pushedArticle =                                      // Zotero journalArticle format
-             {"itemType":"journalArticle","title":"","creators":[{"creatorType":"author","firstName":"","lastName":""}],"abstractNote":"","publicationTitle":"","volume":"","issue":"","pages":"","date":"","series":"","seriesTitle":"","seriesText":"","journalAbbreviation":"","language":"","DOI":"","ISSN":"","shortTitle":"","url":"","accessDate":"","archive":"","archiveLocation":"","libraryCatalog":"","callNumber":"","rights":"","extra":"","tags":[],"collections":[],"relations":{}};
+            let pushedArticle =  {"itemType":"journalArticle",
+            "title":"",
+            "creators":[{"creatorType":"author","firstName":"","lastName":""}],
+            "abstractNote":"","publicationTitle":"","volume":"","issue":"","pages":"","date":"","series":"","seriesTitle":"","seriesText":"","journalAbbreviation":"",
+            "language":"",
+            "DOI":"",
+            "ISSN":"",
+            "shortTitle":"",
+            "url":"",
+            "accessDate":"","archive":"","archiveLocation":"","libraryCatalog":"","callNumber":"","rights":"","extra":"","tags":[],"collections":[],"relations":{}};
 
             // Fill the article with the relevant properties
             pushedArticle.itemType = "journalArticle";
             pushedArticle.title = articles[i]['dc:title'];
+            pushedArticle.url = articles[i]['url'];
             pushedArticle.creators[0].lastName = articles[i]['dc:creator'];
             pushedArticle.date = articles[i]['prism:coverDate'];
             pushedArticle.DOI = articles[i]['prism:doi'];
             pushedArticle.publicationTitle = articles[i]['prism:publicationName'];
-            pushedArticle.shortTitle = JSON.stringify(articles[i].affiliation);
+            let enrichment = {"affiliations":articles[i].affiliation,"OA":articles[i].openaccessFlag};
+            if (articles[i].hasOwnProperty('altmetricData')){enrichment.altmetric=JSON.stringify(articles[i].altmetricData)};
+            pushedArticle.shortTitle= JSON.stringify(enrichment);
             convertedDataset.push(pushedArticle);
             }
 
       } catch(err) {
-        ipcRenderer.send('chaeros-failure', err);                               // On failure, send error to main process
+        ipcRenderer.send('chaeros-failure', JSON.stringify(err));                               // On failure, send error to main process
         ipcRenderer.send('console-logs',JSON.stringify(err));                   // On failure, send error to console
       }
-        finally {
-          let data = JSON.stringify(convertedDataset);                           // Prepare data to be written
-            fs.writeFile(                                                        // Write data
-              userDataPath +'/datasets/zotero/csl-json/csl-'+dataset,data,'utf8',// Path/name, data, format
-                (err) => {if (err)                                               // On error
-                ipcRenderer.send('chaeros-failure', err);                        // Send error to main process for dispatch
-                ipcRenderer.send('console-logs',JSON.stringify(err));
-                win.close();
-            })
+        finally {  
+          pandodb.open();
+          let id = dataset;
+          pandodb.csljson.add({"id":id,"date":date,"name":dataset,"content":convertedDataset}); 
          }
      })
-     ipcRenderer.send('chaeros-success', 'Success: Scopus dataset converted');   // Else send message to main process
-     ipcRenderer.send('console-logs',"scopusConverter successfully converted " + dataset);
-}
+     
+     ipcRenderer.send('chaeros-notification', 'Dataset converted');   // Else send a success message
+     ipcRenderer.send('console-logs',"scopusConverter successfully converted " + dataset); // Log success
+     setTimeout(()=>{win.close()},500);
+};
+
+
 
 //========== scopusGeolocate ==========
-// scopusGeolocate gets cities/countries from a given scopus Dataset and send them to the OSM Geolocate API function.
+// scopusGeolocate gets cities/countries from a given scopus Dataset.
 
-const scopusGeolocate = (dataset,user) => {
+const scopusGeolocate = (dataset) => {
+  
+  geolocationActive = true;
+  ipcRenderer.send('chaeros-notification', 'Geolocating affiliations');
+  ipcRenderer.send('console-logs',"Started scopusGeolocate on " + dataset);
 
-ipcRenderer.send('console-logs',"Started scopusGeolocate on " + dataset);
+ pandodb.enriched.get(dataset).then(doc => {
+  fs.readFile(appPath +'/json/cities.json',    // Read the dataset passed as option
+                              'utf8', (err, locatedCities) => {                       // It should be encoded as UTF-8
 
-fs.readFile(userDataPath +'/datasets/scopus/scopusDatasets/' + dataset,      // Read the dataset passed as option
-                              'utf8', (err, data) => {                       // It should be encoded as UTF-8
-  if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
+  var coordinates = JSON.parse(locatedCities);
 
-
-  const limiter = new bottleneck({                                      // Create a bottleneck
-    maxConcurrent: 1,                                                   // Send one request at a time
-    minTime: 200                                                        // Every 200 milliseconds
-  });
-
-  var doc = JSON.parse(data);                                       // Parse the file as a JSON object
-  let article = doc[Object.keys(doc)[0]][3].entries;                // Find relevant objects in the parsed dataset
-  var datasetDetail = {};                                           // Prepare an empty object
+  let article = doc.content.entries;                // Find relevant objects in the parsed dataset
   let totalCityArray = [];                                          // Prepare an empty array
-
-try{                                                                // Try requesting the locations
-
-keytar.getPassword("Geocoding",user).then((geocodingApiKey) => {    // Retrieve the stored geocoding API key
-
-    let dataPromises = [];                                          // Prepare empty array to store promises to be sent
-
+   
 for (var i=0; i<(article.length-1); i++){                           // For loop to generate list of cities to be requested
-    if (article[i].hasOwnProperty('affiliation') && article[i].affiliation.length>0){ // If item has at least an affiliation
-        for (let j=0; j<article[i].affiliation.length; j++){        // Iterate on item's available affiliation
-            if (article[i].affiliation[j].hasOwnProperty('affiliation-city')) {       // If affiliation has a city
-              let city = article[i].affiliation[j]['affiliation-city'];               // Extract city name
-              if (typeof city === "string"){                                          // Making sure it isn't null or undef
-              totalCityArray.push(city.replace(/\s/g,"%20"))                          // URL encode and push
-              }
-            }
-     }
+  if (article[i].hasOwnProperty('affiliation') && article[i].affiliation.length>0){ // If item has at least an affiliation
+      for (let j=0; j<article[i].affiliation.length; j++){        // Iterate on item's available affiliation
+          if (article[i].affiliation[j].hasOwnProperty('affiliation-country')) {       // If affiliation has a city
+            let location = {};
+            location.country = article[i].affiliation[j]['affiliation-country'];
+            location.city = article[i].affiliation[j]['affiliation-city'];               // Extract city name
+            totalCityArray.push(JSON.stringify(location));         
+          }
    }
  }
-
+}
 let cityRequests = MultiSet.from(totalCityArray);      // Create a multiset from city Array to prevent duplicate requests
+                  
+let cityIndex = [];
 
-let cities = [];
+cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key));});
 
-console.log(cityRequests);
-
-Promise.all(cityRequests.forEachMultiplicity((count, key) => {                  // Generate requests per city (=> key)
-
-    let options = {
-        uri: "https://geocoder.tilehosting.com/q/"+key+".js?key="+geocodingApiKey,
-        headers: {'User-Agent': 'Request-Promise'},
-        json: true
-    };
-console.log(options);
-    return limiter.schedule(rpn,options).then((res) => {                        // Enforce bottleneck through limiter
-            if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
-
-console.log(res);
-
-for (var j=0; j<(article.length-1); j++){                                       // For each article (last is a stop signal)
-  if (article[j].hasOwnProperty('affiliation')){                                // If it has affiliations
-
-        for (var k=0; k<article[j].affiliation.length; k++){                    // Loop on available item's affiliations
-
-          let localKey = article[j].affiliation[k]['affiliation-city'];           // Extract affiliation city
-
-          if (typeof localKey === "object") {localKey = JSON.stringify(localKey)} // Stringify to allow for comparison
-          if (typeof key === "object") {key = JSON.stringify(key)}                // Stringify to allow for comparison
-
-          localKey = localKey.replace(/\s/g,"");                                  // Remove space
-          key = key.replace(/%20/g,"");                                           // Remove URL encoding
-
-          if(localKey===key){                                                     // If affiliation city has been resolved
-            article[j].affiliation[k].lon = res.results[0].lon;                   // Add longitude
-            article[j].affiliation[k].lat = res.results[0].lat;                   // Add latitude
+  cityIndex.forEach(d=>{
+    for (let l = 0; l < coordinates.length; l++) {
+          if (d.country === coordinates[l].country){
+            if(d.city === coordinates[l].name){
+              d.lon = coordinates[l].lon;
+              d.lat = coordinates[l].lat;
+            }
+          }
         }
-    }
-  }
-}
-}).then(()=>{                                                                     // When all locations have been added
+    })
 
-      doc[Object.keys(doc)[0]][1].articleGeoloc = true;                           // Mark file as geolocated
+    article.forEach(d=>{
+      for (let l = 0; l < cityIndex.length; l++) {
+        if (d.hasOwnProperty('affiliation')){ 
+        for (var k=0; k<d.affiliation.length; k++){                    // Loop on available item's affiliations
 
-      let docstring=JSON.stringify(doc);                                          // Stringify to write
+        let city = d.affiliation[k]['affiliation-city'];           // Extract affiliation city
+        let country = d.affiliation[k]['affiliation-country'];           // Extract affiliation city
 
-          fs.writeFile(                                                                  // Write data
-            userDataPath +'/datasets/scopus/scopusDatasets/geoloc-'+dataset,docstring,'utf8',
-              (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
+        if (typeof city === "object") {city = JSON.stringify(city)} // Stringify to allow for comparison
+        if (typeof country === "object") {country = JSON.stringify(country)}                // Stringify to allow for comparison
+        
+        if (country === cityIndex[l].country){
+                  if(city === cityIndex[l].city){
+                    ipcRenderer.send('chaeros-notification', 'Located '+ d.affiliation[k]['affilname']+' in '+city);
+                        d.affiliation[k].lon = cityIndex[l].lon;
+                        d.affiliation[k].lat = cityIndex[l].lat;
+                  }
+                }
+             }
+           }
+        }
+     });
 
-    ipcRenderer.send('chaeros-success', 'Success: Geolocation added');              //Send success message to main process
-    ipcRenderer.send('console-logs',"scopusGeolocate successfully added geolocations on " + dataset);
-    win.close();
-        }  )
-      })
-  }))
-})
-      } catch(e) {
-        ipcRenderer.send('chaeros-failure', e);
-        ipcRenderer.send('console-logs', e);
+     let unlocatedCities = [];
+  
+     article.forEach(d=>{
+       if (d.hasOwnProperty('affiliation')) {
+       for (let i = 0; i < d.affiliation.length; i++) {
+        if (d.affiliation[i].lon === undefined){
+          unlocatedCities.push(d.affiliation[i]);
+          }
+       }
       }
-      finally{
+    });
 
-      }
+     ipcRenderer.send('console-logs',"Unable to locale the following cities " + JSON.stringify(unlocatedCities));
+     doc.content.articleGeoloc = true;                           // Mark file as geolocated
+     pandodb.enriched.put(doc);
+
+     ipcRenderer.send('chaeros-notification', 'Affiliations geolocated');              //Send success message to main process
+     ipcRenderer.send('console-logs',"scopusGeolocate successfully added geolocations on " + dataset);
+     
+     setTimeout(()=>{win.close()},2000);
+    })
   })
-}
+};
 
 
 //========== scopusRetriever ==========
@@ -187,10 +213,17 @@ for (var j=0; j<(article.length-1); j++){                                       
 
 const scopusRetriever = (user, query) => {                          // user argument is passed to get keytar pass
 
-ipcRenderer.send('console-logs',"Started scopusRetriever on " + query + " for user "+ user);
+ipcRenderer.send('console-logs',"Started scopusRetriever on " + query + " for user "+ user); // Log the process
 
-let scopusQuery = query;                                            // query argument is the actual query
+let scopusQuery = query;        // query argument is the actual query
 
+var content = {"type":"Scopus-dataset",
+                "query":scopusQuery,
+                "queryDate":date,
+                "altmetricEnriched":false,
+                "articleGeoloc":false,
+                "entries":[]};
+                                
 keytar.getPassword("Scopus",user).then((scopusApiKey) => {          // Get the password through keytar
 
 // URL Building blocks
@@ -209,17 +242,7 @@ let optionsRequest = {                              // Prepare options for the R
 rpn(optionsRequest)                                 // RPN stands for Request-promise-native (Request + Promise)
               .then(function (firstResponse) {      // Once you get the response
 
-    let docAmount = firstResponse['search-results']['opensearch:totalResults']; // Get the total amount of docs
-
-    let output = fs.createWriteStream(userDataPath+'/datasets/scopus/scopusDatasets/scopus-data-'+ scopusQuery +'.json'); // Start the stream
-
-// Create the output document's properties
-    let date = new Date().toJSON();                 // Create a timestamp
-    output.write('{"Scopus-dataset-'+scopusQuery+   // Start the stream with ID info
-    '":[{"queryDate":"'+date+
-    '"},{"articleGeoloc":false},');
-    output.write(JSON.stringify(firstResponse));    // Add the first response (can provide context info)
-    output.write(',{"entries":[');                  // Open entries(=docs) array to be filled
+let docAmount = firstResponse['search-results']['opensearch:totalResults']; // Get the total amount of docs
 
 var dataPromises = [];                              // Create empty array for the promises to come
 
@@ -243,23 +266,25 @@ Promise.all(dataPromises)                                // Submit requests
             let retrievedDocuments = scopusResponse[i]['search-results']['entry']; // Select the docs it contains
 
             for(let j = 0; j < retrievedDocuments.length; j++){ // For each document
-                      output.write(JSON.stringify(retrievedDocuments[j])+",");  // Write it in the "entries" array
+                      content.entries.push(retrievedDocuments[j]);  // Write it in the "entries" array
                     }
         }
         return
       })
-    .then(function(){                                     // Once all entries/documents have been written
-        output.write('{}]},{"documentComplete":true}]}'); // Add a signal object and close the "entries" array
-        output.end();                                     // Close the stream
-        output.on("finish", function () {                 // When the stream emits "finish" event
-            ipcRenderer.send('chaeros-success', 'Success: Scopus API data retrieved'); // signal success to main process
-            ipcRenderer.send('console-logs',"Scopus dataset on " + query + " for user "+ user +" have been successfully retrieved.");
-            win.close();                                   // Close Chaeros
-            }
-        );
-    })
+    .then(()=>{                                     // Once all entries/documents have been written
+
+      pandodb.open();
+      let id = query+date;
+      pandodb.scopus.add({"id":id,"date":date,"name":query,"content":content}).then(res1=>{
+        pandodb.enriched.add({"id":id,"date":date,"name":query,"content":content}).then(res2 => {
+          ipcRenderer.send('chaeros-notification', 'Scopus API data retrieved'); // signal success to main process
+          ipcRenderer.send('console-logs',"Scopus dataset on " + query + " for user "+ user +" have been successfully retrieved.");
+          setTimeout(()=>{win.close()},500);                                   // Close Chaeros
+        })  
       })
-      .catch(function(e) {
+    })
+  })
+      .catch((e) => {
         ipcRenderer.send('chaeros-failure', e);           // Send error to main process
         })
     })
@@ -274,8 +299,11 @@ const capcoRebuilder = (dataFile,dataMatch) => {
 
 ipcRenderer.send('console-logs',"Rebuilding Capco dataset " + dataFile + " with matching file "+ dataMatch);
 
-Promise.all([d3.csv(userDataPath+"/datasets/publicdebate/capco/"+dataFile, {credentials: 'include'}),     // Load the main datafile
-             d3.csv(userDataPath+"/datasets/publicdebate/matching/"+dataMatch, {credentials: 'include'})  // Load secondary datafile with prop eval
+ipcRenderer.send('console-logs',"Filepath: " + userDataPath +"/datasets/6publicdebate/");
+
+
+Promise.all([d3.csv(userDataPath+"/datasets/6publicdebate/1capco/"+dataFile, {credentials: 'include'}),     // Load the main datafile
+             d3.csv(userDataPath+"/datasets/6publicdebate/2matching/"+dataMatch, {credentials: 'include'})  // Load secondary datafile with prop eval
           ]).then(datajson => {                                             // Then with the response array
           const rawData = datajson[0];                                      // First array/datafile is rawData var
           const opinionData = datajson[1];                                  // Second is opinionData (-> prop eval)
@@ -283,7 +311,13 @@ Promise.all([d3.csv(userDataPath+"/datasets/publicdebate/capco/"+dataFile, {cred
 var data = [];
 var links= [];
 
-try{
+ipcRenderer.send('console-logs',"Files loaded");
+
+
+//try{
+
+  ipcRenderer.send('console-logs',"Cleaning and re-arranging data...");
+
 
 // Nest all arrays in the main datafile by author_id.
 var contributions = d3.nest().key(d => {return d.contributions_author_id;}).entries(rawData),
@@ -325,6 +359,8 @@ const authDirectory = () => {                                                // 
      }
 
  }
+
+  ipcRenderer.send('console-logs',"Creating authors directory...");
 
 authDirectory();                                                             // Run this function (comment out to prevent)
 
@@ -481,6 +517,8 @@ reportBuilder();
 sourceBuilder();
 }
 
+ipcRenderer.send('console-logs',"Pushing content in directory...");
+
 contentPusher();                                                            // Run function
 
 const scoreBuilder = () => {                                                // Build an impact score for each author_id
@@ -532,6 +570,7 @@ data.forEach(d => {                                                         // F
 
 }
 
+ipcRenderer.send('console-logs',"Building score...");
 scoreBuilder();                                                            // Trigger score function
 
 const opinionBuilder = () => {                                             // Build an opinion Score
@@ -628,6 +667,9 @@ const opinionBuilder = () => {                                             // Bu
     d.opinionSpectrum.score = d.opinionSpectrum.contribOpinionScore + d.opinionSpectrum.contribArgScore;
   });
 }
+
+ipcRenderer.send('console-logs',"Building opinion...");
+
 opinionBuilder();
 
 const amountCalc = (e,f) => {                                   // Create a function to compute the total amount of items
@@ -670,44 +712,12 @@ let bestScore = () => {                                                    // Es
 
 bestScore();
 
-lexicAnalysis(data,dataFile.substring(0,dataFile.length-4));
-
-ipcRenderer.send('console-logs',"lexicAnalysis has been performed on " + dataFile);
-}
-
-finally{
-      console.log("writing...");
-      let dataset = JSON.stringify(data);
-        fs.writeFile(
-          userDataPath+'/datasets/publicdebate/pubdeb/'+dataFile.substring(0,dataFile.length-4)+'.json',
-          dataset,
-          'utf8',
-          (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
-        });
-
-    ipcRenderer.send('console-logs',"CapCo " + dataFile + " main file has been successfully rewritten.");
-
-        let datalink = JSON.stringify(links);
-          fs.writeFile(
-            userDataPath +'/datasets/publicdebate/links/'+dataMatch.substring(0,dataMatch.length-4)+'.json',datalink,'utf8',
-              (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
-          });
-    ipcRenderer.send('console-logs',"CapCo " + dataFile + " links has been successfully written.");
-          ipcRenderer.send('chaeros-success', 'Success: dataset rebuilt');
-          win.close();
-        }
-  });
-}
-
-
 //========== lexicAnalysis ==========
 // lexicAnalysis is a way to generate keywords (tokens) used by the participants of a qualitative survey
 // or set of interviews, and then see what kind of keywords each participants has been using to establish their
 // belonging to a group using TF-IDF.
 
 const lexicAnalysis = (data,dataset) => {
-
-//var totalText = "";                                                 // totalText will the total amount of material
 
 var totalFreqs = new MultiSet();
 
@@ -782,35 +792,54 @@ data.forEach(d=>{                                                       // For e
 
 var communitySet = communitySet.top(50);                                // Limit community MultiSet to the top 50 terms
 
-      console.log("writing...");
-      data = JSON.stringify(data);
+    var dataToWrite = JSON.stringify(data);
+
         fs.writeFile(
-          userDataPath+'/datasets/publicdebate/pubdeb/lexi-'+dataset+".json",
-          data,
+          userDataPath+'/datasets/6publicdebate/3pubdeb/lexi-'+dataset+".json",
+          dataToWrite,
           'utf8',
           (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
         });
+
         communitySet = JSON.stringify(communitySet);
+
           fs.writeFile(
-            userDataPath+'/datasets/publicdebate/pubdeb/commun-'+dataset+".json",
+            userDataPath+'/datasets/6publicdebate/5commun/commun-'+dataset+".json",
             communitySet,
             'utf8',
             (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
           });
 }
 
+ipcRenderer.send('console-logs',"Starting lexical analysis...");
+
+lexicAnalysis(data,dataFile.substring(0,dataFile.length-4));
+
+ipcRenderer.send('console-logs',"Lexical analysis on " + dataFile + "complete. Writing files ...");
+
+        let datalink = JSON.stringify(links);
+          fs.writeFile(
+            userDataPath +'/datasets/6publicdebate/4links/'+dataMatch.substring(0,dataMatch.length-4)+'.json',datalink,'utf8',
+              (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
+          });
+    ipcRenderer.send('console-logs',"CapCo " + dataFile + " links has been successfully written.");
+          ipcRenderer.send('chaeros-notification', 'Dataset rebuilt');
+          setTimeout(()=>{win.close()},500);
+
+  });
+}
 
 //========== zoteroItemsRetriever ==========
 // zoteroItemsRetriever retrieves all the documents from one or more zotero collections. A zotero API request can only
 // retrieve 100 items, which can easily trigger the rate limiting.
 
-const zoteroItemsRetriever = (collections,zoteroUser,importName,path) => {
+const zoteroItemsRetriever = (collections,zoteroUser,importName,destination) => {
 
-  ipcRenderer.send('console-logs',"Started retrieving collections " + collections + "for user "+zoteroUser+" under the import name "+ importName + " and under the path "+path);
+  ipcRenderer.send('console-logs',"Started retrieving collections " + collections + "for user "+zoteroUser+" under the import name "+ importName + " towards: " +JSON.stringify(destination));
 
 let zoteroPromises = [];
 
-let stamp = new Date().toJSON().replace(/:/g, '-');                               // Prepare a timestamp
+let zoteroItemsResponse;
 
 keytar.getPassword("Zotero", zoteroUser).then((zoteroApiKey) => {                 // Open keytar
 
@@ -832,10 +861,14 @@ for (let j = 0; j < collections.length; j++) {                                  
   }
 
   Promise.all(zoteroPromises)
-      .then((zoteroItemsResponse)=>{
+      .then((res)=>{
+        zoteroItemsResponse = res;
 
-        zoteroItemsResponse.forEach(f=>{
+ResponseAmount = 0;
+ResponseTarget = 0;
 
+      zoteroItemsResponse.forEach(f=>{
+        ResponseTarget = ResponseTarget + parseInt(f.meta.numItems);
         f.name = f.data.name;
         f.items = [];
 
@@ -858,37 +891,57 @@ for (let j = 0; j < collections.length; j++) {                                  
           }
        Promise.all(itemRequests).then((response)=> {
          for (var i = 0; i < response.length; i++) {
-           response[i].items.forEach(d=>f.items.push(d))
-           fs.writeFile(                                                 // Write data
-             userDataPath+path+importName+'-'+stamp+'.json',JSON.stringify(zoteroItemsResponse),'utf8',         // Options
-               (err) => {if (err)
-               ipcRenderer.send('chaeros-failure', err);                 // On failure, send error to main process
-           })
+           
+           response[i].items.forEach(d=> {
+            var enrichment = JSON.parse(d.shortTitle);
+            d.enrichment = enrichment;
+            if (d.enrichment.hasOwnProperty('altmetric')){d.enrichment.altmetric = JSON.parse(d.enrichment.altmetric)};
+            f.items.push(d);
+            ResponseAmount = ResponseAmount +1;
+            if (ResponseAmount === ResponseTarget){
+              dataWriter(destination,importName,zoteroItemsResponse);
+            }
+          })
          }
       })
-  })
-    ipcRenderer.send('console-logs',"Retrieval successful.");
-    win.hide();
+    })
   })
 }) // closing Keytar
+};
+
+const dataWriter = (destination,importName,content) => {
+  pandodb.open();
+  destination.forEach(d=>{
+    let table = pandodb[d];
+    let id = importName+date; 
+      table.add({"id":id,"date":date,"name":importName,"content":content});
+      ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " was imported in "+d);
+  })
+  ipcRenderer.send('chaeros-notification', 'Dataset successfully imported');
+ setTimeout(()=>{win.close()},1000);
+
 }
 
 //========== zoteroCollectionBuilder ==========
 // zoteroCollectionBuilder creates a new collection from a CSL-JSON dataset.
 
-const zoteroCollectionBuilder = (collectionName,zoteroUser,path) => {
+const zoteroCollectionBuilder = (collectionName,zoteroUser,id) => {
 
-ipcRenderer.send('console-logs',"Building collection" + collectionName + " for user " + zoteroUser +" in path "+path);
+ipcRenderer.send('console-logs',"Building collection" + collectionName + " for user " + zoteroUser +" in path "+id);
 
-  fs.readFile(userDataPath + path,'utf8', (err, data) => {                // Read the designated datafile
-    if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};      // Throw an error if readFile fails
+ipcRenderer.send('chaeros-notification', 'Creating collection '+collectionName);   // Send message to main Display
+
+
+ pandodb.csljson.get(id).then(data=>{
+
+  let timer = 2000;
+
+  var file = data.content;
+
     try {                                                                 // If the file is valid, do the following:
-
-    let file = JSON.parse(data);                                          // Parse data as JSON array
-
     const limiter = new bottleneck({                                      // Create a bottleneck to prevent API rate limit
       maxConcurrent: 1,                                                   // Only one request at once
-      minTime: 150                                                        // Every 150 milliseconds
+      minTime: 500                                                        // Every 150 milliseconds
     });
 
 keytar.getPassword("Zotero", zoteroUser).then((zoteroApiKey) => {         // Retrieve password through keytar
@@ -916,9 +969,9 @@ let collectionCode = {"code":""};
 
     let fileArrays = [];                                         // Create empty array
 
-    file.forEach(file=>{                                         // For each file object
-      file.collections = [];                                     // Create a "collections" property
-      file.collections.push(collectionCode.code);                // Push the collection code attributed by Zotero
+    file.forEach(d=>{                                         // For each file object
+      d.collections = [];                                     // Create a "collections" property
+      d.collections.push(collectionCode.code);                // Push the collection code attributed by Zotero
     })
           for (let i=0; i<file.length; i+=50){                   // Only 50 items can be sent per request
             let subArray = {"items":[]};                         // Create subArray item
@@ -927,9 +980,12 @@ let collectionCode = {"code":""};
               subArray.items.push(file[j]);                      // Push files in subarray
             }
             fileArrays.push(subArray);                           // Push subArray in fileArrays
+            timer = timer+1000;
           }
 
-    Promise.all(fileArrays.forEach((d)=>{                        // Send all requests as promises (bottlenecked)
+          let resCount = 0;
+
+  Promise.all(fileArrays.map(d=>{                        // Send all requests as promises (bottlenecked)
 
         let subArrayUpload = {                                   // Designing promises
             method: 'POST',
@@ -939,12 +995,13 @@ let collectionCode = {"code":""};
             json: true
           };
 
-        return limiter.schedule(rpn,subArrayUpload).then((res) => {                   // Enforce bottleneck
-                if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};      // Send error to console
-
+          return limiter.schedule(rpn,subArrayUpload).then((res) => {                   // Enforce bottleneck
+          resCount = resCount +1;                                                       // Count the amount of responses
+          if (resCount === fileArrays.length){setTimeout(()=>{
+                ipcRenderer.send('chaeros-notification', 'Collection created');   // Send success message to main Display
+                win.close();
+              },2000)};      // If all responses have been recieved, delay then close chaeros
         })
-
-
    }))
 ipcRenderer.send('console-logs',"Collection "+JSON.stringify(collectionName)+" built.");              // Send success message to console
 
@@ -954,29 +1011,94 @@ ipcRenderer.send('console-logs',"Collection "+JSON.stringify(collectionName)+" b
         ipcRenderer.send('console-logs',e);
       }
       finally{
-        ipcRenderer.send('chaeros-success', 'Success: Zotero collection created');   // Send success message to main Display
+      
       }
   })
 }
 
+//========== altmetricRetriever ==========
+// Get altmetric data through the Altmetric API.
 
+const altmetricRetriever = (id,user) => {
+
+  altmetricActive = true;
+  ipcRenderer.send('chaeros-notification', 'Starting Altmetric enrichment');   // Send message to main Display
+
+  pandodb.enriched.get(id).then(doc=>{
+    keytar.getPassword("altmetric", user).then((altmetricAPIkey) => {         // Retrieve password through keytar
+    
+      var timer = 500;
+
+      try {
+        const limiter = new bottleneck({                                      // Create a bottleneck to prevent API rate limit
+          maxConcurrent: 10,                                                   // Only one request at once
+          minTime: 100                                                        // Every 150 milliseconds
+        });
+
+
+        var count = 0;
+        var DOIs = [];
+        var files = doc.content.entries;
+                
+        files.forEach(f=>{
+          if (f.hasOwnProperty("prism:doi")) {
+            DOIs.push(f["prism:doi"]);
+            timer = timer+200;
+          }
+        })
+
+              Promise.all(DOIs.map(d=>{
+                var altmetricRequestOptions = {                                // Prepare options for the Request-Promise-Native Package
+                  uri: "https://api.altmetric.com/v1/doi/"+d+"?key="+altmetricAPIkey,
+                  headers: {'User-Agent': 'Request-Promise'},                  // Headers (some options can be added here)
+                  json: true                                                   // Automatically parses the JSON string in the response
+                };
+
+                return limiter.schedule(rpn,altmetricRequestOptions).then((res) => {                   // Enforce bottleneck
+                  files.forEach(file=>{
+                    if (res.doi === file["prism:doi"]){
+                      count = count +1;
+                    ipcRenderer.send('chaeros-notification', count +' Altmetric references added');
+                    file.altmetricData = res;
+                    }
+                  })
+                })
+              })
+           )    
+
+      } catch (error) {
+          ipcRenderer.send('console-logs',error);
+      } finally {
+
+        doc.content.altmetricEnriched = true;
+
+        setTimeout(()=>{    
+          pandodb.enriched.put(doc);
+          ipcRenderer.send('chaeros-notification', 'Altmetric enrichment successful');   // Send success message to main Display
+          ipcRenderer.send('console-logs',"Altmetric enrichment of "+id+" successful.");
+          setTimeout(()=>{ win.close()},2000);
+      },timer);
+      };
+    }); // End of Keytar
+  }); // End of pandodb request
+}; // End of altmetricRetriever function
 
 //========== chaerosSwitch ==========
 // Switch used to choose the function to execute in CHÆROS.
 
 const chaerosSwitch = (fluxAction,fluxArgs) => {
 
-ipcRenderer.send('console-logs',"CHÆROS started a "+ fluxAction +" process with the following arguments : " + JSON.stringify(fluxArgs));
+  ipcRenderer.send('console-logs',"CHÆROS started a "+ fluxAction +" process with the following arguments : " + JSON.stringify(fluxArgs));
 
       switch (fluxAction) {
-
-          case 'lexicAnalysis' : lexicAnalysis(fluxArgs.lexicAnalysis.dataset);
-          break;
 
           case 'scopusConverter' : scopusConverter(fluxArgs.scopusConverter.dataset);
           break;
 
-          case 'scopusGeolocate' : scopusGeolocate(fluxArgs.scopusGeolocate.dataset,fluxArgs.scopusGeolocate.user);
+          case 'scopusGeolocate' : scopusGeolocate(fluxArgs.scopusGeolocate.dataset);
+                  break;
+
+          case 'altmetricRetriever' :   altmetricRetriever(fluxArgs.altmetricRetriever.id,fluxArgs.altmetricRetriever.user);
           break;
 
           case 'scopusRetriever' : scopusRetriever(fluxArgs.scopusRetriever.user,fluxArgs.scopusRetriever.query);
@@ -985,14 +1107,14 @@ ipcRenderer.send('console-logs',"CHÆROS started a "+ fluxAction +" process with
           case 'capcoRebuilder' : capcoRebuilder(fluxArgs.capcoRebuilder.dataFile,fluxArgs.capcoRebuilder.dataMatch);
           break;
 
-          case 'zoteroItemsRetriever' : zoteroItemsRetriever(fluxArgs.zoteroItemsRetriever.collections,fluxArgs.zoteroItemsRetriever.zoteroUser,fluxArgs.zoteroItemsRetriever.importName,fluxArgs.zoteroItemsRetriever.path);
+          case 'zoteroItemsRetriever' : zoteroItemsRetriever(fluxArgs.zoteroItemsRetriever.collections,fluxArgs.zoteroItemsRetriever.zoteroUser,fluxArgs.zoteroItemsRetriever.importName,fluxArgs.zoteroItemsRetriever.destination);
           break;
 
-          case 'zoteroCollectionBuilder' : zoteroCollectionBuilder(fluxArgs.zoteroCollectionBuilder.collectionName,fluxArgs.zoteroCollectionBuilder.zoteroUser,fluxArgs.zoteroCollectionBuilder.path);
+          case 'zoteroCollectionBuilder' : zoteroCollectionBuilder(fluxArgs.zoteroCollectionBuilder.collectionName,fluxArgs.zoteroCollectionBuilder.zoteroUser,fluxArgs.zoteroCollectionBuilder.id);
           break;
 
       }
 
-}
+    }
 
 module.exports = {chaerosSwitch: chaerosSwitch};                            // Export the switch as a module

@@ -1,142 +1,172 @@
 <!DOCTYPE html><html><meta charset="UTF-8">
 <title>PANDORÆ-FLUX</title>
 
-<style>
-input{
-width: 80%;
-border:none;
-border-bottom:1px solid #141414;
-height: 20px;
-}
+<div id="flux-manager" class="fluxTabs"><svg></svg></div>
 
-input:hover{
-  background-color: #141414;
-  color: white;
-}
+<!-- USER TAB -->
+<div id="user" style="display:none;" class="fluxTabs">
+  <span class="flux-title">USER</span><br><br>
+    <form id="user-data-form" autocomplete="off">
+      <div class="credential"> Name:<br> <input class="fluxInput" spellcheck="false" id="userNameInput" type="text" value="Enter your name"><br><br></div>
+      <div class="credential"> Email:<br> <input class="fluxInput" spellcheck="false" id="userMailInput" type="text" value="Enter your email"><br><br></div>
+      <div class="credential"> Zotero group id:<br> <input class="fluxInput" spellcheck="false" id="zoterouserinput" type="text" value="Enter your zotero group code"><br><br></div>
+      <button type="submit" id="user-button" class="flux-button" onclick="basicUserData();return false">Update User Credentials</button><br>
+ 
+      <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="zoteroAPIValidation">help_outline</i> Zotero API key:<br> <input class="fluxInput" spellcheck="false" id="zoterokeyinput" type="password" value="Enter your Zotero API key"><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Zotero">cached</i> <br><br></div>
+      <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="scopusValidation">help_outline</i> Scopus API key:<br> <input class="fluxInput" spellcheck="false" id="scopuskeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Scopus">cached</i><br><br></div>
+      <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="altmetricValidation">help_outline</i> Altmetric API key:<br> <input class="fluxInput" spellcheck="false" id="altmetrickeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Altmetric">cached</i><br><br></div>
+      <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="twitterValidation">help_outline</i> Twitter API key:<br> <input class="fluxInput" spellcheck="false" id="twitterkeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Twitter">cached</i><br><br></div>
+      <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="openAccessValidation">help_outline</i> OAbutton API key:<br> <input class="fluxInput" spellcheck="false" id="OAbutton" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="OAbutton">cached</i><br><br></div>
+    </form>
+</div>
 
-input:focus{
-  outline:none;
-}
+<!-- DB API TAB -->
+<div id="db/api" style="display:none;" class="fluxTabs">
+  <span class="flux-title">DB/API</span><br><br>
+    Flux can interrogate for you a series of databases :
+    <li onclick="fluxDisplay(this.innerText)">scopus</li>
+    <li onclick="fluxDisplay(this.innerText)">twitter</li>
+</div>
 
-label:hover{
-outline: 1px solid black;
-}
+<!-- SCOPUS TAB -->
+<div id="scopus" style="display:none;" class="fluxTabs">
+    <span class="flux-title">SCOPUS</span>
+    <br><br>
+       <form id="scopus-form" autocomplete="off">Scopus Query:<br> 
+          <input class="fluxInput" spellcheck="false" id="scopuslocalqueryinput" type="text" value="Enter your Scopus Query"><br><br>
+          <button type="submit" class="flux-button" id="scopus-basic-query" onclick="scopusBasicRetriever();return false">Retrieve basic info</button>&nbsp;&nbsp;
+          <button style="display:none;" type="submit" class="flux-button" id="scopus-query" onclick="powerValve('scopusRetriever',this);return false">Submit Scopus Query</button><br><br>
+          <div id="scopus-basic-previewer" style="position:relative;"></div>
+       </form>
+</div>
 
-body{cursor: default;}
-</style>
+<!-- TWITTER TAB -->
+<div id="twitter" style="display:none;" class="fluxTabs">
+  <span class="flux-title">TWITTER</span><br><br>
+    <form id="twitter-form" autocomplete="off">
+      Enrich Twitter datasets.<br><br>
+      <div id="Twitter-Zotero" class="flux-subsection">
+      <button type="submit" class="flux-button" id="twitter-display" onclick="datasetDisplay('/datasets/10twitter/1zotero','twitter-dataset-list','zotero-dataset');return false">Display Zotero Twitter cartography dataset list</button>
+      <div id="zotero-dataset-preview" style="position:relative;">Click on a dataset to display its features.</div>
+      <div id="twitter-dataset-list"  style="position:relative;">No dataset loaded yet.</div></div>
+    </form>
+</div>
+
+<!-- ENRICHMENT TAB -->
+<div id="enrichment" style="display:none;" class="fluxTabs">
+    <span class="flux-title">DATA ENRICHMENT</span><br><br>
+    This tab will allow you to geolocate your documents, check if they are available through an Open Access licence, and return their Altmetric score and identity.<br><br>  
+      <form autocomplete="off">
+        <div id="scopus-dataset-preview" style="position:relative;">Click on a dataset to display its features. </div>
+        <div id="scopus-dataset-buttons" style="display:none;">
+            <button type="submit" class="flux-button" id="scopusGeolocate" onclick='powerValve("scopusGeolocate",this);return false'>Geolocate Affiliations</button>
+            <button type="submit" class="flux-button" id="altmetricRetriever" onclick='powerValve("altmetricRetriever",this);return false'>Enrich with Altmetric Data</button>
+        </div>
+        <br><br>
+        <button type="submit" class="flux-button" id="csljson-display" onclick="datasetDisplay('scopus-dataset-list','scopus');return false">Update available dataset list</button>
+      </form>
+    <div id="scopus-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
+  </div> 
+
+<!-- CSL JSON TAB -->
+<div id="csl-json" style="display:none;" class="fluxTabs">
+  <span class="flux-title">CSL-JSON</span><br><br>
+    <form autocomplete="off">
+      <div id="enriched-dataset-preview" style="position:relative;">Click on a dataset to display its features. </div>
+      <div id="enriched-dataset-buttons" style="display:none;">
+        <button type="submit" class="flux-button" id="convert-csl" onclick="powerValve('scopusConverter',this);return false">Convert to CSL</button>
+      </div><br><br>
+      <button type="submit" class="flux-button" id="scopus-display" onclick="datasetDisplay('enriched-dataset-list','enriched');return false">Update available dataset list</button>
+    </form>
+  <div id="enriched-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
+</div> 
+
+<!-- ZOTERO TAB -->
+<div id="zotero" style="display:none;" class="fluxTabs">
+    <span class="flux-title">ZOTERO</span><br><br>
+
+<form id="zotero-export-form" autocomplete="off">
+<div id="selectedCollection">
+</div>
+
+<br><br>
+<button type="submit" class="flux-button" id="cslcolret" onclick="datasetDisplay('userCsljsonCollections','csljson');return false">Display available csljson files</button><br>
+<div id="csljson-dataset-preview"></div>
+<div id="csljson-dataset-buttons"style="display:none;">
+  <input class="fluxInput" spellcheck="false" class="sendToZotero" id="zoteroCollecName"  type="text" value="Enter collection name">
+
+  <button type="submit" class="flux-button sendToZotero" id="zoteroCollecBuild" onclick="powerValve('zoteroCollectionBuilder',this);return false">Create a new Zotero Collection</button>
+</div>
+<div id="userCsljsonCollections"></div>
+</form>
+<br><br>
+<form id="zotero-import-form" autocomplete="off"></form>
+<button type="submit" class="flux-button" id="zotcolret" onclick="zoteroCollectionRetriever();return false">Display user collections</button><br><br>
+<span id="zoteroImportInstruction" style="display:none;">Select the relevant datasets from your Zotero library (left) and their intended destination (right).</span><br><br>
+
+<div id="zoteroResults" style="display:none;">
+<div id="userZoteroCollections" style="flex:auto"></div>
+<div id="availableDestinations" style="flex:auto">
+  <input class='zotDestCheck' value='chronotype' name='chronotype' type='checkbox'/><label>chronotype</label><br>
+  <input class='zotDestCheck' value='geotype' name='geotype' type='checkbox'/><label>geotype</label><br>
+  <input class='zotDestCheck' value='anthropotype' name='anthropotype' type='checkbox'/><label>anthropotype</label><br>
+  <input class='zotDestCheck' value='pharmatype' name='pharmatype' type='checkbox'/><label>pharmatype</label><br>
+</div>
+</div>
+<br><br><br>
+<input class="fluxInput" spellcheck="false" id="zoteroImportName" style="display:none;" type="text" value="Enter import name">
+<button type="submit" class="flux-button" style="display:none;" id="zotitret" onclick="powerValve('zoteroItemsRetriever',this);return false">Import selected collections</button><br>
+</form>
+</div>
+
+<!-- LOCAL TAB -->
+<div id="local" style="display:none;" class="fluxTabs">
+    <span class="flux-title">LOCAL</span><br><br>
+
+    This feature is currently disabled for security reasons.<br><br>
+
+<input class="fluxInput" id="dataset-upload" type="file" accept=".json,.csv" multiple/><br><br>
+
+<div id="availableDestinations" style="flex:auto">
+  <input class='locDestCheck' value='geotype' name='geotype' type='checkbox'/><label>geotype</label><br>
+  <input class='locDestCheck' value='anthropotype' name='anthropotype' type='checkbox'/><label>anthropotype</label><br>
+  <input class='locDestCheck' value='pharmatype' name='pharmatype' type='checkbox'/><label>pharmatype</label><br>
+  <input class='locDestCheck' value='chronotype' name='chronotype' type='checkbox'/><label>chronotype</label><br>
+</div>
+<button type="submit" class="flux-button" id="load-local" onclick="datasetLoader();return false" disabled>Upload local  datasets</button>
+</div>
+
+<!-- CAPCO TAB -->
+<div id="capco" style="display:none;" class="fluxTabs">
+    <span class="flux-title">CAPCO</span><br><br>
+      <form id="pubdeb-import-form" autocomplete="off">
+        <br><br>
+        <p>Select CapCo dataset <br><input class="fluxInput" id="load-local-pubdeb" type="file" accept="all"/></p>
+        <p>Select Matching dataset<br> <input class="fluxInput" id="load-local-links" type="file" accept="all"/></p>
+        <button type="submit" class="flux-button" id="" onclick='powerValve("capcoRebuilder",this);return false'>Rebuild CapCo Dataset</button>
+      </form>
+  </div>
+
+
+<!-- SYSTEM TAB -->
+<div id="system" style="display:none;" class="fluxTabs">
+    <span class="flux-title">SYSTEM</span><br><br>
+      Once you have loaded the following datasets in Flux's buffer zone. Plug each of those in the relevant visualisation types. The buffer zone is cleared every time PANDORÆ is closed. <br><br>
+      <button type="submit" class="flux-button" id="buffer-display" onclick="bufferUpdate();return false">Display buffer content</button><br><br>
+    <div id="bufferDatasets" style="width:50%;"></div>
+    <form  id="types" style="width:50%;margin-left:50%;">
+    </form>
+    </div>
+
+<div style="padding:5px; position:absolute;top:0;right:0;z-index:20;">
+<i class="material-icons  dialog-buttons" onclick="fluxDisplay('flux-manager');">arrow_back</i>
+<i class="material-icons dialog-buttons" onclick="refreshWindow();">refresh</i>
+<i class="material-icons dialog-buttons" onclick="closeWindow();">close</i>
+</div>
+</div>
 
 <link rel="stylesheet" type="text/css" href="css/pandorae.css">
 <link rel="icon" type="image/png" href="img/AE-favicon.png"/>
 <script src="js/window-management.js"></script>
 <script src="js/flux/flux.js"></script>
 <script src="js/flux/userdata.js"></script>
-
-<div id="flux-div">
-  <div class="flux-tabs">
-  <button class="tabflux" onclick="fluxDisplay('flux-manager',this)">Flux Manager</button><br>
-  <button class="tabflux" onclick="fluxDisplay('user-data',this)" id="defaultOpen">User Credentials</button><br>
-  <button class="tabflux" onclick="fluxDisplay('scopus',this)">Scopus</button><br>
-  <button class="tabflux" onclick="fluxDisplay('PubDeb',this)">Public debate</button><br>
-  <button class="tabflux" onclick="fluxDisplay('altmetric',this)">Altmetric</button><br>
-  <button class="tabflux" onclick="fluxDisplay('zotero',this)">Zotero</button><br>
-  <button class="tabflux" onclick="fluxDisplay('local-loader',this)">Local</button><br>
-</div>
-<div id="flux-manager" class="fluxTabs">
-
-</div>
-<div id="user-data" style="display:none;" class="fluxTabs">
-<form id="user-data-form" autocomplete="off">
-  Name:<br> <input spellcheck="false" id="userNameInput" type="text" value="Enter your name"><br><br>
-  Email:<br> <input spellcheck="false" id="userMailInput" type="text" value="Enter your email"><br><br>
-  Zotero group id:<br> <input spellcheck="false" id="zoterouserinput" type="text" value="Enter your zotero group code"><br><br>
-  Zotero API key:<br> <input spellcheck="false" id="zoterokeyinput" type="password" value="Enter your Zotero API key"><br><br>
-  Scopus API key:<br> <input spellcheck="false" id="scopuskeyinput" type="password" value=""><br><br>
-  Altmetric API key:<br> <input spellcheck="false" id="altmetrickeyinput" type="password" value=""><br><br>
-  MapTiler Geocoding API key:<br> <input spellcheck="false" id="geocodinginput" type="password" value=""><br><br>
-
-
-  <button type="submit" id="user-button" class="flux-button" onclick="updateUserData();return false">Update User Credentials</button><br><br><br><br>
-</form>
-</div>
-
-<div id="scopus" style="display:none;" class="fluxTabs">
-  <form id="scopus-form" autocomplete="off">
-  Scopus Query:<br> <input spellcheck="false" id="scopuslocalqueryinput" type="text" value="Enter your Scopus Query"><br><br>
-    <button type="submit" class="flux-button" id="scopus-basic-query" onclick="scopusBasicRetriever();return false">Retrieve basic info</button>&nbsp;&nbsp;<button style="display:none;" type="submit" class="flux-button" id="scopus-query" onclick="powerValve('scopusRetriever',this);return false">Submit Scopus Query</button><br><br>
-    <div id="scopus-basic-previewer" style="position:relative;"></div>
-
-
-
-    <div id="scopus-dataset-preview" style="position:relative;">Click on a dataset to display its features. </div>
-    <div id="scopus-dataset-buttons" style="display:none;">
-    <button type="submit" class="flux-button"  id="geolocate-button" onclick="powerValve('scopusGeolocate',this);return false">Geolocate Affiliations</button>
-    <button type="submit" class="flux-button" id="convert-button" onclick="powerValve('scopusConverter',this);return false">Convert to CSL</button></div>
-    <br><br>
-      <button type="submit" class="flux-button" id="scopus-display" onclick="datasetDisplay('/datasets/scopus/scopusDatasets','scopus-dataset-list','scopus-dataset');return false">Update Scopus Dataset list</button>
-</form>
-<div id="scopus-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
-</div>
-
-<div id="PubDeb" style="display:none;" class="fluxTabs">
-<form id="pubdeb-import-form" autocomplete="off">
-
-<br><br>
-<p>Select CapCo dataset <br><input id="load-local-pubdeb" type="file" accept="all"/></p>
-<p>Select Matching dataset<br> <input id="load-local-links" type="file" accept="all"/></p>
-<button type="submit" class="flux-button" id="" onclick='powerValve("capcoRebuilder",this);return false'>Rebuild CapCo Dataset</button>
-</form>
-</div>
-
-
-<div id="altmetric" style="display:none;" class="fluxTabs">
-<form id="altmetric-import-form" autocomplete="off">
-  <button type="submit" class="flux-button" id="scopus-display" onclick="datasetDisplay('/datasets/altmetric/requests','almetric-request-dataset-list','almetric-request-dataset');return false">Update datasets available for altmetric request list </button>
-<br>
-
-<div id="almetric-request-dataset-preview"></div>
-<div id="almetric-request-dataset-buttons"style="display:none;">
-<button type="submit" class="flux-button" onclick='powerValve("altmetricRetriever",this);return false'>Retrieve Almetric Data</button>
-</div>
-
-<div id="almetric-request-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
-
-</form>
-</div>
-
-<div id="zotero" style="display:none;" class="fluxTabs">
-<form id="zotero-export-form" autocomplete="off">
-<div id="selectedCollection">
-</div>
-
-<br><br>
-<button type="submit" class="flux-button" id="cslcolret" onclick="datasetDisplay('/datasets/zotero/csl-json','userCsljsonCollections','csl-json-dataset');return false">Display/update available csljson files</button><br>
-<div id="csl-json-dataset-preview"></div>
-<div id="csl-json-dataset-buttons"style="display:none;">
-  <input spellcheck="false" class="sendToZotero" id="zoteroCollecName"  type="text" value="Enter collection name">
-
-  <button type="submit" class="flux-button sendToZotero" id="zoteroCollecBuild" onclick="powerValve('zoteroCollectionBuilder',this);return false">Create a new Zotero Collection</button>
-</div>
-<div id="userCsljsonCollections"></div>
-
-
-
-<button type="submit" class="flux-button" id="zotcolret" onclick="zoteroCollectionRetriever();return false">Display/update user collections</button><br>
-<input spellcheck="false" id="zoteroImportName" style="display:none;" type="text" value="Enter import name">
-<select id="zotColSelector" style="display:none;" required></select>
-<button type="submit" class="flux-button" style="display:none;" id="zotitret" onclick="powerValve('zoteroItemsRetriever',this);return false">Import selected collections</button><br>
-</form>
-<div id="userZoteroCollections"></div>
-
-</div>
-
-<div id="local-loader" style="display:none;" class="fluxTabs">
-
-<button type="submit" class="flux-button" id="load-local" onclick="datasetLoader(this);return false">Upload local  datasets</button><select id="localSelector" required></select>
-<input id="dataset-upload" type="file" onclick="datasetsSubdirList('localSelector')" accept=".json,.csv" multiple/><br><br>
-</div>
-
-<div style="padding:5px; position:absolute;top:0;right:0;z-index:20;">
-<i class="material-icons dialog-buttons" onclick="refreshWindow();">refresh</i>
-<i class="material-icons dialog-buttons" onclick="closeWindow();">close</i>
-</div>
-</div>
