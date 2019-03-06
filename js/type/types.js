@@ -1172,12 +1172,13 @@ var geoData = geo[0];
             for (var l = 0; l < city.values[k].enrichment.affiliations.length; l++) {
             if (city.values[k].enrichment.affiliations[l].affilname===city.affiliations[j]) {
               let link = {}
-              if (institution.papers.findIndex(paper => paper === city.values[k].title)<0) {
+              if (institution.papers.findIndex(paper => paper.title === city.values[k].title)<0) {
                 institution.papers.push({"title":city.values[k].title,"DOI":city.values[k].DOI,"OA":city.values[k].enrichment.OA});
               }
            }
          }
         }
+        console.log(institution)
         if (institutions.findIndex(f => f.name === city.affiliations[j])<0) {
          institutions.push(institution);
         }
