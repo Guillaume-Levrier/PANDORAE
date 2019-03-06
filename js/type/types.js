@@ -550,6 +550,7 @@ const chronotype = (bibliography,links) => {                          // When ca
         let doc = {};
         doc.title = docs[i].items[j].title;
         doc.code = docs[i].items[j].code;
+        doc.OA = docs[i].items[j].enrichment.OA;
         titleList.push(doc);
       }
     }
@@ -562,7 +563,7 @@ const chronotype = (bibliography,links) => {                          // When ca
   var titleNest = d3.nest().key(d => d.code).entries(titleList);
       titleNest.forEach(d => {d.titles = d.values.map(d => d.title)});
       titleNest.forEach(d => {titlesIndex[d.key] = d.titles; });
-  
+
   //========= CHART DISPLAY ===========
   var now = view.append("line")                                               // Red line indicating current time
                 .attr("x1", -1)                                               // X coordinate of point of origin
@@ -655,7 +656,8 @@ const chronotype = (bibliography,links) => {                          // When ca
               formatTime(nodeData[i].date) + '<br/>' +
               nodeData[i].category + ' | ' +
               nodeData[i].type +'<br/><i class="material-icons">'+
-              nodeData[i].num+'</i><br/>' //+
+              nodeData[i].num+'</i><br/>'// +
+            //  '<img src="././svg/OAlogo.svg" height="16px"/>'
             //  nodeData[i].desc + '<br/><br/>' +
             //  nodeData[i].DOI + '<br/>' +
             //  'Source: <a target="_blank" href="'+

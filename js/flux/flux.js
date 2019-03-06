@@ -337,12 +337,9 @@ case 'zoteroCollectionBuilder' : fluxArgs.zoteroCollectionBuilder = {};
 
 // Send a carbon-copy of the orders sent to chaeros to the logs
 ipcRenderer.send('console-logs',"Sending to CHÆROS action "+fluxAction+ " with arguments "+JSON.stringify(fluxArgs)+" "+message);
-
 ipcRenderer.send('dataFlux',fluxAction,fluxArgs,message);                         // Send request to main process
-console.log(fluxAction,fluxArgs,message)
 remote.getCurrentWindow().close();                                                 // Close flux modal window
-
-}
+};
 
 //========== fluxButtonAction ==========
 // fluxButtonAction makes flux button change shape on click. It takes 4 arguments:
@@ -580,15 +577,8 @@ fluxButtonAction ("zotcolret",true,"Zotero Collections Successfully Retrieved","
       document.getElementById("zoteroImportName").style.display = "inline-flex";
       document.getElementById("zoteroImportInstruction").style.display = "inline-flex";
 
-     // datasetsSubdirList("zotColSelector");                                   // Display available dataset directories
-
       checkKey("zoteroAPIValidation",true);
 
- /*        let selector = document.getElementById("zotColSelector");
-        selector.addEventListener("input",()=>{
-              document.getElementById("zotitret").name =
-              selector.options[selector.options.selectedIndex].value;
-            }); */
         }
     )
     .catch(function (err) {

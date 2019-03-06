@@ -103,8 +103,6 @@ var FBO = function(exports){
         var cellMaterial = new THREE.MeshPhongMaterial( { color: 0x156289, transparent: true, opacity: 0.7, emissive: 0x072534, side: THREE.DoubleSide, flatShading: true } );
         var sphere = new THREE.Mesh( cellGeometry, cellMaterial );
         cell.add( sphere );
-        console.log("cell loaded")
-
         scene.add( cell );
 
         //6 the particles:
