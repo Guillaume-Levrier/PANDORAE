@@ -13,4 +13,3 @@ To test the dev branch, clone the repo, cd into it, and use 'npm i', './node_mod
 - Twitter data (API/scrap) connector
 - Zotero connector 
 - API documentation
-- Altmetric FETCH ?
