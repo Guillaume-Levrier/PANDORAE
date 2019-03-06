@@ -278,7 +278,7 @@ ipcRenderer.on('coreSignal', (event,fluxAction,fluxArgs, message) => {
   }
 })
 
-ipcRenderer.on('chaeros-success', (event,message,action) => {
+ipcRenderer.on('chaeros-notification', (event,message,action) => {
   document.getElementById("field").value = message;
   if (action==="detransfect") {pulse(1,1,10,true);}
 });

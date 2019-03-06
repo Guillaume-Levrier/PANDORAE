@@ -59,10 +59,9 @@
       <form autocomplete="off">
         <div id="scopus-dataset-preview" style="position:relative;">Click on a dataset to display its features. </div>
         <div id="scopus-dataset-buttons" style="display:none;">
-            <input class='EnrichCheck' value='geolocate' type='checkbox'/><label>Geolocate Affiliations</label><br>
-            <input class='EnrichCheck' value='checkOA'type='checkbox' disabled/><label>Check for Open Access availability</label><br>
-            <input class='EnrichCheck' value='altmetric'type='checkbox' disabled/><label>Enrich with Altmetric Data</label><br>
-            <button type="submit" class="flux-button" id="enrich-button" onclick='powerValve("datasetEnrichment",this);return false'>Enrich dataset</button>
+            <button type="submit" class="flux-button" id="scopusGeolocate" onclick='powerValve("scopusGeolocate",this);return false'>Geolocate Affiliations</button>
+            <button type="submit" class="flux-button" id="altmetricRetriever" onclick='powerValve("altmetricRetriever",this);return false'>Enrich with Altmetric Data</button>
+
         </div>
         <br><br>
         <button type="submit" class="flux-button" id="csljson-display" onclick="datasetDisplay('scopus-dataset-list','scopus');return false">Update available dataset list</button>
@@ -113,8 +112,6 @@
   <input class='zotDestCheck' value='geotype' name='geotype' type='checkbox'/><label>geotype</label><br>
   <input class='zotDestCheck' value='anthropotype' name='anthropotype' type='checkbox'/><label>anthropotype</label><br>
   <input class='zotDestCheck' value='pharmatype' name='pharmatype' type='checkbox'/><label>pharmatype</label><br>
-  <input class='zotDestCheck' value='altmetric' name='altmetric' type='checkbox'/><label>altmetric</label><br>
-
 </div>
 </div>
 <br><br><br>

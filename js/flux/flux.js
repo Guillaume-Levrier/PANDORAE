@@ -274,17 +274,17 @@ switch (fluxAction) {                                                      // Ac
                            message = "Starting lexical analysis" ;
                            break; */
 
-  /* case 'altmetricRetriever' : fluxArgs.altmetricRetriever = {};
-  fluxArgs.altmetricRetriever.id = document.getElementById("altmetric-dataset-preview").name;
-  fluxArgs.altmetricRetriever.user = document.getElementById("userNameInput").value;
-  break; */
+   case 'altmetricRetriever' : fluxArgs.altmetricRetriever = {};
+                                fluxArgs.altmetricRetriever.id = document.getElementById("altmetricRetriever").name;
+                                fluxArgs.altmetricRetriever.user = document.getElementById("userNameInput").value;
+                                break; 
 
   case 'scopusConverter' : fluxArgs.scopusConverter = {"dataset":""};
                            fluxArgs.scopusConverter.dataset = itemname;
                            message = "Converting to CSL-JSON" ;
                            break; 
 
-  case 'datasetEnrichment' : 
+/*   case 'datasetEnrichment' : 
                            fluxArgs.datasetEnricher = {"dataset":"",geolocate:false,checkOA:false,altmetric:false};
                            fluxArgs.datasetEnricher.dataset = itemname;
                            fluxArgs.datasetEnricher.user = document.getElementById("userNameInput").value;
@@ -293,13 +293,12 @@ switch (fluxAction) {                                                      // Ac
                              if (enrichOptions[i].checked) {fluxArgs.datasetEnricher[enrichOptions[i].value] = true};
                           }
                            message = "Enriching Dataset";
-                           break;
-
-/*   case 'scopusGeolocate' : fluxArgs.scopusGeolocate = {"dataset":""};
-                           fluxArgs.scopusGeolocate.dataset = itemname;
-                           fluxArgs.scopusGeolocate.user = document.getElementById("userNameInput").value;
-                           message = "Geolocating Affiliations";
                            break; */
+
+   case 'scopusGeolocate' : fluxArgs.scopusGeolocate = {};
+                           fluxArgs.scopusGeolocate.dataset = itemname;
+                           message = "Geolocating Affiliations";
+                           break; 
 
   case 'scopusRetriever' : fluxArgs.scopusRetriever = {"user":"","query":""};
                            fluxArgs.scopusRetriever.user = document.getElementById("userNameInput").value;
@@ -360,7 +359,7 @@ case 'zoteroCollectionBuilder' : fluxArgs.zoteroCollectionBuilder = {};
 ipcRenderer.send('console-logs',"Sending to CHÆROS action "+fluxAction+ " with arguments "+JSON.stringify(fluxArgs)+" "+message);
 
 ipcRenderer.send('dataFlux',fluxAction,fluxArgs,message);                         // Send request to main process
-
+console.log(fluxAction,fluxArgs,message)
 remote.getCurrentWindow().close();                                                 // Close flux modal window
 
 }
@@ -437,10 +436,9 @@ switch (kind) {
                 "<br>Query date: "+ doc.date;
                 
                   document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
-                  document.getElementById(buttonId).style.display = "block";
-          
-                  document.getElementById("enrich-button").style.display = "inline-flex";
-                  document.getElementById("enrich-button").name = doc.id;
+                  document.getElementById(buttonId).style.display = "block";            
+                  document.getElementById("scopusGeolocate").name = doc.id;
+                  document.getElementById("altmetricRetriever").name = doc.id;
 
                 break;
 
@@ -636,8 +634,6 @@ for (let i =0; i<dest.length; i++){
   try {
         uploadedFiles.forEach(dataset=>{
           targets.forEach(target=>{
-            console.log(target);
-            console.log(dataset.name);
               pandodb[target].put(dataset);
               ipcRenderer.send('console-logs',"Dataset "+ dataset.name + " loaded in "+JSON.stringify(target)+"."); // Log action
             });
