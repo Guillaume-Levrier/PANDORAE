@@ -133,9 +133,6 @@ const multiFormat = (date) =>
       : d3.timeYear(date) < date ? formatMonth
       : formatYear)(date);
 
-
-
-
 // ========= ANTHROPOTYPE =========
 const anthropotype = (datasetAT) => {                 // When called, draw the anthropotype
 
@@ -775,7 +772,7 @@ const chronotype = (bibliography,links) => {                          // When ca
                 .style('fill', 'white')                             // Icon color
                 .style('font-size', '1.4px')                        // Icon size
                 .text(d => d.type)                                  // Icon
-                .on('click', d => {window.open(d.URL,"_blank");})   // On click, open url in new tab
+                .on('click', d => {shell.openExternal(d.URL)})   // On click, open url in new tab
                 .on("mouseover", HighLightandDisplay(.2))           // On hover, HighLightandDisplay
                 .on("mouseout", mouseOut)                           // On mouseout, mouseOute
                 .raise()                                            // Display above nodes and the rest
@@ -1188,10 +1185,11 @@ var geoData = geo[0];
       institutions.forEach(e=>{
           let localList= "<strong>"+e.name+"</strong><ul>";
               for (var i = 0; i < e.papers.length; i++) {
+                let url = "https://dx.doi.org/"+e.papers[i].DOI;
                 if (e.papers[i].OA === true) { // If OA flag is true
-                  localList = localList+ "<li><img src='././svg/OAlogo.svg' height='16px'/>&nbsp;<a target='blank' href='https://dx.doi.org/"+e.papers[i].DOI+"'>"+e.papers[i].title+"</a></li>"
+                  localList = localList+ "<li><img src='././svg/OAlogo.svg' height='16px'/>&nbsp;<a onclick='shell.openExternal("+JSON.stringify(url)+")'>"+e.papers[i].title+"</a></li>"
                 } else {  // else just resolve DOI
-                localList = localList+ "<li><a target='blank' href='https://dx.doi.org/"+e.papers[i].DOI+"'>"+e.papers[i].title+"</a></li>"
+                localList = localList+ "<li><a onclick='shell.openExternal("+JSON.stringify(url)+")'>"+e.papers[i].title+"</a></li>"
               }
             }
           totalList= totalList+localList+ "</ul>";
