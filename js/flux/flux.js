@@ -269,11 +269,6 @@ let itemname = item.name;                                                  // it
 
 switch (fluxAction) {                                                      // According to function name ...
 
-/*   case 'lexicAnalysis' : fluxArgs.lexicAnalysis = {"dataset":""};
-                           fluxArgs.lexicAnalysis.dataset = item;
-                           message = "Starting lexical analysis" ;
-                           break; */
-
    case 'altmetricRetriever' : fluxArgs.altmetricRetriever = {};
                                 fluxArgs.altmetricRetriever.id = document.getElementById("altmetricRetriever").name;
                                 fluxArgs.altmetricRetriever.user = document.getElementById("userNameInput").value;
@@ -283,17 +278,6 @@ switch (fluxAction) {                                                      // Ac
                            fluxArgs.scopusConverter.dataset = itemname;
                            message = "Converting to CSL-JSON" ;
                            break; 
-
-/*   case 'datasetEnrichment' : 
-                           fluxArgs.datasetEnricher = {"dataset":"",geolocate:false,checkOA:false,altmetric:false};
-                           fluxArgs.datasetEnricher.dataset = itemname;
-                           fluxArgs.datasetEnricher.user = document.getElementById("userNameInput").value;
-                           let enrichOptions = document.getElementsByClassName('EnrichCheck');
-                           for (let i =0; i<enrichOptions.length; i++){
-                             if (enrichOptions[i].checked) {fluxArgs.datasetEnricher[enrichOptions[i].value] = true};
-                          }
-                           message = "Enriching Dataset";
-                           break; */
 
    case 'scopusGeolocate' : fluxArgs.scopusGeolocate = {};
                            fluxArgs.scopusGeolocate.dataset = itemname;
@@ -348,10 +332,6 @@ case 'zoteroCollectionBuilder' : fluxArgs.zoteroCollectionBuilder = {};
                                  fluxArgs.zoteroCollectionBuilder.collectionName = document.getElementById("zoteroCollecName").value;
                                  fluxArgs.zoteroCollectionBuilder.zoteroUser = document.getElementById("zoterouserinput").value;
                                  break;
-
-
-
-
 
 }
 
@@ -443,7 +423,13 @@ switch (kind) {
                 break;
 
           case 'enriched':
-                  dataPreview = "<strong>"+ doc.name +"</strong>";         
+                  dataPreview = "<strong>"+ doc.name +"</strong>"+ // dataPreview is the displayed information in the div
+                  "<br>Origin: Scopus" +
+                  "<br>Query: " + doc.content.query+
+                  "<br>Total results: " + doc.content.entries.length+
+                  "<br>Query date: "+ doc.date+
+                  "<br>Affiliations geolocated: " + doc.content.articleGeoloc+
+                  "<br>Altmetric metadata retrieved: " + doc.content.altmetricEnriched;     
                   document.getElementById(prevId).innerHTML = dataPreview;
                   document.getElementById(buttonId).style.display = "block";
                   document.getElementById("convert-csl").style.display = "inline-flex";

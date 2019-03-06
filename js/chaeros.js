@@ -218,8 +218,9 @@ ipcRenderer.send('console-logs',"Started scopusRetriever on " + query + " for us
 let scopusQuery = query;        // query argument is the actual query
 
 var content = {"type":"Scopus-dataset",
-                query:scopusQuery,
+                "query":scopusQuery,
                 "queryDate":date,
+                "altmetricEnriched":false,
                 "articleGeoloc":false,
                 "entries":[]};
                                 
@@ -274,13 +275,15 @@ Promise.all(dataPromises)                                // Submit requests
 
       pandodb.open();
       let id = query+date;
-      pandodb.scopus.add({"id":id,"date":date,"name":query,"content":content});
-      pandodb.enrich.add({"id":id,"date":date,"name":query,"content":content});
-      ipcRenderer.send('chaeros-notification', 'Scopus API data retrieved'); // signal success to main process
-      ipcRenderer.send('console-logs',"Scopus dataset on " + query + " for user "+ user +" have been successfully retrieved.");
-      setTimeout(()=>{win.close()},500);                                   // Close Chaeros
-    })
+      pandodb.scopus.add({"id":id,"date":date,"name":query,"content":content}).then(res1=>{
+        pandodb.enriched.add({"id":id,"date":date,"name":query,"content":content}).then(res2 => {
+          ipcRenderer.send('chaeros-notification', 'Scopus API data retrieved'); // signal success to main process
+          ipcRenderer.send('console-logs',"Scopus dataset on " + query + " for user "+ user +" have been successfully retrieved.");
+          setTimeout(()=>{win.close()},500);                                   // Close Chaeros
+        })  
       })
+    })
+  })
       .catch((e) => {
         ipcRenderer.send('chaeros-failure', e);           // Send error to main process
         })
@@ -926,6 +929,9 @@ const zoteroCollectionBuilder = (collectionName,zoteroUser,id) => {
 
 ipcRenderer.send('console-logs',"Building collection" + collectionName + " for user " + zoteroUser +" in path "+id);
 
+ipcRenderer.send('chaeros-notification', 'Creating collection '+collectionName);   // Send message to main Display
+
+
  pandodb.csljson.get(id).then(data=>{
 
   let timer = 2000;
@@ -1076,80 +1082,6 @@ const altmetricRetriever = (id,user) => {
     }); // End of Keytar
   }); // End of pandodb request
 }; // End of altmetricRetriever function
-
-/* 
-//========== checkOA ==========
-// FETCH altmetric documents through the Altmetric API.
-
-const checkOA = (id,user) => {
-
-  checkOAActive = true;
-  ipcRenderer.send('chaeros-notification', 'Looking for Open Accesses');
-
-  pandodb.scopus.get(id).then(doc=>{
-    keytar.getPassword("OAbutton", user).then((OAbuttonAPIkey) => {         // Retrieve password through keytar
-
-      var timer = 500;
-
-      try {
-        const limiter = new bottleneck({                                      // Create a bottleneck to prevent API rate limit
-          maxConcurrent: 1,                                                   // Only one request at once
-          minTime: 400                                                        // Every 150 milliseconds
-        });
-
-        var DOIs = [];
-        var files = doc.content.entries;
-
-        files.forEach(f=>{
-          if (f.hasOwnProperty("prism:doi")&&f.hasOwnProperty('openaccessFlag')===true) {
-            DOIs.push(f["prism:doi"]);
-            timer = timer+500;
-          }
-        })
-
-        let OAnum = 0;
-
-        Promise.all(DOIs.map(d=>{
-                var altmetricRequestOptions = {                                // Prepare options for the Request-Promise-Native Package
-                  uri: "https://api.openaccessbutton.org/availability?doi="+d+"?key="+OAbuttonAPIkey,
-                  headers: {'User-Agent': 'Request-Promise'},                  // Headers (some options can be added here)
-                  json: true                                                   // Automatically parses the JSON string in the response
-                };
-
-                return limiter.schedule(rpn,altmetricRequestOptions).then((res) => {                   // Enforce bottleneck
-                  files.forEach(file=>{
-                    if (res.data.availability.length>0) {
-                      console.log(res);
-                      OAnum ++;
-                      ipcRenderer.send('chaeros-notification', 'Adding '+OAnum+' open accesses');   // Send success message to main Display
-                    file.url = res.availability[0].url;
-                  }
-                  })
-                })
-              })
-           )    
-
-      } catch (error) {
-          ipcRenderer.send('console-logs',error);
-      } finally {
-
-        doc.content.OAchecked = true;
-      
-        setTimeout(()=>{
-          pandodb.enriched.put(doc);
-          ipcRenderer.send('chaeros-notification', 'Available Open Access links retrieved');   // Send success message to main Display
-          ipcRenderer.send('console-logs',"OA enrichment of "+id+" successful.");
-        setTimeout(()=>{  checkOAActive = false;},1000);
-      },timer);
-
-      };
-  
-    
-    }); // End of Keytar
-  }); // End of pandodb request
-}; // End of altmetricRetriever function
-
- */
 
 //========== chaerosSwitch ==========
 // Switch used to choose the function to execute in CHÆROS.
