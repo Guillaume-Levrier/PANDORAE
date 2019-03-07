@@ -134,11 +134,11 @@ const toggleMenu = () => {
     else {
 
       if (xtypeExists) {
-        document.body.style.animation="fadeout 0.5s";
+        document.body.style.animation="fadeout 0.1s";
         setTimeout(()=>{
           document.body.remove();
           remote.getCurrentWindow().reload();
-        }, 450);
+        }, 100);
       }
       else {
       logostatus();
@@ -344,135 +344,30 @@ const purgeCore = () => {
 
 };
 
-var options = [];
-
-const start = (type,options) => {
-
-  toggleMenu();
-  let datasets={};
-let argLength = 99;
-
-  switch (type) {
-            case 'chronotype':
-              datasets.bibliography=options[0];
-              document.getElementById("field").addEventListener("click", ()=>{
-                  types.typeSwitch("chronotype",datasets);
-                  document.getElementById("field").removeEventListener("click", ()=>
-                  types.typeSwitch("chronotype",datasets));
-              }
-            );
-          
-          break;
-            case 'anthropotype': 
-              datasets.datasetAT=options[0];
-              document.getElementById("field").addEventListener("click", ()=>{
-                types.typeSwitch("anthropotype",datasets);
-                  document.getElementById("field").removeEventListener("click", ()=>
-                  types.typeSwitch("anthropotype",datasets)
-                  );
-
-              }
-            );
-            break;
-            case 'geotype': 
-              datasets.locations=options[0];
-              document.getElementById("field").addEventListener("click", ()=>{
-                types.typeSwitch("geotype",datasets);
-                        
-                  document.getElementById("field").removeEventListener("click", ()=>
-                  types.typeSwitch("geotype",datasets)
-                );
-
-              }
-            );
-            break;
-            case 'pharmacotype': argLength = 1;
-            if (options.length === argLength) {
-              toggleMenu();
-              document.getElementById("field").style.pointerEvents = "all";
-              document.getElementById("field").value = "start pharmacotype";
-              let datasets={};
-              datasets.trials=options[0];
-              document.getElementById("field").addEventListener("click", ()=>{
-                types.typeSwitch("pharmacotype",datasets);
-                  document.getElementById("field").removeEventListener("click", ()=>
-                  types.typeSwitch("pharmacotype",datasets));
-                  document.getElementById("field").style.pointerEvents = "none";
-
-              }
-            );
-          }
-            break;
-            case '6publicdebate': argLength = 3;
-            if (options.length === argLength) {
-              toggleMenu();
-              document.getElementById("field").style.pointerEvents = "all";
-              document.getElementById("field").value = "start topotype";
-              let datasets={};
-              datasets.pubdeb=options[0];
-              datasets.matching=options[1];
-              datasets.commun=options[2];
-              document.getElementById("field").addEventListener("click", ()=>{
-                types.typeSwitch("topotype",datasets);
-                  document.getElementById("field").removeEventListener("click", ()=>
-                  types.typeSwitch("topotype",datasets));
-                  document.getElementById("field").style.pointerEvents = "none";
-
-              }
-            );
-          }
-            break;
-            case '9gazouillotype': argLength = 2;
-            if (options.length === argLength) {
-              toggleMenu();
-              document.getElementById("field").style.pointerEvents = "all";
-              document.getElementById("field").value = "start gazouillotype";
-              let datasets={};
-              datasets.tweets=options[0];
-              datasets.query=options[1];
-              document.getElementById("field").addEventListener("click", ()=>{
-                types.typeSwitch("gazouillotype",datasets);
-                        pulse(1,1,10);
-                  document.getElementById("field").removeEventListener("click", ()=>
-                    types.typeSwitch("gazouillotype",datasets));
-                  document.getElementById("field").style.pointerEvents = "none";
-
-              }
-            );
-          }
-             break;
-          }
-          document.getElementById("field").style.pointerEvents = "all";
-          document.getElementById("field").style.cursor = "pointer";
-          document.getElementById("field").value = "start "+type;
-};
-
 const selectOption = (type,id) => {
        
-        document.getElementById(id).style.backgroundColor = "darkgrey";
+        document.getElementById(id).style.backgroundColor = "rgba(220,220,220,0.3)";
 
         toggleTertiaryMenu();
 
         var thirdMenu = document.getElementById("thirdMenuContent");
 
-        var options = [];
+        toggleMenu();
 
-        options.push(id);
-
-        start(type,options);
+        let field = document.getElementById("field")
+        
+            field.addEventListener("click", ()=>{
+                                        types.typeSwitch(type,id);
+                                        field.removeEventListener("click", ()=>types.typeSwitch(type,id));
+            });
+        
+            field.style.pointerEvents = "all";
+            field.style.cursor = "pointer";
+            field.value = "start "+type;
 
         ipcRenderer.send('console-logs',"Checking dataset: " + JSON.stringify(id));
 
-}
-
-const nextOption = (type,kind) => {
-
-let newKind = parseInt(kind.slice(0,1))+1;
-
-ipcRenderer.send('datalist',{"type":type,"kind":newKind});
-
-
-}
+};
 
 // ========== main menu options ========
 
@@ -710,9 +605,7 @@ fs.readFile(userDataPath +'/userID/user-id.json',                          // Re
   if (err) throw err;
   let user = JSON.parse(data);
 
-if (false
-//  user.UserName === "Enter your name"
-) {
+if (user.UserName === "Enter your name") {
   document.getElementById("menu-icon").style.cursor = "not-allowed";
   document.getElementById("option-icon").style.cursor = "not-allowed";
   document.getElementById("field").value = "start tutorial";

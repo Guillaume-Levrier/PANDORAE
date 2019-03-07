@@ -42,7 +42,6 @@ const loadType = () => {
   xtypeExists = true;
   coreExists = false;
   document.getElementById("field").value = "";
-  while(options.length > 0) {options.pop();}
 }
 
 
@@ -1175,7 +1174,6 @@ var geoData = geo[0];
            }
          }
         }
-        console.log(institution)
         if (institutions.findIndex(f => f.name === city.affiliations[j])<0) {
          institutions.push(institution);
         }
@@ -2135,7 +2133,7 @@ const topotype = (pubdeb,matching,commun) => {                               // 
 //========== typesSwitch ==========
 // Switch used to which type to draw/generate
 
-const typeSwitch = (type,datasets) => {
+const typeSwitch = (type,id) => {
 
 
   document.getElementById("field").value = "loading " + type;
@@ -2144,32 +2142,32 @@ const typeSwitch = (type,datasets) => {
       switch (type) {
 
           case 'anthropotype' : 
-            anthropotype(datasets.datasetAT);
+            anthropotype(id);
           break;
 
           case 'chronotype' : 
-            chronotype(datasets.bibliography,datasets.links);
+            chronotype(id);
           break;
 
           case 'gazouillotype' : 
-            gazouillotype(datasets.tweets,datasets.query);
+            gazouillotype(id);
           break;
 
           case 'geotype' : 
-            geotype(datasets.locations);
+            geotype(id);
 
           break;
 
           case 'pharmacotype' : 
-            pharmacotype(datasets.trials);
+            pharmacotype(id);
           break;
 
           case 'topotype' : 
-            topotype(datasets.pubdeb,datasets.matching,datasets.commun);
+            topotype(id);
           break;
       }
 
-      ipcRenderer.send('console-logs',"typesSwitch started a "+ type +" process using the following dataset(s) : " + JSON.stringify(datasets));
+      ipcRenderer.send('console-logs',"typesSwitch started a "+ type +" process using the following dataset(s) : " + JSON.stringify(id));
 
 }
 
