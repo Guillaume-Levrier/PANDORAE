@@ -6,6 +6,9 @@ body{
   overflow: scroll;
   text-align: justify;
 }
+::-webkit-scrollbar {
+    display: none;
+}
 #tutorialSections {
   padding: 40px;
 }
@@ -47,16 +50,15 @@ font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
 }
 
 #dialogDiv{
-  position:sticky;
-  z-index:20;
-  padding: 5px;
-  left: 100%;
-  width:40px;
-}
+        position:fixed;
+        z-index:20;
+        padding: 5px;
+        right:0px;
+        top:0px;
+        width:40px;
+      }
+      
 
-::-webkit-scrollbar {
-    display: none;
-}
 
 .arrowDown{
 text-align: center;
@@ -65,10 +67,7 @@ text-decoration: none;
 
 </style>
 <body>
-  <div id="dialogDiv">
-  <i class="material-icons dialog-buttons" onclick="refreshWindow();">refresh</i>
-  <i class="material-icons dialog-buttons" onclick="closeWindow();">close</i>
-  </div>
+
 
 <div id='tutorialSections'>
      <section class="step centerStep">
@@ -81,17 +80,24 @@ text-decoration: none;
      <section id="slide2" class="step centerStep">
        <div class="title">This brief tutorial will show you what PANDORÆ does.</div><br>
        And also what it doesn't do.&nbsp;<br>&nbsp;<br>
-       <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('slide3')">arrow_downward</a></i>
+       <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('slide2bis')">arrow_downward</a></i>
      </section>
+     <section id="slide2bis" class="step centerStep">
+      <div class="title">As you noticed, you can click on the <strong>arrows</strong> to go down.</div><br>
+      You can also use your <strong>mouse wheel</strong> to navigate up and down.&nbsp;<br><br>
+      You can skip specific chapters and come back to this <strong>tutorial</strong> later.<br><br>
+      <br>
+      <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('slide3')">arrow_downward</a></i>
+    </section>
      <section id="slide3" class="step centerStep">
        <div class="title">PANDORÆ is a <strong>data exploration tool.</strong></div><br>
         It has been designed to investigate how <strong>science</strong> sometimes changes <strong>humans</strong>.&nbsp;<br>&nbsp;<br>
         It can even be used to show that science often doesn't.<br>&nbsp;<br>
-          Some people use PANDORÆ to build their <strong>literature reviews</strong>.<br>&nbsp;<br>
+          Some people also use PANDORÆ to build their <strong>literature reviews</strong>.<br>&nbsp;<br>
       <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('slide4')">arrow_downward</a></i>
      </section>
      <section id="slide4" class="step centerStep">
-       <div class="title">PANDORÆ  allows you to perform three main operations:</div><br>
+       <div class="title">PANDORÆ  allows you to perform three main kinds operations:</div><br>
     <a onclick="smoothScrollTo('Chapter1')">Load data</a><br>
        <a onclick="smoothScrollTo('Chapter2')">Enrich data</a><br>
     <a onclick="smoothScrollTo('Chapter3')">Explore data</a><br>
@@ -183,6 +189,11 @@ of "types", that is ways to display your data:
 <li><a onclick="smoothScrollTo('')">Zotero</a> connects you with your Zotero group library, which you will need to check and edit the content of your datasets.</li>
 
 -->
+
+<div id="dialogDiv">
+  <i class="material-icons dialog-buttons" onclick="refreshWindow();">refresh</i>
+  <i class="material-icons dialog-buttons" onclick="closeWindow();">close</i>
+  </div>
 
 <link rel="icon" type="image/png" href="img/AE-favicon.png"/>
 <script src="js/window-management.js"></script>
