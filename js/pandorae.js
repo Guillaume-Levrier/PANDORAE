@@ -99,6 +99,7 @@ aelogo.addEventListener('dblclick', ()=>{location.reload()});
 // =========== Global Variables ===========
 var pandoratio = 0;                         // Used in three.js transitions (from one shape to another)
 
+var field = document.getElementById("field");
 
 // =========== XTYPE ===========
 const xtype = document.getElementById("xtype");             // xtype is a div containing each (-type) visualisation
@@ -108,6 +109,8 @@ var xtypeExists = false;                                    // xtype doesn't exi
 var coreExists = true;                                      // core does exist on document load
 
 // =========== MENU ===========
+
+
 let toggledMenu = false;
 const purgeMenuItems = (menu) => {
   let menuContent = document.getElementById(menu);
@@ -124,7 +127,7 @@ const toggleMenu = () => {
     document.getElementById("menu-icon").style.left = "25px";
     document.getElementById("option-icon").style.left = "25px";
     document.getElementById("console").style.left = "0px";
-    document.getElementById("xtype").style.left = "0px";
+    xtype.style.left = "0px";
         var menuItems = document.getElementsByClassName("menu-item");
         for (let i = 0; i < menuItems.length; i++) {menuItems[i].style.left = "-150px";}
     document.getElementById("logostate").remove();                           // Remove the status svg
@@ -146,7 +149,7 @@ const toggleMenu = () => {
       document.getElementById("console").style.left = "150px";
       document.getElementById("menu-icon").style.left = "175px";
       document.getElementById("option-icon").style.left = "175px";
-      document.getElementById("xtype").style.left = "150px";
+      xtype.style.left = "150px";
           var menuItems = document.getElementsByClassName("menu-item");
           for (let i = 0; i < menuItems.length; i++) {menuItems[i].style.left = "0";}
       toggledMenu = true;
@@ -165,7 +168,7 @@ const toggleSecondaryMenu = () => {
     document.getElementById("console").style.left = "150px";
     document.getElementById("menu-icon").style.left = "175px";
     document.getElementById("option-icon").style.left = "175px";
-    document.getElementById("xtype").style.left = "150px";
+    xtype.style.left = "150px";
     toggledSecondaryMenu = false;
   }
     else {
@@ -173,7 +176,7 @@ const toggleSecondaryMenu = () => {
       document.getElementById("console").style.left = "300px";
       document.getElementById("menu-icon").style.left = "325px";
       document.getElementById("option-icon").style.left = "325px";
-      document.getElementById("xtype").style.left = "300px";
+      xtype.style.left = "300px";
       toggledSecondaryMenu = true;
   }
 }
@@ -187,7 +190,7 @@ const toggleTertiaryMenu = () => {
     document.getElementById("console").style.left = "300px";
     document.getElementById("menu-icon").style.left = "325px";
     document.getElementById("option-icon").style.left = "325px";
-    document.getElementById("xtype").style.left = "300px";
+    xtype.style.left = "300px";
     toggledTertiaryMenu = false;
   }
     else {
@@ -195,7 +198,7 @@ const toggleTertiaryMenu = () => {
       document.getElementById("console").style.left = "450px";
       document.getElementById("menu-icon").style.left = "475px";
       document.getElementById("option-icon").style.left = "475px";
-      document.getElementById("xtype").style.left = "450px";
+      xtype.style.left = "450px";
       toggledTertiaryMenu = true;
   }
 }
@@ -256,34 +259,34 @@ ipcRenderer.on('console-messages', (event,message) => {
 const createTooltip = () => {
   let tooltip = document.createElement("div");
   tooltip.id = "tooltip";
-  document.getElementById("xtype").appendChild(tooltip);
+  xtype.appendChild(tooltip);
 }
 
 const removeTooltip = () => {
   let tooltip = document.getElementById("tooltip");
-  document.getElementById("xtype").removeChild(tooltip);
+  xtype.removeChild(tooltip);
 }
 
 // ========== CORE SIGNALS ===========
 
 ipcRenderer.on('coreSignal', (event,fluxAction,fluxArgs, message) => {
       try{
-      document.getElementById("field").value = message;
+      field.value = message;
       pulse(1,1,10);
     } catch (err){
-      document.getElementById("field").value = err;
+      field.value = err;
     } finally{
 
   }
 })
 
 ipcRenderer.on('chaeros-notification', (event,message,action) => {
-  document.getElementById("field").value = message;
+  field.value = message;
   if (action==="detransfect") {pulse(1,1,10,true);}
 });
 
 ipcRenderer.on('chaeros-failure', (event,message) => {
-  document.getElementById("field").value = message;
+  field.value = message;
 });
 
 ipcRenderer.on('datalist', (event,type,kind,item,path) => {
@@ -302,16 +305,16 @@ ipcRenderer.on('datalist', (event,type,kind,item,path) => {
 var commandReturn = "";
 
 const xtypeDisplay = () => {
-    document.getElementById("xtype").style.opacity = "1",
-    document.getElementById("xtype").style.zIndex = "2",
+    xtype.style.opacity = "1",
+    xtype.style.zIndex = "2",
     commandReturn = "";
     createTooltip();
 };
 
 const purgeXtype = () => {
   if (document.getElementById("xtypeSVG")) {
-    document.getElementById("xtype").style.zIndex = "-2"                      // Send the XTYPE div to back
-    document.getElementById("xtype").removeChild(document.getElementById("xtypeSVG"));
+    xtype.style.zIndex = "-2"                      // Send the XTYPE div to back
+    xtype.removeChild(document.getElementById("xtypeSVG"));
     removeTooltip();
   }
 };
@@ -333,7 +336,7 @@ const purgeCore = () => {
     document.body.removeChild(document.getElementById("version"));
     document.body.removeChild(document.getElementById("mask"));
     document.body.removeChild(document.getElementById("screenMachine"));
-    document.getElementById("field").style.display = "none";
+    field.style.display = "none";
     Array.from(document.getElementsByClassName("purgeable")).forEach(d=>{
       document.body.removeChild(document.getElementById(d.id));
       
@@ -348,18 +351,11 @@ const selectOption = (type,id) => {
        
         document.getElementById(id).style.backgroundColor = "rgba(220,220,220,0.3)";
 
-        toggleTertiaryMenu();
-
-        var thirdMenu = document.getElementById("thirdMenuContent");
-
         toggleMenu();
-
-        let field = document.getElementById("field")
         
             field.addEventListener("click", ()=>{
-                                        types.typeSwitch(type,id);
-                                        field.removeEventListener("click", ()=>types.typeSwitch(type,id));
-            });
+                              types.typeSwitch(type,id);
+            },{once:true});
         
             field.style.pointerEvents = "all";
             field.style.cursor = "pointer";
@@ -389,7 +385,7 @@ const mainDisplay = (type) =>{
 
   displayCore();
   purgeXtype();
-  document.getElementById("field").value = "preparing " + type;
+  field.value = "preparing " + type;
   ipcRenderer.send('console-logs',"Preparing " + type);
 
   toggleSecondaryMenu();
@@ -515,7 +511,7 @@ switch (input) {
           document.getElementById("menu-icon").onclick = toggleMenu;
           document.getElementById("menu-icon").style.cursor = "pointer";
           document.getElementById("option-icon").style.cursor = "pointer";
-          document.getElementById("field").removeEventListener("click", ()=>{
+          field.removeEventListener("click", ()=>{
               openModal("tutorial");
             })
             break;
@@ -540,7 +536,7 @@ switch (input) {
           break;
         }
       }
-document.getElementById("field").value = commandReturn;
+field.value = commandReturn;
 
 }
 
@@ -608,15 +604,20 @@ fs.readFile(userDataPath +'/userID/user-id.json',                          // Re
 if (user.UserName === "Enter your name") {
   document.getElementById("menu-icon").style.cursor = "not-allowed";
   document.getElementById("option-icon").style.cursor = "not-allowed";
-  document.getElementById("field").value = "start tutorial";
-  document.getElementById("field").style.pointerEvents = "all";
-  document.getElementById("field").addEventListener("click", ()=>{
-      openModal("tutorial");
-    })
+  field.style.pointerEvents = "all";
+  field.style.cursor = "pointer";
+  field.value = "start tutorial";
+  field.addEventListener("click", ()=>{
+            openModal("tutorial")
+            field.value = "";
+            field.style.cursor = "unset";
+            field.style.pointerEvents = "none";
+          },{once:true})
   } else{
     document.getElementById("menu-icon").onclick = toggleMenu;
-    document.getElementById("menu-icon").style.cursor = "all";
-    document.getElementById("option-icon").style.cursor = "all";
+    document.getElementById("option-icon").onclick = toggleConsole;
+    document.getElementById("menu-icon").style.cursor = "pointer";
+    document.getElementById("option-icon").style.cursor = "pointer";
   }
 });
 
@@ -650,8 +651,8 @@ blink();
 
 ipcRenderer.on('tutorial', (event,message) => {
   document.getElementById("menu-icon").onclick = toggleMenu;
-  document.getElementById("menu-icon").style.cursor = "all";
-  document.getElementById("option-icon").style.cursor = "all";
+  document.getElementById("menu-icon").style.cursor = "pointer";
+  document.getElementById("option-icon").style.cursor = "pointer";
   let blink = [{"background-color": "#141414","color":"white"},
               {"background-color": "white","color":"#141414"}];
 
@@ -725,7 +726,7 @@ let screenZoomToggle = false;
         document.getElementById("screenMachine").pause(); 
         screenZoomToggle = true;
     } else {
-        document.getElementById("field").value = "this theme doesn't support zooming";
+        field.value = "this theme doesn't support zooming";
     }
    }
   }
