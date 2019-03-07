@@ -104,7 +104,7 @@ function createWindow () {
     })
 
   mainWindow.setMenu(null);
-  mainWindow.webContents.openDevTools();
+  //mainWindow.webContents.openDevTools();
   mainWindow.on('closed', () => { mainWindow = null })
 }
 
@@ -176,7 +176,11 @@ switch (type) {
   case "openModal": openModal(file,scrollTo);
     break;
   case "closeWindow":
+  try{
      win.webContents.send('window-close','close');
+    }catch(e){
+      console.log(e);
+    }
     break;
 }
 
