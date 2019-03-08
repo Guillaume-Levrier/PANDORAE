@@ -7,10 +7,10 @@ ipcRenderer.on('window-close', (event,message) => {
 });
 
 ipcRenderer.on('scroll-to', (event,message) => {
-  smoothScrollTo(message)
+  smoothScrollTo(message);
 });
 
 const tuto = (step) => {
   ipcRenderer.send('tutorial',step);
-  closeAndDisplay();
+  closeWindow();
 }

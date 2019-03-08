@@ -130,6 +130,7 @@ const openHelper = (helperFile) => {
   let win = new BrowserWindow({
     backgroundColor: 'white',
     resizable: false,
+    frame: false,
     width: 350,
     height: 700,
     alwaysOnTop:true,
@@ -161,24 +162,33 @@ const openModal = (modalFile,scrollTo) => {
 })
 }
 
-ipcMain.on('window-manager', (event,type,file,scrollTo) => {
+ipcMain.on('window-manager', (event,type,file,scrollTo,section) => {
 
 let win = {};
 
-for (var i = 0; i < windowIds.length; i++) {
-  if (windowIds[i].name === file) {
-    win = BrowserWindow.fromId(windowIds[i].id)}
-}
 
 switch (type) {
-  case "openHelper": openHelper(file);
-  mainWindow.webContents.send('tutorial-types',"flux");
+  case "openHelper": 
+  openHelper(file);
+
+setTimeout(()=>{
+  for (var i = 0; i < windowIds.length; i++) {
+    if (windowIds[i].name === file) {
+      BrowserWindow.fromId(windowIds[i].id).webContents.send('tutorial-types',section);
+    }
+  }
+},800);
 
     break;
   case "openModal": openModal(file,scrollTo);
     break;
   case "closeWindow":
   try{
+    
+      for (var i = 0; i < windowIds.length; i++) {
+        if (windowIds[i].name === file) {
+          win = BrowserWindow.fromId(windowIds[i].id)}
+      }
      win.webContents.send('window-close','close');
     }catch(e){
       console.log(e);
@@ -274,3 +284,7 @@ setTimeout(()=>{app.quit()},100);
 
 // Tutorial
 ipcMain.on('tutorial', (event,message) => { mainWindow.webContents.send('tutorial',message)});
+
+ipcMain.on('mainWindowReload', (event,message) => {
+  mainWindow.webContents.send('mainWindowReload',message);
+});
