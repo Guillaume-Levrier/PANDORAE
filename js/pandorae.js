@@ -608,11 +608,12 @@ if (user.UserName === "Enter your name") {
   field.style.cursor = "pointer";
   field.value = "start tutorial";
   field.addEventListener("click", ()=>{
-            openModal("tutorial")
+            openModal("tutorial");
             field.value = "";
-            field.style.cursor = "unset";
-            field.style.pointerEvents = "none";
-          },{once:true})
+            //field.style.cursor = "unset";
+            //field.style.pointerEvents = "none";
+          }//,{once:false}
+          );
   } else{
     document.getElementById("menu-icon").onclick = toggleMenu;
     document.getElementById("option-icon").onclick = toggleConsole;
