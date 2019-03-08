@@ -10,7 +10,7 @@ ipcRenderer.on('scroll-to', (event,message) => {
   smoothScrollTo(message)
 });
 
-const tutoFlux = (step) => {
-  ipcRenderer.send('tutorial','flux',step);
+const tuto = (step) => {
+  ipcRenderer.send('tutorial',step);
   closeWindow();
 }

@@ -271,11 +271,4 @@ setTimeout(()=>{app.quit()},100);
   });
 
 // Tutorial
-ipcMain.on('tutorial', (event,message) => {
-  switch (message) {
-    case 'flux': 
-                mainWindow.webContents.send('tutorial','openFlux');
-      break;
-
-  }
-});
+ipcMain.on('tutorial', (event,message) => { mainWindow.webContents.send('tutorial',message)});

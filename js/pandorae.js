@@ -626,47 +626,44 @@ const blinker = (item) => {
 let blinking;
 let blinking2;
 
+let target = document.getElementById(item);
+
 function blink () {
   blinking = setInterval( function(){
-          document.getElementById(item).style.backgroundColor = "#141414";
-          document.getElementById(item).style.color = "white";
+    target.style.backgroundColor = "#141414";
+    target.style.color = "white";
         }, 500);
-  blinking2 = setInterval(function(){ document.getElementById(item).style.backgroundColor = "white";
-        document.getElementById(item).style.color = "#141414"; },1000);
+  blinking2 = setInterval(function(){ 
+    target.style.backgroundColor = "white";
+    target.style.color = "#141414"; },1000);
 };
 
 blink();
 
-        document.getElementById(item).addEventListener('click', function(){
+          target.addEventListener('click', function(){
           clearInterval(blinking);
           clearInterval(blinking2);
-          document.getElementById(item).style.backgroundColor = "white";
-          document.getElementById(item).style.color = "#141414";
+          target.style.backgroundColor = "white";
+          target.style.color = "#141414";
         });
 
 
 };
 
-
-
 ipcRenderer.on('tutorial', (event,message) => {
   document.getElementById("menu-icon").onclick = toggleMenu;
   document.getElementById("menu-icon").style.cursor = "pointer";
   document.getElementById("option-icon").style.cursor = "pointer";
-  let blink = [{"background-color": "#141414","color":"white"},
-              {"background-color": "white","color":"#141414"}];
 
     switch (message) {
-      case "openFlux": openHelper('tutorialHelper');
+      case "flux": openHelper('tutorialHelper');
                        blinker("menu-icon");
                        blinker("fluxMenu");
-
         break;
 
-        case "openTutorial": openModal('tutorial');
-                         break;
-      default:
-
+      case "openTutorial": openModal('tutorial');
+        break;
+    
     }
 });
 
