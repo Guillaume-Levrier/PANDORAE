@@ -610,10 +610,7 @@ if (user.UserName === "Enter your name") {
   field.addEventListener("click", ()=>{
             openModal("tutorial");
             field.value = "";
-            //field.style.cursor = "unset";
-            //field.style.pointerEvents = "none";
-          }//,{once:false}
-          );
+          });
   } else{
     document.getElementById("menu-icon").onclick = toggleMenu;
     document.getElementById("option-icon").onclick = toggleConsole;
