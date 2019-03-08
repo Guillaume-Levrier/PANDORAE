@@ -322,12 +322,23 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
 <link rel="icon" type="image/png" href="img/AE-favicon.png"/>
 
 <script src="js/window-management.js"></script>
+<script>
+  const closeAndDisplay = () => {
+  
+    ipcRenderer.send('chaeros-notification', 'return to tutorial');
+  
+    closeWindow();
+  };
+</script>
 <script src="js/tutorial/scroller.js"></script>
 <script src="js/tutorial/tutorial.js"></script>
 <script src="js/tutorial/cascade.js"></script>
+
+
+
 <div id="dialogDiv">
     <i class="material-icons  dialog-buttons" id="backarrow" style="display:none;" onclick="smoothScrollTo(previous,true);">arrow_back</i>
   <i class="material-icons dialog-buttons" onclick="refreshWindow();">refresh</i>
-  <i class="material-icons dialog-buttons" onclick="closeWindow();">close</i>
+  <i class="material-icons dialog-buttons" onclick="closeAndDisplay();">close</i>
   </div>
 </body>

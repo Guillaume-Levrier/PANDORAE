@@ -12,5 +12,5 @@ ipcRenderer.on('scroll-to', (event,message) => {
 
 const tuto = (step) => {
   ipcRenderer.send('tutorial',step);
-  closeWindow();
+  closeAndDisplay();
 }
