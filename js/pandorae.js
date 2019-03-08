@@ -525,6 +525,10 @@ switch (input) {
             })
             break;
 
+            case 'version':
+            commandReturn = version;
+            break;
+
     case  'start tutorial':
           openModal("tutorial");
           break;
@@ -627,6 +631,7 @@ if (user.UserName === "Enter your name") {
     document.getElementById("option-icon").onclick = toggleConsole;
     document.getElementById("menu-icon").style.cursor = "pointer";
     document.getElementById("option-icon").style.cursor = "pointer";
+    document.getElementById("version").innerHTML =  user.UserName.toUpperCase();
   }
 });
 
