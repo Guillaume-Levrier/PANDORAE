@@ -172,6 +172,8 @@ for (var i = 0; i < windowIds.length; i++) {
 
 switch (type) {
   case "openHelper": openHelper(file);
+  mainWindow.webContents.send('tutorial-types',"flux");
+
     break;
   case "openModal": openModal(file,scrollTo);
     break;

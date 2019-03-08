@@ -31,14 +31,18 @@ const goBack = (slide) => {
     remote.getCurrentWindow().close();
 };
 
-let flux = "flux";
-
-  let fluxDesc = "You can now use the menu.<br><br>"+
+  let flux = "You can now use the menu.<br><br>"+
                   " Click on the blinking menu button to do so.<br><br>"+
                   "Select the 'Flux' tab to open Flux.<br><br> You can explore the different options by clicking on the tabs on the left of flux.<br><br>"+
                   "Once you are done exploring, click <a onClick='goBack(flux)'>here</a> to go back to the tutorial and learn more about the Flux features and options.";
 
-document.getElementById("content").innerHTML = fluxDesc;
+ipcRenderer.on('tutorial-types', (event,message) => {
+  console.log(message);
+        document.getElementById("content").innerHTML = message;
+        
+});
+
+
 
 </script>
 
