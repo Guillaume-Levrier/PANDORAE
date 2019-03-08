@@ -119,6 +119,7 @@ const purgeMenuItems = (menu) => {
 
 const toggleMenu = () => {
   //while(options.length > 0) {options.pop();}
+  field.removeEventListener("click",tutorialOpener);
   if (toggledMenu) {
     if (toggledSecondaryMenu) {toggleSecondaryMenu();toggleMenu();}
     else if (toggledTertiaryMenu) {toggleTertiaryMenu();toggleSecondaryMenu();toggleMenu();}
@@ -224,8 +225,9 @@ lifelines.attr("class","lifelinerror")
 
 }
 
-const openHelper = (helperFile) => {
-  ipcRenderer.send('window-manager',"openHelper",helperFile);
+
+const openHelper = (helperFile,section) => {
+  ipcRenderer.send('window-manager',"openHelper",helperFile,"",section);
 }
 const openModal = (modalFile) => {
   ipcRenderer.send('window-manager',"openModal",modalFile);
@@ -254,6 +256,13 @@ ipcRenderer.on('console-messages', (event,message) => {
     log.innerText = log.innerText+message;
     log.scrollTop = log.scrollHeight;
 });
+
+ipcRenderer.on('mainWindowReload', (event,message) => {
+  console.log(message);
+  remote.getCurrentWindow().reload();
+  location.reload();
+});
+
 
 // ========== TOOLTIP ===========
 const createTooltip = () => {
@@ -596,6 +605,11 @@ const reframeMainWindow = () => {
 
 // Tutorial - Uncomment to force tutorial on boot if no user name defined
 
+const tutorialOpener = () => {
+  openModal("tutorial");
+  field.value = "";
+}
+
 fs.readFile(userDataPath +'/userID/user-id.json',                          // Read the designated datafile
                               'utf8', (err, data) => {              // Additional options for readFile
   if (err) throw err;
@@ -607,10 +621,7 @@ if (user.UserName === "Enter your name") {
   field.style.pointerEvents = "all";
   field.style.cursor = "pointer";
   field.value = "start tutorial";
-  field.addEventListener("click", ()=>{
-            openModal("tutorial");
-            field.value = "";
-          });
+  field.addEventListener("click",tutorialOpener);
   } else{
     document.getElementById("menu-icon").onclick = toggleMenu;
     document.getElementById("option-icon").onclick = toggleConsole;
@@ -654,9 +665,26 @@ ipcRenderer.on('tutorial', (event,message) => {
   document.getElementById("option-icon").style.cursor = "pointer";
 
     switch (message) {
-      case "flux": openHelper('tutorialHelper');
+
+      case "flux":
+      case "zoteroImport": 
+              openHelper('tutorialHelper',message);
                        blinker("menu-icon");
                        blinker("fluxMenu");
+        break;
+
+        case "chronotype": 
+        openHelper('tutorialHelper',message);
+                 blinker("menu-icon");
+                 blinker("chronotype");
+                 field.removeEventListener("click", openModal);
+        break;
+
+        case "geotype": 
+                openHelper('tutorialHelper',message);
+                blinker("menu-icon");
+                blinker("geotype");
+                field.removeEventListener("click", openModal);
         break;
 
       case "openTutorial": openModal('tutorial');
