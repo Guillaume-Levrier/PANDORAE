@@ -3,8 +3,8 @@ const tg = require("@hownetworks/tracegraph");
 //========== Tracegraph ==========
 
 let traces = [
-  {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"SCOPUS"},"name":"SCOPUS"}]},
-  {"hops":[{"info":{"name":"SCOPUS"},"name":"SCOPUS"},{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"}]},
+  {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"DB/API"},"name":"DB/API"}]},
+  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"}]},
   {"hops":[{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
   {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]}
 ];
