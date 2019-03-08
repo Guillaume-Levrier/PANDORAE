@@ -546,7 +546,8 @@ const chronotype = (bibliography,links) => {                          // When ca
         let doc = {};
         doc.title = docs[i].items[j].title;
         doc.code = docs[i].items[j].code;
-        doc.OA = docs[i].items[j].enrichment.OA;
+        if(docs[i].items[j].hasOwnProperty('enrichement')) {doc.OA = docs[i].items[j].enrichment.OA;
+        } else {doc.OA = false;}
         titleList.push(doc);
       }
     }
@@ -947,9 +948,9 @@ const chronotype = (bibliography,links) => {                          // When ca
         formatTime(d.date) + '<br/>' +
         d.category + ' | ' +
         d.type +'<br/><i class="material-icons">'+
-        d.num+'</i><br/>' +
+        d.num+'</i><br/>' //+
         //d.desc + '<br/><br/>' +
-        d.DOI + '<br/>'
+       // d.DOI + '<br/>'
         // +
         //'Source: <a target="_blank" href="'+
         //d.URL+'">'+
@@ -1181,7 +1182,7 @@ var geoData = geo[0];
   
       let totalList="";
       institutions.forEach(e=>{
-          let localList= "<strong>"+e.name+"</strong><ul>";
+          let localList= "<strong>"+e.name+"</strong><ul style='cursor:pointer;'>";
               for (var i = 0; i < e.papers.length; i++) {
                 let url = "https://dx.doi.org/"+e.papers[i].DOI;
                 if (e.papers[i].OA === true) { // If OA flag is true
@@ -1217,7 +1218,7 @@ var geoData = geo[0];
                   .attr("id", d => d.id)
                   .attr("class", "locations");
   
-        locations.datum(d => d3.geoCircle().center([ d.lon, d.lat ]).radius(.3)())
+        locations.datum(d => d3.geoCircle().center([ d.lon, d.lat ]).radius(.15)())
                   .attr("d", path);
   
         locations.on("mouseover", d => {
