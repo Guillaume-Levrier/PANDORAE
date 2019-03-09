@@ -130,7 +130,7 @@ const openHelper = (helperFile) => {
   let win = new BrowserWindow({
     backgroundColor: 'white',
     resizable: false,
-    frame: false,
+    frame: true,
     width: 350,
     height: 700,
     alwaysOnTop:true,
