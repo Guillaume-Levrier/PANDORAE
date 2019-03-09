@@ -1,6 +1,6 @@
 {
 	"name": "PANDORAE",
-	"version": "0.0.90",
+	"version": "0.1.14",
 	"description": "A document-based public policy research protocol",
 	"license": "MIT",
 	"author": "Guillaume Levrier",
