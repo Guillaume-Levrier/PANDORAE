@@ -5,6 +5,7 @@
 body{
   overflow: scroll;
   text-align: justify;
+  color: black;
 }
 ::-webkit-scrollbar {
     display: none;
@@ -28,7 +29,7 @@ body{
 font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
   font-size: 16px;
   line-height: 26px;
-  color: black;
+
 }
 
 .centerStep{
@@ -68,6 +69,12 @@ text-align: center;
 text-decoration: none;
 cursor:pointer;
 }
+
+@keyframes
+  invert {
+    from {background-color: white; color: black;}
+    to {background-color: #141414; color: white;}
+  }
 
 </style>
 <body>
@@ -247,7 +254,7 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
     </section>
 
 <section id="FinalChap" class="step centerStep">
-    <div class="title"><strong>Final Chapter: escaping the constraints</strong></div><br>
+    <div class="title"><strong>Final Chapter: the great escape</strong></div><br>
       Our short journey together is about to come to an end.<br>&nbsp;<br>
        It is now time for you to learn how to escape the Tutorial's constraint. 
       <br>&nbsp;<br>
@@ -298,23 +305,30 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
         <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('final7')">arrow_downward</a></i></div>  
           </section>
         
+
+
         <section id="final7" class="step centerStep">
             <div class="title"><strong>Freedom at last</strong></div><br>
            You will learn how to use PANDORÆ mostly by trial and error.<br>&nbsp;<br> If you're a researcher and/or developer, you might want to go have a look at its 
            <a onclick="shell.openExternal('https://github.com/Guillaume-Levrier/PANDORAE')">source code</a>.<br>&nbsp;<br>
            A more detailed manual will be released once the project goes out of beta.<br>&nbsp;<br>
-           <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('final8')">arrow_downward</a></i></div>  
+           <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="lastScroll()">arrow_downward</a></i></div>  
           </section>
+
+
+
           <section id="final8" class="step centerStep">
            This <strong>CORE</strong> is now yours. <br>&nbsp;<br>
            Close the software and restart it to escape the tutorial.<br>&nbsp;<br>
            Thank you for using PANDORÆ.
           </section>
+
           <section id="last" class="step centerStep">
               <div style="margin:auto;font-size:10px;line-height: 15px;" >
-                Guillaume Levrier<br><br>
-                When you steal from one author, it's plagiarism;<br> if you steal from many, it's research. <br> W.M.<br><br>
                 PANDORÆ - BETA/DEV-V0.1.12<br>
+                Guillaume Levrier<br>-<br>
+                When you steal from one author, it's plagiarism;<br> if you steal from many, it's research. <br> W.M.<br><br>
+                
                
               </div>
               
@@ -344,4 +358,14 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
   <i class="material-icons dialog-buttons" onclick="refreshWindow();">refresh</i>
   <i class="material-icons dialog-buttons" onclick="closeAndDisplay();">close</i>
   </div>
+  <script>//final
+  const lastScroll = () =>{
+    smoothScrollTo('final8');
+    document.body.style.animation = "invert 2s";
+    document.body.style.animationFillMode= "forwards";
+    document.body.style.overflow = "hidden";
+    document.getElementById('backarrow').style.display = "none";
+     };
+      
+      </script>
 </body>
