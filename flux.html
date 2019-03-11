@@ -169,6 +169,21 @@
 
 <link rel="stylesheet" type="text/css" href="css/pandorae.css">
 <link rel="icon" type="image/png" href="img/AE-favicon.png"/>
-<script src="js/window-management.js"></script>
+<script>
+const remote = require('electron').remote;
+
+const closeWindow = () => {
+        ipcRenderer.send("window-ids","flux",remote.getCurrentWindow().id,false);
+       remote.getCurrentWindow().close();
+}
+
+const refreshWindow = () => {
+       remote.getCurrentWindow().reload();
+}
+
+const reframeMainWindow = () => {
+        remote.mainWindow({frame: true})
+}
+</script>
 <script src="js/flux/flux.js"></script>
 <script src="js/flux/userdata.js"></script>
