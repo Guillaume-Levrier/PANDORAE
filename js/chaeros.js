@@ -893,9 +893,11 @@ ResponseTarget = 0;
          for (var i = 0; i < response.length; i++) {
            
            response[i].items.forEach(d=> {
+             if (d.hasOwnProperty('shortTitle')){
             var enrichment = JSON.parse(d.shortTitle);
             d.enrichment = enrichment;
             if (d.enrichment.hasOwnProperty('altmetric')){d.enrichment.altmetric = JSON.parse(d.enrichment.altmetric)};
+            };
             f.items.push(d);
             ResponseAmount = ResponseAmount +1;
             if (ResponseAmount === ResponseTarget){
@@ -1104,8 +1106,8 @@ const chaerosSwitch = (fluxAction,fluxArgs) => {
           case 'scopusRetriever' : scopusRetriever(fluxArgs.scopusRetriever.user,fluxArgs.scopusRetriever.query);
           break;
 
-          case 'capcoRebuilder' : capcoRebuilder(fluxArgs.capcoRebuilder.dataFile,fluxArgs.capcoRebuilder.dataMatch);
-          break;
+    /*       case 'capcoRebuilder' : capcoRebuilder(fluxArgs.capcoRebuilder.dataFile,fluxArgs.capcoRebuilder.dataMatch);
+          break; */
 
           case 'zoteroItemsRetriever' : zoteroItemsRetriever(fluxArgs.zoteroItemsRetriever.collections,fluxArgs.zoteroItemsRetriever.zoteroUser,fluxArgs.zoteroItemsRetriever.importName,fluxArgs.zoteroItemsRetriever.destination);
           break;

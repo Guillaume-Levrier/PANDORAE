@@ -19,26 +19,78 @@ text-decoration: underline;
 <body>
 
 <div id="content"></div>
-
 <script>
 const {remote, ipcRenderer} = require('electron');
 
+
+console.log(remote.getCurrentWindow().id)
 ipcRenderer.send("window-ids","tutorialHelper",remote.getCurrentWindow().id);
 
+
 const goBack = (slide) => {
-    ipcRenderer.send("window-manager","closeWindow","flux")
-    ipcRenderer.send("window-manager","openModal","tutorial",slide)
+    ipcRenderer.send("window-manager","closeWindow","flux");
+    ipcRenderer.send("mainWindowReload","reload");
+    ipcRenderer.send("window-manager","openModal","tutorial",slide);
     remote.getCurrentWindow().close();
 };
 
-let flux = "flux";
+let fluxSlide = "flux";
+let ZoteroSlide = "Zotero2";
+let chronoslide = "chronotype";
+let geoslide = "geotype";
 
-  let fluxDesc = "You can now use the menu.<br><br>"+
+  let fluxContent = "<br><br>You can now use the menu.<br><br>"+
                   " Click on the blinking menu button to do so.<br><br>"+
                   "Select the 'Flux' tab to open Flux.<br><br> You can explore the different options by clicking on the tabs on the left of flux.<br><br>"+
-                  "Once you are done exploring, click <a onClick='goBack(flux)'>here</a> to go back to the tutorial and learn more about the Flux features and options.";
+                  "Once you are done exploring, click <a onClick='goBack(fluxSlide)'>here</a> to go back to the tutorial and learn more about the Flux features and options.";
 
-document.getElementById("content").innerHTML = fluxDesc;
+  let zoteroImport = "<br><br>Let's now import sample data from Zotero to PANDORÆ.<br><br>"+
+                      "Go back to Flux, and go to the USER tab. <br><br>"+
+                      "You can then enter the coordinates of the following library.<br><br>"+
+                      "<i>Zotero group id:</i> <span style='font-family:monospace;'>2301232</span><br><br>"+
+                      "Press 'Update User Crendentials', and then enter the API key.<br><br>"+
+                      "<i>Zotero API key:</i> <span style='font-family:monospace;'>cyEn5eKACVuNTABpwtAp4V4C</span>.<br><br>"+
+                      "Press the Update <i class='material-icons'>cached</i> button.<br><br>"+
+                      "The Zotero Tab should now display three sample collections.<br><br>"+
+                      "Import the 'CRISPR+Human' dataset in 'geotype'. Name it like you want.<br><br>"+
+                      "Now Import the other two datasets <strong>at once</strong> in 'chronotype'.<br><br>"+
+                      "Click <a onClick='goBack(ZoteroSlide)'>here</a> to go back to the tutorial.";  
+  
+                      
+  let chronotype = "<br><br>Open the menu again.<br><br>"+
+                      "Click on 'Chronotype' to display available datasets <br><br>"+
+                      "Click on the sample dataset you previously imported in there from Zotero through Flux.<br><br>"+
+                      "Then click on 'start chronotype'.<br><br>"+
+                      "Click <a onClick='goBack(chronoslide)'>here</a> to go back to the tutorial.";  
+
+  let geotype = "<br><br>Open the menu once again.<br><br>"+
+                      "Click on 'Geotype' to display available datasets <br><br>"+
+                      "Click on the sample dataset you previously imported in there from Zotero through Flux.<br><br>"+
+                      "Then click on 'start geotype'.<br><br>"+
+                      "Click <a onClick='goBack(geoslide)'>here</a> to go back to the tutorial."; 
+
+ipcRenderer.on('tutorial-types', (event,message) => {
+
+let content = document.getElementById("content");
+
+  switch (message) {
+    case "flux":
+    content.innerHTML = fluxContent;
+      break;
+      case "zoteroImport":
+    content.innerHTML = zoteroImport;
+      break;
+      case "chronotype":
+    content.innerHTML = chronotype;
+      break;
+      case "geotype":
+    content.innerHTML = geotype;
+      break;
+  }
+        
+});
+
+
 
 </script>
 

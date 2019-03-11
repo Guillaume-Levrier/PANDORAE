@@ -12,7 +12,7 @@
 
 // ============ VERSION ===========
 const msg = '      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ\n\n';
-const version ='ALPHA/DEV-V0.0.90';
+const version ='BETA/DEV-V0.1.12';
 console.log(msg+version);
 
 // =========== NODE - NPM ===========
@@ -61,7 +61,6 @@ if (!!window.SharedWorker) {
     var multiThreader = new SharedWorker("js/type/mul[type]threader.js");
     ipcRenderer.send('console-logs',"Multithreading enabled.");
         multiThreader.onerror = () => {
-                console.log("Worker error");
                 ipcRenderer.send('console-logs',"Worker failed to start.");
               };
 };
@@ -100,6 +99,7 @@ aelogo.addEventListener('dblclick', ()=>{location.reload()});
 // =========== Global Variables ===========
 var pandoratio = 0;                         // Used in three.js transitions (from one shape to another)
 
+var field = document.getElementById("field");
 
 // =========== XTYPE ===========
 const xtype = document.getElementById("xtype");             // xtype is a div containing each (-type) visualisation
@@ -109,6 +109,8 @@ var xtypeExists = false;                                    // xtype doesn't exi
 var coreExists = true;                                      // core does exist on document load
 
 // =========== MENU ===========
+
+
 let toggledMenu = false;
 const purgeMenuItems = (menu) => {
   let menuContent = document.getElementById(menu);
@@ -117,6 +119,7 @@ const purgeMenuItems = (menu) => {
 
 const toggleMenu = () => {
   //while(options.length > 0) {options.pop();}
+  field.removeEventListener("click",tutorialOpener);
   if (toggledMenu) {
     if (toggledSecondaryMenu) {toggleSecondaryMenu();toggleMenu();}
     else if (toggledTertiaryMenu) {toggleTertiaryMenu();toggleSecondaryMenu();toggleMenu();}
@@ -125,7 +128,7 @@ const toggleMenu = () => {
     document.getElementById("menu-icon").style.left = "25px";
     document.getElementById("option-icon").style.left = "25px";
     document.getElementById("console").style.left = "0px";
-    document.getElementById("xtype").style.left = "0px";
+    xtype.style.left = "0px";
         var menuItems = document.getElementsByClassName("menu-item");
         for (let i = 0; i < menuItems.length; i++) {menuItems[i].style.left = "-150px";}
     document.getElementById("logostate").remove();                           // Remove the status svg
@@ -135,11 +138,11 @@ const toggleMenu = () => {
     else {
 
       if (xtypeExists) {
-        document.body.style.animation="fadeout 0.5s";
+        document.body.style.animation="fadeout 0.1s";
         setTimeout(()=>{
           document.body.remove();
           remote.getCurrentWindow().reload();
-        }, 450);
+        }, 100);
       }
       else {
       logostatus();
@@ -147,7 +150,7 @@ const toggleMenu = () => {
       document.getElementById("console").style.left = "150px";
       document.getElementById("menu-icon").style.left = "175px";
       document.getElementById("option-icon").style.left = "175px";
-      document.getElementById("xtype").style.left = "150px";
+      xtype.style.left = "150px";
           var menuItems = document.getElementsByClassName("menu-item");
           for (let i = 0; i < menuItems.length; i++) {menuItems[i].style.left = "0";}
       toggledMenu = true;
@@ -166,7 +169,7 @@ const toggleSecondaryMenu = () => {
     document.getElementById("console").style.left = "150px";
     document.getElementById("menu-icon").style.left = "175px";
     document.getElementById("option-icon").style.left = "175px";
-    document.getElementById("xtype").style.left = "150px";
+    xtype.style.left = "150px";
     toggledSecondaryMenu = false;
   }
     else {
@@ -174,7 +177,7 @@ const toggleSecondaryMenu = () => {
       document.getElementById("console").style.left = "300px";
       document.getElementById("menu-icon").style.left = "325px";
       document.getElementById("option-icon").style.left = "325px";
-      document.getElementById("xtype").style.left = "300px";
+      xtype.style.left = "300px";
       toggledSecondaryMenu = true;
   }
 }
@@ -188,7 +191,7 @@ const toggleTertiaryMenu = () => {
     document.getElementById("console").style.left = "300px";
     document.getElementById("menu-icon").style.left = "325px";
     document.getElementById("option-icon").style.left = "325px";
-    document.getElementById("xtype").style.left = "300px";
+    xtype.style.left = "300px";
     toggledTertiaryMenu = false;
   }
     else {
@@ -196,7 +199,7 @@ const toggleTertiaryMenu = () => {
       document.getElementById("console").style.left = "450px";
       document.getElementById("menu-icon").style.left = "475px";
       document.getElementById("option-icon").style.left = "475px";
-      document.getElementById("xtype").style.left = "450px";
+      xtype.style.left = "450px";
       toggledTertiaryMenu = true;
   }
 }
@@ -222,8 +225,9 @@ lifelines.attr("class","lifelinerror")
 
 }
 
-const openHelper = (helperFile) => {
-  ipcRenderer.send('window-manager',"openHelper",helperFile);
+
+const openHelper = (helperFile,section) => {
+  ipcRenderer.send('window-manager',"openHelper",helperFile,"",section);
 }
 const openModal = (modalFile) => {
   ipcRenderer.send('window-manager',"openModal",modalFile);
@@ -253,38 +257,45 @@ ipcRenderer.on('console-messages', (event,message) => {
     log.scrollTop = log.scrollHeight;
 });
 
+ipcRenderer.on('mainWindowReload', (event,message) => {
+  console.log(message);
+  remote.getCurrentWindow().reload();
+  location.reload();
+});
+
+
 // ========== TOOLTIP ===========
 const createTooltip = () => {
   let tooltip = document.createElement("div");
   tooltip.id = "tooltip";
-  document.getElementById("xtype").appendChild(tooltip);
+  xtype.appendChild(tooltip);
 }
 
 const removeTooltip = () => {
   let tooltip = document.getElementById("tooltip");
-  document.getElementById("xtype").removeChild(tooltip);
+  xtype.removeChild(tooltip);
 }
 
 // ========== CORE SIGNALS ===========
 
 ipcRenderer.on('coreSignal', (event,fluxAction,fluxArgs, message) => {
       try{
-      document.getElementById("field").value = message;
+      field.value = message;
       pulse(1,1,10);
     } catch (err){
-      document.getElementById("field").value = err;
+      field.value = err;
     } finally{
 
   }
 })
 
 ipcRenderer.on('chaeros-notification', (event,message,action) => {
-  document.getElementById("field").value = message;
+  field.value = message;
   if (action==="detransfect") {pulse(1,1,10,true);}
 });
 
 ipcRenderer.on('chaeros-failure', (event,message) => {
-  document.getElementById("field").value = message;
+  field.value = message;
 });
 
 ipcRenderer.on('datalist', (event,type,kind,item,path) => {
@@ -303,16 +314,16 @@ ipcRenderer.on('datalist', (event,type,kind,item,path) => {
 var commandReturn = "";
 
 const xtypeDisplay = () => {
-    document.getElementById("xtype").style.opacity = "1",
-    document.getElementById("xtype").style.zIndex = "2",
+    xtype.style.opacity = "1",
+    xtype.style.zIndex = "2",
     commandReturn = "";
     createTooltip();
 };
 
 const purgeXtype = () => {
   if (document.getElementById("xtypeSVG")) {
-    document.getElementById("xtype").style.zIndex = "-2"                      // Send the XTYPE div to back
-    document.getElementById("xtype").removeChild(document.getElementById("xtypeSVG"));
+    xtype.style.zIndex = "-2"                      // Send the XTYPE div to back
+    xtype.removeChild(document.getElementById("xtypeSVG"));
     removeTooltip();
   }
 };
@@ -334,7 +345,7 @@ const purgeCore = () => {
     document.body.removeChild(document.getElementById("version"));
     document.body.removeChild(document.getElementById("mask"));
     document.body.removeChild(document.getElementById("screenMachine"));
-    document.getElementById("field").style.display = "none";
+    field.style.display = "none";
     Array.from(document.getElementsByClassName("purgeable")).forEach(d=>{
       document.body.removeChild(document.getElementById(d.id));
       
@@ -345,135 +356,23 @@ const purgeCore = () => {
 
 };
 
-var options = [];
-
-const start = (type,options) => {
-
-  toggleMenu();
-  let datasets={};
-let argLength = 99;
-
-  switch (type) {
-            case 'chronotype':
-              datasets.bibliography=options[0];
-              document.getElementById("field").addEventListener("click", ()=>{
-                  types.typeSwitch("chronotype",datasets);
-                  document.getElementById("field").removeEventListener("click", ()=>
-                  types.typeSwitch("chronotype",datasets));
-              }
-            );
-          
-          break;
-            case 'anthropotype': 
-              datasets.datasetAT=options[0];
-              document.getElementById("field").addEventListener("click", ()=>{
-                types.typeSwitch("anthropotype",datasets);
-                  document.getElementById("field").removeEventListener("click", ()=>
-                  types.typeSwitch("anthropotype",datasets)
-                  );
-
-              }
-            );
-            break;
-            case 'geotype': 
-              datasets.locations=options[0];
-              document.getElementById("field").addEventListener("click", ()=>{
-                types.typeSwitch("geotype",datasets);
-                        
-                  document.getElementById("field").removeEventListener("click", ()=>
-                  types.typeSwitch("geotype",datasets)
-                );
-
-              }
-            );
-            break;
-            case 'pharmacotype': argLength = 1;
-            if (options.length === argLength) {
-              toggleMenu();
-              document.getElementById("field").style.pointerEvents = "all";
-              document.getElementById("field").value = "start pharmacotype";
-              let datasets={};
-              datasets.trials=options[0];
-              document.getElementById("field").addEventListener("click", ()=>{
-                types.typeSwitch("pharmacotype",datasets);
-                  document.getElementById("field").removeEventListener("click", ()=>
-                  types.typeSwitch("pharmacotype",datasets));
-                  document.getElementById("field").style.pointerEvents = "none";
-
-              }
-            );
-          }
-            break;
-            case '6publicdebate': argLength = 3;
-            if (options.length === argLength) {
-              toggleMenu();
-              document.getElementById("field").style.pointerEvents = "all";
-              document.getElementById("field").value = "start topotype";
-              let datasets={};
-              datasets.pubdeb=options[0];
-              datasets.matching=options[1];
-              datasets.commun=options[2];
-              document.getElementById("field").addEventListener("click", ()=>{
-                types.typeSwitch("topotype",datasets);
-                  document.getElementById("field").removeEventListener("click", ()=>
-                  types.typeSwitch("topotype",datasets));
-                  document.getElementById("field").style.pointerEvents = "none";
-
-              }
-            );
-          }
-            break;
-            case '9gazouillotype': argLength = 2;
-            if (options.length === argLength) {
-              toggleMenu();
-              document.getElementById("field").style.pointerEvents = "all";
-              document.getElementById("field").value = "start gazouillotype";
-              let datasets={};
-              datasets.tweets=options[0];
-              datasets.query=options[1];
-              document.getElementById("field").addEventListener("click", ()=>{
-                types.typeSwitch("gazouillotype",datasets);
-                        pulse(1,1,10);
-                  document.getElementById("field").removeEventListener("click", ()=>
-                    types.typeSwitch("gazouillotype",datasets));
-                  document.getElementById("field").style.pointerEvents = "none";
-
-              }
-            );
-          }
-             break;
-          }
-          document.getElementById("field").style.pointerEvents = "all";
-          document.getElementById("field").style.cursor = "pointer";
-          document.getElementById("field").value = "start "+type;
-};
-
 const selectOption = (type,id) => {
        
-        document.getElementById(id).style.backgroundColor = "darkgrey";
+        document.getElementById(id).style.backgroundColor = "rgba(220,220,220,0.3)";
 
-        toggleTertiaryMenu();
-
-        var thirdMenu = document.getElementById("thirdMenuContent");
-
-        var options = [];
-
-        options.push(id);
-
-        start(type,options);
+        toggleMenu();
+        
+            field.addEventListener("click", ()=>{
+                              types.typeSwitch(type,id);
+            },{once:true});
+        
+            field.style.pointerEvents = "all";
+            field.style.cursor = "pointer";
+            field.value = "start "+type;
 
         ipcRenderer.send('console-logs',"Checking dataset: " + JSON.stringify(id));
 
-}
-
-const nextOption = (type,kind) => {
-
-let newKind = parseInt(kind.slice(0,1))+1;
-
-ipcRenderer.send('datalist',{"type":type,"kind":newKind});
-
-
-}
+};
 
 // ========== main menu options ========
 
@@ -495,7 +394,7 @@ const mainDisplay = (type) =>{
 
   displayCore();
   purgeXtype();
-  document.getElementById("field").value = "preparing " + type;
+  field.value = "preparing " + type;
   ipcRenderer.send('console-logs',"Preparing " + type);
 
   toggleSecondaryMenu();
@@ -621,9 +520,13 @@ switch (input) {
           document.getElementById("menu-icon").onclick = toggleMenu;
           document.getElementById("menu-icon").style.cursor = "pointer";
           document.getElementById("option-icon").style.cursor = "pointer";
-          document.getElementById("field").removeEventListener("click", ()=>{
+          field.removeEventListener("click", ()=>{
               openModal("tutorial");
             })
+            break;
+
+            case 'version':
+            commandReturn = version;
             break;
 
     case  'start tutorial':
@@ -646,7 +549,7 @@ switch (input) {
           break;
         }
       }
-document.getElementById("field").value = commandReturn;
+field.value = commandReturn;
 
 }
 
@@ -706,25 +609,29 @@ const reframeMainWindow = () => {
 
 // Tutorial - Uncomment to force tutorial on boot if no user name defined
 
+const tutorialOpener = () => {
+  openModal("tutorial");
+  field.value = "";
+}
+
 fs.readFile(userDataPath +'/userID/user-id.json',                          // Read the designated datafile
                               'utf8', (err, data) => {              // Additional options for readFile
   if (err) throw err;
   let user = JSON.parse(data);
 
-if (false
-//  user.UserName === "Enter your name"
-) {
+if (user.UserName === "Enter your name") {
   document.getElementById("menu-icon").style.cursor = "not-allowed";
   document.getElementById("option-icon").style.cursor = "not-allowed";
-  document.getElementById("field").value = "start tutorial";
-  document.getElementById("field").style.pointerEvents = "all";
-  document.getElementById("field").addEventListener("click", ()=>{
-      openModal("tutorial");
-    })
+  field.style.pointerEvents = "all";
+  field.style.cursor = "pointer";
+  field.value = "start tutorial";
+  field.addEventListener("click",tutorialOpener);
   } else{
     document.getElementById("menu-icon").onclick = toggleMenu;
-    document.getElementById("menu-icon").style.cursor = "all";
-    document.getElementById("option-icon").style.cursor = "all";
+    document.getElementById("option-icon").onclick = toggleConsole;
+    document.getElementById("menu-icon").style.cursor = "pointer";
+    document.getElementById("option-icon").style.cursor = "pointer";
+    document.getElementById("version").innerHTML =  user.UserName.toUpperCase();
   }
 });
 
@@ -733,54 +640,63 @@ const blinker = (item) => {
 let blinking;
 let blinking2;
 
+let target = document.getElementById(item);
+
 function blink () {
   blinking = setInterval( function(){
-          document.getElementById(item).style.backgroundColor = "#141414";
-          document.getElementById(item).style.color = "white";
+    target.style.backgroundColor = "#141414";
+    target.style.color = "white";
         }, 500);
-  blinking2 = setInterval(function(){ document.getElementById(item).style.backgroundColor = "white";
-        document.getElementById(item).style.color = "#141414"; },1000);
+  blinking2 = setInterval(function(){ 
+    target.style.backgroundColor = "white";
+    target.style.color = "#141414"; },1000);
 };
 
 blink();
 
-        document.getElementById(item).addEventListener('click', function(){
+          target.addEventListener('click', function(){
           clearInterval(blinking);
           clearInterval(blinking2);
-          document.getElementById(item).style.backgroundColor = "white";
-          document.getElementById(item).style.color = "#141414";
+          target.style.backgroundColor = "white";
+          target.style.color = "#141414";
         });
 
 
 };
 
-
-
 ipcRenderer.on('tutorial', (event,message) => {
   document.getElementById("menu-icon").onclick = toggleMenu;
-  document.getElementById("menu-icon").style.cursor = "all";
-  document.getElementById("option-icon").style.cursor = "all";
-  let blink = [{"background-color": "#141414","color":"white"},
-              {"background-color": "white","color":"#141414"}];
+  document.getElementById("menu-icon").style.cursor = "pointer";
+  document.getElementById("option-icon").style.cursor = "pointer";
 
     switch (message) {
-      case "openFlux": openHelper('tutorialHelper');
+
+      case "flux":
+      case "zoteroImport": 
+              openHelper('tutorialHelper',message);
                        blinker("menu-icon");
                        blinker("fluxMenu");
-
         break;
 
-        case "openTutorial": openModal('tutorial');
-                         break;
-      default:
+        case "chronotype": 
+        openHelper('tutorialHelper',message);
+                 blinker("menu-icon");
+                 blinker("chronotype");
+                 field.removeEventListener("click", openModal);
+        break;
 
+        case "geotype": 
+                openHelper('tutorialHelper',message);
+                blinker("menu-icon");
+                blinker("geotype");
+                field.removeEventListener("click", openModal);
+        break;
+
+      case "openTutorial": openModal('tutorial');
+        break;
+    
     }
 });
-
-ipcRenderer.on('window-close', (event,message) => {
-  console.log("Closing "+message);
-});
-
 
 // ========= THEMES =======
 
@@ -838,7 +754,7 @@ let screenZoomToggle = false;
         document.getElementById("screenMachine").pause(); 
         screenZoomToggle = true;
     } else {
-        document.getElementById("field").value = "this theme doesn't support zooming";
+        field.value = "this theme doesn't support zooming";
     }
    }
   }
