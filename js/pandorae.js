@@ -622,6 +622,7 @@ fs.readFile(userDataPath +'/userID/user-id.json',                          // Re
 if (user.UserName === "Enter your name") {
   document.getElementById("menu-icon").style.cursor = "not-allowed";
   document.getElementById("option-icon").style.cursor = "not-allowed";
+  document.getElementById("tutostartmenu").style.display = "block";
   field.style.pointerEvents = "all";
   field.style.cursor = "pointer";
   field.value = "start tutorial";
