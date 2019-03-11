@@ -109,8 +109,6 @@ var xtypeExists = false;                                    // xtype doesn't exi
 var coreExists = true;                                      // core does exist on document load
 
 // =========== MENU ===========
-
-
 let toggledMenu = false;
 const purgeMenuItems = (menu) => {
   let menuContent = document.getElementById(menu);
@@ -118,7 +116,6 @@ const purgeMenuItems = (menu) => {
 }
 
 const toggleMenu = () => {
-  //while(options.length > 0) {options.pop();}
   field.removeEventListener("click",tutorialOpener);
   if (toggledMenu) {
     if (toggledSecondaryMenu) {toggleSecondaryMenu();toggleMenu();}
@@ -222,7 +219,6 @@ lifelines.append("polyline").attr("id","datastatus").attr("points", "26,51, 45,6
 if (statuserror = false) {
 lifelines.attr("class","lifelinerror")
     }
-
 }
 
 
@@ -284,8 +280,6 @@ ipcRenderer.on('coreSignal', (event,fluxAction,fluxArgs, message) => {
       pulse(1,1,10);
     } catch (err){
       field.value = err;
-    } finally{
-
   }
 })
 
@@ -335,11 +329,9 @@ const displayCore = () => {
               coreExists = true;
           }
 
-
 const purgeCore = () => {
   if (coreExists) {
     d3.select("canvas").remove();
-    
     document.body.removeChild(document.getElementById("core-logo"));
     document.body.removeChild(document.getElementById("vignette"));
     document.body.removeChild(document.getElementById("version"));
@@ -347,13 +339,11 @@ const purgeCore = () => {
     document.body.removeChild(document.getElementById("screenMachine"));
     field.style.display = "none";
     Array.from(document.getElementsByClassName("purgeable")).forEach(d=>{
-      document.body.removeChild(document.getElementById(d.id));
-      
+      document.body.removeChild(document.getElementById(d.id));   
       d3.select(d.id).remove();
     });
     ipcRenderer.send('console-logs',"Purging core");
   }
-
 };
 
 const selectOption = (type,id) => {

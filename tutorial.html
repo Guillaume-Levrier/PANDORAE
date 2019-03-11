@@ -340,6 +340,7 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
 <script>
   const closeAndDisplay = () => {
   
+    ipcRenderer.send("window-ids","tutorial",remote.getCurrentWindow().id,false);
     ipcRenderer.send('chaeros-notification', 'return to tutorial');
   
     closeWindow();

@@ -44,8 +44,9 @@ pandodb.version(1).stores({
 
 //========== STARTING FLUX ==========
 ipcRenderer.send('console-logs',"Opening Flux");           // Sending notification to console
-ipcRenderer.send("window-ids","flux",remote.getCurrentWindow().id)
+ipcRenderer.send("window-ids","flux",remote.getCurrentWindow().id,true)
 ipcRenderer.on('window-close', (event,message) => {
+  ipcRenderer.send("window-ids","flux",remote.getCurrentWindow().id,false)
   closeWindow();
 });
 
