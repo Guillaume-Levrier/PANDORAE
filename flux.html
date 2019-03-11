@@ -1,6 +1,15 @@
 <!DOCTYPE html><html><meta charset="UTF-8">
 <title>PANDORÆ-FLUX</title>
 
+<style>
+  body{
+    overflow: scroll;
+  }
+  ::-webkit-scrollbar {
+      display: none;
+  }
+</style>
+
 <div id="flux-manager" class="fluxTabs"><svg></svg></div>
 
 <!-- USER TAB -->
@@ -44,18 +53,14 @@
 <div id="twitter" style="display:none;" class="fluxTabs">
   <span class="flux-title">TWITTER</span><br><br>
     <form id="twitter-form" autocomplete="off">
-      Enrich Twitter datasets.<br><br>
-      <div id="Twitter-Zotero" class="flux-subsection">
-      <button type="submit" class="flux-button" id="twitter-display" onclick="datasetDisplay('/datasets/10twitter/1zotero','twitter-dataset-list','zotero-dataset');return false">Display Zotero Twitter cartography dataset list</button>
-      <div id="zotero-dataset-preview" style="position:relative;">Click on a dataset to display its features.</div>
-      <div id="twitter-dataset-list"  style="position:relative;">No dataset loaded yet.</div></div>
+      Enrich Twitter datasets. This tab is currently disabled but will be unlocked soon.<br><br>
     </form>
 </div>
 
 <!-- ENRICHMENT TAB -->
 <div id="enrichment" style="display:none;" class="fluxTabs">
     <span class="flux-title">DATA ENRICHMENT</span><br><br>
-    This tab will allow you to geolocate your documents, check if they are available through an Open Access licence, and return their Altmetric score and identity.<br><br>  
+    This tab will allow you to geolocate your documents' affiliations and find their Altmetric metadata.<br><br>  
       <form autocomplete="off">
         <div id="scopus-dataset-preview" style="position:relative;">Click on a dataset to display its features. </div>
         <div id="scopus-dataset-buttons" style="display:none;">
@@ -109,8 +114,8 @@
 <div id="availableDestinations" style="flex:auto">
   <input class='zotDestCheck' value='chronotype' name='chronotype' type='checkbox'/><label>chronotype</label><br>
   <input class='zotDestCheck' value='geotype' name='geotype' type='checkbox'/><label>geotype</label><br>
-  <input class='zotDestCheck' value='anthropotype' name='anthropotype' type='checkbox'/><label>anthropotype</label><br>
-  <input class='zotDestCheck' value='pharmatype' name='pharmatype' type='checkbox'/><label>pharmatype</label><br>
+<!--   <input class='zotDestCheck' value='anthropotype' name='anthropotype' type='checkbox'/><label>anthropotype</label><br>
+  <input class='zotDestCheck' value='pharmatype' name='pharmatype' type='checkbox'/><label>pharmatype</label><br> -->
 </div>
 </div>
 <br><br><br>
@@ -123,7 +128,7 @@
 <div id="local" style="display:none;" class="fluxTabs">
     <span class="flux-title">LOCAL</span><br><br>
 
-    This feature is currently disabled for security reasons.<br><br>
+    This tab is currently disabled but will be unlocked soon.<br><br>
 
 <input class="fluxInput" id="dataset-upload" type="file" accept=".json,.csv" multiple/><br><br>
 
@@ -139,11 +144,12 @@
 <!-- CAPCO TAB -->
 <div id="capco" style="display:none;" class="fluxTabs">
     <span class="flux-title">CAPCO</span><br><br>
+    This tab is currently disabled but will be unlocked soon.
       <form id="pubdeb-import-form" autocomplete="off">
         <br><br>
-        <p>Select CapCo dataset <br><input class="fluxInput" id="load-local-pubdeb" type="file" accept="all"/></p>
-        <p>Select Matching dataset<br> <input class="fluxInput" id="load-local-links" type="file" accept="all"/></p>
-        <button type="submit" class="flux-button" id="" onclick='powerValve("capcoRebuilder",this);return false'>Rebuild CapCo Dataset</button>
+        <p>Select CapCo dataset <br><input class="fluxInput" id="load-local-pubdeb" type="file" accept="all" disabled/></p>
+        <p>Select Matching dataset<br> <input class="fluxInput" id="load-local-links" type="file" accept="all" disabled/></p>
+        <button type="submit" class="flux-button" id="" onclick='powerValve("capcoRebuilder",this);return false' disabled>Rebuild CapCo Dataset</button>
       </form>
   </div>
 
@@ -151,14 +157,10 @@
 <!-- SYSTEM TAB -->
 <div id="system" style="display:none;" class="fluxTabs">
     <span class="flux-title">SYSTEM</span><br><br>
-      Once you have loaded the following datasets in Flux's buffer zone. Plug each of those in the relevant visualisation types. The buffer zone is cleared every time PANDORÆ is closed. <br><br>
-      <button type="submit" class="flux-button" id="buffer-display" onclick="bufferUpdate();return false">Display buffer content</button><br><br>
-    <div id="bufferDatasets" style="width:50%;"></div>
-    <form  id="types" style="width:50%;margin-left:50%;">
-    </form>
+    This tab is currently disabled but will be unlocked soon. <br><br>
     </div>
 
-<div style="padding:5px; position:absolute;top:0;right:0;z-index:20;">
+<div style="position:fixed;z-index:20;padding: 5px;right:0px;top:0px;">
 <i class="material-icons  dialog-buttons" onclick="fluxDisplay('flux-manager');">arrow_back</i>
 <i class="material-icons dialog-buttons" onclick="refreshWindow();">refresh</i>
 <i class="material-icons dialog-buttons" onclick="closeWindow();">close</i>

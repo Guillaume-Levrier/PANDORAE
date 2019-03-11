@@ -42,7 +42,6 @@ const loadType = () => {
   xtypeExists = true;
   coreExists = false;
   document.getElementById("field").value = "";
-  while(options.length > 0) {options.pop();}
 }
 
 
@@ -132,9 +131,6 @@ const multiFormat = (date) =>
       : d3.timeMonth(date) < date ? (d3.timeWeek(date) < date ? formatDay : formatWeek)
       : d3.timeYear(date) < date ? formatMonth
       : formatYear)(date);
-
-
-
 
 // ========= ANTHROPOTYPE =========
 const anthropotype = (datasetAT) => {                 // When called, draw the anthropotype
@@ -550,6 +546,8 @@ const chronotype = (bibliography,links) => {                          // When ca
         let doc = {};
         doc.title = docs[i].items[j].title;
         doc.code = docs[i].items[j].code;
+        if(docs[i].items[j].hasOwnProperty('enrichement')) {doc.OA = docs[i].items[j].enrichment.OA;
+        } else {doc.OA = false;}
         titleList.push(doc);
       }
     }
@@ -562,7 +560,7 @@ const chronotype = (bibliography,links) => {                          // When ca
   var titleNest = d3.nest().key(d => d.code).entries(titleList);
       titleNest.forEach(d => {d.titles = d.values.map(d => d.title)});
       titleNest.forEach(d => {titlesIndex[d.key] = d.titles; });
-  
+
   //========= CHART DISPLAY ===========
   var now = view.append("line")                                               // Red line indicating current time
                 .attr("x1", -1)                                               // X coordinate of point of origin
@@ -655,7 +653,8 @@ const chronotype = (bibliography,links) => {                          // When ca
               formatTime(nodeData[i].date) + '<br/>' +
               nodeData[i].category + ' | ' +
               nodeData[i].type +'<br/><i class="material-icons">'+
-              nodeData[i].num+'</i><br/>' //+
+              nodeData[i].num+'</i><br/>'// +
+            //  '<img src="././svg/OAlogo.svg" height="16px"/>'
             //  nodeData[i].desc + '<br/><br/>' +
             //  nodeData[i].DOI + '<br/>' +
             //  'Source: <a target="_blank" href="'+
@@ -773,7 +772,7 @@ const chronotype = (bibliography,links) => {                          // When ca
                 .style('fill', 'white')                             // Icon color
                 .style('font-size', '1.4px')                        // Icon size
                 .text(d => d.type)                                  // Icon
-                .on('click', d => {window.open(d.URL,"_blank");})   // On click, open url in new tab
+                .on('click', d => {shell.openExternal(d.URL)})   // On click, open url in new tab
                 .on("mouseover", HighLightandDisplay(.2))           // On hover, HighLightandDisplay
                 .on("mouseout", mouseOut)                           // On mouseout, mouseOute
                 .raise()                                            // Display above nodes and the rest
@@ -949,9 +948,9 @@ const chronotype = (bibliography,links) => {                          // When ca
         formatTime(d.date) + '<br/>' +
         d.category + ' | ' +
         d.type +'<br/><i class="material-icons">'+
-        d.num+'</i><br/>' +
+        d.num+'</i><br/>' //+
         //d.desc + '<br/><br/>' +
-        d.DOI + '<br/>'
+       // d.DOI + '<br/>'
         // +
         //'Source: <a target="_blank" href="'+
         //d.URL+'">'+
@@ -1170,7 +1169,7 @@ var geoData = geo[0];
             for (var l = 0; l < city.values[k].enrichment.affiliations.length; l++) {
             if (city.values[k].enrichment.affiliations[l].affilname===city.affiliations[j]) {
               let link = {}
-              if (institution.papers.findIndex(paper => paper === city.values[k].title)<0) {
+              if (institution.papers.findIndex(paper => paper.title === city.values[k].title)<0) {
                 institution.papers.push({"title":city.values[k].title,"DOI":city.values[k].DOI,"OA":city.values[k].enrichment.OA});
               }
            }
@@ -1183,12 +1182,13 @@ var geoData = geo[0];
   
       let totalList="";
       institutions.forEach(e=>{
-          let localList= "<strong>"+e.name+"</strong><ul>";
+          let localList= "<strong>"+e.name+"</strong><ul style='cursor:pointer;'>";
               for (var i = 0; i < e.papers.length; i++) {
+                let url = "https://dx.doi.org/"+e.papers[i].DOI;
                 if (e.papers[i].OA === true) { // If OA flag is true
-                  localList = localList+ "<li><img src='././svg/OAlogo.svg' height='16px'/>&nbsp;<a target='blank' href='https://dx.doi.org/"+e.papers[i].DOI+"'>"+e.papers[i].title+"</a></li>"
+                  localList = localList+ "<li><img src='././svg/OAlogo.svg' height='16px'/>&nbsp;<a onclick='shell.openExternal("+JSON.stringify(url)+")'>"+e.papers[i].title+"</a></li>"
                 } else {  // else just resolve DOI
-                localList = localList+ "<li><a target='blank' href='https://dx.doi.org/"+e.papers[i].DOI+"'>"+e.papers[i].title+"</a></li>"
+                localList = localList+ "<li><a onclick='shell.openExternal("+JSON.stringify(url)+")'>"+e.papers[i].title+"</a></li>"
               }
             }
           totalList= totalList+localList+ "</ul>";
@@ -1218,7 +1218,7 @@ var geoData = geo[0];
                   .attr("id", d => d.id)
                   .attr("class", "locations");
   
-        locations.datum(d => d3.geoCircle().center([ d.lon, d.lat ]).radius(.3)())
+        locations.datum(d => d3.geoCircle().center([ d.lon, d.lat ]).radius(.15)())
                   .attr("d", path);
   
         locations.on("mouseover", d => {
@@ -2134,7 +2134,7 @@ const topotype = (pubdeb,matching,commun) => {                               // 
 //========== typesSwitch ==========
 // Switch used to which type to draw/generate
 
-const typeSwitch = (type,datasets) => {
+const typeSwitch = (type,id) => {
 
 
   document.getElementById("field").value = "loading " + type;
@@ -2143,32 +2143,32 @@ const typeSwitch = (type,datasets) => {
       switch (type) {
 
           case 'anthropotype' : 
-            anthropotype(datasets.datasetAT);
+            anthropotype(id);
           break;
 
           case 'chronotype' : 
-            chronotype(datasets.bibliography,datasets.links);
+            chronotype(id);
           break;
 
           case 'gazouillotype' : 
-            gazouillotype(datasets.tweets,datasets.query);
+            gazouillotype(id);
           break;
 
           case 'geotype' : 
-            geotype(datasets.locations);
+            geotype(id);
 
           break;
 
           case 'pharmacotype' : 
-            pharmacotype(datasets.trials);
+            pharmacotype(id);
           break;
 
           case 'topotype' : 
-            topotype(datasets.pubdeb,datasets.matching,datasets.commun);
+            topotype(id);
           break;
       }
 
-      ipcRenderer.send('console-logs',"typesSwitch started a "+ type +" process using the following dataset(s) : " + JSON.stringify(datasets));
+      ipcRenderer.send('console-logs',"typesSwitch started a "+ type +" process using the following dataset(s) : " + JSON.stringify(id));
 
 }
 

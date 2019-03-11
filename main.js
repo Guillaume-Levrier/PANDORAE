@@ -38,7 +38,6 @@ const changeTheme = () => {
         try {
               themeData = JSON.parse(theme);
             } catch (error) {
-                console.log(error);             //Often fails at parsing 
             } finally {
                 activeTheme = themeData.activeTheme;
                 for (let i = 0; i < themeData.themes.length; i++) {
@@ -131,6 +130,7 @@ const openHelper = (helperFile) => {
   let win = new BrowserWindow({
     backgroundColor: 'white',
     resizable: false,
+    frame: true,
     width: 350,
     height: 700,
     alwaysOnTop:true,
@@ -162,22 +162,37 @@ const openModal = (modalFile,scrollTo) => {
 })
 }
 
-ipcMain.on('window-manager', (event,type,file,scrollTo) => {
+ipcMain.on('window-manager', (event,type,file,scrollTo,section) => {
 
 let win = {};
 
-for (var i = 0; i < windowIds.length; i++) {
-  if (windowIds[i].name === file) {
-    win = BrowserWindow.fromId(windowIds[i].id)}
-}
 
 switch (type) {
-  case "openHelper": openHelper(file);
+  case "openHelper": 
+  openHelper(file);
+
+setTimeout(()=>{
+  for (var i = 0; i < windowIds.length; i++) {
+    if (windowIds[i].name === file) {
+      BrowserWindow.fromId(windowIds[i].id).webContents.send('tutorial-types',section);
+    }
+  }
+},800);
+
     break;
   case "openModal": openModal(file,scrollTo);
     break;
   case "closeWindow":
+  try{
+    
+      for (var i = 0; i < windowIds.length; i++) {
+        if (windowIds[i].name === file) {
+          win = BrowserWindow.fromId(windowIds[i].id)}
+      }
      win.webContents.send('window-close','close');
+    }catch(e){
+      console.log(e);
+    }
     break;
 }
 
@@ -251,7 +266,7 @@ const chaerosCalculator = () =>  {
   chaerosWindow.loadFile('chaeros.html')
 
   chaerosWindow.webContents.on('did-finish-load', function () {
-  //  chaerosWindow.webContents.openDevTools();
+   // chaerosWindow.webContents.openDevTools();
   });
 
 }
@@ -268,11 +283,8 @@ setTimeout(()=>{app.quit()},100);
   });
 
 // Tutorial
-ipcMain.on('tutorial', (event,message) => {
-  switch (message) {
-    case 'flux': 
-                mainWindow.webContents.send('tutorial','openFlux');
-      break;
+ipcMain.on('tutorial', (event,message) => { mainWindow.webContents.send('tutorial',message)});
 
-  }
+ipcMain.on('mainWindowReload', (event,message) => {
+  mainWindow.webContents.send('mainWindowReload',message);
 });

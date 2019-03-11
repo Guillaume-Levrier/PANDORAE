@@ -142912,7 +142912,7 @@
       "country": "United States"
     },
     {
-      "name": "Washington, D.C.",
+      "name": "Washington",
       "lat": "38.89511",
       "lon": "-77.03637",
       "countrycode": "US",
@@ -152610,13 +152610,6 @@
       "name": "Wasco",
       "lat": "41.93808",
       "lon": "-88.40452",
-      "countrycode": "US",
-      "country": "United States"
-    },
-    {
-      "name": "Washington",
-      "lat": "40.70365",
-      "lon": "-89.40731",
       "countrycode": "US",
       "country": "United States"
     },
@@ -162725,13 +162718,6 @@
       "name": "Saint George",
       "lat": "37.10415",
       "lon": "-113.58412",
-      "countrycode": "US",
-      "country": "United States"
-    },
-    {
-      "name": "Washington",
-      "lat": "37.13054",
-      "lon": "-113.50829",
       "countrycode": "US",
       "country": "United States"
     },

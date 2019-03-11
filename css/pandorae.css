@@ -875,7 +875,7 @@ label {
 .arc {
   fill: none;
   stroke: crimson;
-  stroke-width: .5px;
+  stroke-width: .2px;
   stroke-linecap: round;
 }
 
@@ -900,7 +900,7 @@ cursor: help;
 
 .locations:hover {
 stroke: #fff;
-stroke-width: 1px;
+stroke-width: 0.3px;
 }
 
 .parallax {
@@ -1044,4 +1044,4 @@ stroke-width: 1px;
       .fluxInput:focus{
         outline:none;
       }
-      
+  

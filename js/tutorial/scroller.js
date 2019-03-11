@@ -1,5 +1,7 @@
 const d3 = require("d3");
 
+let activeIndex = 0;
+
 function scroller() {
   let container = d3.select('body'),
       dispatch = d3.dispatch('active', 'progress'),
@@ -37,7 +39,6 @@ function scroller() {
     containerStart = container.node().getBoundingClientRect().top + window.pageYOffset;
   }
 
-
   function position() {
     var pos = window.pageYOffset - 10 - containerStart;
     var sectionIndex = d3.bisect(sectionPositions, pos);
@@ -45,12 +46,14 @@ function scroller() {
 
       if (currentIndex !== sectionIndex) {
         dispatch.call('active', this, sectionIndex);
-        currentIndex = sectionIndex;
+          currentIndex = sectionIndex;
+          activeIndex = currentIndex;
       }
 
     var prevIndex = Math.max(sectionIndex - 1, 0);
     var prevTop = sectionPositions[prevIndex];
     var progress = (pos - prevTop) / (sectionPositions[sectionIndex] - prevTop);
+
     dispatch.call('progress', this, currentIndex, progress);
   }
 
@@ -69,13 +72,17 @@ function scroller() {
   return scroll;
 }
 
-function smoothScrollTo(target){
-  document.getElementById(target).scrollIntoView({ behavior: 'smooth' });
+var previous = "";
+
+const smoothScrollTo = (target,hide) => {
+  var sectionList = document.querySelectorAll("section");                                                  // Create an array with all sections
+  previous = sectionList[activeIndex].id;                                                                  // Store current section ID
+  document.getElementById('backarrow').style.display = "inline-block";                                     // Display "previous" arrow button
+  document.getElementById(target).scrollIntoView({ behavior: 'smooth' });                                  // Scroll smoothly to target
+  if (hide === true) {document.getElementById('backarrow').style.display = "none"};                        // If order comes from the "previous" arrow button, hide this button
 };
 
-var sourceTargetBlank = 'target="blank" style="background-color: #fff;text-decoration:underline;"';
-
-function display() {
+const display = () => {
 
 var scroll = scroller().container(d3.select('#tutorialSections'));
 
@@ -83,7 +90,6 @@ scroll(d3.selectAll('.step'));
 
         scroll.on('active', function (index) {
                 d3.selectAll('.step').style('opacity', function (d, i) { return i === index ? 1 : 0.1; });
-                let sourceCredit = "Source/Credit: ";
                               });
 
         scroll.on('progress', function (index, progress) {
