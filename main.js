@@ -113,13 +113,14 @@ app.on('ready', ()=>{createWindow()});
 app.on('activate',  () => { if (mainWindow === null) { createWindow() } });
 
 var windowIds = [
-{name:"flux",id:0},
-{name:"tutorialHelper",id:0},
-{name:"tutorial",id:0}
+{name:"flux",id:0,open:false},
+{name:"tutorialHelper",id:0,open:false},
+{name:"tutorial",id:0,open:false}
 ];
 
-ipcMain.on('window-ids', (event,window,id) => {
-    windowIds.forEach(d=>{if (d.name === window) { d.id = id};})
+ipcMain.on('window-ids', (event,window,id,open) => {
+    windowIds.forEach(d=>{if (d.name === window) { d.id = id;d.open=open;}})
+    console.log(windowIds)
 });
 
 const openHelper = (helperFile) => {
@@ -146,20 +147,32 @@ const openHelper = (helperFile) => {
 }
 
 const openModal = (modalFile,scrollTo) => {
-  let win = new BrowserWindow({
-    backgroundColor: 'white',
-    modal: true,
-    alwaysOnTop:true,
-    frame: false,
-    resizable: false,
-    show: false
-  })
-  var path = 'file://' + __dirname + '/'+ modalFile +'.html';
-  win.loadURL(path);
-  win.once('ready-to-show', () => {
-  win.show();
-  win.webContents.send('scroll-to',scrollTo);
-})
+  
+  for (let i = 0; i < windowIds.length; i++) {
+    if (windowIds[i].name === modalFile){
+      console.log(modalFile);
+      console.log(windowIds[i].open)
+
+      
+      if (windowIds[i].open === false) {
+              let win = new BrowserWindow({
+                backgroundColor: 'white',
+                modal: true,
+                alwaysOnTop:true,
+                frame: false,
+                resizable: false,
+                show: false
+              })
+
+              var path = 'file://' + __dirname + '/'+ modalFile +'.html';
+              win.loadURL(path);
+              win.once('ready-to-show', () => {
+              win.show();
+              win.webContents.send('scroll-to',scrollTo);
+            })
+          }
+        }
+      }
 }
 
 ipcMain.on('window-manager', (event,type,file,scrollTo,section) => {
