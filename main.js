@@ -120,7 +120,6 @@ var windowIds = [
 
 ipcMain.on('window-ids', (event,window,id,open) => {
     windowIds.forEach(d=>{if (d.name === window) { d.id = id;d.open=open;}})
-    console.log(windowIds)
 });
 
 const openHelper = (helperFile) => {
@@ -149,11 +148,7 @@ const openHelper = (helperFile) => {
 const openModal = (modalFile,scrollTo) => {
   
   for (let i = 0; i < windowIds.length; i++) {
-    if (windowIds[i].name === modalFile){
-      console.log(modalFile);
-      console.log(windowIds[i].open)
-
-      
+    if (windowIds[i].name === modalFile){ 
       if (windowIds[i].open === false) {
               let win = new BrowserWindow({
                 backgroundColor: 'white',
