@@ -339,6 +339,7 @@ case 'zoteroCollectionBuilder' : fluxArgs.zoteroCollectionBuilder = {};
 // Send a carbon-copy of the orders sent to chaeros to the logs
 ipcRenderer.send('console-logs',"Sending to CHÆROS action "+fluxAction+ " with arguments "+JSON.stringify(fluxArgs)+" "+message);
 ipcRenderer.send('dataFlux',fluxAction,fluxArgs,message);                         // Send request to main process
+ipcRenderer.send("window-ids","flux",remote.getCurrentWindow().id,false);
 remote.getCurrentWindow().close();                                                 // Close flux modal window
 };
 
