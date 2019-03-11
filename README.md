@@ -4,7 +4,9 @@ PANDORÆ is currently in beta. Available processes should be functional.
 
 Releases are announced on [Twitter](https://mobile.twitter.com/PANDORAE_CORE).
 
-- Download PANDORÆ Beta 0.1.17 for [Windows](https://anthropos-ecosystems.com/pandorae/PANDORAE-win32-x64.zip) (100 Mo)
+- Download PANDORÆ Beta 0.1.17 for [Windows](https://anthropos-ecosystems.com/pandorae/PANDORAE-win32-x64.zip) (±100 Mo)
+- Download PANDORÆ Beta 0.1.17 for [macOS](https://anthropos-ecosystems.com/pandorae/PANDORAE-darwin-x64.zip) (±100 Mo)
+- Download PANDORÆ Beta 0.1.17 for [Linux](https://anthropos-ecosystems.com/pandorae/PANDORAE-linux-x64.zip) (±100 Mo)
 
 ### Current available processes
 The current available processes are listed below per category.
