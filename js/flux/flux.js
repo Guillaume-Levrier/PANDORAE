@@ -385,7 +385,11 @@ const datasetDisplay = (divId,kind) => {              // This function displays 
   for (var i=0; i<datasets.length; ++i){                         // For each element of the array
       datasetList = datasetList + datasets[i];                   // Add it to the string
     }
+    if (datasetList.length===0) {
+      document.getElementById(divId).innerHTML = 'No dataset available in the system';
+    } else {
     document.getElementById(divId).innerHTML = '<ul>'+datasetList+'</ul>';         // The string is a <ul> list
+  }
   })
     } catch(err){
           document.getElementById(divId).innerHTML = err;        // Display error in the result div
