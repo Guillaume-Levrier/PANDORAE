@@ -8,9 +8,6 @@ let mainWindow
 const basePath = app.getAppPath();
 
 //FileSystem
-var pandoDir = userDataPath;
-
-var dirTree = ["/logs","/userID","/themes"];
 
 const userDataDirTree = (path,dirTree) => {
     dirTree.forEach(d=>{
@@ -22,9 +19,21 @@ const userDataDirTree = (path,dirTree) => {
     })
 }
 
-userDataDirTree(pandoDir,dirTree);
+const createUserId = () => {
+
+let userID = {"UserName":"Enter your name","UserMail":"Enter your e-mail (not required)","ZoteroID":"Enter your Zotero ID (required to use Flux features)"};
+
+  if (!fs.existsSync(userDataPath+'/userID/user-id.json')) {
+    fs.writeFile(userDataPath +"/userID/user-id.json",JSON.stringify(userID),'utf8',
+      (err) => {if (err) throw err;}
+    );
+  }
+};
 
 // Themes
+
+const themeRoutine = ()=> {
+
 let activeTheme;
 
 fs.copyFileSync(basePath+"/json/themes.json", userDataPath +"/themes/themes.json");
@@ -62,6 +71,7 @@ const themeChangeTrigger = (theme) => {
 ipcMain.on('change-theme', (event,theme) => {
   themeChangeTrigger(theme);
 })
+};
 
 function createWindow () {
 
@@ -78,6 +88,8 @@ function createWindow () {
          plugins: true
        }
    })
+
+   themeRoutine();
 
   mainWindow.loadFile('index.html')
 
@@ -108,7 +120,11 @@ function createWindow () {
   mainWindow.on('closed', () => { mainWindow = null })
 }
 
-app.on('ready', ()=>{createWindow()});
+app.on('ready', ()=>{
+  userDataDirTree(userDataPath,["/logs","/userID","/themes"]);
+  createUserId();
+  createWindow();
+});
 
 app.on('activate',  () => { if (mainWindow === null) { createWindow() } });
 
@@ -213,13 +229,7 @@ setTimeout(()=>{
 });
 
 
-let userID = {"UserName":"Enter your name","UserMail":"Enter your e-mail (not required)","ZoteroID":"Enter your Zotero ID (required to use Flux features)"};
 
-  if (!fs.existsSync(userDataPath+'/userID/user-id.json')) {
-    fs.writeFile(userDataPath +"/userID/user-id.json",JSON.stringify(userID),'utf8',
-      (err) => {if (err) throw err;}
-    );
-  }
 
 //CONSOLE
 
