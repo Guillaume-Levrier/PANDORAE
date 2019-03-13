@@ -40,7 +40,7 @@ function scroller() {
   }
 
   function position() {
-    var pos = window.pageYOffset - 10 - containerStart;
+    var pos = window.pageYOffset - 100 - containerStart;
     var sectionIndex = d3.bisect(sectionPositions, pos);
     sectionIndex = Math.min(sections.size() - 1, sectionIndex);
 
@@ -92,8 +92,7 @@ scroll(d3.selectAll('.step'));
                 d3.selectAll('.step').style('opacity', function (d, i) { return i === index ? 1 : 0.1; });
                               });
 
-        scroll.on('progress', function (index, progress) {
-        });
+        //scroll.on('progress', function (index, progress) {});
 }
 
 display();
