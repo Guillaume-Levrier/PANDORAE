@@ -8,7 +8,6 @@ let mainWindow
 const basePath = app.getAppPath();
 
 //FileSystem
-
 const userDataDirTree = (path,dirTree) => {
     dirTree.forEach(d=>{
         if (!fs.existsSync(path+d)){
@@ -19,9 +18,11 @@ const userDataDirTree = (path,dirTree) => {
     })
 }
 
+let userID;
+
 const createUserId = () => {
 
-let userID = {"UserName":"Enter your name","UserMail":"Enter your e-mail (not required)","ZoteroID":"Enter your Zotero ID (required to use Flux features)"};
+  userID = {"UserName":"Enter your name","UserMail":"Enter your e-mail (not required)","ZoteroID":"Enter your Zotero ID (required to use Flux features)","theme":"normal"};
 
   if (!fs.existsSync(userDataPath+'/userID/user-id.json')) {
     fs.writeFile(userDataPath +"/userID/user-id.json",JSON.stringify(userID),'utf8',
@@ -30,48 +31,36 @@ let userID = {"UserName":"Enter your name","UserMail":"Enter your e-mail (not re
   }
 };
 
-// Themes
+ const createThemes = () => {
+    if (!fs.existsSync(userDataPath+'/themes/themes.json')) {
+      fs.copyFileSync(basePath+"/json/themes.json", userDataPath +"/themes/themes.json");
+    }
+  };
 
-const themeRoutine = ()=> {
 
-let activeTheme;
+var activeTheme;
 
-fs.copyFileSync(basePath+"/json/themes.json", userDataPath +"/themes/themes.json");
-
-const changeTheme = () => {
-
-    fs.readFile(basePath+"/json/themes.json",                // Read the designated datafile
-                      'utf8', (err, theme) => {             // utf8 encoding - start function
-        var themeData;
-
-        try {
-              themeData = JSON.parse(theme);
-            } catch (error) {
-            } finally {
-                activeTheme = themeData.activeTheme;
-                for (let i = 0; i < themeData.themes.length; i++) {
-                      if (themeData.themes[i]["theme-name"]===activeTheme) {
-                          mainWindow.webContents.send('change-theme',themeData.themes[i]);     
-                      } 
-            }
-          }
-     });
-};
+const changeTheme = (themeName) => {
+    fs.readFile(basePath+"/json/themes.json",'utf8', (err, data) => {
+           var themeData=JSON.parse(data);
+                for (let i = 0; i < themeData.length; i++) {
+                      if (themeData[i]["theme-name"]===themeName) {
+                          mainWindow.webContents.send('change-theme',themeData[i]);     
+                 }
+              }
+         });
+  };
 
 const themeChangeTrigger = (theme) => {
-    fs.readFile(basePath +'/json/themes.json','utf8', (err, newThemeData) => {             
-      let changeThemedata = JSON.parse(newThemeData);
-      changeThemedata.activeTheme = theme;
-      fs.writeFileSync(basePath+"/json/themes.json",JSON.stringify(changeThemedata),'utf8',(err) => {if (err) throw err;});
-      fs.writeFileSync(userDataPath +"/themes/themes.json",JSON.stringify(changeThemedata),'utf8',(err) => {if (err) throw err;});
-      changeTheme();
-    })
+  if (theme != null){userID.theme = theme};
+      fs.writeFileSync(userDataPath +"/userID/user-id.json",JSON.stringify(userID),'utf8');
+      changeTheme(userID.theme);
 };
 
 ipcMain.on('change-theme', (event,theme) => {
-  themeChangeTrigger(theme);
+      themeChangeTrigger(theme);
 })
-};
+
 
 function createWindow () {
 
@@ -89,7 +78,7 @@ function createWindow () {
        }
    })
 
-   themeRoutine();
+   //themeRoutine();
 
   mainWindow.loadFile('index.html')
 
@@ -123,6 +112,7 @@ function createWindow () {
 app.on('ready', ()=>{
   userDataDirTree(userDataPath,["/logs","/userID","/themes"]);
   createUserId();
+  createThemes();
   createWindow();
 });
 
