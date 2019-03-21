@@ -5,8 +5,9 @@ const getUserData = () => {
   fs.readFile(userDataPath +'/userID/user-id.json',                          // Read the designated datafile
                                 'utf8', (err, data) => {              // Additional options for readFile
     if (err) throw err;
+    
     let user = JSON.parse(data);
-
+    
           let userName = user.UserName;
           let userMail = user.UserMail;
           let zoteroUser = user.ZoteroID;
@@ -17,8 +18,8 @@ const getUserData = () => {
           document.getElementById("zoterokeyinput").value =     keytar.getPassword("Zotero",zoteroUser);
           document.getElementById("scopuskeyinput").value =     keytar.getPassword("Scopus",userName);
           document.getElementById("altmetrickeyinput").value =  keytar.getPassword("Altmetric",userName);
-          document.getElementById("twitterkeyinput").value =    keytar.getPassword("Twitter",userName);
-          document.getElementById("OAbutton").value =    keytar.getPassword("OAbutton",userName);
+          //document.getElementById("twitterkeyinput").value =    keytar.getPassword("Twitter",userName);
+          //document.getElementById("OAbutton").value =    keytar.getPassword("OAbutton",userName); 
 
 
     });
