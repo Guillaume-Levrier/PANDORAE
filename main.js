@@ -81,9 +81,9 @@ function createWindow () {
 
   mainWindow.loadFile('index.html')
 
-  mainWindow.addListener("enter-full-screen",(e) => {
-    themeChangeTrigger("normal");
-  });
+  //mainWindow.addListener("enter-full-screen",(e) => {
+  //  themeChangeTrigger("normal");
+  //});
   
   mainWindow.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures) => {
 
