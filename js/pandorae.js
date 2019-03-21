@@ -441,7 +441,7 @@ switch (input) {
     }, 450);
             //nameDisplay("PANDORÆ - HYPERCORE");
             //commandReturn = "unlocked error bypass";
-            change
+            
             break;
 
     case 'toggle menu':
