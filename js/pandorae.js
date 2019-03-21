@@ -292,17 +292,6 @@ ipcRenderer.on('chaeros-failure', (event,message) => {
   field.value = message;
 });
 
-ipcRenderer.on('datalist', (event,type,kind,item,path) => {
-  if (item !== ".gitignore"){
-  let dataset = document.createElement("div");
-  dataset.className = "secContentTabs";
-  dataset.id = item;
-  dataset.innerHTML = item;
-  dataset.onclick = function () {selectOption(type,kind,item,path)};
-  document.getElementById("secMenContent").appendChild(dataset);
-  }
-});
-
 // ========== CORE ACTIONS ===========
 
 var commandReturn = "";
@@ -372,12 +361,28 @@ const mainDisplay = (type) =>{
     let targetType = pandodb[table];
     targetType.toArray().then( e=> {
       e.forEach(d=>{
+        let datasetContainer = document.createElement("div");
+        datasetContainer.style.display="flex";
+        datasetContainer.style.borderBottom= "1px solid rgba(192,192,192,0.3)";
+        document.getElementById("secMenContent").appendChild(datasetContainer);
           let dataset = document.createElement("div");
           dataset.className = "secContentTabs";
           dataset.id = d.id;
           dataset.innerHTML = "<span><strong>"+d.name+"</strong><br>"+d.date+"</span>";
           dataset.onclick = function () {selectOption(type,d.id)};
-          document.getElementById("secMenContent").appendChild(dataset);
+          datasetContainer.appendChild(dataset);
+          let removeDataset = document.createElement("div");
+          removeDataset.className = "secContentDel";
+          removeDataset.id = "del"+d.id;
+          removeDataset.innerHTML = "<span><strong><i class='material-icons'>delete_forever</i></strong><br></span>";
+          removeDataset.onclick = function () {
+              pandodb[type].delete(d.id);
+              document.getElementById("secMenContent").removeChild(datasetContainer);
+              field.value = "Dataset removed from "+type;
+              ipcRenderer.send('console-logs',"Removed "+d.id+" from database: "+type);
+
+            };
+          datasetContainer.appendChild(removeDataset);
         }) 
       });
   }
