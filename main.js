@@ -25,7 +25,7 @@ const createUserId = () => {
   userID = {"UserName":"Enter your name","UserMail":"Enter your e-mail (not required)","ZoteroID":"Enter your Zotero ID (required to use Flux features)","theme":"normal"};
 
   if (!fs.existsSync(userDataPath+'/userID/user-id.json')) {
-    fs.writeFile(userDataPath +"/userID/user-id.json",JSON.stringify(userID),'utf8',
+    fs.writeFileSync(userDataPath +"/userID/user-id.json",JSON.stringify(userID),'utf8',
       (err) => {if (err) throw err;}
     );
   }
@@ -53,7 +53,6 @@ const changeTheme = (themeName) => {
 
 const themeChangeTrigger = (theme) => {
   if (theme != null){userID.theme = theme};
-      fs.writeFileSync(userDataPath +"/userID/user-id.json",JSON.stringify(userID),'utf8');
       changeTheme(userID.theme);
 };
 
@@ -105,7 +104,7 @@ function createWindow () {
     })
 
   mainWindow.setMenu(null);
-  //mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
   mainWindow.on('closed', () => { mainWindow = null })
 }
 
