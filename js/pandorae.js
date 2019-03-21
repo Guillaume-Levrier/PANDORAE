@@ -400,8 +400,7 @@ ipcRenderer.send('console-logs'," user$ "+ input);
 
 const loadingType = () => commandReturn = "loading " + commandInput;
 
-if (input.substring(0, 13) === "change theme " && remote.getCurrentWindow().isFullScreen() === false) {
-  
+if (input.substring(0, 13) === "change theme " /* && remote.getCurrentWindow().isFullScreen() === false */) {
   document.body.style.animation="fadeout 0.5s";
             setTimeout(()=>{
               document.body.remove();
@@ -429,8 +428,15 @@ switch (input) {
             break;
 
     case 'hypercore':
-            nameDisplay("PANDORÆ - HYPERCORE");
-            commandReturn = "unlocked error bypass";
+    document.body.style.animation="fadeout 0.5s";
+    setTimeout(()=>{
+      document.body.remove();
+      ipcRenderer.send('change-theme','blood-dragon');
+      remote.getCurrentWindow().reload();
+    }, 450);
+            //nameDisplay("PANDORÆ - HYPERCORE");
+            //commandReturn = "unlocked error bypass";
+            change
             break;
 
     case 'toggle menu':
