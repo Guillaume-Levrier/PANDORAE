@@ -38,7 +38,8 @@ pandodb.version(1).stores({
       geotype: structureV1,
       pharmacotype: structureV1,
       publicdebate: structureV1,
-      gazouillotype: structureV1
+      gazouillotype: structureV1,
+      system:structureV1
   });
   pandodb.open();
 
@@ -312,7 +313,7 @@ case 'zoteroItemsRetriever' :  if (document.getElementById("zotitret").name ==="
                                )
                              }
                           }
-                          var dest = document.getElementsByClassName('zotDestCheck');
+                         /*  var dest = document.getElementsByClassName('zotDestCheck');
                           for (let i =0; i<dest.length; i++){
                             if (dest[i].checked)
                              {
@@ -320,7 +321,7 @@ case 'zoteroItemsRetriever' :  if (document.getElementById("zotitret").name ==="
                                 dest[i].value
                                )
                              }
-                          }
+                          } */
 
                           fluxArgs.zoteroItemsRetriever.zoteroUser = document.getElementById("zoterouserinput").value;
                           fluxArgs.zoteroItemsRetriever.importName = document.getElementById("zoteroImportName").value.replace(/\s/g,"");
@@ -444,7 +445,28 @@ switch (kind) {
                 document.getElementById(prevId).innerHTML = dataPreview;
                 document.getElementById(prevId).name = doc.id;
                 document.getElementById(buttonId).style.display = "inline-flex";
-              break
+              break;
+
+              case 'system':
+              let subArrayContent = "";
+              doc.content.forEach(d=>{
+                let subContent = "<tr><td>"+d.name+"</td><td>"+d.items.length+" </td><td>"+d.library.name+"</td></tr>";
+                subArrayContent+=subContent;
+              });
+              dataPreview = "<br><strong>"+ doc.name +"</strong><br>" + 
+              "Dataset date: "+doc.date+
+              "<br><table><thead><tr><th>Name</th><th>Amount</th><th>Origin</th></tr></thead>"+
+              "<tbody>"+
+              subArrayContent+
+              "</tbody></table>";
+
+              document.getElementById(prevId).innerHTML = dataPreview;
+              document.getElementById(prevId).name = doc.id;
+              //document.getElementById(buttonId).style.display = "inline-flex";
+
+              let availableDest = "";
+              //create input pattern here
+            break;
                   }
                    
   })

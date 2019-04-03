@@ -107,20 +107,15 @@
 <br><br>
 <form id="zotero-import-form" autocomplete="off"></form>
 <button type="submit" class="flux-button" id="zotcolret" onclick="zoteroCollectionRetriever();return false">Display user collections</button><br><br>
-<span id="zoteroImportInstruction" style="display:none;">Select the relevant datasets from your Zotero library (left) and their intended destination (right).</span><br><br>
+<span id="zoteroImportInstruction" style="display:none;">Select the Zotero collections you want to import to PANDORÆ </span><br><br>
 
 <div id="zoteroResults" style="display:none;">
 <div id="userZoteroCollections" style="flex:auto"></div>
-<div id="availableDestinations" style="flex:auto">
-  <input class='zotDestCheck' value='chronotype' name='chronotype' type='checkbox'/><label>chronotype</label><br>
-  <input class='zotDestCheck' value='geotype' name='geotype' type='checkbox'/><label>geotype</label><br>
-<!--   <input class='zotDestCheck' value='anthropotype' name='anthropotype' type='checkbox'/><label>anthropotype</label><br>
-  <input class='zotDestCheck' value='pharmatype' name='pharmatype' type='checkbox'/><label>pharmatype</label><br> -->
-</div>
+
 </div>
 <br><br><br>
 <input class="fluxInput" spellcheck="false" id="zoteroImportName" style="display:none;" type="text" value="Enter import name">
-<button type="submit" class="flux-button" style="display:none;" id="zotitret" onclick="powerValve('zoteroItemsRetriever',this);return false">Import selected collections</button><br>
+<button type="submit" class="flux-button" style="display:none;" id="zotitret" onclick="powerValve('zoteroItemsRetriever',this);return false">Import selected collections into system</button><br>
 </form>
 </div>
 
@@ -138,7 +133,7 @@
   <input class='locDestCheck' value='pharmatype' name='pharmatype' type='checkbox'/><label>pharmatype</label><br>
   <input class='locDestCheck' value='chronotype' name='chronotype' type='checkbox'/><label>chronotype</label><br>
 </div>
-<button type="submit" class="flux-button" id="load-local" onclick="datasetLoader();return false" disabled>Upload local  datasets</button>
+<button type="submit" class="flux-button" id="load-local" onclick="datasetLoader();return false" disabled>Upload local datasets</button>
 </div>
 
 <!-- CAPCO TAB -->
@@ -157,7 +152,20 @@
 <!-- SYSTEM TAB -->
 <div id="system" style="display:none;" class="fluxTabs">
     <span class="flux-title">SYSTEM</span><br><br>
-    This tab is currently disabled but will be unlocked soon. <br><br>
+    Datasets listed in SYSTEM are available locally and ready to be poured into one of PANDORÆ's visualisation tools.
+    <button type="submit" class="flux-button" id="cslcolret" onclick="datasetDisplay('systemDatasetsList','system');return false">Display available datasets</button><br>
+  <div  style="display:flex">
+<div id="system-dataset-preview" style="flex:auto"></div>
+  <div id="availableDestinations" style="flex:auto">
+<!-- The list should be created according to the info retrieved from the dataset
+  <input class='zotDestCheck' value='chronotype' name='chronotype' type='checkbox'/><label>chronotype</label><br>
+  <input class='zotDestCheck' value='geotype' name='geotype' type='checkbox'/><label>geotype</label><br>
+  <input class='zotDestCheck' value='anthropotype' name='anthropotype' type='checkbox'/><label>anthropotype</label><br>
+  <input class='zotDestCheck' value='pharmatype' name='pharmatype' type='checkbox'/><label>pharmatype</label><br> -->
+</div>
+</div>
+<div id="systemDatasetsList"></div>
+
     </div>
 
 <div style="position:fixed;z-index:20;padding: 5px;right:0px;top:0px;">

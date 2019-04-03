@@ -39,7 +39,7 @@ let pandodb = new Dexie("PandoraeDatabase");
 let structureV1 = "id,date,name";
 
 pandodb.version(1).stores({
-  enriched: structureV1,
+      enriched: structureV1,
       scopus: structureV1,
       csljson: structureV1,
       zotero: structureV1,
@@ -49,7 +49,8 @@ pandodb.version(1).stores({
       geotype: structureV1,
       pharmacotype: structureV1,
       publicdebate: structureV1,
-      gazouillotype: structureV1
+      gazouillotype: structureV1,
+      system:structureV1
   });
 
 // =========== SHARED WORKER ===========
