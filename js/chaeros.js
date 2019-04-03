@@ -39,7 +39,8 @@ pandodb.version(1).stores({
       geotype: structureV1,
       pharmacotype: structureV1,
       publicdebate: structureV1,
-      gazouillotype: structureV1
+      gazouillotype: structureV1,
+      system:structureV1
   });
 
   pandodb.open();
@@ -833,9 +834,9 @@ ipcRenderer.send('console-logs',"Lexical analysis on " + dataFile + "complete. W
 // zoteroItemsRetriever retrieves all the documents from one or more zotero collections. A zotero API request can only
 // retrieve 100 items, which can easily trigger the rate limiting.
 
-const zoteroItemsRetriever = (collections,zoteroUser,importName,destination) => {
+const zoteroItemsRetriever = (collections,zoteroUser,importName) => {
 
-  ipcRenderer.send('console-logs',"Started retrieving collections " + collections + "for user "+zoteroUser+" under the import name "+ importName + " towards: " +JSON.stringify(destination));
+  ipcRenderer.send('console-logs',"Started retrieving collections " + collections + "for user "+zoteroUser+" under the import name "+ importName + " into SYSTEM.");
 
 let zoteroPromises = [];
 
@@ -901,7 +902,7 @@ ResponseTarget = 0;
             f.items.push(d);
             ResponseAmount = ResponseAmount +1;
             if (ResponseAmount === ResponseTarget){
-              dataWriter(destination,importName,zoteroItemsResponse);
+              dataWriter(["system"],importName,zoteroItemsResponse);
             }
           })
          }
