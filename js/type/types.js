@@ -145,6 +145,185 @@ const anthropotype = (datasetAT) => {                 // When called, draw the a
   
   //zoom extent
   var zoom = d3.zoom()                                      // Zoom ability
+      .scaleExtent([0.2, 15])                               // To which extent do we allow to zoom forward or zoom back
+      .translateExtent([[-width*2,-height*2],[width*3,height*3]])
+      .on("zoom", zoomed);                                  // Trigger the "zoomed" function on "zoom" behaviour
+  
+  //======== DATA CALL & SORT =========
+  
+  pandodb.anthropotype.get(datasetAT).then(datajson => {
+  
+  const data = datajson[0].nodes;         
+  
+  const critDesc = datajson[0].criteria;   
+  
+  
+  const menuBuilder = () => {
+  
+  criteriaList = [];
+  
+  critDesc.forEach(d=>criteriaList.push(d.name))
+  
+        criteriaList.forEach(d=>{
+          let crit = document.createElement("div");
+          crit.className = "criteriaTab";
+          crit.id = d;
+          crit.innerHTML = d;
+          crit.onclick = function () {cartoSorter(d)};
+          document.getElementById("menu").appendChild(crit);
+  
+        })
+  }
+  
+  menuBuilder();
+  
+  //========== FORCE GRAPH ============
+  var simulation = d3.forceSimulation()                           // Start the force graph
+      .alphaMin(0.1)                                              // Each action starts at 1 and decrements "Decay" per Tick
+      .alphaDecay(0.01)                                          // "Decay" value
+      .force('collision', d3.forceCollide(30).iterations(3))                     // Nodes collide with each other (they don't overlap)      
+      .force("charge", d3.forceManyBody(30).distanceMax(60))                     // Adding ManyBody to repel nodes from each other
+      .force("center", d3.forceCenter(width/2, height/2));        // The graph tends towards the center of the svg
+  
+  const isolate = (force, filter) => {
+    var initialize = force.initialize;
+    force.initialize = function() { initialize.call(force, data.filter(filter)); };
+    return force;
+  }
+  
+  var nodeImage = view.selectAll("nodeImage")                     // Create nodeImage variable
+    .data(data)                                                 // Using the "humans" variable data
+    .enter().append("image")                                      // Append images
+            .attr("class","nodeImage")                            // This class contains the circular clip path
+            .attr("xlink:href", d => "img/"+d.img)       // The image path is stored in the img property
+            .attr("height", 40)                                   // Image height
+            .attr("width", 40);                                    // Image width
+  
+  nodeImage.append("title").text(d => d.name);
+  
+        var masks = view.selectAll("masks") 
+        .data(data)                                                
+    .enter().append("circle")
+            .attr('r',25)
+            .attr('fill','transparent')
+            .attr('stroke','white')
+            .attr('stroke-width',10)
+            .on("mouseover",d=>{document.getElementById("photoCredit").innerHTML="Photo Credit: " +d.photoCredit;})
+            .call(d3.drag()
+          .on("start", forcedragstarted)
+          .on("drag", forcedragged)
+          .on("end", forcedragended));
+  
+   var sortInfo = view.selectAll("sortInfo")
+          .data(data)
+          .enter().append("text")
+          .attr("pointer-events", "none")
+          .attr("dx", 45)
+          .attr("dy", 30)
+          .style('fill', 'black');
+         
+  var name = view.selectAll("name")
+        .data(data)
+            .enter().append("text")
+            //.attr("pointer-events", "none")
+            .attr("class", "humans")
+            .attr("dx", 45)
+            .attr("dy", 15)
+            .style('fill', 'black')
+            .style('cursor', 'pointer')
+            .on('click',d=>{name.filter(e => e===d).style("fill","DeepSkyBlue")})
+            .on('dblclick',d=>{name.filter(e => e===d).style("fill","black")})
+            .text(d => d.name);
+  
+    const ticked = () => {
+        nodeImage.attr("x", d => d.x).attr("y", d => d.y);
+        masks.attr("cx", d => d.x+20).attr("cy", d => d.y+20);
+        name.attr("x", d => d.x).attr("y", d => d.y);
+        sortInfo.attr("x", d => d.x).attr("y", d => d.y); 
+      }
+  
+  simulation.nodes(data).on("tick", ticked);
+  
+  var previousDiversity=[];
+  
+  const cartoSorter = (criteria) => {
+  
+  var tabs = document.getElementsByClassName("criteriaTab");
+  
+  for (let i = 0; i < tabs.length; i++) {
+    document.getElementById(tabs[i].id).style.backgroundColor="white";
+    document.getElementById(tabs[i].id).style.color="black"; 
+  }
+  
+  document.getElementById(criteria).style.color="white";
+  document.getElementById(criteria).style.backgroundColor="black";
+  
+    for (let j = 0; j < previousDiversity.length; j++) {
+      simulation.force(JSON.stringify(previousDiversity[j]), isolate(d3.forceX(0).strength(0), f => f[criteria] === previousDiversity[j]));
+    }
+  
+    simulation.alpha(1).restart();
+  
+  let criteriaDiversity = [];
+  
+  data.forEach(d=>{
+      if (criteriaDiversity.indexOf(d[criteria])<0){
+        criteriaDiversity.push(d[criteria]);
+      }
+  })
+  
+  previousDiversity=[];
+  
+    for (let j = 0; j < criteriaDiversity.length; j++) {
+      simulation.force(JSON.stringify(criteriaDiversity[j]), isolate(d3.forceX((j*width) / (criteriaDiversity.length)).strength(0.3), f => f[criteria] === criteriaDiversity[j]));
+      previousDiversity.push(criteriaDiversity[j]);
+    }
+    sortInfo.text(d =>d[criteria]); 
+    simulation.nodes(data).on("tick", ticked);
+    simulation.alpha(1).restart();
+    }
+  
+  function forcedragstarted(d) {
+    if (!d3.event.active) simulation.alpha(1).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+  
+  function forcedragged(d) {
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
+  }
+  
+    function forcedragended(d) {
+        if (!d3.event.active) simulation.alpha(1).restart();
+        d.fx = null;
+        d.fy = null;
+    }
+  
+  });
+  
+  //======== ZOOM & RESCALE ===========
+  svg.call(zoom).on("dblclick.zoom", null);
+  
+  function zoomed() {
+     view.attr("transform", d3.event.transform);
+  }
+    ipcRenderer.send('console-logs',"Starting anthropotype");
+
+  }
+
+const anthropotypeLegacy = (datasetAT) => {                 // When called, draw the anthropotype
+
+  //========== SVG VIEW =============
+  var svg = d3.select(xtype).append("svg").attr("id","xtypeSVG");   // Creating the SVG DOM node
+  
+  svg.attr("width", width).attr("height", height);                  // Attributing width and height to svg
+  
+  var view = svg.append("g")                                        // Appending a group to SVG
+                .attr("class", "view");                             // CSS viewfinder properties
+  
+  //zoom extent
+  var zoom = d3.zoom()                                      // Zoom ability
       .scaleExtent([0.5, 10])                               // To which extent do we allow to zoom forward or zoom back
       .on("zoom", zoomed);                                  // Trigger the "zoomed" function on "zoom" behaviour
   
