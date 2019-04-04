@@ -298,6 +298,22 @@ switch (fluxAction) {                                                      // Ac
                           message = "Rebuilding Public Debate dataset" ;
                           break;
 
+  case 'sysExport' : fluxArgs.sysExport = {};
+                          fluxArgs.sysExport.id = document.getElementById("system-dataset-preview").name;
+                          fluxArgs.sysExport.name = document.getElementById('systemToType').value;
+                          fluxArgs.sysExport.dest = [];
+                          var dest = document.getElementsByClassName('sysDestCheck');
+                          for (let i =0; i<dest.length; i++){
+                            if (dest[i].checked)
+                             {
+                               fluxArgs.sysExport.dest.push(
+                                dest[i].value
+                               )
+                             }
+                          }
+                          message = "Exporting "+ fluxArgs.sysExport.name;
+                          break;
+
 case 'zoteroItemsRetriever' :  if (document.getElementById("zotitret").name ==="block") {
       fluxButtonAction ("zotcolret",false,"Zotero Collections Successfully Retrieved","Please select a destination");
                           }
@@ -455,15 +471,20 @@ switch (kind) {
               });
               dataPreview = "<br><strong>"+ doc.name +"</strong><br>" + 
               "Dataset date: "+doc.date+
-              "<br><table><thead><tr><th>Name</th><th>Amount</th><th>Origin</th></tr></thead>"+
+              "<br><br>Arrays contained in the dataset"+
+              "<br><table style='border-collapse: collapse;'><thead><tr style='border:1px solid #141414;'><th>Name</th><th>#</th><th>Origin</th></tr></thead>"+
               "<tbody>"+
               subArrayContent+
               "</tbody></table>";
 
               document.getElementById(prevId).innerHTML = dataPreview;
               document.getElementById(prevId).name = doc.id;
-              //document.getElementById(buttonId).style.display = "inline-flex";
+              document.getElementById(buttonId).style.display = "unset";
+              document.getElementById(buttonId).style.flex = "auto";
+              document.getElementById("systemToType").value = doc.id;
 
+              
+              
               let availableDest = "";
               //create input pattern here
             break;

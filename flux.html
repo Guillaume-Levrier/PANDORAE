@@ -152,16 +152,17 @@
 <!-- SYSTEM TAB -->
 <div id="system" style="display:none;" class="fluxTabs">
     <span class="flux-title">SYSTEM</span><br><br>
-    Datasets listed in SYSTEM are available locally and ready to be poured into one of PANDORÆ's visualisation tools.
+    Datasets listed in SYSTEM are available locally and ready to be exported to one of PANDORÆ's visualisation tools.
     <button type="submit" class="flux-button" id="cslcolret" onclick="datasetDisplay('systemDatasetsList','system');return false">Display available datasets</button><br>
   <div  style="display:flex">
 <div id="system-dataset-preview" style="flex:auto"></div>
-  <div id="availableDestinations" style="flex:auto">
-<!-- The list should be created according to the info retrieved from the dataset
-  <input class='zotDestCheck' value='chronotype' name='chronotype' type='checkbox'/><label>chronotype</label><br>
-  <input class='zotDestCheck' value='geotype' name='geotype' type='checkbox'/><label>geotype</label><br>
-  <input class='zotDestCheck' value='anthropotype' name='anthropotype' type='checkbox'/><label>anthropotype</label><br>
-  <input class='zotDestCheck' value='pharmatype' name='pharmatype' type='checkbox'/><label>pharmatype</label><br> -->
+  <div id="system-dataset-buttons" style="display:none">
+    <br>Export dataset to :<br>
+  <input class='sysDestCheck' value='chronotype' name='chronotype' type='checkbox'/><label>chronotype</label><br>
+  <input class='sysDestCheck' value='geotype' name='geotype' type='checkbox'/><label>geotype</label><br>
+  <input class='sysDestCheck' value='anthropotype' name='anthropotype' type='checkbox'/><label>anthropotype</label><br>
+  <input class="fluxInput" spellcheck="false" id="systemToType" type="text" value="Enter a dataset name">
+  <button type="submit" class="flux-button" id="systitret" onclick="powerValve('sysExport',this);return false">Export</button><br>
 </div>
 </div>
 <div id="systemDatasetsList"></div>
