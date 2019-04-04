@@ -1171,6 +1171,9 @@ const chronotype = (bibliography,links) => {                          // When ca
   
   loadType();
   
+  }).catch(error=>{
+    field.value = "error - invalid dataset";
+    ipcRenderer.send('console-logs',"Chronotype error: dataset " +datasetAT+" is invalid.");
   });  //======== END OF DATA CALL (PROMISES) ===========
   
   
@@ -1250,9 +1253,14 @@ const geotype = (locations) => {
   
 //Calling data
 pandodb.geotype.get(locations).then(locations => {
-  var data = locations.content[0].items;
-        Promise.all([d3.json("json/world-countries.json")])                
-            .then(geo => {
+
+  var data = [];
+  
+  for (let i = 0; i < locations.content.length; i++) {
+    locations.content[i].items.forEach(d=>data.push(d))
+  }
+
+  Promise.all([d3.json("json/world-countries.json")]).then(geo => {
 
 var geoData = geo[0];
 
@@ -1443,6 +1451,9 @@ var geoData = geo[0];
     d3.select("#reset").on("click", narrative(data[3]));
   */
 })
+  }).catch(error=>{
+    field.value = "error - invalid dataset";
+    ipcRenderer.send('console-logs',"Geotype error: dataset " +datasetAT+" is invalid.");
   });
   
   var λ = d3.scaleLinear()
@@ -1497,8 +1508,6 @@ var geoData = geo[0];
   function zoomed() {view.style('transform', 'scale(' + d3.event.transform.k + ')');
   
         }
-
-
 
           loadType();
   
