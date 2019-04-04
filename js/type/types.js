@@ -35,6 +35,9 @@ pandodb.version(1).stores({
       system:structureV1
   });
   pandodb.open();
+
+ var field = document.getElementById("field");
+
 // =========== LOADTYPE ===========
 
 const loadType = () => {
@@ -42,7 +45,7 @@ const loadType = () => {
   purgeCore();
   xtypeExists = true;
   coreExists = false;
-  document.getElementById("field").value = "";
+  field.value = "";
 }
 
 
@@ -301,6 +304,9 @@ const anthropotype = (datasetAT) => {                 // When called, draw the a
         d.fy = null;
     }
   
+  }).catch(error=>{
+    field.value = "error - invalid dataset";
+    ipcRenderer.send('console-logs',"Anthropotype error: dataset " +datasetAT+" is invalid.");
   });
   
   //======== ZOOM & RESCALE ===========
@@ -2317,7 +2323,7 @@ const topotype = (pubdeb,matching,commun) => {                               // 
 const typeSwitch = (type,id) => {
 
 
-  document.getElementById("field").value = "loading " + type;
+  field.value = "loading " + type;
 
 
       switch (type) {

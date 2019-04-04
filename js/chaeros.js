@@ -912,6 +912,16 @@ ResponseTarget = 0;
 }) // closing Keytar
 };
 
+//========== sysExport ==========
+const sysExport = (destination,importName,id) => {
+  pandodb.open();
+
+  pandodb.system.get(id).then(dataset => {
+    dataWriter(destination,importName,dataset.content)
+  })
+};
+
+
 const dataWriter = (destination,importName,content) => {
   pandodb.open();
   destination.forEach(d=>{
@@ -924,6 +934,9 @@ const dataWriter = (destination,importName,content) => {
  setTimeout(()=>{win.close()},1000);
 
 }
+
+
+
 
 //========== zoteroCollectionBuilder ==========
 // zoteroCollectionBuilder creates a new collection from a CSL-JSON dataset.
@@ -1116,6 +1129,8 @@ const chaerosSwitch = (fluxAction,fluxArgs) => {
           case 'zoteroCollectionBuilder' : zoteroCollectionBuilder(fluxArgs.zoteroCollectionBuilder.collectionName,fluxArgs.zoteroCollectionBuilder.zoteroUser,fluxArgs.zoteroCollectionBuilder.id);
           break;
 
+ case 'sysExport' : sysExport(fluxArgs.sysExport.dest,fluxArgs.sysExport.name,fluxArgs.sysExport.id);
+          break;
       }
 
     }
