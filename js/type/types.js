@@ -157,9 +157,9 @@ const anthropotype = (datasetAT) => {                 // When called, draw the a
   
   pandodb.anthropotype.get(datasetAT).then(datajson => {
   
-  const data = datajson[0].nodes;         
+  const data = datajson.content[0].items;         
   
-  const critDesc = datajson[0].criteria;   
+ // const critDesc = datajson[0].criteria;   
   
   
   const menuBuilder = () => {
@@ -177,9 +177,9 @@ const anthropotype = (datasetAT) => {                 // When called, draw the a
           document.getElementById("menu").appendChild(crit);
   
         })
-  }
+  } 
   
-  menuBuilder();
+ // menuBuilder();
   
   //========== FORCE GRAPH ============
   var simulation = d3.forceSimulation()                           // Start the force graph
@@ -199,7 +199,7 @@ const anthropotype = (datasetAT) => {                 // When called, draw the a
     .data(data)                                                 // Using the "humans" variable data
     .enter().append("image")                                      // Append images
             .attr("class","nodeImage")                            // This class contains the circular clip path
-            .attr("xlink:href", d => "img/"+d.img)       // The image path is stored in the img property
+           //.attr("xlink:href", d => "img/"+d.img)       // The image path is stored in the img property
             .attr("height", 40)                                   // Image height
             .attr("width", 40);                                    // Image width
   
@@ -209,10 +209,10 @@ const anthropotype = (datasetAT) => {                 // When called, draw the a
         .data(data)                                                
     .enter().append("circle")
             .attr('r',25)
-            .attr('fill','transparent')
+            .attr('fill','blue')
             .attr('stroke','white')
             .attr('stroke-width',10)
-            .on("mouseover",d=>{document.getElementById("photoCredit").innerHTML="Photo Credit: " +d.photoCredit;})
+           // .on("mouseover",d=>{document.getElementById("photoCredit").innerHTML="Photo Credit: " +d.photoCredit;})
             .call(d3.drag()
           .on("start", forcedragstarted)
           .on("drag", forcedragged)
@@ -304,7 +304,11 @@ const anthropotype = (datasetAT) => {                 // When called, draw the a
         d.fy = null;
     }
   
+    loadType();
+
+
   }).catch(error=>{
+    console.log(error)
     field.value = "error - invalid dataset";
     ipcRenderer.send('console-logs',"Anthropotype error: dataset " +datasetAT+" is invalid.");
   });
