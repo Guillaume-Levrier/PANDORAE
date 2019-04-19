@@ -157,30 +157,53 @@ const anthropotype = (datasetAT) => {                 // When called, draw the a
   
   pandodb.anthropotype.get(datasetAT).then(datajson => {
   
-  const data = datajson.content[0].items;         
+  const docData = datajson.content[0].items;         
   
- // const critDesc = datajson[0].criteria;   
-  
-  
-  const menuBuilder = () => {
-  
-  criteriaList = [];
-  
-  critDesc.forEach(d=>criteriaList.push(d.name))
-  
-        criteriaList.forEach(d=>{
+ var criteriaList = [];
+ 
+ docData.forEach(d=>criteriaList.push(d.title))
+ 
+ var currentCriteria = [];
+
+const menuBuilder = () => {
+ 
+
+criteriaList.forEach(d=>{
           let crit = document.createElement("div");
           crit.className = "criteriaTab";
           crit.id = d;
           crit.innerHTML = d;
           crit.onclick = function () {cartoSorter(d)};
-          document.getElementById("menu").appendChild(crit);
-  
+          document.getElementById("tooltip").appendChild(crit);
         })
   } 
   
- // menuBuilder();
-  
+//const data = [];
+let data = [];
+let dataCheck = [];
+docData.forEach(doc=>{
+  doc.author.forEach(auth=>{
+    let checkCode = auth.family+auth.given;
+    if (dataCheck.indexOf(checkCode)<0){
+      dataCheck.push(checkCode)
+      auth.crit = [];
+      auth.crit.push(doc.title);
+      data.push(auth)
+    }
+    else {
+      for (let j = 0; j < data.length; j++) {
+        if (data[j].family === auth.family &&data[j].given === auth.given){
+          data[j].crit.push(doc.title);
+
+        }
+        
+      }
+
+    }
+  })
+});
+console.log(data);
+
   //========== FORCE GRAPH ============
   var simulation = d3.forceSimulation()                           // Start the force graph
       .alphaMin(0.1)                                              // Each action starts at 1 and decrements "Decay" per Tick
@@ -208,36 +231,36 @@ const anthropotype = (datasetAT) => {                 // When called, draw the a
         var masks = view.selectAll("masks") 
         .data(data)                                                
     .enter().append("circle")
-            .attr('r',25)
+            .attr('r',6)
             .attr('fill','blue')
             .attr('stroke','white')
-            .attr('stroke-width',10)
+            .attr('stroke-width',2)
            // .on("mouseover",d=>{document.getElementById("photoCredit").innerHTML="Photo Credit: " +d.photoCredit;})
             .call(d3.drag()
           .on("start", forcedragstarted)
           .on("drag", forcedragged)
           .on("end", forcedragended));
   
-   var sortInfo = view.selectAll("sortInfo")
+    var sortInfo = view.selectAll("sortInfo")
           .data(data)
           .enter().append("text")
           .attr("pointer-events", "none")
           .attr("dx", 45)
           .attr("dy", 30)
-          .style('fill', 'black');
+          .style('fill', 'black'); 
          
   var name = view.selectAll("name")
         .data(data)
             .enter().append("text")
             //.attr("pointer-events", "none")
             .attr("class", "humans")
-            .attr("dx", 45)
+            .attr("dx", 15)
             .attr("dy", 15)
             .style('fill', 'black')
             .style('cursor', 'pointer')
             .on('click',d=>{name.filter(e => e===d).style("fill","DeepSkyBlue")})
             .on('dblclick',d=>{name.filter(e => e===d).style("fill","black")})
-            .text(d => d.name);
+            .text(d => d.family +" "+ d.given);
   
     const ticked = () => {
         nodeImage.attr("x", d => d.x).attr("y", d => d.y);
@@ -252,40 +275,55 @@ const anthropotype = (datasetAT) => {                 // When called, draw the a
   
   const cartoSorter = (criteria) => {
   
-  var tabs = document.getElementsByClassName("criteriaTab");
-  
-  for (let i = 0; i < tabs.length; i++) {
-    document.getElementById(tabs[i].id).style.backgroundColor="white";
-    document.getElementById(tabs[i].id).style.color="black"; 
-  }
-  
-  document.getElementById(criteria).style.color="white";
+
+
+ let criteriaIndex = currentCriteria.indexOf(criteria);   
+
+if (criteriaIndex<0){
+  currentCriteria.push(criteria);
   document.getElementById(criteria).style.backgroundColor="black";
-  
-    for (let j = 0; j < previousDiversity.length; j++) {
-      simulation.force(JSON.stringify(previousDiversity[j]), isolate(d3.forceX(0).strength(0), f => f[criteria] === previousDiversity[j]));
-    }
-  
-    simulation.alpha(1).restart();
-  
-  let criteriaDiversity = [];
-  
-  data.forEach(d=>{
-      if (criteriaDiversity.indexOf(d[criteria])<0){
-        criteriaDiversity.push(d[criteria]);
-      }
-  })
-  
-  previousDiversity=[];
-  
-    for (let j = 0; j < criteriaDiversity.length; j++) {
-      simulation.force(JSON.stringify(criteriaDiversity[j]), isolate(d3.forceX((j*width) / (criteriaDiversity.length)).strength(0.3), f => f[criteria] === criteriaDiversity[j]));
-      previousDiversity.push(criteriaDiversity[j]);
-    }
-    sortInfo.text(d =>d[criteria]); 
-    simulation.nodes(data).on("tick", ticked);
-    simulation.alpha(1).restart();
-    }
+  document.getElementById(criteria).style.color="white"; 
+} else {
+  currentCriteria.splice(criteriaIndex,1);
+  document.getElementById(criteria).style.backgroundColor="white";
+  document.getElementById(criteria).style.color="black"; 
+}
+
+
+
+console.log(currentCriteria)
+
+
+
+  // Previous Diversity
+        for (let j = 0; j < previousDiversity.length; j++) {
+          simulation.force(JSON.stringify(previousDiversity[j]), isolate(d3.forceX(0).strength(0), f => f[criteria] === previousDiversity[j]));
+        }
+      
+        simulation.alpha(1).restart();
+
+// New Diversity
+      let criteriaDiversity = [];
+      
+      data.forEach(d=>{
+      
+          if (criteriaDiversity.indexOf(d[criteria])<0){
+            criteriaDiversity.push(d[criteria]);
+          }
+      })
+
+      
+      previousDiversity=[];
+      
+        for (let j = 0; j < criteriaDiversity.length; j++) {
+          simulation.force(JSON.stringify(criteriaDiversity[j]), isolate(d3.forceX((j*width) / (criteriaDiversity.length)).strength(0.3), f => f[criteria] === criteriaDiversity[j]));
+          previousDiversity.push(criteriaDiversity[j]);
+        }
+        sortInfo.text(d =>d[criteria]); 
+        simulation.nodes(data).on("tick", ticked);
+        simulation.alpha(1).restart();
+}
+
   
   function forcedragstarted(d) {
     if (!d3.event.active) simulation.alpha(1).restart();
@@ -305,7 +343,7 @@ const anthropotype = (datasetAT) => {                 // When called, draw the a
     }
   
     loadType();
-
+    menuBuilder();
 
   }).catch(error=>{
     console.log(error)
@@ -2369,6 +2407,7 @@ const typeSwitch = (type,id) => {
 
       ipcRenderer.send('console-logs',"typesSwitch started a "+ type +" process using the following dataset(s) : " + JSON.stringify(id));
 
+   document.getElementById('source').innerText = "Source: "+id;
 }
 
 module.exports = {typeSwitch: typeSwitch};                            // Export the switch as a module
