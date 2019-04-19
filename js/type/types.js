@@ -283,17 +283,20 @@ if (criteriaIndex<0){
   currentCriteria.push(criteria);
   document.getElementById(criteria).style.backgroundColor="black";
   document.getElementById(criteria).style.color="white"; 
+  var newCriteria = {given:""};
+  newCriteria.family = criteria;
+  //data.push(newCriteria)
 } else {
   currentCriteria.splice(criteriaIndex,1);
   document.getElementById(criteria).style.backgroundColor="white";
   document.getElementById(criteria).style.color="black"; 
 }
 
-
-
 console.log(currentCriteria)
+simulation.nodes(data).on("tick", ticked);
+simulation.alpha(1).restart();
 
-
+/* 
 
   // Previous Diversity
         for (let j = 0; j < previousDiversity.length; j++) {
@@ -321,7 +324,7 @@ console.log(currentCriteria)
         }
         sortInfo.text(d =>d[criteria]); 
         simulation.nodes(data).on("tick", ticked);
-        simulation.alpha(1).restart();
+        simulation.alpha(1).restart(); */
 }
 
   
