@@ -178,48 +178,6 @@ criteriaList.forEach(d=>{
         })
   } 
   
-//const data = [];
-let data = [];
-let dataCheck = [];
-docData.forEach(doc=>{
-  doc.id = doc.title;
-  doc.author.forEach(auth=>{
-    let checkCode = auth.family+auth.given;
-    if (dataCheck.indexOf(checkCode)<0){
-      dataCheck.push(checkCode)
-      auth.crit = [];
-      auth.crit.push(doc.title);
-      data.push(auth)
-    }
-    else {
-      for (let j = 0; j < data.length; j++) {
-        if (data[j].family === auth.family &&data[j].given === auth.given){
-          data[j].crit.push(doc.title);
-
-        }
-        
-      }
-
-    }
-  })
-});
-
-var links = [];
-
-data.forEach(d=>{
-    d.id = d.given +" "+ d.family;
-        d.crit.forEach(crit=>{
-          let link = {};
-          link.source = d.id;
-          link.target = crit;
-          links.push(link);
-        });
-});
-
-docData.forEach(doc=>data.push(doc));
-
-console.log(data);
-console.log(links);
 
 
   //========== FORCE GRAPH ============
@@ -237,74 +195,19 @@ console.log(links);
      }))                     // Adding ManyBody to repel nodes from each other
      .force("center", d3.forceCenter(width/2, height/2));        // The graph tends towards the center of the svg
   
-  const isolate = (force, filter) => {
+/*   const isolate = (force, filter) => {
     var initialize = force.initialize;
     force.initialize = function() { initialize.call(force, data.filter(filter)); };
     return force;
   }
-  
-  var nodeImage = view.selectAll("nodeImage")                     // Create nodeImage variable
-  .exit().remove() 
-    .data(data)                                                 // Using the "humans" variable data
-    .enter().append("image")                                      // Append images
-            .attr("class","nodeImage")                            // This class contains the circular clip path
-           //.attr("xlink:href", d => "img/"+d.img)       // The image path is stored in the img property
-            .attr("height", 40)                                   // Image height
-            .attr("width", 40);                                    // Image width
-  
+   */
+  var nodeImage = view.selectAll("nodeImage");                  
   nodeImage.append("title").text(d => d.name);
-
-  
-  var link = view.selectAll("link")                               // Creatin the link variable
-  .exit().remove() 
-  .data(links)                                     // Link data is stored in the "links" variable
-  .enter().append("line")
-  .style("fill","none");  
-
-  var masks = view.selectAll("masks") 
-  .exit().remove() 
-        .data(data)                                                
-    .enter().append("circle")
-            .attr('r',d=>{ let r = 7;
-              if(d.hasOwnProperty("author")){ r = r + d.author.length*4}
-                  return r;
-                })
-            .attr('fill','rgba(63, 191, 191, 0.20)')
-            .attr('stroke','white')
-            .attr('stroke-width',2)
-           // .on("mouseover",d=>{document.getElementById("photoCredit").innerHTML="Photo Credit: " +d.photoCredit;})
-            .call(d3.drag()
-          .on("start", forcedragstarted)
-          .on("drag", forcedragged)
-          .on("end", forcedragended));
-  
-    var sortInfo = view.selectAll("sortInfo")
-    .exit().remove() 
-          .data(data)
-          .enter().append("text")
-          .attr("pointer-events", "none")
-          .attr("dx", 0)
-          .attr("dy", 0)
-          .style('fill', 'black'); 
-         
-  var name = view.selectAll("name")
-  .exit().remove() 
-        .data(data)
-            .enter().append("text")
-            //.attr("pointer-events", "none")
-            .attr("class", "humans")
-            .attr("dx", 7)
-            .attr("dy", -5)
-            .style('fill', 'black')
-            .style('cursor', 'pointer')
-            .style('font-size','7px')
-            .on('click',d=>{name.filter(e => e===d).style("fill","DeepSkyBlue")})
-            .on('dblclick',d=>{name.filter(e => e===d).style("fill","black")})
-            .text(d => d.id);
-                       
-                
- 
-       
+  var link = view.selectAll("link");                            
+  var masks = view.selectAll("masks"); 
+  var sortInfo = view.selectAll("sortInfo");  
+  var name = view.selectAll("name");
+               
     const ticked = () => {
         nodeImage.attr("x", d => d.x).attr("y", d => d.y);
         masks.attr("cx", d => d.x).attr("cy", d => d.y);
@@ -317,47 +220,139 @@ console.log(links);
             .attr("y2", d => d.target.y);
       }
 
-
-      simulation.nodes(data).on("tick", ticked);
-      simulation.force("link").links(links); 
-
-  var previousDiversity=[];
-  
   const cartoSorter = (criteria) => {
-
   
-    //simulation.alpha(1).restart();
+        nodeImage.remove();
+        masks.remove();
+        name.remove();
+        sortInfo.remove();
+        link.remove();
+        simulation.alpha(1).restart();
+
+      let criteriaIndex = currentCriteria.indexOf(criteria);   
+
+        if (criteriaIndex<0){
+          currentCriteria.push(criteria);
+          document.getElementById(criteria).style.backgroundColor="black";
+          document.getElementById(criteria).style.color="white"; 
+          var newCriteria = {given:""};
+          newCriteria.family = criteria;
+        } else {
+          currentCriteria.splice(criteriaIndex,1);
+          document.getElementById(criteria).style.backgroundColor="white";
+          document.getElementById(criteria).style.color="black"; 
+        }
+
+let data = [];
+let dataCheck = [];
+let links = [];
+
+currentCriteria.forEach(criteria=>{
   
-   
+      docData.forEach(doc=>{
+        if (doc.title===criteria){
+        doc.id = doc.title;
+        doc.author.forEach(auth=>{
+          let checkCode = auth.family+auth.given;
+          if (dataCheck.indexOf(checkCode)<0){
+            dataCheck.push(checkCode)
+            auth.crit = [];
+            auth.crit.push(doc.title);
+            data.push(auth)
+          }
+          else {
+            for (let j = 0; j < data.length; j++) {
+              if (data[j].family === auth.family &&data[j].given === auth.given){
+                data[j].crit.push(doc.title);
+              }
+            }
+          }
+        })
+      }
+    })
+  });
 
- let criteriaIndex = currentCriteria.indexOf(criteria);   
+      data.forEach(d=>{
+          d.id = d.given +" "+ d.family;
+              d.crit.forEach(crit=>{
+                let link = {};
+                link.source = d.id;
+                link.target = crit;
+                links.push(link);
+              });
+      });
 
-if (criteriaIndex<0){
-  currentCriteria.push(criteria);
-  document.getElementById(criteria).style.backgroundColor="black";
-  document.getElementById(criteria).style.color="white"; 
-  var newCriteria = {given:""};
-  newCriteria.family = criteria;
-} else {
-  currentCriteria.splice(criteriaIndex,1);
-  document.getElementById(criteria).style.backgroundColor="white";
-  document.getElementById(criteria).style.color="black"; 
+      docData.forEach(doc=>{
+        for (let i = 0; i < currentCriteria.length; i++) {
+         if (currentCriteria[i]===doc.title){
+          data.push(doc);
+         }
+        }
+    });
+
+ nodeImage = view.selectAll("nodeImage")                     // Create nodeImage variable
+        .exit().remove() 
+        .data(data)                                                 // Using the "humans" variable data
+        .enter().append("image")                                      // Append images
+                .attr("class","nodeImage")                            // This class contains the circular clip path
+              //.attr("xlink:href", d => "img/"+d.img)       // The image path is stored in the img property
+                .attr("height", 40)                                   // Image height
+                .attr("width", 40);                                    // Image width
+
+nodeImage.append("title").text(d => d.name);
+
+
+        link = view.selectAll("link")                               // Creatin the link variable
+          .exit().remove() 
+          .data(links)                                     // Link data is stored in the "links" variable
+          .enter().append("line")
+          .style("fill","none");  
+
+ masks = view.selectAll("masks") 
+        .exit().remove() 
+              .data(data)                                                
+          .enter().append("circle")
+                  .attr('r',d=>{ let r = 7;
+                    if(d.hasOwnProperty("author")){ r = r + d.author.length*4}
+                        return r;
+                      })
+                  .attr('fill','rgba(63, 191, 191, 0.20)')
+                  .attr('stroke','white')
+                  .attr('stroke-width',2)
+                // .on("mouseover",d=>{document.getElementById("photoCredit").innerHTML="Photo Credit: " +d.photoCredit;})
+                  .call(d3.drag()
+                .on("start", forcedragstarted)
+                .on("drag", forcedragged)
+                .on("end", forcedragended));
+
+   sortInfo = view.selectAll("sortInfo")
+          .exit().remove() 
+                .data(data)
+                .enter().append("text")
+                .attr("pointer-events", "none")
+                .attr("dx", 0)
+                .attr("dy", 0)
+                .style('fill', 'black'); 
+       
+ name = view.selectAll("name")
+        .exit().remove() 
+              .data(data)
+                  .enter().append("text")
+                  //.attr("pointer-events", "none")
+                  .attr("class", "humans")
+                  .attr("dx", 7)
+                  .attr("dy", -5)
+                  .style('fill', 'black')
+                  .style('cursor', 'pointer')
+                  .style('font-size','7px')
+                  .on('click',d=>{name.filter(e => e===d).style("fill","DeepSkyBlue")})
+                  .on('dblclick',d=>{name.filter(e => e===d).style("fill","black")})
+                  .text(d => d.id);
+                     
+simulation.nodes(data).on("tick", ticked);
+simulation.force("link").links(links); 
+simulation.alpha(1).restart();
 }
-
-console.log(currentCriteria)
-
- // First the relevant nodes in the data, i.e. those whose code is exactly the same as the clicked circle.
- let dataDocs = data.filter(d => d.hasOwnProperty("author"));
- 
- console.log(dataDocs)
- // Then, add those nodes to the group of nodes which are to be displayed by the graph
- //nodeData.push.apply(nodeData, focusNodes);
-
-//simulation.alpha(1).restart();
-
-}
-
-  
 
   function forcedragstarted(d) {
     if (!d3.event.active) simulation.alpha(1).restart();
@@ -378,6 +373,7 @@ console.log(currentCriteria)
   
     loadType();
     menuBuilder();
+    cartoSorter(docData[0].title);
 
   }).catch(error=>{
     console.log(error)
