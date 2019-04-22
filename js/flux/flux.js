@@ -660,7 +660,7 @@ for (let i =0; i<dest.length; i++){
         uploadedFiles.forEach(dataset=>{
           targets.forEach(target=>{
               pandodb[target].put(dataset);
-              ipcRenderer.send('console-logs',"Dataset "+ dataset.name + " loaded in "+JSON.stringify(target)+"."); // Log action
+              ipcRenderer.send('console-logs',"Dataset "+ dataset.name + " loaded into "+JSON.stringify(target)+"."); // Log action
             });
         });
   } catch(e) {
