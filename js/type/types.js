@@ -182,6 +182,7 @@ criteriaList.forEach(d=>{
 let data = [];
 let dataCheck = [];
 docData.forEach(doc=>{
+  doc.id = doc.title;
   doc.author.forEach(auth=>{
     let checkCode = auth.family+auth.given;
     if (dataCheck.indexOf(checkCode)<0){
@@ -201,15 +202,36 @@ docData.forEach(doc=>{
 
     }
   })
+  doc.factor=25;
 });
+
+var links = [];
+
+data.forEach(d=>{
+    d.id = d.given +" "+ d.family;
+    d.factor=1;
+        d.crit.forEach(crit=>{
+          let link = {};
+          link.source = d.id;
+          link.target = crit;
+          links.push(link);
+        });
+});
+
+docData.forEach(doc=>data.push(doc));
+
 console.log(data);
+console.log(links);
 
   //========== FORCE GRAPH ============
   var simulation = d3.forceSimulation()                           // Start the force graph
       .alphaMin(0.1)                                              // Each action starts at 1 and decrements "Decay" per Tick
       .alphaDecay(0.01)                                          // "Decay" value
-      .force('collision', d3.forceCollide(30).iterations(3))                     // Nodes collide with each other (they don't overlap)      
-      .force("charge", d3.forceManyBody(30).distanceMax(60))                     // Adding ManyBody to repel nodes from each other
+      .force("link",d3.forceLink()                                // Links has specific properties
+                  .strength(0.08)                              // Defining non-standard strength value
+                  .id(d => d.id))                         // Defining an ID (used to compute link data)
+      .force('collision', d3.forceCollide(d=>d.factor*10).iterations(5))                     // Nodes collide with each other (they don't overlap)      
+     .force("charge", d3.forceManyBody(300))                     // Adding ManyBody to repel nodes from each other
       .force("center", d3.forceCenter(width/2, height/2));        // The graph tends towards the center of the svg
   
   const isolate = (force, filter) => {
@@ -227,12 +249,18 @@ console.log(data);
             .attr("width", 40);                                    // Image width
   
   nodeImage.append("title").text(d => d.name);
+
   
-        var masks = view.selectAll("masks") 
+  var link = view.selectAll("link")                               // Creatin the link variable
+  .data(links)                                     // Link data is stored in the "links" variable
+  .enter().append("line")
+  .style("fill","none");  
+
+  var masks = view.selectAll("masks") 
         .data(data)                                                
     .enter().append("circle")
-            .attr('r',6)
-            .attr('fill','blue')
+            .attr('r',d=>d.factor*7)
+            .attr('fill','rgba(63, 191, 191, 0.20)')
             .attr('stroke','white')
             .attr('stroke-width',2)
            // .on("mouseover",d=>{document.getElementById("photoCredit").innerHTML="Photo Credit: " +d.photoCredit;})
@@ -245,8 +273,8 @@ console.log(data);
           .data(data)
           .enter().append("text")
           .attr("pointer-events", "none")
-          .attr("dx", 45)
-          .attr("dy", 30)
+          .attr("dx", 0)
+          .attr("dy", 0)
           .style('fill', 'black'); 
          
   var name = view.selectAll("name")
@@ -254,23 +282,34 @@ console.log(data);
             .enter().append("text")
             //.attr("pointer-events", "none")
             .attr("class", "humans")
-            .attr("dx", 15)
-            .attr("dy", 15)
+            .attr("dx", 7)
+            .attr("dy", -5)
             .style('fill', 'black')
             .style('cursor', 'pointer')
+            .style('font-size','7px')
             .on('click',d=>{name.filter(e => e===d).style("fill","DeepSkyBlue")})
             .on('dblclick',d=>{name.filter(e => e===d).style("fill","black")})
-            .text(d => d.family +" "+ d.given);
-  
+            .text(d => d.id);
+                       
+                
+ 
+       
     const ticked = () => {
         nodeImage.attr("x", d => d.x).attr("y", d => d.y);
-        masks.attr("cx", d => d.x+20).attr("cy", d => d.y+20);
+        masks.attr("cx", d => d.x).attr("cy", d => d.y);
         name.attr("x", d => d.x).attr("y", d => d.y);
-        sortInfo.attr("x", d => d.x).attr("y", d => d.y); 
+        sortInfo.attr("x", d => d.x).attr("y", d => d.y);
+        link
+            .attr("x1", d => d.source.x)
+            .attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x)
+            .attr("y2", d => d.target.y);
       }
-  
-  simulation.nodes(data).on("tick", ticked);
-  
+
+      simulation.nodes(data).on("tick", ticked);
+      simulation.force("link").links(links); 
+
+
   var previousDiversity=[];
   
   const cartoSorter = (criteria) => {
@@ -285,7 +324,6 @@ if (criteriaIndex<0){
   document.getElementById(criteria).style.color="white"; 
   var newCriteria = {given:""};
   newCriteria.family = criteria;
-  //data.push(newCriteria)
 } else {
   currentCriteria.splice(criteriaIndex,1);
   document.getElementById(criteria).style.backgroundColor="white";
@@ -297,7 +335,6 @@ simulation.nodes(data).on("tick", ticked);
 simulation.alpha(1).restart();
 
 /* 
-
   // Previous Diversity
         for (let j = 0; j < previousDiversity.length; j++) {
           simulation.force(JSON.stringify(previousDiversity[j]), isolate(d3.forceX(0).strength(0), f => f[criteria] === previousDiversity[j]));
@@ -325,6 +362,7 @@ simulation.alpha(1).restart();
         sortInfo.text(d =>d[criteria]); 
         simulation.nodes(data).on("tick", ticked);
         simulation.alpha(1).restart(); */
+
 }
 
   

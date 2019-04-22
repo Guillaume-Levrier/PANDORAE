@@ -930,7 +930,7 @@ const dataWriter = (destination,importName,content) => {
       table.add({"id":id,"date":date,"name":importName,"content":content});
       ipcRenderer.send('console-logs',"Retrieval successful. "+importName+ " was imported in "+d);
   })
-  ipcRenderer.send('chaeros-notification', 'dataset loaded in '+destination);
+  ipcRenderer.send('chaeros-notification', 'dataset loaded into '+destination);
  setTimeout(()=>{win.close()},1000);
 
 }
