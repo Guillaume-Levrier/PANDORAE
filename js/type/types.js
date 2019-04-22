@@ -202,14 +202,12 @@ docData.forEach(doc=>{
 
     }
   })
-  doc.factor=25;
 });
 
 var links = [];
 
 data.forEach(d=>{
     d.id = d.given +" "+ d.family;
-    d.factor=1;
         d.crit.forEach(crit=>{
           let link = {};
           link.source = d.id;
@@ -223,6 +221,7 @@ docData.forEach(doc=>data.push(doc));
 console.log(data);
 console.log(links);
 
+
   //========== FORCE GRAPH ============
   var simulation = d3.forceSimulation()                           // Start the force graph
       .alphaMin(0.1)                                              // Each action starts at 1 and decrements "Decay" per Tick
@@ -230,9 +229,13 @@ console.log(links);
       .force("link",d3.forceLink()                                // Links has specific properties
                   .strength(0.08)                              // Defining non-standard strength value
                   .id(d => d.id))                         // Defining an ID (used to compute link data)
-      .force('collision', d3.forceCollide(d=>d.factor*10).iterations(5))                     // Nodes collide with each other (they don't overlap)      
-     .force("charge", d3.forceManyBody(300))                     // Adding ManyBody to repel nodes from each other
-      .force("center", d3.forceCenter(width/2, height/2));        // The graph tends towards the center of the svg
+      .force('collision', d3.forceCollide(5).iterations(5))                     // Nodes collide with each other (they don't overlap)      
+     .force("charge", d3.forceManyBody().strength(d=>{
+      let str = -70;
+              if(d.hasOwnProperty("author")){ str = str - d.author.length*35}
+                  return str;
+     }))                     // Adding ManyBody to repel nodes from each other
+     .force("center", d3.forceCenter(width/2, height/2));        // The graph tends towards the center of the svg
   
   const isolate = (force, filter) => {
     var initialize = force.initialize;
@@ -241,6 +244,7 @@ console.log(links);
   }
   
   var nodeImage = view.selectAll("nodeImage")                     // Create nodeImage variable
+  .exit().remove() 
     .data(data)                                                 // Using the "humans" variable data
     .enter().append("image")                                      // Append images
             .attr("class","nodeImage")                            // This class contains the circular clip path
@@ -252,14 +256,19 @@ console.log(links);
 
   
   var link = view.selectAll("link")                               // Creatin the link variable
+  .exit().remove() 
   .data(links)                                     // Link data is stored in the "links" variable
   .enter().append("line")
   .style("fill","none");  
 
   var masks = view.selectAll("masks") 
+  .exit().remove() 
         .data(data)                                                
     .enter().append("circle")
-            .attr('r',d=>d.factor*7)
+            .attr('r',d=>{ let r = 7;
+              if(d.hasOwnProperty("author")){ r = r + d.author.length*4}
+                  return r;
+                })
             .attr('fill','rgba(63, 191, 191, 0.20)')
             .attr('stroke','white')
             .attr('stroke-width',2)
@@ -270,6 +279,7 @@ console.log(links);
           .on("end", forcedragended));
   
     var sortInfo = view.selectAll("sortInfo")
+    .exit().remove() 
           .data(data)
           .enter().append("text")
           .attr("pointer-events", "none")
@@ -278,6 +288,7 @@ console.log(links);
           .style('fill', 'black'); 
          
   var name = view.selectAll("name")
+  .exit().remove() 
         .data(data)
             .enter().append("text")
             //.attr("pointer-events", "none")
@@ -306,15 +317,18 @@ console.log(links);
             .attr("y2", d => d.target.y);
       }
 
+
       simulation.nodes(data).on("tick", ticked);
       simulation.force("link").links(links); 
-
 
   var previousDiversity=[];
   
   const cartoSorter = (criteria) => {
-  
 
+  
+    //simulation.alpha(1).restart();
+  
+   
 
  let criteriaIndex = currentCriteria.indexOf(criteria);   
 
@@ -331,41 +345,20 @@ if (criteriaIndex<0){
 }
 
 console.log(currentCriteria)
-simulation.nodes(data).on("tick", ticked);
-simulation.alpha(1).restart();
 
-/* 
-  // Previous Diversity
-        for (let j = 0; j < previousDiversity.length; j++) {
-          simulation.force(JSON.stringify(previousDiversity[j]), isolate(d3.forceX(0).strength(0), f => f[criteria] === previousDiversity[j]));
-        }
-      
-        simulation.alpha(1).restart();
+ // First the relevant nodes in the data, i.e. those whose code is exactly the same as the clicked circle.
+ let dataDocs = data.filter(d => d.hasOwnProperty("author"));
+ 
+ console.log(dataDocs)
+ // Then, add those nodes to the group of nodes which are to be displayed by the graph
+ //nodeData.push.apply(nodeData, focusNodes);
 
-// New Diversity
-      let criteriaDiversity = [];
-      
-      data.forEach(d=>{
-      
-          if (criteriaDiversity.indexOf(d[criteria])<0){
-            criteriaDiversity.push(d[criteria]);
-          }
-      })
-
-      
-      previousDiversity=[];
-      
-        for (let j = 0; j < criteriaDiversity.length; j++) {
-          simulation.force(JSON.stringify(criteriaDiversity[j]), isolate(d3.forceX((j*width) / (criteriaDiversity.length)).strength(0.3), f => f[criteria] === criteriaDiversity[j]));
-          previousDiversity.push(criteriaDiversity[j]);
-        }
-        sortInfo.text(d =>d[criteria]); 
-        simulation.nodes(data).on("tick", ticked);
-        simulation.alpha(1).restart(); */
+//simulation.alpha(1).restart();
 
 }
 
   
+
   function forcedragstarted(d) {
     if (!d3.event.active) simulation.alpha(1).restart();
     d.fx = d.x;
