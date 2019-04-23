@@ -12,7 +12,7 @@
 
 // ============ VERSION ===========
 const msg = '      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ\n\n';
-const version ='BETA/DEV-V0.1.17';
+const version ='BETA/DEV-V0.1.23';
 console.log(msg+version);
 
 // =========== NODE - NPM ===========
@@ -406,7 +406,7 @@ ipcRenderer.send('console-logs'," user$ "+ input);
 
 const loadingType = () => commandReturn = "loading " + commandInput;
 
-if (input.substring(0, 13) === "change theme " /* && remote.getCurrentWindow().isFullScreen() === false */) {
+if (input.substring(0, 13) === "change theme ") {
   document.body.style.animation="fadeout 0.5s";
             setTimeout(()=>{
               document.body.remove();
