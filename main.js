@@ -37,9 +37,6 @@ const createUserId = () => {
     }
   };
 
-
-var activeTheme;
-
 const changeTheme = (themeName) => {
     fs.readFile(basePath+"/json/themes.json",'utf8', (err, data) => {
            var themeData=JSON.parse(data);
@@ -77,13 +74,8 @@ function createWindow () {
        }
    })
 
-   //themeRoutine();
 
   mainWindow.loadFile('index.html')
-
-  //mainWindow.addListener("enter-full-screen",(e) => {
-  //  themeChangeTrigger("normal");
-  //});
   
   mainWindow.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures) => {
 
@@ -218,8 +210,6 @@ setTimeout(()=>{
 });
 
 
-
-
 //CONSOLE
 
 let date = new Date().toJSON().replace(/:/g,"-");                 // Create a timestamp
@@ -298,6 +288,4 @@ setTimeout(()=>{app.quit()},100);
 // Tutorial
 ipcMain.on('tutorial', (event,message) => { mainWindow.webContents.send('tutorial',message)});
 
-ipcMain.on('mainWindowReload', (event,message) => {
-  mainWindow.webContents.send('mainWindowReload',message);
-});
+ipcMain.on('mainWindowReload', (event,message) => { mainWindow.webContents.send('mainWindowReload',message)});
