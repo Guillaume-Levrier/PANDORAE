@@ -12,15 +12,11 @@ onconnect = (e) => {
     switch (type) {
 
       case 'gazouillotype':
-          
-Promise.all([                                                     // Loading data through promises
-   d3.csv(typeRequest.data.dataset, {credentials: 'include'}),                     // Loading dataset
-   d3.json(typeRequest.data.query, {credentials: 'include'})])                     // Loading keywords
-   .then(datajson => {
+
+pandodb.gazouillotype.get(dataset).then(datajson => {
 
             var data = datajson[0];
-         
-
+        
             // Convert dataset if it comes from scraping instead of a proper API request
             const scrapToApiFormat = (data) => {
                 if(data[0].hasOwnProperty('username')) {
@@ -67,12 +63,14 @@ Promise.all([                                                     // Loading dat
 
             piler();
 
-
             res.dataNest = dataNest;
             res.editedData = data;
             res.median = median;
             res.keywords = datajson[1];
             port.postMessage(res);
+            }).catch(error=>{
+              port.postMessage(error);
+              ipcRenderer.send('console-logs',"error: dataset " +dataset+" is invalid.");
             });
         break;
     }

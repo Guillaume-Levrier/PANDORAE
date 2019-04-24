@@ -1721,7 +1721,7 @@ const pharmacotype = (trials) => {
   }
 
 // ========= GAZOUILLOTYPE =========
-const gazouillotype = (dataset,query) => {                             // When called, draw the gazouillotype
+const gazouillotype = (dataset) => {                             // When called, draw the gazouillotype
 
   //========== SVG VIEW =============
   var svg = d3.select(xtype).append("svg").attr("id","xtypeSVG");       // Creating the SVG node
@@ -1773,12 +1773,14 @@ const gazouillotype = (dataset,query) => {                             // When c
   
   var domainDates = [];
   
+  console.log(dataset)
+
   // =========== SHARED WORKER ===========
-  let typeRequest = {kind:"gazouillotype",dataset:dataset, query:query};
+  let typeRequest = {kind:"gazouillotype",dataset:dataset};
       multiThreader.port.postMessage(typeRequest);
       
   multiThreader.port.onmessage = (res) => {
-  
+  console.log(res);
   var dataNest = res.data.dataNest;
   var data = res.data.editedData;
   var median = res.data.median;
