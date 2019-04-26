@@ -69,6 +69,7 @@ function createWindow () {
      frame: true,
      resizable:false,
      webPreferences: {
+         nodeIntegration: true,
          nodeIntegrationInWorker: true,
          plugins: true
        }
@@ -87,7 +88,8 @@ function createWindow () {
             parent: mainWindow,
             frame: true,
             webPreferences: {
-                nodeIntegrationInWorker: true
+              nodeIntegration: true,
+              nodeIntegrationInWorker: true
               }
         })
 
@@ -136,7 +138,11 @@ const openHelper = (helperFile) => {
     alwaysOnTop:true,
     autoHideMenuBar : true,
     x:screenWidth-350,
-    y:100
+    y:100,
+    webPreferences: {
+      nodeIntegration: true,
+      nodeIntegrationInWorker: true
+      }
   })
   win.once('ready-to-show', () => {
   win.show()
@@ -159,7 +165,12 @@ const openModal = (modalFile,scrollTo) => {
                 alwaysOnTop:true,
                 frame: false,
                 resizable: false,
-                show: false
+                show: false,
+                y:100,
+                webPreferences: {
+                  nodeIntegration: true,
+                  nodeIntegrationInWorker: true
+                  }
               })
 
               var path = 'file://' + __dirname + '/'+ modalFile +'.html';
@@ -262,6 +273,7 @@ const chaerosCalculator = () =>  {
     transparent: true,
     show: false,
     webPreferences: {
+        nodeIntegration: true,
         nodeIntegrationInWorker: true
       }
   });
