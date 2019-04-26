@@ -53,7 +53,14 @@
 <div id="twitter" style="display:none;" class="fluxTabs">
   <span class="flux-title">TWITTER</span><br><br>
     <form id="twitter-form" autocomplete="off">
-      Enrich Twitter datasets. This tab is currently disabled but will be unlocked soon.<br><br>
+      Upload tweets to the system. Only properties consistent with the twitter API will be imported. Tweet datasets must be uploaded as CSV, queries as JSON objects (<a>read more here</a>).
+      <br><br>
+        Twitter Dataset<br>
+         <input type="file" id="twitterDataset" accept="csv"><br><br>
+        Twitter Query<br>
+        <input type="file" id="twitterQuery" accept="json"><br><br>
+        <br> <button type="submit" class="flux-button" id="twitterImporter" onclick='powerValve("tweetImporter",this);return false'>Import to SYSTEM</button>
+
     </form>
 </div>
 
