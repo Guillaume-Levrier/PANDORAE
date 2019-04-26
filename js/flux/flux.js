@@ -55,13 +55,15 @@ ipcRenderer.on('window-close', (event,message) => {
 //========== Tracegraph ==========
 
 let traces = [
+  {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
   {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"TWITTER"},"name":"TWITTER"}]},
-   {"hops":[{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"API"},"name":"API"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
-   {"hops":[{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"SCRAPING"},"name":"SCRAPING"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
   {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"DB/API"},"name":"DB/API"}]},
-  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"SCOPUS"},"name":"SCOPUS"},{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"}]},
-  {"hops":[{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"},{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
-  {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]}
+   {"hops":[{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"API"},"name":"API"},{"info":{"name":"MERGER"},"name":"MERGER"}]},
+   {"hops":[{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"GAZOUILLOIRE"},"name":"GAZOUILLOIRE"},{"info":{"name":"MERGER"},"name":"MERGER"}]},
+   {"hops":[{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"SCRAPING"},"name":"SCRAPING"},{"info":{"name":"MERGER"},"name":"MERGER"}]},
+   {"hops":[{"info":{"name":"MERGER"},"name":"MERGER"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+   {"hops":[{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"},{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+   {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"SCOPUS"},"name":"SCOPUS"},{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"}]}
   ];
 
 const drawFlux = (svg, traces, horizontal, showTexts) => {
@@ -72,7 +74,7 @@ const drawFlux = (svg, traces, horizontal, showTexts) => {
      .attr("font-size", 12);
  }
 
- const tmpSvg = d3.select("body").append("svg").attr("width", 650).attr("height", 500);
+ const tmpSvg = d3.select("body").append("svg").attr("width", 720).attr("height", 500);
 
  const tmpText = makeText(tmpSvg);
 
@@ -107,7 +109,7 @@ tmpSvg.remove();
 
  svg
    .attr("viewBox", `${vb.x} ${vb.y} ${vb.width} ${vb.height}`)
-   .attr("width", 650)
+   .attr("width", 720)
    .attr("height", 500);
 
    const gradients = layout.nodes.map(() => tg.genUID());
