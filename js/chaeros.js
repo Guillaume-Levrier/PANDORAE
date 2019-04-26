@@ -1099,10 +1099,44 @@ const altmetricRetriever = (id,user) => {
   }); // End of pandodb request
 }; // End of altmetricRetriever function
 
+
+//========== tweetImporter ==========
+
+const tweetImporter = (dataset,query)=>{
+
+var tweetDataset = {};
+let dataStream;
+
+var metaData = {};
+fs.readFile(query,"utf8", (err, data) => {
+    if (err) throw err;
+    tweetDataset.metaData = JSON.parse(data);
+});
+
+fs.createReadStream(dataset).on('data', chunk => {
+  dataStream += chunk;
+  console.log(chunk);
+}).on('end', function () {
+  let s = this;
+  setTimeout(function () {
+      s.destroy();
+  }, 500);
+})
+.on('close', function () {
+  console.log('closed now');
+console.log(dataStream)
+});
+
+
+
+};
+
 //========== chaerosSwitch ==========
 // Switch used to choose the function to execute in CHÆROS.
 
 const chaerosSwitch = (fluxAction,fluxArgs) => {
+console.log(fluxAction)
+console.log(fluxArgs)
 
   ipcRenderer.send('console-logs',"CHÆROS started a "+ fluxAction +" process with the following arguments : " + JSON.stringify(fluxArgs));
 
@@ -1129,7 +1163,11 @@ const chaerosSwitch = (fluxAction,fluxArgs) => {
           case 'zoteroCollectionBuilder' : zoteroCollectionBuilder(fluxArgs.zoteroCollectionBuilder.collectionName,fluxArgs.zoteroCollectionBuilder.zoteroUser,fluxArgs.zoteroCollectionBuilder.id);
           break;
 
- case 'sysExport' : sysExport(fluxArgs.sysExport.dest,fluxArgs.sysExport.name,fluxArgs.sysExport.id);
+          case 'sysExport' : sysExport(fluxArgs.sysExport.dest,fluxArgs.sysExport.name,fluxArgs.sysExport.id);
+          break;
+
+          case 'tweetImporter' : console.log("plop")
+                                 tweetImporter(fluxArgs.tweetImporter.dataset,fluxArgs.tweetImporter.query);
           break;
       }
 

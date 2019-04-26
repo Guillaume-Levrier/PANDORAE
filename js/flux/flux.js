@@ -56,14 +56,10 @@ ipcRenderer.on('window-close', (event,message) => {
 
 let traces = [
   {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
-  {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"TWITTER"},"name":"TWITTER"}]},
-  {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"DB/API"},"name":"DB/API"}]},
-   {"hops":[{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"API"},"name":"API"},{"info":{"name":"MERGER"},"name":"MERGER"}]},
-   {"hops":[{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"GAZOUILLOIRE"},"name":"GAZOUILLOIRE"},{"info":{"name":"MERGER"},"name":"MERGER"}]},
-   {"hops":[{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"SCRAPING"},"name":"SCRAPING"},{"info":{"name":"MERGER"},"name":"MERGER"}]},
-   {"hops":[{"info":{"name":"MERGER"},"name":"MERGER"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
+  {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
    {"hops":[{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"},{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
-   {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"SCOPUS"},"name":"SCOPUS"},{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"}]}
+   {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"SCOPUS"},"name":"SCOPUS"},{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"}]},
+   {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"DB/API"},"name":"DB/API"}]}
   ];
 
 const drawFlux = (svg, traces, horizontal, showTexts) => {
@@ -352,6 +348,11 @@ case 'zoteroCollectionBuilder' : fluxArgs.zoteroCollectionBuilder = {};
                                  fluxArgs.zoteroCollectionBuilder.collectionName = document.getElementById("zoteroCollecName").value;
                                  fluxArgs.zoteroCollectionBuilder.zoteroUser = document.getElementById("zoterouserinput").value;
                                  break;
+
+  case 'tweetImporter' : fluxArgs.tweetImporter = {};
+                fluxArgs.tweetImporter.dataset = document.getElementById("twitterDataset").files[0].path;
+                fluxArgs.tweetImporter.query = document.getElementById("twitterQuery").files[0].path;
+                break; 
 
 }
 
