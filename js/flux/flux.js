@@ -485,6 +485,7 @@ switch (kind) {
 
               case 'system':
               let subArrayContent = "";
+              if (doc.content.isArray) {
               doc.content.forEach(d=>{
                 let subContent = "<tr><td>"+d.name+"</td><td>"+d.items.length+" </td><td>"+d.library.name+"</td></tr>";
                 subArrayContent+=subContent;
@@ -496,7 +497,13 @@ switch (kind) {
               "<tbody>"+
               subArrayContent+
               "</tbody></table>";
+            } else {
+              dataPreview = "<br><strong>"+ doc.name +"</strong><br>" + 
+              "Dataset date: "+doc.date+"<br>"
+              "Dataset type: "+doc.content.type+"<br>"
+              
 
+            }
               document.getElementById(prevId).innerHTML = dataPreview;
               document.getElementById(prevId).name = doc.id;
               document.getElementById(buttonId).style.display = "unset";

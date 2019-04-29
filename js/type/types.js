@@ -1773,10 +1773,11 @@ const gazouillotype = (dataset) => {                             // When called,
   
   var domainDates = [];
   
-  console.log(dataset)
 
   // =========== SHARED WORKER ===========
-  let typeRequest = {kind:"gazouillotype",dataset:dataset};
+  let typeRequest = {kind:"gazouillotype",userPath: userDataPath+"/flatDatasets/",dataset:dataset};
+  console.log(typeRequest)
+
       multiThreader.port.postMessage(typeRequest);
       
   multiThreader.port.onmessage = (res) => {
