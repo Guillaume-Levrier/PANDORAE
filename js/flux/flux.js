@@ -43,6 +43,8 @@ pandodb.version(1).stores({
   });
   pandodb.open();
 
+  var db = "";
+
 //========== STARTING FLUX ==========
 ipcRenderer.send('console-logs',"Opening Flux");           // Sending notification to console
 ipcRenderer.send("window-ids","flux",remote.getCurrentWindow().id,true)
@@ -243,6 +245,7 @@ drawFlux(svg, traces, false, true);
 //========== fluxDisplay ==========
 // Display relevant tab when called according to the tab's id.
 const fluxDisplay = (tab) => {
+    db = tab;
 
     let tabs = document.getElementsByClassName("fluxTabs");           // Get all content DIVs by their common class
 
@@ -392,12 +395,14 @@ const fluxButtonAction = (buttonID,success,successPhrase,errorPhrase) => {
 
 const datasetDisplay = (divId,kind) => {              // This function displays the available datasets
 
+  
   try {                                                          // Try the following block
     let datasets = [];                                           // Start from an empty array
    pandodb[kind].toArray(files=>{
        files.forEach(file => {                                    // For each file in the directory                               
         datasets.push(                                           // Push the file in the array
-          "<li onclick=datasetDetail('"+kind+"-dataset-preview','"+kind+"',"+JSON.stringify(file.id)+",'"+kind+"-dataset-buttons');>"+file.name+"</li>"                 // A file is an HTML bullet point in a list
+          "<li id='"+file.id+"' >"+"<span style='cursor:pointer;' onclick=datasetDetail('"+kind+"-dataset-preview','"+kind+"',"+JSON.stringify(file.id)+",'"+kind+"-dataset-buttons')>"+file.name+"</span>"+
+          "<i class='fluxDelDataset material-icons' onclick=datasetRemove("+JSON.stringify(kind)+","+JSON.stringify(db)+","+JSON.stringify(file.id)+")>close</i></li>"
         )
     });
 
@@ -417,7 +422,12 @@ const datasetDisplay = (divId,kind) => {              // This function displays 
         }
 }
 
-
+const datasetRemove = (kind,db,id)=> {
+     datasetDetail(null,kind,null,null);
+      document.getElementById(id).parentNode.removeChild(document.getElementById(id));
+      pandodb[db].delete(id);
+      ipcRenderer.send('console-logs',"Removed "+id+" from database: "+db);
+}
 //========== datasetDetail ==========
 // Clicking on a dataset displayed by the previous function displays some of its metadata and allows for further actions
 // to be triggered (such as sending a larger request to Chæros).
@@ -426,6 +436,12 @@ const datasetDetail = (prevId,kind,id,buttonId) => {   // This function provides
 
   var datasetDetail = {};                                  // Create the dataDetail object
   let dataPreview = "";                                    // Created dataPreview variable
+
+if (prevId === null){
+  document.getElementById(kind+"-dataset-preview").innerText = "Dataset deleted";
+  document.getElementById(kind+"-dataset-buttons").style.display = "none";
+}
+else{
 
 try {
   pandodb[kind].get(id).then(doc=>{
@@ -487,10 +503,6 @@ switch (kind) {
               document.getElementById(buttonId).style.flex = "auto";
               document.getElementById("systemToType").value = doc.id;
 
-              
-              
-              let availableDest = "";
-              //create input pattern here
             break;
                   }
                    
@@ -502,8 +514,8 @@ switch (kind) {
         document.getElementById(prevId).innerHTML =  error;   // Display error message
         ipcRenderer.send('console-logs',error);               // Log error
       }
-
-}
+    }
+};
 
 //========== scopusBasicRetriever ==========
 // Send a single request for a single document to Scopus in order to retrieve the request's metadata and give the user a
