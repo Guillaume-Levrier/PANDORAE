@@ -1102,7 +1102,7 @@ const altmetricRetriever = (id,user) => {
 
 //========== tweetImporter ==========
 
-const tweetImporter = (dataset,query)=>{
+const tweetImporter = (dataset,query,name)=>{
 
 var tweetDataset = {};
 let dataStream=[];
@@ -1117,16 +1117,16 @@ fs.createReadStream(dataset)
 .pipe(csv())
 .on('data', data => dataStream.push(data))
 .on('end', () => {
-  let id = "twitterData - "+date;
+  let id = name+' '+date;
   let content = {type:"twitter"};
   content.tweetAmount = dataStream.length;
   var jsonDataset = {};
   jsonDataset.tweets=dataStream;
   jsonDataset.metaData=metaData;
   jsonDataset.id = id;
-  fs.writeFile(userDataPath+"/flatDatasets/"+"twitterData.json", JSON.stringify(jsonDataset), (err) => {
+  fs.writeFile(userDataPath+"/flatDatasets/"+name+".json", JSON.stringify(jsonDataset), (err) => {
     if (err) throw err
-    dataWriter(["system"],id,content);
+    dataWriter(["system"],name,content);
   });
 })
 .on('close', () => {
@@ -1141,8 +1141,6 @@ fs.createReadStream(dataset)
 // Switch used to choose the function to execute in CHÆROS.
 
 const chaerosSwitch = (fluxAction,fluxArgs) => {
-console.log(fluxAction)
-console.log(fluxArgs)
 
   ipcRenderer.send('console-logs',"CHÆROS started a "+ fluxAction +" process with the following arguments : " + JSON.stringify(fluxArgs));
 
@@ -1172,7 +1170,7 @@ console.log(fluxArgs)
           case 'sysExport' : sysExport(fluxArgs.sysExport.dest,fluxArgs.sysExport.name,fluxArgs.sysExport.id);
           break;
 
-          case 'tweetImporter' : tweetImporter(fluxArgs.tweetImporter.dataset,fluxArgs.tweetImporter.query);
+          case 'tweetImporter' : tweetImporter(fluxArgs.tweetImporter.dataset,fluxArgs.tweetImporter.query,fluxArgs.tweetImporter.datasetName);
           break;
       }
 
