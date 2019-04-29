@@ -59,6 +59,8 @@
          <input type="file" id="twitterDataset" accept="csv"><br><br>
         Twitter Query<br>
         <input type="file" id="twitterQuery" accept="json"><br><br>
+        Dataset Name (if a dataset with the same name already exists, it will be overwritten)<br>
+        <input class="fluxInput" spellcheck="false" id="twitterDatasetName" type="text" value="Enter a dataset name"><br><br>
         <br> <button type="submit" class="flux-button" id="twitterImporter" onclick='powerValve("tweetImporter",this);return false'>Import to SYSTEM</button>
 
     </form>
