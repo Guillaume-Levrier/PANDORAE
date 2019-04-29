@@ -376,12 +376,11 @@ const mainDisplay = (type) =>{
           removeDataset.className = "secContentDel";
           removeDataset.id = "del"+d.id;
           removeDataset.innerHTML = "<span><strong><i class='material-icons'>delete_forever</i></strong><br></span>";
-          removeDataset.onclick = function () {
+          removeDataset.onclick = () => {
               pandodb[type].delete(d.id);
               document.getElementById("secMenContent").removeChild(datasetContainer);
               field.value = "Dataset removed from "+type;
               ipcRenderer.send('console-logs',"Removed "+d.id+" from database: "+type);
-
             };
           datasetContainer.appendChild(removeDataset);
         }) 

@@ -407,6 +407,10 @@ h1 {
   overflow-y: scroll;
 }
 
+li {
+width:80%;
+}
+
 ul {
   list-style-type: square;
   padding-left: 15px;
@@ -1010,6 +1014,13 @@ stroke-width: 0.3px;
 .flux-subsection{
   border: 1px dashed black;
 }
+.fluxDelDataset{
+float: right;
+font-size: 12px;
+font-weight:bold;
+cursor: pointer;
+}
+
 
 .credential{
   padding-left: 40px;
