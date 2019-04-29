@@ -19,6 +19,7 @@ const wordTokenizer = require('talisman/tokenizers/words');           // Load Ta
 const carryStemmer = require('talisman/stemmers/french/carry');       // idem
 const MultiSet = require('mnemonist/multi-set')                       // Load Mnemonist to manage other data structures
 const Dexie = require('dexie');
+const csv = require('csv-parser');
 
 const date = new Date().toLocaleDateString() +"-"+ new Date().toLocaleTimeString();  
 
@@ -1051,7 +1052,6 @@ const altmetricRetriever = (id,user) => {
           minTime: 100                                                        // Every 150 milliseconds
         });
 
-
         var count = 0;
         var DOIs = [];
         var files = doc.content.entries;
@@ -1105,7 +1105,7 @@ const altmetricRetriever = (id,user) => {
 const tweetImporter = (dataset,query)=>{
 
 var tweetDataset = {};
-let dataStream;
+let dataStream=[];
 
 var metaData = {};
 fs.readFile(query,"utf8", (err, data) => {
@@ -1113,18 +1113,24 @@ fs.readFile(query,"utf8", (err, data) => {
     tweetDataset.metaData = JSON.parse(data);
 });
 
-fs.createReadStream(dataset).on('data', chunk => {
-  dataStream += chunk;
-  console.log(chunk);
-}).on('end', function () {
-  let s = this;
-  setTimeout(function () {
-      s.destroy();
-  }, 500);
+fs.createReadStream(dataset)
+.pipe(csv())
+.on('data', data => dataStream.push(data))
+.on('end', () => {
+  let id = "twitterData - "+date;
+  let content = {type:"twitter"};
+  content.tweetAmount = dataStream.length;
+  var jsonDataset = {};
+  jsonDataset.tweets=dataStream;
+  jsonDataset.metaData=metaData;
+  jsonDataset.id = id;
+  fs.writeFile(userDataPath+"/flatDatasets/"+"twitterData.json", JSON.stringify(jsonDataset), (err) => {
+    if (err) throw err
+    dataWriter(["system"],id,content);
+  });
 })
-.on('close', function () {
-  console.log('closed now');
-console.log(dataStream)
+.on('close', () => {
+  console.log('closing...');
 });
 
 
@@ -1166,8 +1172,7 @@ console.log(fluxArgs)
           case 'sysExport' : sysExport(fluxArgs.sysExport.dest,fluxArgs.sysExport.name,fluxArgs.sysExport.id);
           break;
 
-          case 'tweetImporter' : console.log("plop")
-                                 tweetImporter(fluxArgs.tweetImporter.dataset,fluxArgs.tweetImporter.query);
+          case 'tweetImporter' : tweetImporter(fluxArgs.tweetImporter.dataset,fluxArgs.tweetImporter.query);
           break;
       }
 
