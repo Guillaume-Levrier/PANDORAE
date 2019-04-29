@@ -103,7 +103,7 @@ function createWindow () {
 }
 
 app.on('ready', ()=>{
-  userDataDirTree(userDataPath,["/logs","/userID","/themes"]);
+  userDataDirTree(userDataPath,["/logs","/userID","/themes","/flatDatasets"]);
   createUserId();
   createThemes();
   createWindow();
