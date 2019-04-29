@@ -1,21 +1,32 @@
+import { fstat } from "fs";
+
 onconnect = (e) => {
   var port = e.ports[0];
 
  importScripts("../../node_modules/d3/dist/d3.min.js");    
 
   port.onmessage = (typeRequest) => {
+   
     let type = typeRequest.data.kind;
-    let datajson = typeRequest.data.data;
+    let dataset = typeRequest.dataset;
+    let userPath = typeRequest.userPath;
 
-    let res = {};
+    let res = {mess:"got message"};
+
+    port.postMessage(res);
 
     switch (type) {
 
       case 'gazouillotype':
 
-pandodb.gazouillotype.get(dataset).then(datajson => {
+pandodb.gazouillotype.get(dataset).then(datasetID => {
+  let name = datasetID.name +".json";
+  res.message = userPath+name;
+  port.postMessage(res);
+  /* 
+  fs.readFile(userPath+name,datajson=> {
 
-            var data = datajson[0];
+            var data = datajson.tweets;
         
             // Convert dataset if it comes from scraping instead of a proper API request
             const scrapToApiFormat = (data) => {
@@ -66,12 +77,13 @@ pandodb.gazouillotype.get(dataset).then(datajson => {
             res.dataNest = dataNest;
             res.editedData = data;
             res.median = median;
-            res.keywords = datajson[1];
+            res.keywords = datajson.keywords;
             port.postMessage(res);
             }).catch(error=>{
               port.postMessage(error);
               ipcRenderer.send('console-logs',"error: dataset " +dataset+" is invalid.");
-            });
+            }); */
+          });
         break;
     }
 

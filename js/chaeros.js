@@ -1104,34 +1104,34 @@ const altmetricRetriever = (id,user) => {
 
 const tweetImporter = (dataset,query,name)=>{
 
-var tweetDataset = {};
+var keywords = [];
 let dataStream=[];
 
-var metaData = {};
 fs.readFile(query,"utf8", (err, data) => {
     if (err) throw err;
-    tweetDataset.metaData = JSON.parse(data);
+    data = JSON.parse(data);
+    data.keywords.forEach(d=>keywords.push(d))
 });
 
-fs.createReadStream(dataset)
-.pipe(csv())
-.on('data', data => dataStream.push(data))
-.on('end', () => {
-  let id = name+' '+date;
-  let content = {type:"twitter"};
-  content.tweetAmount = dataStream.length;
-  var jsonDataset = {};
-  jsonDataset.tweets=dataStream;
-  jsonDataset.metaData=metaData;
-  jsonDataset.id = id;
-  fs.writeFile(userDataPath+"/flatDatasets/"+name+".json", JSON.stringify(jsonDataset), (err) => {
-    if (err) throw err
-    dataWriter(["system"],name,content);
-  });
-})
-.on('close', () => {
-  console.log('closing...');
-});
+ fs.createReadStream(dataset)
+    .pipe(csv())
+    .on('data', data => dataStream.push(data))
+    .on('end', () => {
+      let id = name+' '+date;
+      let content = {type:"twitter"};
+      content.tweetAmount = dataStream.length;
+      var jsonDataset = {};
+      jsonDataset.tweets=dataStream;
+      jsonDataset.keywords=keywords;
+      jsonDataset.id = id;
+      fs.writeFile(userDataPath+"/flatDatasets/"+name+".json", JSON.stringify(jsonDataset), (err) => {
+        if (err) throw err
+        dataWriter(["system"],name,content);
+      });
+    })
+    .on('close', () => {
+      console.log('closing...');
+    }); 
 
 
 
