@@ -1107,6 +1107,8 @@ const tweetImporter = (dataset,query,name)=>{
 let content = {'keywords':[],'tweets':[]};
 
 let id = name+date;
+let twDate ="";
+let newDay = {};
 
 fs.readFile(query,"utf8", (err, queryKeywords) => {
     if (err) throw err;
@@ -1124,7 +1126,17 @@ fs.readFile(query,"utf8", (err, queryKeywords) => {
  fs.createReadStream(dataset)
     .pipe(csv())
     .on('data', data => {
-      pandodb.system.where('id').equals(id).modify(d => d.content.tweets.push(data));
+if (data.created_at.substring(0, 10)!=twDate){
+  console.log(newDay);
+  pandodb.system.where('id').equals(id).modify(d => d.content.tweets.push(newDay));
+  twDate = data.created_at.substring(0, 10);
+  newDay = {date:twDate,tweets:[]};
+  newDay.tweets.push(data);
+}
+else {
+  newDay.tweets.push(data);
+}
+      //pandodb.system.where('id').equals(id).modify(d => d.content.tweets.push(data));
       tweetAmount+=1
       ipcRenderer.send('chaeros-notification', tweetAmount+' tweets loaded');
 

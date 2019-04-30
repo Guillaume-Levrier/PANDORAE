@@ -356,6 +356,7 @@ case 'zoteroCollectionBuilder' : fluxArgs.zoteroCollectionBuilder = {};
                 fluxArgs.tweetImporter.dataset = document.getElementById("twitterDataset").files[0].path;
                 fluxArgs.tweetImporter.query = document.getElementById("twitterQuery").files[0].path;
                 fluxArgs.tweetImporter.datasetName = document.getElementById("twitterDatasetName").value;
+                message = "loading twitter dataset" ;
                 break; 
 
 }
