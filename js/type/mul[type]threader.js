@@ -23,7 +23,7 @@ pandodb.gazouillotype.get(dataset).then(datasetID => {
   let name = datasetID.name +".json";
   res.message = userPath+name;
   port.postMessage(res);
-  /* 
+  
   fs.readFile(userPath+name,datajson=> {
 
             var data = datajson.tweets;
@@ -82,7 +82,7 @@ pandodb.gazouillotype.get(dataset).then(datasetID => {
             }).catch(error=>{
               port.postMessage(error);
               ipcRenderer.send('console-logs',"error: dataset " +dataset+" is invalid.");
-            }); */
+            }); 
           });
         break;
     }

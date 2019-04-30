@@ -1775,17 +1775,75 @@ const gazouillotype = (dataset) => {                             // When called,
   
 
   // =========== SHARED WORKER ===========
-  let typeRequest = {kind:"gazouillotype",userPath: userDataPath+"/flatDatasets/",dataset:dataset};
+  /* let typeRequest = {kind:"gazouillotype",userPath: userDataPath+"/flatDatasets/",dataset:dataset};
   console.log(typeRequest)
 
       multiThreader.port.postMessage(typeRequest);
       
   multiThreader.port.onmessage = (res) => {
-  console.log(res);
-  var dataNest = res.data.dataNest;
-  var data = res.data.editedData;
-  var median = res.data.median;
-  var keywords = res.data.keywords.keywords;
+  console.log(res);*/
+  
+  // Forget the worker for now
+  // Data is de facto already ordered by day for IndexedDB purposes
+  // Switch from circles to static force graph
+  // Load only a limited amount of days (controlled by brush)
+
+  pandodb.gazouillotype.get(dataset).then(datajson => {
+
+var data = datajson.content.tweets;
+var keywords = datajson.content.keywords;
+
+const scrapToApiFormat = (data) => {
+  if(data[0].hasOwnProperty('username')) {
+        data.forEach(d=>{
+          d.from_user_name = d.username;
+          d.created_at = d.date;
+          d.retweet_count = d.retweets;
+          d.favorite_count = d.favorites;
+          delete d.username;
+          delete d.date;
+          delete d.retweets;
+          delete d.favorites;
+          })
+      data.reverse();
+    }
+}
+
+var meanRetweetsArray = [];
+
+data.forEach(tweetDataset => {
+
+  scrapToApiFormat(tweetDataset.tweets);
+
+  tweetDataset.tweets.forEach(d=>{
+    d.date = new Date(d.created_at);
+    d.timespan = new Date(Math.round(d.date.getTime()/600000)*600000);
+    if (d.retweet_count>0) {meanRetweetsArray.push(d.retweet_count)};
+
+
+  })
+})
+
+    meanRetweetsArray.sort((a, b) => a - b);
+    var median = meanRetweetsArray[parseInt(meanRetweetsArray.length/2)];
+
+  const piler = () => {
+      for (i = 0; i < data.length; i++) {
+        let j = data[i].tweets.length + 1;
+          for (k = 0; k < data[i].tweets.length; k++) {
+            data[i].tweets[k].indexPosition = j-1;
+            j--;
+          }
+      }
+    }
+
+  piler();
+
+  var dataNest = data;
+
+ console.log(dataNest);
+ console.log(keywords);
+ console.log(median);
   
   var color = d3.scaleSequential(d3.interpolateBlues)
   .clamp(true)
@@ -1806,8 +1864,8 @@ const gazouillotype = (dataset) => {                             // When called,
     let radius = 0;
     const radiusCalculator = () => {
     for (var i = 0; i < dataNest.length; i++) {
-      if (dataNest[i].values.length>2) {
-      radius = (y(dataNest[i].values[1].indexPosition)-y(dataNest[i].values[0].indexPosition))/3;
+      if (dataNest[i].tweets.length>2) {
+      radius = (y(dataNest[i].tweets[1].indexPosition)-y(dataNest[i].tweets[0].indexPosition))/3;
     break;
         }
       }
@@ -1815,12 +1873,15 @@ const gazouillotype = (dataset) => {                             // When called,
   
     radiusCalculator();
   
+console.log("radius = " + radius)
+console.log(data[0])
+
   const keywordsDisplay = () => {
     document.getElementById("tooltip").innerHTML ="<p> Request content:<br> "+JSON.stringify(keywords)+"</p>";
       };
   
   context.append("path")
-      .datum(data)
+      .datum(data[0].tweets)
       .style('fill','steelblue')
       .attr("d", area);
   
@@ -1831,9 +1892,9 @@ const gazouillotype = (dataset) => {                             // When called,
         .call(brush.move, x.range())
         .style("cursor","not-allowed");
   
-  
+  //display only the first day (for testing and dev purpose)
   var circle = view.selectAll("circle")
-                .data(data)
+                .data(data[0].tweets)
                 .enter().append("circle")
                     .attr("class", "circle")
                    .style('fill',d => color(d.retweet_count))
@@ -1893,7 +1954,7 @@ const gazouillotype = (dataset) => {                             // When called,
               .translate(-x(focused.timespan), -y(focused.indexPosition)));
   }
   
-  narrative(data[0]);
+  //narrative(data[0]);
   
   
   
@@ -1914,7 +1975,7 @@ const gazouillotype = (dataset) => {                             // When called,
         .attr("transform", "translate(0,0)")
         .call(zoom);
   */
-  }
+  });
   //});  //======== END OF DATA CALL (PROMISES) ===========
   
   
