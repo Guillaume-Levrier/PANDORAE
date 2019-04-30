@@ -30,7 +30,6 @@ The current available processes are listed below per category.
 If you encounter an issue, please tag this [account](https://mobile.twitter.com/PANDORAE_CORE) or create an issue here on Github.
 
 ### Roadmap
-- Twitter data (API/scrap) connector 
 - Gazouillotype brush/dynamic node display/max node amount
 - Chronotype Ybrush
 - Zotero connector 
