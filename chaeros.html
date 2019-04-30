@@ -7,7 +7,7 @@
 
 ipcRenderer.on('chaeros-compute', (event, fluxAction,fluxArgs,message) => {
   try{
-      ipcRenderer.send('test', 'Switch Started');
+      
       chaeros.chaerosSwitch(fluxAction,fluxArgs);
     } catch (err){
       ipcRenderer.send('console-logs',err);
