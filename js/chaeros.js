@@ -1104,36 +1104,38 @@ const altmetricRetriever = (id,user) => {
 
 const tweetImporter = (dataset,query,name)=>{
 
-var keywords = [];
-let dataStream=[];
+let content = {'keywords':[],'tweets':[]};
 
-fs.readFile(query,"utf8", (err, data) => {
+let id = name+date;
+
+fs.readFile(query,"utf8", (err, queryKeywords) => {
     if (err) throw err;
-    data = JSON.parse(data);
-    data.keywords.forEach(d=>keywords.push(d))
-});
+    queryKeywords = JSON.parse(queryKeywords);
+    queryKeywords.keywords.forEach(d=>content.keywords.push(d))
+
+
+   pandodb.open();
+
+
+   pandodb.system.add({"id":id,"date":date,"name":name,"content":content});
+
+   let tweetAmount = 0;
 
  fs.createReadStream(dataset)
     .pipe(csv())
-    .on('data', data => dataStream.push(data))
-    .on('end', () => {
-      let id = name+' '+date;
-      let content = {type:"twitter"};
-      content.tweetAmount = dataStream.length;
-      var jsonDataset = {};
-      jsonDataset.tweets=dataStream;
-      jsonDataset.keywords=keywords;
-      jsonDataset.id = id;
-      fs.writeFile(userDataPath+"/flatDatasets/"+name+".json", JSON.stringify(jsonDataset), (err) => {
-        if (err) throw err
-        dataWriter(["system"],name,content);
-      });
+    .on('data', data => {
+      pandodb.system.where('id').equals(id).modify(d => d.content.tweets.push(data));
+      tweetAmount+=1
+      ipcRenderer.send('chaeros-notification', tweetAmount+' tweets loaded');
+
     })
-    .on('close', () => {
-      console.log('closing...');
-    }); 
+    .on('end', () => {
 
-
+      ipcRenderer.send('chaeros-notification', 'Twitter dataset loaded into system');
+      ipcRenderer.send('console-logs', 'Twitter dataset loaded into system');
+      setTimeout(()=>{ win.close()},1000);
+    })
+  });
 
 };
 
