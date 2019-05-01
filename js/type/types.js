@@ -1901,7 +1901,6 @@ data.forEach(d=>{
   areaData.push(point);
 });
 
-
 /* context.append("path")
         .datum(areaData)
         .style('fill','steelblue')
@@ -1981,12 +1980,8 @@ context.append("g")
                            d.from_user_tweetcount+""+
                          '<br><br>Request content:<br> '+JSON.stringify(keywords)+'<br><br><br><br><br><br><br><br>&nbsp;</p>')});
   
-
-
 simulation.nodes(circleData).on("tick", ticked);                                         
-    
-                                   
-    
+                              
 function ticked() {                                                               // Actual force function
       circle                                                                            // Node coordinates
       .attr("cx", d => d.x)
@@ -2004,12 +1999,15 @@ function ticked() {                                                             
   
   narrative(circleData[0]);
   
-  
-  
-//const reset = () => narrative(data[0]);
-  
- // d3.select("#option-icon").on("click", reset);           // Clicking the button "reset" triggers the "resetted" function
-  
+ 
+
+
+ setTimeout(() => {
+  zoom.translateExtent([[-200, -400], [width, circleData[0].y*2]]);
+  console.log(circleData[0].y);
+ }, 2000); 
+
+
   loadType();
   
   keywordsDisplay();
