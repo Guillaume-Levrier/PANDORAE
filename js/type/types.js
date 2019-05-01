@@ -1776,17 +1776,15 @@ const gazouillotype = (dataset) => {                             // When called,
 
 
   const scrapToApiFormat = (data) => {
-    if(data.hasOwnProperty('username')) {
-        
+    if(data.hasOwnProperty('date')) {
             data.from_user_name = data.username;
             data.created_at = data.date;
             data.retweet_count = data.retweets;
             data.favorite_count = data.favorites;
-            delete data.username;
+             delete data.username;
             delete data.date;
             delete data.retweets;
             delete data.favorites;
-         
       }
   }
   
@@ -1824,6 +1822,7 @@ datajson.content.tweets=[];                                       // Prepare arr
 var data = datajson.content.tweets;                               // Reassign data
 var keywords = datajson.content.keywords;
 
+console.log(datajson)
 
 // Find out the mean retweet value to attribute color scale
 var meanRetweetsArray = [];
@@ -1882,6 +1881,8 @@ var color = d3.scaleSequential(d3.interpolateBlues)
   
     radiusCalculator();
    
+
+
   const keywordsDisplay = () => {
     document.getElementById("tooltip").innerHTML ="<p> Request content:<br> "+JSON.stringify(keywords)+"</p>";
       };
