@@ -1773,87 +1773,77 @@ const gazouillotype = (dataset) => {                             // When called,
       .y1(d =>y2(d.indexPosition));
   
   var domainDates = [];
-  
-
-  // =========== SHARED WORKER ===========
-  /* let typeRequest = {kind:"gazouillotype",userPath: userDataPath+"/flatDatasets/",dataset:dataset};
-  console.log(typeRequest)
-
-      multiThreader.port.postMessage(typeRequest);
-      
-  multiThreader.port.onmessage = (res) => {
-  console.log(res);*/
-  
-  // Forget the worker for now
-  // Data is de facto already ordered by day for IndexedDB purposes
-  // Switch from circles to static force graph
-  // Load only a limited amount of days (controlled by brush)
 
 
-
-pandodb.gazouillotype.get(dataset).then(datajson => {
-
-datajson.content.tweets=[];
-
-  let tranche = {};
-  let twDate=0;
-   fs.createReadStream(datajson.content.path)
-      .pipe(csv())
-      .on('data', data => {
-        data.date = new Date(data.created_at);
-        data.stamp = Math.round(data.date.getTime()/600000)*600000;
-        data.timespan = new Date(data.stamp);
-  
-  if (data.stamp===twDate){
-    tranche.tweets.push(data);
+  const scrapToApiFormat = (data) => {
+    if(data.hasOwnProperty('username')) {
+        
+            data.from_user_name = data.username;
+            data.created_at = data.date;
+            data.retweet_count = data.retweets;
+            data.favorite_count = data.favorites;
+            delete data.username;
+            delete data.date;
+            delete data.retweets;
+            delete data.favorites;
+         
+      }
   }
-  else {
-    datajson.content.tweets.push(tranche);
-    twDate = data.stamp;
-    tranche = {date:data.timespan,tweets:[]};
-    tranche.tweets.push(data);
+  
+pandodb.gazouillotype.get(dataset).then(datajson => {             // Load dataset info from pandodb
+
+datajson.content.tweets=[];                                       // Prepare array to store tweets into
+
+  let tranche = {date:"",tweets:[]};                              // A tranche will be a pile on the graph
+  let twDate=0;                                                   // Date variable
+  let twtAmount = 0;                                              // Tweet amount variable
+
+   fs.createReadStream(datajson.content.path)                     // Read the flatfile dataset provided by the user
+      .pipe(csv())                                                // pipe buffers to csv parser
+      .on('data', data => {                                       // each line becomes an object
+        scrapToApiFormat(data);                                   // convert the object to the twitter API format
+        data.date = new Date(data.created_at);                    // get the date
+        data.stamp = Math.round(data.date.getTime()/600000)*600000; // make it part of a 10-min pile in milliseconds
+        data.timespan = new Date(data.stamp);                     // turn that into a proper JS date
+  
+  if (data.stamp===twDate){                                       // If a pile already exists
+    tranche.tweets.push(data);                                    // add this tweet to the current pile
   }
-}).on('end', ()=>{
+  else {                                                          // else
+    twtAmount += tranche.tweets.length;                    // add the amount of the previous pile to the previous total
+    datajson.content.tweets.push(tranche);                        // push the pile to the main array
+    twDate = data.stamp;                                          // change pile date
+    tranche = {date:data.timespan,tweets:[]};                     // create new pile object
+    tranche.tweets.push(data);                                    // add tweet to this new pile
+    ipcRenderer.send('chaeros-notification', twtAmount+' tweets loaded');  // send new total to main display
+  }
+}).on('end', ()=>{                                                // Once file has been totally read
 
-console.log(datajson);   
+  datajson.content.tweets.shift();                                // Remove first empty value
 
-var data = datajson.content.tweets;
+var data = datajson.content.tweets;                               // Reassign data
 var keywords = datajson.content.keywords;
 
-const scrapToApiFormat = (data) => {
-  if(data[0].hasOwnProperty('username')) {
-        data.forEach(d=>{
-          d.from_user_name = d.username;
-          d.created_at = d.date;
-          d.retweet_count = d.retweets;
-          d.favorite_count = d.favorites;
-          delete d.username;
-          delete d.date;
-          delete d.retweets;
-          delete d.favorites;
-          })
-      data.reverse();
-    }
-}
 
+// Find out the mean retweet value to attribute color scale
 var meanRetweetsArray = [];
 
-data.forEach(tweetDataset => {
-
-  scrapToApiFormat(tweetDataset.tweets);
-
+data.forEach(tweetDataset => {                                   
   tweetDataset.tweets.forEach(d=>{
     d.date = new Date(d.created_at);
     d.timespan = new Date(Math.round(d.date.getTime()/600000)*600000);
     if (d.retweet_count>0) {meanRetweetsArray.push(d.retweet_count)};
-
-
   })
 })
 
     meanRetweetsArray.sort((a, b) => a - b);
     var median = meanRetweetsArray[parseInt(meanRetweetsArray.length/2)];
 
+var color = d3.scaleSequential(d3.interpolateBlues)
+              .clamp(true)
+              .domain([-median*2,median*10]);
+
+// Assign each tweet a place in the pile according to their index position
   const piler = () => {
       for (i = 0; i < data.length; i++) {
         let j = data[i].tweets.length + 1;
@@ -1865,23 +1855,13 @@ data.forEach(tweetDataset => {
     }
 
   piler();
-
-  var dataNest = data;
-
- console.log(dataNest);
- console.log(keywords);
- console.log(median);
   
-  var color = d3.scaleSequential(d3.interpolateBlues)
-  .clamp(true)
-  .domain([-median*2,median*10]);
-  
-    var firstDate = new Date(dataNest[0].key);
-    var lastDate = new Date(dataNest[dataNest.length-1].key);
+    var firstDate = new Date(data[0].date);
+    var lastDate = new Date(data[data.length-1].date);
     domainDates.push(firstDate,lastDate);
   
-    var totalPiles = (domainDates[1].getTime()-domainDates[0].getTime())/600000;
-  
+    var totalPiles = data.length;
+
     x.domain(domainDates);
     y.domain([0,totalPiles/1.2]);
   
@@ -1889,39 +1869,42 @@ data.forEach(tweetDataset => {
     y2.domain([0, d3.max(data, d=> d.indexPosition)]);
   
     let radius = 0;
+
     const radiusCalculator = () => {
-    for (var i = 0; i < dataNest.length; i++) {
-      if (dataNest[i].tweets.length>2) {
-      radius = (y(dataNest[i].tweets[1].indexPosition)-y(dataNest[i].tweets[0].indexPosition))/3;
+    for (var i = 0; i < data.length; i++) {
+      if (data[i].tweets.length>2) {
+      radius = (y(data[i].tweets[1].indexPosition)-y(data[i].tweets[0].indexPosition))/3;
     break;
         }
       }
     }
   
     radiusCalculator();
-  
-console.log("radius = " + radius)
-console.log(data[0])
-
+   
   const keywordsDisplay = () => {
     document.getElementById("tooltip").innerHTML ="<p> Request content:<br> "+JSON.stringify(keywords)+"</p>";
       };
   
-  context.append("path")
-      .datum(data[0].tweets)
-      .style('fill','steelblue')
-      .attr("d", area);
-  
-  context.append("g")
-        .attr("class", "brush")
-        .attr("transform", "translate(0,"+(50)+")")
-        .call(brush)
-        .call(brush.move, x.range())
-        .style("cursor","not-allowed");
-  
+let circleData = [];
+data.forEach(d=>{d.tweets.forEach(tweet=>circleData.push(tweet))});
+
+/* 
+context.append("path")
+.datum(circleData)
+.style('fill','steelblue')
+.attr("d", area); 
+
+context.append("g")
+  .attr("class", "brush")
+  .attr("transform", "translate(0,"+(50)+")")
+  .call(brush)
+  .call(brush.move, x.range())
+  .style("cursor","not-allowed"); 
+ */
+
   //display only the first day (for testing and dev purpose)
   var circle = view.selectAll("circle")
-                .data(data[0].tweets)
+                .data(circleData)
                 .enter().append("circle")
                     .attr("class", "circle")
                    .style('fill',d => color(d.retweet_count))
