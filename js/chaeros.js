@@ -19,7 +19,6 @@ const wordTokenizer = require('talisman/tokenizers/words');           // Load Ta
 const carryStemmer = require('talisman/stemmers/french/carry');       // idem
 const MultiSet = require('mnemonist/multi-set')                       // Load Mnemonist to manage other data structures
 const Dexie = require('dexie');
-const csv = require('csv-parser');
 
 const date = new Date().toLocaleDateString() +"-"+ new Date().toLocaleTimeString();  
 
@@ -1104,51 +1103,19 @@ const altmetricRetriever = (id,user) => {
 
 const tweetImporter = (dataset,query,name)=>{
 
-let content = {'keywords':[],'tweets':[]};
+let content = {'keywords':[],'path':''};
 
-let id = name+date;
-let twDate ="";
-let newDay = {};
+let id = name + date;
 
 fs.readFile(query,"utf8", (err, queryKeywords) => {
     if (err) throw err;
     queryKeywords = JSON.parse(queryKeywords);
     queryKeywords.keywords.forEach(d=>content.keywords.push(d))
-
-
-   pandodb.open();
-
-
-   pandodb.system.add({"id":id,"date":date,"name":name,"content":content});
-
-   let tweetAmount = 0;
-
- fs.createReadStream(dataset)
-    .pipe(csv())
-    .on('data', data => {
-if (data.created_at.substring(0, 10)!=twDate){
-  console.log(newDay);
-  pandodb.system.where('id').equals(id).modify(d => d.content.tweets.push(newDay));
-  twDate = data.created_at.substring(0, 10);
-  newDay = {date:twDate,tweets:[]};
-  newDay.tweets.push(data);
-}
-else {
-  newDay.tweets.push(data);
-}
-      //pandodb.system.where('id').equals(id).modify(d => d.content.tweets.push(data));
-      tweetAmount+=1
-      ipcRenderer.send('chaeros-notification', tweetAmount+' tweets loaded');
-
-    })
-    .on('end', () => {
-
-      ipcRenderer.send('chaeros-notification', 'Twitter dataset loaded into system');
-      ipcRenderer.send('console-logs', 'Twitter dataset loaded into system');
-      setTimeout(()=>{ win.close()},1000);
-    })
+    let path = userDataPath+"/flatDatasets/"+name+".csv";
+    content.path=path;
+    fs.copyFileSync(dataset,path);
+    dataWriter(["system"],name,content);
   });
-
 };
 
 //========== chaerosSwitch ==========

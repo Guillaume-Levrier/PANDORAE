@@ -13,6 +13,7 @@ const d3 = require('d3');
 const THREE = require('three');
 const userDataPath = remote.app.getPath('userData');
 const Dexie = require('dexie');
+const csv = require('csv-parser');
 
 Dexie.debug = true;
 
@@ -1788,7 +1789,33 @@ const gazouillotype = (dataset) => {                             // When called,
   // Switch from circles to static force graph
   // Load only a limited amount of days (controlled by brush)
 
-  pandodb.gazouillotype.get(dataset).then(datajson => {
+
+
+pandodb.gazouillotype.get(dataset).then(datajson => {
+
+datajson.content.tweets=[];
+
+  let tranche = {};
+  let twDate=0;
+   fs.createReadStream(datajson.content.path)
+      .pipe(csv())
+      .on('data', data => {
+        data.date = new Date(data.created_at);
+        data.stamp = Math.round(data.date.getTime()/600000)*600000;
+        data.timespan = new Date(data.stamp);
+  
+  if (data.stamp===twDate){
+    tranche.tweets.push(data);
+  }
+  else {
+    datajson.content.tweets.push(tranche);
+    twDate = data.stamp;
+    tranche = {date:data.timespan,tweets:[]};
+    tranche.tweets.push(data);
+  }
+}).on('end', ()=>{
+
+console.log(datajson);   
 
 var data = datajson.content.tweets;
 var keywords = datajson.content.keywords;
@@ -1976,7 +2003,7 @@ console.log(data[0])
         .call(zoom);
   */
   });
-  //});  //======== END OF DATA CALL (PROMISES) ===========
+  });  //======== END OF DATA CALL (PROMISES) ===========
   
   
   //======== ZOOM & RESCALE ===========
