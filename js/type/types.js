@@ -1885,8 +1885,14 @@ var color = d3.scaleSequential(d3.interpolateBlues)
     document.getElementById("tooltip").innerHTML ="<p> Request content:<br> "+JSON.stringify(keywords)+"</p>";
       };
   
+let bufferData = [];
+data.forEach(d=>{d.tweets.forEach(tweet=>bufferData.push(tweet))});
+
 let circleData = [];
-data.forEach(d=>{d.tweets.forEach(tweet=>circleData.push(tweet))});
+for (let i = 0; i < 2000; i++) {
+  circleData.push(bufferData[i]);
+}
+
 
 let areaData = [];
 data.forEach(d=>{
@@ -1895,12 +1901,11 @@ data.forEach(d=>{
   areaData.push(point);
 });
 
-console.log(areaData);
 
-context.append("path")
+/* context.append("path")
         .datum(areaData)
         .style('fill','steelblue')
-        .attr("d", area); 
+        .attr("d", area);  */
 
 context.append("g")
   .attr("class", "brush")
@@ -1909,6 +1914,19 @@ context.append("g")
   .call(brush.move, x.range())
   .style("cursor","not-allowed"); 
 
+
+  var simulation = d3.forceSimulation()                      // starting simulation
+  .alphaMin(0.1)                                         // Each action starts at 1 and decrements "Decay" per Tick
+  .alphaDecay(0.035)                                     // "Decay" value
+/*   .force("link",d3.forceLink()
+                  .distance(0)
+                  .strength(0)
+                  .id(d =>  d.title)) */
+  .force('collision',d3.forceCollide()                   // nodes can collide
+                       .radius(radius)    // if expanded is true, they collide with a force superior to 0
+                       .iterations(3))
+  .force("x", d3.forceX().strength(1).x(d => x(d.timespan)))                      // X origin data
+  .force("y", d3.forceY().strength(1).y(d => y(d.indexPosition)));              // Y origin data
 
   //display only the first day (for testing and dev purpose)
   var circle = view.selectAll("circle")
@@ -1963,22 +1981,34 @@ context.append("g")
                            d.from_user_tweetcount+""+
                          '<br><br>Request content:<br> '+JSON.stringify(keywords)+'<br><br><br><br><br><br><br><br>&nbsp;</p>')});
   
+
+
+simulation.nodes(circleData).on("tick", ticked);                                         
+    
+                                   
+    
+function ticked() {                                                               // Actual force function
+      circle                                                                            // Node coordinates
+      .attr("cx", d => d.x)
+      .attr("cy", d => d.y);
+    }
+
   function narrative(focused) {                                                     // Experimental narrative function
        d3.select("#xtypeSVG")
-          .transition().duration(5000)
+          .transition().duration(1)
           .call(zoom.transform, d3.zoomIdentity
               .translate(width / 2, height / 2)
-              .scale(8)
+              .scale(15)
               .translate(-x(focused.timespan), -y(focused.indexPosition)));
   }
   
-  //narrative(data[0]);
+  narrative(circleData[0]);
   
   
   
-  const reset = () => narrative(data[0]);
+//const reset = () => narrative(data[0]);
   
-  d3.select("#option-icon").on("click", reset);           // Clicking the button "reset" triggers the "resetted" function
+ // d3.select("#option-icon").on("click", reset);           // Clicking the button "reset" triggers the "resetted" function
   
   loadType();
   
