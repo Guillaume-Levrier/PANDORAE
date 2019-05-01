@@ -1858,12 +1858,13 @@ var color = d3.scaleSequential(d3.interpolateBlues)
   
     var firstDate = new Date(data[0].date);
     var lastDate = new Date(data[data.length-1].date);
+
     domainDates.push(firstDate,lastDate);
   
     var totalPiles = data.length;
 
     x.domain(domainDates);
-    y.domain([0,totalPiles/1.2]);
+    y.domain([0,totalPiles*2]);
   
     x2.domain(domainDates);
     y2.domain([0, d3.max(data, d=> d.indexPosition)]);
