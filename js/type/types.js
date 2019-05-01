@@ -1746,8 +1746,8 @@ const gazouillotype = (dataset) => {                             // When called,
       .attr("transform", "translate(0,"+(height-brushHeight-50)+")");   // Placing it in the dedicated "brush" area
   
   var zoom = d3.zoom()
-              .scaleExtent([0.6, Infinity])                                    // Extent to which one can zoom in or out
-              .translateExtent([[-200, -Infinity], [Infinity, height+brushHeight]])
+              .scaleExtent([0.8, Infinity])                                    // Extent to which one can zoom in or out
+              .translateExtent([[-200, -400], [width, height+brushHeight]])
               .on("zoom", zoomed);                                     // Trigger the actual zooming function
   
   var brush = d3.brushX()
@@ -1767,10 +1767,10 @@ const gazouillotype = (dataset) => {                             // When called,
   var yAxis = d3.axisRight(y);
   
   var area = d3.area()                                                // Brush content is a single object (area)
-      .curve(d3.curveMonotoneX)
-      .x(d =>x2(d.timespan))
+     // .curve(d3.curveMonotoneX)
+      .x(d=>x2(d.timespan))
       .y0(brushHeight)
-      .y1(d =>y2(d.indexPosition));
+      .y1(d=>y2(d.indexPosition));
   
   var domainDates = [];
 
@@ -1821,8 +1821,6 @@ datajson.content.tweets=[];                                       // Prepare arr
 
 var data = datajson.content.tweets;                               // Reassign data
 var keywords = datajson.content.keywords;
-
-console.log(datajson)
 
 // Find out the mean retweet value to attribute color scale
 var meanRetweetsArray = [];
@@ -1890,11 +1888,19 @@ var color = d3.scaleSequential(d3.interpolateBlues)
 let circleData = [];
 data.forEach(d=>{d.tweets.forEach(tweet=>circleData.push(tweet))});
 
-/* 
+let areaData = [];
+data.forEach(d=>{
+  let point= {timespan:d.tweets[0].timespan,
+              indexPosition:+d.tweets[0].indexPosition};  
+  areaData.push(point);
+});
+
+console.log(areaData);
+
 context.append("path")
-.datum(circleData)
-.style('fill','steelblue')
-.attr("d", area); 
+        .datum(areaData)
+        .style('fill','steelblue')
+        .attr("d", area); 
 
 context.append("g")
   .attr("class", "brush")
@@ -1902,7 +1908,7 @@ context.append("g")
   .call(brush)
   .call(brush.move, x.range())
   .style("cursor","not-allowed"); 
- */
+
 
   //display only the first day (for testing and dev purpose)
   var circle = view.selectAll("circle")
