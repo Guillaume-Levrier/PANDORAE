@@ -1774,6 +1774,7 @@ const gazouillotype = (dataset) => {                             // When called,
       .y1(d=>y2(d.indexPosition)); */
   
   var domainDates = [];
+  var activeDates = [];
 
 
   const scrapToApiFormat = (data) => {
@@ -1819,6 +1820,8 @@ datajson.content.tweets=[];                                       // Prepare arr
 }).on('end', ()=>{                                                // Once file has been totally read
 
   datajson.content.tweets.shift();                                // Remove first empty value
+
+// RE-SORT PILES TO MAKE SURE THEY ARE PAST->FUTURE
 
 var data = datajson.content.tweets;                               // Reassign data
 var keywords = datajson.content.keywords;
@@ -1873,10 +1876,9 @@ var color = d3.scaleSequential(d3.interpolateBlues)
       document.getElementById("tooltip").innerHTML ="<p> Request content:<br> "+JSON.stringify(keywords)+"</p>";
     };
   
-
     x.domain(domainDates);
     y.domain([0,totalPiles*2]);
-  
+
     x2.domain(domainDates);
     y2.domain([0, +d3.max(circleData, d=> {return +d.indexPosition})]);
   
@@ -2040,7 +2042,7 @@ function ticked() {                                                             
   svg.call(zoom).on("dblclick.zoom", null);                         // Zoom and deactivate doubleclick zooming
   //zoom.scaleExtent([1, Math.min(width / (x1 - x0), height / (y1 - y0))]);
 
-
+  context.on(".brush", null);
 
   function zoomed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
@@ -2048,21 +2050,24 @@ function ticked() {                                                             
     context.select(".brush").call(brush.move, x2.range().map(t.invertX, t));
      view.attr("transform", t);
     
-   //  console.log(t.rescaleX(x));
+
        gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
        gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
 
-      /*  var b = d3.event.selection ? x.domain() : brush.extent();
-  
-       var d = x.domain(),
-            r = x.range(),
-            startDate = d[d3.bisect(r, b[0]) - 1],
-            finDate = d[d3.bisect(r, b[1]) - 1];
-   
-       console.log([startDate, finDate]); */
+activeDates = [];
+
+activeDates.push(
+  x.invert(d3.brushSelection(d3.select(".brush").node())[0]),
+  x.invert(d3.brushSelection(d3.select(".brush").node())[1])
+  );
+     
+console.log(activeDates)
+
+    
+ 
+
      }
   
-
   
 
   /*
