@@ -424,10 +424,15 @@ const datasetDisplay = (divId,kind) => {              // This function displays 
 }
 
 const datasetRemove = (kind,db,id)=> {
-     datasetDetail(null,kind,null,null);
+  pandodb[db].get(id).then(dataset=>{
+      if (dataset.content.hasOwnProperty("path")) {
+          fs.unlink(dataset.content.path, (err) => {if (err) throw err;});
+      }
       document.getElementById(id).parentNode.removeChild(document.getElementById(id));
       pandodb[db].delete(id);
       ipcRenderer.send('console-logs',"Removed "+id+" from database: "+db);
+      datasetDetail(null,kind,null,null);
+  })
 }
 //========== datasetDetail ==========
 // Clicking on a dataset displayed by the previous function displays some of its metadata and allows for further actions
