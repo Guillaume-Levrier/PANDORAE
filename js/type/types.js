@@ -1751,6 +1751,7 @@ const gazouillotype = (dataset) => {                             // When called,
   
   var brush = d3.brushX()
       .extent([[0, 0], [width, brushHeight-50]]);
+
       //.on("brush",brushed);
   
   //========== X & Y AXIS  ============                                // Creating two arrays of scales (graph + brush)
@@ -1761,16 +1762,16 @@ const gazouillotype = (dataset) => {                             // When called,
   var xAxis2 = d3.axisBottom(x2).tickFormat(multiFormat);
   
   var y = d3.scaleLinear().range([height-brushHeight,0]),
-      y2 = d3.scaleLinear().range([brushHeight,0]);
+      y2 = d3.scaleLinear().range([150,145]);
   
   var yAxis = d3.axisRight(y);
   
-
+/* 
   // replace area by bin
   var area = d3.area()                                                // Brush content is a single object (area)
       .x(d=>x2(d.timespan))
       .y0(brushHeight)
-      .y1(d=>y2(d.indexPosition));
+      .y1(d=>y2(d.indexPosition)); */
   
   var domainDates = [];
 
@@ -1903,17 +1904,27 @@ data.forEach(d=>{
   areaData.push(point);
 });
 
- context.append("path")
+/*  context.append("path")
         .datum(areaData)
         .style('fill','steelblue')
         .attr("d", area)
-        .style("pointer-events","none");  
+        .style("pointer-events","none");   */
+
+context.append("g")
+        .attr("fill", "steelblue")
+      .selectAll("rect")
+      .data(areaData)
+      .join("rect")
+        .attr("x", d => x2(d.timespan))
+        .attr("y", d => y2(d.indexPosition))
+        .attr("height", d => y2(0) - y2(d.indexPosition))
+        .attr("width", 0.1);
 
 context.append("g")
   .attr("class", "brush")
   .attr("transform", "translate(0,"+(50)+")")
   .call(brush)
-  .call(brush.move, x.range())
+  //.call(brush.move, x.range())
   .style("pointer-events","none"); 
 
 
@@ -2027,18 +2038,33 @@ function ticked() {                                                             
               .call(yAxis);
   
   svg.call(zoom).on("dblclick.zoom", null);                         // Zoom and deactivate doubleclick zooming
-  
   //zoom.scaleExtent([1, Math.min(width / (x1 - x0), height / (y1 - y0))]);
+
+
 
   function zoomed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
     var t = d3.event.transform;
     context.select(".brush").call(brush.move, x2.range().map(t.invertX, t));
      view.attr("transform", t);
+    
+   //  console.log(t.rescaleX(x));
        gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
        gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
+
+      /*  var b = d3.event.selection ? x.domain() : brush.extent();
+  
+       var d = x.domain(),
+            r = x.range(),
+            startDate = d[d3.bisect(r, b[0]) - 1],
+            finDate = d[d3.bisect(r, b[1]) - 1];
+   
+       console.log([startDate, finDate]); */
      }
   
+
+  
+
   /*
   function brushed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
@@ -2055,6 +2081,12 @@ function ticked() {                                                             
   
   }
   */
+
+ var b = context.select('.brush');
+    b.selectAll('.resize').remove();
+    b.selectAll('.select').remove();
+    brush(b);
+
   
   ipcRenderer.send('console-logs',"Starting gazouillotype");           // Starting gazouillotype
   }                                                                 // Close gazouillotype function
