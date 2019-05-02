@@ -1730,7 +1730,8 @@ const gazouillotype = (dataset) => {                             // When called,
   svg.attr("width",width).attr("height", height);                       // Attributing width and height to svg
   
   var view = svg.append("g")                                            // Appending a group to SVG
-                .attr("class", "view");
+                .attr("class", "view")
+                .attr("id","piles");
   
   var brushHeight = 150;                                                // Hardcoding brush height
   
@@ -1743,12 +1744,10 @@ const gazouillotype = (dataset) => {                             // When called,
   var context = svg.append("g")                                         // Creating the "context" SVG group
       .attr("class", "context")                                         // Giving it a CSS/SVG class
       .style("pointer-event","none")
+      .attr("height",brushHeight)
       .attr("transform", "translate(0,"+(height-brushHeight-50)+")");   // Placing it in the dedicated "brush" area
   
-  var zoom = d3.zoom()
-              .scaleExtent([0.8, Infinity])                                    // Extent to which one can zoom in or out
-              .translateExtent([[-200, -400], [width, height+brushHeight]])
-              .on("zoom", zoomed);                                     // Trigger the actual zooming function
+  var zoom = d3.zoom().on("zoom", zoomed);                                     // Trigger the actual zooming function
   
   var brush = d3.brushX()
       .extent([[0, 0], [width, brushHeight-50]]);
@@ -1766,8 +1765,9 @@ const gazouillotype = (dataset) => {                             // When called,
   
   var yAxis = d3.axisRight(y);
   
+
+  // replace area by bin
   var area = d3.area()                                                // Brush content is a single object (area)
-     // .curve(d3.curveMonotoneX)
       .x(d=>x2(d.timespan))
       .y0(brushHeight)
       .y1(d=>y2(d.indexPosition));
@@ -1860,11 +1860,24 @@ var color = d3.scaleSequential(d3.interpolateBlues)
   
     var totalPiles = data.length;
 
+    let bufferData = [];
+    data.forEach(d=>{d.tweets.forEach(tweet=>bufferData.push(tweet))});
+    
+    let circleData = [];
+    for (let i = 0; i < 2000; i++) {
+      circleData.push(bufferData[i]);
+    }
+    
+    const keywordsDisplay = () => {
+      document.getElementById("tooltip").innerHTML ="<p> Request content:<br> "+JSON.stringify(keywords)+"</p>";
+    };
+  
+
     x.domain(domainDates);
     y.domain([0,totalPiles*2]);
   
     x2.domain(domainDates);
-    y2.domain([0, d3.max(data, d=> d.indexPosition)]);
+    y2.domain([0, +d3.max(circleData, d=> {return +d.indexPosition})]);
   
     let radius = 0;
 
@@ -1878,20 +1891,9 @@ var color = d3.scaleSequential(d3.interpolateBlues)
     }
   
     radiusCalculator();
-   
 
-
-  const keywordsDisplay = () => {
-    document.getElementById("tooltip").innerHTML ="<p> Request content:<br> "+JSON.stringify(keywords)+"</p>";
-      };
-  
-let bufferData = [];
-data.forEach(d=>{d.tweets.forEach(tweet=>bufferData.push(tweet))});
-
-let circleData = [];
-for (let i = 0; i < 2000; i++) {
-  circleData.push(bufferData[i]);
-}
+// zoom.scaleExtent([0.8, Infinity]);                                    // Extent to which one can zoom in or out
+// zoom.translateExtent([[-50, -(+d3.max(circleData, d=> {return +d.indexPosition})*radius*2)], [width-(width*0.3), height+brushHeight]])
 
 
 let areaData = [];
@@ -1901,17 +1903,18 @@ data.forEach(d=>{
   areaData.push(point);
 });
 
-/* context.append("path")
+ context.append("path")
         .datum(areaData)
         .style('fill','steelblue')
-        .attr("d", area);  */
+        .attr("d", area)
+        .style("pointer-events","none");  
 
 context.append("g")
   .attr("class", "brush")
   .attr("transform", "translate(0,"+(50)+")")
   .call(brush)
   .call(brush.move, x.range())
-  .style("cursor","not-allowed"); 
+  .style("pointer-events","none"); 
 
 
   var simulation = d3.forceSimulation()                      // starting simulation
@@ -1993,34 +1996,16 @@ function ticked() {                                                             
           .transition().duration(1)
           .call(zoom.transform, d3.zoomIdentity
               .translate(width / 2, height / 2)
-              .scale(15)
+              .scale(10/radius)
               .translate(-x(focused.timespan), -y(focused.indexPosition)));
   }
   
   narrative(circleData[0]);
   
- 
-
-
- setTimeout(() => {
-  zoom.translateExtent([[-200, -400], [width, circleData[0].y*2]]);
-  console.log(circleData[0].y);
- }, 2000); 
-
-
   loadType();
   
   keywordsDisplay();
-  /*
-  svg.append("rect")
-        .attr("class", "zoom")
-        .attr("width", width)
-        .attr("height", height-brushHeight)
-        .style("fill","none")
-        .style("pointer-events","all")
-        .attr("transform", "translate(0,0)")
-        .call(zoom);
-  */
+
   });
   });  //======== END OF DATA CALL (PROMISES) ===========
   
@@ -2043,6 +2028,8 @@ function ticked() {                                                             
   
   svg.call(zoom).on("dblclick.zoom", null);                         // Zoom and deactivate doubleclick zooming
   
+  //zoom.scaleExtent([1, Math.min(width / (x1 - x0), height / (y1 - y0))]);
+
   function zoomed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
     var t = d3.event.transform;
@@ -2069,17 +2056,11 @@ function ticked() {                                                             
   }
   */
   
-  function type(d) {
-    d.date = new Date(d.created_at);
-    d.timespan = new Date(Math.round(d.date.getTime()/600000)*600000);
-    d.indexPosition = +d.indexPosition;
-    return d;
-  }
   ipcRenderer.send('console-logs',"Starting gazouillotype");           // Starting gazouillotype
   }                                                                 // Close gazouillotype function
 
 // ======== TOPOTYPE =======
-
+/* 
 const topotype = (pubdeb,matching,commun) => {                               // When called, draw the topotype
 
   //========== SVG VIEW =============
@@ -2507,7 +2488,7 @@ const topotype = (pubdeb,matching,commun) => {                               // 
   ipcRenderer.send('console-logs',"Starting topotype");          
   }
   
-
+ */
 //========== typesSwitch ==========
 // Switch used to which type to draw/generate
 
