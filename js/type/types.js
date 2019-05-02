@@ -1775,7 +1775,7 @@ const gazouillotype = (dataset) => {                             // When called,
   
   var domainDates = [];
   var activeDates = [];
-
+  var bufferData = [];
 
   const scrapToApiFormat = (data) => {
     if(data.hasOwnProperty('date')) {
@@ -1791,6 +1791,13 @@ const gazouillotype = (dataset) => {                             // When called,
   }
   
 pandodb.gazouillotype.get(dataset).then(datajson => {             // Load dataset info from pandodb
+
+
+// TO DO
+// - limit scaling
+// - find out what is the relevant amount of circles on load
+// - make the force graph fixed and worker based https://bl.ocks.org/mbostock/01ab2e85e8727d6529d20391c0fd9a16
+// - so static nodes + static links
 
 datajson.content.tweets=[];                                       // Prepare array to store tweets into
 
@@ -1864,11 +1871,11 @@ var color = d3.scaleSequential(d3.interpolateBlues)
   
     var totalPiles = data.length;
 
-    let bufferData = [];
+   
     data.forEach(d=>{d.tweets.forEach(tweet=>bufferData.push(tweet))});
     
     let circleData = [];
-    for (let i = 0; i < 2000; i++) {
+    for (let i = 0; i < 10000; i++) {
       circleData.push(bufferData[i]);
     }
     
@@ -1906,11 +1913,6 @@ data.forEach(d=>{
   areaData.push(point);
 });
 
-/*  context.append("path")
-        .datum(areaData)
-        .style('fill','steelblue')
-        .attr("d", area)
-        .style("pointer-events","none");   */
 
 context.append("g")
         .attr("fill", "steelblue")
@@ -2006,7 +2008,6 @@ function ticked() {                                                             
 
   function narrative(focused) {                                                     // Experimental narrative function
        d3.select("#xtypeSVG")
-          .transition().duration(1)
           .call(zoom.transform, d3.zoomIdentity
               .translate(width / 2, height / 2)
               .scale(10/radius)
@@ -2019,7 +2020,7 @@ function ticked() {                                                             
   
   keywordsDisplay();
 
-  });
+      });
   });  //======== END OF DATA CALL (PROMISES) ===========
   
   
@@ -2061,12 +2062,10 @@ activeDates.push(
   x.invert(d3.brushSelection(d3.select(".brush").node())[1])
   );
      
-console.log(activeDates)
 
-    
- 
+}
 
-     }
+     
   
   
 
@@ -2087,10 +2086,6 @@ console.log(activeDates)
   }
   */
 
- var b = context.select('.brush');
-    b.selectAll('.resize').remove();
-    b.selectAll('.select').remove();
-    brush(b);
 
   
   ipcRenderer.send('console-logs',"Starting gazouillotype");           // Starting gazouillotype
