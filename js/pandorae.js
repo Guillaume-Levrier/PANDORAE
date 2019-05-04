@@ -60,10 +60,18 @@ pandodb.version(1).stores({
 // back to Types only what it needs to know.
 if (!!window.SharedWorker) {
     var multiThreader = new SharedWorker("js/type/mul[type]threader.js");
-    ipcRenderer.send('console-logs',"Multithreading enabled.");
-        multiThreader.onerror = () => {
+
+    multiThreader.port.onmessage = (res) => {  
+    if (res.data.type === "notification") {
+      ipcRenderer.send(res.data.dest,res.data.msg);
+    }
+  };
+
+        multiThreader.onerror = (err) => {
                 ipcRenderer.send('console-logs',"Worker failed to start.");
+                ipcRenderer.send('console-logs',JSON.stringify(err));
               };
+
 };
 
 // =========== MAIN LOGO ===========

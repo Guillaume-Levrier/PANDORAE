@@ -1,93 +1,45 @@
-import { fstat } from "fs";
+//import { fstat } from "fs";
+//const {remote, ipcRenderer, shell} = require('electron');
 
 onconnect = (e) => {
   var port = e.ports[0];
 
+  const notifySystem = (dest,msg) => {
+    port.postMessage({type:"notification",dest:dest,msg:msg});
+  }
+  
+  notifySystem('console-logs','Multithreading enabled');
+
  importScripts("../../node_modules/d3/dist/d3.min.js");    
 
-  port.onmessage = (typeRequest) => {
-   
-    let type = typeRequest.data.kind;
-    let dataset = typeRequest.dataset;
-    let userPath = typeRequest.userPath;
-
-    let res = {mess:"got message"};
-
-    port.postMessage(res);
-
-    switch (type) {
-
-      case 'gazouillotype':
-
-pandodb.gazouillotype.get(dataset).then(datasetID => {
-  let name = datasetID.name +".json";
-  res.message = userPath+name;
-  port.postMessage(res);
-  
-  fs.readFile(userPath+name,datajson=> {
-
-            var data = datajson.tweets;
+  port.onmessage = (message) => {
+ 
+    switch (message.data.type) {
+      case "gz": 
+      
+      try {
         
-            // Convert dataset if it comes from scraping instead of a proper API request
-            const scrapToApiFormat = (data) => {
-                if(data[0].hasOwnProperty('username')) {
-                      data.forEach(d=>{
-                        d.from_user_name = d.username;
-                        d.created_at = d.date;
-                        d.retweet_count = d.retweets;
-                        d.favorite_count = d.favorites;
-                        delete d.username;
-                        delete d.date;
-                        delete d.retweets;
-                        delete d.favorites;
-                        })
-                    data.reverse();
-                  }
-            }
+  var circleData = message.data.dataset;
 
-            scrapToApiFormat(data);
+        var simulation = d3.forceSimulation(circleData)                      // starting simulation
+            .force("x", d3.forceX().strength(1))
+            .force("y", d3.forceY().strength(1))
+            .stop();
+  
+    for (var i = 0, n = Math.ceil(Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay())); i < n; ++i) {
+      simulation.tick();
+    }
+    
+  port.postMessage({type:"gz",msg:circleData});
 
-            var meanRetweetsArray = [];
-
-            data.forEach(d=>{
-                      d.date = new Date(d.created_at);
-                      d.timespan = new Date(Math.round(d.date.getTime()/600000)*600000);
-                      if (d.retweet_count>0) {meanRetweetsArray.push(d.retweet_count)};
-              })
-
-              meanRetweetsArray.sort((a, b) => a - b);
-              var median = meanRetweetsArray[parseInt(meanRetweetsArray.length/2)];
-
-              var dataNest = d3.nest()
-                                .key(d => {return d.timespan;})
-                                .entries(data);
-
-            const piler = () => {
-                for (i = 0; i < dataNest.length; i++) {
-                  let j = dataNest[i].values.length + 1;
-                    for (k = 0; k < dataNest[i].values.length; k++) {
-                      dataNest[i].values[k].indexPosition = j-1;
-                      j--;
-                    }
-                }
-              }
-
-            piler();
-
-            res.dataNest = dataNest;
-            res.editedData = data;
-            res.median = median;
-            res.keywords = datajson.keywords;
-            port.postMessage(res);
-            }).catch(error=>{
-              port.postMessage(error);
-              ipcRenderer.send('console-logs',"error: dataset " +dataset+" is invalid.");
-            }); 
-          });
+  } catch (error) {
+    port.postMessage({type:"gz",msg:error});
+  }
         break;
     }
-
     
+  
+
 
   }
   
