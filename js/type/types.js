@@ -1724,8 +1724,17 @@ const pharmacotype = (trials) => {
 // ========= GAZOUILLOTYPE =========
 const gazouillotype = (dataset) => {                             // When called, draw the gazouillotype
 
+
+// TO DO
+// - move to Canvas?
+// - limit scaling
+// - find out what is the relevant amount of circles on load
+// - make the force graph fixed and worker based https://bl.ocks.org/mbostock/01ab2e85e8727d6529d20391c0fd9a16
+// - so static nodes + static links
+
   //========== SVG VIEW =============
   var svg = d3.select(xtype).append("svg").attr("id","xtypeSVG");       // Creating the SVG node
+  var canvas = d3.select(xtype).append("canvas").attr("id","xtypeCANVAS");       // Creating the SVG node
   
   svg.attr("width",width).attr("height", height);                       // Attributing width and height to svg
   
@@ -1741,8 +1750,8 @@ const gazouillotype = (dataset) => {                             // When called,
       .style("fill", "white")                                           // Rectangle background color
         .style("stroke-width","0");                                     // Invisible borders
   
-  var context = svg.append("g")                                         // Creating the "context" SVG group
-      .attr("class", "context")                                         // Giving it a CSS/SVG class
+  var contextBrush = svg.append("g")                                         // Creating the "context" SVG group
+      .attr("class", "contextBrush")                                         // Giving it a CSS/SVG class
       .style("pointer-event","none")
       .attr("height",brushHeight)
       .attr("transform", "translate(0,"+(height-brushHeight-50)+")");   // Placing it in the dedicated "brush" area
@@ -1766,13 +1775,6 @@ const gazouillotype = (dataset) => {                             // When called,
   
   var yAxis = d3.axisRight(y);
   
-/* 
-  // replace area by bin
-  var area = d3.area()                                                // Brush content is a single object (area)
-      .x(d=>x2(d.timespan))
-      .y0(brushHeight)
-      .y1(d=>y2(d.indexPosition)); */
-  
   var domainDates = [];
   var activeDates = [];
   var bufferData = [];
@@ -1792,12 +1794,7 @@ const gazouillotype = (dataset) => {                             // When called,
   
 pandodb.gazouillotype.get(dataset).then(datajson => {             // Load dataset info from pandodb
 
-
-// TO DO
-// - limit scaling
-// - find out what is the relevant amount of circles on load
-// - make the force graph fixed and worker based https://bl.ocks.org/mbostock/01ab2e85e8727d6529d20391c0fd9a16
-// - so static nodes + static links
+  pulse(1,1,10);
 
 datajson.content.tweets=[];                                       // Prepare array to store tweets into
 
@@ -1827,6 +1824,8 @@ datajson.content.tweets=[];                                       // Prepare arr
 }).on('end', ()=>{                                                // Once file has been totally read
 
   datajson.content.tweets.shift();                                // Remove first empty value
+
+
 
 // RE-SORT PILES TO MAKE SURE THEY ARE PAST->FUTURE
 
@@ -1875,7 +1874,7 @@ var color = d3.scaleSequential(d3.interpolateBlues)
     data.forEach(d=>{d.tweets.forEach(tweet=>bufferData.push(tweet))});
     
     let circleData = [];
-    for (let i = 0; i < 10000; i++) {
+    for (let i = 0; i < bufferData.length; i++) {
       circleData.push(bufferData[i]);
     }
     
@@ -1902,9 +1901,6 @@ var color = d3.scaleSequential(d3.interpolateBlues)
   
     radiusCalculator();
 
-// zoom.scaleExtent([0.8, Infinity]);                                    // Extent to which one can zoom in or out
-// zoom.translateExtent([[-50, -(+d3.max(circleData, d=> {return +d.indexPosition})*radius*2)], [width-(width*0.3), height+brushHeight]])
-
 
 let areaData = [];
 data.forEach(d=>{
@@ -1914,7 +1910,7 @@ data.forEach(d=>{
 });
 
 
-context.append("g")
+contextBrush.append("g")
         .attr("fill", "steelblue")
       .selectAll("rect")
       .data(areaData)
@@ -1924,7 +1920,7 @@ context.append("g")
         .attr("height", d => y2(0) - y2(d.indexPosition))
         .attr("width", 0.1);
 
-context.append("g")
+contextBrush.append("g")
   .attr("class", "brush")
   .attr("transform", "translate(0,"+(50)+")")
   .call(brush)
@@ -1932,21 +1928,19 @@ context.append("g")
   .style("pointer-events","none"); 
 
 
-  var simulation = d3.forceSimulation()                      // starting simulation
-  .alphaMin(0.1)                                         // Each action starts at 1 and decrements "Decay" per Tick
-  .alphaDecay(0.035)                                     // "Decay" value
-/*   .force("link",d3.forceLink()
-                  .distance(0)
-                  .strength(0)
-                  .id(d =>  d.title)) */
-  .force('collision',d3.forceCollide()                   // nodes can collide
-                       .radius(radius)    // if expanded is true, they collide with a force superior to 0
-                       .iterations(3))
-  .force("x", d3.forceX().strength(1).x(d => x(d.timespan)))                      // X origin data
-  .force("y", d3.forceY().strength(1).y(d => y(d.indexPosition)));              // Y origin data
+ipcRenderer.send('chaeros-notification', "generating network");  // send new total to main display
+multiThreader.port.postMessage({type:"gz",dataset:circleData});
+
+  
+multiThreader.port.onmessage = (workerAnswer) => {
+  
+  pulse(1,1,10,true);
+
+  circleData = workerAnswer.data.msg;
+  
 
   //display only the first day (for testing and dev purpose)
-  var circle = view.selectAll("circle")
+  view.selectAll("circle")
                 .data(circleData)
                 .enter().append("circle")
                     .attr("class", "circle")
@@ -1997,15 +1991,17 @@ context.append("g")
                            d.from_user_friendcount+"<br> User tweet count: "+
                            d.from_user_tweetcount+""+
                          '<br><br>Request content:<br> '+JSON.stringify(keywords)+'<br><br><br><br><br><br><br><br>&nbsp;</p>')});
-  
-simulation.nodes(circleData).on("tick", ticked);                                         
+    
+                        
+
+//simulation.nodes(circleData).on("tick", ticked);                                         
                               
-function ticked() {                                                               // Actual force function
+/* function ticked() {                                                               // Actual force function
       circle                                                                            // Node coordinates
       .attr("cx", d => d.x)
       .attr("cy", d => d.y);
     }
-
+ */
   function narrative(focused) {                                                     // Experimental narrative function
        d3.select("#xtypeSVG")
           .call(zoom.transform, d3.zoomIdentity
@@ -2020,6 +2016,7 @@ function ticked() {                                                             
   
   keywordsDisplay();
 
+          }  // === Getting worker answer
       });
   });  //======== END OF DATA CALL (PROMISES) ===========
   
@@ -2043,15 +2040,14 @@ function ticked() {                                                             
   svg.call(zoom).on("dblclick.zoom", null);                         // Zoom and deactivate doubleclick zooming
   //zoom.scaleExtent([1, Math.min(width / (x1 - x0), height / (y1 - y0))]);
 
-  context.on(".brush", null);
+  contextBrush.on(".brush", null);
 
   function zoomed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
     var t = d3.event.transform;
-    context.select(".brush").call(brush.move, x2.range().map(t.invertX, t));
+    contextBrush.select(".brush").call(brush.move, x2.range().map(t.invertX, t));
      view.attr("transform", t);
     
-
        gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
        gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
 
