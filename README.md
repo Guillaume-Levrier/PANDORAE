@@ -1,3 +1,5 @@
+<p align="center"><img src="./PANDORAE.png" width="200px" alt="PANDORAE Logo"></p>
+
 # PANDORÆ Roadmap
 
 PANDORÆ is currently in beta. Available processes should be functional.
