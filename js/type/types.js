@@ -1724,7 +1724,6 @@ const pharmacotype = (trials) => {
 // ========= GAZOUILLOTYPE =========
 const gazouillotype = (dataset) => {                             // When called, draw the gazouillotype
 
-
 // TO DO
 // - move to Canvas?
 // - limit scaling
@@ -1764,14 +1763,14 @@ const gazouillotype = (dataset) => {                             // When called,
       //.on("brush",brushed);
   
   //========== X & Y AXIS  ============                                // Creating two arrays of scales (graph + brush)
-  var x = d3.scaleTime().range([0,width-(0.3*width)]),
+  var x = d3.scaleTime(),
       x2 = d3.scaleTime().range([0,width-(0.3*width)]);
   
   var xAxis = d3.axisBottom(x).tickFormat(multiFormat);
   var xAxis2 = d3.axisBottom(x2).tickFormat(multiFormat);
   
-  var y = d3.scaleLinear().range([height-brushHeight,0]),
-      y2 = d3.scaleLinear().range([150,145]);
+  var y = d3.scaleLinear().range([height-brushHeight,0])
+  var y2 = d3.scaleLinear().range([150,145]);
   
   var yAxis = d3.axisRight(y);
   
@@ -1794,7 +1793,7 @@ const gazouillotype = (dataset) => {                             // When called,
   
 pandodb.gazouillotype.get(dataset).then(datajson => {             // Load dataset info from pandodb
 
-  pulse(1,1,10);
+  
 
 datajson.content.tweets=[];                                       // Prepare array to store tweets into
 
@@ -1823,9 +1822,9 @@ datajson.content.tweets=[];                                       // Prepare arr
   }
 }).on('end', ()=>{                                                // Once file has been totally read
 
+  ipcRenderer.send('chaeros-notification', "rebuilding data");  // send new total to main display
+
   datajson.content.tweets.shift();                                // Remove first empty value
-
-
 
 // RE-SORT PILES TO MAKE SURE THEY ARE PAST->FUTURE
 
@@ -1869,8 +1868,8 @@ var color = d3.scaleSequential(d3.interpolateBlues)
     domainDates.push(firstDate,lastDate);
   
     var totalPiles = data.length;
-
-   
+    var pileExtent = (lastDate - firstDate)/600000;
+    
     data.forEach(d=>{d.tweets.forEach(tweet=>bufferData.push(tweet))});
     
     let circleData = [];
@@ -1881,9 +1880,9 @@ var color = d3.scaleSequential(d3.interpolateBlues)
     const keywordsDisplay = () => {
       document.getElementById("tooltip").innerHTML ="<p> Request content:<br> "+JSON.stringify(keywords)+"</p>";
     };
-  
+
     x.domain(domainDates);
-    y.domain([0,totalPiles*2]);
+    y.domain([0,+d3.max(circleData, d=> {return +d.indexPosition})]);
 
     x2.domain(domainDates);
     y2.domain([0, +d3.max(circleData, d=> {return +d.indexPosition})]);
@@ -1898,9 +1897,20 @@ var color = d3.scaleSequential(d3.interpolateBlues)
         }
       }
     }
-  
+
     radiusCalculator();
 
+console.log("radius :"+radius)
+console.log("pileExtent : "+ pileExtent)
+    const xRanger = () => {        // Determine X axis range according to Y-axis (& radius)
+      if (radius>=1) {
+        x.range([0,(radius)*pileExtent*3])
+      } else {
+        x.range([0,pileExtent*(1+radius)])
+      }
+    }
+  
+    xRanger();
 
 let areaData = [];
 data.forEach(d=>{
