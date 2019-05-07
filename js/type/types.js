@@ -1754,7 +1754,8 @@ const gazouillotype = (dataset) => {                             // When called,
       .attr("height",brushHeight)
       .attr("transform", "translate(0,"+(height-brushHeight-50)+")");   // Placing it in the dedicated "brush" area
   
-  var zoom = d3.zoom().on("zoom", zoomed);                                     // Trigger the actual zooming function
+  var zoom = d3.zoom().on("zoom", zoomed)
+                .translateExtent([[-width/3,0],[Infinity,height]]);                                     
   
   var brush = d3.brushX()
       .extent([[0, 0], [width, brushHeight-50]]);
@@ -2033,8 +2034,8 @@ multiThreader.port.onmessage = (workerAnswer) => {
     contextBrush.select(".brush").call(brush.move, x2.range().map(t.invertX, t));
      view.attr("transform", t);
     
-       gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
-       gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
+       gX.call(xAxis.scale(t.rescaleX(x)));
+       gY.call(yAxis.scale(t.rescaleY(y)));
 
 activeDates = [];
 
