@@ -123,9 +123,9 @@ const formatMillisecond = locale.format(".%L"),
     formatSecond = locale.format(":%S"),
     formatMinute = locale.format("%I:%M"),
     formatHour = locale.format("%H"),
-    formatDay = locale.format("%d %B %Y"),
+    formatDay = locale.format("%d/%m/%Y"),
     formatWeek = locale.format("%d %b %Y"),
-    formatMonth = locale.format("%B %Y"),
+    formatMonth = locale.format("%m/%Y"),
     formatYear = locale.format("%Y");
 
 const multiFormat = (date) =>
@@ -1752,25 +1752,27 @@ const gazouillotype = (dataset) => {                             // When called,
       .attr("class", "contextBrush")                                         // Giving it a CSS/SVG class
       .style("pointer-event","none")
       .attr("height",brushHeight)
+      .attr("width",width-(0.3*width))
       .attr("transform", "translate(0,"+(height-brushHeight-50)+")");   // Placing it in the dedicated "brush" area
   
   var zoom = d3.zoom().on("zoom", zoomed)
                 .translateExtent([[-width/3,0],[Infinity,height]]);                                     
   
   var brush = d3.brushX()
-      .extent([[0, 0], [width, brushHeight-50]]);
-
-      //.on("brush",brushed);
-  
+                .extent([[0, 0], [width-(0.3*width), brushHeight-50]]);
+               // .on("brush",brushed);
+                
   //========== X & Y AXIS  ============                                // Creating two arrays of scales (graph + brush)
   var x = d3.scaleTime();
-  var x2 = d3.scaleTime().range([0,width-(0.3*width)]);
-  
-  var xAxis = d3.axisBottom(x).tickFormat(multiFormat);
-  
   var y = d3.scaleLinear().range([height-brushHeight,0])
-  var y2 = d3.scaleLinear().range([150,145]);
   
+  var x2 = d3.scaleTime();
+  var y2 = d3.scaleLinear().range([150,0]);
+
+  var xAxis = d3.axisBottom(x).tickFormat(multiFormat);
+  var xAxis2 = d3.axisBottom(x2).tickFormat(multiFormat);
+  
+
   var yAxis = d3.axisRight(y);
   
   var domainDates = [];
@@ -1783,13 +1785,15 @@ const gazouillotype = (dataset) => {                             // When called,
             data.created_at = data.date;
             data.retweet_count = data.retweets;
             data.favorite_count = data.favorites;
-             delete data.username;
+            delete data.username;
             delete data.date;
             delete data.retweets;
             delete data.favorites;
       }
   }
-  
+
+// LOADING DATA
+
 pandodb.gazouillotype.get(dataset).then(datajson => {             // Load dataset info from pandodb
 
 datajson.content.tweets=[];                                       // Prepare array to store tweets into
@@ -1878,12 +1882,14 @@ var color = d3.scaleSequential(d3.interpolateBlues)
       document.getElementById("tooltip").innerHTML ="<p> Request content:<br> "+JSON.stringify(keywords)+"</p>";
     };
 
-    x.domain(domainDates);
+//    x.domain(domainDates);
+
     y.domain([0,+d3.max(circleData, d=> {return +d.indexPosition})]);
 
-    x2.domain(domainDates);
-    y2.domain([0, +d3.max(circleData, d=> {return +d.indexPosition})]);
-  
+    //xAxis.ticks(pileExtent);                                          // Amount of Ticks on X Axis
+
+    y2.domain([0,+d3.max(circleData, d=> {return +d.indexPosition})]);
+
     let radius = 0;
 
     const radiusCalculator = () => {
@@ -1899,11 +1905,12 @@ var color = d3.scaleSequential(d3.interpolateBlues)
 
     const xRanger = () => {        // Determine X axis range according to Y-axis (& radius)
       if (radius>=1) {
-        x.range([0,(radius)*pileExtent*3])
+        x.domain(domainDates).range([0,(radius)*pileExtent*3])
       } else {
-        x.range([0,pileExtent*(1+radius)])
+        x.domain(domainDates).range([0,pileExtent*(1+radius)])
       }
-      x.ticks(pileExtent)
+      x2.domain(domainDates).range([0,width-(0.3*width)]);
+      //x.ticks(pileExtent)
     }
   
     xRanger();
@@ -1916,25 +1923,8 @@ data.forEach(d=>{
   areaData.push(point);
 });
 
-contextBrush.selectAll("rect")
-            .data(areaData)
-            .append("g")
-              .join("rect")
-              .attr("fill", "steelblue")
-              .attr("x", d => x2(d.timespan))
-              .attr("y", d => y2(d.indexPosition))
-              .attr("height", d => y2(0) - y2(d.indexPosition))
-              .attr("width", 0.1);
-
-contextBrush.append("g")
-  .attr("class", "brush")
-  .attr("transform", "translate(0,"+(50)+")")
-  .call(brush)
-  //.call(brush.move, x.range())
-  .style("pointer-events","none"); 
-
-
 ipcRenderer.send('chaeros-notification', "generating network");  // send new total to main display
+
 multiThreader.port.postMessage({type:"gz",dataset:circleData});
 
 multiThreader.port.onmessage = (workerAnswer) => {
@@ -1994,6 +1984,22 @@ multiThreader.port.onmessage = (workerAnswer) => {
                            d.from_user_tweetcount+""+
                          '<br><br>Request content:<br> '+JSON.stringify(keywords)+'<br><br><br><br><br><br><br><br>&nbsp;</p>')});
 
+    contextBrush.append("g")
+            .attr("fill", "steelblue")
+          .selectAll("rect")
+          .data(areaData)
+          .join("rect")
+            .attr("x", d => x2(d.timespan))
+            .attr("y", d => y2(d.indexPosition))
+            .attr("height", d => y2(0) - y2(d.indexPosition))
+            .attr("width", 1);
+            
+   contextBrush.append("g")
+      .attr("class", "brush")
+      .attr("transform", "translate(0,"+(50)+")")
+      .call(brush)
+      .call(brush.move, x2.range()); 
+                
   function narrative(focused) {                                                     // Experimental narrative function
        d3.select("#xtypeSVG")
           .call(zoom.transform, d3.zoomIdentity
@@ -2002,23 +2008,29 @@ multiThreader.port.onmessage = (workerAnswer) => {
               .translate(-x(focused.timespan), -y(focused.indexPosition)));
   }
   
-  narrative(circleData[0]);
+ narrative(circleData[0]);
   
   loadType();
   
   keywordsDisplay();
-
+  
           }  // === Getting worker answer
       });
   });  //======== END OF DATA CALL (PROMISES) ===========
   
   
   //======== ZOOM & RESCALE ===========
+
   var gX = svg.append("g")                                          // Make X axis rescalable
               .attr("class", "axis axis--x")
               .attr("transform", "translate(0,"+ (height - 180) +")")
               .call(xAxis);
   
+  var gX2 = contextBrush.append("g")                                          // Make X axis rescalable
+              .attr("class", "axis axis--x")
+              .attr("transform", "translate(0,"+ (150) +")")
+              .call(xAxis2);
+
   var gY = svg.append("g")                                          // Make Y axis rescalable
               .attr("class", "axis axis--y")
               .attr("transform", "translate(" + (width -(0.3*width)-70 )+ ",0)")
@@ -2026,24 +2038,42 @@ multiThreader.port.onmessage = (workerAnswer) => {
   
   svg.call(zoom).on("dblclick.zoom", null);                         // Zoom and deactivate doubleclick zooming
 
-  contextBrush.on(".brush", null);
+ // contextBrush.on(".brush", null);
 
   function zoomed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+
     var t = d3.event.transform;
-    contextBrush.select(".brush").call(brush.move, x2.range().map(t.invertX, t));
+    
+    let rangeRatio = x.range()[1]/x2.range()[1];
+
      view.attr("transform", t);
     
-       gX.call(xAxis.scale(t.rescaleX(x)));
-       gY.call(yAxis.scale(t.rescaleY(y)));
+       gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
+       gX2.call(xAxis2);
+       gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
 
+       contextBrush.select(".brush").call(brush.move, [(x2.range().map(t.invertX, t)[0])/rangeRatio,(x2.range().map(t.invertX, t)[1])/rangeRatio]);
+  
 activeDates = [];
 
-  activeDates.push(
-      x.invert(d3.brushSelection(d3.select(".brush").node())[0]),
-      x.invert(d3.brushSelection(d3.select(".brush").node())[1])
-  );
-    
+   activeDates.push(
+      x2.invert(d3.brushSelection(d3.select(".brush").node())[0]),
+      x2.invert(d3.brushSelection(d3.select(".brush").node())[1])
+  ); 
+
+}
+
+
+function brushed() {
+  if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+  /* var s = d3.event.selection || x2.range();
+  x.domain(s.map(x2.invert, x2));
+  focus.select(".area").attr("d", area);
+  focus.select(".axis--x").call(xAxis);
+  svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
+      .scale(width / (s[1] - s[0]))
+      .translate(-s[0], 0)); */
 }
 
   ipcRenderer.send('console-logs',"Starting gazouillotype");           // Starting gazouillotype
