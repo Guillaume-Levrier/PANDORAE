@@ -49,6 +49,12 @@ const loadType = () => {
   field.value = "";
 }
 
+// =========== XTYPE ===========
+const xtype = document.getElementById("xtype");             // xtype is a div containing each (-type) visualisation
+const width = xtype.clientWidth;                            // Fetching client width
+const height = xtype.clientHeight;                          // Fetching client height
+const toolWidth = (0.3*width)+20;
+
 
 // =========== LINKS ===========
 const links = {};
@@ -649,14 +655,14 @@ const chronotype = (bibliography,links) => {                          // When ca
   //========== SVG VIEW =============
   var svg = d3.select(xtype).append("svg").attr("id","xtypeSVG");       // Creating the SVG node
   
-  svg.attr("width", width-(0.3*width)).attr("height", height);          // Attributing width and height to svg
+  svg.attr("width", width-toolWidth).attr("height", height);          // Attributing width and height to svg
   
   var view = svg.append("g")                                            // Appending a group to SVG
                 .attr("class", "view");                                 // CSS viewfinder properties
   
   var zoom = d3.zoom()
                .scaleExtent([1, 20])                                    // Extent to which one can zoom in or out
-               .translateExtent([[0,0], [width-(0.3*width), height*height]]) // Extent to which one can go up/down/left/right
+               .translateExtent([[0,0], [width-toolWidth, height*height]]) // Extent to which one can go up/down/left/right
                .on("zoom", zoomed);                                     // Trigger the actual zooming function
   
   //============ RESET ============
@@ -672,7 +678,7 @@ const chronotype = (bibliography,links) => {                          // When ca
   //========== X & Y AXIS  ============
   var x = d3.scaleLinear()                             // X axis scale (each area has its own attributed value)
       .domain([-.3,1.3])
-      .range([0, width-(0.3*width)]);                  // Graph size is 0.7 times the client width (0.3 -> tooltip)
+      .range([0, width-toolWidth]);                  // Graph size is 0.7 times the client width (0.3 -> tooltip)
   
   var xAxis = d3.axisBottom(x)                         // Actual X axis
       .scale(x)                                        // Scale has been declared just above
@@ -1277,7 +1283,7 @@ const geotype = (locations) => {
   // ========== SVG VIEW ==========
   var svg = d3.select(xtype).append("svg").attr("id","xtypeSVG");
   
-  svg.attr("width", width-(0.3*width)).attr("height", height);        // Attributing width and height to svg
+  svg.attr("width", width-toolWidth).attr("height", height);        // Attributing width and height to svg
   
   var view = svg.append("g")                                          // Appending a group to SVG
                 .attr("class", "view");                               // CSS viewfinder properties
@@ -1285,7 +1291,7 @@ const geotype = (locations) => {
   //globe properties and beginning aspect
   const projection = d3.geoOrthographic()
       .scale(340)
-      .translate([width-(0.3*width)*2, height / 2])
+      .translate([width-toolWidth*2, height / 2])
       .clipAngle(90)
       .precision(.1)
       .rotate([-20,-40,0]);
@@ -1307,7 +1313,7 @@ const geotype = (locations) => {
   //globe outline and background
     view.append("circle")
         .attr("class", "graticule-outline")
-        .attr("cx", width-(0.3*width)*2)
+        .attr("cx", width-toolWidth*2)
         .attr("cy", height / 2)
         .attr("r", projection.scale());
   
@@ -1725,11 +1731,9 @@ const pharmacotype = (trials) => {
 const gazouillotype = (dataset) => {                             // When called, draw the gazouillotype
 
 // TO DO
-// - move to Canvas?
-// - limit scaling
 // - find out what is the relevant amount of circles on load
-// - make the force graph fixed and worker based https://bl.ocks.org/mbostock/01ab2e85e8727d6529d20391c0fd9a16
-// - so static nodes + static links
+// - dynamic node loading/unloading
+// - links ?
 
   //========== SVG VIEW =============
   var svg = d3.select(xtype).append("svg").attr("id","xtypeSVG");       // Creating the SVG node
@@ -1752,15 +1756,15 @@ const gazouillotype = (dataset) => {                             // When called,
       .attr("class", "contextBrush")                                         // Giving it a CSS/SVG class
       .style("pointer-event","none")
       .attr("height",brushHeight)
-      .attr("width",width-(0.3*width))
+      .attr("width",width-toolWidth)
       .attr("transform", "translate(0,"+(height-brushHeight-50)+")");   // Placing it in the dedicated "brush" area
   
   var zoom = d3.zoom().on("zoom", zoomed)
                 .translateExtent([[-width/3,0],[Infinity,height]]);                                     
   
   var brush = d3.brushX()
-                .extent([[0, 0], [width-(0.3*width), brushHeight-50]]);
-               // .on("brush",brushed);
+                .extent([[0, 0], [width-toolWidth, brushHeight-50]])
+                .on("brush end", brushed);
                 
   //========== X & Y AXIS  ============                                // Creating two arrays of scales (graph + brush)
   var x = d3.scaleTime();
@@ -1778,6 +1782,7 @@ const gazouillotype = (dataset) => {                             // When called,
   var domainDates = [];
   var activeDates = [];
   var bufferData = [];
+  let radius = 0;
 
   const scrapToApiFormat = (data) => {
     if(data.hasOwnProperty('date')) {
@@ -1801,6 +1806,7 @@ datajson.content.tweets=[];                                       // Prepare arr
   let tranche = {date:"",tweets:[]};                              // A tranche will be a pile on the graph
   let twDate=0;                                                   // Date variable
   let twtAmount = 0;                                              // Tweet amount variable
+  
 
    fs.createReadStream(datajson.content.path)                     // Read the flatfile dataset provided by the user
       .pipe(csv())                                                // pipe buffers to csv parser
@@ -1882,15 +1888,9 @@ var color = d3.scaleSequential(d3.interpolateBlues)
       document.getElementById("tooltip").innerHTML ="<p> Request content:<br> "+JSON.stringify(keywords)+"</p>";
     };
 
-//    x.domain(domainDates);
-
     y.domain([0,+d3.max(circleData, d=> {return +d.indexPosition})]);
 
-    //xAxis.ticks(pileExtent);                                          // Amount of Ticks on X Axis
-
     y2.domain([0,+d3.max(circleData, d=> {return +d.indexPosition})]);
-
-    let radius = 0;
 
     const radiusCalculator = () => {
     for (var i = 0; i < data.length; i++) {
@@ -1909,8 +1909,8 @@ var color = d3.scaleSequential(d3.interpolateBlues)
       } else {
         x.domain(domainDates).range([0,pileExtent*(1+radius)])
       }
-      x2.domain(domainDates).range([0,width-(0.3*width)]);
-      //x.ticks(pileExtent)
+      x2.domain(domainDates).range([0,width-toolWidth]);
+      xAxis.ticks(x.range()[1]/100);
     }
   
     xRanger();
@@ -2014,7 +2014,7 @@ multiThreader.port.onmessage = (workerAnswer) => {
   
   keywordsDisplay();
   
-          }  // === Getting worker answer
+          }  //======== END OF WORKER ANWSER ===========
       });
   });  //======== END OF DATA CALL (PROMISES) ===========
   
@@ -2033,12 +2033,14 @@ multiThreader.port.onmessage = (workerAnswer) => {
 
   var gY = svg.append("g")                                          // Make Y axis rescalable
               .attr("class", "axis axis--y")
-              .attr("transform", "translate(" + (width -(0.3*width)-70 )+ ",0)")
+              .attr("transform", "translate(" + (width -toolWidth-70 )+ ",0)")
               .call(yAxis);
   
   svg.call(zoom).on("dblclick.zoom", null);                         // Zoom and deactivate doubleclick zooming
 
  // contextBrush.on(".brush", null);
+
+ var midDate = new Date();
 
   function zoomed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
@@ -2053,27 +2055,33 @@ multiThreader.port.onmessage = (workerAnswer) => {
        gX2.call(xAxis2);
        gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
 
-       contextBrush.select(".brush").call(brush.move, [(x2.range().map(t.invertX, t)[0])/rangeRatio,(x2.range().map(t.invertX, t)[1])/rangeRatio]);
-  
-activeDates = [];
+       contextBrush.select(".brush").call(brush.move, 
+        [(x2.range().map(t.invertX, t)[0])/rangeRatio,
+          (x2.range().map(t.invertX, t)[1])/rangeRatio]);
+
+  activeDates = [];
 
    activeDates.push(
       x2.invert(d3.brushSelection(d3.select(".brush").node())[0]),
       x2.invert(d3.brushSelection(d3.select(".brush").node())[1])
   ); 
 
+  midDate = new Date(activeDates[0].getTime() + ((activeDates[1].getTime()-activeDates[0].getTime())/2));
+
+  console.log(midDate);  
+
 }
 
 
 function brushed() {
   if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-  /* var s = d3.event.selection || x2.range();
-  x.domain(s.map(x2.invert, x2));
-  focus.select(".area").attr("d", area);
-  focus.select(".axis--x").call(xAxis);
-  svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
-      .scale(width / (s[1] - s[0]))
-      .translate(-s[0], 0)); */
+  
+
+
+  d3.select("#xtypeSVG")
+          .call(zoom.transform, d3.zoomIdentity
+              .scale(10/radius)
+              .translate(-x(midDate), -y(20)));
 }
 
   ipcRenderer.send('console-logs',"Starting gazouillotype");           // Starting gazouillotype
@@ -2090,7 +2098,7 @@ const topotype = (pubdeb,matching,commun) => {                               // 
   
   var tokenSelected = [];
   
-  svg.attr("width", width-(0.3*width)).attr("height", height);                // Attributing width and height to svg
+  svg.attr("width", width-toolWidth).attr("height", height);                // Attributing width and height to svg
   
   var view = svg.append("g")                                                  // Appending a group to SVG
                 .attr("class", "view");                                       // CSS viewfinder properties
@@ -2103,7 +2111,7 @@ const topotype = (pubdeb,matching,commun) => {                               // 
   
   var x = d3.scaleLinear()                                                    // x is a linear scale
             .domain([-140, 140])                                              // Domain means value range on the graph onload
-            .range([0, width-(0.3*width)]);                                               // Range is pixel display size
+            .range([0, width-toolWidth]);                                               // Range is pixel display size
   
   var y = d3.scaleLinear()                                                    // y is a linear scale
       .domain([2000,-800])                                                    // Domain is negative to allow contour display
@@ -2442,7 +2450,7 @@ const topotype = (pubdeb,matching,commun) => {                               // 
                  .text("← Conservative interventions #");
   
      var xLegendRight = svg.append("text")
-                  .attr("x", width-(0.3*width)-20)
+                  .attr("x", width-toolWidth-20)
                   .attr("y", height/2-5)
                   .attr("stroke", "white")
                   .attr("stroke-width", 2)
@@ -2451,7 +2459,7 @@ const topotype = (pubdeb,matching,commun) => {                               // 
                   .text("Liberal interventions # →");
   
               svg.append("text")
-                  .attr("x", width-(0.3*width)-20)
+                  .attr("x", width-toolWidth-20)
                   .attr("y", height/2-5)
                   .attr("text-anchor", "end")
                   .style("font-size","11")
