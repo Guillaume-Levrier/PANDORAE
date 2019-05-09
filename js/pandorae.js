@@ -110,10 +110,6 @@ var pandoratio = 0;                         // Used in three.js transitions (fro
 
 var field = document.getElementById("field");
 
-// =========== XTYPE ===========
-const xtype = document.getElementById("xtype");             // xtype is a div containing each (-type) visualisation
-const width = xtype.clientWidth;                            // Fetching client width
-const height = xtype.clientHeight;                          // Fetching client height
 var xtypeExists = false;                                    // xtype doesn't exist on document load
 var coreExists = true;                                      // core does exist on document load
 
