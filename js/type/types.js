@@ -1764,7 +1764,7 @@ const gazouillotype = (dataset) => {                             // When called,
   
   var brush = d3.brushX()
                 .extent([[0, 0], [width-toolWidth, brushHeight-50]])
-                .on("brush end", brushed);
+                .on("end", brushed);
                 
   //========== X & Y AXIS  ============                                // Creating two arrays of scales (graph + brush)
   var x = d3.scaleTime();
@@ -2060,26 +2060,29 @@ multiThreader.port.onmessage = (workerAnswer) => {
         [(x2.range().map(t.invertX, t)[0])/rangeRatio,
           (x2.range().map(t.invertX, t)[1])/rangeRatio]);
 
-  activeDates = [];
-
-   activeDates.push(
-      x2.invert(d3.brushSelection(d3.select(".brush").node())[0]),
-      x2.invert(d3.brushSelection(d3.select(".brush").node())[1])
-  ); 
-
-  midDate = new Date(activeDates[0].getTime() + ((activeDates[1].getTime()-activeDates[0].getTime())/2));
-
-  console.log(midDate);  
-
+          
 }
 
 
 function brushed() {
   if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
 
+
+
+activeDates = [];
+
+activeDates.push(
+   x2.invert(d3.brushSelection(d3.select(".brush").node())[0]),
+   x2.invert(d3.brushSelection(d3.select(".brush").node())[1])
+); 
+
+midDate = new Date(activeDates[0].getTime()+((activeDates[1].getTime()-activeDates[0].getTime())/2));
+
+let zoomScale = (d3.brushSelection(d3.select(".brush").node())[1]-d3.brushSelection(d3.select(".brush").node())[0]);
+
   d3.select("#xtypeSVG")
           .call(zoom.transform, d3.zoomIdentity
-              .scale(10/radius)
+              .scale(1)
               .translate(-x(midDate), -y(20)));
 }
 
