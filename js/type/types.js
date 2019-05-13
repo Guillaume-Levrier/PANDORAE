@@ -1759,8 +1759,8 @@ const gazouillotype = (dataset) => {                             // When called,
       .attr("width",width-toolWidth)
       .attr("transform", "translate(0,"+(height-brushHeight-50)+")");   // Placing it in the dedicated "brush" area
   
-  var zoom = d3.zoom().on("zoom", zoomed)
-                .translateExtent([[-width/3,0],[Infinity,height]]);                                     
+  var zoom = d3.zoom().on("zoom", zoomed);
+                
   
   var brush = d3.brushX()
                 .extent([[0, 0], [width-toolWidth, brushHeight-50]])
@@ -1874,7 +1874,6 @@ var color = d3.scaleSequential(d3.interpolateBlues)
 
     domainDates.push(firstDate,lastDate);
   
-    var totalPiles = data.length;
     var pileExtent = (lastDate - firstDate)/600000;
     
     data.forEach(d=>{d.tweets.forEach(tweet=>bufferData.push(tweet))});
@@ -1903,7 +1902,7 @@ var color = d3.scaleSequential(d3.interpolateBlues)
 
     radiusCalculator();
 
-    const xRanger = () => {        // Determine X axis range according to Y-axis (& radius)
+    const viewFinder = () => {        // Determine X axis range according to Y-axis (& radius)
       if (radius>=1) {
         x.domain(domainDates).range([0,(radius)*pileExtent*3])
       } else {
@@ -1911,9 +1910,11 @@ var color = d3.scaleSequential(d3.interpolateBlues)
       }
       x2.domain(domainDates).range([0,width-toolWidth]);
       xAxis.ticks(x.range()[1]/100);
+      zoom.translateExtent([[-width/3,0],[pileExtent*radius*4,height]]);   
+      zoom.scaleExtent([1/pileExtent,5])
     }
   
-    xRanger();
+    viewFinder();
 
 let areaData = [];
 
@@ -2075,8 +2076,6 @@ multiThreader.port.onmessage = (workerAnswer) => {
 
 function brushed() {
   if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-  
-
 
   d3.select("#xtypeSVG")
           .call(zoom.transform, d3.zoomIdentity
