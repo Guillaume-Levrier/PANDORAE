@@ -1910,8 +1910,8 @@ var color = d3.scaleSequential(d3.interpolateBlues)
       }
       x2.domain(domainDates).range([0,width-toolWidth]);
       xAxis.ticks(x.range()[1]/100);
-      zoom.translateExtent([[-width/3,0],[pileExtent*radius*4,height]]);   
-      zoom.scaleExtent([1/pileExtent,5])
+      zoom.translateExtent([[-width/3,0],[Infinity,height]]);   
+     // zoom.scaleExtent([1/pileExtent,5])
     }
   
     viewFinder();
