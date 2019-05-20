@@ -1339,7 +1339,7 @@ pandodb.geotype.get(locations).then(locations => {
     locations.content[i].items.forEach(d=>data.push(d))
   }
 
-  Promise.all([d3.json("json/world-countries.json")]).then(geo => {
+  Promise.all([d3.json("json/world-countries-large.json")]).then(geo => {
 
 var geoData = geo[0];
 
@@ -1546,11 +1546,11 @@ var geoData = geo[0];
  var timer = d3.timer(elapsed=>{                                //Rotate globe on start
               projection.rotate([.01 * elapsed, 0]);
               view.selectAll("path").attr("d", path);
-              view.selectAll(".graticule").remove();
-              view.insert("path", "#AGO")
+/*               view.selectAll(".graticule").remove();
+               view.insert("path", "#AGO")
                 .datum(graticule)
                 .attr("class", "graticule")
-                .attr("d", path);
+                .attr("d", path);  */
             })
  
 var precisionRatio = 1;
@@ -1571,11 +1571,11 @@ var precisionRatio = 1;
       view.selectAll("path").attr("d", path);
   
   // The graticule is removed and re-injected below the countries (the first in the list and consequently all others)
-  view.selectAll(".graticule").remove();
-  view.insert("path", "#AGO")
+/*  view.selectAll(".graticule").remove();
+   view.insert("path", "#AGO")
     .datum(graticule)
     .attr("class", "graticule")
-    .attr("d", path);
+    .attr("d", path); */
   });
   
   //drag call
