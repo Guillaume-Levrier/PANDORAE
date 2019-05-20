@@ -897,7 +897,7 @@ label {
 }
 
 .graticule {
-  fill: #fff;
+  fill:transparent;
   stroke: #777;
   stroke-width: .5px;
   stroke-opacity: .2;
