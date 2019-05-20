@@ -1317,18 +1317,8 @@ const geotype = (locations) => {
         .attr("cy", height / 2)
         .attr("r", projection.scale());
   
-  //graticule
-    view.append("path")
-      .datum(graticule)
-      .attr("class", "graticule")
-      .attr("d", path);
+
   
-  //parallax
-    view.append("parallax")
-      .attr("class", "parallax")
-      .attr("width", width)
-      .attr("height", height)
-      .attr("d", path);
   
 //Calling data
 pandodb.geotype.get(locations).then(locations => {
@@ -1339,7 +1329,7 @@ pandodb.geotype.get(locations).then(locations => {
     locations.content[i].items.forEach(d=>data.push(d))
   }
 
-  Promise.all([d3.json("json/world-countries-large.json")]).then(geo => {
+  Promise.all([d3.json("json/world-countries.json")]).then(geo => {
 
 var geoData = geo[0];
 
@@ -1471,14 +1461,23 @@ var geoData = geo[0];
   }
   
   
-  var countries = view.selectAll("path")
+  // countries
+ view.selectAll("path")
         .data(geoData.features)
         .enter().append("path")
         .attr("class", "boundary")
         .attr("id", d => d.id)
         .attr("d", path);
   
-  var collaborations = view.selectAll("lines")
+  //graticule
+  view.append("path")
+  .datum(graticule)
+  .attr("class", "graticule")
+  .attr("d", path);
+
+
+  // collaboration arcs
+ view.selectAll("lines")
     .data(links)
     .enter().append("path")
       .attr("class", "arc")
@@ -1542,22 +1541,12 @@ var geoData = geo[0];
   var φ = d3.scaleLinear()
             .domain([0, height])
             .range([90, -90]);
-  
- var timer = d3.timer(elapsed=>{                                //Rotate globe on start
-              projection.rotate([.01 * elapsed, 0]);
-              view.selectAll("path").attr("d", path);
-/*               view.selectAll(".graticule").remove();
-               view.insert("path", "#AGO")
-                .datum(graticule)
-                .attr("class", "graticule")
-                .attr("d", path);  */
-            })
+
  
 var precisionRatio = 1;
 
   var drag = d3.drag().subject(()=>{
   
-  timer.stop();
 
   var r = projection.rotate();
 
@@ -1571,11 +1560,11 @@ var precisionRatio = 1;
       view.selectAll("path").attr("d", path);
   
   // The graticule is removed and re-injected below the countries (the first in the list and consequently all others)
-/*  view.selectAll(".graticule").remove();
+/*   view.selectAll(".graticule").remove();
    view.insert("path", "#AGO")
     .datum(graticule)
     .attr("class", "graticule")
-    .attr("d", path); */
+    .attr("d", path);  */
   });
   
   //drag call
