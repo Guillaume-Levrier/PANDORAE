@@ -892,7 +892,7 @@ label {
 .arc {
   fill: none;
   stroke: crimson;
-  stroke-width: .2px;
+  stroke-width: .1px;
   stroke-linecap: round;
 }
 

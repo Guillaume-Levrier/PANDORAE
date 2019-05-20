@@ -1290,10 +1290,10 @@ const geotype = (locations) => {
   
   //globe properties and beginning aspect
   const projection = d3.geoOrthographic()
-      .scale(340)
+      .scale(1000)
       .translate([width-toolWidth*2, height / 2])
       .clipAngle(90)
-      .precision(.1)
+      .precision(.01)
       .rotate([-20,-40,0]);
   
   //globe, as well as surface projects
@@ -1305,7 +1305,7 @@ const geotype = (locations) => {
   var velocity = .02;
   
   var zoom = d3.zoom()
-      .scaleExtent([1, 8])
+      .scaleExtent([0, 50])
       .translateExtent([[0, 0],[1200, 900]])
       .extent([[0, 0],[1200, 900]])
       .on("zoom", zoomed);
@@ -1491,7 +1491,7 @@ var geoData = geo[0];
                   .attr("id", d => d.id)
                   .attr("class", "locations");
   
-        locations.datum(d => d3.geoCircle().center([ d.lon, d.lat ]).radius(.09)())
+        locations.datum(d => d3.geoCircle().center([ d.lon, d.lat ]).radius(0.05)())
                   .attr("d", path);
   
         locations.on("mouseover", d => {
@@ -1553,7 +1553,7 @@ var geoData = geo[0];
                 .attr("d", path);
             })
  
-
+var precisionRatio = 1;
 
   var drag = d3.drag().subject(()=>{
   
@@ -1576,7 +1576,6 @@ var geoData = geo[0];
     .datum(graticule)
     .attr("class", "graticule")
     .attr("d", path);
-  
   });
   
   //drag call
@@ -1584,8 +1583,9 @@ var geoData = geo[0];
   view.call(drag);
   view.call(zoom);
   
-  function zoomed() {view.style('transform', 'scale(' + d3.event.transform.k + ')');
-  
+  function zoomed() {
+    view.style('transform', 'scale(' + d3.event.transform.k + ')');
+    precisionRatio=d3.event.transform.k+1;
         }
 
           loadType();
