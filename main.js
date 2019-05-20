@@ -135,7 +135,7 @@ const openHelper = (helperFile) => {
     frame: true,
     width: 350,
     height: 700,
-    alwaysOnTop:true,
+    alwaysOnTop:false,
     autoHideMenuBar : true,
     x:screenWidth-350,
     y:100,
@@ -162,7 +162,7 @@ const openModal = (modalFile,scrollTo) => {
               let win = new BrowserWindow({
                 backgroundColor: 'white',
                 modal: true,
-                alwaysOnTop:true,
+                alwaysOnTop:false,
                 frame: false,
                 resizable: false,
                 show: false,
