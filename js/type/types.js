@@ -1037,7 +1037,7 @@ const chronotype = (bibliography,links) => {                          // When ca
                 .style('fill', 'white')                             // Icon color
                 .style('font-size', '1.4px')                        // Icon size
                 .text(d => d.type)                                  // Icon
-                .on('click', d => {shell.openExternal(d.URL)})   // On click, open url in new tab
+                .on('click', d => {shell.openExternal("https://dx.doi.org/"+d.DOI)})   // On click, open url in new tab
                 .on("mouseover", HighLightandDisplay(.2))           // On hover, HighLightandDisplay
                 .on("mouseout", mouseOut)                           // On mouseout, mouseOute
                 .raise()                                            // Display above nodes and the rest
