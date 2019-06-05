@@ -61,7 +61,8 @@ let traces = [
   {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"TWITTER"},"name":"TWITTER"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
    {"hops":[{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"},{"info":{"name":"CSL-JSON"},"name":"CSL-JSON"},{"info":{"name":"ZOTERO"},"name":"ZOTERO"},{"info":{"name":"SYSTEM"},"name":"SYSTEM"}]},
    {"hops":[{"info":{"name":"DB/API"},"name":"DB/API"},{"info":{"name":"SCOPUS"},"name":"SCOPUS"},{"info":{"name":"ENRICHMENT"},"name":"ENRICHMENT"}]},
-   {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"DB/API"},"name":"DB/API"}]}
+   {"hops":[{"root":true},{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"DB/API"},"name":"DB/API"}]},
+   {"hops":[{"info":{"name":"USER"},"name":"USER"},{"info":{"name":"HYPHE"},"name":"HYPHE"}]}
   ];
 
 const drawFlux = (svg, traces, horizontal, showTexts) => {

@@ -1,5 +1,5 @@
 const electron = require('electron')
-const {app, BrowserWindow, ipcMain, shell} = electron;
+const {app, BrowserView, BrowserWindow, ipcMain, shell} = electron;
 const fs = require('fs');
 const userDataPath = app.getPath('userData');
 
@@ -107,6 +107,11 @@ app.on('ready', ()=>{
   createUserId();
   createThemes();
   createWindow();
+
+  mainWindow.onbeforeunload = (e) => {
+    BrowserView.getAllViews().forEach(view=>view.destroy());
+  }
+
 });
 
 app.on('activate',  () => { if (mainWindow === null) { createWindow() } });
@@ -300,4 +305,13 @@ setTimeout(()=>{app.quit()},100);
 // Tutorial
 ipcMain.on('tutorial', (event,message) => { mainWindow.webContents.send('tutorial',message)});
 
-ipcMain.on('mainWindowReload', (event,message) => { mainWindow.webContents.send('mainWindowReload',message)});
+ipcMain.on('mainWindowReload', (event,message) => { 
+  mainWindow.webContents.send('mainWindowReload',message)
+});
+
+ipcMain.on('startHyphe', (event,message) => { 
+  let view = new BrowserView();
+  mainWindow.setBrowserView(view)
+  view.setBounds({ x: 0, y: 20, width: 1200, height: 780 })
+  view.webContents.loadURL(message)
+});
