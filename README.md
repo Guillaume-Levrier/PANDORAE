@@ -35,4 +35,5 @@ If you encounter an issue, please tag this [account](https://mobile.twitter.com/
 - Gazouillotype brush/dynamic node display/max node amount
 - Chronotype Ybrush
 - Zotero connector 
+- Hyphe implementation?
 - API documentation

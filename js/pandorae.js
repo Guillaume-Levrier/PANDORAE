@@ -29,7 +29,7 @@ const appPath = remote.app.getAppPath();
 const QRCode = require('qrcode');
 const Dexie = require('dexie');
 const types = require('./js/type/types');
-
+const keytar = require('keytar');                                     // Load keytar to manage user API keys
 
 // =========== DATABASE ===========
 Dexie.debug = true;
@@ -399,6 +399,19 @@ const mainDisplay = (type) =>{
   toggleSecondaryMenu();
   listTableDatasets(type);
 
+}
+
+const hypheStart = () => {
+keytar.getPassword("hyphe", "PandoHyphe").then((hypheaddress) => {  
+  ipcRenderer.send('startHyphe', hypheaddress);
+})
+//create a back to pandorae bar
+//
+/*var backarrow = document.createElement("i");
+i.className ="material-icons  dialog-buttons";
+i.onclick="";
+i.innerText="arrow_back";*/
+document.body.appendChild('<i class="material-icons  dialog-buttons" onclick="">arrow_back</i>');
 }
 
 const cmdinput = (input) => {
