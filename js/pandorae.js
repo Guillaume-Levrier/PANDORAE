@@ -405,13 +405,16 @@ const hypheStart = () => {
 keytar.getPassword("hyphe", "PandoHyphe").then((hypheaddress) => {  
   ipcRenderer.send('startHyphe', hypheaddress);
 })
+
 //create a back to pandorae bar
 //
-/*var backarrow = document.createElement("i");
-i.className ="material-icons  dialog-buttons";
-i.onclick="";
-i.innerText="arrow_back";*/
-document.body.appendChild('<i class="material-icons  dialog-buttons" onclick="">arrow_back</i>');
+var backarrow = document.createElement("div");
+backarrow.id = "backarrow";
+document.body.appendChild(backarrow);
+document.getElementById("backarrow").style.marginTop = "0px";
+document.getElementById("backarrow").style.top = "0px";
+document.getElementById("backarrow").innerHTML='<i class="material-icons  dialog-buttons" onclick="remote.getCurrentWindow().reload();">arrow_back</i>';
+
 }
 
 const cmdinput = (input) => {
