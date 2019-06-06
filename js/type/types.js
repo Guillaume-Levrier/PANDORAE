@@ -33,6 +33,7 @@ pandodb.version(1).stores({
       pharmacotype: structureV1,
       publicdebate: structureV1,
       gazouillotype: structureV1,
+      hyphe: structureV1,
       system:structureV1
   });
   pandodb.open();
@@ -2508,6 +2509,18 @@ const topotype = (pubdeb,matching,commun) => {                               // 
   }
   
  */
+
+
+
+const backFromHyphe = () => {
+var closeHyphe = document.createElement("div");
+closeHyphe.id = "closeHyphe";
+let hyphe = "hyphe";
+let close = "close";
+closeHyphe.innerHTML = '<i class="material-icons  dialog-buttons" onclick="killViews();">arrow_back</i>';
+document.body.appendChild(closeHyphe);
+};
+
 //========== typesSwitch ==========
 // Switch used to which type to draw/generate
 
@@ -2543,6 +2556,11 @@ const typeSwitch = (type,id) => {
           case 'topotype' : 
             topotype(id);
           break;
+
+          case 'hyphe' : 
+          ipcRenderer.send('hyphe', id);
+          backFromHyphe();
+        break;
       }
 
       ipcRenderer.send('console-logs',"typesSwitch started a "+ type +" process using the following dataset(s) : " + JSON.stringify(id));

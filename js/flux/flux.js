@@ -39,11 +39,14 @@ pandodb.version(1).stores({
       pharmacotype: structureV1,
       publicdebate: structureV1,
       gazouillotype: structureV1,
+      hyphe: structureV1,
       system:structureV1
   });
   pandodb.open();
 
   var db = "";
+
+  const date = new Date().toLocaleDateString() +"-"+ new Date().toLocaleTimeString();  
 
 //========== STARTING FLUX ==========
 ipcRenderer.send('console-logs',"Opening Flux");           // Sending notification to console
@@ -331,15 +334,7 @@ case 'zoteroItemsRetriever' :  if (document.getElementById("zotitret").name ==="
                                )
                              }
                           }
-                         /*  var dest = document.getElementsByClassName('zotDestCheck');
-                          for (let i =0; i<dest.length; i++){
-                            if (dest[i].checked)
-                             {
-                               fluxArgs.zoteroItemsRetriever.destination.push(
-                                dest[i].value
-                               )
-                             }
-                          } */
+
 
                           fluxArgs.zoteroItemsRetriever.zoteroUser = document.getElementById("zoterouserinput").value;
                           fluxArgs.zoteroItemsRetriever.importName = document.getElementById("zoteroImportName").value.replace(/\s/g,"");
@@ -719,24 +714,50 @@ if (kind="local") {
     document.getElementById(dirListId).innerHTML = datasetDirList;           // The string is a <ul> list
 }
 
-//========== scopusGeolocate ==========
-// scopusGeolocate gets cities/countries from a given scopus Dataset and send them to the OSM Geolocate API function.
 
-const geoTest = () => {
+// ======== endpointConnector ======
 
-  ipcRenderer.send('console-logs',"Testing geocoder API");
-  
-  keytar.getPassword("Geocoding",document.getElementById("userNameInput").value).then((geocodingApiKey) => {    // Retrieve the stored geocoding API key
-  
-  let options = {
-    uri: "https://geocoder.tilehosting.com/q/paris.js?key="+geocodingApiKey,
-    headers: {'User-Agent': 'Request-Promise'},
-    json: true }
-      
-    rpn(options).then((res) => {                        // Enforce bottleneck through limiter
-              checkKey("mapTilerValidation",true)
-        }) .catch(function (err) {
-          checkKey("mapTilerValidation",false)
-        })
-  })
+const endpointConnector = (service,target) => {
+
+pandodb.open();
+
+pandodb[service].add({"id":target,"date":date,"name":target,"content":target});
+
+document.getElementById(service+"-exporter").innerText = "Added to "+service+" endpoints";
+
+}
+
+//======== Hyphe Endpoint Chercker ======
+
+const hypheCheck = (target) => {
+
+  let chk = document.getElementById("hyphe-checker");
+
+
+  var hypheCheckOptions = {
+    method:'POST',
+    uri: target+'/api/',                  // URI to be accessed
+    headers: {'User-Agent': 'Request-Promise'},    // User agent to access is Request-promise
+    body: {"method":"get_status","params":[null]}, 
+    json: true                                     // Automatically parses the JSON string in the response
+};
+
+rpn(hypheCheckOptions)                          // RPN stands for Request-promise-native (ES6)
+    .then(hypheResponse => {            // With the response
+
+        if(hypheResponse[0].code ==="success") {
+          chk.style.color = "DarkOliveGreen";
+          chk.innerText = "Hyphe enpoint reached";
+          document.getElementById("hyphe-exporter").style.display = "block";
+
+          
+        }else {
+          chk.style.color = "DarkRed";
+          chk.innerText = "Failure";
+        }
+    }).catch(e => {
+      chk.style.color = "DarkRed";
+      chk.innerText = "Failure";
+    })
+
 }

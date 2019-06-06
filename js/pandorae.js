@@ -50,6 +50,7 @@ pandodb.version(1).stores({
       pharmacotype: structureV1,
       publicdebate: structureV1,
       gazouillotype: structureV1,
+      hyphe: structureV1,
       system:structureV1
   });
 
@@ -346,9 +347,7 @@ const selectOption = (type,id) => {
 
         toggleMenu();
         
-            field.addEventListener("click", ()=>{
-                              types.typeSwitch(type,id);
-            },{once:true});
+            field.addEventListener("click", ()=>{types.typeSwitch(type,id);},{once:true});
         
             field.style.pointerEvents = "all";
             field.style.cursor = "pointer";
@@ -398,22 +397,6 @@ const mainDisplay = (type) =>{
 
   toggleSecondaryMenu();
   listTableDatasets(type);
-
-}
-
-const hypheStart = () => {
-keytar.getPassword("hyphe", "PandoHyphe").then((hypheaddress) => {  
-  ipcRenderer.send('startHyphe', hypheaddress);
-})
-
-//create a back to pandorae bar
-//
-var backarrow = document.createElement("div");
-backarrow.id = "backarrow";
-document.body.appendChild(backarrow);
-document.getElementById("backarrow").style.marginTop = "0px";
-document.getElementById("backarrow").style.top = "0px";
-document.getElementById("backarrow").innerHTML='<i class="material-icons  dialog-buttons" onclick="remote.getCurrentWindow().reload();">arrow_back</i>';
 
 }
 
@@ -788,3 +771,14 @@ let screenZoomToggle = false;
 
   ipcRenderer.send('change-theme',activateTheme.activeTheme);
 });
+
+
+const killViews = () => {
+  remote.BrowserView.getAllViews().forEach(view=>{
+    remote.BrowserView.fromId(view.id).destroy();
+  })
+  document.getElementById('closeHyphe').remove();
+
+  field.value = "";
+
+};
