@@ -328,12 +328,10 @@ const purgeCore = () => {
   if (coreExists) {
     d3.select("canvas").remove();
     document.body.removeChild(document.getElementById("core-logo"));
-    document.body.removeChild(document.getElementById("vignette"));
     document.body.removeChild(document.getElementById("version"));
-    document.body.removeChild(document.getElementById("mask"));
-    document.body.removeChild(document.getElementById("screenMachine"));
     field.style.display = "none";
     Array.from(document.getElementsByClassName("purgeable")).forEach(d=>{
+
       document.body.removeChild(document.getElementById(d.id));   
       d3.select(d.id).remove();
     });
@@ -409,12 +407,26 @@ ipcRenderer.send('console-logs'," user$ "+ input);
 const loadingType = () => commandReturn = "loading " + commandInput;
 
 if (input.substring(0, 13) === "change theme ") {
+
+
+  switch (input.substring(13,input.length)) {
+
+
+case "normal":
+case "blood-dragon":
+case "minitel-magis":
+
   document.body.style.animation="fadeout 0.5s";
             setTimeout(()=>{
               document.body.remove();
               ipcRenderer.send('change-theme',input.substring(13,input.length));
               remote.getCurrentWindow().reload();
             }, 450);
+            break;
+
+ default: commandReturn = "invalid theme name";
+
+          }
 } else {
 
 switch (input) {
@@ -734,8 +746,13 @@ setTimeout(()=>{      // Give the process enough time to create the relevant DOM
   Object.assign(document.getElementById("coreCanvas").style, theme.coreCanvas);
 }
 
+if (theme["theme-background"]!=null){
   document.getElementById("screenMachine").src = theme["theme-background"];
+}
+
+if (theme["theme-mask"]!=null){
   document.getElementById("mask").src = theme["theme-mask"];
+}
 
   coreDefW = theme.coreDefW;
   coreDefH = theme.coreDefH;

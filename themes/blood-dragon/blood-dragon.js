@@ -157,10 +157,11 @@ const voronoiBackground = () =>
 {
     let canvas = document.createElement("CANVAS");
     canvas.id ="spaceVoronoi";
-    document.getElementById('spaceVoronoi').className +="purgeable";
-    document.getElementById('spaceVoronoi').width = window.innerWidth;
-    document.getElementById('spaceVoronoi').height = window.innerHeight;
-    
+    canvas.className +="purgeable";
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    document.body.insertBefore(canvas,document.getElementById("signal"));
+
     canvas = {
         
 		init() {
@@ -514,16 +515,23 @@ const cityScape = () =>
         baseImg.attr("src",imageURI);
         baseImg.style("display","none");
 
-        let canvas = document.createElement("CANVAS");
+        let canvas = document.createElement("canvas");
         canvas.id ="allgone-noescape3";
-        document.getElementById('allgone-noescape3').className +="purgeable";
-        document.getElementById('allgone-noescape3').width = window.innerWidth;
-        document.getElementById('allgone-noescape3').height = window.innerHeight;
-        document.getElementById('allgone-noescape3').style.position = "absolute";
-        document.getElementById('allgone-noescape3').style.top = "0px";
-        document.getElementById('allgone-noescape3').style.left = "0px";
-        document.getElementById('allgone-noescape3').style.zIndex = 3;
+        canvas.className +="purgeable";
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        canvas.style.position = "absolute";
+        canvas.style.top = "0px";
+        canvas.style.left = "0px";
+        canvas.style.zIndex = 3;
+        document.body.insertBefore(canvas,document.getElementById("signal"));
 
+        let mask = document.createElement('img');
+        mask.id = "mask";
+        mask.className +="themeCustom";
+        mask.className +=" purgeable";
+        document.body.insertBefore(mask,document.getElementById("allgone-noescape3"));
+        
 
 setTimeout(()=> {    
     canvas = {

@@ -2073,7 +2073,7 @@ let zoomScale = (d3.brushSelection(d3.select(".brush").node())[1]-d3.brushSelect
   d3.select("#xtypeSVG")
           .call(zoom.transform, d3.zoomIdentity
               .scale(1)
-              .translate(-x(midDate), -y(20)));
+              .translate(-x(midDate), -y(200)));
 }
 
   ipcRenderer.send('console-logs',"Starting gazouillotype");           // Starting gazouillotype

@@ -172,7 +172,7 @@ window.onload = reloadCore();
            renderer.setClearColor( 0xFFFFFF , 1 );
            renderer.className +="themeCustom";
                       
-           document.body.insertBefore(renderer.domElement,document.getElementById("canvasSignal"));
+           document.body.insertBefore(renderer.domElement,document.getElementById("signal"));
 
 
            scene = new THREE.Scene();

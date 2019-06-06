@@ -171,7 +171,7 @@ window.onload = reloadCore();
            renderer.setClearColor( 0xFFFFFF , 1 );
            renderer.className +="themeCustom";
                       
-           document.body.insertBefore(renderer.domElement,document.getElementById("canvasSignal"));
+           document.body.insertBefore(renderer.domElement,document.getElementById("signal"));
 
 
            scene = new THREE.Scene();
@@ -280,6 +280,34 @@ window.onload = reloadCore();
            renderer.render( scene, camera );
        }
 
+
+//Add background
+// <video autoplay loop class="themeCustom" id="screenMachine" type="video/mp4"></video>
+
+let cinemagraph = document.createElement('video');
+cinemagraph.id = 'screenMachine';
+cinemagraph.type="video/mp4";
+cinemagraph.className +="themeCustom";
+cinemagraph.className +=" purgeable";
+cinemagraph.loop=true;
+cinemagraph.autoplay = true;
+
+document.body.insertBefore(cinemagraph,document.getElementById("coreCanvas"));
+
+//<div class="themeCustom" id="vignette"></div>
+
+let vignette = document.createElement('div');
+vignette.id = "vignette";
+vignette.className +="themeCustom";
+vignette.className +=" purgeable";
+document.body.insertBefore(vignette,document.getElementById("coreCanvas"));
+
+//<img class="themeCustom" id="mask">   
+let mask = document.createElement('img');
+mask.id = "mask";
+mask.className +="themeCustom";
+mask.className +=" purgeable";
+document.body.insertBefore(mask,document.getElementById("coreCanvas"));
 
 }
 
