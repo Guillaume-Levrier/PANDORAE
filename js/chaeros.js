@@ -40,6 +40,7 @@ pandodb.version(1).stores({
       pharmacotype: structureV1,
       publicdebate: structureV1,
       gazouillotype: structureV1,
+      hyphe: structureV1,
       system:structureV1
   });
 

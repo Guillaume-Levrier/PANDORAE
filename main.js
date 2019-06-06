@@ -309,9 +309,16 @@ ipcMain.on('mainWindowReload', (event,message) => {
   mainWindow.webContents.send('mainWindowReload',message)
 });
 
-ipcMain.on('startHyphe', (event,message) => { 
+ipcMain.on('hyphe', (event,message) => { 
   let view = new BrowserView();
-  mainWindow.setBrowserView(view)
   view.setBounds({ x: 0, y: 20, width: 1200, height: 780 })
-  view.webContents.loadURL(message)
+
+  if (message === "close") {
+    view.destroy();
+  } else {
+    mainWindow.setBrowserView(view)
+    view.webContents.loadURL(message)
+  }
+ 
+
 });
