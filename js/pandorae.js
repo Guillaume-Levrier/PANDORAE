@@ -419,7 +419,8 @@ case "minitel-magis":
   document.body.style.animation="fadeout 0.5s";
             setTimeout(()=>{
               document.body.remove();
-              ipcRenderer.send('change-theme',input.substring(13,input.length));
+             // ipcRenderer.send('change-theme',input.substring(13,input.length));
+             selectTheme(input.substring(13,input.length));
               remote.getCurrentWindow().reload();
             }, 450);
             break;
@@ -717,9 +718,11 @@ ipcRenderer.on('tutorial', (event,message) => {
 
 // ========= THEMES =======
 
-ipcRenderer.on('change-theme', (event,theme) => {
+/* ipcRenderer.on('change-theme', (event,theme) => {
   loadTheme(theme);
 });
+ */
+
 
 var activeTheme;
 var fullscreenable;
@@ -730,37 +733,67 @@ var coreCanvasH = window.innerHeight;
 var coreDefW = 512;
 var coreDefH = 512;
 
-const loadTheme = (theme) => {
-  activeTheme = theme;
-
-  if (theme.hasOwnProperty("script")) { 
-    var themeScripts = require(appPath+"/themes/"+theme["theme-name"]+"/"+theme.script)();
-}
-
-setTimeout(()=>{      // Give the process enough time to create the relevant DOM elements
-  Array.from(document.getElementsByClassName("themeCustom")).forEach(d=>{
-    Object.assign(document.getElementById(d.id).style, theme[d.id]);
+const selectTheme = (themeName) => {
+  fs.readFile(userDataPath+"/themes/themes.json",'utf8', (err, data) => {
+    var themeData=JSON.parse(data);
+         for (let i = 0; i < themeData.length; i++) {
+            themeData[i].selected = false;
+               if (themeData[i]["theme-name"]===themeName) {
+                                    themeData[i].selected = true;
+                 }    
+              }
+   fs.writeFile(
+    userDataPath+"/themes/themes.json",
+    JSON.stringify(themeData),
+    'utf8',
+    (err) => {if (err) {ipcRenderer.send('console-logs',JSON.stringify(err))};
+  });
   })
+};
 
-  if (document.getElementById("coreCanvas")!=null) {
-  Object.assign(document.getElementById("coreCanvas").style, theme.coreCanvas);
-}
 
-if (theme["theme-background"]!=null){
-  document.getElementById("screenMachine").src = theme["theme-background"];
-}
+const loadTheme = () => {
 
-if (theme["theme-mask"]!=null){
-  document.getElementById("mask").src = theme["theme-mask"];
-}
+  fs.readFile(userDataPath+"/themes/themes.json",'utf8', (err, data) => {
+    var themeData=JSON.parse(data);
+         for (let i = 0; i < themeData.length; i++) {
+               if (themeData[i].selected===true) {
 
-  coreDefW = theme.coreDefW;
-  coreDefH = theme.coreDefH;
-  fullscreenable = theme.fullscreenable;
-},100);
-      
-  
-  }
+                  let theme = themeData[i];
+                  activeTheme = theme;
+
+                if (theme.hasOwnProperty("script")) { 
+                  var themeScripts = require(appPath+"/themes/"+theme["theme-name"]+"/"+theme.script)();
+              }
+
+                setTimeout(()=>{      // Give the process enough time to create the relevant DOM elements
+                          Array.from(document.getElementsByClassName("themeCustom")).forEach(d=>{
+                            Object.assign(document.getElementById(d.id).style, theme[d.id]);
+                          })
+
+                          if (document.getElementById("coreCanvas")!=null) {
+                          Object.assign(document.getElementById("coreCanvas").style, theme.coreCanvas);
+                        }
+
+                        if (theme["theme-background"]!=null){
+                          document.getElementById("screenMachine").src = theme["theme-background"];
+                        }
+
+                        if (theme["theme-mask"]!=null){
+                          document.getElementById("mask").src = theme["theme-mask"];
+                        }
+
+                          coreDefW = theme.coreDefW;
+                          coreDefH = theme.coreDefH;
+                          fullscreenable = theme.fullscreenable;
+                },100);
+          }
+     }
+  });
+}; // end of loadtheme
+
+  window.onload=loadTheme();
+
 
 let screenZoomToggle = false;
 
@@ -781,14 +814,14 @@ let screenZoomToggle = false;
    }
   }
 
-  fs.readFile(userDataPath +'/themes/themes.json',                          // Read the designated datafile
+/*   fs.readFile(userDataPath +'/themes/themes.json',                          // Read the designated datafile
                               'utf8', (err, activeThemeData) => {              // Additional options for readFile
   if (err) throw err;
   let activateTheme = JSON.parse(activeThemeData);
 
   ipcRenderer.send('change-theme',activateTheme.activeTheme);
 });
-
+ */
 
 const killViews = () => {
   remote.BrowserView.getAllViews().forEach(view=>{

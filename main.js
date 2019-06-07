@@ -31,32 +31,11 @@ const createUserId = () => {
   }
 };
 
- const createThemes = () => {
+  const createThemes = () => {
     if (!fs.existsSync(userDataPath+'/themes/themes.json')) {
       fs.copyFileSync(basePath+"/json/themes.json", userDataPath +"/themes/themes.json");
     }
-  };
-
-const changeTheme = (themeName) => {
-    fs.readFile(basePath+"/json/themes.json",'utf8', (err, data) => {
-           var themeData=JSON.parse(data);
-                for (let i = 0; i < themeData.length; i++) {
-                      if (themeData[i]["theme-name"]===themeName) {
-                          mainWindow.webContents.send('change-theme',themeData[i]);     
-                 }
-              }
-         });
-  };
-
-const themeChangeTrigger = (theme) => {
-  if (theme != null){userID.theme = theme};
-      changeTheme(userID.theme);
-};
-
-ipcMain.on('change-theme', (event,theme) => {
-      themeChangeTrigger(theme);
-})
-
+  }; 
 
 function createWindow () {
 
