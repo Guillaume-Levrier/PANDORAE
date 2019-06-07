@@ -29,7 +29,7 @@ const appPath = remote.app.getAppPath();
 const QRCode = require('qrcode');
 const Dexie = require('dexie');
 const types = require('./js/type/types');
-const keytar = require('keytar');                                     // Load keytar to manage user API keys
+const keytar = require('keytar');                                    
 
 // =========== DATABASE ===========
 Dexie.debug = true;
@@ -477,16 +477,22 @@ switch (input) {
             toggleConsole();
             break;
 
+
+    case 'menu select type':
+      categoryLoader('type');
+      break;
+
+      case 'menu select ext':
+        categoryLoader('ext');
+        break;
+
     case 'hypercore':
-    document.body.style.animation="fadeout 0.5s";
-    setTimeout(()=>{
-      document.body.remove();
-      ipcRenderer.send('change-theme','blood-dragon');
-      remote.getCurrentWindow().reload();
-    }, 450);
-            //nameDisplay("PANDORÆ - HYPERCORE");
-            //commandReturn = "unlocked error bypass";
-            
+             document.body.style.animation="fadeout 0.5s";
+              setTimeout(()=>{
+                    document.body.remove();
+                    ipcRenderer.send('change-theme','blood-dragon');
+                    remote.getCurrentWindow().reload();
+              }, 450);
             break;
 
     case 'toggle menu':
@@ -742,12 +748,6 @@ ipcRenderer.on('tutorial', (event,message) => {
 
 // ========= THEMES =======
 
-/* ipcRenderer.on('change-theme', (event,theme) => {
-  loadTheme(theme);
-});
- */
-
-
 var activeTheme;
 var fullscreenable;
 
@@ -838,15 +838,6 @@ let screenZoomToggle = false;
    }
   }
 
-/*   fs.readFile(userDataPath +'/themes/themes.json',                          // Read the designated datafile
-                              'utf8', (err, activeThemeData) => {              // Additional options for readFile
-  if (err) throw err;
-  let activateTheme = JSON.parse(activeThemeData);
-
-  ipcRenderer.send('change-theme',activateTheme.activeTheme);
-});
- */
-
 const killViews = () => {
   remote.BrowserView.getAllViews().forEach(view=>{
     remote.BrowserView.fromId(view.id).destroy();
@@ -856,3 +847,36 @@ const killViews = () => {
   field.value = "";
 
 };
+
+
+// ====== Keyboard shortcuts ======
+
+
+document.addEventListener("keydown", event => {
+
+
+switch (event.isComposing || event.code) {
+  case "Digit1":
+    toggleMenu();
+    break;
+
+  case "Digit2":
+    toggleFlux();
+    break;
+  
+    case "Digit3":
+      if(toggledMenu===false){toggleMenu()};
+      categoryLoader('type');
+      break;
+    
+      case "Digit4":
+      if(toggledMenu===false){toggleMenu()};
+      categoryLoader('ext');
+      break;
+
+      case "Digit5":
+        toggleConsole();
+          break;
+    }
+  
+});
