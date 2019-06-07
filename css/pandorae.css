@@ -440,13 +440,24 @@ li:active {
   transition: 0.3s;
 }
 
+#log::-webkit-scrollbar {
+  width: 3px;
+}
+ 
+#log::-webkit-scrollbar-track {
+  background: #141414;
+}
+ 
+#log::-webkit-scrollbar-thumb {
+  background: #ddd; 
+}
+
 #console-options {
   position: absolute;
   width: 30%;
   height: 100%;
   top: 0;
   left: 70%;
-  background-color: #141414;
 }
 
 #log {
