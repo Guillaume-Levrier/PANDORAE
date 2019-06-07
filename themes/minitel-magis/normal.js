@@ -292,7 +292,7 @@ cinemagraph.className +=" purgeable";
 cinemagraph.loop=true;
 cinemagraph.autoplay = true;
 
-document.body.insertBefore(cinemagraph,document.getElementById("coreCanvas"));
+    document.body.insertBefore(cinemagraph,document.getElementById("coreCanvas"));
 
 //<div class="themeCustom" id="vignette"></div>
 
