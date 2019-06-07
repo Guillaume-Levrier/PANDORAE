@@ -449,7 +449,6 @@ case "minitel-magis":
   document.body.style.animation="fadeout 0.5s";
             setTimeout(()=>{
               document.body.remove();
-             // ipcRenderer.send('change-theme',input.substring(13,input.length));
              selectTheme(input.substring(13,input.length));
               remote.getCurrentWindow().reload();
             }, 450);
@@ -515,11 +514,6 @@ switch (input) {
     case  'anthropotype':
           loadingType();
           displayAnthropotype();
-          break;
-
-    case  'sis-hyphe':
-          //loadingType();
-          //window.location.href = "../sis-hyphe/#/login";
           break;
 
     case  'reload':
