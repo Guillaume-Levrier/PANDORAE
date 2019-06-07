@@ -25,24 +25,23 @@
 <div id="menu" class="themeCustom">
   <img id="aelogo" class="menu-item" width="100%" onClick="displayCore();" src="svg/pandorae-app-logo.svg">
   <div id="fluxMenu" class="tabs menu-item" onClick="toggleFlux();">flux</div>
-  <div id="chronotype" class="tabs menu-item" onClick="mainDisplay('chronotype');">chronotype</div>
-  <div id="geotype" class="tabs menu-item" onClick="mainDisplay('geotype');">geotype</div>
-  <div class="tabs menu-item" onClick="mainDisplay('anthropotype');">anthropotype</div>
-  <div class="tabs menu-item" onClick="mainDisplay('gazouillotype');">gazouillotype</div> 
-  <div class="tabs menu-item" onClick="mainDisplay('hyphe');">hyphe</div> 
+  <div id="type" class="tabs menu-item" onClick="categoryLoader('type');">type</div>
+  <div id="type" class="tabs menu-item" onClick="categoryLoader('ext');">ext</div>
   <div id="tutostartmenu" style="display:none;" class="tabs menu-item" onClick="toggleMenu();tutorialOpener();">return to tutorial</div>
   <div class="tabs menu-item" onClick="closeWindow();">quit</div>
 </div>
 
 <div id="secmenu" class="themeCustom">
-  <div id="secMenTopTab" class="secMenuTabs">Select Dataset
-</div>
+    <div id="secMenTopTab" class="secMenuTabs"></div>
+
 
 <div id="secMenContent">
+  
   </div>
 </div>
 
 <div id="thirdmenu" class="themeCustom">
+    <div id="secMenTopTab" class="secMenuTabs">Select Dataset</div>
   <div id="thirdMenuContent"></div>
 </div>
 

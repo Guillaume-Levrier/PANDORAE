@@ -357,6 +357,36 @@ const selectOption = (type,id) => {
 
 // ========== main menu options ========
 
+const categoryLoader = (cat) => {
+
+let blocks;
+
+switch (cat) {
+  case "type": blocks = ['chronotype','geotype','anthropotype','gazouillotype'];
+              break;
+
+    case "ext": blocks = ['hyphe'];
+    break;
+}
+
+blocks.forEach(block=>{
+  pandodb[block].toArray().then(thisBlock=>{
+      if (thisBlock.length>0) {
+        let typeContainer = document.createElement("div");
+        typeContainer.style.display="flex";
+        typeContainer.style.borderBottom= "1px solid rgba(192,192,192,0.3)";
+        typeContainer.id = block;
+        typeContainer.className+= "tabs menu-item";
+        typeContainer.innerText = block;
+        typeContainer.onclick = function (){mainDisplay(block)};
+        document.getElementById("secMenContent").appendChild(typeContainer);
+      }
+  })
+})
+
+toggleSecondaryMenu();
+}
+
 const mainDisplay = (type) =>{
 
   const listTableDatasets = (table) => {
@@ -366,7 +396,7 @@ const mainDisplay = (type) =>{
         let datasetContainer = document.createElement("div");
         datasetContainer.style.display="flex";
         datasetContainer.style.borderBottom= "1px solid rgba(192,192,192,0.3)";
-        document.getElementById("secMenContent").appendChild(datasetContainer);
+        document.getElementById("thirdMenuContent").appendChild(datasetContainer);
           let dataset = document.createElement("div");
           dataset.className = "secContentTabs";
           dataset.id = d.id;
@@ -379,7 +409,7 @@ const mainDisplay = (type) =>{
           removeDataset.innerHTML = "<span><strong><i class='material-icons'>delete_forever</i></strong><br></span>";
           removeDataset.onclick = () => {
               pandodb[type].delete(d.id);
-              document.getElementById("secMenContent").removeChild(datasetContainer);
+              document.getElementById("thirdMenuContent").removeChild(datasetContainer);
               field.value = "Dataset removed from "+type;
               ipcRenderer.send('console-logs',"Removed "+d.id+" from database: "+type);
             };
@@ -393,7 +423,7 @@ const mainDisplay = (type) =>{
   field.value = "preparing " + type;
   ipcRenderer.send('console-logs',"Preparing " + type);
 
-  toggleSecondaryMenu();
+  toggleTertiaryMenu();
   listTableDatasets(type);
 
 }
