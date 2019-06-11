@@ -81,7 +81,7 @@ let coreLogoArchive = "";
 
 document.getElementById("version").innerHTML = version;
 
-let coreLogo = ["P","&nbsp;","A","&nbsp;","N","&nbsp;","D","&nbsp;","O","&nbsp;","R","&nbsp;","Æ","&nbsp;","&nbsp;"," ","-"," ","&nbsp;","C","&nbsp;","O","&nbsp;","R","&nbsp;","E"];
+let coreLogo = ["P","&nbsp;","A","&nbsp;","N","&nbsp;","D","&nbsp;","O","&nbsp;","R","&nbsp;","Æ","&nbsp;"," ","-"," ","&nbsp;","C","&nbsp;","O","&nbsp;","R","&nbsp;","E"];
 
 let chaeros = ["C","H","&nbsp;","&nbsp;","&nbsp;","<div id='A-e' style='margin-left:240px;'>A</div><div id='a-E' style='margin-left:250px;'>E</div>","R","O","S"," ","-"," ","D","I","S","T","A","N","T"];
 
@@ -879,4 +879,24 @@ switch (event.isComposing || event.code) {
           break;
     }
   
+});
+
+
+const progBarSign = (prog) => {
+
+  prog = parseInt(prog);
+
+if (prog>100){prog = 100};
+
+  let progBar = document.getElementById("version");
+      //progBar.innerText = prog+" %";  
+      //progBar.style.textAlign="center";
+      progBar.style.background = "linear-gradient(0.25turn,rgba(0,0,255,0.3) 0%,rgba(0,0,255,0.3) "+prog+"%,transparent "+(prog+0.1)+"%)";  
+
+}
+
+
+ipcRenderer.on('progressBar', (event,prog) => {
+  progBarSign(prog)
+
 });

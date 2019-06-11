@@ -301,3 +301,10 @@ ipcMain.on('hyphe', (event,message) => {
  
 
 });
+
+
+// ProgressBar
+ipcMain.on('progress', (event,message) => { 
+  let ratio = parseInt(message);
+  mainWindow.webContents.send('progressBar',ratio)
+});
