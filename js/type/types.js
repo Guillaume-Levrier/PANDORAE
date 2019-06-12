@@ -903,6 +903,17 @@ const chronotype = (bibliography,links) => {                          // When ca
                       .each(d => d.circleexpanded === false)          // Their are by default NOT expanded
                       .on("click", CellSelect);                       // Clicking one circle triggers CellSelect
   
+  var circleContent = view.selectAll("textAmount")                               // Clusters are represented as circles
+                  .data(clusters)                                    // From the "clusters" array of objects
+                  .enter().append("text")                          // Clusters are circles
+                      .attr("x", d => x(d.zone))                     // Their relative X positions are by zone
+                      .attr("y", d => y(d.date))                     // Their relative Y positions are by date
+                      .attr("dx",d => "-"+JSON.stringify(codeFreq[d.code]).length/2+"px")
+                      .attr("dy","1px")
+                      .style('fill', "white")              // Their color is by zone
+                      .style('font-size',"2px")
+                      .text(d => codeFreq[d.code]);
+                  
   //======== DOC LIST =========
   function listDisplay(d) {                           // Expanding a cluster displays the list of docs it contains
   
@@ -953,7 +964,7 @@ const chronotype = (bibliography,links) => {                          // When ca
                   var n = codeFreq[d.code], k = 10;                     // Variables used to determine radius
                   return Math.log(k * n / Math.PI);});                  // Formula used to compute radius
               regroup(d);                                               // Trigger node regrouping function
-              setTimeout(function(){thisCluster.raise();}, 500);        // Put it above the rest (links)
+              setTimeout(function(){thisCluster.raise();circleContent.raise();}, 500);        // Put it above the rest (links)
               ipcRenderer.send('console-logs',"Closing chronotype cluster " + d.code);// Send message in the "console"
             }
       else {                                                            // Else expand the node
@@ -1138,7 +1149,8 @@ const chronotype = (bibliography,links) => {                          // When ca
           .style("opacity", 0.5);                                                   // Links opacity
   
   circle.raise();                                                                   // Circles are raised above links
-  
+  circleContent.raise();
+
   simulation
       .nodes(nodeDocs)                                                                  // Start the force graph with "docs" as data
       .on("tick", ticked);                                                          // Start the "tick" for the first time
