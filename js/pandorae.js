@@ -861,7 +861,7 @@ switch (event.isComposing || event.code) {
     break;
 
   case "Digit2":
-    toggleFlux();
+    toggleFlux(); toggleMenu();
     break;
   
     case "Digit3":
