@@ -462,7 +462,7 @@ case "minitel-magis":
 switch (input) {
 
     case 'test':
-          loadingType();
+          //loadingType();
           break;
 
     case 'zoom':
@@ -479,10 +479,12 @@ switch (input) {
 
 
     case 'menu select type':
+      toggleMenu();
       categoryLoader('type');
       break;
 
       case 'menu select ext':
+        toggleMenu();
         categoryLoader('ext');
         break;
 
@@ -500,27 +502,33 @@ switch (input) {
             break;
 
     case 'help':
-            toggleHelp();
+            //toggleHelp();
             break;
 
     case 'chronotype':
+            toggleMenu();
+            categoryLoader('type');
             mainDisplay('chronotype');
             break;
 
-    case 'pharmacotype':
-            loadingType();
-            displayPharmacotype();
-            break;
-
     case  'geotype':
-          loadingType();
-          displayGeotype();
+        toggleMenu();
+        categoryLoader('type');
+        mainDisplay('geotype');
           break;
 
     case  'anthropotype':
-          loadingType();
-          displayAnthropotype();
+        toggleMenu();
+        categoryLoader('type');
+        mainDisplay('anthropotype');
           break;
+
+          case  'gazouillotype':
+              toggleMenu();
+              categoryLoader('type');
+              mainDisplay('gazouillotype');
+              break;
+
 
     case  'reload':
             document.body.style.animation="fadeout 0.5s";
@@ -559,7 +567,7 @@ switch (input) {
 
     case  'chromium console':
           commandReturn = "opening chromium console";
-          mainWindow.webContents.openDevTools();
+          remote.getCurrentWindow().openDevTools();
           ipcRenderer.send('console-logs',"Opening chromium console.");
           break;
 
