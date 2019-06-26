@@ -1,11 +1,11 @@
 //========== CHÆEROS ==========
-//When flux actions are too heavy to be quasi-instantaneous, powerValve sends a message to the main process. This
+//When Flux actions are too heavy to be quasi-instantaneous, powerValve sends a message to the main process. This
 //message is both the function to be executed, and an object containing its arguments. Once recieved, the main process
 //creates a new invisible (never shown) window which calls the chaeros module, and executes one of the functions below,
 //depending on what has been called by powerValve and transmitted by the main process. While executing, the chaeros
 //module sends messages to the main process informing of the state of the function's execution, which is in turn
-//redispatched to the index's "coreCanvas" and "field", which subsequently impacts the core animation and the field's
-//value.
+//redispatched to the index's "coreCanvas" and "field" (the main field), which subsequently impacts the core animation 
+//and the field's value.
 
 const {remote, ipcRenderer} = require('electron');                    // Load ipc to communicate with main process
 const userDataPath = remote.app.getPath('userData');                  // Find userData folder Path
@@ -52,23 +52,17 @@ pandodb.version(1).stores({
  var altmetricActive = false;
 
 //========== scopusConverter ==========
-//scopusConverter is only available once scopusDatasetDetail has been called. If triggered, it creates a new
-//CSL-JSON file from the selected dataset and puts it in json/csl-json. This CSL-JSON file should then be ready
-//to be imported to Zotero.
+//scopusConverter converts a scopus JSON dataset into a Zotero CSL-JSON dataset.
 
-const scopusConverter = (dataset) => {                               // [dataset] is the file to be converted
-
-ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // Notify console conversion started
-
-  let convertedDataset = [];                                         // Create relevant array
+const scopusConverter = (dataset) => {                                            // [dataset] is the file to be converted
+  ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset);      // Notify console conversion started
+  let convertedDataset = [];                                                       // Create an array
   
-  pandodb.enriched.get(dataset).then(doc=>{
-
-  try {                                                            // If the file is valid, do the following:
-        
-        let articles = doc.content.entries;                       // Select articles
+  pandodb.enriched.get(dataset).then(doc=>{                                       // Open the database in which the scopus dataset is stored
+   try {                                                                          // If the file is valid, do the following:
+        let articles = doc.content.entries;                                       // Select the array filled with the targeted articles
  
-        for (var i=0; i<articles.length; ++i){                       // For each article of the array
+        for (var i=0; i<articles.length; ++i){                                    // For each article of the array, change the name of the properties
             let pushedArticle =  {"itemType":"journalArticle",
             "title":"",
             "creators":[{"creatorType":"author","firstName":"","lastName":""}],
@@ -80,7 +74,7 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // No
             "url":"",
             "accessDate":"","archive":"","archiveLocation":"","libraryCatalog":"","callNumber":"","rights":"","extra":"","tags":[],"collections":[],"relations":{}};
 
-            // Fill the article with the relevant properties
+            // Then Fill the article with the relevant properties
             pushedArticle.itemType = "journalArticle";
             pushedArticle.title = articles[i]['dc:title'];
             pushedArticle.url = articles[i]['url'];
@@ -88,32 +82,36 @@ ipcRenderer.send('console-logs',"Starting scopusConverter on " + dataset); // No
             pushedArticle.date = articles[i]['prism:coverDate'];
             pushedArticle.DOI = articles[i]['prism:doi'];
             pushedArticle.publicationTitle = articles[i]['prism:publicationName'];
+
             let enrichment = {"affiliations":articles[i].affiliation,"OA":articles[i].openaccessFlag};
-            if (articles[i].hasOwnProperty('altmetricData')){enrichment.altmetric=JSON.stringify(articles[i].altmetricData)};
+
+            if (articles[i].hasOwnProperty('altmetricData')) {
+              enrichment.altmetric=JSON.stringify(articles[i].altmetricData)
+            };
+
             pushedArticle.shortTitle= JSON.stringify(enrichment);
-            convertedDataset.push(pushedArticle);
-            }
+            convertedDataset.push(pushedArticle);                                 // Then push the article in the array of converted articles
+
+        }
 
       } catch(err) {
-        ipcRenderer.send('chaeros-failure', JSON.stringify(err));                               // On failure, send error to main process
-        ipcRenderer.send('console-logs',JSON.stringify(err));                   // On failure, send error to console
+        ipcRenderer.send('chaeros-failure', JSON.stringify(err));                 // On failure, send error notification to main process
+        ipcRenderer.send('console-logs',JSON.stringify(err));                     // On failure, send error to console
       }
         finally {  
           pandodb.open();
           let id = dataset;
-          pandodb.csljson.add({"id":id,"date":date,"name":dataset,"content":convertedDataset}); 
-         }
+          pandodb.csljson.add({"id":id,"date":date,"name":dataset,"content":convertedDataset});  // Save array in local database
+      }
      })
      
-     ipcRenderer.send('chaeros-notification', 'Dataset converted');   // Else send a success message
+     ipcRenderer.send('chaeros-notification', 'Dataset converted');               // Send a success message
      ipcRenderer.send('console-logs',"scopusConverter successfully converted " + dataset); // Log success
      setTimeout(()=>{win.close()},500);
 };
 
-
-
 //========== scopusGeolocate ==========
-// scopusGeolocate gets cities/countries from a given scopus Dataset.
+// scopusGeolocate gets cities/countries geographical coordinates from affiliations.
 
 const scopusGeolocate = (dataset) => {
   
@@ -910,7 +908,7 @@ ResponseTarget = 0;
       })
     })
   })
-}) // closing Keytar
+}) 
 };
 
 //========== sysExport ==========
@@ -922,7 +920,7 @@ const sysExport = (destination,importName,id) => {
   })
 };
 
-
+//========== dataWriter ==========
 const dataWriter = (destination,importName,content) => {
   pandodb.open();
   destination.forEach(d=>{
@@ -1140,8 +1138,8 @@ const chaerosSwitch = (fluxAction,fluxArgs) => {
           case 'scopusRetriever' : scopusRetriever(fluxArgs.scopusRetriever.user,fluxArgs.scopusRetriever.query);
           break;
 
-    /*       case 'capcoRebuilder' : capcoRebuilder(fluxArgs.capcoRebuilder.dataFile,fluxArgs.capcoRebuilder.dataMatch);
-          break; */
+   //       case 'capcoRebuilder' : capcoRebuilder(fluxArgs.capcoRebuilder.dataFile,fluxArgs.capcoRebuilder.dataMatch);
+   //       break; 
 
           case 'zoteroItemsRetriever' : zoteroItemsRetriever(fluxArgs.zoteroItemsRetriever.collections,fluxArgs.zoteroItemsRetriever.zoteroUser,fluxArgs.zoteroItemsRetriever.importName,fluxArgs.zoteroItemsRetriever.destination);
           break;

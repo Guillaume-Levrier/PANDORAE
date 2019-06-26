@@ -6,10 +6,11 @@
 //      /_/    ∖___|           PANDORÆ
 //
 //   LICENSE : MIT
+//
 // pandorae.js is the main JS file managing what happens in the mainWindow. It communicates with the Main process
-// and with other windows through the Main process (by ipc channels). Visualisations are loaded in the Main window
-// through the "type" module, itself computing complex operations in a dedicated SharedWorker. 
-
+// and with other windows through the Main process (by ipc channels). Visualisations (types) are loaded in the Main window
+// through the "type" module, which computes heavier operations in a dedicated SharedWorker. 
+//
 // ============ VERSION ===========
 const msg = '      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ\n\n';
 const version ='BETA/DEV-V0.1.23';
@@ -59,19 +60,19 @@ pandodb.version(1).stores({
 // couldn't be done in Chaeros can be long. In order not to freeze the user's mainWindow,
 // most of the math to be done is sent to a Shared Worker which loads the data and sends
 // back to Types only what it needs to know.
-if (!!window.SharedWorker) {
-    var multiThreader = new SharedWorker("js/type/mul[type]threader.js");
+if (!!window.SharedWorker) {                                                      // If the SharedWorker doesn't exist yet
+    var multiThreader = new SharedWorker("js/type/mul[type]threader.js");         // Create a SharedWorker named multiThreader based on that file
 
-    multiThreader.port.onmessage = (res) => {  
-    if (res.data.type === "notification") {
-      ipcRenderer.send(res.data.dest,res.data.msg);
+    multiThreader.port.onmessage = (res) => {                                     // If multiThreader sends a message
+      if (res.data.type === "notification") {                                     // And the type property of this message is "notification"
+        ipcRenderer.send(res.data.dest,res.data.msg);                             // Send the notification to the main process for dispatch
     }
   };
 
-        multiThreader.onerror = (err) => {
-                ipcRenderer.send('console-logs',"Worker failed to start.");
-                ipcRenderer.send('console-logs',JSON.stringify(err));
-              };
+    multiThreader.onerror = (err) => {                                            // If the multiThreader reports an error
+      ipcRenderer.send('console-logs',"Worker failed to start.");                 // Send an error message to the console
+      ipcRenderer.send('console-logs',JSON.stringify(err));                       // Send the actual error content to the console
+    };
 
 };
 
@@ -107,14 +108,15 @@ nameDisplay(coreLogo);
 aelogo.addEventListener('dblclick', ()=>{location.reload()});
 
 // =========== Global Variables ===========
-var pandoratio = 0;                         // Used in three.js transitions (from one shape to another)
+var pandoratio = 0;                                         // Used in three.js transitions (from one shape to another)
 
-var field = document.getElementById("field");
+var field = document.getElementById("field");               // Field is the main field
 
-var xtypeExists = false;                                    // xtype doesn't exist on document load
+var xtypeExists = false;                                    // xtype SVG doesn't exist on document load
 var coreExists = true;                                      // core does exist on document load
 
 // =========== MENU ===========
+// Menu behaviors
 let toggledMenu = false;
 const purgeMenuItems = (menu) => {
   let menuContent = document.getElementById(menu);
@@ -207,6 +209,19 @@ const toggleTertiaryMenu = () => {
   }
 }
 
+const openHelper = (helperFile,section) => {
+  ipcRenderer.send('window-manager',"openHelper",helperFile,"",section);
+}
+const openModal = (modalFile) => {
+  ipcRenderer.send('window-manager',"openModal",modalFile);
+}
+const toggleOptions = () => {openRegular("options");}
+const toggleFlux = () => {toggleMenu();displayCore();openModal("flux");}
+const toggleHelp = () => {window.open("help.html","_blank");}
+
+
+// =========== MENU LOGO ===========
+// The menu logo behavior. This feature isn't called by any process yet.
 var logostatus = (statuserror) => {
 let svg = d3.select(menu).append("svg")
                   .attr("id","logostate")
@@ -227,40 +242,30 @@ lifelines.attr("class","lifelinerror")
     }
 }
 
-
-const openHelper = (helperFile,section) => {
-  ipcRenderer.send('window-manager',"openHelper",helperFile,"",section);
-}
-const openModal = (modalFile) => {
-  ipcRenderer.send('window-manager',"openModal",modalFile);
-}
-const toggleOptions = () => {openRegular("options");}
-const toggleFlux = () => {toggleMenu();displayCore();openModal("flux");}
-const toggleHelp = () => {window.open("help.html","_blank");}
-
 // =========== CONSOLE ===========
+
 let toggledConsole = false;
+
 const toggleConsole = () => {
-    if (toggledConsole) {
-      document.getElementById("console").style.zIndex = "-1";
-      document.getElementById("console").style.display = "none";
-      toggledConsole = false;
+  if (toggledConsole) {
+    document.getElementById("console").style.zIndex = "-1";
+    document.getElementById("console").style.display = "none";
+    toggledConsole = false;
+  }
+  else {
+    document.getElementById("console").style.zIndex = "3";
+    document.getElementById("console").style.display = "block";
+    toggledConsole = true;
     }
-    else {
-      document.getElementById("console").style.zIndex = "3";
-      document.getElementById("console").style.display = "block";
-      toggledConsole = true;
-      }
 }
 
 ipcRenderer.on('console-messages', (event,message) => {
-    let log = document.getElementById("log");
-    log.innerText = log.innerText+message;
-    log.scrollTop = log.scrollHeight;
+  let log = document.getElementById("log");
+  log.innerText = log.innerText+message;
+  log.scrollTop = log.scrollHeight;
 });
 
 ipcRenderer.on('mainWindowReload', (event,message) => {
-  console.log(message);
   remote.getCurrentWindow().reload();
   location.reload();
 });
@@ -281,13 +286,14 @@ const removeTooltip = () => {
 // ========== CORE SIGNALS ===========
 
 ipcRenderer.on('coreSignal', (event,fluxAction,fluxArgs, message) => {
-      try{
+    try {
       field.value = message;
       pulse(1,1,10);
-    } catch (err){
+    } 
+    catch (err) {
       field.value = err;
-  }
-})
+    }
+});
 
 ipcRenderer.on('chaeros-notification', (event,message,action) => {
   field.value = message;
@@ -303,10 +309,10 @@ ipcRenderer.on('chaeros-failure', (event,message) => {
 var commandReturn = "";
 
 const xtypeDisplay = () => {
-    xtype.style.opacity = "1",
-    xtype.style.zIndex = "2",
-    commandReturn = "";
-    createTooltip();
+  xtype.style.opacity = "1",
+  xtype.style.zIndex = "2",
+  commandReturn = "";
+  createTooltip();
 };
 
 const purgeXtype = () => {
@@ -318,11 +324,11 @@ const purgeXtype = () => {
 };
 
 const displayCore = () => {
-              purgeXtype();
-              if (coreExists === false) {reloadCore();}
-              xtypeExists = false;
-              coreExists = true;
-          }
+  purgeXtype();
+  if (coreExists === false) {reloadCore();}
+  xtypeExists = false;
+  coreExists = true;
+}
 
 const purgeCore = () => {
   if (coreExists) {
@@ -330,136 +336,142 @@ const purgeCore = () => {
     document.body.removeChild(document.getElementById("core-logo"));
     document.body.removeChild(document.getElementById("version"));
     field.style.display = "none";
-    Array.from(document.getElementsByClassName("purgeable")).forEach(d=>{
 
+    Array.from(document.getElementsByClassName("purgeable")).forEach(d=>{
       document.body.removeChild(document.getElementById(d.id));   
       d3.select(d.id).remove();
     });
+
     ipcRenderer.send('console-logs',"Purging core");
   }
 };
 
-const selectOption = (type,id) => {
-       
-        document.getElementById(id).style.backgroundColor = "rgba(220,220,220,0.3)";
+const selectOption = (type,id) => {   
+  document.getElementById(id).style.backgroundColor = "rgba(220,220,220,0.3)";
+  toggleMenu();
 
-        toggleMenu();
-        
-            field.addEventListener("click", ()=>{types.typeSwitch(type,id);},{once:true});
-        
-            field.style.pointerEvents = "all";
-            field.style.cursor = "pointer";
-            field.value = "start "+type;
+  field.addEventListener("click", ()=>{types.typeSwitch(type,id);},{once:true});
+  field.style.pointerEvents = "all";
+  field.style.cursor = "pointer";
+  field.value = "start "+type;
 
-        ipcRenderer.send('console-logs',"Checking dataset: " + JSON.stringify(id));
-
+  ipcRenderer.send('console-logs',"Checking dataset: " + JSON.stringify(id));
 };
 
-// ========== main menu options ========
+// ========== MAIN MENU OPTIONS ========
 
 const categoryLoader = (cat) => {
 
-let blocks;
+  let blocks;
 
-switch (cat) {
-  case "type": blocks = ['chronotype','geotype','anthropotype','gazouillotype'];
-              break;
+  switch (cat) {
+    case "type": blocks = ['chronotype','geotype','anthropotype','gazouillotype'];
+                  break;
 
     case "ext": blocks = ['hyphe'];
-    break;
-}
+                  break;
+  }
 
-blocks.forEach(block=>{
-  pandodb[block].toArray().then(thisBlock=>{
-      if (thisBlock.length>0) {
-        let typeContainer = document.createElement("div");
-        typeContainer.style.display="flex";
-        typeContainer.style.borderBottom= "1px solid rgba(192,192,192,0.3)";
-        typeContainer.id = block;
-        typeContainer.className+= "tabs menu-item";
-        typeContainer.innerText = block;
-        typeContainer.onclick = function (){mainDisplay(block)};
-        document.getElementById("secMenContent").appendChild(typeContainer);
-      }
+  blocks.forEach(block=>{
+    pandodb[block].toArray().then(thisBlock=>{
+        if (thisBlock.length>0) {
+          let typeContainer = document.createElement("div");
+          typeContainer.style.display="flex";
+          typeContainer.style.borderBottom= "1px solid rgba(192,192,192,0.3)";
+          typeContainer.id = block;
+          typeContainer.className+= "tabs menu-item";
+          typeContainer.innerText = block;
+          typeContainer.onclick = function (){mainDisplay(block)};
+          document.getElementById("secMenContent").appendChild(typeContainer);
+        }
+    })
   })
-})
 
-toggleSecondaryMenu();
+ toggleSecondaryMenu();
 }
 
 const mainDisplay = (type) =>{
 
   const listTableDatasets = (table) => {
     let targetType = pandodb[table];
-    targetType.toArray().then( e=> {
-      e.forEach(d=>{
+
+    targetType.toArray().then(e=> {
+
+      e.forEach(d=> {
+
+        // datasetContainer
         let datasetContainer = document.createElement("div");
         datasetContainer.style.display="flex";
         datasetContainer.style.borderBottom= "1px solid rgba(192,192,192,0.3)";
         document.getElementById("thirdMenuContent").appendChild(datasetContainer);
-          let dataset = document.createElement("div");
-          dataset.className = "secContentTabs";
-          dataset.id = d.id;
-          dataset.innerHTML = "<span><strong>"+d.name+"</strong><br>"+d.date+"</span>";
-          dataset.onclick = function () {selectOption(type,d.id)};
-          datasetContainer.appendChild(dataset);
-          let removeDataset = document.createElement("div");
-          removeDataset.className = "secContentDel";
-          removeDataset.id = "del"+d.id;
-          removeDataset.innerHTML = "<span><strong><i class='material-icons'>delete_forever</i></strong><br></span>";
-          removeDataset.onclick = () => {
-              pandodb[type].delete(d.id);
-              document.getElementById("thirdMenuContent").removeChild(datasetContainer);
-              field.value = "Dataset removed from "+type;
-              ipcRenderer.send('console-logs',"Removed "+d.id+" from database: "+type);
-            };
-          datasetContainer.appendChild(removeDataset);
+
+        // Dataset
+        let dataset = document.createElement("div");
+        dataset.className = "secContentTabs";
+        dataset.id = d.id;
+        dataset.innerHTML = "<span><strong>"+d.name+"</strong><br>"+d.date+"</span>";
+        dataset.onclick = function () {selectOption(type,d.id)};
+        datasetContainer.appendChild(dataset);
+
+        // Remove dataset
+        let removeDataset = document.createElement("div");
+        removeDataset.className = "secContentDel";
+        removeDataset.id = "del"+d.id;
+        removeDataset.innerHTML = "<span><strong><i class='material-icons'>delete_forever</i></strong><br></span>";
+        removeDataset.onclick = () => {
+            pandodb[type].delete(d.id);
+            document.getElementById("thirdMenuContent").removeChild(datasetContainer);
+            field.value = "Dataset removed from "+type;
+            ipcRenderer.send('console-logs',"Removed "+d.id+" from database: "+type);
+          };
+        datasetContainer.appendChild(removeDataset);
+
         }) 
       });
   }
 
-  displayCore();
-  purgeXtype();
   field.value = "preparing " + type;
   ipcRenderer.send('console-logs',"Preparing " + type);
-
+  displayCore();
+  purgeXtype();
   toggleTertiaryMenu();
   listTableDatasets(type);
-
 }
+
+
+// ========== MAIN FIELD COMMAND INPUT ========
 
 const cmdinput = (input) => {
 
-input = input.toLowerCase();
+  input = input.toLowerCase();
 
-ipcRenderer.send('console-logs'," user$ "+ input);
+  ipcRenderer.send('console-logs'," user$ "+ input);
 
-const loadingType = () => commandReturn = "loading " + commandInput;
+  // Theme change 
+  if (input.substring(0, 13) === "change theme ") {
 
-if (input.substring(0, 13) === "change theme ") {
+    switch (input.substring(13,input.length)) {
 
+          case "normal":
+          case "blood-dragon":
+          case "minitel-magis":
 
-  switch (input.substring(13,input.length)) {
+              document.body.style.animation="fadeout 0.5s";
+              setTimeout(()=>{
+                    document.body.remove();
+                    selectTheme(input.substring(13,input.length));
+                    remote.getCurrentWindow().reload();
+              }, 450);
 
+              break;
 
-case "normal":
-case "blood-dragon":
-case "minitel-magis":
+          default: commandReturn = "invalid theme name";
+            }
+  } 
 
-  document.body.style.animation="fadeout 0.5s";
-            setTimeout(()=>{
-              document.body.remove();
-             selectTheme(input.substring(13,input.length));
-              remote.getCurrentWindow().reload();
-            }, 450);
-            break;
+  else {
 
- default: commandReturn = "invalid theme name";
-
-          }
-} else {
-
-switch (input) {
+  switch (input) {
 
     case 'test':
           //loadingType();
@@ -648,21 +660,15 @@ const detransfect = () => {
 }
 
 
-// Window management
+//// ========== WINDOW MANAGEMENT ========
 
-const closeWindow = () => {
-       remote.getCurrentWindow().close();
-}
+const closeWindow = () => { remote.getCurrentWindow().close() };
 
-const refreshWindow = () => {
-       remote.getCurrentWindow().reload();
-}
+const refreshWindow = () => { remote.getCurrentWindow().reload() };
 
-const reframeMainWindow = () => {
-        remote.mainWindow({frame: true})
-}
+const reframeMainWindow = () => { remote.mainWindow({frame: true}) };
 
-// Tutorial - Uncomment to force tutorial on boot if no user name defined
+//// ========== TUTORIAL ========
 
 const tutorialOpener = () => {
   openModal("tutorial");
@@ -670,25 +676,25 @@ const tutorialOpener = () => {
 }
 
 fs.readFile(userDataPath +'/userID/user-id.json',                          // Read the designated datafile
-                              'utf8', (err, data) => {              // Additional options for readFile
+                              'utf8', (err, data) => {                     // Additional options for readFile
   if (err) throw err;
   let user = JSON.parse(data);
 
-if (user.UserName === "Enter your name") {
-  document.getElementById("menu-icon").style.cursor = "not-allowed";
-  document.getElementById("option-icon").style.cursor = "not-allowed";
-  document.getElementById("tutostartmenu").style.display = "block";
-  field.style.pointerEvents = "all";
-  field.style.cursor = "pointer";
-  field.value = "start tutorial";
-  field.addEventListener("click",tutorialOpener);
+  if (user.UserName === "Enter your name") {
+    document.getElementById("menu-icon").style.cursor = "not-allowed";
+    document.getElementById("option-icon").style.cursor = "not-allowed";
+    document.getElementById("tutostartmenu").style.display = "block";
+    field.style.pointerEvents = "all";
+    field.style.cursor = "pointer";
+    field.value = "start tutorial";
+    field.addEventListener("click",tutorialOpener);
   } else{
-    document.getElementById("menu-icon").onclick = toggleMenu;
-    document.getElementById("option-icon").onclick = toggleConsole;
-    document.getElementById("menu-icon").style.cursor = "pointer";
-    document.getElementById("option-icon").style.cursor = "pointer";
-    document.getElementById("version").innerHTML =  user.UserName.toUpperCase();
-  }
+      document.getElementById("menu-icon").onclick = toggleMenu;
+      document.getElementById("option-icon").onclick = toggleConsole;
+      document.getElementById("menu-icon").style.cursor = "pointer";
+      document.getElementById("option-icon").style.cursor = "pointer";
+      document.getElementById("version").innerHTML =  user.UserName.toUpperCase();
+    }
 });
 
 const blinker = (item) => {
@@ -822,10 +828,9 @@ const loadTheme = () => {
           }
      }
   });
-}; // end of loadtheme
+};
 
-  window.onload=loadTheme();
-
+window.onload=loadTheme();
 
 let screenZoomToggle = false;
 
@@ -857,54 +862,37 @@ const killViews = () => {
 };
 
 
-// ====== Keyboard shortcuts ======
-
+// ====== KEYBOARD SHORTCUTS ======
 
 document.addEventListener("keydown", event => {
 
+  switch (event.isComposing || event.code) {
+    case "Digit1": toggleMenu();
+                   break;
 
-switch (event.isComposing || event.code) {
-  case "Digit1":
-    toggleMenu();
-    break;
-
-  case "Digit2":
-    toggleFlux(); toggleMenu();
-    break;
-  
-    case "Digit3":
-      if(toggledMenu===false){toggleMenu()};
-      categoryLoader('type');
-      break;
+    case "Digit2": toggleFlux(); 
+                   toggleMenu();
+                   break;
     
-      case "Digit4":
-      if(toggledMenu===false){toggleMenu()};
-      categoryLoader('ext');
-      break;
+    case "Digit3": if (toggledMenu===false) { toggleMenu() };
+                   categoryLoader('type');
+                   break;
+      
+    case "Digit4": if(toggledMenu===false) { toggleMenu() };
+                   categoryLoader('ext');
+                  break;
 
-      case "Digit5":
-        toggleConsole();
-          break;
-    }
-  
+    case "Digit5": toggleConsole();
+                   break;
+  }
 });
 
+// ====== PROGRESS BAR ======
 
 const progBarSign = (prog) => {
-
   prog = parseInt(prog);
-
-if (prog>100){prog = 100};
-
-  let progBar = document.getElementById("version");
-      //progBar.innerText = prog+" %";  
-      //progBar.style.textAlign="center";
-      progBar.style.background = "linear-gradient(0.25turn,rgba(0,0,255,0.3) 0%,rgba(0,0,255,0.3) "+prog+"%,transparent "+(prog+0.1)+"%)";  
-
+  if (prog>100) { prog = 100 };
+  document.getElementById("version").style.background = "linear-gradient(0.25turn,rgba(0,0,255,0.3) 0%,rgba(0,0,255,0.3) "+prog+"%,transparent "+(prog+0.1)+"%)";  
 }
 
-
-ipcRenderer.on('progressBar', (event,prog) => {
-  progBarSign(prog)
-
-});
+ipcRenderer.on('progressBar', (event,prog) => {progBarSign(prog)});
