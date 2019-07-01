@@ -471,7 +471,7 @@ li:active {
   top:40%;
   left:50%;
   font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
-  font-weight: 600;
+  /* font-weight: 500; */
   letter-spacing: 7px;
   font-size: 45px;
   margin-left:-400px;
@@ -492,7 +492,6 @@ li:active {
   top: calc(45% + 20px);
   left:70%;
   font-size: 0.8em;
-  font-weight: bolder;
   pointer-events: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
