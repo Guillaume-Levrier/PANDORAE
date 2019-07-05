@@ -211,7 +211,9 @@ cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key))
 // the total amount of documents). This is sent to chaeros via powerValve because it can be heavy, depending on the
 // size of the sample and the power/broadband available on the user's system.
 
-const scopusRetriever = (user, query) => {                          // user argument is passed to get keytar pass
+const scopusRetriever = (user, query,bottleRate) => {                          // user argument is passed to get keytar pass
+
+//bottleneck to be implemented
 
 ipcRenderer.send('console-logs',"Started scopusRetriever on " + query + " for user "+ user); // Log the process
 
@@ -1135,7 +1137,7 @@ const chaerosSwitch = (fluxAction,fluxArgs) => {
           case 'altmetricRetriever' :   altmetricRetriever(fluxArgs.altmetricRetriever.id,fluxArgs.altmetricRetriever.user);
           break;
 
-          case 'scopusRetriever' : scopusRetriever(fluxArgs.scopusRetriever.user,fluxArgs.scopusRetriever.query);
+          case 'scopusRetriever' : scopusRetriever(fluxArgs.scopusRetriever.user,fluxArgs.scopusRetriever.query,fluxArgs.scopusRetriever.bottleneck);
           break;
 
    //       case 'capcoRebuilder' : capcoRebuilder(fluxArgs.capcoRebuilder.dataFile,fluxArgs.capcoRebuilder.dataMatch);
