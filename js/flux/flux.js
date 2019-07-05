@@ -56,7 +56,6 @@ ipcRenderer.on('window-close', (event,message) => {
   closeWindow();
 });
 
-
 //========== Tracegraph ==========
 
 let traces = [
@@ -294,6 +293,7 @@ switch (fluxAction) {                                                      // Ac
   case 'scopusRetriever' : fluxArgs.scopusRetriever = {"user":"","query":""};
                            fluxArgs.scopusRetriever.user = document.getElementById("userNameInput").value;
                            fluxArgs.scopusRetriever.query = document.getElementById("scopuslocalqueryinput").value;
+                           fluxArgs.scopusRetriever.bottleneck = document.getElementById("scopusRange").value;
                            message = "Retrieving data from Scopus" ;
                            break;
 
@@ -573,7 +573,8 @@ let optionsRequest = {                             // Prepare options for the Re
     let dataBasicPreview = "<strong>"+ searchTerms+"</strong>"+
                            "<br>Expected results at request time : " + totalResults+
                            "<br>Amount of requests needed to retrieve full response : " + requestAmount(totalResults) +
-                           "<br>Query date: "+ date+"<br>[Reload this window to submit a different query.]<br><br>";
+                           "<br>Query date: "+ date+"<br>[Reload this window to submit a different query.]<br>"+
+                           "<br>Amount of requests per second: <span id='scopusRangeValue'>1</span><input style='margin-left:30px' type='range' oninput='this.previousSibling.innerText=parseInt(this.value)' id='scopusRange' min='1' step='any' max='20' value='1'><br><br>";
 
     document.getElementById('scopus-basic-previewer').innerHTML = dataBasicPreview;
 
