@@ -16,7 +16,10 @@ macOS starting issues: put the app in the "Applications" folder and then start a
 If you encounter an issue, please tag this [account](https://mobile.twitter.com/PANDORAE_CORE) or create an issue here on Github.
 
 ### Roadmap
+- API requests bottleneck size slider in Flux
 - fix Gz brush
 - Chronotype Ybrush
+- API documentation (under way in the repo's Wiki)
+- Prodigy connector?
+- Actual Hyphe connector
 - Zotero local connector
-- API documentation
