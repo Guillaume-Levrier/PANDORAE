@@ -288,7 +288,8 @@ ipcMain.on('mainWindowReload', (event,message) => {
   mainWindow.webContents.send('mainWindowReload',message)
 });
 
-ipcMain.on('hyphe', (event,message) => { 
+
+/* ipcMain.on('hyphe', (event,message) => { 
   let view = new BrowserView();
   view.setBounds({ x: 0, y: 20, width: 1200, height: 780 })
 
@@ -298,10 +299,9 @@ ipcMain.on('hyphe', (event,message) => {
     mainWindow.setBrowserView(view)
     view.webContents.loadURL(message)
   }
- 
 
 });
-
+ */
 
 // ProgressBar
 ipcMain.on('progress', (event,message) => { 
