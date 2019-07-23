@@ -1,9 +1,9 @@
 //========== TYPES ==========
-// PANDORAE is a data exploration tools. Once the user's data has been loaded through Flux
-// and potentially hand-curated through Zotero and/or rekindled in Chaeros, it is to be sent
+// PANDORAE is a data exploration tool. Once the user's data has been loaded through Flux
+// and potentially curated through Zotero and/or rekindled in Chaeros, it is to be sent
 // to one of the available Types. Types are simple data visualisation frameworks designed to
-// support certain types of data. Each focuses on a certain aspect, and helps the user
-// discover patterns on potentially large datasets.
+// support certain types of data. Each focuses on a certain perspective, and helps the user
+// discover patterns on potentially larger datasets.
 
 
 // =========== NODE - NPM ===========
@@ -2570,8 +2570,8 @@ const typeSwitch = (type,id) => {
           break;
 
           case 'hyphe' : 
-          ipcRenderer.send('hyphe', id);
-          backFromHyphe();
+        //  ipcRenderer.send('hyphe', id);
+        //  backFromHyphe();
         break;
       }
 
