@@ -1330,9 +1330,10 @@ const geotype = (locations) => {
         .attr("cy", height / 2)
         .attr("r", projection.scale());
   
+ 
+      
 
-  
-  
+
 //Calling data
 pandodb.geotype.get(locations).then(locations => {
 
@@ -1343,6 +1344,8 @@ pandodb.geotype.get(locations).then(locations => {
   }
 
   Promise.all([d3.json("json/world-countries.json")]).then(geo => {
+
+   
 
 var geoData = geo[0];
 
@@ -1355,6 +1358,11 @@ var geoData = geo[0];
   data.forEach(d=>{
       if (d.hasOwnProperty('enrichment')&&d.enrichment.hasOwnProperty('affiliations')){
 
+        if(d.hasOwnProperty('issued')) {
+          d.date=JSON.stringify(d.issued['date-parts'][0][0])+","+d.issued['date-parts'][0][1];
+          
+        }
+      
       d.authors = [];
       if (d.hasOwnProperty('author')){
           for (let j=0;j<d.author.length;j++){
@@ -1494,18 +1502,24 @@ var geoData = geo[0];
     .data(links)
     .enter().append("path")
       .attr("class", "arc")
+      .style('stroke', "red")             
       .attr("d", path);
-  
+
+
 
   var locations = view.selectAll("locations")
                   .data(cities)
                   .enter().append("path")
                   .attr("id", d => d.id)
                   .attr("class", "locations");
-  
-        locations.datum(d => d3.geoCircle().center([ d.lon, d.lat ]).radius(0.05)())
+
+        locations.datum(d => d3.geoCircle().center([ d.lon, d.lat ]).radius((Math.log(d.values.length)+1)*0.05)())
                   .attr("d", path);
-  
+                  
+                  locations.append("text")
+                  .data(cities)
+                  .text(d=>d.key); 
+
         locations.on("mouseover", d => {
                 for (var i = 0; i < locations._groups[0].length; i++) {
                     if(d.coordinates[0][0] === locations._groups[0][i].__data__.coordinates[0][0]){
@@ -1521,6 +1535,130 @@ var geoData = geo[0];
                                         }
                                       });
   
+//Brush
+
+// This might be much much better https://observablehq.com/@bumbeishvili/data-driven-range-sliders
+
+var toggleBrush = document.createElement("INPUT")
+toggleBrush.type ="checkbox";
+toggleBrush.checked =true;
+
+
+
+ toggleBrush.addEventListener("change",e=>{
+
+  if (e.target.checked) {
+    document.getElementById("brushgroup").style.display = "block";
+  } else {
+    
+    document.getElementById("brushgroup").style.display = "none";
+  } 
+})
+
+document.getElementById("source").appendChild(toggleBrush)
+
+let brushtogglelabel = document.createElement("span");
+brushtogglelabel.innerText="Toggle brush";
+
+document.getElementById("source").appendChild(brushtogglelabel)
+
+var areaGraphData =  d3.nest().key(d => d.date).entries(data);
+
+areaGraphData.forEach(d=>{d.key=new Date(d.key);d.value=d.values.length;delete d.values});
+
+for (let i = 0; i < areaGraphData.length; i++) {
+  if(typeof areaGraphData[i].key != "date"){
+    areaGraphData.splice(i,1)
+
+  }
+  
+}
+
+var brushGroup = svg.append("g").attr("id","brushgroup");
+
+
+for (let i = 0; i < data.length; i++) {
+  if (data[i].issued.hasOwnProperty('date-parts')) {
+    
+    firstDate = new Date(JSON.stringify(data[i].issued['date-parts'][0][0]));
+    break;
+  }
+  
+}
+
+var x = d3.scaleTime([areaGraphData[0].key, areaGraphData[areaGraphData.length-1].key], [20, width - toolWidth -40])
+
+let axisTopOffset = parseInt(document.body.offsetHeight-50);
+
+var xAxis = g => g
+  .attr("transform", 'translate(10,'+axisTopOffset+')')
+  .call(d3.axisBottom(x))
+
+  brushGroup.append("g").call(xAxis);
+
+
+
+  var y = d3.scaleLinear()
+      .domain([0, d3.max(areaGraphData, d=> +d.value)])
+      .range([ 100, 0 ]);
+
+      var yAxis = g => g.append("g")
+      .attr("transform", 'translate(30,'+parseInt(axisTopOffset-100)+')')
+      .call(d3.axisLeft(y));
+
+      brushGroup.append("g").call(yAxis);
+
+
+
+      brushGroup.append("path")
+        .datum(areaGraphData)
+        .attr("transform", 'translate(10,'+parseInt(axisTopOffset-100)+')')
+        .attr("fill-opacity", 0.4)
+        .attr("fill", "steelblue")
+          .attr("d", d3.area()
+          .x(d => x(d.key))
+          .y1(d => y(d.value))
+          .y0(y(0)))
+
+
+          var brushHandle = (g, selection) => g
+          .selectAll(".handle--custom")
+          .data([{type: "w"}, {type: "e"}])
+          .join(
+            enter => enter.append("path")
+                .attr("class", "handle--custom")
+                .attr("fill", "#666")
+                .attr("fill-opacity", 0.8)
+                .attr("stroke", "#000")
+                .attr("stroke-width", 1.5)
+                .attr("cursor", "ew-resize")
+                .attr("d", d3.arc()
+                .innerRadius(0)
+                .outerRadius((100) / 2)
+                .startAngle(0)
+                .endAngle((d, i) => i ? Math.PI : -Math.PI))
+          )
+            .attr("display", selection === null ? "none" : null)
+            .attr("transform", selection === null ? null : (d, i) => `translate(${selection[i]},${(100) / 2})`)
+        
+
+    var brush = d3.brushX()
+    .extent([[10, 100], [600, 100]])
+    //.extent([[10, document.body.offsetHeight-200], [width - toolWidth -10, 100]])
+    .on("start brush end", brushed);
+
+    brushGroup.append("g")
+        .call(brush);
+       // .call(brush.move, [0.3, 0.5].map(x));
+  
+        function brushed() {
+          const selection = d3.event.selection;
+          d3.select(this).call(brushHandle, selection);
+        }
+    
+    
+  
+
 
 // rotate globe
 
@@ -1547,6 +1685,9 @@ var geoData = geo[0];
     ipcRenderer.send('console-logs',"Geotype error: dataset " +datasetAT+" is invalid.");
   });
   
+
+ 
+
   var λ = d3.scaleLinear()
             .domain([0, width])
             .range([-180, 180]);
