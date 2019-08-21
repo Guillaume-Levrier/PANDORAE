@@ -14,7 +14,7 @@ const THREE = require('three');
 const userDataPath = remote.app.getPath('userData');
 const Dexie = require('dexie');
 const csv = require('csv-parser');
-
+const versor = require('versor');
 
 
 Dexie.debug = true;
@@ -1546,11 +1546,24 @@ var locGroup = view.append("g").attr('id','cityLocations');  // recreate the cit
                   .attr("class", "locations");
     locations.datum(d => d3.geoCircle().center([ d.lon, d.lat ]).radius(d.radius*0.05)())
               .attr("d", path);
-                  
-        // To do : add the cities names 
-                /*   locations.append("text")
-                  .data(cities)
-                  .text(d=>d.key);  */
+
+      var locNames = locGroup.selectAll("text")
+            .data(cities)
+            .enter().append("text")
+            .style("fill", "black")
+            .style("fond-style","Noto Sans")
+            .style('user-select',"none")
+            //.style("font-weight", "bolder")
+            .style("font-size", d=>{if(d.radius>0){return (d.radius+.1)+"px"}else{return "0"}})
+            .attr("transform", d => {
+              var loc = projection([ d.lon, d.lat ]),
+                x = loc[0];
+                y = loc[1];
+              return "translate(" + (x+d.radius) + "," + y + ")"
+            })
+            .text(d => d.key);
+  
+
 
     locations.on("mouseover", d => {
             for (var i = 0; i < locations._groups[0].length; i++) {
@@ -1839,8 +1852,6 @@ grouped.forEach(d=>{d.key=d.date;d.value=d.values.length});
       }
       
         brushContent = d1;
-        console.log(brushContent)
-
 
      cities.forEach(city=>{
       city.values.forEach(paper=>{
@@ -1973,6 +1984,8 @@ grouped.forEach(d=>{d.key=d.date;d.value=d.values.length});
   
     d3.select("#reset").on("click", narrative(data[3]));
   */
+
+ 
 })
   }).catch(error=>{
     field.value = "error - invalid dataset";
@@ -1980,7 +1993,47 @@ grouped.forEach(d=>{d.key=d.date;d.value=d.values.length});
   });
   
 
- 
+  function drag() {
+    let v0, q0, r0;
+    
+    function dragstarted() {
+     v0 = versor.cartesian(projection.invert(d3.mouse(this)));
+      q0 = versor(r0 = projection.rotate());
+    }
+    
+    function dragged() {
+      const v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this)));
+  
+      const q1 = versor.multiply(q0, versor.delta(v0, v1));
+      projection.rotate(versor.rotation(q1));
+      //linkloc()
+      view.selectAll("text").attr("transform", (d) => {
+        var loc = projection([ d.lon, d.lat ]),
+          x = loc[0],
+          y = loc[1];
+        return "translate(" + (x+d.radius) + "," + y + ")"
+      })
+      .text(d => d.key);
+      view.selectAll("path").attr("d", path);
+      
+    }
+    
+   
+  
+    return d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged);
+      
+  }
+  
+  view.call(drag());
+
+
+
+
+  //view.call(drag);
+
+ /*
 
   var λ = d3.scaleLinear()
             .domain([0, width])
@@ -2005,10 +2058,12 @@ grouped.forEach(d=>{d.key=d.date;d.value=d.values.length});
       view.selectAll("path").attr("d", path);
 
   });
-  
+  */
   //drag call
-  view.style("transform-origin", "50% 50% 0");
-  view.call(drag);
+ 
+
+  
+ view.style("transform-origin", "50% 50% 0");
   view.call(zoom);
   
   function zoomed() {
