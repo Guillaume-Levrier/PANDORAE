@@ -837,9 +837,9 @@ label {
 }
 
 .boundary {
-  fill: #c6c6c6;
-  stroke: white;
-  stroke-width: 0.4px;
+  fill: white;
+  stroke: #c6c6c6;
+  stroke-width: .5px;
 }
 
 .arc {
@@ -851,13 +851,13 @@ label {
 
 .graticule {
   fill:transparent;
-  stroke: #c6c6c6;
+  stroke: white;
   stroke-width: .7px;
   /* stroke-opacity: .6; */
 }
 
 .graticule-outline {
-  fill: #fff;
+  fill:  #e6f3ff;
   stroke: #333;
   stroke-width: 1px;
 }
