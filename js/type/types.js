@@ -1457,7 +1457,7 @@ var geoData = geo[0];
             if (city.values[k].enrichment.affiliations[l].affilname===city.affiliations[j]) {
               let link = {}
               if (institution.papers.findIndex(paper => paper.title === city.values[k].title)<0) {
-                institution.papers.push({"title":city.values[k].title,"DOI":city.values[k].DOI,"OA":city.values[k].enrichment.OA});
+                institution.papers.push({"title":city.values[k].title,"DOI":city.values[k].DOI,"OA":city.values[k].enrichment.OA,"visibility":city.values[k].visibility});
               }
            }
          }
@@ -1472,11 +1472,14 @@ var geoData = geo[0];
           let localList= "<strong>"+e.name+"</strong><ul style='cursor:pointer;'>";
               for (var i = 0; i < e.papers.length; i++) {
                 let url = "https://dx.doi.org/"+e.papers[i].DOI;
-                if (e.papers[i].OA === true) { // If OA flag is true
+               
+              if (e.papers[i].visibility){
+                if (e.papers[i].OA) { // If OA flag is true
                   localList = localList+ "<li><img src='././svg/OAlogo.svg' height='16px'/>&nbsp;<a onclick='shell.openExternal("+JSON.stringify(url)+")'>"+e.papers[i].title+"</a></li>"
                 } else {  // else just resolve DOI
                 localList = localList+ "<li><a onclick='shell.openExternal("+JSON.stringify(url)+")'>"+e.papers[i].title+"</a></li>"
               }
+            }
             }
           totalList= totalList+localList+ "</ul>";
       })
@@ -1502,7 +1505,22 @@ var geoData = geo[0];
 
   // collaboration arcs
 
-  const linkLoc = (cities,links) => {
+cities.forEach(city=>city.values.forEach(paper=>paper.visibility=true));
+
+  const linkLoc = () => {
+    console.log(cities);
+
+    cities.forEach(city=>{
+      let radius =1;
+      for (let i = 0; i < city.values.length; i++) {
+        if(city.values[i].visibility){
+          radius = radius+1;
+        } 
+      }
+      if (radius === 1) {city.radius === 0}
+      else {city.radius = Math.log(radius)+1}
+      
+    })
 
 
  view.selectAll("lines")
@@ -1515,12 +1533,14 @@ var geoData = geo[0];
 
 
   var locations = view.selectAll("locations")
+  .exit().remove()  
                   .data(cities)
                   .enter().append("path")
                   .attr("id", d => d.id)
                   .attr("class", "locations");
 
-        locations.datum(d => d3.geoCircle().center([ d.lon, d.lat ]).radius((Math.log(d.values.length)+1)*0.05)())
+        locations.datum(d => d3.geoCircle().center([ d.lon, d.lat ]).radius(d.radius*0.05)())
+      
                   .attr("d", path);
                   
                   locations.append("text")
@@ -1544,7 +1564,7 @@ var geoData = geo[0];
   
       }
 
-      linkLoc(cities,links);
+      linkLoc();
 // Brush Data
 
 
@@ -1829,8 +1849,8 @@ grouped.forEach(d=>{d.key=d.date;d.value=d.values.length});
       })
      })
 
-     console.log(cities);
-
+     
+     linkLoc();
   }
 
   function brushed(d) {
