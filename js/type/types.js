@@ -1301,7 +1301,8 @@ const geotype = (locations) => {
   svg.attr("width", width-toolWidth).attr("height", height);        // Attributing width and height to svg
   
   var view = svg.append("g")                                          // Appending a group to SVG
-                .attr("class", "view");                               // CSS viewfinder properties
+                .attr("class", "view")
+                .attr("id","view");                               // CSS viewfinder properties
   
   //globe properties and beginning aspect
   const projection = d3.geoOrthographic()
@@ -1489,7 +1490,9 @@ var geoData = geo[0];
   
   
   // countries
- view.selectAll("path")
+var countryMap = view.append("g").attr("id","countryMap")
+
+countryMap.selectAll("path")
         .data(geoData.features)
         .enter().append("path")
         .attr("class", "boundary")
@@ -1497,74 +1500,76 @@ var geoData = geo[0];
         .attr("d", path);
   
   //graticule
-  view.append("path")
+  countryMap.append("path")
   .datum(graticule)
   .attr("class", "graticule")
   .attr("d", path);
 
 
-  // collaboration arcs
 
-cities.forEach(city=>city.values.forEach(paper=>paper.visibility=true));
 
-  const linkLoc = () => {
-    console.log(cities);
+var locGroup = view.append("g").attr('id','cityLocations');  // Create a group for cities + links (circles + arcs)
 
-    cities.forEach(city=>{
-      let radius =1;
-      for (let i = 0; i < city.values.length; i++) {
-        if(city.values[i].visibility){
-          radius = radius+1;
+cities.forEach(city=>city.values.forEach(paper=>paper.visibility=true));  // Make all cities visible at first
+links.forEach(link=>link.visibility=true);                                // Make all links visibile at first
+
+const linkLoc = () => {                                                   // generate links and cities 
+   
+    document.getElementById('view').removeChild(document.getElementById("cityLocations")) // remove all cities & links
+
+var locGroup = view.append("g").attr('id','cityLocations');  // recreate the cities & links svg group
+
+    cities.forEach(city=>{                                    // for each city
+      let radius =1;                                          // base radius is 1
+      for (let i = 0; i < city.values.length; i++) {          // for each article in each city
+        if(city.values[i].visibility){                        // if the article has been published in this timeframe
+          radius = radius+1;                                  // add a unit to the radius
         } 
       }
-      if (radius === 1) {city.radius === 0}
-      else {city.radius = Math.log(radius)+1}
-      
+      if (radius === 1) {city.radius = 0}                     // if it stays at 1, no articles published
+      else {city.radius = Math.log(radius)+1}                 // else, the radius is log(article number) + 1      
     })
 
-
- view.selectAll("lines")
+ var affilLinks = locGroup.selectAll("lines")                 // add the links
     .data(links)
     .enter().append("path")
       .attr("class", "arc")
-      .style('stroke', "red")             
+      .style('stroke',d=>{if (d.visibility){return "red"} else {return "transparent"}})   // links always exist, they just become transparent if the articles are not in the timeframe          
       .attr("d", path);
 
+// ADDING THE CITIES
 
-
-  var locations = view.selectAll("locations")
-  .exit().remove()  
-                  .data(cities)
-                  .enter().append("path")
+  var locations = locGroup.selectAll("locations")
+              .data(cities)
+              .enter().append("path")
                   .attr("id", d => d.id)
                   .attr("class", "locations");
-
-        locations.datum(d => d3.geoCircle().center([ d.lon, d.lat ]).radius(d.radius*0.05)())
-      
-                  .attr("d", path);
+    locations.datum(d => d3.geoCircle().center([ d.lon, d.lat ]).radius(d.radius*0.05)())
+              .attr("d", path);
                   
-                  locations.append("text")
+        // To do : add the cities names 
+                /*   locations.append("text")
                   .data(cities)
-                  .text(d=>d.key); 
+                  .text(d=>d.key);  */
 
-        locations.on("mouseover", d => {
-                for (var i = 0; i < locations._groups[0].length; i++) {
-                    if(d.coordinates[0][0] === locations._groups[0][i].__data__.coordinates[0][0]){
-                                            d3.select("#tooltip").transition()
-                                               .duration(200)
-                                               .style("display", "block");
-                                            d3.select("#tooltip").html(
-                                              '<strong><h2>' + cities[i].key +
-                                              '</strong> <br/><sup>' +cities[i].country +'</sup></h2><br>' +
-                                              affilFinder(cities[i])
-                                           );
-                                          }
-                                        }
-                                      });
+    locations.on("mouseover", d => {
+            for (var i = 0; i < locations._groups[0].length; i++) {
+                if(d.coordinates[0][0] === locations._groups[0][i].__data__.coordinates[0][0]){
+                                        d3.select("#tooltip").transition()
+                                            .duration(200)
+                                            .style("display", "block");
+                                        d3.select("#tooltip").html(
+                                          '<strong><h2>' + cities[i].key +
+                                          '</strong> <br/><sup>' +cities[i].country +'</sup></h2><br>' +
+                                          affilFinder(cities[i])
+                                        );
+                                      }
+                                    }
+                                  });
   
       }
 
-      linkLoc();
+      linkLoc(); // start it a first time
 // Brush Data
 
 
@@ -1572,7 +1577,6 @@ cities.forEach(city=>city.values.forEach(paper=>paper.visibility=true));
 // adapted from https://observablehq.com/@bumbeishvili/data-driven-range-sliders
 
 const barRangeSlider = (initialDataArray, accessorFunction, aggregatorFunction, paramsObject) => {
-
 
   const chartWidth = width - toolWidth - 40;
   let chartHeight = 100;
@@ -1841,16 +1845,21 @@ grouped.forEach(d=>{d.key=d.date;d.value=d.values.length});
      cities.forEach(city=>{
       city.values.forEach(paper=>{
         paper.date = new Date(paper.date);
+        var linkIndex = links.findIndex(link=>link.DOI===paper.DOI);
+
         if (paper.date>=brushContent[0] && paper.date<=brushContent[1]) {
           paper.visibility = true;
+        if (linkIndex>-1){links[linkIndex].visibility=true}
         } else {
           paper.visibility=false;
+          if (linkIndex>-1){links[linkIndex].visibility=false}
         }
       })
      })
 
      
      linkLoc();
+     d3.select("#tooltip").html('')
   }
 
   function brushed(d) {
@@ -1944,110 +1953,6 @@ grouped.forEach(d=>{d.key=d.date;d.value=d.values.length});
 
   barRangeSlider(data)
 
- 
-//Brush
-/*
-// This might be much much better https://observablehq.com/@bumbeishvili/data-driven-range-sliders
-
-var toggleBrush = document.createElement("INPUT")
-toggleBrush.type ="checkbox";
-toggleBrush.checked =true;
-
-
-
- toggleBrush.addEventListener("change",e=>{
-
-  if (e.target.checked) {
-    document.getElementById("brushgroup").style.display = "block";
-  } else {
-    
-    document.getElementById("brushgroup").style.display = "none";
-  } 
-})
-
-document.getElementById("source").appendChild(toggleBrush)
-
-let brushtogglelabel = document.createElement("span");
-brushtogglelabel.innerText="Toggle brush";
-
-document.getElementById("source").appendChild(brushtogglelabel)
-
-
-var brushGroup = svg.append("g").attr("id","brushgroup");
-
-var x = d3.scaleTime([areaGraphData[0].key, areaGraphData[areaGraphData.length-1].key], [20, width - toolWidth -40])
-
-let axisTopOffset = parseInt(document.body.offsetHeight-50);
-
-var xAxis = g => g
-  .attr("transform", 'translate(10,'+axisTopOffset+')')
-  .call(d3.axisBottom(x))
-
-  brushGroup.append("g").call(xAxis);
-
-
-
-  var y = d3.scaleLinear()
-      .domain([0, d3.max(areaGraphData, d=> +d.value)])
-      .range([ 100, 0 ]);
-
-      var yAxis = g => g.append("g")
-      .attr("transform", 'translate(30,'+parseInt(axisTopOffset-100)+')')
-      .call(d3.axisLeft(y));
-
-      brushGroup.append("g").call(yAxis);
-
-
-
-      brushGroup.append("path")
-        .datum(areaGraphData)
-        .attr("transform", 'translate(10,'+parseInt(axisTopOffset-100)+')')
-        .attr("fill-opacity", 0.4)
-        .attr("fill", "steelblue")
-          .attr("d", d3.area()
-          .x(d => x(d.key))
-          .y1(d => y(d.value))
-          .y0(y(0)))
-
-
-          var brushHandle = (g, selection) => g
-          .selectAll(".handle--custom")
-          .data([{type: "w"}, {type: "e"}])
-          .join(
-            enter => enter.append("path")
-                .attr("class", "handle--custom")
-                .attr("fill", "#666")
-                .attr("fill-opacity", 0.8)
-                .attr("stroke", "#000")
-                .attr("stroke-width", 1.5)
-                .attr("cursor", "ew-resize")
-                .attr("d", d3.arc()
-                .innerRadius(0)
-                .outerRadius((100) / 2)
-                .startAngle(0)
-                .endAngle((d, i) => i ? Math.PI : -Math.PI))
-          )
-            .attr("display", selection === null ? "none" : null)
-            .attr("transform", selection === null ? null : (d, i) => `translate(${selection[i]},${(100) / 2})`)
-        
-
-    var brush = d3.brushX()
-    .extent([[10, 100], [600, 100]])
-    //.extent([[10, document.body.offsetHeight-200], [width - toolWidth -10, 100]])
-    .on("start brush end", brushed);
-
-    brushGroup.append("g")
-        .call(brush);
-       // .call(brush.move, [0.3, 0.5].map(x));
-  
-        function brushed() {
-          const selection = d3.event.selection;
-          d3.select(this).call(brushHandle, selection);
-        }
-    
-    
-  
-*/
 
 // rotate globe
 
@@ -2085,11 +1990,6 @@ var xAxis = g => g
             .domain([0, height])
             .range([90, -90]);
 
- 
-var precisionRatio = 1;
-
-
-
   var drag = d3.drag().subject(()=>{
   
 
@@ -2115,7 +2015,6 @@ var precisionRatio = 1;
     view.style('transform', 'scale(' + d3.event.transform.k + ')');
    
         }
-
           loadType();
   
   ipcRenderer.send('console-logs',"Starting geotype");
