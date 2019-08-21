@@ -1537,6 +1537,38 @@ var locGroup = view.append("g").attr('id','cityLocations');  // recreate the cit
       .style('stroke',d=>{if (d.visibility){return "red"} else {return "transparent"}})   // links always exist, they just become transparent if the articles are not in the timeframe          
       .attr("d", path);
 
+// city names
+/*
+      var locLabels = locGroup.selectAll("rect")  
+      .data(cities)
+      .enter().append("rect")
+      .style("fill", "rgba(255,255,255,.6)")
+      .attr("width",d=>d.key.length*d.radius+1)
+      .attr("height",d=>d.radius)
+      .attr("transform", d => {
+        var loc = projection([ d.lon, d.lat ]),
+          x = loc[0]-.5;
+          y = loc[1]-2;
+        return "translate(" + (x+d.radius) + "," + y + ")"
+      });
+      */
+      
+            var locNames = locGroup.selectAll("text")
+                  .data(cities)
+                  .enter().append("text")
+                  .style("fill", "black")
+                  .style("fond-style","Noto Sans")
+                  .style('user-select',"none")
+                  //.style("font-weight", "bolder")
+                  .style("font-size", d=>{if(d.radius>0){return (d.radius+.1)+"px"}else{return "0"}})
+                  .attr("transform", d => {
+                    var loc = projection([ d.lon, d.lat ]),
+                      x = loc[0];
+                      y = loc[1];
+                    return "translate(" + (x+d.radius) + "," + y + ")"
+                  })
+                  .text(d => d.key);
+
 // ADDING THE CITIES
 
   var locations = locGroup.selectAll("locations")
@@ -1547,21 +1579,7 @@ var locGroup = view.append("g").attr('id','cityLocations');  // recreate the cit
     locations.datum(d => d3.geoCircle().center([ d.lon, d.lat ]).radius(d.radius*0.05)())
               .attr("d", path);
 
-      var locNames = locGroup.selectAll("text")
-            .data(cities)
-            .enter().append("text")
-            .style("fill", "black")
-            .style("fond-style","Noto Sans")
-            .style('user-select',"none")
-            //.style("font-weight", "bolder")
-            .style("font-size", d=>{if(d.radius>0){return (d.radius+.1)+"px"}else{return "0"}})
-            .attr("transform", d => {
-              var loc = projection([ d.lon, d.lat ]),
-                x = loc[0];
-                y = loc[1];
-              return "translate(" + (x+d.radius) + "," + y + ")"
-            })
-            .text(d => d.key);
+
   
 
 
@@ -2003,17 +2021,30 @@ grouped.forEach(d=>{d.key=d.date;d.value=d.values.length});
     
     function dragged() {
       const v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this)));
-  
       const q1 = versor.multiply(q0, versor.delta(v0, v1));
-      projection.rotate(versor.rotation(q1));
-      //linkloc()
-      view.selectAll("text").attr("transform", (d) => {
+      projection.rotate(versor.rotation(q1));       // rotate projection
+/*
+      view.selectAll("rect")                    // redraw labels (white rectangles)
+      .attr("width",d=>d.key.length*d.radius*.8)
+      .attr("height",d=>d.radius*2)
+      .attr("transform", d => {
+        var loc = projection([ d.lon, d.lat ]),
+          x = loc[0]-.5;
+          y = loc[1]-d.radius;
+        return "translate(" + (x+d.radius) + "," + y + ")"
+      });
+*/
+      view.selectAll("text").attr("transform", (d) => {    //redraw text
         var loc = projection([ d.lon, d.lat ]),
           x = loc[0],
           y = loc[1];
         return "translate(" + (x+d.radius) + "," + y + ")"
       })
       .text(d => d.key);
+
+      
+      
+
       view.selectAll("path").attr("d", path);
       
     }
