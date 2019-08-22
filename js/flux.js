@@ -27,21 +27,9 @@ let pandodb = new Dexie("PandoraeDatabase");
 
 let structureV1 = "id,date,name";
 
-pandodb.version(1).stores({
-      enriched: structureV1,
-      scopus: structureV1,
-      csljson:structureV1,
-      zotero: structureV1,
-      twitter: structureV1,
-      anthropotype: structureV1,
-      chronotype: structureV1,
-      geotype: structureV1,
-      pharmacotype: structureV1,
-      publicdebate: structureV1,
-      gazouillotype: structureV1,
-      hyphe: structureV1,
-      system:structureV1
-  });
+pandodb.version(1).stores({enriched: structureV1,scopus: structureV1,csljson:structureV1,zotero: structureV1,twitter: structureV1,anthropotype: structureV1,chronotype: structureV1, geotype: structureV1,pharmacotype: structureV1,publicdebate: structureV1, gazouillotype: structureV1, hyphe: structureV1, system:structureV1});
+pandodb.version(2).stores({hyphotype: structureV1,enriched: structureV1,scopus: structureV1,csljson: structureV1, zotero: structureV1, twitter: structureV1, anthropotype: structureV1,chronotype: structureV1, geotype: structureV1,pharmacotype: structureV1,publicdebate: structureV1,gazouillotype: structureV1,hyphe: structureV1,system:structureV1});
+
   pandodb.open();
 
   var db = "";
@@ -781,19 +769,17 @@ const hypheCorpusList = (target,prevId) => {
     json: true                                     // Automatically parses the JSON string in the response
 };
 
-console.log(hypheCheckOptions)
 
 rpn(hypheCheckOptions)                          // RPN stands for Request-promise-native (ES6)
     .then(hypheResponse => {            // With the response
-      console.log(hypheResponse)
         if(hypheResponse[0].code ==="success") {
           let corpusList= "<ul>";
 
           for (var corpus in hypheResponse[0].result) {
             if (hypheResponse[0].result[corpus].password){
-            corpusList = corpusList + "<li  id="+corpus+"><strong>"+hypheResponse[0].result[corpus].name+ "</strong> - IN WE:"+hypheResponse[0].result[corpus].webentities_in+" - password : <input id="+corpus+"pass"+" type='password'> <input type='button' value='Load' onclick='loadHyphe("+JSON.stringify(corpus)+","+JSON.stringify(target)+",true)'></li>";
+            corpusList = corpusList + "<li  id="+hypheResponse[0].result[corpus].corpus_id+"><strong>"+hypheResponse[0].result[corpus].name+ "</strong> - IN WE:"+hypheResponse[0].result[corpus].webentities_in+" - password : <input id="+corpus+"pass"+" type='password'> <input type='button' value='Load' onclick='loadHyphe("+JSON.stringify(hypheResponse[0].result[corpus].corpus_id)+","+JSON.stringify(target)+",true)'></li>";
           } else {
-            corpusList = corpusList + "<li  id="+corpus+"><strong>"+hypheResponse[0].result[corpus].name+ "</strong> - IN WE:"+hypheResponse[0].result[corpus].webentities_in+" <input type='button' value='Load' onclick='loadHyphe("+JSON.stringify(corpus)+","+JSON.stringify(target)+")'></li>";
+            corpusList = corpusList + "<li  id="+hypheResponse[0].result[corpus].corpus_id+"><strong>"+hypheResponse[0].result[corpus].name+ "</strong> - IN WE:"+hypheResponse[0].result[corpus].webentities_in+" <input type='button' value='Load' onclick='loadHyphe("+JSON.stringify(hypheResponse[0].result[corpus].corpus_id)+","+JSON.stringify(target)+")'></li>";
             }
           }
           corpusList = corpusList+"</ul>"
@@ -801,46 +787,36 @@ rpn(hypheCheckOptions)                          // RPN stands for Request-promis
           
         }else {
      
-          
         }
     }).catch(e => {
 
-      
     })
 
 }
 
 const loadHyphe = (corpus,endpoint,pass) =>{
 
-  let password = false;
-console.log(corpus, endpoint)
+let password = false;
 if(pass){password=document.getElementById(corpus+"pass").value}
-console.log(password)
-
 
 var hypheCheckOptions = {
   method:'POST',
   uri: endpoint+'/api/',                  // URI to be accessed
   headers: {'User-Agent': 'Request-Promise'},    // User agent to access is Request-promise
-  body: {"method":"start_corpus","params":{"name":corpus,"password":password}}, 
+  body: {"method":"start_corpus","params":[corpus,password]}, 
   json: true                                     // Automatically parses the JSON string in the response
 };
 
-console.log(hypheCheckOptions)
+
 
 rpn(hypheCheckOptions)                          // RPN stands for Request-promise-native (ES6)
   .then(hypheResponse => {            // With the response
-    console.log(hypheResponse)
       if(hypheResponse[0].code ==="success") {
-      
+              pandodb.hyphotype.add({"id":corpus+date,"date":date,"name":corpus,"content":{corpus:corpus,endpoint:endpoint,password:password},"corpus":true});
+              document.getElementById(corpus).innerHTML = "<mark>Corpus added to hyphotype</mark>"; 
       }else {
-   
-        
+        document.getElementById(corpus).innerHTML = "<mark><strong>Failure</strong> - check your password or the server's endpoints</mark>"; 
       }
   }).catch(e => {
-
-    
   })
-
-
 }

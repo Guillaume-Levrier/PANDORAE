@@ -265,7 +265,7 @@ const chaerosCalculator = () =>  {
   chaerosWindow.loadFile('chaeros.html')
 
   chaerosWindow.webContents.on('did-finish-load', function () {
-   chaerosWindow.webContents.openDevTools();
+   //chaerosWindow.webContents.openDevTools();
   });
 
 }
