@@ -16,18 +16,15 @@ macOS starting issues: put the app in the "Applications" folder and then start a
 If you encounter an issue, please tag this [account](https://mobile.twitter.com/PANDORAE_CORE) or create an issue here on Github.
 
 ### Roadmap
-#### Chaeros
-- API requests bottleneck size slider in Flux (WIP)
-- Better scopusGeolocate (check country then validate)
 
 #### Types
 - fix Gz brush (using geotype brush)
 - Chronotype fast slider
+- Create a Hyphotype
 
 #### Wiki
 - API documentation (WIP)
 
 #### New features
-- Prodigy connector
-- Actual Hyphe connector
+- Prodigy connector?
 - Zotero local connector
