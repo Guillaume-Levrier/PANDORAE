@@ -46,6 +46,8 @@
   <button type="submit" class="flux-button" id="hyphe-checker" onclick="hypheCheck(document.getElementById('hypheaddress').value);return false">Check Hyphe endpoint</button><br><br>
   <button type="submit" style="display:none;" class="flux-button" id="hyphe-exporter" onclick="endpointConnector('hyphe',document.getElementById('hypheaddress').value);return false">Add to Hyphe endpoints</button><br><br>
   <button type="submit" class="flux-button" id="cslcolret" onclick="datasetDisplay('hyphe-dataset-list','hyphe');return false">Display available Hyphe endpoints</button><br>
+  <div id="hyphe-dataset-preview"  style="position:relative;max-height: 200px;overflow-y: scroll;"></div>
+
   <div id="hyphe-dataset-list"  style="position:relative;"></div>
 
   <!-- send to SYSTEM instead -->
@@ -222,5 +224,5 @@ const reframeMainWindow = () => {
         remote.mainWindow({frame: true})
 }
 </script>
-<script src="js/flux/flux.js"></script>
-<script src="js/flux/userdata.js"></script>
+<script src="js/flux.js"></script>
+<script src="js/userdata.js"></script>

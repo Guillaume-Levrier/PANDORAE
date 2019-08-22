@@ -436,12 +436,17 @@ const datasetRemove = (kind,db,id)=> {
 
 const datasetDetail = (prevId,kind,id,buttonId) => {   // This function provides info on a specific dataset
 
+
   var datasetDetail = {};                                  // Create the dataDetail object
   let dataPreview = "";                                    // Created dataPreview variable
 
 if (prevId === null){
   document.getElementById(kind+"-dataset-preview").innerText = "Dataset deleted";
   document.getElementById(kind+"-dataset-buttons").style.display = "none";
+} else if (kind === "hyphe") {
+  hypheCorpusList(id,prevId)
+  
+
 }
 else{
 
@@ -760,5 +765,82 @@ rpn(hypheCheckOptions)                          // RPN stands for Request-promis
       chk.style.color = "DarkRed";
       chk.innerText = "Failure";
     })
+
+}
+
+//======== Hyphe Endpoint Chercker ======
+
+const hypheCorpusList = (target,prevId) => {
+
+
+  var hypheCheckOptions = {
+    method:'POST',
+    uri: target+'/api/',                  // URI to be accessed
+    headers: {'User-Agent': 'Request-Promise'},    // User agent to access is Request-promise
+    body: {"method":"list_corpus"/* ,"params":[null] */}, 
+    json: true                                     // Automatically parses the JSON string in the response
+};
+
+console.log(hypheCheckOptions)
+
+rpn(hypheCheckOptions)                          // RPN stands for Request-promise-native (ES6)
+    .then(hypheResponse => {            // With the response
+      console.log(hypheResponse)
+        if(hypheResponse[0].code ==="success") {
+          let corpusList= "<ul>";
+
+          for (var corpus in hypheResponse[0].result) {
+            if (hypheResponse[0].result[corpus].password){
+            corpusList = corpusList + "<li  id="+corpus+"><strong>"+hypheResponse[0].result[corpus].name+ "</strong> - IN WE:"+hypheResponse[0].result[corpus].webentities_in+" - password : <input id="+corpus+"pass"+" type='password'> <input type='button' value='Load' onclick='loadHyphe("+JSON.stringify(corpus)+","+JSON.stringify(target)+",true)'></li>";
+          } else {
+            corpusList = corpusList + "<li  id="+corpus+"><strong>"+hypheResponse[0].result[corpus].name+ "</strong> - IN WE:"+hypheResponse[0].result[corpus].webentities_in+" <input type='button' value='Load' onclick='loadHyphe("+JSON.stringify(corpus)+","+JSON.stringify(target)+")'></li>";
+            }
+          }
+          corpusList = corpusList+"</ul>"
+          document.getElementById(prevId).innerHTML = corpusList; // Display dataPreview in a div
+          
+        }else {
+     
+          
+        }
+    }).catch(e => {
+
+      
+    })
+
+}
+
+const loadHyphe = (corpus,endpoint,pass) =>{
+
+  let password = false;
+console.log(corpus, endpoint)
+if(pass){password=document.getElementById(corpus+"pass").value}
+console.log(password)
+
+
+var hypheCheckOptions = {
+  method:'POST',
+  uri: endpoint+'/api/',                  // URI to be accessed
+  headers: {'User-Agent': 'Request-Promise'},    // User agent to access is Request-promise
+  body: {"method":"start_corpus","params":{"name":corpus,"password":password}}, 
+  json: true                                     // Automatically parses the JSON string in the response
+};
+
+console.log(hypheCheckOptions)
+
+rpn(hypheCheckOptions)                          // RPN stands for Request-promise-native (ES6)
+  .then(hypheResponse => {            // With the response
+    console.log(hypheResponse)
+      if(hypheResponse[0].code ==="success") {
+      
+      }else {
+   
+        
+      }
+  }).catch(e => {
+
+    
+  })
+
 
 }
