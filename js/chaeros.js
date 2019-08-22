@@ -199,7 +199,7 @@ cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key))
      ipcRenderer.send('chaeros-notification', 'Affiliations geolocated');              //Send success message to main process
      ipcRenderer.send('console-logs',"scopusGeolocate successfully added geolocations on " + dataset);
      
-     setTimeout(()=>{win.close()},2000);
+    setTimeout(()=>{win.close()},2000);
     })
   })
 };
@@ -213,7 +213,11 @@ cityRequests.forEachMultiplicity((count,key) => {cityIndex.push(JSON.parse(key))
 
 const scopusRetriever = (user, query,bottleRate) => {                          // user argument is passed to get keytar pass
 
-//bottleneck to be implemented
+const limiter = new bottleneck({                                      // Create a bottleneck to prevent API rate limit
+  maxConcurrent: 1,                                                   // Only one request at once
+  minTime: 1/parseInt(bottleRate)                                                        // Every 500 milliseconds
+});
+
 
 ipcRenderer.send('console-logs',"Started scopusRetriever on " + query + " for user "+ user); // Log the process
 
@@ -261,8 +265,10 @@ let optionsTotalRequest = {                              // Prepare options for 
 dataPromises.push(rpn(optionsTotalRequest));             // Push promise in the relevant array
 }
 
-Promise.all(dataPromises)                                // Submit requests
-    .then(function (scopusResponse) {                    // The response is an array with all pages of results
+limiter.schedule(()=>Promise.all(dataPromises))
+          .then((scopusResponse) => {  
+//Promise.all(dataPromises)                                // Submit requests
+ //  .then(function (scopusResponse) {                    // The response is an array with all pages of results
 
         for(let i = 0; i < scopusResponse.length; i++){  // For each page of (max 200) results
             let retrievedDocuments = scopusResponse[i]['search-results']['entry']; // Select the docs it contains
@@ -281,7 +287,7 @@ Promise.all(dataPromises)                                // Submit requests
         pandodb.enriched.add({"id":id,"date":date,"name":query,"content":content}).then(res2 => {
           ipcRenderer.send('chaeros-notification', 'Scopus API data retrieved'); // signal success to main process
           ipcRenderer.send('console-logs',"Scopus dataset on " + query + " for user "+ user +" have been successfully retrieved.");
-          setTimeout(()=>{win.close()},500);                                   // Close Chaeros
+         setTimeout(()=>{win.close()},500);           // Close Chaeros
         })  
       })
     })
