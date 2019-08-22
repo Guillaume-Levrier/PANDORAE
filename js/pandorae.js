@@ -39,21 +39,8 @@ let pandodb = new Dexie("PandoraeDatabase");
 
 let structureV1 = "id,date,name";
 
-pandodb.version(1).stores({
-      enriched: structureV1,
-      scopus: structureV1,
-      csljson: structureV1,
-      zotero: structureV1,
-      twitter: structureV1,
-      anthropotype: structureV1,
-      chronotype: structureV1,
-      geotype: structureV1,
-      pharmacotype: structureV1,
-      publicdebate: structureV1,
-      gazouillotype: structureV1,
-      hyphe: structureV1,
-      system:structureV1
-  });
+pandodb.version(1).stores({enriched: structureV1,scopus: structureV1,csljson:structureV1,zotero: structureV1,twitter: structureV1,anthropotype: structureV1,chronotype: structureV1, geotype: structureV1,pharmacotype: structureV1,publicdebate: structureV1, gazouillotype: structureV1, hyphe: structureV1, system:structureV1});
+pandodb.version(2).stores({hyphotype: structureV1,enriched: structureV1,scopus: structureV1,csljson: structureV1, zotero: structureV1, twitter: structureV1, anthropotype: structureV1,chronotype: structureV1, geotype: structureV1,pharmacotype: structureV1,publicdebate: structureV1,gazouillotype: structureV1,hyphe: structureV1,system:structureV1});
 
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that 
@@ -365,11 +352,11 @@ const categoryLoader = (cat) => {
   let blocks;
 
   switch (cat) {
-    case "type": blocks = ['chronotype','geotype','anthropotype','gazouillotype'];
+    case "type": blocks = ['chronotype','geotype','anthropotype','gazouillotype','hyphotype'];
                   break;
 
-    case "ext": blocks = ['hyphe'];
-                  break;
+/*     case "ext": blocks = ['hyphe'];
+                  break; */
   }
 
   blocks.forEach(block=>{
@@ -878,9 +865,9 @@ document.addEventListener("keydown", event => {
                    categoryLoader('type');
                    break;
       
-    case "Digit4": if(toggledMenu===false) { toggleMenu() };
+/*     case "Digit4": if(toggledMenu===false) { toggleMenu() };
                    categoryLoader('ext');
-                  break;
+                  break; */
 
     case "Digit5": toggleConsole();
                    break;
