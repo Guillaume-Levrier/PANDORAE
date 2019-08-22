@@ -1321,9 +1321,6 @@ const geotype = (locations) => {
         .attr("cy", height / 2)
         .attr("r", projection.scale());
   
- 
-      
-
 
 //Calling data
 pandodb.geotype.get(locations).then(locations => {
@@ -1335,8 +1332,6 @@ pandodb.geotype.get(locations).then(locations => {
   }
 
   Promise.all([d3.json("json/world-countries.json")]).then(geo => {
-
-   
 
 var geoData = geo[0];
 
@@ -1366,11 +1361,16 @@ var geoData = geo[0];
       link.DOI = d.DOI;
       for (var k = 0; k < d.enrichment.affiliations.length; k++) {
       if(d.enrichment.affiliations[k].lon!=undefined){
+        
+              d.enrichment.affiliations[k].affilId = d.enrichment.affiliations[k]['affiliation-city']+"-"+d.enrichment.affiliations[k]['affiliation-country']
+
               dataArray.push(d.enrichment.affiliations[k]);
-              let thisCity = {"cityname":"","lon":"","lat":""}
+              
+              let thisCity = {"cityname":"","lon":"","lat":"","affilId":""}
               thisCity.cityname = d.enrichment.affiliations[k]['affiliation-city'];
               thisCity.lon = d.enrichment.affiliations[k].lon;
               thisCity.lat = d.enrichment.affiliations[k].lat;
+              thisCity.affilId = d.enrichment.affiliations[k].affilId;
               link.points.push(thisCity);
         }
       }
@@ -1380,8 +1380,7 @@ var geoData = geo[0];
   })
   
   for (var i = 0; i < linksBuffer.length; i++) {if (linksBuffer[i].points.length>1) {links.push(linksBuffer[i])}};
-  
-  
+    
   links.forEach(d=>{
   if (d.points.length<3){
     d.type='LineString';
@@ -1406,20 +1405,20 @@ var geoData = geo[0];
   
   for (var i = 0; i < data.length; i++) { data[i].index = i;};  // id = item index
   
-  
-  var cities =  d3.nest().key(d => d['affiliation-city']).entries(dataArray);
+  var cities =  d3.nest().key(d => d.affilId).entries(dataArray);
 
   cities.forEach(d=>{
     d.lon = d.values[0].lon;
     d.lat = d.values[0].lat;
     d.country = d.values[0]['affiliation-country'];
+    d.city = d.values[0]['affiliation-city'];
     d.affiliations = [];
     d.values = [];
   
     for (var j = 0; j < data.length; j++) {
       if (data[j].hasOwnProperty('enrichment') && data[j].enrichment.hasOwnProperty("affiliations")){
           for (var k = 0; k < data[j].enrichment.affiliations.length; k++) {
-          if (data[j].enrichment.affiliations[k]['affiliation-city']===d.key){
+          if (data[j].enrichment.affiliations[k].affilId===d.key){
             d.affiliations.push(data[j].enrichment.affiliations[k].affilname);
             d.values.push(data[j]);
           }
@@ -1524,22 +1523,6 @@ var locGroup = view.append("g").attr('id','cityLocations');  // recreate the cit
       .attr("class", "arc")
       .style('stroke',d=>{if (d.visibility){return "red"} else {return "transparent"}})   // links always exist, they just become transparent if the articles are not in the timeframe          
       .attr("d", path);
-
-// city names
-/*
-      var locLabels = locGroup.selectAll("rect")  
-      .data(cities)
-      .enter().append("rect")
-      .style("fill", "rgba(255,255,255,.6)")
-      .attr("width",d=>d.key.length*d.radius+1)
-      .attr("height",d=>d.radius)
-      .attr("transform", d => {
-        var loc = projection([ d.lon, d.lat ]),
-          x = loc[0]-.5;
-          y = loc[1]-2;
-        return "translate(" + (x+d.radius) + "," + y + ")"
-      });
-      */
       
             var locNames = locGroup.selectAll("text")
                   .data(cities)
@@ -1555,7 +1538,7 @@ var locGroup = view.append("g").attr('id','cityLocations');  // recreate the cit
                       y = loc[1];
                     return "translate(" + (x+d.radius) + "," + y + ")"
                   })
-                  .text(d => d.key);
+                  .text(d => d.city);
 
 // ADDING THE CITIES
 
@@ -1578,7 +1561,7 @@ var locGroup = view.append("g").attr('id','cityLocations');  // recreate the cit
                                             .duration(200)
                                             .style("display", "block");
                                         d3.select("#tooltip").html(
-                                          '<strong><h2>' + cities[i].key +
+                                          '<strong><h2>' + cities[i].city +
                                           '</strong> <br/><sup>' +cities[i].country +'</sup></h2><br>' +
                                           affilFinder(cities[i])
                                         );
@@ -2011,24 +1994,14 @@ grouped.forEach(d=>{d.key=d.date;d.value=d.values.length});
       const v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this)));
       const q1 = versor.multiply(q0, versor.delta(v0, v1));
       projection.rotate(versor.rotation(q1));       // rotate projection
-/*
-      view.selectAll("rect")                    // redraw labels (white rectangles)
-      .attr("width",d=>d.key.length*d.radius*.8)
-      .attr("height",d=>d.radius*2)
-      .attr("transform", d => {
-        var loc = projection([ d.lon, d.lat ]),
-          x = loc[0]-.5;
-          y = loc[1]-d.radius;
-        return "translate(" + (x+d.radius) + "," + y + ")"
-      });
-*/
+
       view.selectAll("text").attr("transform", (d) => {    //redraw text
         var loc = projection([ d.lon, d.lat ]),
           x = loc[0],
           y = loc[1];
         return "translate(" + (x+d.radius) + "," + y + ")"
       })
-      .text(d => d.key);
+      .text(d => d.city);
 
       
       
