@@ -1841,6 +1841,8 @@ grouped.forEach(d=>{d.key=d.date;d.value=d.values.length});
       }
       
         brushContent = d1;
+      let visArticleAmnt = 0;
+
 
      cities.forEach(city=>{
       city.values.forEach(paper=>{
@@ -1849,6 +1851,7 @@ grouped.forEach(d=>{d.key=d.date;d.value=d.values.length});
 
         if (paper.date>=brushContent[0] && paper.date<=brushContent[1]) {
           paper.visibility = true;
+          visArticleAmnt= visArticleAmnt+1;
         if (linkIndex>-1){links[linkIndex].visibility=true}
         } else {
           paper.visibility=false;
@@ -1857,7 +1860,9 @@ grouped.forEach(d=>{d.key=d.date;d.value=d.values.length});
       })
      })
 
-     
+
+  
+    document.getElementById("docCountDiv").innerHTML=visArticleAmnt+ " articles";
      linkLoc();
      d3.select("#tooltip").html('')
   }
@@ -1950,8 +1955,17 @@ grouped.forEach(d=>{d.key=d.date;d.value=d.values.length});
   return returnValue;
 }
 
+var docCountDiv = document.createElement("div")
+docCountDiv.id = "docCountDiv";
+docCountDiv.style.position="absolute";
+docCountDiv.style.fontSize="10px";
+docCountDiv.style.top=document.body.offsetHeight-15+"px";
+docCountDiv.style.left=parseInt(width-toolWidth)/2+"px";
+docCountDiv.innerHTML=data.length+" articles";
+xtype.appendChild(docCountDiv)
 
   barRangeSlider(data)
+
 
 
 // rotate globe
