@@ -1607,7 +1607,6 @@ const barRangeSlider = (initialDataArray, accessorFunction, aggregatorFunction, 
       accessorFunc = accessor;
   }
 
-
   const grouped = d3.nest().key(d => d.date).entries(initialData); 
 
 
@@ -1623,12 +1622,15 @@ const barRangeSlider = (initialDataArray, accessorFunction, aggregatorFunction, 
     
   }
 
-  
 
   const isDate = true;
   var dateExtent, dateScale, scaleTime, dateRangesCount, dateRanges, scaleTime;
   if (isDate) {
       dateExtent = d3.extent(grouped.map(d=>d.date));
+      
+      dateExtent[0].setFullYear(dateExtent[0].getFullYear()-1);
+      dateExtent[1].setFullYear(dateExtent[1].getFullYear()+1);
+
       dateRangesCount = Math.round(width / 5);
       dateScale = d3.scaleTime().domain(dateExtent).range([0, dateRangesCount])
       scaleTime = d3.scaleTime().domain(dateExtent).range([0, chartWidth])
@@ -1734,6 +1736,7 @@ grouped.forEach(d=>{d.key=d.date;d.value=d.values.length});
       .call(axisY)
 
   const brush = chart.append("g")
+      .attr("id","selectionBrush")
       .attr("class", "brush")
       .call(d3.brushX()
           .extent([
