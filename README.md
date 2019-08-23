@@ -19,7 +19,6 @@ If you encounter an issue, please tag this [account](https://mobile.twitter.com/
 
 #### Types
 - fix Gz brush (using geotype brush)
-- Chronotype fast slider
 - Create a Hyphotype
 
 #### Wiki

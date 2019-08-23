@@ -652,7 +652,7 @@ const chronotype = (bibliography,links) => {                          // When ca
                 .attr("class", "view");                                 // CSS viewfinder properties
   
   var zoom = d3.zoom()
-               .scaleExtent([1, 20])                                    // Extent to which one can zoom in or out
+               .scaleExtent([.1, 20])                                    // Extent to which one can zoom in or out
                .translateExtent([[0,0], [width-toolWidth, height*height]]) // Extent to which one can go up/down/left/right
                .on("zoom", zoomed);                                     // Trigger the actual zooming function
   
