@@ -2075,16 +2075,25 @@ const gazouillotype = (dataset) => {                             // When called,
       .style("fill", "white")                                           // Rectangle background color
         .style("stroke-width","0");                                     // Invisible borders
   
-  var contextBrush = svg.append("g")                                         // Creating the "context" SVG group
+
+
+
+
+/*   var contextBrush = svg.append("g")                                         // Creating the "context" SVG group
       .attr("class", "contextBrush")                                         // Giving it a CSS/SVG class
       .style("pointer-event","none")
       .attr("height",brushHeight)
       .attr("width",width-toolWidth)
       .attr("transform", "translate(0,"+(height-brushHeight-50)+")");   // Placing it in the dedicated "brush" area
+   */
+  var zoom = d3.zoom();
   
-  var zoom = d3.zoom().on("zoom", zoomed);
-                
-/*   
+  svg.call(zoom.on("zoom", zoomed))
+
+var brushXscale;
+
+
+  /*   
   var brush = d3.brushX()
                 .extent([[0, 0], [width-toolWidth, brushHeight-50]])
                 .on("end", brushed); */
@@ -2308,23 +2317,20 @@ multiThreader.port.onmessage = (workerAnswer) => {
                            d.from_user_tweetcount+""+
                          '<br><br>Request content:<br> '+JSON.stringify(keywords)+'<br><br><br><br><br><br><br><br>&nbsp;</p>')});
 
-    /* contextBrush.append("g")
-            .attr("fill", "steelblue")
-          .selectAll("rect")
-          .data(areaData)
-          .join("rect")
-            .attr("x", d => x2(d.timespan))
-            .attr("y", d => y2(d.indexPosition))
-            .attr("height", d => y2(0) - y2(d.indexPosition))
-            .attr("width", 1);*/
-            
-   
-console.log(areaData)
+
+                     /*     const zooming =()=> console.log("zooming");
+
+                         var brushZoom = d3.zoom().on("zoom", zooming);
+ */
+
+
 
 // === Bar Range Slider ===
 // adapted from https://observablehq.com/@bumbeishvili/data-driven-range-sliders
 
 const barRangeSlider = (initialDataArray, accessorFunction, aggregatorFunction, paramsObject) => {
+
+
 
   const chartWidth = width - toolWidth - 40;
   let chartHeight = 100;
@@ -2352,28 +2358,14 @@ const barRangeSlider = (initialDataArray, accessorFunction, aggregatorFunction, 
   if (typeof accessor == 'function') {
       accessorFunc = accessor;
   }
-/* 
-  const grouped = d3.nest().key(d => d.date).entries(initialData); 
 
-
-  for (let i = 0; i < grouped.length; i++) {
-    grouped[i].date = new Date(grouped[i].key)
-  
-  }  
-   
-  for (let i = 0; i < grouped.length; i++) {
-       if(grouped[i].key === "undefined"){
-      grouped.splice(i,1)
-    } 
-    
-  } */
 
 
   const grouped = initialData;
 
   const isDate = true;
   var dateExtent, dateScale, scaleTime, dateRangesCount, dateRanges, scaleTime;
-  if (isDate) {
+
       dateExtent = d3.extent(grouped.map(d=>d.date));
       
    //   dateExtent[0].setFullYear(dateExtent[0].getFullYear()-1);
@@ -2388,7 +2380,7 @@ const barRangeSlider = (initialDataArray, accessorFunction, aggregatorFunction, 
               dateScale.invert(d + 1)
           ])
 
-  }
+ 
 
 
   d3.selection.prototype.patternify = function(params) {
@@ -2422,7 +2414,7 @@ const svg = d3.select(xtypeSVG);
 
 let sliderOffsetHeight = document.body.offsetHeight-120;
 
-const chart = svg.append('g').attr('transform', 'translate(30,'+sliderOffsetHeight+')');
+const chart = svg.append('g').attr('transform', 'translate(30,'+sliderOffsetHeight+')').attr("id","chart");
 
 grouped.forEach(d=>{d.key=d.timespan;d.value=d.indexPosition});
 
@@ -2455,11 +2447,10 @@ grouped.forEach(d=>{d.key=d.timespan;d.value=d.indexPosition});
   const scaleY = scale.copy().domain([max, params.minY]).range([0, chartHeight - 25])
 
   const scaleX = d3.scaleLinear().domain([minX, maxX]).range([0, chartWidth])
-  var axis = d3.axisBottom(scaleX);
-  if (isDate) {
-      axis = d3.axisBottom(scaleTime)
-  }
+  var axis = d3.axisBottom(scaleTime);
   const axisY = d3.axisLeft(scaleY).tickSize(-chartWidth - 20).ticks(max == 1 ? 1 : params.yTicks).tickFormat(d3.format('.2s'))
+
+  brushXscale = scaleX;
 
 //console.log(grouped)
 
@@ -2482,6 +2473,7 @@ grouped.forEach(d=>{d.key=d.timespan;d.value=d.indexPosition});
   const yAxisWrapper = chart.append('g')
       .attr('transform', `translate(${-10},${0})`)
       .call(axisY)
+
 
   const brush = chart.append("g")
       .attr("id","selectionBrush")
@@ -2567,8 +2559,11 @@ grouped.forEach(d=>{d.key=d.timespan;d.value=d.indexPosition});
     function brushStarted(){
         if (d3.event.selection) {
             startSelection = d3.event.selection[0];
+            console.log("selection")
         }
     }
+
+
 
   function brushEnded() {
       //console.log('ended')
@@ -2592,6 +2587,18 @@ grouped.forEach(d=>{d.key=d.timespan;d.value=d.indexPosition});
       }
       
         brushContent = d1;
+
+        console.log(brushContent)
+
+        let midDate;
+
+        midDate = new Date(brushContent[0].getTime()+((brushContent[1].getTime()-brushContent[0].getTime())/2));
+
+        d3.select("#xtypeSVG")
+        .call(zoom.transform, d3.zoomIdentity
+            .scale(1)
+            .translate(-x(midDate), -y(200)));
+
       let visibleTweets = 0;
 
       grouped.forEach(pile=>{
@@ -2619,6 +2626,8 @@ grouped.forEach(d=>{d.key=d.timespan;d.value=d.indexPosition});
            
             d3.event.selection[0]= 0;
         //    console.log(d3.event.selection)
+
+         
 
         d3.select(this)
           .call(d3.event.target.move, 
@@ -2735,11 +2744,6 @@ xtype.appendChild(docCountDiv)
               .attr("transform", "translate(0,"+ (height - 180) +")")
               .call(xAxis);
   
-  var gX2 = contextBrush.append("g")                                          // Make X axis rescalable
-              .attr("class", "axis axis--x")
-              .attr("transform", "translate(0,"+ (150) +")")
-              .call(xAxis2);
-
   var gY = svg.append("g")                                          // Make Y axis rescalable
               .attr("class", "axis axis--y")
               .attr("transform", "translate(" + (width -toolWidth-70 )+ ",0)")
@@ -2747,12 +2751,28 @@ xtype.appendChild(docCountDiv)
   
   svg.call(zoom).on("dblclick.zoom", null);                         // Zoom and deactivate doubleclick zooming
 
- // contextBrush.on(".brush", null);
-
+ 
  var midDate = new Date();
+
+
+ function testZoom(){
+  console.log("event")
+  if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom"){
+
+    console.log("testZoom")
+  }
+  }
+
+
+//svg.on(".zoom", testZoom);                         // Zoom and deactivate doubleclick zooming
+
+window.addEventListener("mousemove",e=>testZoom)
+window.addEventListener("wheel",e=>console.log(e))
+window.addEventListener("touchmove",e=>testZoom)
 
   function zoomed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+
 
     var t = d3.event.transform;
     
@@ -2761,14 +2781,40 @@ xtype.appendChild(docCountDiv)
      view.attr("transform", t);
     
        gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
-       gX2.call(xAxis2);
+      //gX2.call(xAxis2);
        gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
+      
+//console.log(t)
 
-      /*  contextBrush.select(".brush").call(brush.move, 
+      // console.log(x.invert(x.range().map(t.invertX, t)[1]))
+
+       console.log(x.invert(x.range().map(t.invertX, t)[0]))
+
+
+       d3.select("#selectionBrush").attr("transform","translate("+brushXscale(x.invert(x.range().map(t.invertX, t)[0]))+",0)");
+
+       /* document.getElementById("handle")
+       .attr("display", null)
+       .attr("transform", function(d, i) {
+  //   console.log(d)
+           return "translate(" + (s[i] - 2) + "," + chartHeight / 2 + ")";
+       });
+   output({
+       range: [x.invert(x.range().map(t.invertX, t)[0]),x.invert(x.range().map(t.invertX, t)[1])]
+   }) */
+
+     //  console.log([(x.range().map(t.invertX, t)[0]),(x.range().map(t.invertX, t)[1])])
+     //  console.log([new Date(x((x.range().map(t.invertX, t)[0]))),new Date(x((x.range().map(t.invertX, t)[1])))])
+
+    // d3.select("#chart").select(".brush").call(document.getElementById("selectionBrush").move/* , x.range().map(t.invertX, t) */);
+
+
+    //   console.log([x.range()[1],x2.range()[1]])
+/*     d3.select("#selectionBrush").call(brush.move, 
         [(x2.range().map(t.invertX, t)[0])/rangeRatio,
           (x2.range().map(t.invertX, t)[1])/rangeRatio]);
- */
-          
+  
+           */
 }
 
 /* 
