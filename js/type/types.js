@@ -22,41 +22,37 @@ let pandodb = new Dexie("PandoraeDatabase");
 
 let structureV1 = "id,date,name";
 
-pandodb
-  .version(1)
-  .stores({
-    enriched: structureV1,
-    scopus: structureV1,
-    csljson: structureV1,
-    zotero: structureV1,
-    twitter: structureV1,
-    anthropotype: structureV1,
-    chronotype: structureV1,
-    geotype: structureV1,
-    pharmacotype: structureV1,
-    publicdebate: structureV1,
-    gazouillotype: structureV1,
-    hyphe: structureV1,
-    system: structureV1
-  });
-pandodb
-  .version(2)
-  .stores({
-    hyphotype: structureV1,
-    enriched: structureV1,
-    scopus: structureV1,
-    csljson: structureV1,
-    zotero: structureV1,
-    twitter: structureV1,
-    anthropotype: structureV1,
-    chronotype: structureV1,
-    geotype: structureV1,
-    pharmacotype: structureV1,
-    publicdebate: structureV1,
-    gazouillotype: structureV1,
-    hyphe: structureV1,
-    system: structureV1
-  });
+pandodb.version(1).stores({
+  enriched: structureV1,
+  scopus: structureV1,
+  csljson: structureV1,
+  zotero: structureV1,
+  twitter: structureV1,
+  anthropotype: structureV1,
+  chronotype: structureV1,
+  geotype: structureV1,
+  pharmacotype: structureV1,
+  publicdebate: structureV1,
+  gazouillotype: structureV1,
+  hyphe: structureV1,
+  system: structureV1
+});
+pandodb.version(2).stores({
+  hyphotype: structureV1,
+  enriched: structureV1,
+  scopus: structureV1,
+  csljson: structureV1,
+  zotero: structureV1,
+  twitter: structureV1,
+  anthropotype: structureV1,
+  chronotype: structureV1,
+  geotype: structureV1,
+  pharmacotype: structureV1,
+  publicdebate: structureV1,
+  gazouillotype: structureV1,
+  hyphe: structureV1,
+  system: structureV1
+});
 
 pandodb.open();
 
@@ -2694,23 +2690,11 @@ const gazouillotype = dataset => {
     .style("fill", "white") // Rectangle background color
     .style("stroke-width", "0"); // Invisible borders
 
-  /*   var contextBrush = svg.append("g")                                         // Creating the "context" SVG group
-      .attr("class", "contextBrush")                                         // Giving it a CSS/SVG class
-      .style("pointer-event","none")
-      .attr("height",brushHeight)
-      .attr("width",width-toolWidth)
-      .attr("transform", "translate(0,"+(height-brushHeight-50)+")");   // Placing it in the dedicated "brush" area
-   */
   var zoom = d3.zoom();
 
   svg.call(zoom.on("zoom", zoomed));
 
   var brushXscale;
-
-  /*   
-  var brush = d3.brushX()
-                .extent([[0, 0], [width-toolWidth, brushHeight-50]])
-                .on("end", brushed); */
 
   //========== X & Y AXIS  ============                                // Creating two arrays of scales (graph + brush)
   var x = d3.scaleTime();
@@ -2728,6 +2712,7 @@ const gazouillotype = dataset => {
   var activeDates = [];
   var bufferData = [];
   let radius = 0;
+  var lineData = [];
 
   const scrapToApiFormat = data => {
     if (data.hasOwnProperty("date")) {
@@ -2810,6 +2795,11 @@ const gazouillotype = dataset => {
 
         var color = d3
           .scaleSequential(d3.interpolateBlues)
+          .clamp(true)
+          .domain([-median * 2, median * 10]);
+
+        var altColor = d3
+          .scaleSequential(d3.interpolateOranges)
           .clamp(true)
           .domain([-median * 2, median * 10]);
 
@@ -2914,14 +2904,53 @@ const gazouillotype = dataset => {
             .enter()
             .append("circle")
             .attr("class", "circle")
+            .attr("id", d => d.id)
             .style("fill", d => color(d.retweet_count))
+            .style("cursor", "pointer")
             .attr("r", radius)
             .attr("cx", d => x(d.timespan))
             .attr("cy", d => y(d.indexPosition))
-            .on("mouseover", function(d) {
-              d3.select(this).style("cursor", "pointer");
-            })
-            .on("click", function(d) {
+            .on("click", d => {
+              d3.select("#linktosource").remove();
+              lineData = [];
+              lineData.push(d);
+              circleData.forEach(tweet => {
+                document.getElementById(tweet.id).style =
+                  "fill :" + color(tweet.retweet_count);
+
+                if (tweet.id === d.retweeted_id) {
+                  lineData.push(tweet);
+                }
+
+                if (
+                  d.retweeted_id.length > 1 &&
+                  tweet.retweeted_id === d.retweeted_id
+                ) {
+                  document.getElementById(tweet.id).style = "fill : orange";
+                }
+                if (tweet.from_user_id === d.from_user_id) {
+                  document.getElementById(tweet.id).style =
+                    "fill : " + altColor(tweet.retweet_count);
+                }
+              });
+
+              if (d.retweeted_id.length > 1) {
+                document.getElementById(d.retweeted_id).style = "fill : red";
+
+                var line = (line = d3
+                  .line()
+                  .x(line => x(line.timespan))
+                  .y(line => y(line.indexPosition)));
+
+                view
+                  .append("path")
+                  .datum(lineData)
+                  .attr("id", "linktosource")
+                  .style("stroke", "red")
+                  .style("stroke-width", radius / 3)
+                  .attr("d", line);
+              }
+
               keywords
                 .reduce((res, val) => res.concat(val.split(/ AND /)), [])
                 .forEach(e => {
@@ -3309,7 +3338,6 @@ const gazouillotype = dataset => {
 
               brushContent = d1;
 
-
               let midDate;
 
               midDate = new Date(
@@ -3317,13 +3345,16 @@ const gazouillotype = dataset => {
                   (brushContent[1].getTime() - brushContent[0].getTime()) / 2
               );
 
-// TO DO 
-// COMPUTE ZOOM SCALE ACCORDING TO d1
+              // TO DO
+              // COMPUTE ZOOM SCALE ACCORDING TO d1
 
-              d3.select("#xtypeSVG").transition().duration(750).call(
-                zoom.transform,
-                d3.zoomIdentity.translate(-x(d1[0]), -y(200))
-              );
+              d3.select("#xtypeSVG")
+                .transition()
+                .duration(750)
+                .call(
+                  zoom.transform,
+                  d3.zoomIdentity.translate(-x(d1[0]), -y(200))
+                );
 
               let visibleTweets = 0;
 
@@ -3403,7 +3434,7 @@ const gazouillotype = dataset => {
                 .filter(d => {
                   return d.key >= range[0] && d.key <= range[1];
                 })
-              //  .attr("fill", "red")
+                //  .attr("fill", "red")
                 .nodes()
                 .map(d => d.__data__)
                 .map(d => d.values)
@@ -3535,7 +3566,7 @@ const gazouillotype = dataset => {
       );
     d3.select("#selectionBrush")
       .selectAll("g")
-      .select(function (){
+      .select(function() {
         return this.nextElementSibling;
       })
       .attr(
