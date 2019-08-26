@@ -18,7 +18,6 @@ If you encounter an issue, please tag this [account](https://mobile.twitter.com/
 ### Roadmap
 
 #### Types
-- fix Gz brush (using geotype brush)
 - Create a Hyphotype
 
 #### Wiki

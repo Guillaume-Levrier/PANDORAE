@@ -3309,7 +3309,6 @@ const gazouillotype = dataset => {
 
               brushContent = d1;
 
-              console.log(brushContent);
 
               let midDate;
 
@@ -3318,9 +3317,12 @@ const gazouillotype = dataset => {
                   (brushContent[1].getTime() - brushContent[0].getTime()) / 2
               );
 
-              d3.select("#xtypeSVG").call(
+// TO DO 
+// COMPUTE ZOOM SCALE ACCORDING TO d1
+
+              d3.select("#xtypeSVG").transition().duration(750).call(
                 zoom.transform,
-                d3.zoomIdentity.scale(1).translate(-x(midDate), -y(200))
+                d3.zoomIdentity.translate(-x(d1[0]), -y(200))
               );
 
               let visibleTweets = 0;
@@ -3401,7 +3403,7 @@ const gazouillotype = dataset => {
                 .filter(d => {
                   return d.key >= range[0] && d.key <= range[1];
                 })
-                .attr("fill", "red")
+              //  .attr("fill", "red")
                 .nodes()
                 .map(d => d.__data__)
                 .map(d => d.values)
@@ -3533,7 +3535,7 @@ const gazouillotype = dataset => {
       );
     d3.select("#selectionBrush")
       .selectAll("g")
-      .select(() => {
+      .select(function (){
         return this.nextElementSibling;
       })
       .attr(
