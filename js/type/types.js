@@ -3405,8 +3405,7 @@ requestContent=requestContent+"</ul>"
                 }
               });
 
-              document.getElementById("docCountDiv").innerHTML =
-                visibleTweets + " tweets";
+           //   document.getElementById("docCountDiv").innerHTML = visibleTweets + " tweets";
             }
 
             function brushed(d) {
