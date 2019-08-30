@@ -46,7 +46,7 @@ function createWindow () {
      backgroundColor: 'white',
      titleBarStyle: 'hidden',
      frame: true,
-     resizable:false,
+     resizable:true,
      webPreferences: {
          nodeIntegration: true,
          nodeIntegrationInWorker: true,

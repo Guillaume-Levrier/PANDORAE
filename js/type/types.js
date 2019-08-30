@@ -1850,7 +1850,7 @@ const geotype = locations => {
         ); // Make all cities visible at first
         links.forEach(link => (link.visibility = true)); // Make all links visibile at first
 
-        const linkLoc = () => {
+const linkLoc = () => {
           // generate links and cities
 
           document
@@ -1873,7 +1873,7 @@ const geotype = locations => {
               city.radius = 0;
             } // if it stays at 1, no articles published
             else {
-              city.radius = Math.log(radius) + 1;
+              city.radius = Math.log(radius) + 1.5;
             } // else, the radius is log(article number) + 1
           });
 
@@ -2926,7 +2926,7 @@ const gazouillotype = dataset => {
                   d.retweeted_id.length > 1 &&
                   tweet.retweeted_id === d.retweeted_id
                 ) {
-                  document.getElementById(tweet.id).style = "fill : orange";
+                  document.getElementById(tweet.id).style = "fill : salmon";
                 }
                 if (tweet.from_user_id === d.from_user_id) {
                   document.getElementById(tweet.id).style =
