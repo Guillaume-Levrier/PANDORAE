@@ -2972,7 +2972,7 @@ requestContent=requestContent+"</ul>"
                 }
               });
 
-              if (d.retweeted_id.length > 1) {
+              if (parseInt(d.retweeted_id)) {             // if it is a NaN, returns false
                 document.getElementById(d.retweeted_id).style = "fill : red";
 
                 var line = (line = d3
@@ -2985,6 +2985,7 @@ requestContent=requestContent+"</ul>"
                   .datum(lineData)
                   .attr("id", "linktosource")
                   .style("stroke", "red")
+                  .style("stroke-linecap", "round")
                   .style("stroke-width", radius / 3)
                   .attr("d", line);
               }
