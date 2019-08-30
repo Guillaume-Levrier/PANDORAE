@@ -2273,6 +2273,9 @@ const linkLoc = () => {
             brushContent = d1;
             let visArticleAmnt = 0;
 
+            links.forEach(link => (link.visibility = false)); // Make all links invisible
+
+
             cities.forEach(city => {
               city.values.forEach(paper => {
                 paper.date = new Date(paper.date);
@@ -2284,15 +2287,16 @@ const linkLoc = () => {
                 ) {
                   paper.visibility = true;
                   visArticleAmnt = visArticleAmnt + 1;
-                  if (linkIndex > -1) {
+                  if (linkIndex > -1 && links[linkIndex].DOI!=undefined) {
                     links[linkIndex].visibility = true;
                   }
                 } else {
                   paper.visibility = false;
-                  if (linkIndex > -1) {
-                    links[linkIndex].visibility = false;
-                  }
+                //  if (linkIndex > -1) {
+                //    links[linkIndex].visibility = false;
+                //  }
                 }
+                
               });
             });
 
@@ -2775,6 +2779,13 @@ const gazouillotype = dataset => {
         var data = datajson.content.tweets; // Reassign data
         var keywords = datajson.content.keywords;
 
+var requestContent= "Request content :<br><ul>";
+
+keywords.forEach(kw=>{
+  requestContent=requestContent+"<li>"+kw+"</li>"
+})
+requestContent=requestContent+"</ul>"
+
         // Find out the mean retweet value to attribute color scale
         var meanRetweetsArray = [];
 
@@ -2834,7 +2845,7 @@ const gazouillotype = dataset => {
 
         const keywordsDisplay = () => {
           document.getElementById("tooltip").innerHTML =
-            "<p> Request content:<br> " + JSON.stringify(keywords) + "</p>";
+           requestContent
         };
 
         y.domain([
@@ -3028,9 +3039,9 @@ const gazouillotype = dataset => {
                   "<br> User tweet count: " +
                   d.from_user_tweetcount +
                   "" +
-                  "<br><br>Request content:<br> " +
-                  JSON.stringify(keywords) +
-                  "<br><br><br><br><br><br><br><br>&nbsp;</p>"
+                  "<br><br>" +
+                  requestContent +
+                  "<br><br><br><br><br><br><br><br></p>"
               );
             });
 
@@ -3312,7 +3323,6 @@ const gazouillotype = dataset => {
             function brushStarted() {
               if (d3.event.selection) {
                 startSelection = d3.event.selection[0];
-                console.log("selection");
               }
             }
 
@@ -3508,18 +3518,6 @@ const gazouillotype = dataset => {
 
   var midDate = new Date();
 
-  function testZoom() {
-    console.log("event");
-    if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") {
-      console.log("testZoom");
-    }
-  }
-
-  //svg.on(".zoom", testZoom);                         // Zoom and deactivate doubleclick zooming
-
-  window.addEventListener("mousemove", e => testZoom);
-  window.addEventListener("wheel", e => console.log(e));
-  window.addEventListener("touchmove", e => testZoom);
 
   function zoomed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
