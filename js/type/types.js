@@ -1790,6 +1790,7 @@ const geotype = locations => {
           }
 
           let totalList = "";
+
           institutions.forEach(e => {
             let localList =
               "<strong>" + e.name + "</strong><ul style='cursor:pointer;'>";
@@ -1919,7 +1920,7 @@ const linkLoc = () => {
           // ADDING THE CITIES
 
           var locations = locGroup
-            .selectAll("locations")
+            .selectAll(".locations")
             .data(cities)
             .enter()
             .append("path")
@@ -1935,11 +1936,16 @@ const linkLoc = () => {
             .attr("d", path);
 
           locations.on("mouseover", d => {
+
+            d3.selectAll(".arc").style("opacity",".15"); 
+            d3.selectAll(".locations").style("opacity",".4"); 
+
             for (var i = 0; i < locations._groups[0].length; i++) {
               if (
                 d.coordinates[0][0] ===
                 locations._groups[0][i].__data__.coordinates[0][0]
               ) {
+               d3.select(locations._groups[0][i]).style("opacity","1");
                 d3.select("#tooltip")
                   .transition()
                   .duration(200)
@@ -1950,11 +1956,32 @@ const linkLoc = () => {
                     "</strong> <br/><sup>" +
                     cities[i].country +
                     "</sup></h2><br>" +
-                    affilFinder(cities[i])
+                    affilFinder(cities[i])                    
                 );
+       
+                
+                  d3.selectAll(".arc")._groups[0].forEach(lk=>{
+                    if(lk.__data__.points[0].cityname===cities[i].city){
+                        d3.select(lk).style("opacity","1")
+                    }
+
+                    if(lk.__data__.points[1].cityname===cities[i].city){
+                      d3.select(lk).style("opacity","1")
+                  }
+                 
+
+                })
+
               }
+           
             }
           });
+
+          locations.on("mouseout", () => {
+            d3.selectAll(".arc").style("opacity","1");
+            d3.selectAll(".locations").style("opacity","1")
+        });
+
         };
 
         linkLoc(); // start it a first time
