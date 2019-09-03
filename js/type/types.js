@@ -5,7 +5,7 @@
 // support certain types of data. Each focuses on a certain perspective, and helps the user
 // discover patterns on potentially larger datasets.
 
-// =========== NODE - NPM ===========
+// =========== NODE MODULES ===========
 const { remote, ipcRenderer, shell } = require("electron");
 const fs = require("fs");
 const d3 = require("d3");
@@ -16,6 +16,7 @@ const csv = require("csv-parser");
 const versor = require("versor");
 const rpn = require("request-promise-native"); // RPN enables to generate requests to various APIs
 
+// =========== DEXIE DB ===========
 Dexie.debug = true;
 
 let pandodb = new Dexie("PandoraeDatabase");
@@ -59,7 +60,10 @@ pandodb.open();
 var field = document.getElementById("field");
 
 // =========== LOADTYPE ===========
-
+// LoadType is the process that removes the main display canvas and then displays
+// the xtype div and xtype SVG element. It is usually called when the data has been
+// loaded and rekindled by the type function, i.e. when the visualisation is (almost)
+// ready to show
 const loadType = () => {
   xtypeDisplay();
   purgeCore();
@@ -72,9 +76,12 @@ const loadType = () => {
 const xtype = document.getElementById("xtype"); // xtype is a div containing each (-type) visualisation
 const width = xtype.clientWidth; // Fetching client width
 const height = xtype.clientHeight; // Fetching client height
-const toolWidth = 0.3 * width + 20;
+const toolWidth = 0.3 * width + 20; // The tooltip is around a third of total available screen width
 
+// The following features used to be dedicated to the chronotype and have been deactivated since.
+/*
 // =========== LINKS ===========
+
 const links = {};
 const linkedByIndex = {};
 const isConnected = (a, b) =>
@@ -88,6 +95,7 @@ const dragged = d => {
     .attr("cx", (d.zone = d3.event.x))
     .attr("x", (d.zone = d3.event.x));
 };
+*/
 
 // ========== TIME ===========
 const currentTime = new Date(); // Precise time when the page has loaded
@@ -307,12 +315,10 @@ const multiFormat = date =>
     : formatYear)(date);
 
 // ========= ANTHROPOTYPE =========
-const anthropotype = datasetAT => {
-  // When called, draw the anthropotype
+const anthropotype = datasetAT => {  // When called, draw the anthropotype
 
-  //========== SVG VIEW =============
-  var svg = d3
-    .select(xtype)
+//========== SVG VIEW =============
+  var svg = d3.select(xtype)
     .append("svg")
     .attr("id", "xtypeSVG"); // Creating the SVG DOM node
 
@@ -323,14 +329,12 @@ const anthropotype = datasetAT => {
     .attr("class", "view"); // CSS viewfinder properties
 
   //zoom extent
-  var zoom = d3
-    .zoom() // Zoom ability
+  var zoom = d3.zoom() // Zoom ability
     .scaleExtent([0.2, 15]) // To which extent do we allow to zoom forward or zoom back
     .translateExtent([[-width * 2, -height * 2], [width * 3, height * 3]])
     .on("zoom", zoomed); // Trigger the "zoomed" function on "zoom" behaviour
 
-  //======== DATA CALL & SORT =========
-
+//======== DATA CALL & SORT =========
   pandodb.anthropotype
     .get(datasetAT)
     .then(datajson => {
@@ -356,14 +360,10 @@ const anthropotype = datasetAT => {
       };
 
       //========== FORCE GRAPH ============
-      var simulation = d3
-        .forceSimulation() // Start the force graph
+      var simulation = d3.forceSimulation() // Start the force graph
         .alphaMin(0.1) // Each action starts at 1 and decrements "Decay" per Tick
         .alphaDecay(0.01) // "Decay" value
-        .force(
-          "link",
-          d3
-            .forceLink() // Links has specific properties
+        .force("link",d3.forceLink() // Links has specific properties
             .strength(0.08) // Defining non-standard strength value
             .id(d => d.id)
         ) // Defining an ID (used to compute link data)
@@ -380,14 +380,8 @@ const anthropotype = datasetAT => {
         ) // Adding ManyBody to repel nodes from each other
         .force("center", d3.forceCenter(width / 2, height / 2)); // The graph tends towards the center of the svg
 
-      /*   const isolate = (force, filter) => {
-    var initialize = force.initialize;
-    force.initialize = function() { initialize.call(force, data.filter(filter)); };
-    return force;
-  }
-   */
       var nodeImage = view.selectAll("nodeImage");
-      nodeImage.append("title").text(d => d.name);
+          nodeImage.append("title").text(d => d.name);
       var link = view.selectAll("link");
       var masks = view.selectAll("masks");
       var sortInfo = view.selectAll("sortInfo");
@@ -398,6 +392,7 @@ const anthropotype = datasetAT => {
         masks.attr("cx", d => d.x).attr("cy", d => d.y);
         name.attr("x", d => d.x).attr("y", d => d.y);
         sortInfo.attr("x", d => d.x).attr("y", d => d.y);
+
         link
           .attr("x1", d => d.source.x)
           .attr("y1", d => d.source.y)
@@ -475,88 +470,75 @@ const anthropotype = datasetAT => {
           }
         });
 
-        nodeImage = view
-          .selectAll("nodeImage") // Create nodeImage variable
+        nodeImage = view.selectAll("nodeImage") // Create nodeImage variable
           .exit()
           .remove()
           .data(data) // Using the "humans" variable data
           .enter()
           .append("image") // Append images
           .attr("class", "nodeImage") // This class contains the circular clip path
-          //.attr("xlink:href", d => "img/"+d.img)       // The image path is stored in the img property
           .attr("height", 40) // Image height
           .attr("width", 40); // Image width
 
         nodeImage.append("title").text(d => d.name);
 
-        link = view
-          .selectAll("link") // Creatin the link variable
-          .exit()
-          .remove()
+        link = view.selectAll("link") // Creatin the link variable
+          .exit().remove()
           .data(links) // Link data is stored in the "links" variable
           .enter()
-          .append("line")
-          .style("fill", "none");
+            .append("line")
+            .style("fill", "none");
 
-        masks = view
-          .selectAll("masks")
-          .exit()
-          .remove()
+        masks = view.selectAll("masks")
+          .exit().remove()
           .data(data)
           .enter()
-          .append("circle")
-          .attr("r", d => {
-            let r = 7;
-            if (d.hasOwnProperty("author")) {
-              r = r + d.author.length * 4;
-            }
-            return r;
-          })
-          .attr("fill", "rgba(63, 191, 191, 0.20)")
-          .attr("stroke", "white")
-          .attr("stroke-width", 2)
-          // .on("mouseover",d=>{document.getElementById("photoCredit").innerHTML="Photo Credit: " +d.photoCredit;})
-          .call(
-            d3
-              .drag()
-              .on("start", forcedragstarted)
-              .on("drag", forcedragged)
-              .on("end", forcedragended)
-          );
+            .append("circle")
+            .attr("r", d => {
+              let r = 7;
+              if (d.hasOwnProperty("author")) {
+                r = r + d.author.length * 4;
+              }
+              return r;
+            })
+            .attr("fill", "rgba(63, 191, 191, 0.20)")
+            .attr("stroke", "white")
+            .attr("stroke-width", 2)
+            .call(
+              d3.drag()
+                .on("start", forcedragstarted)
+                .on("drag", forcedragged)
+                .on("end", forcedragended)
+            );
 
-        sortInfo = view
-          .selectAll("sortInfo")
-          .exit()
-          .remove()
+        sortInfo = view.selectAll("sortInfo")
+          .exit().remove()
+          .data(data)
+            .enter()
+            .append("text")
+            .attr("pointer-events", "none")
+            .attr("dx", 0)
+            .attr("dy", 0)
+            .style("fill", "black");
+
+        name = view.selectAll("name")
+          .exit().remove()
           .data(data)
           .enter()
-          .append("text")
-          .attr("pointer-events", "none")
-          .attr("dx", 0)
-          .attr("dy", 0)
-          .style("fill", "black");
-
-        name = view
-          .selectAll("name")
-          .exit()
-          .remove()
-          .data(data)
-          .enter()
-          .append("text")
-          //.attr("pointer-events", "none")
-          .attr("class", "humans")
-          .attr("dx", 7)
-          .attr("dy", -5)
-          .style("fill", "black")
-          .style("cursor", "pointer")
-          .style("font-size", "7px")
-          .on("click", d => {
-            name.filter(e => e === d).style("fill", "DeepSkyBlue");
-          })
-          .on("dblclick", d => {
-            name.filter(e => e === d).style("fill", "black");
-          })
-          .text(d => d.id);
+            .append("text")
+            .attr("class", "humans")
+            .attr("dx", 7)
+            .attr("dy", -5)
+            .style("fill", "black")
+            .style("cursor", "pointer")
+            .style("font-size", "7px")
+            .on("click", d => {
+              name.filter(e => e === d).style("fill", "DeepSkyBlue");
+            })
+            .on("dblclick", d => {
+              name.filter(e => e === d).style("fill", "black");
+            })
+            .text(d => d.id);
 
         simulation.nodes(data).on("tick", ticked);
         simulation.force("link").links(links);
@@ -585,7 +567,6 @@ const anthropotype = datasetAT => {
       cartoSorter(docData[0].title);
     })
     .catch(error => {
-      console.log(error);
       field.value = "error - invalid dataset";
       ipcRenderer.send(
         "console-logs",
@@ -607,15 +588,13 @@ const hyphotype = id => {
   // When called, draw the anthropotype
 
   //========== SVG VIEW =============
-  var svg = d3
-    .select(xtype)
+  var svg = d3.select(xtype)
     .append("svg")
     .attr("id", "xtypeSVG"); // Creating the SVG DOM node
 
   svg.attr("width", width).attr("height", height); // Attributing width and height to svg
 
-  var view = svg
-    .append("g") // Appending a group to SVG
+  var view = svg.append("g") // Appending a group to SVG
     .attr("class", "view"); // CSS viewfinder properties
 
   //zoom extent
@@ -699,26 +678,22 @@ const hyphotype = id => {
 };
 
 // ========== CHRONOTYPE ==========
-const chronotype = (bibliography, links) => {
-  // When called, draw the chronotype
+const chronotype = (bibliography, links) => { // When called, draw the chronotype
 
-  //========== SVG VIEW =============
-  var svg = d3
-    .select(xtype)
+//========== SVG VIEW =============
+  var svg = d3.select(xtype)
     .append("svg")
-    .attr("id", "xtypeSVG"); // Creating the SVG node
+    .attr("id", "xtypeSVG"); 
 
   svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
 
-  var view = svg
-    .append("g") // Appending a group to SVG
-    .attr("class", "view"); // CSS viewfinder properties
+  var view = svg.append("g") // Appending a group to SVG
+                .attr("class", "view"); // CSS viewfinder properties
 
-  var zoom = d3
-    .zoom()
-    .scaleExtent([0.1, 20]) // Extent to which one can zoom in or out
-    .translateExtent([[0, 0], [width - toolWidth, height * height]]) // Extent to which one can go up/down/left/right
-    .on("zoom", zoomed); // Trigger the actual zooming function
+  var zoom = d3.zoom()
+                .scaleExtent([0.1, 20]) // Extent to which one can zoom in or out
+                .translateExtent([[0, 0], [width - toolWidth, height * height]]) // Extent to which one can go up/down/left/right
+                .on("zoom", zoomed); // Trigger the actual zooming function
 
   //============ RESET ============
   d3.select("#reset").on("click", resetted); // Clicking the button "reset" triggers the "resetted" function
@@ -736,25 +711,21 @@ const chronotype = (bibliography, links) => {
   }
 
   //========== X & Y AXIS  ============
-  var x = d3
-    .scaleLinear() // X axis scale (each area has its own attributed value)
+  var x = d3.scaleLinear() // X axis scale (each area has its own attributed value)
     .domain([-0.3, 1.3])
     .range([0, width - toolWidth]); // Graph size is 0.7 times the client width (0.3 -> tooltip)
 
-  var xAxis = d3
-    .axisBottom(x) // Actual X axis
+  var xAxis = d3.axisBottom(x) // Actual X axis
     .scale(x) // Scale has been declared just above
     .ticks(12) // Amount of ticks displayed
     .tickSize(0) // 0 = no vertical lines ; height = vertical lines
     .tickFormat(""); // No legend
 
-  var y = d3
-    .scaleTime() // Y axis scale
+  var y = d3.scaleTime() // Y axis scale
     .domain([Past, Future]) // First shows a range from minus one year to plus one year
     .range([height, 0]); // Size on screen is full height of client
 
-  var yAxis = d3
-    .axisRight(y) // Actual Y axis
+  var yAxis = d3.axisRight(y) // Actual Y axis
     .scale(y) // Scale is declared just above
     .ticks(20) // 20 ticks are displayed
     .tickSize(width) // Ticks are horizontal lines
@@ -762,8 +733,7 @@ const chronotype = (bibliography, links) => {
     .tickFormat(multiFormat); // Custom legend declared in a different file
 
   //========= LINES & INFO ============
-  var chrono = d3
-    .line() // Each zone is represented by a curve, or a "line"
+  var chrono = d3.line() // Each zone is represented by a curve, or a "line"
     .x(d => x(d.zone)) // The X value of each point is defined by "zone" (stable)
     .y(d => y(d.date)); // The Y value of each point is defined by "date" (changing)
 
@@ -777,8 +747,7 @@ const chronotype = (bibliography, links) => {
     .style("opacity", 0.8) // Rectangle background color and opacity
     .style("stroke-width", "0"); // Invisible borders
 
-  var color = d3
-    .scaleOrdinal() // Line colors
+  var color = d3.scaleOrdinal() // Line colors
     .domain([0, 1])
     .range([
       "#08154a",
@@ -830,7 +799,7 @@ const chronotype = (bibliography, links) => {
         NA4: "video_label",
         NA3: "question_answer",
         NA1: "markunread_mailbox",
-        interview: "speaker_notes",
+        interview:"speaker_notes",
         legal_case: "announcement",
         thesis: "note",
         graphic: "edit",
@@ -913,8 +882,7 @@ const chronotype = (bibliography, links) => {
 
       dataSorter();
 
-      const clustersNest = d3
-        .nest() // Sorting clusters
+      const clustersNest = d3.nest() // Sorting clusters
         .key(d => d.category) // Sorting them by category
         .entries(clusters); // Selecting relevant data
 
@@ -969,8 +937,7 @@ const chronotype = (bibliography, links) => {
 
       var titlesIndex = {};
 
-      var titleNest = d3
-        .nest()
+      var titleNest = d3.nest()
         .key(d => d.code)
         .entries(titleList);
       titleNest.forEach(d => {
@@ -981,8 +948,7 @@ const chronotype = (bibliography, links) => {
       });
 
       //========= CHART DISPLAY ===========
-      var now = view
-        .append("line") // Red line indicating current time
+      var now = view.append("line") // Red line indicating current time
         .attr("x1", -1) // X coordinate of point of origin
         .attr("y1", d => y(currentTime)) // Y -> current time, declared above
         .attr("x2", 99999) // X coordinate of point of destination
@@ -990,8 +956,7 @@ const chronotype = (bibliography, links) => {
         .style("stroke", "DarkRed") // Line color
         .style("stroke-width", 0.5); // Line thickness
 
-      var displayDate = view
-        .append("text") // Precise date (page loading timestamp)
+      var displayDate = view.append("text") // Precise date (page loading timestamp)
         .attr("x", width / 1.7) // X coordinate, centre-right
         .attr("y", d => y(currentTime)) // Y coordinate, current time
         .attr("dy", -5) // Place it above the "now" line
@@ -999,8 +964,7 @@ const chronotype = (bibliography, links) => {
         .style("font-size", "0.3em") // Font size
         .text(d => currentTime); // Actual date string
 
-      var lines = view
-        .selectAll("lines") // Lines by category
+      var lines = view.selectAll("lines") // Lines by category
         .data(clusterData) // Loading relevant data, ie nested clusters
         .enter()
         .append("path") // Lines are paths
@@ -1024,8 +988,7 @@ const chronotype = (bibliography, links) => {
         d.values.push(shadowBot);
       });
 
-      var shadowLines = view
-        .selectAll("shadowLines") // Lines by category
+      var shadowLines = view.selectAll("shadowLines") // Lines by category
         .data(shadowLineData) // Loading relevant data, ie nested clusters
         .enter()
         .append("path") // Lines are paths
@@ -1035,8 +998,7 @@ const chronotype = (bibliography, links) => {
         .style("stroke", "grey") // Color according to key
         .style("stroke-width", 0.5); // Stroke width
 
-      var categories = view
-        .selectAll("categoriesText") // Display category name
+      var categories = view.selectAll("categoriesText") // Display category name
         .data(clusterData) // Loading relevant data, ie nested clusters
         .enter()
         .append("text") // Lines are paths
@@ -1050,8 +1012,7 @@ const chronotype = (bibliography, links) => {
       d3.select(lines).lower();
 
       //======== CIRCLES/CLUSTERS =========
-      var circle = view
-        .selectAll("circle") // Clusters are represented as circles
+      var circle = view.selectAll("circle") // Clusters are represented as circles
         .data(clusters) // From the "clusters" array of objects
         .enter()
         .append("circle") // Clusters are circles
@@ -1069,8 +1030,7 @@ const chronotype = (bibliography, links) => {
         .each(d => d.circleexpanded === false) // Their are by default NOT expanded
         .on("click", CellSelect); // Clicking one circle triggers CellSelect
 
-      var circleContent = view
-        .selectAll("textAmount") // Clusters are represented as circles
+      var circleContent = view.selectAll("textAmount") // Clusters are represented as circles
         .data(clusters) // From the "clusters" array of objects
         .enter()
         .append("text") // Clusters are circles
@@ -1196,36 +1156,31 @@ const chronotype = (bibliography, links) => {
 
       //==========  NODE SUB-GRAPHS =======
       // Each cluster contains documents, i.e. each "circle" contains "nodes" which are force graphs
-      var simulation = d3
-        .forceSimulation() // starting simulation
+      var simulation = d3.forceSimulation() // starting simulation
         .alphaMin(0.1) // Each action starts at 1 and decrements "Decay" per Tick
         .alphaDecay(0.035) // "Decay" value
         .force(
           "link",
-          d3
-            .forceLink()
+          d3.forceLink()
             .distance(0)
             .strength(0)
             .id(d => d.title)
         )
         .force(
           "collision",
-          d3
-            .forceCollide() // nodes can collide
+          d3.forceCollide() // nodes can collide
             .radius(d => (d.expanded ? 1.8 : 0)) // if expanded is true, they collide with a force superior to 0
             .iterations(3)
         )
         .force(
           "x",
-          d3
-            .forceX()
+          d3.forceX()
             .strength(d => (d.expanded ? 0.03 : 0.15)) // nodes are attracted to their X origin
             .x(d => x(d.zone))
         ) // X origin data
         .force(
           "y",
-          d3
-            .forceY()
+          d3.forceY()
             .strength(d => (d.expanded ? 0.03 : 0.15)) // nodes are attracted to their Y origin
             .y(d => y(d.clusterDate))
         ); // Y origin data
@@ -1291,8 +1246,7 @@ const chronotype = (bibliography, links) => {
           .raise() // Display above nodes and the rest
           .merge(nodetext) // Merge the nodes
           .call(
-            d3
-              .drag() // Dragging behaviour
+            d3.drag() // Dragging behaviour
               .on("start", forcedragstarted)
               .on("drag", forcedragged)
               .on("end", forcedragended)
@@ -1394,8 +1348,7 @@ const chronotype = (bibliography, links) => {
   linksBuilder();
    */
 
-      var link = view
-        .selectAll("link") // Create links
+      var link = view.selectAll("link") // Create links
         .data(links) // With data created above
         .enter()
         .append("line") // Links are SVG lines
@@ -1573,8 +1526,7 @@ const chronotype = (bibliography, links) => {
 
 const geotype = locations => {
   // ========== SVG VIEW ==========
-  var svg = d3
-    .select(xtype)
+  var svg = d3.select(xtype)
     .append("svg")
     .attr("id", "xtypeSVG");
 
@@ -1586,8 +1538,7 @@ const geotype = locations => {
     .attr("id", "view"); // CSS viewfinder properties
 
   //globe properties and beginning aspect
-  const projection = d3
-    .geoOrthographic()
+  const projection = d3.geoOrthographic()
     .scale(800)
     .translate([width - toolWidth * 2, height / 2])
     .clipAngle(90)
@@ -1602,16 +1553,14 @@ const geotype = locations => {
 
   var velocity = 0.02;
 
-  var zoom = d3
-    .zoom()
+  var zoom = d3.zoom()
     .scaleExtent([0, 50])
     .translateExtent([[0, 0], [1200, 900]])
     .extent([[0, 0], [1200, 900]])
     .on("zoom", zoomed);
 
   //globe outline and background
-  view
-    .append("circle")
+  view.append("circle")
     .attr("class", "graticule-outline")
     .attr("cx", width - toolWidth * 2)
     .attr("cy", height / 2)
@@ -1714,8 +1663,7 @@ const geotype = locations => {
           data[i].index = i;
         } // id = item index
 
-        var cities = d3
-          .nest()
+        var cities = d3.nest()
           .key(d => d.affilId)
           .entries(dataArray);
 
@@ -1928,8 +1876,7 @@ const linkLoc = () => {
             .attr("class", "locations");
           locations
             .datum(d =>
-              d3
-                .geoCircle()
+              d3.geoCircle()
                 .center([d.lon, d.lat])
                 .radius(d.radius * 0.05)()
             )
@@ -2023,8 +1970,7 @@ const linkLoc = () => {
             accessorFunc = accessor;
           }
 
-          const grouped = d3
-            .nest()
+          const grouped = d3.nest()
             .key(d => d.date)
             .entries(initialData);
 
@@ -2052,16 +1998,13 @@ const linkLoc = () => {
             dateExtent[1].setFullYear(dateExtent[1].getFullYear() + 1);
 
             dateRangesCount = Math.round(width / 5);
-            dateScale = d3
-              .scaleTime()
+            dateScale = d3.scaleTime()
               .domain(dateExtent)
               .range([0, dateRangesCount]);
-            scaleTime = d3
-              .scaleTime()
+            scaleTime = d3.scaleTime()
               .domain(dateExtent)
               .range([0, chartWidth]);
-            dateRanges = d3
-              .range(dateRangesCount)
+            dateRanges = d3.range(dateRangesCount)
               .map(d => [dateScale.invert(d), dateScale.invert(d + 1)]);
           }
 
@@ -2143,16 +2086,14 @@ const linkLoc = () => {
             .domain([max, params.minY])
             .range([0, chartHeight - 25]);
 
-          const scaleX = d3
-            .scaleLinear()
+          const scaleX = d3.scaleLinear()
             .domain([minX, maxX])
             .range([0, chartWidth]);
           var axis = d3.axisBottom(scaleX);
           if (isDate) {
             axis = d3.axisBottom(scaleTime);
           }
-          const axisY = d3
-            .axisLeft(scaleY)
+          const axisY = d3.axisLeft(scaleY)
             .tickSize(-chartWidth - 20)
             .ticks(max == 1 ? 1 : params.yTicks)
             .tickFormat(d3.format(".2s"));
@@ -2187,8 +2128,7 @@ const linkLoc = () => {
             .attr("id", "selectionBrush")
             .attr("class", "brush")
             .call(
-              d3
-                .brushX()
+              d3.brushX()
                 .extent([[0, 0], [chartWidth, chartHeight]])
                 .on("start", brushStarted)
                 .on("end", brushEnded)
@@ -2473,8 +2413,7 @@ const linkLoc = () => {
       const q1 = versor.multiply(q0, versor.delta(v0, v1));
       projection.rotate(versor.rotation(q1)); // rotate projection
 
-      view
-        .selectAll("text")
+      view.selectAll("text")
         .attr("transform", d => {
           //redraw text
           var loc = projection([d.lon, d.lat]),
@@ -2487,8 +2426,7 @@ const linkLoc = () => {
       view.selectAll("path").attr("d", path);
     }
 
-    return d3
-      .drag()
+    return d3.drag()
       .on("start", dragstarted)
       .on("drag", dragged);
   }
@@ -2539,8 +2477,7 @@ const linkLoc = () => {
 // ======== PHARMACOTYPE ==========
 const pharmacotype = trials => {
   //========== SVG VIEW =============
-  var svg = d3
-    .select(xtype)
+  var svg = d3.select(xtype)
     .append("svg")
     .attr("id", "xtypeSVG");
 
@@ -2550,8 +2487,7 @@ const pharmacotype = trials => {
     .append("g") // Appending a viewroup to SVG
     .attr("class", "view"); // CSS viewfinder properties
 
-  var zoom = d3
-    .zoom()
+  var zoom = d3.zoom()
     .scaleExtent([0.5, 10]) // Extent to which one can zoom in or out
     .on("zoom", zoomed); // Trigger the actual zooming function
 
@@ -2563,32 +2499,28 @@ const pharmacotype = trials => {
     d3.select("#xtypeSVG") // Selecting the relevant svg element in webpage
       .transition()
       .duration(2000) // Resetting takes some time
-      .call(zoom.transform, d3.zoomIdentity); // Using "zoomIdentity", viewo back to initial position
+      .call(zoom.transform, d3.zoomIdentity); // Using "zoomIdentity", view.ack to initial position
   }
 
   //========== X & Y AXIS  ============
   //Y axis (timeline)
-  var x = d3
-    .scaleTime() // Y axis scale
+  var x = d3.scaleTime() // Y axis scale
     .domain([d3.timeYear.offset(currentTime, -10), Future])
     .range([0, width]); // Size on screen is full height of client
 
   //Format of the Y axis
-  var xAxis = d3
-    .axisBottom(x) // Actual Y axis
+  var xAxis = d3.axisBottom(x) // Actual Y axis
     .scale(x) // Scale is declared just above
     .tickSize(height - 20)
     .ticks(20) // 20 ticks are displayed
     .tickFormat(multiFormat); // Custom legend declared in a different file
 
-  var y = d3
-    .scaleLinear() // X axis scale (each area has its own attributed value)
+  var y = d3.scaleLinear() // X axis scale (each area has its own attributed value)
     .domain([0, 20])
     .range([height, 0]); // Screen size is 1.2 times bigger than client width
 
   //Format of the X axis
-  var yAxis = d3
-    .axisRight(y) // Actual X axis
+  var yAxis = d3.axisRight(y) // Actual X axis
     .scale(y) // Scale has been declared just above
     .ticks(12) // Amount of ticks displayed
     .tickSize(3);
@@ -2610,8 +2542,7 @@ const pharmacotype = trials => {
         d.title = d.Title;
       });
 
-      var trials = view
-        .selectAll("lines")
+      var trials = view.selectAll("lines")
         .data(clinicalTrials) // Loading relevant data, ie nested clusters
         .enter()
         .append("line") // Lines are paths
@@ -2624,8 +2555,7 @@ const pharmacotype = trials => {
         .style("stroke-linecap", "round") // Node stroke width
         .style("cursor", "context-menu"); // Type of cursor on node hover
 
-      var trialTitle = view
-        .selectAll("text")
+      var trialTitle = view.selectAll("text")
         .data(clinicalTrials) // Loading relevant data, ie nested clusters
         .enter()
         .append("text") // Lines are paths
@@ -2698,8 +2628,7 @@ const gazouillotype = dataset => {
   // When called, draw the gazouillotype
 
   //========== SVG VIEW =============
-  var svg = d3
-    .select(xtype)
+  var svg = d3.select(xtype)
     .append("svg")
     .attr("id", "xtypeSVG"); // Creating the SVG node
 
@@ -2831,13 +2760,11 @@ requestContent=requestContent+"</ul>"
         meanRetweetsArray.sort((a, b) => a - b);
         var median = meanRetweetsArray[parseInt(meanRetweetsArray.length / 2)];
 
-        var color = d3
-          .scaleSequential(d3.interpolateBlues)
+        var color = d3.scaleSequential(d3.interpolateBlues)
           .clamp(true)
           .domain([-median * 2, median * 10]);
 
-        var altColor = d3
-          .scaleSequential(d3.interpolateOranges)
+        var altColor = d3.scaleSequential(d3.interpolateOranges)
           .clamp(true)
           .domain([-median * 2, median * 10]);
 
@@ -2936,8 +2863,7 @@ requestContent=requestContent+"</ul>"
           circleData = workerAnswer.data.msg;
 
           //display only the first day (for testing and dev purpose)
-          view
-            .selectAll("circle")
+          view.selectAll("circle")
             .data(circleData)
             .enter()
             .append("circle")
@@ -2975,13 +2901,11 @@ requestContent=requestContent+"</ul>"
               if (parseInt(d.retweeted_id)) {             // if it is a NaN, returns false
                 document.getElementById(d.retweeted_id).style = "fill : red";
 
-                var line = (line = d3
-                  .line()
+                var line = (line = d3.line()
                   .x(line => x(line.timespan))
                   .y(line => y(line.indexPosition)));
 
-                view
-                  .append("path")
+                view.append("path")
                   .datum(lineData)
                   .attr("id", "linktosource")
                   .style("stroke", "red")
@@ -3130,16 +3054,13 @@ requestContent=requestContent+"</ul>"
             //   dateExtent[1].setFullYear(dateExtent[1].getFullYear()+1);
 
             dateRangesCount = Math.round(width / 5);
-            dateScale = d3
-              .scaleTime()
+            dateScale = d3.scaleTime()
               .domain(dateExtent)
               .range([0, dateRangesCount]);
-            scaleTime = d3
-              .scaleTime()
+            scaleTime = d3.scaleTime()
               .domain(dateExtent)
               .range([0, chartWidth]);
-            dateRanges = d3
-              .range(dateRangesCount)
+            dateRanges = d3.range(dateRangesCount)
               .map(d => [dateScale.invert(d), dateScale.invert(d + 1)]);
 
             d3.selection.prototype.patternify = function(params) {
@@ -3221,13 +3142,11 @@ requestContent=requestContent+"</ul>"
               .domain([max, params.minY])
               .range([0, chartHeight - 25]);
 
-            const scaleX = d3
-              .scaleLinear()
+            const scaleX = d3.scaleLinear()
               .domain([minX, maxX])
               .range([0, chartWidth]);
             var axis = d3.axisBottom(scaleTime);
-            const axisY = d3
-              .axisLeft(scaleY)
+            const axisY = d3.axisLeft(scaleY)
               .tickSize(-chartWidth - 20)
               .ticks(max == 1 ? 1 : params.yTicks)
               .tickFormat(d3.format(".2s"));
@@ -3264,8 +3183,7 @@ requestContent=requestContent+"</ul>"
               .attr("id", "selectionBrush")
               .attr("class", "brush")
               .call(
-                d3
-                  .brushX()
+                d3.brushX()
                   .extent([[0, 0], [chartWidth, chartHeight]])
                   .on("start", brushStarted)
                   .on("end", brushEnded)
@@ -4082,10 +4000,6 @@ const typeSwitch = (type, id) => {
       topotype(id);
       break;
 
-    case "hyphe":
-      //  ipcRenderer.send('hyphe', id);
-      //  backFromHyphe();
-      break;
   }
 
   ipcRenderer.send(
