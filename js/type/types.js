@@ -660,12 +660,52 @@ const hyphotype = id => {
 
       corpusRequests.push(rpn(getWebEntities));
 
+      var getNetwork = {
+        method: "POST",
+        uri: datajson.content.endpoint + "/api/", // URI to be accessed
+        headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
+        body: {
+          method: "store.get_webentities_network",
+          params: {corpus:datajson.content.corpus}
+        },
+        json: true
+      };
+
+      corpusRequests.push(rpn(getNetwork));
+
 
       Promise.all(corpusRequests).then(status => {
       console.log(status)
+
+      var links = [];
+
       let corpusStatus = status[0][0].result;
 
       let weStatus = status[1][0].result;
+
+      let nodeData = status[2][0].result.webentities;
+      console.log(nodeData)
+
+      let networkLinks = status[3][0].result;
+
+     
+      for (let j = 0; j < nodeData.length; j++) {
+        for (let i = 0; i < networkLinks.length; i++) {
+          let link = {}
+          if(nodeData[j].id===networkLinks[i][0]){
+            for (let f = 0; f < nodeData.length; f++) {
+              if(nodeData[f].id===networkLinks[i][1]){
+                link.source = networkLinks[i][0];
+                link.target = networkLinks[i][1];
+                link.weight = networkLinks[i][2];
+                links.push(link);
+              }
+            } 
+           } 
+      }
+    }
+     
+      console.log(links)
 
       weStatus = weStatus[weStatus.length-1];
       
