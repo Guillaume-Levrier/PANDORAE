@@ -609,13 +609,11 @@ const hyphotype = id => {
   pandodb.hyphotype
     .get(id)
     .then(datajson => {
-      console.log(datajson);
 
-      var tooltip = document.getElementById("tooltip");
 
       var corpusRequests = [];
 
-      var tooltipTitle =
+      var tooltipTop =
         "<strong>" +
         datajson.name.toUpperCase() +
         "</strong></br>" +
@@ -641,7 +639,7 @@ const hyphotype = id => {
         uri: datajson.content.endpoint + "/api/", // URI to be accessed
         headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
         body: {
-          method: "get_webentities_stats",
+          method: "store.get_webentities_stats",
           params: [datajson.content.corpus]
         },
         json: true
@@ -649,13 +647,45 @@ const hyphotype = id => {
 
       corpusRequests.push(rpn(getCorpusStats));
 
-      Promise.all(corpusRequests).then(status => {
-        console.log(status);
-      });
+      var getWebEntities = {
+        method: "POST",
+        uri: datajson.content.endpoint + "/api/", // URI to be accessed
+        headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
+        body: {
+          method: "store.get_webentities_by_status",
+          params: {corpus:datajson.content.corpus,status:"in", count:100000}
+        },
+        json: true
+      };
 
+      corpusRequests.push(rpn(getWebEntities));
+
+
+      Promise.all(corpusRequests).then(status => {
+      console.log(status)
+      let corpusStatus = status[0][0].result;
+
+      let weStatus = status[1][0].result;
+
+      weStatus = weStatus[weStatus.length-1];
+      
+      tooltipTop = tooltipTop + 
+      "<br> Corpus ID: "+ corpusStatus.corpus_id +
+      "<br> Corpus status: " + corpusStatus.status +
+      "<li> Total: " + weStatus.total + "</li>"+
+      "<li> Discovered: " + weStatus.discovered + "</li>"+
+      "<li> Undecided: " + weStatus.undecided + "</li>"+
+      "<li> Out: " + weStatus.out + "</li>"+
+      "<li> In: " + weStatus.in + "</li>"+
+      "</ul>" ;
+     
       loadType();
 
-      document.getElementById("tooltip").innerHTML = tooltipTitle;
+      document.getElementById("tooltip").innerHTML = tooltipTop;
+
+      });
+
+     
     })
     .catch(error => {
       console.log(error);
