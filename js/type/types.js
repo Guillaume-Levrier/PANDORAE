@@ -334,6 +334,8 @@ const anthropotype = datasetAT => {  // When called, draw the anthropotype
     .translateExtent([[-width * 2, -height * 2], [width * 3, height * 3]])
     .on("zoom", zoomed); // Trigger the "zoomed" function on "zoom" behaviour
 
+    
+
 //======== DATA CALL & SORT =========
   pandodb.anthropotype
     .get(datasetAT)
@@ -598,18 +600,43 @@ const hyphotype = id => {
     .attr("class", "view"); // CSS viewfinder properties
 
   //zoom extent
-  /*
+  
   var zoom = d3.zoom()                                      // Zoom ability
       .scaleExtent([0.2, 15])                               // To which extent do we allow to zoom forward or zoom back
       .translateExtent([[-width*2,-height*2],[width*3,height*3]])
       .on("zoom", zoomed);                                  // Trigger the "zoomed" function on "zoom" behaviour
-  */
+
+      
+      var color = d3.scaleOrdinal() // Line colors
+      .domain([0, 1])
+      .range([
+        "#08154a",
+        "#490027",
+        "#5c7a38",
+        "#4f4280",
+        "#6f611b",
+        "#5b7abd",
+        "#003f13",
+        "#b479a9",
+        "#3a2e00",
+        "#017099",
+        "#845421",
+        "#008b97",
+        "#460d00",
+        "#62949e",
+        "#211434",
+        "#af8450",
+        "#30273c",
+        "#bd7b70",
+        "#005b5c",
+        "#c56883",
+        "#a68199"
+      ]);
+  
+
   //======== DATA CALL & SORT =========
 
-  pandodb.hyphotype
-    .get(id)
-    .then(datajson => {
-
+  pandodb.hyphotype.get(id).then(datajson => {
 
       var corpusRequests = [];
 
@@ -632,7 +659,10 @@ const hyphotype = id => {
         json: true // Automatically parses the JSON string in the response
       };
 
-      corpusRequests.push(rpn(startCorpus));
+     Promise.all([rpn(startCorpus)]).then(startingCorpus => {
+
+      let corpusStatus = startingCorpus[0][0].result;
+
 
       var getCorpusStats = {
         method: "POST",
@@ -673,20 +703,18 @@ const hyphotype = id => {
 
       corpusRequests.push(rpn(getNetwork));
 
-
-      Promise.all(corpusRequests).then(status => {
+    Promise.all(corpusRequests).then(status => {
       console.log(status)
 
       var links = [];
 
-      let corpusStatus = status[0][0].result;
 
-      let weStatus = status[1][0].result;
+      let weStatus = status[0][0].result;
 
-      let nodeData = status[2][0].result.webentities;
+      let nodeData = status[1][0].result.webentities;
       console.log(nodeData)
 
-      let networkLinks = status[3][0].result;
+      let networkLinks = status[2][0].result;
 
      
       for (let j = 0; j < nodeData.length; j++) {
@@ -719,31 +747,140 @@ const hyphotype = id => {
       "<li> In: " + weStatus.in + "</li>"+
       "</ul>" ;
      
+
+    // network graph starts here
+
+      var arrows = view.append("svg:defs").selectAll("marker")
+      .data(["end"])                                         // Different link/path types can be defined here
+    .enter().append("svg:marker")                            // This section adds in the arrows
+      .attr("id", String)
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 150)
+      .attr("refY", 0)
+      .attr("markerWidth", 12)
+      .attr("markerHeight", 12)
+      .attr("orient", "auto")
+      .attr("stroke-width",0.5)
+      .attr("fill","grey")
+      .attr("fill-opacity",.8)
+    .append("svg:path")
+      .attr("d", "M0,-5L10,0L0,5");
+
+var simulation = d3.forceSimulation(nodeData) // Start the force graph
+        .alphaMin(0.1) // Each action starts at 1 and decrements "Decay" per Tick
+        .alphaDecay(0.01) // "Decay" value
+        .force("link",d3.forceLink().id(d => d.id).strength(d=>parseInt(d.weight/1000))) // Defining an ID (used to compute link data)
+        //.force("collision", d3.forceCollide(1)) // Nodes collide with each other (they don't overlap)
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        //.force("charge",d3.forceManyBody().strength(-1));
+              
+        nodeData.forEach(node=>{
+          if (node.tags.USER===undefined) {
+            node.tags.USER = {}
+            node.tags.USER.pays = []
+            node.tags.USER.pays.push("NA");
+          } else if(node.tags.USER.pays===undefined){
+            node.tags.USER.pays = []
+            node.tags.USER.pays.push("NA");
+          } 
+        })
+                 
+    var nodes = view.selectAll("circle")
+                    .data(nodeData)
+                    .enter().append("circle")
+                        .style('fill',d=>color(d.tags.USER.pays[0]))
+                        .style('opacity',.3)
+                        .attr('stroke',"black")
+                        .attr('stroke-width',.1)
+                        .attr("r", 3) //d=>d.indegree)
+                        .attr("id", d => d.id)
+                        .call(
+                          d3.drag()
+                            .on("start", forcedragstarted)
+                            .on("drag", forcedragged)
+                            .on("end", forcedragended)
+                        );
+       
+          var nodelinks = view.selectAll("line")
+                        .data(links)
+                   .enter().append("line")
+                   //   .attr("class",d=> d.type)
+                     // .attr("opacity", d=> Math.log10(0.2+(d.opacity*2)))
+                      .attr("stroke-width", .1);
+                   //   .attr("marker-end", "url(#end)");
+
+
+
+simulation
+      .nodes(nodeData) // Start the force graph with "docs" as data
+      .on("tick", ticked); // Start the "tick" for the first time
+
+simulation
+      .force("link") // Create the links
+      .links(links); // Data for those links is "links"
+
+      simulation.alpha(1).restart();
+
+      nodes.raise()
+
+function ticked() {
+// Actual force function
+nodelinks // Links coordinates
+  .attr("x1", d => d.source.x)
+  .attr("y1", d => d.source.y)
+  .attr("x2", d => d.target.x)
+  .attr("y2", d => d.target.y);
+
+nodes // Node coordinates
+  .attr("cx", d => d.x)
+  .attr("cy", d => d.y);
+
+}
+
+
+function forcedragstarted(d) {
+  if (!d3.event.active) simulation.alpha(1).restart();
+  d.fx = d.x;
+  d.fy = d.y;
+}
+
+function forcedragged(d) {
+  d.fx = d3.event.x;
+  d.fy = d3.event.y;
+}
+
+function forcedragended(d) {
+  if (!d3.event.active) simulation.alpha(1).restart();
+  d.fx = null;
+  d.fy = null;
+}
+
       loadType();
 
       document.getElementById("tooltip").innerHTML = tooltipTop;
 
-      });
+      })  // end of get webentities data
 
-     
+      }) // end of start corpus
     })
     .catch(error => {
       console.log(error);
-      field.value = "error - invalid dataset";
+      field.value = "error - Cannot start corpus";
       ipcRenderer.send(
         "console-logs",
-        "Hyphotype error: dataset " + id + " is invalid."
+        "Hyphotype error: cannot start corpus " + id + "."
       );
     });
 
+
   //======== ZOOM & RESCALE ===========
 
-  /*svg.call(zoom).on("dblclick.zoom", null);
+  svg.call(zoom).on("dblclick.zoom", null);
   
   function zoomed() {
      view.attr("transform", d3.event.transform);
   }
-  */
+  
   ipcRenderer.send("console-logs", "Starting Hyphotype");
 };
 
@@ -4023,16 +4160,6 @@ const topotype = (pubdeb,matching,commun) => {                               // 
   }
   
  */
-
-const backFromHyphe = () => {
-  var closeHyphe = document.createElement("div");
-  closeHyphe.id = "closeHyphe";
-  let hyphe = "hyphe";
-  let close = "close";
-  closeHyphe.innerHTML =
-    '<i class="material-icons  dialog-buttons" onclick="killViews();">arrow_back</i>';
-  document.body.appendChild(closeHyphe);
-};
 
 //========== typesSwitch ==========
 // Switch used to which type to draw/generate
