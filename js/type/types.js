@@ -533,7 +533,7 @@ const anthropotype = datasetAT => {  // When called, draw the anthropotype
             .attr("dy", -5)
             .style("fill", "black")
             .style("cursor", "pointer")
-            .style("font-size", "7px")
+            .style("font-size", "15px")
             .on("click", d => {
               name.filter(e => e === d).style("fill", "DeepSkyBlue");
             })
