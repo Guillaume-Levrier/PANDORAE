@@ -3362,7 +3362,7 @@ requestContent=requestContent+"</ul>"
               var axis = d3.axisBottom(scaleX);
 
               if (isDate) {
-                axis = d3.axisBottom(scaleTime).tickFormat(d3.timeFormat("%I:%M"));
+                axis = d3.axisBottom(scaleTime).tickFormat(d3.timeFormat("%d/%m/%y"));
               }
 
             const axisY = d3.axisLeft(scaleY)
