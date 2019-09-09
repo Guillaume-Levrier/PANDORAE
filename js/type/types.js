@@ -2288,6 +2288,7 @@ const linkLoc = () => {
           const scale = params.yScale
             .domain([params.minY, max])
             .range([0, chartHeight - 25]);
+
           const scaleY = scale
             .copy()
             .domain([max, params.minY])
@@ -2296,6 +2297,7 @@ const linkLoc = () => {
           const scaleX = d3.scaleLinear()
             .domain([minX, maxX])
             .range([0, chartWidth]);
+
           var axis = d3.axisBottom(scaleX);
           if (isDate) {
             axis = d3.axisBottom(scaleTime);
@@ -2322,6 +2324,7 @@ const linkLoc = () => {
 
           const xAxisWrapper = chart
             .append("g")
+            .attr("id","brushXAxis")
             .attr("transform", `translate(${0},${chartHeight - 25})`)
             .call(axis);
 
@@ -2839,7 +2842,7 @@ const gazouillotype = dataset => {
     .append("svg")
     .attr("id", "xtypeSVG"); // Creating the SVG node
 
-  svg.attr("width", width).attr("height", height); // Attributing width and height to svg
+  svg.attr("width", width-toolWidth).attr("height", height); // Attributing width and height to svg
 
   var view = svg
     .append("g") // Appending a group to SVG
@@ -2865,15 +2868,16 @@ const gazouillotype = dataset => {
 
   //========== X & Y AXIS  ============                                // Creating two arrays of scales (graph + brush)
   var x = d3.scaleTime();
-  var y = d3.scaleLinear().range([height - brushHeight, 0]);
+  var y = d3.scaleLinear()
+          .range([height - brushHeight, 0]);
 
   var x2 = d3.scaleTime();
   var y2 = d3.scaleLinear().range([150, 0]);
 
   var xAxis = d3.axisBottom(x).tickFormat(multiFormat);
-  var xAxis2 = d3.axisBottom(x2).tickFormat(multiFormat);
+  //var xAxis2 = d3.axisBottom(x2).tickFormat(multiFormat);
 
-  var yAxis = d3.axisRight(y);
+  var yAxis = d3.axisRight(y).tickFormat(d3.format(".2s"));
 
   var domainDates = [];
   var activeDates = [];
@@ -3044,7 +3048,7 @@ requestContent=requestContent+"</ul>"
           } else {
             x.domain(domainDates).range([0, pileExtent * (1 + radius)]);
           }
-          x2.domain(domainDates).range([0, width - toolWidth]);
+         // x2.domain(domainDates).range([0, width - toolWidth]);
           xAxis.ticks(x.range()[1] / 100);
           zoom.translateExtent([[-width / 3, 0], [Infinity, height]]);
           // zoom.scaleExtent([1/pileExtent,5])
@@ -3255,10 +3259,9 @@ requestContent=requestContent+"</ul>"
               dateRanges,
               scaleTime;
 
-            dateExtent = d3.extent(grouped.map(d => d.date));
+            dateExtent = d3.extent(grouped.map(d => d.timespan));
 
-            //   dateExtent[0].setFullYear(dateExtent[0].getFullYear()-1);
-            //   dateExtent[1].setFullYear(dateExtent[1].getFullYear()+1);
+          
 
             dateRangesCount = Math.round(width / 5);
             dateScale = d3.scaleTime()
@@ -3267,6 +3270,7 @@ requestContent=requestContent+"</ul>"
             scaleTime = d3.scaleTime()
               .domain(dateExtent)
               .range([0, chartWidth]);
+          
             dateRanges = d3.range(dateRangesCount)
               .map(d => [dateScale.invert(d), dateScale.invert(d + 1)]);
 
@@ -3315,7 +3319,7 @@ requestContent=requestContent+"</ul>"
               d.key = d.timespan;
               d.value = d.indexPosition;
             });
-
+            
             const values = grouped.map(d => d.value);
             const min = d3.min(values);
             const max = d3.max(values);
@@ -3344,6 +3348,7 @@ requestContent=requestContent+"</ul>"
             const scale = params.yScale
               .domain([params.minY, max])
               .range([0, chartHeight - 25]);
+
             const scaleY = scale
               .copy()
               .domain([max, params.minY])
@@ -3351,8 +3356,15 @@ requestContent=requestContent+"</ul>"
 
             const scaleX = d3.scaleLinear()
               .domain([minX, maxX])
-              .range([0, chartWidth]);
-            var axis = d3.axisBottom(scaleTime);
+              .range([0, chartWidth])
+              
+
+              var axis = d3.axisBottom(scaleX);
+
+              if (isDate) {
+                axis = d3.axisBottom(scaleTime).tickFormat(d3.timeFormat("%I:%M"));
+              }
+
             const axisY = d3.axisLeft(scaleY)
               .tickSize(-chartWidth - 20)
               .ticks(max == 1 ? 1 : params.yTicks)
@@ -3377,6 +3389,7 @@ requestContent=requestContent+"</ul>"
 
             const xAxisWrapper = chart
               .append("g")
+              .attr("id","brushXAxis")
               .attr("transform", `translate(${0},${chartHeight - 25})`)
               .call(axis);
 
@@ -3654,6 +3667,20 @@ requestContent=requestContent+"</ul>"
 
   //======== ZOOM & RESCALE ===========
 
+  svg.append("rect")
+      .attr("x","0")
+      .attr("y",parseInt(height - 180))
+      .attr("width",width)
+      .attr("height","40px")
+      .attr("fill","rgba(255,255,255,.7)");
+
+  svg.append("rect")
+      .attr("x",parseInt(width - toolWidth - 65))
+      .attr("y","0")
+      .attr("width","80px")
+      .attr("height",height)
+      .attr("fill","rgba(255,255,255,.7)");
+
   var gX = svg
     .append("g") // Make X axis rescalable
     .attr("class", "axis axis--x")
@@ -3668,9 +3695,6 @@ requestContent=requestContent+"</ul>"
 
   svg.call(zoom).on("dblclick.zoom", null); // Zoom and deactivate doubleclick zooming
 
-  var midDate = new Date();
-
-
   function zoomed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
     var t = d3.event.transform;
@@ -3679,41 +3703,22 @@ requestContent=requestContent+"</ul>"
     gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
     gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
 
-    d3.select("#selectionBrush")
-      .select(".handle.handle--e")
-      .attr(
-        "x",
-        parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[0])))
-      );
-    d3.select("#selectionBrush")
-      .select(".handle.handle--w")
-      .attr(
-        "x",
-        parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[1])))
-      );
+    let ext1 = parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[0])));
+    let ext2 = parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[1])));
+
 
     d3.select("#selectionBrush")
       .select(".selection")
-      .attr(
-        "x",
-        parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[0])))
-      )
-      .attr(
-        "width",
-        parseInt(
-          brushXscale(x.invert(x.range().map(t.invertX, t)[1])) -
-            brushXscale(x.invert(x.range().map(t.invertX, t)[0]))
-        )
-      );
+      .attr("x",ext1)
+      .attr("width",parseInt(ext2-ext1));
 
     d3.select("#selectionBrush")
       .select("g")
       .attr(
         "transform",
-        "translate(" +
-          parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[0]))) +
-          ",50)"
+        "translate(" + ext1 + ",50)"
       );
+
     d3.select("#selectionBrush")
       .selectAll("g")
       .select(function() {
@@ -3721,9 +3726,7 @@ requestContent=requestContent+"</ul>"
       })
       .attr(
         "transform",
-        "translate(" +
-          parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[1]))) +
-          ",50)"
+        "translate(" + ext2 + ",50)"
       );
   }
 
