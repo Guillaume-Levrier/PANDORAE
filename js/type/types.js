@@ -2871,16 +2871,11 @@ const gazouillotype = dataset => {
   var y = d3.scaleLinear()
           .range([height - brushHeight, 0]);
 
-  var x2 = d3.scaleTime();
-  var y2 = d3.scaleLinear().range([150, 0]);
-
   var xAxis = d3.axisBottom(x).tickFormat(multiFormat);
-  //var xAxis2 = d3.axisBottom(x2).tickFormat(multiFormat);
 
   var yAxis = d3.axisRight(y).tickFormat(d3.format(".2s"));
 
   var domainDates = [];
-  var activeDates = [];
   var bufferData = [];
   let radius = 0;
   var lineData = [];
@@ -3020,13 +3015,6 @@ requestContent=requestContent+"</ul>"
           })
         ]);
 
-        y2.domain([
-          0,
-          +d3.max(circleData, d => {
-            return +d.indexPosition;
-          })
-        ]);
-
         const radiusCalculator = () => {
           for (var i = 0; i < data.length; i++) {
             if (data[i].tweets.length > 2) {
@@ -3043,11 +3031,12 @@ requestContent=requestContent+"</ul>"
 
         const viewFinder = () => {
           // Determine X axis range according to Y-axis (& radius)
-          if (radius >= 1) {
+          /* if (radius >= 1) {
             x.domain(domainDates).range([0, radius * pileExtent * 3]);
           } else {
             x.domain(domainDates).range([0, pileExtent * (1 + radius)]);
-          }
+          } */
+          x.domain(domainDates).range([0, width - toolWidth]);
          // x2.domain(domainDates).range([0, width - toolWidth]);
           xAxis.ticks(x.range()[1] / 100);
           zoom.translateExtent([[-width / 3, 0], [Infinity, height]]);
@@ -3208,13 +3197,9 @@ requestContent=requestContent+"</ul>"
               );
             });
 
-          /*     const zooming =()=> console.log("zooming");
-
-                         var brushZoom = d3.zoom().on("zoom", zooming);
- */
-
-          // === Bar Range Slider ===
-          // adapted from https://observablehq.com/@bumbeishvili/data-driven-range-sliders
+         
+  // === Bar Range Slider ===
+  // adapted from https://observablehq.com/@bumbeishvili/data-driven-range-sliders
 
           const barRangeSlider = (
             initialDataArray,
@@ -3645,7 +3630,7 @@ requestContent=requestContent+"</ul>"
 
           barRangeSlider(areaData);
 
-          function narrative(focused) {
+          /* function narrative(focused) {
             // Experimental narrative function
             d3.select("#xtypeSVG").call(
               zoom.transform,
@@ -3657,7 +3642,7 @@ requestContent=requestContent+"</ul>"
           }
 
           narrative(circleData[0]);
-
+ */
           loadType();
 
           keywordsDisplay();
@@ -3696,16 +3681,20 @@ requestContent=requestContent+"</ul>"
   svg.call(zoom).on("dblclick.zoom", null); // Zoom and deactivate doubleclick zooming
 
   function zoomed() {
+    
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+    
     var t = d3.event.transform;
+
     view.attr("transform", t);
 
-    gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
-    gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
-
+    gX.call(xAxis.scale(t.rescaleX(x)));
+    gY.call(yAxis.scale(t.rescaleY(y)));
+  
     let ext1 = parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[0])));
     let ext2 = parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[1])));
 
+    console.log(x.invert(x.range().map(t.invertX, t)[1]))
 
     d3.select("#selectionBrush")
       .select(".selection")
