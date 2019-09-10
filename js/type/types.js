@@ -3015,20 +3015,6 @@ requestContent=requestContent+"</ul>"
           })
         ]);
 
-        const radiusCalculator = () => {
-          for (var i = 0; i < data.length; i++) {
-            if (data[i].tweets.length > 2) {
-              radius =
-                (y(data[i].tweets[1].indexPosition) -
-                  y(data[i].tweets[0].indexPosition)) /
-                3;
-              break;
-            }
-          }
-        };
-
-        radiusCalculator();
-
         const viewFinder = () => {
           // Determine X axis range according to Y-axis (& radius)
           /* if (radius >= 1) {
@@ -3044,6 +3030,22 @@ requestContent=requestContent+"</ul>"
         };
 
         viewFinder();
+
+     const radiusCalculator = () => {
+          for (var i = 0; i < data.length; i++) {
+            if (data[i].tweets.length > 2) {
+              radius =
+                (y(data[i].tweets[1].indexPosition) -
+                  y(data[i].tweets[0].indexPosition)) /
+                3;
+              break;
+            }
+          }
+        };
+
+        radiusCalculator();
+
+        
 
         let areaData = [];
 
