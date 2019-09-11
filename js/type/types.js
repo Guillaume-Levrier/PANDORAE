@@ -2869,7 +2869,8 @@ const gazouillotype = dataset => {
   //========== X & Y AXIS  ============                                // Creating two arrays of scales (graph + brush)
   var x = d3.scaleTime();
   var y = d3.scaleLinear()
-          .range([height - brushHeight, 0]);
+          .range([height - brushHeight, 0])
+          .domain([0,210]);
 
   var xAxis = d3.axisBottom(x).tickFormat(multiFormat);
 
@@ -2877,7 +2878,7 @@ const gazouillotype = dataset => {
 
   var domainDates = [];
   var bufferData = [];
-  let radius = 0;
+  let radius = 1;
   var lineData = [];
 
   const scrapToApiFormat = data => {
@@ -2988,7 +2989,16 @@ requestContent=requestContent+"</ul>"
         piler();
 
         var firstDate = new Date(data[0].date);
+        
+        function addDays(date, days) {
+          var result = new Date(date);
+          result.setDate(result.getDate() + days);
+          return result;
+        }
+        var plusDate = addDays(firstDate,2)
         var lastDate = new Date(data[data.length - 1].date);
+
+       // console.log(firstDate,plusTen)
 
         domainDates.push(firstDate, lastDate);
 
@@ -3004,49 +3014,13 @@ requestContent=requestContent+"</ul>"
         }
 
         const keywordsDisplay = () => {
-          document.getElementById("tooltip").innerHTML =
-           requestContent
+          document.getElementById("tooltip").innerHTML = requestContent
         };
 
-        y.domain([
-          0,
-          +d3.max(circleData, d => {
-            return +d.indexPosition;
-          })
-        ]);
-
-        const viewFinder = () => {
-          // Determine X axis range according to Y-axis (& radius)
-          /* if (radius >= 1) {
-            x.domain(domainDates).range([0, radius * pileExtent * 3]);
-          } else {
-            x.domain(domainDates).range([0, pileExtent * (1 + radius)]);
-          } */
-          x.domain(domainDates).range([0, width - toolWidth]);
-         // x2.domain(domainDates).range([0, width - toolWidth]);
-          xAxis.ticks(x.range()[1] / 100);
-          zoom.translateExtent([[-width / 3, 0], [Infinity, height]]);
-          // zoom.scaleExtent([1/pileExtent,5])
-        };
-
-        viewFinder();
-
-     const radiusCalculator = () => {
-          for (var i = 0; i < data.length; i++) {
-            if (data[i].tweets.length > 2) {
-              radius =
-                (y(data[i].tweets[1].indexPosition) -
-                  y(data[i].tweets[0].indexPosition)) /
-                3;
-              break;
-            }
-          }
-        };
-
-        radiusCalculator();
-
-        
-
+        x.domain([firstDate,plusDate]).range([0, width - toolWidth]);
+        xAxis.ticks(x.range()[1] / 100);
+        zoom.translateExtent([[-width / 3, 0], [Infinity, height]]);
+             
         let areaData = [];
 
         data.forEach(d => {
@@ -3695,8 +3669,6 @@ requestContent=requestContent+"</ul>"
   
     let ext1 = parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[0])));
     let ext2 = parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[1])));
-
-    console.log(x.invert(x.range().map(t.invertX, t)[1]))
 
     d3.select("#selectionBrush")
       .select(".selection")
