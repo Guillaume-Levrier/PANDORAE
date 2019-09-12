@@ -16,13 +16,10 @@ macOS starting issues: put the app in the "Applications" folder and then start a
 If you encounter an issue, please tag this [account](https://mobile.twitter.com/PANDORAE_CORE) or create an issue here on Github.
 
 ### Roadmap
+Expected 1.0 release date : 14/10/2019
 
-#### Types
-- Create a Hyphotype
+No new features will be released until then. 
 
 #### Wiki
 - API documentation (WIP)
 
-#### New features
-- Prodigy connector?
-- Zotero local connector
