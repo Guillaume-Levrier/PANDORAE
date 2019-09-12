@@ -865,9 +865,9 @@ document.addEventListener("keydown", event => {
                    categoryLoader('type');
                    break;
       
-/*     case "Digit4": if(toggledMenu===false) { toggleMenu() };
-                   categoryLoader('ext');
-                  break; */
+     case "Backquote": location.reload();
+     
+                  break; 
 
     case "Digit5": toggleConsole();
                    break;

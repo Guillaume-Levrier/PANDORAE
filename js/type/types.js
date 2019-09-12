@@ -610,28 +610,37 @@ const hyphotype = id => {
       var color = d3.scaleOrdinal() // Line colors
       .domain([0, 1])
       .range([
-        "#08154a",
-        "#490027",
-        "#5c7a38",
-        "#4f4280",
-        "#6f611b",
-        "#5b7abd",
-        "#003f13",
-        "#b479a9",
-        "#3a2e00",
-        "#017099",
-        "#845421",
-        "#008b97",
-        "#460d00",
-        "#62949e",
-        "#211434",
-        "#af8450",
-        "#30273c",
-        "#bd7b70",
-        "#005b5c",
-        "#c56883",
-        "#a68199"
-      ]);
+          "#623500",
+          "#970ccd",
+          "#53fa4d",
+          "#0040bd",
+          "#d2d400",
+          "#c00092",
+          "#2d9300",
+          "#ff0d8a",
+          "#66ffbf",
+          "#ff432f",
+          "#01ab6d",
+          "#c58eff",
+          "#3b5a00",
+          "#bfb5ff",
+          "#b06500",
+          "#0079bf",
+          "#fffa94",
+          "#200026",
+          "#f4ffc7",
+          "#a40045",
+          "#01a9a4",
+          "#ff6e56",
+          "#0093b5",
+          "#ffb373",
+          "#005c77",
+          "#7b6100",
+          "#d1daff",
+          "#0a3500",
+          "#ffb8cc",
+          "#00392b"
+    ]);
   
 
   //======== DATA CALL & SORT =========
@@ -703,6 +712,19 @@ const hyphotype = id => {
 
       corpusRequests.push(rpn(getNetwork));
 
+      var getTags = {
+        method: "POST",
+        uri: datajson.content.endpoint + "/api/", // URI to be accessed
+        headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
+        body: {
+          method: "store.get_tags",
+          params: {namespace:null,corpus:datajson.content.corpus}
+        },
+        json: true
+      };
+
+      corpusRequests.push(rpn(getTags));
+
     Promise.all(corpusRequests).then(status => {
       console.log(status)
 
@@ -716,7 +738,17 @@ const hyphotype = id => {
 
       let networkLinks = status[2][0].result;
 
-     
+      let tags = status[3][0].result.USER;
+      
+      var tagDiv= "<select id='tagDiv'>"
+
+      for (var prop in tags) {
+        tagDiv = tagDiv +  '<option value="'+prop+'">'+prop+'</option>';
+
+      }
+      tagDiv = tagDiv +  "</select>"
+
+
       for (let j = 0; j < nodeData.length; j++) {
         for (let i = 0; i < networkLinks.length; i++) {
           let link = {}
@@ -745,8 +777,36 @@ const hyphotype = id => {
       "<li> Undecided: " + weStatus.undecided + "</li>"+
       "<li> Out: " + weStatus.out + "</li>"+
       "<li> In: " + weStatus.in + "</li>"+
-      "</ul>" ;
-     
+      "</ul><br><br>"+tagDiv+"<br><div id='tagList'></div>" ;
+
+
+
+    const showTags = (tag) =>{
+      console.log(tag)
+      let tagList = document.getElementById('tagList');
+      tagList.innerHTML="";
+      let thisTagList = "<ul>";
+
+      for (var prop in tags) {
+        if(prop === tag) {
+          console.log(tags[prop])
+          for (let thisTag in tags[prop]) {
+           
+            thisTagList = thisTagList + "<li style='color:"+color(thisTag)+"'>"+thisTag+":"+tags[prop][thisTag]+"</li>"
+          }
+
+        }
+
+      }
+      thisTagList = thisTagList + "</ul>"
+      tagList.innerHTML = thisTagList;
+      nodes.style('fill',d=>color(d.tags.USER[tag]))
+    }
+
+
+setTimeout(()=> document.getElementById('tagDiv').addEventListener("change",e=>{
+        showTags(e.srcElement.value)
+      }),200)
 
     // network graph starts here
 
@@ -767,12 +827,9 @@ const hyphotype = id => {
       .attr("d", "M0,-5L10,0L0,5");
 
 var simulation = d3.forceSimulation(nodeData) // Start the force graph
-        .alphaMin(0.1) // Each action starts at 1 and decrements "Decay" per Tick
-        .alphaDecay(0.01) // "Decay" value
-        .force("link",d3.forceLink().id(d => d.id).strength(d=>parseInt(d.weight/1000))) // Defining an ID (used to compute link data)
-        //.force("collision", d3.forceCollide(1)) // Nodes collide with each other (they don't overlap)
-        .force("center", d3.forceCenter(width / 2, height / 2))
-        //.force("charge",d3.forceManyBody().strength(-1));
+        .force("link", d3.forceLink(links).id(d => d.id).distance(0).strength(1))
+         .force("charge", d3.forceManyBody().strength(-600))
+        .force("center", d3.forceCenter(width / 2, height / 2));
               
         nodeData.forEach(node=>{
           if (node.tags.USER===undefined) {
@@ -789,10 +846,10 @@ var simulation = d3.forceSimulation(nodeData) // Start the force graph
                     .data(nodeData)
                     .enter().append("circle")
                         .style('fill',d=>color(d.tags.USER.pays[0]))
-                        .style('opacity',.3)
+                        .style('opacity',.45)
                         .attr('stroke',"black")
-                        .attr('stroke-width',.1)
-                        .attr("r", 3) //d=>d.indegree)
+                        .attr('stroke-width',.2)
+                        .attr("r", d=> 1+Math.log(d.indegree+1))
                         .attr("id", d => d.id)
                         .call(
                           d3.drag()
@@ -806,7 +863,7 @@ var simulation = d3.forceSimulation(nodeData) // Start the force graph
                    .enter().append("line")
                    //   .attr("class",d=> d.type)
                      // .attr("opacity", d=> Math.log10(0.2+(d.opacity*2)))
-                      .attr("stroke-width", .1);
+                      .attr("stroke-width", .25);
                    //   .attr("marker-end", "url(#end)");
 
 
