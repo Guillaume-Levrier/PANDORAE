@@ -1,5 +1,19 @@
 const d3 = require("d3");
 
+var sectionList = document.getElementById("tutorialSections").childNodes;
+
+for (let sect of sectionList) {
+  if(sect.tagName === "SECTION") {
+   let thisSect = document.getElementById(sect.id);
+   let paddingTop = parseInt((window.innerHeight - thisSect.getBoundingClientRect().height)/2.5);
+   thisSect.style.paddingTop = paddingTop+"px";
+   thisSect.style.paddingBottom = paddingTop+"px";
+  }
+
+}
+
+
+
 let activeIndex = 0;
 
 function scroller() {
@@ -78,7 +92,7 @@ const smoothScrollTo = (target,hide) => {
   var sectionList = document.querySelectorAll("section");                                                  // Create an array with all sections
   previous = sectionList[activeIndex].id;                                                                  // Store current section ID
   document.getElementById('backarrow').style.display = "inline-block";                                     // Display "previous" arrow button
-  document.getElementById(target).scrollIntoView({ behavior: 'smooth' });                                  // Scroll smoothly to target
+  document.getElementById(target).scrollIntoView({block:"start",behavior:'smooth'});                                  // Scroll smoothly to target
   if (hide === true) {document.getElementById('backarrow').style.display = "none"};                        // If order comes from the "previous" arrow button, hide this button
 };
 
