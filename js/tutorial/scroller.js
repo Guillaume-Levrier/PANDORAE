@@ -1,9 +1,6 @@
 const d3 = require("d3");
 
 
-
-
-
 let activeIndex = 0;
 
 function scroller() {
@@ -84,6 +81,12 @@ const smoothScrollTo = (target,hide) => {
   document.getElementById('backarrow').style.display = "inline-block";                                     // Display "previous" arrow button
   document.getElementById(target).scrollIntoView({block:"start",behavior:'smooth'});                                  // Scroll smoothly to target
   if (hide === true) {document.getElementById('backarrow').style.display = "none"};                        // If order comes from the "previous" arrow button, hide this button
+
+
+
+
+
+
 };
 
 const display = () => {
@@ -94,9 +97,36 @@ scroll(d3.selectAll('.step'));
 
         scroll.on('active', function (index) {
                 d3.selectAll('.step').style('opacity', function (d, i) { return i === index ? 1 : 0.1; });
-                              });
+                progress(index);
+              });
 
-        //scroll.on('progress', function (index, progress) {});
+        
 }
 
 display();
+
+const progress = (index) => {
+
+  var sectionList = document.querySelectorAll("section");   
+  let progBasis = parseInt(((activeIndex)/sectionList.length)*window.innerHeight);
+  let progNext = parseInt((index/sectionList.length)*window.innerHeight); 
+  
+  var progProc = setInterval(incr,15);
+  
+  function incr() {
+  
+    if (progBasis===progNext) {
+      clearInterval(progProc);
+    }else if (progBasis<progNext) {
+      progBasis++
+      document.getElementById("progressBar").style.height = progBasis+"px";
+    } else if (progBasis>progNext) {
+      progBasis--
+      document.getElementById("progressBar").style.height = progBasis+"px";
+    }
+  
+  }
+
+  
+}
+  
