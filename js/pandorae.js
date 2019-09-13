@@ -730,6 +730,7 @@ ipcRenderer.on('tutorial', (event,message) => {
         case "chronotype": 
         openHelper('tutorialHelper',message);
                  blinker("menu-icon");
+                 blinker("type");
                  blinker("chronotype");
                  field.removeEventListener("click", openModal);
         break;

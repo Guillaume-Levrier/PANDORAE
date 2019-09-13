@@ -1,11 +1,13 @@
 <!DOCTYPE html><html><meta charset="UTF-8">
 <title>PANDORÆ-FLUX</title>
 <link rel="stylesheet" type="text/css" href="css/pandorae.css">
+
 <style>
 body{
   overflow: scroll;
   text-align: justify;
   color: black;
+  animation: fadein .7s;
 }
 ::-webkit-scrollbar {
     display: none;
@@ -25,10 +27,10 @@ body{
 }
 
 .step {
-  /* padding-top:calc(100% * 0.3); */
   font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
   font-size: 16px;
   line-height: 26px;
+  display: none;
 }
 
 .centerStep{
@@ -272,14 +274,14 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
     <section id="final3" class="step centerStep">
         <div class="title"><strong>Back to Flux-ture</strong></div><br>
           PANDORÆ starts in tutorial mode when it detects that no user name has been entered. <br>&nbsp;<br>
-          To disable the tutorial mode for your next start, go back to <a onclick="smoothScrollTo('flux')">Flux</a> and enter a user name. <br>&nbsp;<br>
+          To turn off the tutorial mode, go back to <a onclick="smoothScrollTo('flux')">Flux</a> and enter a user name. <br>&nbsp;<br>
           Then come back here.<br>&nbsp;<br>
     <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('final4')">arrow_downward</a></i></div>  
       </section>
     
       <section id="final4" class="step centerStep">
           <div class="title"><strong>The main field</strong></div><br>
-            PANDORÆ communicates with you by displaying messages in the main field, on the main screen. But you can also write on this channel to communicate with the system. <br>&nbsp;<br>
+            PANDORÆ communicates with you by displaying messages in the main field, on the main screen. You can also write in this field to communicate with PANDORÆ. <br>&nbsp;<br>
             To select the field, push your <strong>TAB</strong> key after clicking on the main screen. You can then enter commands and push the <strong>ENTER</strong> key. <br>&nbsp;<br>
 
       <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('final5')">arrow_downward</a></i></div>  
@@ -308,7 +310,8 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
             <div class="title"><strong>Freedom at last</strong></div><br>
            You will learn how to use PANDORÆ mostly by trial and error.<br>&nbsp;<br> If you're a researcher and/or developer, you might want to go have a look at its 
            <a onclick="shell.openExternal('https://github.com/Guillaume-Levrier/PANDORAE')">source code</a>.<br>&nbsp;<br>
-           A more detailed manual will be released once the project goes out of beta.<br>&nbsp;<br>
+           A wiki of the project is available <a onclick="shell.openExternal('https://github.com/Guillaume-Levrier/PANDORAE/wiki')">here</a>.
+           <br>&nbsp;<br>
            <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="lastScroll()">arrow_downward</a></i></div>  
           </section>
 
@@ -332,7 +335,20 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
             </section>
          
 </div>
-
+<script>
+  var sectionList = document.getElementById("tutorialSections").childNodes;
+  
+  for (let sect of sectionList) {
+    if(sect.tagName === "SECTION") {
+     let thisSect = document.getElementById(sect.id);
+     let paddingTop = parseInt((window.innerHeight - thisSect.getBoundingClientRect().height)/2.5);
+     thisSect.style.paddingTop = paddingTop+"px";
+     thisSect.style.paddingBottom = paddingTop+"px";
+     thisSect.style.display = "block";
+    }
+  
+  }
+  </script>
 <link rel="icon" type="image/png" href="img/AE-favicon.png"/>
 
 <script src="js/window-management.js"></script>

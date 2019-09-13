@@ -1,16 +1,6 @@
 const d3 = require("d3");
 
-var sectionList = document.getElementById("tutorialSections").childNodes;
 
-for (let sect of sectionList) {
-  if(sect.tagName === "SECTION") {
-   let thisSect = document.getElementById(sect.id);
-   let paddingTop = parseInt((window.innerHeight - thisSect.getBoundingClientRect().height)/2.5);
-   thisSect.style.paddingTop = paddingTop+"px";
-   thisSect.style.paddingBottom = paddingTop+"px";
-  }
-
-}
 
 
 
