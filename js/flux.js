@@ -656,6 +656,79 @@ fluxButtonAction ("zotcolret",true,"Zotero Collections Successfully Retrieved","
   })
 }
 
+//========== zoteroLocalRetriever ==========
+// This would need a custom zotero plugin - post v 1.0
+// more info here https://www.zotero.org/support/dev/client_coding/connector_http_server
+// and here https://github.com/zotero/zotero-connectors
+
+const zoteroLocalRetriever = () => {
+
+  ipcRenderer.send('console-logs',"Retrieving local Zotero collections."); // Log collection request
+  
+  // Ask keytar for zotero API key
+  //keytar.getPassword("Zotero",zoteroUser).then((zoteroApiKey) => {
+  
+  // URL Building blocks
+  let rootUrl = "http://127.0.0.1:23119/";
+
+  
+  //build the url
+  let zoteroCollectionRequest = rootUrl;
+  
+  // Prepare options for the Request-Promise-Native Package
+  var optionsGlobalRequest = {
+      uri: zoteroCollectionRequest,                  // URI to be accessed
+      method:'GET',
+      headers: {'User-Agent': 'Request-Promise'},    // User agent to access is Request-promise
+      json: true                                     // Automatically parses the JSON string in the response
+  };
+  
+  rpn(optionsGlobalRequest)                          // RPN stands for Request-promise-native (ES6)
+  
+      .then(zoteroColResponse => {            // With the response
+  
+        console.log(zoteroColResponse)
+
+        let collections=[];                          // Create empty 'collections' array
+  
+        for(let i = 0; i < zoteroColResponse.length; i++){   // Loop on the response
+          let coll = {};                                     // Create an empty object
+          coll.key = zoteroColResponse[i].data.key;          // Fill it with this collection's key
+          coll.name = zoteroColResponse[i].data.name;        // Fill it with this collection's name
+          collections.push(                                  // Push a string (HTML input list) in the collections array
+           "<input class='zotColCheck' value='"+coll.key+"' name='"+coll.name+"' type='checkbox'/><label> " +coll.key+" - "+ coll.name +"</label><br> ");
+        }
+  
+        var collectionList = "" ;                                      // Create the list as a string
+          for (var k=0; k< collections.length; ++k){                   // For each element of the array
+              collectionList = collectionList + collections[k];        // Add it to the string
+            }
+  
+  // Display full list in div
+  document.getElementById("userZoteroCollections").innerHTML = "<form style='line-height:1.5'>"+collectionList+"</form>";
+  
+  // Show success on button
+  fluxButtonAction ("zotcolret",true,"Zotero Collections Successfully Retrieved","errorPhrase");
+  
+  // Preparing and showing additional options
+        document.getElementById("zotitret").style.display = "inline-flex";
+        document.getElementById("zoteroResults").style.display = "flex";
+        document.getElementById("zoteroImportName").style.display = "inline-flex";
+        document.getElementById("zoteroImportInstruction").style.display = "inline-flex";
+  
+        checkKey("zoteroAPIValidation",true);
+  
+          }
+      )
+      .catch(err => {
+        console.log(err)
+      /*   fluxButtonAction ("zotcolret",false,"Zotero Collections Successfully Retrieved",err);
+        ipcRenderer.send('console-logs',"Error in retrieving collections for Zotero id "+ zoteroUser + " : "+err); //  */
+      });
+  //  })
+  }
+
+
 //========== datasetLoader ==========
 // datasetLoader allows user to load datasets from a local directory into a PANDORAE target subdirectory.
 
