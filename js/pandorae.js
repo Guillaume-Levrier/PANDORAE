@@ -335,14 +335,14 @@ const purgeCore = () => {
 
 const selectOption = (type,id) => {   
   document.getElementById(id).style.backgroundColor = "rgba(220,220,220,0.3)";
+  
   toggleMenu();
+  document.getElementById("menu-icon").onclick="";
+  document.getElementById("menu-icon").addEventListener("click", ()=>{location.reload();},{once:true});
+  field.value = "starting "+type;
+  types.typeSwitch(type,id)
 
-  field.addEventListener("click", ()=>{types.typeSwitch(type,id);},{once:true});
-  field.style.pointerEvents = "all";
-  field.style.cursor = "pointer";
-  field.value = "start "+type;
-
-  ipcRenderer.send('console-logs',"Checking dataset: " + JSON.stringify(id));
+  ipcRenderer.send('console-logs',"Starting with dataset: " + JSON.stringify(id));
 };
 
 // ========== MAIN MENU OPTIONS ========
