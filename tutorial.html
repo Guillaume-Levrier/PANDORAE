@@ -30,7 +30,7 @@ body{
   font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
   font-size: 16px;
   line-height: 26px;
-  display: none;
+  padding-bottom: 100px;
 }
 
 .centerStep{
@@ -76,6 +76,16 @@ cursor:pointer;
     from {background-color: white; color: black;}
     to {background-color: #141414; color: white;}
   }
+
+#progressBar{
+  position:fixed;
+        z-index:19;
+  top: 0px;
+  left:calc(100%-4px);
+  width:4px;
+  height: 0px;
+  background-color: #141414;
+}
 
 </style>
 <body>
@@ -335,20 +345,16 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
             </section>
          
 </div>
+<div id="progressBar"></div>
 <script>
-  var sectionList = document.getElementById("tutorialSections").childNodes;
-  
+var sectionList = document.querySelectorAll("section");
+
   for (let sect of sectionList) {
-    if(sect.tagName === "SECTION") {
-     let thisSect = document.getElementById(sect.id);
-     let paddingTop = parseInt((window.innerHeight - thisSect.getBoundingClientRect().height)/2.5);
+    let thisSect = document.getElementById(sect.id);
+    let paddingTop = (window.innerHeight - thisSect.getBoundingClientRect().height)/(thisSect.getBoundingClientRect().height/100)+20;
      thisSect.style.paddingTop = paddingTop+"px";
-     thisSect.style.paddingBottom = paddingTop+"px";
-     thisSect.style.display = "block";
-    }
-  
   }
-  </script>
+</script>
 <link rel="icon" type="image/png" href="img/AE-favicon.png"/>
 
 <script src="js/window-management.js"></script>
