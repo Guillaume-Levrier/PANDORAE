@@ -140,11 +140,10 @@ const openModal = (modalFile,scrollTo) => {
   for (let i = 0; i < windowIds.length; i++) {
     if (windowIds[i].name === modalFile){ 
 
-
-
       if (windowIds[i].open === false) {
               let win = new BrowserWindow({
                 backgroundColor: 'white',
+                parent: mainWindow,
                 modal: true,
                 alwaysOnTop:false,
                 frame: false,
@@ -161,7 +160,11 @@ const openModal = (modalFile,scrollTo) => {
               win.loadURL(path);
               win.once('ready-to-show', () => {
               win.show();
-              win.webContents.send('scroll-to',scrollTo);
+              if (scrollTo) {
+                setTimeout(()=>
+                   win.webContents.send('scroll-to',scrollTo)
+                ,1000)
+              }
             })
           }
         }
@@ -186,19 +189,20 @@ setTimeout(()=>{
 },800);
 
     break;
-  case "openModal": openModal(file,scrollTo);
+  case "openModal": 
+  openModal(file,scrollTo);
     break;
   case "closeWindow":
-  try{
-    
+   try{
       for (var i = 0; i < windowIds.length; i++) {
         if (windowIds[i].name === file) {
-          win = BrowserWindow.fromId(windowIds[i].id)}
+        win = BrowserWindow.fromId(windowIds[i].id);
+        }
       }
      win.webContents.send('window-close','close');
     }catch(e){
       console.log(e);
-    }
+    } 
     break;
 }
 
@@ -287,21 +291,6 @@ ipcMain.on('tutorial', (event,message) => { mainWindow.webContents.send('tutoria
 ipcMain.on('mainWindowReload', (event,message) => { 
   mainWindow.webContents.send('mainWindowReload',message)
 });
-
-
-/* ipcMain.on('hyphe', (event,message) => { 
-  let view = new BrowserView();
-  view.setBounds({ x: 0, y: 20, width: 1200, height: 780 })
-
-  if (message === "close") {
-    view.destroy();
-  } else {
-    mainWindow.setBrowserView(view)
-    view.webContents.loadURL(message)
-  }
-
-});
- */
 
 // ProgressBar
 ipcMain.on('progress', (event,message) => { 
