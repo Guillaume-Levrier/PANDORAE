@@ -826,12 +826,26 @@ setTimeout(()=> document.getElementById('tagDiv').addEventListener("change",e=>{
     .append("svg:path")
       .attr("d", "M0,-5L10,0L0,5");
 
+
+      multiThreader.port.postMessage({ type: "gz", dataset: nodeData,links:links,height:height,width:width });
+
+      multiThreader.port.onmessage = workerAnswer => {
+
+       
+
+      nodeData = workerAnswer.data.msg;
+
+
+      console.log(nodeData)
+
+/* 
 var simulation = d3.forceSimulation(nodeData) // Start the force graph
         .force("link", d3.forceLink(links).id(d => d.id).distance(0).strength(1))
          .force("charge", d3.forceManyBody().strength(-600))
         .force("center", d3.forceCenter(width / 2, height / 2));
-              
-        nodeData.forEach(node=>{
+               */
+
+/*         nodeData.forEach(node=>{
           if (node.tags.USER===undefined) {
             node.tags.USER = {}
             node.tags.USER.pays = []
@@ -840,47 +854,47 @@ var simulation = d3.forceSimulation(nodeData) // Start the force graph
             node.tags.USER.pays = []
             node.tags.USER.pays.push("NA");
           } 
-        })
+        }) */
                  
     var nodes = view.selectAll("circle")
                     .data(nodeData)
                     .enter().append("circle")
-                        .style('fill',d=>color(d.tags.USER.pays[0]))
+                        .style('fill',d=>color(d.tags.USER))
                         .style('opacity',.45)
                         .attr('stroke',"black")
                         .attr('stroke-width',.2)
                         .attr("r", d=> 1+Math.log(d.indegree+1))
-                        .attr("id", d => d.id)
-                        .call(
+                        .attr("id", d => d.id);
+                       /*  .call(
                           d3.drag()
                             .on("start", forcedragstarted)
                             .on("drag", forcedragged)
                             .on("end", forcedragended)
-                        );
+                        ); */
        
-          var nodelinks = view.selectAll("line")
+         /*  var nodelinks = view.selectAll("line")
                         .data(links)
                    .enter().append("line")
                    //   .attr("class",d=> d.type)
                      // .attr("opacity", d=> Math.log10(0.2+(d.opacity*2)))
                       .attr("stroke-width", .25);
                    //   .attr("marker-end", "url(#end)");
+ */
 
 
-
-simulation
+/* simulation
       .nodes(nodeData) // Start the force graph with "docs" as data
       .on("tick", ticked); // Start the "tick" for the first time
-
+ 
 simulation
       .force("link") // Create the links
       .links(links); // Data for those links is "links"
 
       simulation.alpha(1).restart();
-
+*/
       nodes.raise()
 
-function ticked() {
+/* function ticked() {
 // Actual force function
 nodelinks // Links coordinates
   .attr("x1", d => d.source.x)
@@ -910,8 +924,9 @@ function forcedragended(d) {
   if (!d3.event.active) simulation.alpha(1).restart();
   d.fx = null;
   d.fy = null;
-}
+} */
 
+}
       loadType();
 
       document.getElementById("tooltip").innerHTML = tooltipTop;
