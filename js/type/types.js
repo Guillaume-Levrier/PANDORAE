@@ -734,12 +734,24 @@ const hyphotype = id => {
       let weStatus = status[0][0].result;
 
       let nodeData = status[1][0].result.webentities;
-      console.log(nodeData)
+     // console.log(nodeData)
 
       let networkLinks = status[2][0].result;
 
       let tags = status[3][0].result.USER;
       
+       for (var subTag in tags) {
+         let taggedNodes=0;
+         console.log()
+        for (let tagVal in tags[subTag]) {
+          console.log(tags[subTag][tagVal])
+          taggedNodes = taggedNodes+ tags[subTag][tagVal]
+        }
+       tags[subTag].NA = parseInt(nodeData.length-taggedNodes);
+      }
+ 
+      console.log(tags)
+
       var tagDiv= "<select id='tagDiv'>"
 
       for (var prop in tags) {
@@ -765,7 +777,7 @@ const hyphotype = id => {
       }
     }
      
-      console.log(links)
+    //  console.log(links)
 
       weStatus = weStatus[weStatus.length-1];
       
@@ -781,33 +793,7 @@ const hyphotype = id => {
 
 
 
-    const showTags = (tag) =>{
-      console.log(tag)
-      let tagList = document.getElementById('tagList');
-      tagList.innerHTML="";
-      let thisTagList = "<ul>";
-
-      for (var prop in tags) {
-        if(prop === tag) {
-          console.log(tags[prop])
-          for (let thisTag in tags[prop]) {
-           
-            thisTagList = thisTagList + "<li style='color:"+color(thisTag)+"'>"+thisTag+":"+tags[prop][thisTag]+"</li>"
-          }
-
-        }
-
-      }
-      thisTagList = thisTagList + "</ul>"
-      tagList.innerHTML = thisTagList;
-      nodes.style('fill',d=>color(d.tags.USER[tag]))
-    }
-
-
-setTimeout(()=> document.getElementById('tagDiv').addEventListener("change",e=>{
-        showTags(e.srcElement.value)
-      }),200)
-
+ 
     // network graph starts here
 
       var arrows = view.append("svg:defs").selectAll("marker")
@@ -827,110 +813,87 @@ setTimeout(()=> document.getElementById('tagDiv').addEventListener("change",e=>{
       .attr("d", "M0,-5L10,0L0,5");
 
 
-      multiThreader.port.postMessage({ type: "gz", dataset: nodeData,links:links,height:height,width:width });
+      multiThreader.port.postMessage({ type: "hy", nodeData:nodeData,links:links, tags:tags});
 
       multiThreader.port.onmessage = workerAnswer => {
 
-       
+      nodeData = workerAnswer.data.nodeData;
+      links = workerAnswer.data.links;
 
-      nodeData = workerAnswer.data.msg;
 
-
-      console.log(nodeData)
-
-/* 
-var simulation = d3.forceSimulation(nodeData) // Start the force graph
-        .force("link", d3.forceLink(links).id(d => d.id).distance(0).strength(1))
-         .force("charge", d3.forceManyBody().strength(-600))
-        .force("center", d3.forceCenter(width / 2, height / 2));
-               */
-
-/*         nodeData.forEach(node=>{
-          if (node.tags.USER===undefined) {
-            node.tags.USER = {}
-            node.tags.USER.pays = []
-            node.tags.USER.pays.push("NA");
-          } else if(node.tags.USER.pays===undefined){
-            node.tags.USER.pays = []
-            node.tags.USER.pays.push("NA");
-          } 
-        }) */
-                 
     var nodes = view.selectAll("circle")
                     .data(nodeData)
                     .enter().append("circle")
                         .style('fill',d=>color(d.tags.USER))
                         .style('opacity',.45)
                         .attr('stroke',"black")
+                        .attr('cx',d=>d.x)
+                        .attr('cy',d=>d.y)
                         .attr('stroke-width',.2)
                         .attr("r", d=> 1+Math.log(d.indegree+1))
                         .attr("id", d => d.id);
-                       /*  .call(
-                          d3.drag()
-                            .on("start", forcedragstarted)
-                            .on("drag", forcedragged)
-                            .on("end", forcedragended)
-                        ); */
-       
-         /*  var nodelinks = view.selectAll("line")
+                 
+           var nodelinks = view.selectAll("line")
                         .data(links)
                    .enter().append("line")
-                   //   .attr("class",d=> d.type)
-                     // .attr("opacity", d=> Math.log10(0.2+(d.opacity*2)))
-                      .attr("stroke-width", .25);
-                   //   .attr("marker-end", "url(#end)");
- */
-
-
-/* simulation
-      .nodes(nodeData) // Start the force graph with "docs" as data
-      .on("tick", ticked); // Start the "tick" for the first time
+                   .attr("x1",d=>d.source.x)
+                   .attr("y1",d=>d.source.y)
+                   .attr("x2",d=>d.target.x)
+                   .attr("y2",d=>d.target.y)
+                 
+                      .attr("stroke-width", .25)
+                      .attr("marker-end", "url(#arrow)");
  
-simulation
-      .force("link") // Create the links
-      .links(links); // Data for those links is "links"
+                      nodes.raise()   
 
-      simulation.alpha(1).restart();
-*/
-      nodes.raise()
 
-/* function ticked() {
-// Actual force function
-nodelinks // Links coordinates
-  .attr("x1", d => d.source.x)
-  .attr("y1", d => d.source.y)
-  .attr("x2", d => d.target.x)
-  .attr("y2", d => d.target.y);
+      const showTags = (tag) =>{
 
-nodes // Node coordinates
-  .attr("cx", d => d.x)
-  .attr("cy", d => d.y);
-
+          let tagList = document.getElementById('tagList');
+          tagList.innerHTML="";
+          let thisTagList = "<ul>";
+    
+          for (var prop in tags) {
+            if(prop === tag) {
+            
+              for (let thisTag in tags[prop]) {
+                
+                thisTagList = thisTagList + "<li style='color:"+color(thisTag)+"'>"+thisTag+":"+tags[prop][thisTag]+"</li>"
+              }
+    
+            }
+    
+          }
+          thisTagList = thisTagList + "</ul>"
+          tagList.innerHTML = thisTagList;
+          nodes.style('fill',d=>color(d.tags.USER[tag][0]))
+        }
+    
+    
+    setTimeout(()=> document.getElementById('tagDiv').addEventListener("change",e=>{
+            showTags(e.srcElement.value)
+          }),200)
+    
+ //============ NARRATIVE ============
+ function narrative() {
+  // Experimental narrative function
+  d3.select("#xtypeSVG")
+    .transition()
+    .duration(2000)
+    .call(
+      zoom.transform,
+      d3.zoomIdentity
+        .translate(width / 2, height / 2)
+        .scale(8)
+        .translate(width / 2,height / 2)
+    );
 }
+//narrative();
+    
+} // end of worker answer
+loadType();
 
-
-function forcedragstarted(d) {
-  if (!d3.event.active) simulation.alpha(1).restart();
-  d.fx = d.x;
-  d.fy = d.y;
-}
-
-function forcedragged(d) {
-  d.fx = d3.event.x;
-  d.fy = d3.event.y;
-}
-
-function forcedragended(d) {
-  if (!d3.event.active) simulation.alpha(1).restart();
-  d.fx = null;
-  d.fy = null;
-} */
-
-}
-      loadType();
-
-      document.getElementById("tooltip").innerHTML = tooltipTop;
-
+document.getElementById("tooltip").innerHTML = tooltipTop;
       })  // end of get webentities data
 
       }) // end of start corpus
@@ -3108,6 +3071,7 @@ requestContent=requestContent+"</ul>"
         multiThreader.port.postMessage({ type: "gz", dataset: circleData });
 
         multiThreader.port.onmessage = workerAnswer => {
+
           circleData = workerAnswer.data.msg;
 
           //display only the first day (for testing and dev purpose)
