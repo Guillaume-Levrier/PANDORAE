@@ -1899,12 +1899,6 @@ const geotype = locations => {
             }
           }
 
-         
-          
-
-        
-         
-
           institutions.forEach(e => {
 
             var list = document.createElement('UL')
@@ -1913,8 +1907,8 @@ const geotype = locations => {
             for (var i = 0; i < e.papers.length; i++) {
               if (e.papers[i].visibility){     
                 inst.innerHTML="<strong>"+e.name+"</strong>";
+                break;
               }
-              break;
             }
 
             for (var i = 0; i < e.papers.length; i++) {
