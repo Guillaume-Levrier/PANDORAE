@@ -551,9 +551,9 @@ const hyphotype = id => {
       .translateExtent([[-width*2,-height*2],[width*3,height*3]])
       .on("zoom", zoomed);                                  // Trigger the "zoomed" function on "zoom" behaviour
 
-      
-      var color = d3.scaleOrdinal() // Line colors
-      .domain([0, 1])
+  
+      var color =  d3.scaleOrdinal()
+      .domain([0, 1])    
       .range([
           "#623500",
           "#970ccd",
@@ -586,7 +586,7 @@ const hyphotype = id => {
           "#ffb8cc",
           "#00392b"
     ]);
-  
+   
 
   //======== DATA CALL & SORT =========
 
@@ -754,6 +754,10 @@ const hyphotype = id => {
 
       multiThreader.port.onmessage = workerAnswer => {
 
+        if (workerAnswer.data.type==="tick") {
+          ipcRenderer.send("chaeros-notification", "ticking ("+workerAnswer.data.current+"/"+workerAnswer.data.target+")"); // send new total to main display
+        } else if (workerAnswer.data.type === "hy") {
+
       nodeData = workerAnswer.data.nodeData;
       links = workerAnswer.data.links;
 
@@ -826,7 +830,7 @@ const hyphotype = id => {
     );
 }
 //narrative();
-    
+}
 } // end of worker answer
 loadType();
 
@@ -1489,46 +1493,7 @@ const chronotype = (bibliography, links) => { // When called, draw the chronotyp
         simulation.nodes(nodeData); // Simulation with updated data
       };
 
-      //========= LINKS BUILDER ===========
-      /* const linksBuilder = () => {                                                      // links are generated directly in JS
   
-  var dataLink = [];                                                                // Storage variable
-  
-  docs.forEach(d => {                                                               // Loop on docs (to be changed)
-    for (var i = 0; i < chronoLinksKeywords.length; i++) {                          // Loop on keywords
-        let keyword = new RegExp(chronoLinksKeywords[i],'gmi');                     // Keyword as a RegExp
-            if (d.desc.search(keyword)>0){                                          // If keyword found
-              let item = {};                                                        // Store title and keyword in item
-              item.keyword = keyword.source;
-              item.title = d.title;
-              dataLink.push(item);                                                  // Push item in storage variable
-              }
-          }
-    })
-  
-  let nestedLinks = d3.nest().key(d => d.keyword).entries(dataLink);                // Nest stored data in new var
-  
-  for (var i = 0; i < nestedLinks.length; i++) {                                    // Loop nested arrays
-    let values = nestedLinks[i].values;                                             // Store arrays content
-  
-      for (var j = 0; j < values.length; j++) {                                     // Loop arrays content
-        let localLinkStorage = [];                                                  // Storage variable
-  
-              for (var k = 0; k < values.length; k++) {                             // Loop all elements on each element
-                let link = {"source":"","target":"","keyword":""};                  // Storage link
-                  link.source = values[j].title;
-                  link.keyword = values[j].keyword;
-                  link.target = values[k].title;
-                  links.push(link);                                                 // Push each link to links variable
-                            }
-          }
-      }
-  }
-  
-  // linksBuilder is triggered everytime the chronotype is drawn. Links purging and storing functions are needed.
-  linksBuilder();
-   */
-
       var link = view.selectAll("link") // Create links
         .data(links) // With data created above
         .enter()
@@ -2551,25 +2516,7 @@ const linkLoc = () => {
 
         barRangeSlider(data);
 
-        // rotate globe
-
-        /*
-    //============ NARRATIVE ============
-    function narrative(focused) {
-      d3.transition()
-        .duration(1250)
-    .tween("rotate",
-      function() {
-      var r = d3.interpolate(projection.rotate(), [-focused.longitude, -focused.latitude]);
-      return function(t) {
-        projection.rotate(r(t));
-      };
-            })
-  
-    }
-  
-    d3.select("#reset").on("click", narrative(data[3]));
-  */
+        loadType();
       });
     })
     .catch(error => {
@@ -2613,43 +2560,13 @@ const linkLoc = () => {
 
   view.call(drag());
 
-  //view.call(drag);
-
-  /*
-
-  var λ = d3.scaleLinear()
-            .domain([0, width])
-            .range([-180, 180]);
-  
-  var φ = d3.scaleLinear()
-            .domain([0, height])
-            .range([90, -90]);
-
-  var drag = d3.drag().subject(()=>{
-  
-
-  var r = projection.rotate();
-
-            return {
-                x: λ.invert(r[0]),
-                y: φ.invert(r[1])
-              };
-           })
-    .on("drag", ()=>{
-      projection.rotate([λ(d3.event.x), φ(d3.event.y)]);
-      view.selectAll("path").attr("d", path);
-
-  });
-  */
-  //drag call
-
   view.style("transform-origin", "50% 50% 0");
   view.call(zoom);
 
   function zoomed() {
     view.style("transform", "scale(" + d3.event.transform.k + ")");
   }
-  loadType();
+ 
 
   ipcRenderer.send("console-logs", "Starting geotype");
 };
@@ -3001,12 +2918,15 @@ requestContent=requestContent+"</ul>"
 
         ipcRenderer.send("chaeros-notification", "generating network"); // send new total to main display
 
+
         multiThreader.port.postMessage({ type: "gz", dataset: circleData });
 
         multiThreader.port.onmessage = workerAnswer => {
-
-          circleData = workerAnswer.data.msg;
-
+         
+        if (workerAnswer.data.type==="gz"){
+          
+          circleData = workerAnswer.data.msg; 
+ 
           //display only the first day (for testing and dev purpose)
           view.selectAll("circle")
             .data(circleData)
@@ -3588,6 +3508,7 @@ requestContent=requestContent+"</ul>"
           loadType();
 
           keywordsDisplay();
+          }
         }; //======== END OF WORKER ANWSER ===========
       });
   }); //======== END OF DATA CALL (PROMISES) ===========
