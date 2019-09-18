@@ -42,6 +42,7 @@ if (!!window.SharedWorker) {
   var multiThreader = new SharedWorker("js/mul[type]threader.js"); // Create a SharedWorker named multiThreader based on that file
 
   multiThreader.port.onmessage = res => {
+  
     // If multiThreader sends a message
     if (res.data.type === "notification") {
       // And the type property of this message is "notification"

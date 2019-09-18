@@ -1,6 +1,3 @@
-//import { fstat } from "fs";
-//const {remote, ipcRenderer, shell} = require('electron');
-
 onconnect = e => {
   var port = e.ports[0];
 
@@ -10,31 +7,24 @@ onconnect = e => {
 
   notifySystem("console-logs", "Multithreading enabled");
 
-  importScripts("../../node_modules/d3/dist/d3.min.js");
+  importScripts("../node_modules/d3/dist/d3.min.js");
+
+
 
   port.onmessage = message => {
+
     switch (message.data.type) {
       case "gz":
+         
+
         try {
           var circleData = message.data.dataset;
+       
+         d3.forceSimulation(circleData) // starting simulation
+            .force("x", d3.forceX())
+            .force("y", d3.forceY())
+            .stop(); 
 
-          var simulation = d3
-            .forceSimulation(circleData) // starting simulation
-            .force("x", d3.forceX().strength(1))
-            .force("y", d3.forceY().strength(1))
-            .stop();
-
-          for (
-            var i = 0,
-              n = Math.ceil(
-                Math.log(simulation.alphaMin()) /
-                  Math.log(1 - simulation.alphaDecay())
-              );
-            i < n;
-            ++i
-          ) {
-            simulation.tick();
-          }
 
           port.postMessage({ type: "gz", msg: circleData });
         } catch (error) {
@@ -61,12 +51,8 @@ onconnect = e => {
               }
             }
           });
-          var simulation = d3
-            .forceSimulation(nodeData) // Start the force graph
-            .force(
-              "link",
-              d3
-                .forceLink(links)
+          var simulation = d3.forceSimulation(nodeData) // Start the force graph
+            .force("link",d3.forceLink(links)
                 .id(d => d.id)
                 .distance(0)
                 .strength(1)
@@ -87,6 +73,7 @@ onconnect = e => {
             ++i
           ) {
             simulation.tick();
+            port.postMessage({ type: "tick", current:parseInt(i), target:parseInt(n) });
           }
 
           port.postMessage({ type: "hy", nodeData: nodeData, links: links });
