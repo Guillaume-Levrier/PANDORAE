@@ -353,6 +353,7 @@ h1 {
 
 li {
 width:80%;
+cursor: pointer;
 }
 
 ul {

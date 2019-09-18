@@ -16,46 +16,6 @@ const csv = require("csv-parser");
 const versor = require("versor");
 const rpn = require("request-promise-native"); // RPN enables to generate requests to various APIs
 
-// =========== DEXIE DB ===========
-Dexie.debug = true;
-
-let pandodb = new Dexie("PandoraeDatabase");
-
-let structureV1 = "id,date,name";
-
-pandodb.version(1).stores({
-  enriched: structureV1,
-  scopus: structureV1,
-  csljson: structureV1,
-  zotero: structureV1,
-  twitter: structureV1,
-  anthropotype: structureV1,
-  chronotype: structureV1,
-  geotype: structureV1,
-  pharmacotype: structureV1,
-  publicdebate: structureV1,
-  gazouillotype: structureV1,
-  hyphe: structureV1,
-  system: structureV1
-});
-pandodb.version(2).stores({
-  hyphotype: structureV1,
-  enriched: structureV1,
-  scopus: structureV1,
-  csljson: structureV1,
-  zotero: structureV1,
-  twitter: structureV1,
-  anthropotype: structureV1,
-  chronotype: structureV1,
-  geotype: structureV1,
-  pharmacotype: structureV1,
-  publicdebate: structureV1,
-  gazouillotype: structureV1,
-  hyphe: structureV1,
-  system: structureV1
-});
-
-pandodb.open();
 
 var field = document.getElementById("field");
 
@@ -77,25 +37,6 @@ const xtype = document.getElementById("xtype"); // xtype is a div containing eac
 const width = xtype.clientWidth; // Fetching client width
 const height = xtype.clientHeight; // Fetching client height
 const toolWidth = 0.3 * width + 20; // The tooltip is around a third of total available screen width
-
-// The following features used to be dedicated to the chronotype and have been deactivated since.
-/*
-// =========== LINKS ===========
-
-const links = {};
-const linkedByIndex = {};
-const isConnected = (a, b) =>
-  linkedByIndex[a.index + "," + b.index] ||
-  linkedByIndex[b.index + "," + a.index] ||
-  a.index == b.index;
-
-// =========== DRAG =========
-const dragged = d => {
-  d3.select(this)
-    .attr("cx", (d.zone = d3.event.x))
-    .attr("x", (d.zone = d3.event.x));
-};
-*/
 
 // ========== TIME ===========
 const currentTime = new Date(); // Precise time when the page has loaded
@@ -313,6 +254,9 @@ const multiFormat = date =>
     : d3.timeYear(date) < date
     ? formatMonth
     : formatYear)(date);
+
+
+
 
 // ========= ANTHROPOTYPE =========
 const anthropotype = datasetAT => {  // When called, draw the anthropotype
@@ -585,11 +529,12 @@ const anthropotype = datasetAT => {  // When called, draw the anthropotype
   ipcRenderer.send("console-logs", "Starting anthropotype");
 };
 
+
+
 // ========= HYPHOTYPE =========
 const hyphotype = id => {
-  // When called, draw the anthropotype
-
-  //========== SVG VIEW =============
+  
+ //  SVG VIEW 
   var svg = d3.select(xtype)
     .append("svg")
     .attr("id", "xtypeSVG"); // Creating the SVG DOM node
@@ -726,15 +671,14 @@ const hyphotype = id => {
       corpusRequests.push(rpn(getTags));
 
     Promise.all(corpusRequests).then(status => {
-      console.log(status)
-
+   
       var links = [];
 
 
       let weStatus = status[0][0].result;
 
       let nodeData = status[1][0].result.webentities;
-     // console.log(nodeData)
+   
 
       let networkLinks = status[2][0].result;
 
@@ -742,16 +686,14 @@ const hyphotype = id => {
       
        for (var subTag in tags) {
          let taggedNodes=0;
-         console.log()
+      
         for (let tagVal in tags[subTag]) {
-          console.log(tags[subTag][tagVal])
+         
           taggedNodes = taggedNodes+ tags[subTag][tagVal]
         }
        tags[subTag].NA = parseInt(nodeData.length-taggedNodes);
       }
  
-      console.log(tags)
-
       var tagDiv= "<select id='tagDiv'>"
 
       for (var prop in tags) {
@@ -777,8 +719,6 @@ const hyphotype = id => {
       }
     }
      
-    //  console.log(links)
-
       weStatus = weStatus[weStatus.length-1];
       
       tooltipTop = tooltipTop + 
@@ -791,9 +731,6 @@ const hyphotype = id => {
       "<li> In: " + weStatus.in + "</li>"+
       "</ul><br><br>"+tagDiv+"<br><div id='tagList'></div>" ;
 
-
-
- 
     // network graph starts here
 
       var arrows = view.append("svg:defs").selectAll("marker")
@@ -1328,7 +1265,9 @@ const chronotype = (bibliography, links) => { // When called, draw the chronotyp
         }
 
         var docTitles = titlesIndex[d.code];
-        d3.select("#tooltip")
+
+       
+         d3.select("#tooltip")
           .style("display", "block")
           .html(
             "<ul>" +
@@ -1339,7 +1278,7 @@ const chronotype = (bibliography, links) => { // When called, draw the chronotyp
                 )
                 .join("\n") +
               "</ul>"
-          );
+          ); 
         for (var i = 0; i < docTitles.length; i++) {
           document
             .getElementById(docTitles[i])
@@ -1939,6 +1878,22 @@ const geotype = locations => {
         } // id = item index
 
         const affilFinder = city => {
+          // purge existing tooltip content
+          let geoToolTip = document.getElementById('tooltip');
+          while (geoToolTip.firstChild) {
+            geoToolTip.removeChild(geoToolTip.firstChild);
+          }
+
+          let cityTitle = document.createElement("h2")
+          cityTitle.innerText = city.city;
+
+          let country = document.createElement("h3")
+          country.innerText = city.country;
+          
+          geoToolTip.appendChild(cityTitle)
+          geoToolTip.appendChild(country)
+
+
           let institutions = [];
 
           for (var j = 0; j < city.affiliations.length; j++) {
@@ -1979,40 +1934,35 @@ const geotype = locations => {
             }
           }
 
-          let totalList = "";
+         
+
+          var list = document.createElement('UL')
 
           institutions.forEach(e => {
-            let localList =
-              "<strong>" + e.name + "</strong><ul style='cursor:pointer;'>";
+
             for (var i = 0; i < e.papers.length; i++) {
               let url = "https://dx.doi.org/" + e.papers[i].DOI;
+              let docDOM = document.createElement('LI');
 
               if (e.papers[i].visibility) {
                 if (e.papers[i].OA) {
                   // If OA flag is true
-                  localList =
-                    localList +
-                    "<li><img src='././svg/OAlogo.svg' height='16px'/>&nbsp;<a onclick='shell.openExternal(" +
-                    JSON.stringify(url) +
-                    ")'>" +
-                    e.papers[i].title +
-                    "</a></li>";
+                  docDOM.innerHTML = "<img src='././svg/OAlogo.svg' height='16px'/>&nbsp;"+e.papers[i].title;
                 } else {
-                  // else just resolve DOI
-                  localList =
-                    localList +
-                    "<li><a onclick='shell.openExternal(" +
-                    JSON.stringify(url) +
-                    ")'>" +
-                    e.papers[i].title +
-                    "</a></li>";
+                  docDOM.innerHTML = e.papers[i].title;
                 }
               }
+             
+              docDOM.addEventListener("click",e=>{
+                shell.openExternal(url)
+              });
+            
+              list.appendChild(docDOM);
             }
-            totalList = totalList + localList + "</ul>";
+            
           });
+          document.getElementById('tooltip').appendChild(list);
 
-          return totalList;
         };
 
         // countries
@@ -2135,18 +2085,8 @@ const linkLoc = () => {
                 locations._groups[0][i].__data__.coordinates[0][0]
               ) {
                d3.select(locations._groups[0][i]).style("opacity","1");
-                d3.select("#tooltip")
-                  .transition()
-                  .duration(200)
-                  .style("display", "block");
-                d3.select("#tooltip").html(
-                  "<strong><h2>" +
-                    cities[i].city +
-                    "</strong> <br/><sup>" +
-                    cities[i].country +
-                    "</sup></h2><br>" +
-                    affilFinder(cities[i])                    
-                );
+               affilFinder(cities[i])   
+              
        
                 
                   d3.selectAll(".arc")._groups[0].forEach(lk=>{
@@ -2342,8 +2282,6 @@ const linkLoc = () => {
             .ticks(max == 1 ? 1 : params.yTicks)
             .tickFormat(d3.format(".2s"));
 
-          //console.log(grouped)
-
           const bars = chart
             .selectAll(".bar")
             .data(grouped)
@@ -2463,7 +2401,7 @@ const linkLoc = () => {
           }
 
           function brushEnded() {
-            //console.log('ended')
+          
             if (!d3.event.selection) {
               handle.attr("display", "none");
 
@@ -2520,8 +2458,7 @@ const linkLoc = () => {
 
           function brushed(d) {
             if (d3.event.sourceEvent.type === "brush") return;
-            //  console.log('brushed',d3.event.selection)
-
+          
             if (params.freezeMin) {
               if (d3.event.selection[0] < startSelection) {
                 d3.event.selection[1] = Math.min(
@@ -2537,17 +2474,15 @@ const linkLoc = () => {
               }
 
               d3.event.selection[0] = 0;
-              //    console.log(d3.event.selection)
-
+           
               d3.select(this).call(d3.event.target.move, d3.event.selection);
             }
 
             var d0 = d3.event.selection.map(scaleX.invert);
             const s = d3.event.selection;
-            //  console.log(s)
-
+           
             handle.attr("display", null).attr("transform", function(d, i) {
-              //   console.log(d)
+            
               return "translate(" + (s[i] - 2) + "," + chartHeight / 2 + ")";
             });
             output({
@@ -3033,8 +2968,6 @@ requestContent=requestContent+"</ul>"
         var plusDate = addDays(firstDate,2)
         var lastDate = new Date(data[data.length - 1].date);
 
-       // console.log(firstDate,plusTen)
-
         domainDates.push(firstDate, lastDate);
 
         var pileExtent = (lastDate - firstDate) / 600000;
@@ -3369,8 +3302,6 @@ requestContent=requestContent+"</ul>"
 
             brushXscale = scaleX;
 
-            //console.log(grouped)
-
             const bars = chart
               .selectAll(".bar")
               .data(grouped)
@@ -3490,7 +3421,7 @@ requestContent=requestContent+"</ul>"
             }
 
             function brushEnded() {
-              //console.log('ended')
+             
               if (!d3.event.selection) {
                 handle.attr("display", "none");
 
@@ -3546,7 +3477,7 @@ requestContent=requestContent+"</ul>"
 
             function brushed(d) {
               if (d3.event.sourceEvent.type === "brush") return;
-              //  console.log('brushed',d3.event.selection)
+          
 
               if (params.freezeMin) {
                 if (d3.event.selection[0] < startSelection) {
@@ -3563,17 +3494,16 @@ requestContent=requestContent+"</ul>"
                 }
 
                 d3.event.selection[0] = 0;
-                //    console.log(d3.event.selection)
+              
 
                 d3.select(this).call(d3.event.target.move, d3.event.selection);
               }
 
               var d0 = d3.event.selection.map(scaleX.invert);
               const s = d3.event.selection;
-              //  console.log(s)
 
               handle.attr("display", null).attr("transform", function(d, i) {
-                //   console.log(d)
+              
                 return "translate(" + (s[i] - 2) + "," + chartHeight / 2 + ")";
               });
               output({
