@@ -47,6 +47,8 @@
 
 /* ============ GENERAL =========== */
 
+html{width:100%;height:100%;}
+
 body{
   width:100%;
   height:100%;
@@ -1024,15 +1026,8 @@ cursor: pointer;
   
 
 
- /*CloseHyphe*/
-
-      #closeHyphe {
-        background-color: rgb(239, 235, 232);
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        z-index: 55;
-        width: 100%;
-        height: 30px;
-        text-align: right;
-      }
+ /*tutorial*/
+#tutostartmenu{
+  display: none;
+}
+    

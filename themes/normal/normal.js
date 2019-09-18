@@ -87,7 +87,8 @@ var FBO = function(exports){
             format: THREE.RGBAFormat,
             type:THREE.FloatType//important as we need precise coordinates (not ints)
         };
-        rtt = new THREE.WebGLRenderTarget( width,height, options);
+
+        rtt = new THREE.WebGLRenderTarget( width, height, options);
 
 
         //5 the simulation:
@@ -131,10 +132,17 @@ var FBO = function(exports){
     exports.update = function(){
 
         //1 update the simulation and render the result in a target texture
-        exports.renderer.render( scene, orthoCamera, rtt, true );
+      
+        exports.renderer.setRenderTarget( rtt );
+       
+        renderer.clear();
+       
+        exports.renderer.render( scene, orthoCamera );
+
+        exports.renderer.setRenderTarget(null);
 
         //2 use the result of the swap as the new position for the particles' renderer
-        exports.particles.material.uniforms.positions.value = rtt;
+        exports.particles.material.uniforms.positions.value = rtt.texture;
     };
     return exports;
 }
