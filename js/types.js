@@ -1900,21 +1900,35 @@ const geotype = locations => {
           }
 
          
+          
 
-          var list = document.createElement('UL')
+        
+         
 
           institutions.forEach(e => {
 
+            var list = document.createElement('UL')
+            let inst =document.createElement("SPAN");
+            
             for (var i = 0; i < e.papers.length; i++) {
+              if (e.papers[i].visibility){     
+                inst.innerHTML="<strong>"+e.name+"</strong>";
+              }
+              break;
+            }
+
+            for (var i = 0; i < e.papers.length; i++) {
+          
               let url = "https://dx.doi.org/" + e.papers[i].DOI;
               let docDOM = document.createElement('LI');
 
               if (e.papers[i].visibility) {
                 if (e.papers[i].OA) {
-                  // If OA flag is true
                   docDOM.innerHTML = "<img src='././svg/OAlogo.svg' height='16px'/>&nbsp;"+e.papers[i].title;
+                  list.appendChild(docDOM);
                 } else {
                   docDOM.innerHTML = e.papers[i].title;
+                  list.appendChild(docDOM);
                 }
               }
              
@@ -1922,11 +1936,13 @@ const geotype = locations => {
                 shell.openExternal(url)
               });
             
-              list.appendChild(docDOM);
+              
             }
+            document.getElementById('tooltip').appendChild(inst);
+            document.getElementById('tooltip').appendChild(list);
             
           });
-          document.getElementById('tooltip').appendChild(list);
+       
 
         };
 
