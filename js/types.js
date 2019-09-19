@@ -753,9 +753,11 @@ const hyphotype = id => {
       multiThreader.port.postMessage({ type: "hy", nodeData:nodeData,links:links, tags:tags});
 
       multiThreader.port.onmessage = workerAnswer => {
-
+      
         if (workerAnswer.data.type==="tick") {
-          ipcRenderer.send("chaeros-notification", "ticking ("+workerAnswer.data.current+"/"+workerAnswer.data.target+")"); // send new total to main display
+         
+          progBarSign(workerAnswer.data.prog)
+         
         } else if (workerAnswer.data.type === "hy") {
 
       nodeData = workerAnswer.data.nodeData;
@@ -830,11 +832,13 @@ const hyphotype = id => {
     );
 }
 //narrative();
+loadType();
+document.getElementById("tooltip").innerHTML = tooltipTop;
+
 }
 } // end of worker answer
-loadType();
 
-document.getElementById("tooltip").innerHTML = tooltipTop;
+
       })  // end of get webentities data
 
       }) // end of start corpus
@@ -2932,8 +2936,11 @@ requestContent=requestContent+"</ul>"
         multiThreader.port.postMessage({ type: "gz", dataset: circleData });
 
         multiThreader.port.onmessage = workerAnswer => {
-         
-        if (workerAnswer.data.type==="gz"){
+          if (workerAnswer.data.type==="tick") {
+         console.log(workerAnswer.data.prog)
+            progBarSign(workerAnswer.data.prog)
+           
+          } else if (workerAnswer.data.type==="gz"){
           
           circleData = workerAnswer.data.msg; 
  

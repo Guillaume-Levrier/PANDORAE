@@ -1020,7 +1020,7 @@ const progBarSign = prog => {
   if (prog > 100) {
     prog = 100;
   }
-  document.getElementById("version").style.background =
+  document.getElementById("version").style.backgroundImage =
     "linear-gradient(0.25turn,rgba(0,0,255,0.3) 0%,rgba(0,0,255,0.3) " +
     prog +
     "%,transparent " +
