@@ -542,6 +542,8 @@ const mainDisplay = type => {
   listTableDatasets(type);
 };
 
+field.addEventListener("click", ()=>{cmdinput(field.value)});
+
 // ========== MAIN FIELD COMMAND INPUT ========
 
 const cmdinput = input => {
@@ -787,7 +789,7 @@ fs.readFile(
       field.style.pointerEvents = "all";
       field.style.cursor = "pointer";
       field.value = "start tutorial";
-      field.addEventListener("click", tutorialOpener);
+      
     } else {
       document.getElementById("menu-icon").onclick = toggleMenu;
       document.getElementById("option-icon").onclick = toggleConsole;
