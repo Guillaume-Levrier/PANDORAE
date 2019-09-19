@@ -2936,11 +2936,7 @@ requestContent=requestContent+"</ul>"
         multiThreader.port.postMessage({ type: "gz", dataset: circleData });
 
         multiThreader.port.onmessage = workerAnswer => {
-          if (workerAnswer.data.type==="tick") {
-         console.log(workerAnswer.data.prog)
-            progBarSign(workerAnswer.data.prog)
-           
-          } else if (workerAnswer.data.type==="gz"){
+        if (workerAnswer.data.type==="gz"){
           
           circleData = workerAnswer.data.msg; 
  
