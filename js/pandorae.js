@@ -851,9 +851,16 @@ ipcRenderer.on("tutorial", (event, message) => {
     case "geotype":
       openHelper("tutorialHelper", message);
       blinker("menu-icon");
-      blinker("geotype");
+      blinker("type");
       field.removeEventListener("click", openModal);
       break;
+
+      case "anthropotype":
+        openHelper("tutorialHelper", message);
+        blinker("menu-icon");
+        blinker("type");
+        field.removeEventListener("click", openModal);
+        break;
 
     case "openTutorial":
       openModal("tutorial");
@@ -1031,3 +1038,10 @@ const progBarSign = prog => {
 ipcRenderer.on("progressBar", (event, prog) => {
   progBarSign(prog);
 });
+
+
+// changethemer
+
+ipcRenderer.on("cmdInputFromRenderer", (event, command) => {
+  cmdinput(command)
+})
