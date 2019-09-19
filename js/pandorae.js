@@ -269,9 +269,16 @@ const toggleHelp = () => {
 // =========== MENU BUTTONS ===========
 
 document.addEventListener("keydown",e=>{
+  
+
   if(e.keyCode == 13) {
-    cmdinput(document.getElementById('field').value);
     e.preventDefault();
+    if (field.value.length>0){
+    cmdinput(field.value);
+  } else if (field.value.length===0 && document.getElementById('cli-field').value.length>0) {
+    cmdinput(document.getElementById('cli-field').value);
+  }
+  
     return false
   }
 });
@@ -382,7 +389,7 @@ ipcRenderer.on("chaeros-failure", (event, message) => {
 var commandReturn = "";
 
 const xtypeDisplay = () => {
-  (xtype.style.opacity = "1"), (xtype.style.zIndex = "2"), (commandReturn = "");
+  (xtype.style.opacity = "1"), (xtype.style.zIndex = "6"), (commandReturn = "");
   createTooltip();
 };
 
@@ -703,6 +710,7 @@ const cmdinput = input => {
     }
   }
   field.value = commandReturn;
+  document.getElementById("cli-field").value = commandReturn;
 };
 
 var pump = {};
