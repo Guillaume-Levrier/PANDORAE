@@ -8,7 +8,9 @@ body{
   text-align: justify;
   color: black;
   animation: fadein .7s;
+  background-color:white;
 }
+
 ::-webkit-scrollbar {
     display: none;
 }
@@ -73,8 +75,8 @@ cursor:pointer;
 
 @keyframes
   invert {
-    from {background-color: white; color: black;}
-    to {background-color: #141414; color: white;}
+    from {background-color: white;}
+    to {background-color: transparent;}
   }
 
 #progressBar{
@@ -108,6 +110,7 @@ cursor:pointer;
       <div class="title">As you noticed, you can click on the <strong>arrows</strong> to go down or back.</div><br>
       You can also use your <strong>mouse wheel</strong> to navigate up and down.&nbsp;<br><br>
       You can skip specific chapters and come back to this <strong>tutorial</strong> later.<br><br>
+      If you're unsure of how to proceed, you can watch the step-by-step video of this tutorial while you interact with it.<br><br>
       <br>
       <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('slide3')">arrow_downward</a></i>
     </section>
@@ -233,14 +236,11 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
     <div class="title"><strong>Chapter 3: Exploring data</strong></div><br>
     PANDORÆ's main purpose is to enable you to explore large and/or complex datasets. It features several different kinds 
     of "<strong>types</strong>", that is ways to display your data:
-      <li><a onclick="smoothScrollTo('chronotype')">Chronotype</a> displays different series of documents published over any period of time</li>
-      <!-- <li><a onclick="smoothScrollTo('Anthropotype')">Anthropotype</a> shows networks of natural or legal entities</li> -->
-      <li><a onclick="smoothScrollTo('geotype')">Geotype</a> draws a globe and displays scholarly paper's affiliation cities (and cooperation links)</li>
-      <!-- <li><a onclick="smoothScrollTo('')">Topotype</a> maps the participants to an online debate according to user-established criteria</li>
-      <li><a onclick="smoothScrollTo('')">Pharmatype</a> highlights clinical trials duration and publicly available information.</li>
-      <li><a onclick="smoothScrollTo('')">Gazouillotype</a> displays (potentially massive amounts of) tweets obtained either through Twitter's API or through scraping. </li> -->
+      <li><a onclick="smoothScrollTo('chronotype')">Chronotype</a> puts different corpuse of documents on a same timeline for you to compare their size and content.</li>
+      <li><a onclick="smoothScrollTo('geotype')">Geotype</a> draws a globe and displays scholarly paper's affiliation cities, institutions, and who cooperates with whom.</li>
+      <li><a onclick="smoothScrollTo('anthropotype')">Anthropotype</a> allows you to explore co-authorship networks.</li> 
     <br>
-      Detail of the other types of visualisation processes will be added as those are rolled out.  <br>&nbsp;<br>
+      Other features are documented on the <a onclick="shell.openExternal('https://github.com/Guillaume-Levrier/PANDORAE/wiki')">wiki</a>.  <br>&nbsp;<br>
     <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('chronotype')">arrow_downward</a></i></div>
 </section>
 
@@ -258,6 +258,15 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
         The <strong>geotype</strong> displays a globe on which available affiliations are geolocated. Affiliations having cooperated on a paper listed in the dataset are linked in red.
           <br>&nbsp;<br>
         Click <a onclick="tuto('geotype');">here</a> to try to the geotype if you already loaded the sample datasets. If not, click <a onclick="smoothScrollTo('Zotero2')">here</a> to do so.
+        <br>&nbsp;<br>
+  <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('anthropotype')">arrow_downward</a></i></div>  
+    </section>
+
+    <section id="anthropotype" class="step">
+      <div class="title"><strong>Anthropotype</strong></div><br>
+        The <strong>Anthropotype</strong> displays a network graph with the loaded documents and their authors, allowing you to explore the co-authorship relationships in your corpus.
+          <br>&nbsp;<br>
+        Click <a onclick="tuto('anthropotype');">here</a> to try to the anthropotype if you already loaded the sample datasets. If not, click <a onclick="smoothScrollTo('Zotero2')">here</a> to do so.
         <br>&nbsp;<br>
   <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('FinalChap')">arrow_downward</a></i></div>  
     </section>
@@ -309,7 +318,7 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
         <section id="final6" class="step centerStep">
             <div class="title"><strong>Call me ...  maybe?</strong></div><br>
             If you ever miss the tutorial, or want to check one of its chapter, you can use the 
-            &nbsp;<span class="commands">start tutorial</span>&nbsp; command.<br>&nbsp;<br> You'll always be welcome here.<br>&nbsp;<br>
+            &nbsp;<span class="commands">start tutorial</span>&nbsp; command.<br>&nbsp;<br> You will always be welcome here.<br>&nbsp;<br>
         
         <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('final7')">arrow_downward</a></i></div>  
           </section>
@@ -385,6 +394,7 @@ var sectionList = document.querySelectorAll("section");
     document.body.style.animationFillMode= "forwards";
     document.body.style.overflow = "hidden";
     document.getElementById('backarrow').style.display = "none";
+    ipcRenderer.send("cmdInputFromRenderer", "change theme blood-dragon")
      };
       
       </script>
