@@ -362,7 +362,7 @@ var sectionList = document.querySelectorAll("section");
   const closeAndDisplay = () => {
   
     ipcRenderer.send("window-ids","tutorial",remote.getCurrentWindow().id,false);
-    ipcRenderer.send('chaeros-notification', 'return to tutorial');
+  //  ipcRenderer.send('chaeros-notification', 'return to tutorial');
   
     closeWindow();
   };
