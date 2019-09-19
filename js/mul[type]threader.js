@@ -9,24 +9,21 @@ onconnect = e => {
 
   importScripts("../node_modules/d3/dist/d3.min.js");
 
-
-
   port.onmessage = message => {
 
     switch (message.data.type) {
       case "gz":
          
-
         try {
           var circleData = message.data.dataset;
-       
+
          d3.forceSimulation(circleData) // starting simulation
             .force("x", d3.forceX())
             .force("y", d3.forceY())
             .stop(); 
 
-
           port.postMessage({ type: "gz", msg: circleData });
+        
         } catch (error) {
           port.postMessage({ type: "gz", msg: error });
         }
@@ -58,7 +55,6 @@ onconnect = e => {
                 .strength(1)
             )
             .force("charge", d3.forceManyBody().strength(-600))
-            //.force("center", d3.forceCenter(width / 2, height / 2))
             .force("x", d3.forceX())
             .force("y", d3.forceY())
             .stop();
@@ -73,10 +69,11 @@ onconnect = e => {
             ++i
           ) {
             simulation.tick();
-            port.postMessage({ type: "tick", current:parseInt(i), target:parseInt(n) });
+            let prog = (i/n)*100;
+            port.postMessage({ type: "tick", prog:prog});
           }
+                port.postMessage({ type: "hy", nodeData: nodeData, links: links });
 
-          port.postMessage({ type: "hy", nodeData: nodeData, links: links });
         } catch (error) {
           port.postMessage({ type: "hy", msg: error });
         }
