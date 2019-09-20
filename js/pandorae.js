@@ -339,7 +339,7 @@ const toggleConsole = () => {
     document.getElementById("console").style.display = "none";
     toggledConsole = false;
   } else {
-    document.getElementById("console").style.zIndex = "3";
+    document.getElementById("console").style.zIndex = "7";
     document.getElementById("console").style.display = "block";
     toggledConsole = true;
   }
@@ -1076,7 +1076,9 @@ const killViews = () => {
 document.addEventListener("keydown", event => {
   switch (event.isComposing || event.code) {
     case "Digit1":
+      if (coreExists){
       toggleMenu();
+    }
       break;
 
     case "Digit2":
@@ -1085,10 +1087,13 @@ document.addEventListener("keydown", event => {
       break;
 
     case "Digit3":
+        if (coreExists){
+  
       if (toggledMenu === false) {
         toggleMenu();
       }
       categoryLoader("type");
+    }
       break;
 
     case "Backquote":
@@ -1096,8 +1101,18 @@ document.addEventListener("keydown", event => {
 
       break;
 
+      case "Digit4":
+          toggleConsole();
+          break;
+
     case "Digit5":
-      toggleConsole();
+      if(xtypeExists){
+        if (toggledMenu === false) {
+          toggleMenu();
+        }
+      categoryLoader("export");
+      }
+    
       break;
   }
 });
