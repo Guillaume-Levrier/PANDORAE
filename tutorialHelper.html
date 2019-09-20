@@ -22,10 +22,7 @@ text-decoration: underline;
 <script>
 const {remote, ipcRenderer} = require('electron');
 
-
-console.log(remote.getCurrentWindow().id)
 ipcRenderer.send("window-ids","tutorialHelper",remote.getCurrentWindow().id);
-
 
 const goBack = (slide) => {
     ipcRenderer.send("window-manager","closeWindow","flux");
@@ -38,6 +35,7 @@ let fluxSlide = "flux";
 let ZoteroSlide = "Zotero2";
 let chronoslide = "chronotype";
 let geoslide = "geotype";
+let anthroposlide = "anthropotype";
 
   let fluxContent = "<br><br>You can now use the menu.<br><br>"+
                   " Click on the blinking menu button to do so.<br><br>"+
@@ -52,22 +50,27 @@ let geoslide = "geotype";
                       "<i>Zotero API key:</i> <span style='font-family:monospace;'>cyEn5eKACVuNTABpwtAp4V4C</span>.<br><br>"+
                       "Press the Update <i class='material-icons'>cached</i> button.<br><br>"+
                       "The Zotero Tab should now display three sample collections.<br><br>"+
-                      "Import the 'CRISPR+Human' dataset in 'geotype'. Name it like you want.<br><br>"+
+                      "Import each in the system, then go to the System Tab.<br><br>"+
+                      "Import the 'intersection' dataset in 'geotype'. Name it like you want.<br><br>"+
+                      "Import the 'Controversy' dataset in 'anthropotype'. Name it like you want.<br><br>"+
                       "Now Import the other two datasets <strong>at once</strong> in 'chronotype'.<br><br>"+
                       "Click <a onClick='goBack(ZoteroSlide)'>here</a> to go back to the tutorial.";  
   
                       
   let chronotype = "<br><br>Open the menu again.<br><br>"+
-                      "Click on 'Chronotype' to display available datasets <br><br>"+
+                      "Click on 'Type -> Chronotype' to display available datasets <br><br>"+
                       "Click on the sample dataset you previously imported in there from Zotero through Flux.<br><br>"+
-                      "Then click on 'start chronotype'.<br><br>"+
                       "Click <a onClick='goBack(chronoslide)'>here</a> to go back to the tutorial.";  
 
   let geotype = "<br><br>Open the menu once again.<br><br>"+
-                      "Click on 'Geotype' to display available datasets <br><br>"+
+                      "Click on 'Type -> Geotype' to display available datasets <br><br>"+
                       "Click on the sample dataset you previously imported in there from Zotero through Flux.<br><br>"+
-                      "Then click on 'start geotype'.<br><br>"+
                       "Click <a onClick='goBack(geoslide)'>here</a> to go back to the tutorial."; 
+
+    let anthropotype = "<br><br>Open the menu once again.<br><br>"+
+                      "Click on 'Type -> Anthropotype' to display available datasets <br><br>"+
+                      "Click on the sample dataset you previously imported in there from Zotero through Flux.<br><br>"+
+                      "Click <a onClick='goBack(anthroposlide)'>here</a> to go back to the tutorial."; 
 
 ipcRenderer.on('tutorial-types', (event,message) => {
 
@@ -85,6 +88,10 @@ let content = document.getElementById("content");
       break;
       case "geotype":
     content.innerHTML = geotype;
+      break;
+      
+      case "anthropotype":
+    content.innerHTML = anthropotype;
       break;
   }
         

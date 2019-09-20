@@ -8,7 +8,9 @@ body{
   text-align: justify;
   color: black;
   animation: fadein .7s;
+  background-color:white;
 }
+
 ::-webkit-scrollbar {
     display: none;
 }
@@ -73,8 +75,8 @@ cursor:pointer;
 
 @keyframes
   invert {
-    from {background-color: white; color: black;}
-    to {background-color: #141414; color: white;}
+    from {background-color: white; color:black}
+    to {background-color: black; color:white}
   }
 
 #progressBar{
@@ -108,6 +110,7 @@ cursor:pointer;
       <div class="title">As you noticed, you can click on the <strong>arrows</strong> to go down or back.</div><br>
       You can also use your <strong>mouse wheel</strong> to navigate up and down.&nbsp;<br><br>
       You can skip specific chapters and come back to this <strong>tutorial</strong> later.<br><br>
+      If you're unsure of how to proceed, you can watch the step-by-step video of this tutorial while you interact with it.<br><br>
       <br>
       <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('slide3')">arrow_downward</a></i>
     </section>
@@ -146,15 +149,14 @@ Click <a onclick="tuto('flux');">here</a> to learn how to open Flux.
 
      <section id="flux2" class="step">
        <div class="title"><strong>Flux sections</strong></div><br>
-Flux has different sections. Each section has its own purpose, and relies on different services:
-<ul style="list-style-type: square;">
-<li><a onclick="smoothScrollTo('Cascade')">Cascade</a> displays available paths to guide your data through.</li>
-<li>User lets you insert your API keys and credentials.</li>
-<li><a onclick="smoothScrollTo('Bibliometric-databases')">Bibliometric databases</a> allow you to request science articles, preview the amount of results and trigger the actual request.</li>
-<li><a onclick="smoothScrollTo('enrichment')">Enrichment</a> tries to geolocate each paper's affiliations and request Altmetric API to retrieve relevant metadata.</li>
-<!-- <li><a onclick="smoothScrollTo('')">Public debate</a> loads files extracted from an online public debate platform and rekindles the data to build a cartography of opinion groups involved in the debate.</li> -->
-<li>CSL-JSON converts your datasets to make them uploadable to Zotero.</li>
-<li><a onclick="smoothScrollTo('Zotero1')">Zotero</a> upload datasets to and/or download collections from your Zotero library.</li>
+          Flux has different sections. Each section has its own purpose, and relies on different services:
+          <ul style="list-style-type: square;">
+          <li><a onclick="smoothScrollTo('Cascade')">Cascade</a> displays available paths to guide your data through.</li>
+          <li>User lets you insert your API keys and credentials.</li>
+          <li><a onclick="smoothScrollTo('Bibliometric-databases')">Bibliometric databases</a> allow you to request science articles, preview the amount of results and trigger the actual request.</li>
+          <li><a onclick="smoothScrollTo('enrichment')">Enrichment</a> tries to geolocate each paper's affiliations and request Altmetric API to retrieve relevant metadata.</li>
+          <li>CSL-JSON converts your datasets to make them uploadable to Zotero.</li>
+          <li><a onclick="smoothScrollTo('Zotero1')">Zotero</a> upload datasets to and/or download collections from your Zotero library.</li>
 </ul>
     Detail about the other sections will become available when they will be rolled out. Click on a section name to learn more about that section right now, or simply click on the arrow to continue.   <br>&nbsp;<br>
       <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('Cascade')">arrow_downward</a></i></div>
@@ -185,7 +187,6 @@ Flux has different sections. Each section has its own purpose, and relies on dif
      <section id="Chapter2" class="step">
        <div class="title"><strong>Chapter 2: Enriching data</strong></div><br>
           <strong>Flux</strong> enables you do retrieve data from different kinds of <a onclick="smoothScrollTo('Bibliometric-databases')">databases</a>. 
-          <!--But none of those are perfect. For each request, your "<strong>signal</strong>", the core content of what you're looking for, will be obscured by "<strong>noise</strong>", data that might not be completely irrelevant but still doesn't qualify to your criteria either.<br><br>-->
           Articles can be <a onclick="smoothScrollTo('enrichment')">enriched</a> by <strong>geolocating</strong> their affiliation and retrieving additional <strong>metadata</strong>. But you will often have to curate your data and enrich its content by hand. PANDORÆ therefore helps you send your datasets to <a onclick="smoothScrollTo('Zotero1')">Zotero</a> and download them back into the system when you're done cleaning your dataset.
         <br>&nbsp;<br>
       <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('enrichment')">arrow_downward</a></i></div>
@@ -228,19 +229,15 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
 <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('Chapter3')">arrow_downward</a></i></div>
 </section>
 
-
- <section id="Chapter3" class="step">
+<section id="Chapter3" class="step">
     <div class="title"><strong>Chapter 3: Exploring data</strong></div><br>
     PANDORÆ's main purpose is to enable you to explore large and/or complex datasets. It features several different kinds 
     of "<strong>types</strong>", that is ways to display your data:
-      <li><a onclick="smoothScrollTo('chronotype')">Chronotype</a> displays different series of documents published over any period of time</li>
-      <!-- <li><a onclick="smoothScrollTo('Anthropotype')">Anthropotype</a> shows networks of natural or legal entities</li> -->
-      <li><a onclick="smoothScrollTo('geotype')">Geotype</a> draws a globe and displays scholarly paper's affiliation cities (and cooperation links)</li>
-      <!-- <li><a onclick="smoothScrollTo('')">Topotype</a> maps the participants to an online debate according to user-established criteria</li>
-      <li><a onclick="smoothScrollTo('')">Pharmatype</a> highlights clinical trials duration and publicly available information.</li>
-      <li><a onclick="smoothScrollTo('')">Gazouillotype</a> displays (potentially massive amounts of) tweets obtained either through Twitter's API or through scraping. </li> -->
+      <li><a onclick="smoothScrollTo('chronotype')">Chronotype</a> puts different corpuse of documents on a same timeline for you to compare their size and content.</li>
+      <li><a onclick="smoothScrollTo('geotype')">Geotype</a> draws a globe and displays scholarly paper's affiliation cities, institutions, and who cooperates with whom.</li>
+      <li><a onclick="smoothScrollTo('anthropotype')">Anthropotype</a> allows you to explore co-authorship networks.</li> 
     <br>
-      Detail of the other types of visualisation processes will be added as those are rolled out.  <br>&nbsp;<br>
+      Other features are documented on the <a onclick="shell.openExternal('https://github.com/Guillaume-Levrier/PANDORAE/wiki')">wiki</a>.  <br>&nbsp;<br>
     <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('chronotype')">arrow_downward</a></i></div>
 </section>
 
@@ -258,6 +255,15 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
         The <strong>geotype</strong> displays a globe on which available affiliations are geolocated. Affiliations having cooperated on a paper listed in the dataset are linked in red.
           <br>&nbsp;<br>
         Click <a onclick="tuto('geotype');">here</a> to try to the geotype if you already loaded the sample datasets. If not, click <a onclick="smoothScrollTo('Zotero2')">here</a> to do so.
+        <br>&nbsp;<br>
+  <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('anthropotype')">arrow_downward</a></i></div>  
+    </section>
+
+    <section id="anthropotype" class="step">
+      <div class="title"><strong>Anthropotype</strong></div><br>
+        The <strong>Anthropotype</strong> displays a network graph with the loaded documents and their authors, allowing you to explore the co-authorship relationships in your corpus.
+          <br>&nbsp;<br>
+        Click <a onclick="tuto('anthropotype');">here</a> to try to the anthropotype if you already loaded the sample datasets. If not, click <a onclick="smoothScrollTo('Zotero2')">here</a> to do so.
         <br>&nbsp;<br>
   <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('FinalChap')">arrow_downward</a></i></div>  
     </section>
@@ -300,8 +306,10 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
         <section id="final5" class="step centerStep">
             <div class="title"><strong>Entering commands</strong></div><br>
              If your menu is locked, you can use the &nbsp;<span class="commands">unlock menu</span>&nbsp; command. <br>&nbsp;<br>
-             You can also change PANDORÆ's theme with the &nbsp;<span class="commands">change theme</span>&nbsp; command. <br>&nbsp;<br>
-             Try with &nbsp;<span class="commands">change theme blood-dragon</span>&nbsp; for example. You can switch back with &nbsp;<span class="commands">change theme normal</span>. <br>&nbsp;<br>
+             It also works in the console.
+             <br>&nbsp;<br>
+            <!--  You can also change PANDORÆ's theme with the &nbsp;<span class="commands">change theme</span>&nbsp; command. <br>&nbsp;<br>
+             Try with &nbsp;<span class="commands">change theme blood-dragon</span>&nbsp; for example. You can switch back with &nbsp;<span class="commands">change theme normal</span>. <br>&nbsp;<br> -->
         
         <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('final6')">arrow_downward</a></i></div>  
           </section>
@@ -309,13 +317,11 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
         <section id="final6" class="step centerStep">
             <div class="title"><strong>Call me ...  maybe?</strong></div><br>
             If you ever miss the tutorial, or want to check one of its chapter, you can use the 
-            &nbsp;<span class="commands">start tutorial</span>&nbsp; command.<br>&nbsp;<br> You'll always be welcome here.<br>&nbsp;<br>
+            &nbsp;<span class="commands">start tutorial</span>&nbsp; command.<br>&nbsp;<br> You will always be welcome here.<br>&nbsp;<br>
         
         <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('final7')">arrow_downward</a></i></div>  
           </section>
         
-
-
         <section id="final7" class="step centerStep">
             <div class="title"><strong>Freedom at last</strong></div><br>
            You will learn how to use PANDORÆ mostly by trial and error.<br>&nbsp;<br> If you're a researcher and/or developer, you might want to go have a look at its 
@@ -324,8 +330,6 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
            <br>&nbsp;<br>
            <div class="arrowDown">    <i class="material-icons"><a class="arrowDown" onclick="lastScroll()">arrow_downward</a></i></div>  
           </section>
-
-
 
           <section id="final8" class="step centerStep">
            This <strong>CORE</strong> is now yours. <br>&nbsp;<br>
@@ -338,14 +342,13 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
                 PANDORÆ - BETA/DEV-V0.1.29<br>
                 Guillaume Levrier<br>-<br>
                 When you steal from one author, it's plagiarism;<br> if you steal from many, it's research. <br> W.M.<br><br>
-                
-               
+                               
               </div>
-              
-            </section>
-         
+      </section>         
 </div>
+
 <div id="progressBar"></div>
+
 <script>
 var sectionList = document.querySelectorAll("section");
 
@@ -355,37 +358,38 @@ var sectionList = document.querySelectorAll("section");
      thisSect.style.paddingTop = paddingTop+"px";
   }
 </script>
+
 <link rel="icon" type="image/png" href="img/AE-favicon.png"/>
 
 <script src="js/window-management.js"></script>
+
 <script>
-  const closeAndDisplay = () => {
-  
+  const closeAndDisplay = () => { 
     ipcRenderer.send("window-ids","tutorial",remote.getCurrentWindow().id,false);
-    ipcRenderer.send('chaeros-notification', 'return to tutorial');
-  
     closeWindow();
   };
 </script>
+
 <script src="js/tutorial/scroller.js"></script>
 <script src="js/tutorial/tutorial.js"></script>
 <script src="js/tutorial/cascade.js"></script>
-
-
 
 <div id="dialogDiv">
     <i class="material-icons  dialog-buttons" id="backarrow" style="display:none;" onclick="smoothScrollTo(previous,true);">arrow_back</i>
   <i class="material-icons dialog-buttons" onclick="refreshWindow();">refresh</i>
   <i class="material-icons dialog-buttons" onclick="closeAndDisplay();">close</i>
   </div>
-  <script>//final
-  const lastScroll = () =>{
-    smoothScrollTo('final8');
-    document.body.style.animation = "invert 2s";
-    document.body.style.animationFillMode= "forwards";
-    document.body.style.overflow = "hidden";
-    document.getElementById('backarrow').style.display = "none";
-     };
-      
-      </script>
+  <script>
+      const lastScroll = () =>{
+        smoothScrollTo('final8');
+        ipcRenderer.send("cmdInputFromRenderer", "change theme blood-dragon")
+        document.body.style.animation = "invert 2s";
+        document.body.style.animationFillMode= "forwards";
+        document.body.style.overflow = "hidden";
+        document.getElementById('backarrow').style.display = "none";  
+        setTimeout(() => {
+          ipcRenderer.send('chaeros-notification', 'change theme normal');
+        }, 1500);
+      };        
+  </script>
 </body>

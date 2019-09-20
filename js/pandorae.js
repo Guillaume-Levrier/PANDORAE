@@ -275,9 +275,16 @@ const toggleHelp = () => {
 // =========== MENU BUTTONS ===========
 
 document.addEventListener("keydown",e=>{
+  
+
   if(e.keyCode == 13) {
-    cmdinput(document.getElementById('field').value);
     e.preventDefault();
+    if (field.value.length>0){
+    cmdinput(field.value);
+  } else if (field.value.length===0 && document.getElementById('cli-field').value.length>0) {
+    cmdinput(document.getElementById('cli-field').value);
+  }
+  
     return false
   }
 });
@@ -388,7 +395,7 @@ ipcRenderer.on("chaeros-failure", (event, message) => {
 var commandReturn = "";
 
 const xtypeDisplay = () => {
-  (xtype.style.opacity = "1"), (xtype.style.zIndex = "2"), (commandReturn = "");
+  (xtype.style.opacity = "1"), (xtype.style.zIndex = "6"), (commandReturn = "");
   createTooltip();
 };
 
@@ -615,6 +622,8 @@ const mainDisplay = type => {
   listTableDatasets(type);
 };
 
+field.addEventListener("click", ()=>{cmdinput(field.value)});
+
 // ========== MAIN FIELD COMMAND INPUT ========
 
 const cmdinput = input => {
@@ -783,6 +792,7 @@ const cmdinput = input => {
     }
   }
   field.value = commandReturn;
+  document.getElementById("cli-field").value = commandReturn;
 };
 
 var pump = {};
@@ -859,7 +869,7 @@ fs.readFile(
       field.style.pointerEvents = "all";
       field.style.cursor = "pointer";
       field.value = "start tutorial";
-      field.addEventListener("click", tutorialOpener);
+      
     } else {
       document.getElementById("menu-icon").onclick = toggleMenu;
       document.getElementById("option-icon").onclick = toggleConsole;
@@ -923,9 +933,16 @@ ipcRenderer.on("tutorial", (event, message) => {
     case "geotype":
       openHelper("tutorialHelper", message);
       blinker("menu-icon");
-      blinker("geotype");
+      blinker("type");
       field.removeEventListener("click", openModal);
       break;
+
+      case "anthropotype":
+        openHelper("tutorialHelper", message);
+        blinker("menu-icon");
+        blinker("type");
+        field.removeEventListener("click", openModal);
+        break;
 
     case "openTutorial":
       openModal("tutorial");
@@ -1092,7 +1109,7 @@ const progBarSign = prog => {
   if (prog > 100) {
     prog = 100;
   }
-  document.getElementById("version").style.background =
+  document.getElementById("version").style.backgroundImage =
     "linear-gradient(0.25turn,rgba(0,0,255,0.3) 0%,rgba(0,0,255,0.3) " +
     prog +
     "%,transparent " +
@@ -1103,3 +1120,10 @@ const progBarSign = prog => {
 ipcRenderer.on("progressBar", (event, prog) => {
   progBarSign(prog);
 });
+
+
+// changethemer
+
+ipcRenderer.on("cmdInputFromRenderer", (event, command) => {
+  cmdinput(command)
+})

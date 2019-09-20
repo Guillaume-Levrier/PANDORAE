@@ -430,7 +430,7 @@ li:active {
   height: auto;
   overflow-y:scroll;
   pointer-events: all;
-  width: 70%;
+  width: calc(100% - 5px);
   margin-top: 5px;
 }
 
@@ -450,7 +450,7 @@ li:active {
 #cli-field {
   position: absolute;
   left: 60px;
-  width: 800px;
+  width: 100%;
   bottom: 0;
   border: 0;
   font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
