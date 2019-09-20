@@ -170,6 +170,7 @@ const toggleMenu = () => {
       document.getElementById("menu").style.left = "-150px";
       document.getElementById("menu-icon").style.left = "25px";
       document.getElementById("option-icon").style.left = "25px";
+      document.getElementById("export-icon").style.left = "25px";
       document.getElementById("console").style.left = "0px";
       xtype.style.left = "0px";
       var menuItems = document.getElementsByClassName("menu-item");
@@ -180,23 +181,20 @@ const toggleMenu = () => {
       toggledMenu = false;
     }
   } else {
-    if (xtypeExists) {
-      document.body.style.animation = "fadeout 0.1s";
-      setTimeout(() => {
-        document.body.remove();
-        remote.getCurrentWindow().reload();
-      }, 100);
-    } else {
+   // if (xtypeExists) {
+     
+   // } else {
       logostatus();
       document.getElementById("menu").style.left = "0px";
       document.getElementById("console").style.left = "150px";
       document.getElementById("menu-icon").style.left = "175px";
+      document.getElementById("export-icon").style.left = "175px";
       document.getElementById("option-icon").style.left = "175px";
       xtype.style.left = "150px";
       var menuItems = document.getElementsByClassName("menu-item");
       for (let i = 0; i < menuItems.length; i++) {
         menuItems[i].style.left = "0";
-      }
+    //  }
       toggledMenu = true;
     }
   }
@@ -205,7 +203,7 @@ const toggleMenu = () => {
 let toggledSecondaryMenu = false;
 
 const toggleSecondaryMenu = () => {
-  purgeMenuItems("secMenContent");
+  
   purgeMenuItems("thirdMenuContent");
   if (toggledSecondaryMenu) {
     if (toggledTertiaryMenu) {
@@ -215,6 +213,8 @@ const toggleSecondaryMenu = () => {
     document.getElementById("console").style.left = "150px";
     document.getElementById("menu-icon").style.left = "175px";
     document.getElementById("option-icon").style.left = "175px";
+    document.getElementById("export-icon").style.left = "175px";
+
     xtype.style.left = "150px";
     toggledSecondaryMenu = false;
   } else {
@@ -222,6 +222,8 @@ const toggleSecondaryMenu = () => {
     document.getElementById("console").style.left = "300px";
     document.getElementById("menu-icon").style.left = "325px";
     document.getElementById("option-icon").style.left = "325px";
+    document.getElementById("export-icon").style.left = "325px";
+
     xtype.style.left = "300px";
     toggledSecondaryMenu = true;
   }
@@ -236,6 +238,8 @@ const toggleTertiaryMenu = () => {
     document.getElementById("console").style.left = "300px";
     document.getElementById("menu-icon").style.left = "325px";
     document.getElementById("option-icon").style.left = "325px";
+    document.getElementById("export-icon").style.left = "325px";
+
     xtype.style.left = "300px";
     toggledTertiaryMenu = false;
   } else {
@@ -243,6 +247,8 @@ const toggleTertiaryMenu = () => {
     document.getElementById("console").style.left = "450px";
     document.getElementById("menu-icon").style.left = "475px";
     document.getElementById("option-icon").style.left = "475px";
+    document.getElementById("export-icon").style.left = "475px";
+
     xtype.style.left = "450px";
     toggledTertiaryMenu = true;
   }
@@ -443,6 +449,9 @@ const selectOption = (type, id) => {
 // ========== MAIN MENU OPTIONS ========
 
 const categoryLoader = cat => {
+
+  purgeMenuItems("secMenContent");
+
   let blocks;
 
   switch (cat) {
@@ -454,31 +463,102 @@ const categoryLoader = cat => {
         "gazouillotype",
         "hyphotype"
       ];
+
+      blocks.forEach(block => {
+        pandodb[block].toArray().then(thisBlock => {
+          if (thisBlock.length > 0) {
+            let typeContainer = document.createElement("div");
+            typeContainer.style.display = "flex";
+            typeContainer.style.borderBottom = "1px solid rgba(192,192,192,0.3)";
+            typeContainer.id = block;
+            typeContainer.className += "tabs menu-item";
+            typeContainer.innerText = block;
+            typeContainer.onclick = function() {
+              mainDisplay(block);
+            };
+            document.getElementById("secMenContent").appendChild(typeContainer);
+          }
+        });
+      });
       break;
 
-    /*     case "ext": blocks = ['hyphe'];
-                  break; */
+         case "export": 
+         blocks = [
+           'svg'
+          ];
+
+          blocks.forEach(thisBlock => {
+                let typeContainer = document.createElement("div");
+                typeContainer.style.display = "flex";
+                typeContainer.style.borderBottom = "1px solid rgba(192,192,192,0.3)";
+                typeContainer.id = thisBlock;
+                typeContainer.className += "tabs menu-item";
+                typeContainer.innerText = thisBlock;
+                typeContainer.addEventListener("click",e=>saveAs(thisBlock))
+                document.getElementById("secMenContent").append(typeContainer);    
+          });
+
+                  break; 
   }
 
-  blocks.forEach(block => {
-    pandodb[block].toArray().then(thisBlock => {
-      if (thisBlock.length > 0) {
-        let typeContainer = document.createElement("div");
-        typeContainer.style.display = "flex";
-        typeContainer.style.borderBottom = "1px solid rgba(192,192,192,0.3)";
-        typeContainer.id = block;
-        typeContainer.className += "tabs menu-item";
-        typeContainer.innerText = block;
-        typeContainer.onclick = function() {
-          mainDisplay(block);
-        };
-        document.getElementById("secMenContent").appendChild(typeContainer);
-      }
-    });
-  });
-
-  toggleSecondaryMenu();
+ toggleSecondaryMenu();
 };
+
+document.getElementById("export-icon").addEventListener("click",e=>{
+  toggleMenu();
+})
+
+const saveAs = (format) =>{
+
+switch (format) {
+  case 'svg': serialize(document.getElementById("xtypeSVG"))
+    
+    break;
+
+  default:
+    break;
+}
+
+}
+
+const serialize = (svg) => {
+  const xmlns = "http://www.w3.org/2000/xmlns/";
+  const xlinkns = "http://www.w3.org/1999/xlink";
+  const svgns = "http://www.w3.org/2000/svg";
+ 
+    svg = svg.cloneNode(true);
+    const fragment = window.location.href + "#";
+    const walker = document.createTreeWalker(svg, NodeFilter.SHOW_ELEMENT, null, false);
+    while (walker.nextNode()) {
+      for (const attr of walker.currentNode.attributes) {
+        if (attr.value.includes(fragment)) {
+          attr.value = attr.value.replace(fragment, "#");
+        }
+      }
+    }
+
+    svg.setAttributeNS(xmlns, "xmlns", svgns);
+    svg.setAttributeNS(xmlns, "xmlns:xlink", xlinkns);
+    const serializer = new window.XMLSerializer;
+    const string = serializer.serializeToString(svg);
+    var datasetName =document.getElementById('source').innerText.slice(8);
+    datasetName = datasetName.replace(/\//ig,"_");
+    datasetName = datasetName.replace(/:/ig,"+");
+
+    toggleMenu();
+    fs.writeFile(
+      remote.app.getPath('pictures') + "/"+datasetName+".svg",
+      string,
+      "utf8",
+      err => {
+        if (err) {
+          ipcRenderer.send("console-logs", JSON.stringify(err));
+        }
+        
+      }
+    );
+  
+}
 
 const mainDisplay = type => {
   const listTableDatasets = table => {
