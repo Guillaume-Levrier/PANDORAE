@@ -453,6 +453,7 @@ const anthropotype = datasetAT => {  // When called, draw the anthropotype
           .data(links) // Link data is stored in the "links" variable
           .enter()
             .append("line")
+            .attr("stroke","#d3d3d3")
             .style("fill", "none");
 
         masks = view.selectAll("masks")
@@ -498,6 +499,7 @@ const anthropotype = datasetAT => {  // When called, draw the anthropotype
             .style("fill", "black")
             .style("cursor", "pointer")
             .style("font-size", "15px")
+            .style("font-family","sans-serif")
             .on("click", d => {
               name.filter(e => e === d).style("fill", "DeepSkyBlue");
             })
@@ -764,7 +766,7 @@ const hyphotype = id => {
       .attr("markerHeight", 12)
       .attr("orient", "auto")
       .attr("stroke-width",0.5)
-      .attr("fill","grey")
+      .attr("fill","#d3d3d3")
       .attr("fill-opacity",.8)
     .append("svg:path")
       .attr("d", "M0,-5L10,0L0,5");
@@ -799,15 +801,15 @@ const hyphotype = id => {
            var nodelinks = view.selectAll("line")
                         .data(links)
                    .enter().append("line")
+                   .attr("stroke-width", .25)
+                   .attr("stroke","#d3d3d3")
                    .attr("x1",d=>d.source.x)
                    .attr("y1",d=>d.source.y)
                    .attr("x2",d=>d.target.x)
-                   .attr("y2",d=>d.target.y)
-                 
-                      .attr("stroke-width", .25)
-                      .attr("marker-end", "url(#arrow)");
+                   .attr("y2",d=>d.target.y);
+                 // .attr("marker-end", "url(#arrow)");
  
-                      nodes.raise()   
+                      nodes.raise();   
 
 
       const showTags = (tag) =>{
@@ -1176,6 +1178,9 @@ const chronotype = (bibliography, links) => { // When called, draw the chronotyp
         .enter()
         .append("path") // Lines are paths
         .attr("class", "line") // CSS style of the lines
+        .style("pointer-events","none")
+        .style("shape-rendering","crispEdges")
+        .style("fill","none")
         .attr("d", d => chrono(d.values)) //Values of each point/cluster of the lines
         .style("stroke", d => color(d.zone)) // Color according to key
         .style("stroke-width", 1.5); // Stroke width
@@ -1202,14 +1207,16 @@ const chronotype = (bibliography, links) => { // When called, draw the chronotyp
         .attr("class", "shadowLines") // CSS style of the lines
         .attr("d", d => chrono(d.values)) //Values of each point/cluster of the lines
         .style("opacity", 0.5)
-        .style("stroke", "grey") // Color according to key
+        .style("stroke", "#d3d3d3") // Color according to key
         .style("stroke-width", 0.5); // Stroke width
 
       var categories = view.selectAll("categoriesText") // Display category name
         .data(clusterData) // Loading relevant data, ie nested clusters
         .enter()
         .append("text") // Lines are paths
-        .attr("class", "categories") // CSS style of the lines
+       // .attr("class", "categories") // CSS style of the lines
+        .style("font-size","20px")
+        .style("font-family","sans-serif")
         .attr("y", d => -x(d.zone)) // The X value of each category is defined by "zone"
         .attr("x", d => y(currentTime)) // Y coordinate, current time
         .attr("fill", d => color(d.zone)) // Color according to key
@@ -1243,6 +1250,7 @@ const chronotype = (bibliography, links) => { // When called, draw the chronotyp
         .append("text") // Clusters are circles
         .attr("x", d => x(d.zone)) // Their relative X positions are by zone
         .attr("y", d => y(d.date)) // Their relative Y positions are by date
+        .style("font-familey","sans-serif")
         .attr(
           "dx",
           d => "-" + JSON.stringify(codeFreq[d.code]).length / 2 + "px"
@@ -1523,7 +1531,7 @@ const chronotype = (bibliography, links) => { // When called, draw the chronotyp
         .enter()
         .append("line") // Links are SVG lines
         .attr("stroke-width", 0.15) // Links stroke width
-        .attr("stroke", "grey") // Links color
+        .attr("stroke", "#d3d3d3") // Links color
         .style("opacity", 0.5); // Links opacity
 
       circle.raise(); // Circles are raised above links
@@ -1674,11 +1682,13 @@ const chronotype = (bibliography, links) => { // When called, draw the chronotyp
   var gX = svg
     .append("g") // Make X axis rescalable
     .attr("class", "axis axis--x")
+    .style("stroke-opacity",.2)
     .call(xAxis);
 
   var gY = svg
     .append("g") // Make Y axis rescalable
     .attr("class", "axis axis--y")
+    .style("stroke-opacity",.1)
     .call(yAxis);
 
   svg.call(zoom).on("dblclick.zoom", null); // Zoom and deactivate doubleclick zooming
@@ -1731,7 +1741,9 @@ const geotype = locations => {
 
   //globe outline and background
   view.append("circle")
-    .attr("class", "graticule-outline")
+    .style("fill","#e6f3ff")
+    .style("stroke","#333")
+    .style("stroke-width",1)
     .attr("cx", width - toolWidth * 2)
     .attr("cy", height / 2)
     .attr("r", projection.scale());
@@ -1972,7 +1984,9 @@ const geotype = locations => {
           .data(geoData.features)
           .enter()
           .append("path")
-          .attr("class", "boundary")
+          .style("fill","white")
+          .style("stroke","#c6c6c6")
+          .style("stroke-width",.5)
           .attr("id", d => d.id)
           .attr("d", path);
 
@@ -1980,7 +1994,9 @@ const geotype = locations => {
         countryMap
           .append("path")
           .datum(graticule)
-          .attr("class", "graticule")
+          .style("fill","transparent")
+          .style("stroke","white")
+          .style("stroke-width",.7)
           .attr("d", path);
 
         var locGroup = view.append("g").attr("id", "cityLocations"); // Create a group for cities + links (circles + arcs)
@@ -2022,10 +2038,12 @@ const linkLoc = () => {
             .data(links)
             .enter()
             .append("path")
-            .attr("class", "arc")
+           .style("fill","none")
+           .style("stroke-width",".1")
+           .style("stroke-linecap","round")
             .style("stroke", d => {
               if (d.visibility) {
-                return "red";
+                return "crimson";
               } else {
                 return "transparent";
               }
@@ -2064,7 +2082,13 @@ const linkLoc = () => {
             .enter()
             .append("path")
             .attr("id", d => d.id)
-            .attr("class", "locations");
+            .attr("class","locations")
+            .style("fill","rgba(0, 82, 158, 0.55)")
+            .style("stroke","none")
+            .style("cursor","help");
+
+
+
           locations
             .datum(d =>
               d3.geoCircle()
@@ -2074,6 +2098,7 @@ const linkLoc = () => {
             .attr("d", path);
 
           locations.on("mouseover", d => {
+           
 
             d3.selectAll(".arc").style("opacity",".15"); 
             d3.selectAll(".locations").style("opacity",".4"); 
@@ -2084,6 +2109,7 @@ const linkLoc = () => {
                 locations._groups[0][i].__data__.coordinates[0][0]
               ) {
                d3.select(locations._groups[0][i]).style("opacity","1");
+              
                affilFinder(cities[i])   
               
        
