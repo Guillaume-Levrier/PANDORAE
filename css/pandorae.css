@@ -6,8 +6,8 @@
 @font-face {
   font-family: 'Material Icons';
   font-style: normal;
-  font-weight: 400;
-  src: url(fonts/material-icons.woff2) format('woff2');
+  font-weight: 100;
+  src: url(fonts/material-icons-outlined.woff2) format('woff2');
 }
 
 .material-icons {
@@ -167,6 +167,21 @@ h1 {
   cursor: pointer;
   background-color: white;
   border: 1px solid rgb(230,230,230);
+}
+
+
+#export-icon{
+  top:95px;
+  left:25px;
+  position: absolute;
+  font-size: 26px;
+  display: flex;
+  transition: 0.3s;
+  z-index: 15;
+  cursor: pointer;
+  background-color: white;
+  border: 1px solid rgb(230,230,230);
+  display: none;
 }
 
 #aelogo {

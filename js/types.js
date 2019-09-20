@@ -30,7 +30,27 @@ const loadType = () => {
   xtypeExists = true;
   coreExists = false;
   field.value = "";
+  document.getElementById('export-icon').style.display = "flex";
+  document.getElementById('fluxMenu').style.display = "none";
+  document.getElementById('type').style.display = "none";
+  document.getElementById('menu-icon').addEventListener("click", ()=>{
+    document.body.style.animation = "fadeout 0.1s";
+    setTimeout(() => {
+      document.body.remove();
+      remote.getCurrentWindow().reload();
+    }, 100);
+  })
+
+var exportButton = document.createElement("DIV");
+exportButton.innerText = "export"
+exportButton.className="tabs menu-item"
+exportButton.addEventListener("click",e=>categoryLoader('export'))
+
+document.getElementById("menu").insertBefore(exportButton,document.getElementById("quitBut"))
+
 };
+
+
 
 // =========== XTYPE ===========
 const xtype = document.getElementById("xtype"); // xtype is a div containing each (-type) visualisation
