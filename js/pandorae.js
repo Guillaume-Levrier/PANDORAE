@@ -31,6 +31,7 @@ const appPath = remote.app.getAppPath();
 const QRCode = require("qrcode");
 const types = require("./js/types");
 const keytar = require("keytar");
+const readline = require('readline');
 
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that
@@ -159,6 +160,7 @@ const purgeMenuItems = menu => {
 const toggleMenu = () => {
   field.removeEventListener("click", tutorialOpener);
   if (toggledMenu) {
+    ipcRenderer.send("console-logs", "Collapsing menu");
     if (toggledSecondaryMenu) {
       toggleSecondaryMenu();
       toggleMenu();
@@ -181,9 +183,7 @@ const toggleMenu = () => {
       toggledMenu = false;
     }
   } else {
-   // if (xtypeExists) {
-     
-   // } else {
+    ipcRenderer.send("console-logs", "Opening menu");
       logostatus();
       document.getElementById("menu").style.left = "0px";
       document.getElementById("console").style.left = "150px";
@@ -194,7 +194,6 @@ const toggleMenu = () => {
       var menuItems = document.getElementsByClassName("menu-item");
       for (let i = 0; i < menuItems.length; i++) {
         menuItems[i].style.left = "0";
-    //  }
       toggledMenu = true;
     }
   }
@@ -255,28 +254,22 @@ const toggleTertiaryMenu = () => {
 };
 
 const openHelper = (helperFile, section) => {
+  ipcRenderer.send("console-logs", "Opening helper window");
   ipcRenderer.send("window-manager", "openHelper", helperFile, "", section);
 };
 const openModal = modalFile => {
   ipcRenderer.send("window-manager", "openModal", modalFile);
 };
-const toggleOptions = () => {
-  openRegular("options");
-};
 const toggleFlux = () => {
+  ipcRenderer.send("console-logs", "Opening Flux");
   toggleMenu();
   displayCore();
   openModal("flux");
-};
-const toggleHelp = () => {
-  window.open("help.html", "_blank");
 };
 
 // =========== MENU BUTTONS ===========
 
 document.addEventListener("keydown",e=>{
-  
-
   if(e.keyCode == 13) {
     e.preventDefault();
     if (field.value.length>0){
@@ -335,21 +328,28 @@ let toggledConsole = false;
 
 const toggleConsole = () => {
   if (toggledConsole) {
+    ipcRenderer.send("console-logs", "Hiding console");
     document.getElementById("console").style.zIndex = "-1";
     document.getElementById("console").style.display = "none";
     toggledConsole = false;
   } else {
+    ipcRenderer.send("console-logs", "Displaying console");
     document.getElementById("console").style.zIndex = "7";
     document.getElementById("console").style.display = "block";
     toggledConsole = true;
   }
 };
 
-ipcRenderer.on("console-messages", (event, message) => {
-  let log = document.getElementById("log");
-  log.innerText = log.innerText + message;
+var logContent = "";
+let log = document.getElementById("log");
+
+const addToLog = (message) => {
+  logContent += message;
+  log.innerText = logContent
   log.scrollTop = log.scrollHeight;
-});
+}
+
+ipcRenderer.on("console-messages", (event, message) => addToLog(message));
 
 ipcRenderer.on("mainWindowReload", (event, message) => {
   remote.getCurrentWindow().reload();
@@ -470,7 +470,7 @@ const categoryLoader = cat => {
         "gazouillotype",
         "hyphotype"
       ];
-
+      ipcRenderer.send("console-logs", "Displaying available types");
       blocks.forEach(block => {
         pandodb[block].toArray().then(thisBlock => {
           if (thisBlock.length > 0) {
@@ -491,9 +491,11 @@ const categoryLoader = cat => {
 
          case "export": 
          blocks = [
-           'svg'
+           'svg',
+           'png',
+           'tooltip'
           ];
-
+          ipcRenderer.send("console-logs", "Displaying available export formats");
           blocks.forEach(thisBlock => {
                 let typeContainer = document.createElement("div");
                 typeContainer.style.display = "flex";
@@ -516,17 +518,47 @@ document.getElementById("export-icon").addEventListener("click",e=>{
 })
 
 const saveAs = (format) =>{
-
-switch (format) {
-  case 'svg': serialize(document.getElementById("xtypeSVG"))
+  toggleMenu();
+setTimeout(() => {
+  switch (format) {
+    case 'svg': serialize(document.getElementById("xtypeSVG"))
+      break;
     
-    break;
-
-  default:
-    break;
+    case 'png': savePNG()
+      break;
+  
+    case 'tooltip': saveToolTip()
+      break;
+  
+    default:
+      break;
+  }
+}, 500);
 }
 
+const saveToolTip = () => {
+
+  let tooltip = document.getElementById("tooltip");
+  var datasetName =document.getElementById('source').innerText.slice(8);
+  datasetName = datasetName.replace(/\//ig,"_");
+  datasetName = datasetName.replace(/:/ig,"+");
+  remote.getCurrentWindow().capturePage({x:parseInt(tooltip.offsetLeft),y:parseInt(tooltip.offsetTop),width:parseInt(tooltip.offsetWidth),height:parseInt(tooltip.offsetHeight)}).then(img=>{
+    fs.writeFile(remote.app.getPath('pictures') + "/"+datasetName+".png",img.toPNG(),()=>{})
+  })
+      
 }
+
+const savePNG = () => {
+
+  var datasetName =document.getElementById('source').innerText.slice(8);
+  datasetName = datasetName.replace(/\//ig,"_");
+  datasetName = datasetName.replace(/:/ig,"+");
+  remote.getCurrentWindow().capturePage().then(img=>{
+    fs.writeFile(remote.app.getPath('pictures') + "/"+datasetName+".png",img.toPNG(),()=>{})
+  })
+      
+}
+
 
 const serialize = (svg) => {
   const xmlns = "http://www.w3.org/2000/xmlns/";
@@ -552,7 +584,8 @@ const serialize = (svg) => {
     datasetName = datasetName.replace(/\//ig,"_");
     datasetName = datasetName.replace(/:/ig,"+");
 
-    toggleMenu();
+    
+    ipcRenderer.send("console-logs", "Exporting snapshot of current type to SVG in the user's 'Pictures' folder.");
     fs.writeFile(
       remote.app.getPath('pictures') + "/"+datasetName+".svg",
       string,
@@ -1062,14 +1095,6 @@ const zoomThemeScreen = theme => {
   }
 };
 
-const killViews = () => {
-  remote.BrowserView.getAllViews().forEach(view => {
-    remote.BrowserView.fromId(view.id).destroy();
-  });
-  document.getElementById("closeHyphe").remove();
-
-  field.value = "";
-};
 
 // ====== KEYBOARD SHORTCUTS ======
 
@@ -1142,3 +1167,4 @@ ipcRenderer.on("progressBar", (event, prog) => {
 ipcRenderer.on("cmdInputFromRenderer", (event, command) => {
   cmdinput(command)
 })
+

@@ -232,6 +232,12 @@
       "text-shadow": ".5px .5px 0px #ff33cc",
       "border": "1px solid #66ffff"
     },
+    "export-icon": {
+      "background-color": "rgba(0,0,0,0.2)",
+      "color": "#66ffff",
+      "text-shadow": ".5px .5px 0px #ff33cc",
+      "border": "1px solid #66ffff"
+    },
     "theme-background": null,
     "theme-mask": "themes/blood-dragon/fuji.svg",
     "screenMachine": { "display": "none" },
