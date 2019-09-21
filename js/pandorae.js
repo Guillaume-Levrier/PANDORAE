@@ -493,7 +493,7 @@ const categoryLoader = cat => {
          blocks = [
            'svg',
            'png',
-           'tooltip'
+           'description'
           ];
           ipcRenderer.send("console-logs", "Displaying available export formats");
           blocks.forEach(thisBlock => {
@@ -519,6 +519,8 @@ document.getElementById("export-icon").addEventListener("click",e=>{
 
 const saveAs = (format) =>{
   toggleMenu();
+
+
 setTimeout(() => {
   switch (format) {
     case 'svg': serialize(document.getElementById("xtypeSVG"))
@@ -527,7 +529,7 @@ setTimeout(() => {
     case 'png': savePNG()
       break;
   
-    case 'tooltip': saveToolTip()
+    case 'description': saveToolTip()
       break;
   
     default:
@@ -539,24 +541,41 @@ setTimeout(() => {
 const saveToolTip = () => {
 
   let tooltip = document.getElementById("tooltip");
+  tooltip.style.overflow = "hidden";
   var datasetName =document.getElementById('source').innerText.slice(8);
   datasetName = datasetName.replace(/\//ig,"_");
   datasetName = datasetName.replace(/:/ig,"+");
   remote.getCurrentWindow().capturePage({x:parseInt(tooltip.offsetLeft),y:parseInt(tooltip.offsetTop),width:parseInt(tooltip.offsetWidth),height:parseInt(tooltip.offsetHeight)}).then(img=>{
-    fs.writeFile(remote.app.getPath('pictures') + "/"+datasetName+".png",img.toPNG(),()=>{})
+    fs.writeFile(remote.app.getPath('pictures') + "/"+datasetName+"_tooltip.png",img.toPNG(),()=>{
+      tooltip.style.overflow = "auto";
+    })
   })
-      
 }
 
 const savePNG = () => {
+  document.getElementById('menu-icon').style.display = "none";
+  document.getElementById('option-icon').style.display = "none";
+  document.getElementById('export-icon').style.display = "none";
+  document.getElementById('tooltip').style.overflow = "hidden";
+
 
   var datasetName =document.getElementById('source').innerText.slice(8);
   datasetName = datasetName.replace(/\//ig,"_");
   datasetName = datasetName.replace(/:/ig,"+");
-  remote.getCurrentWindow().capturePage().then(img=>{
-    fs.writeFile(remote.app.getPath('pictures') + "/"+datasetName+".png",img.toPNG(),()=>{})
-  })
+  setTimeout(() => {
+    remote.getCurrentWindow().capturePage().then(img=>{
+      fs.writeFile(remote.app.getPath('pictures') + "/"+datasetName+"_full.png",img.toPNG(),()=>{
+        
+         document.getElementById('menu-icon').style.display = "flex";
+          document.getElementById('option-icon').style.display = "flex";
+          document.getElementById('export-icon').style.display = "flex";
+          document.getElementById('tooltip').style.overflow = "auto"; 
       
+      })
+    })
+  }, 250);
+  
+ 
 }
 
 
