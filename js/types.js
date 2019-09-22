@@ -561,6 +561,8 @@ const hyphotype = id => {
     .append("svg")
     .attr("id", "xtypeSVG"); // Creating the SVG DOM node
 
+    svg.style("background-color","#e6f3ff")
+
   svg.attr("width", width).attr("height", height); // Attributing width and height to svg
 
   var view = svg.append("g") // Appending a group to SVG
@@ -609,6 +611,10 @@ const hyphotype = id => {
           "#00392b"
     ]);
    
+    var colorFill = d3.scaleLog()                                                 // Color is determined on a log scale
+    .domain(d3.extent(d3.range(1, 11)))                           // Domain ranges from 1 to 15
+    .interpolate(d => d3.interpolateOranges);                      // Interpolate is the color spectrum
+
 
   //======== DATA CALL & SORT =========
 
@@ -772,7 +778,7 @@ const hyphotype = id => {
       .attr("d", "M0,-5L10,0L0,5");
 
 
-      multiThreader.port.postMessage({ type: "hy", nodeData:nodeData,links:links, tags:tags});
+      multiThreader.port.postMessage({ type: "hy", nodeData:nodeData,links:links, tags:tags,width:width,height:height});
 
       multiThreader.port.onmessage = workerAnswer => {
       
@@ -786,7 +792,46 @@ const hyphotype = id => {
       links = workerAnswer.data.links;
 
 
-    var nodes = view.selectAll("circle")
+       
+    
+
+       var contours =   d3.contourDensity()      
+       .size([width, height])                
+       .weight(d => d.indegree)              
+       .x(d => d.x)                       
+       .y(d => d.y)                       
+       .bandwidth(9)
+       .thresholds(80)(nodeData);
+
+       console.log(contours)
+
+var  densityContour = view.insert("g")                                     // Create contour density graph
+       .attr("fill", "none")                                          // Start by making it empty/transparent
+       .attr("stroke", "GoldenRod")                                   // Separation lines color
+       .attr("stroke-width", .5)                                      // Line thickness
+       .attr("stroke-linejoin", "round")                              // Join style
+     .selectAll("path")
+     .data(contours)
+     .enter().append("path")
+       .attr("stroke-width", .5)
+       .attr("fill",d => colorFill(d.value*100))
+       .attr("d", d3.geoPath());
+
+    
+
+      var nodelinks = view.insert("g").selectAll("line")
+                      .data(links)
+                .enter().append("line")
+                .attr("stroke-width", .25)
+                .attr("stroke","#d3d3d3")
+                .attr("x1",d=>d.source.x)
+                .attr("y1",d=>d.source.y)
+                .attr("x2",d=>d.target.x)
+                .attr("y2",d=>d.target.y);
+                // .attr("marker-end", "url(#arrow)");
+
+    var nodes = view.insert("g")
+                  .selectAll("circle")
                     .data(nodeData)
                     .enter().append("circle")
                         .style('fill',d=>color(d.tags.USER))
@@ -798,18 +843,15 @@ const hyphotype = id => {
                         .attr("r", d=> 1+Math.log(d.indegree+1))
                         .attr("id", d => d.id);
                  
-           var nodelinks = view.selectAll("line")
-                        .data(links)
-                   .enter().append("line")
-                   .attr("stroke-width", .25)
-                   .attr("stroke","#d3d3d3")
-                   .attr("x1",d=>d.source.x)
-                   .attr("y1",d=>d.source.y)
-                   .attr("x2",d=>d.target.x)
-                   .attr("y2",d=>d.target.y);
-                 // .attr("marker-end", "url(#arrow)");
+
+
+
  
                       nodes.raise();   
+
+
+
+                                    
 
 
       const showTags = (tag) =>{
@@ -839,21 +881,7 @@ const hyphotype = id => {
             showTags(e.srcElement.value)
           }),200)
     
- //============ NARRATIVE ============
- function narrative() {
-  // Experimental narrative function
-  d3.select("#xtypeSVG")
-    .transition()
-    .duration(2000)
-    .call(
-      zoom.transform,
-      d3.zoomIdentity
-        .translate(width / 2, height / 2)
-        .scale(8)
-        .translate(width / 2,height / 2)
-    );
-}
-//narrative();
+
 loadType();
 document.getElementById("tooltip").innerHTML = tooltipTop;
 

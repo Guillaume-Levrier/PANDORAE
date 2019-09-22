@@ -55,8 +55,7 @@ onconnect = e => {
                 .strength(1)
             )
             .force("charge", d3.forceManyBody().strength(-600))
-            .force("x", d3.forceX())
-            .force("y", d3.forceY())
+            .force("center", d3.forceCenter(message.data.width /2, message.data.height / 2))
             .stop();
 
           for (
