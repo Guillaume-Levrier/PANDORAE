@@ -34,6 +34,8 @@ onconnect = e => {
           var nodeData = message.data.nodeData;
           var links = message.data.links;
           var tags = message.data.tags;
+          var width = message.data.width;
+          var height = message.data.height;
 
           nodeData.forEach(node => {
             for (let tag in tags) {
@@ -55,7 +57,7 @@ onconnect = e => {
                 .strength(1)
             )
             .force("charge", d3.forceManyBody().strength(-600))
-            .force("center", d3.forceCenter(message.data.width /2, message.data.height / 2))
+            .force("center", d3.forceCenter(width /2, height / 2))
             .stop();
 
           for (
@@ -71,7 +73,18 @@ onconnect = e => {
             let prog = (i/n)*100;
             port.postMessage({ type: "tick", prog:prog});
           }
-                port.postMessage({ type: "hy", nodeData: nodeData, links: links });
+
+             
+          var contours =   d3.contourDensity()      
+          .size([width, height])                
+          .weight(d => d.indegree)              
+          .x(d => d.x)                       
+          .y(d => d.y)                       
+          .bandwidth(9)
+          .thresholds(80)(nodeData);
+     
+
+                port.postMessage({ type: "hy", nodeData: nodeData, links: links, contours:contours });
 
         } catch (error) {
           port.postMessage({ type: "hy", msg: error });

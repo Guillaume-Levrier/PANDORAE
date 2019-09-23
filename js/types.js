@@ -790,22 +790,10 @@ const hyphotype = id => {
 
       nodeData = workerAnswer.data.nodeData;
       links = workerAnswer.data.links;
-
-
+      contours = workerAnswer.data.contours;
        
-    
 
-       var contours =   d3.contourDensity()      
-       .size([width, height])                
-       .weight(d => d.indegree)              
-       .x(d => d.x)                       
-       .y(d => d.y)                       
-       .bandwidth(9)
-       .thresholds(80)(nodeData);
-
-       console.log(contours)
-
-var  densityContour = view.insert("g")                                     // Create contour density graph
+    var  densityContour = view.insert("g")                                     // Create contour density graph
        .attr("fill", "none")                                          // Start by making it empty/transparent
        .attr("stroke", "GoldenRod")                                   // Separation lines color
        .attr("stroke-width", .5)                                      // Line thickness
@@ -835,25 +823,15 @@ var  densityContour = view.insert("g")                                     // Cr
                     .data(nodeData)
                     .enter().append("circle")
                         .style('fill',d=>color(d.tags.USER))
-                        .style('opacity',.45)
                         .attr('stroke',"black")
                         .attr('cx',d=>d.x)
                         .attr('cy',d=>d.y)
                         .attr('stroke-width',.2)
                         .attr("r", d=> 1+Math.log(d.indegree+1))
                         .attr("id", d => d.id);
-                 
-
-
-
  
                       nodes.raise();   
-
-
-
-                                    
-
-
+                            
       const showTags = (tag) =>{
 
           let tagList = document.getElementById('tagList');
