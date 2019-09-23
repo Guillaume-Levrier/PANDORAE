@@ -772,11 +772,6 @@ img.headshots{
   stroke-width: 1.5px;
 }
 
-line {
-  stroke: #d3d3d3;
-  stroke-opacity: 1;
-  pointer-events: none;
-}
 
 .links {
   pointer-events: none;

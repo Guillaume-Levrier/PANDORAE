@@ -563,7 +563,7 @@ const hyphotype = id => {
 
     svg.style("background-color","#e6f3ff")
 
-  svg.attr("width", width).attr("height", height); // Attributing width and height to svg
+  svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
 
   var view = svg.append("g") // Appending a group to SVG
     .attr("class", "view"); // CSS viewfinder properties
@@ -614,6 +614,22 @@ const hyphotype = id => {
     var colorFill = d3.scaleLog()                                                 // Color is determined on a log scale
     .domain(d3.extent(d3.range(1, 11)))                           // Domain ranges from 1 to 15
     .interpolate(d => d3.interpolateOranges);                      // Interpolate is the color spectrum
+
+
+    var x = d3.scaleLinear()                                                    // x is a linear scale
+    .domain([-width, width])                                              // Domain means value range on the graph onload
+    .range([0, width-toolWidth]);                                               // Range is pixel display size
+
+var y = d3.scaleLinear()                                                    // y is a linear scale
+.domain([height,-height])                                                    // Domain is negative to allow contour display
+.range([0, height]);                                                    // Range is total height
+
+var xAxis = d3.axisBottom(x);                                               // xAxis is the abscissa axis
+var xAxis2 = xAxis;                                                         // xAxis2 is its white contour for lisiblity
+var yAxis = d3.axisRight(y);                                                // yAxis is the yordinate axis
+var yAxis2 = yAxis;                                                         // yAxis white contour for lisiblit
+var xGrid = d3.axisBottom(x).tickSize(height);                              // xGrid is actually axis ticks without axis
+var yGrid = d3.axisRight(y).tickSize(width);                                // Same but for horizontal ticks
 
 
   //======== DATA CALL & SORT =========
@@ -883,10 +899,51 @@ document.getElementById("tooltip").innerHTML = tooltipTop;
 
   //======== ZOOM & RESCALE ===========
 
+  var gXGrid = svg.append("g")
+  .call(xGrid);
+
+var gYGrid = svg.append("g")
+  .call(yGrid);
+
+
+let upHeight = parseInt(height-50);
+
+var gX2 = svg.append("g")
+.attr("transform", "translate(0," + upHeight + ")")
+.attr("fill", "white")
+.attr("stroke", "white")
+.attr("stroke-width", 2)
+.call(xAxis2);
+
+var gY2 = svg.append("g")
+.attr("transform", "translate(" + 50 + ",0)")
+.attr("stroke", "white")
+.attr("stroke-width", 2)
+.call(yAxis2);
+
+var gX = svg.append("g")
+.attr("transform", "translate(0," + upHeight + ")")
+.call(xAxis);
+
+var gY = svg.append("g")
+.attr("transform", "translate(" + 50 + ",0)")
+.call(yAxis);
+
+d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.5)")
+
+
   svg.call(zoom).on("dblclick.zoom", null);
   
   function zoomed() {
      view.attr("transform", d3.event.transform);
+     gXGrid.call(xGrid.scale(d3.event.transform.rescaleX(x)));
+     gYGrid.call(yGrid.scale(d3.event.transform.rescaleY(y)));
+     gX2.call(xAxis2.scale(d3.event.transform.rescaleX(x)));
+     gY2.call(yAxis2.scale(d3.event.transform.rescaleY(y)));
+     gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
+     gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
+     d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.5)")
+
   }
   
   ipcRenderer.send("console-logs", "Starting Hyphotype");
