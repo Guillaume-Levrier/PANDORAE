@@ -804,10 +804,10 @@ const cmdinput = input => {
         pulse(1, 1, 10, true);
         break;
 
-      case "chromium console":
-        commandReturn = "opening chromium console";
+      case "open devtools":
+        commandReturn = "opening devtools";
         remote.getCurrentWindow().openDevTools();
-        ipcRenderer.send("console-logs", "Opening chromium console.");
+        ipcRenderer.send("console-logs", "opening devtools");
         break;
 
       case "unlock menu":
