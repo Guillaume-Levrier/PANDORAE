@@ -566,7 +566,8 @@ const hyphotype = id => {
   svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
 
   var view = svg.append("g") // Appending a group to SVG
-    .attr("class", "view"); // CSS viewfinder properties
+    .attr("class", "view")
+    .style("cursor","move");
 
   //zoom extent
   
@@ -773,6 +774,7 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
       "<li> Undecided: " + weStatus.undecided + "</li>"+
       "<li> Out: " + weStatus.out + "</li>"+
       "<li> In: " + weStatus.in + "</li>"+
+      "<button id='resetContour'>Reset</button>"+
       "</ul><br>Filtrer par tags<br><select id='tagDiv'>"+tagDiv+"<br><div id='tagList'></div>";
     //  "<br>Par contour<br><select id='tagDivContour'>"+tagDiv+"<br><div id='tagListContour'></div>" ;
 
@@ -829,12 +831,13 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
                       .data(links)
                 .enter().append("line")
                 .attr("stroke-width", .25)
+                .attr("class","hylinks")
                 .attr("stroke","#d3d3d3")
                 .attr("x1",d=>d.source.x)
                 .attr("y1",d=>d.source.y)
                 .attr("x2",d=>d.target.x)
                 .attr("y2",d=>d.target.y);
-                // .attr("marker-end", "url(#arrow)");
+             
 
     var nodes = view.insert("g")
                   .selectAll("circle")
@@ -844,21 +847,59 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
                         .attr('stroke',"black")
                         .attr('cx',d=>d.x)
                         .attr('cy',d=>d.y)
+                        .style("cursor","pointer")
                         .attr('stroke-width',.2)
                         .attr("r", d=> 1+Math.log(d.indegree+1))
                         .attr("id", d => d.id);
  
                       nodes.raise();   
-                       
-                      
+   setTimeout(() => {
+     
+               
+  document.getElementById("resetContour").addEventListener("click",e=>{
+
+    d3.selectAll(".contours").remove();
+
+    view.insert("g")                                     // Create contour density graph
+    .attr("fill", "none")                                          // Start by making it empty/transparent
+    .attr("class","contours")
+    .attr("stroke", "GoldenRod")                                   // Separation lines color
+    .attr("stroke-width", .5)                                      // Line thickness
+    .attr("stroke-linejoin", "round")                              // Join style
+  .selectAll("path")
+  .data(contours)
+  .enter().append("path")
+    .attr("stroke-width", .5)
+    .attr("fill",d => colorFill(d.value*100))
+    .attr("d", d3.geoPath());
+
+    d3.selectAll(".contours").lower();
+    d3.selectAll("circle").attr("opacity","1")
+    d3.selectAll(".hylinks").attr("opacity","1")
+
+  })                    
+
+}, 200);  
+
 const displayContour = (cat,tag) => {
 
   d3.selectAll(".contours").remove();
 
-
+  view.insert("g")                                     // Create contour density graph
+  .attr("fill", "none")                                          // Start by making it empty/transparent
+  .attr("class","contours")
+  .attr("stroke", "GoldenRod")                                   // Separation lines color
+  .attr("stroke-width", .5)                                      // Line thickness
+  .attr("stroke-linejoin", "round")                              // Join style
+  .attr("opacity",.3)
+    .selectAll("path")
+    .data(contours)
+    .enter().append("path")
+      .attr("stroke-width", .5)
+      .attr("fill",d => colorFill(d.value*100))
+      .attr("d", d3.geoPath());
 
   var tagNodes = nodeData.filter(item => item.tags.USER[cat][0] === tag);
-
 
   var thisContour = d3.contourDensity()      
   .size([width, height])                
@@ -867,7 +908,6 @@ const displayContour = (cat,tag) => {
   .y(d => d.y)                       
   .bandwidth(9)
   .thresholds(d3.max(tagNodes,d=>d.indegree))(tagNodes);
-
 
  var thisContourPath =  view.insert("g")                                     // Create contour density graph
     .attr("fill", "none")                                          // Start by making it empty/transparent
@@ -883,10 +923,10 @@ const displayContour = (cat,tag) => {
     .attr("d", d3.geoPath());
 
     d3.selectAll("circle").attr("opacity",".1")
+    d3.selectAll(".hylinks").attr("opacity",".1")
 
     d3.selectAll("circle").filter(item => item.tags.USER[cat][0] === tag)
     .attr("opacity","1");
- 
 
     d3.selectAll(".contours").lower();
 } 
@@ -894,20 +934,24 @@ const displayContour = (cat,tag) => {
 
       const showTags = (tag,list) =>{
 
-         //let contours=[];
           let tagList = document.getElementById(list);
           tagList.innerHTML="";
           let thisTagList = document.createElement("UL");
 
     
           for (var prop in tags) {
+
             if(prop === tag) {
             
               for (let thisTag in tags[prop]) {
+               let criteria = prop;
                 var thisTagOption = document.createElement("LI")
                 thisTagOption.innerText = thisTag+":"+tags[prop][thisTag];
                 thisTagOption.style.color = color(thisTag);
-                thisTagOption.addEventListener("click",e=>displayContour(prop,thisTag))
+                
+                thisTagOption.addEventListener("click",e=>{
+                  displayContour(criteria,thisTag)
+                })
                 thisTagList.appendChild(thisTagOption);
 
     
@@ -925,7 +969,7 @@ const displayContour = (cat,tag) => {
     
     
     setTimeout(()=> {document.getElementById('tagDiv').addEventListener("change",e=>{
-            showTags(e.srcElement.value,'tagList','node')
+            showTags(e.srcElement.value,'tagList')
             })
          
     },200)
