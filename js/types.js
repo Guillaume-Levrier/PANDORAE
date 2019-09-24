@@ -773,8 +773,8 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
       "<li> Undecided: " + weStatus.undecided + "</li>"+
       "<li> Out: " + weStatus.out + "</li>"+
       "<li> In: " + weStatus.in + "</li>"+
-      "</ul><br>Par noeud<br><select id='tagDiv'>"+tagDiv+"<br><div id='tagList'></div>"+
-      "<br>Par contour<br><select id='tagDivContour'>"+tagDiv+"<br><div id='tagListContour'></div>" ;
+      "</ul><br>Filtrer par tags<br><select id='tagDiv'>"+tagDiv+"<br><div id='tagList'></div>";
+    //  "<br>Par contour<br><select id='tagDivContour'>"+tagDiv+"<br><div id='tagListContour'></div>" ;
 
     // network graph starts here
 
@@ -849,69 +849,76 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
                         .attr("id", d => d.id);
  
                       nodes.raise();   
-                            
-      const showTags = (tag,list,mean) =>{
+                       
+                      
+const displayContour = (cat,tag) => {
 
-          let contours=[];
+  d3.selectAll(".contours").remove();
+
+
+
+  var tagNodes = nodeData.filter(item => item.tags.USER[cat][0] === tag);
+
+
+  var thisContour = d3.contourDensity()      
+  .size([width, height])                
+  .weight(d => d.indegree)              
+  .x(d => d.x)                       
+  .y(d => d.y)                       
+  .bandwidth(9)
+  .thresholds(d3.max(tagNodes,d=>d.indegree))(tagNodes);
+
+
+ var thisContourPath =  view.insert("g")                                     // Create contour density graph
+    .attr("fill", "none")                                          // Start by making it empty/transparent
+    .attr("class","contours")
+    .attr("stroke", "GoldenRod")                                   // Separation lines color
+    .attr("stroke-width", .5)                                      // Line thickness
+    .attr("stroke-linejoin", "round")                              // Join style
+  .selectAll("path")
+  .data(thisContour)
+  .enter().append("path")
+    .attr("stroke-width", .5)
+    .attr("fill",d => colorFill(d.value*100))
+    .attr("d", d3.geoPath());
+
+    d3.selectAll("circle").attr("opacity",".1")
+
+    d3.selectAll("circle").filter(item => item.tags.USER[cat][0] === tag)
+    .attr("opacity","1");
+ 
+
+    d3.selectAll(".contours").lower();
+} 
+
+
+      const showTags = (tag,list) =>{
+
+         //let contours=[];
           let tagList = document.getElementById(list);
           tagList.innerHTML="";
-          let thisTagList = "<ul>";
+          let thisTagList = document.createElement("UL");
+
     
           for (var prop in tags) {
             if(prop === tag) {
             
               for (let thisTag in tags[prop]) {
-                
-                thisTagList = thisTagList + "<li style='color:"+color(thisTag)+"'>"+thisTag+":"+tags[prop][thisTag]+"</li>"
+                var thisTagOption = document.createElement("LI")
+                thisTagOption.innerText = thisTag+":"+tags[prop][thisTag];
+                thisTagOption.style.color = color(thisTag);
+                thisTagOption.addEventListener("click",e=>displayContour(prop,thisTag))
+                thisTagList.appendChild(thisTagOption);
 
-                if (mean === "contour") {
-               
-                  var tagNodes = nodeData.filter(item => item.tags.USER[tag][0] === thisTag);
-
-                  var thisContour = d3.contourDensity()      
-                  .size([width, height])                
-                  .weight(d => d.indegree)              
-                  .x(d => d.x)                       
-                  .y(d => d.y)                       
-                  .bandwidth(9)
-                  .thresholds(80)(tagNodes);
-
-                  contours.push(thisContour)
-                }
-
+    
               }
     
             }
     
           }
-          thisTagList = thisTagList + "</ul>"
-          tagList.innerHTML = thisTagList;
-          switch (mean) {
-            case "node": nodes.style('fill',d=>color(d.tags.USER[tag][0]))
-              break;
-          
-            case 'contour': 
-
-            d3.select(".contours").remove();
-
-            contours.forEach(contour=>{
-              view.insert("g")                                     // Create contour density graph
-              .attr("fill", "none")                                          // Start by making it empty/transparent
-              .attr("class","contours")
-              .attr("stroke", "GoldenRod")                                   // Separation lines color
-              .attr("stroke-width", .5)                                      // Line thickness
-              .attr("stroke-linejoin", "round")                              // Join style
-            .selectAll("path")
-            .data(contour)
-            .enter().append("path")
-              .attr("stroke-width", .5)
-              .attr("fill",d => colorFill(d.value*100))
-              .attr("d", d3.geoPath());
-              d3.select(".contours").lower();
-              nodes.raise();   
-            })
-              break;
-          }
+          tagList.appendChild(thisTagList)
+        nodes.style('fill',d=>color(d.tags.USER[tag][0]))
+           
          
           nodes.raise();   
         }
@@ -920,9 +927,7 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
     setTimeout(()=> {document.getElementById('tagDiv').addEventListener("change",e=>{
             showTags(e.srcElement.value,'tagList','node')
             })
-            document.getElementById('tagDivContour').addEventListener("change",e=>{
-              showTags(e.srcElement.value,'tagListContour','contour')
-              })
+         
     },200)
     
 

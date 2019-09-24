@@ -81,7 +81,7 @@ onconnect = e => {
           .x(d => d.x)                       
           .y(d => d.y)                       
           .bandwidth(9)
-          .thresholds(80)(nodeData);
+          .thresholds(d3.max(nodeData,d=>d.indegree))(nodeData);
      
 
                 port.postMessage({ type: "hy", nodeData: nodeData, links: links, contours:contours });
