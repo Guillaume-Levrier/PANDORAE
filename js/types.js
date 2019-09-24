@@ -812,6 +812,7 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
 
     var  densityContour = view.insert("g")                                     // Create contour density graph
        .attr("fill", "none")                                          // Start by making it empty/transparent
+       .attr("class","contours")
        .attr("stroke", "GoldenRod")                                   // Separation lines color
        .attr("stroke-width", .5)                                      // Line thickness
        .attr("stroke-linejoin", "round")                              // Join style
@@ -851,6 +852,7 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
                             
       const showTags = (tag,list,mean) =>{
 
+          let contours=[];
           let tagList = document.getElementById(list);
           tagList.innerHTML="";
           let thisTagList = "<ul>";
@@ -861,6 +863,22 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
               for (let thisTag in tags[prop]) {
                 
                 thisTagList = thisTagList + "<li style='color:"+color(thisTag)+"'>"+thisTag+":"+tags[prop][thisTag]+"</li>"
+
+                if (mean === "contour") {
+               
+                  var tagNodes = nodeData.filter(item => item.tags.USER[tag][0] === thisTag);
+
+                  var thisContour = d3.contourDensity()      
+                  .size([width, height])                
+                  .weight(d => d.indegree)              
+                  .x(d => d.x)                       
+                  .y(d => d.y)                       
+                  .bandwidth(9)
+                  .thresholds(80)(tagNodes);
+
+                  contours.push(thisContour)
+                }
+
               }
     
             }
@@ -872,10 +890,30 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
             case "node": nodes.style('fill',d=>color(d.tags.USER[tag][0]))
               break;
           
-            case 'contour': console.log("contour")
+            case 'contour': 
+
+            d3.select(".contours").remove();
+
+            contours.forEach(contour=>{
+              view.insert("g")                                     // Create contour density graph
+              .attr("fill", "none")                                          // Start by making it empty/transparent
+              .attr("class","contours")
+              .attr("stroke", "GoldenRod")                                   // Separation lines color
+              .attr("stroke-width", .5)                                      // Line thickness
+              .attr("stroke-linejoin", "round")                              // Join style
+            .selectAll("path")
+            .data(contour)
+            .enter().append("path")
+              .attr("stroke-width", .5)
+              .attr("fill",d => colorFill(d.value*100))
+              .attr("d", d3.geoPath());
+              d3.select(".contours").lower();
+              nodes.raise();   
+            })
               break;
           }
          
+          nodes.raise();   
         }
     
     
