@@ -738,7 +738,7 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
        tags[subTag].NA = parseInt(nodeData.length-taggedNodes);
       }
  
-      var tagDiv= "<select id='tagDiv'>"
+      var tagDiv= ""
 
       for (var prop in tags) {
         tagDiv = tagDiv +  '<option value="'+prop+'">'+prop+'</option>';
@@ -773,7 +773,8 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
       "<li> Undecided: " + weStatus.undecided + "</li>"+
       "<li> Out: " + weStatus.out + "</li>"+
       "<li> In: " + weStatus.in + "</li>"+
-      "</ul><br><br>"+tagDiv+"<br><div id='tagList'></div>" ;
+      "</ul><br>Par noeud<br><select id='tagDiv'>"+tagDiv+"<br><div id='tagList'></div>"+
+      "<br>Par contour<br><select id='tagDivContour'>"+tagDiv+"<br><div id='tagListContour'></div>" ;
 
     // network graph starts here
 
@@ -848,9 +849,9 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
  
                       nodes.raise();   
                             
-      const showTags = (tag) =>{
+      const showTags = (tag,list,mean) =>{
 
-          let tagList = document.getElementById('tagList');
+          let tagList = document.getElementById(list);
           tagList.innerHTML="";
           let thisTagList = "<ul>";
     
@@ -867,13 +868,24 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
           }
           thisTagList = thisTagList + "</ul>"
           tagList.innerHTML = thisTagList;
-          nodes.style('fill',d=>color(d.tags.USER[tag][0]))
+          switch (mean) {
+            case "node": nodes.style('fill',d=>color(d.tags.USER[tag][0]))
+              break;
+          
+            case 'contour': console.log("contour")
+              break;
+          }
+         
         }
     
     
-    setTimeout(()=> document.getElementById('tagDiv').addEventListener("change",e=>{
-            showTags(e.srcElement.value)
-          }),200)
+    setTimeout(()=> {document.getElementById('tagDiv').addEventListener("change",e=>{
+            showTags(e.srcElement.value,'tagList','node')
+            })
+            document.getElementById('tagDivContour').addEventListener("change",e=>{
+              showTags(e.srcElement.value,'tagListContour','contour')
+              })
+    },200)
     
 
 loadType();
