@@ -16,7 +16,6 @@ const csv = require("csv-parser");
 const versor = require("versor");
 const rpn = require("request-promise-native"); // RPN enables to generate requests to various APIs
 
-
 var field = document.getElementById("field");
 
 // =========== LOADTYPE ===========
@@ -782,7 +781,8 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
       "<li> Undecided: " + weStatus.undecided + "</li>"+
       "<li> Out: " + weStatus.out + "</li>"+
       "<li> In: " + weStatus.in + "</li>"+
-      "</ul><br>Filtrer par tags<br><select id='tagDiv'>"+tagDiv+"<br><div id='tagList'></div>";
+      "</ul><br>Filtrer par tags<br><select id='tagDiv'>"+tagDiv+"<br><div id='tagList'></div>"+
+      "<br><br><div id='weDetail'></div><br><br><br><div id='whois'></div><br><br><br><br><br>";
 
 
       var arrows = view.append("svg:defs").selectAll("marker")
@@ -817,7 +817,7 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
       contours = workerAnswer.data.contours;
        
 
-    var  densityContour = view.insert("g")                                     // Create contour density graph
+    var densityContour = view.insert("g")                                     // Create contour density graph
        .attr("fill", "none")                                          // Start by making it empty/transparent
        .attr("class","contours")
        .attr("stroke", "GoldenRod")                                   // Separation lines color
@@ -855,7 +855,30 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
                         .style("cursor","pointer")
                         .attr('stroke-width',.2)
                         .attr("r", d=> 1+Math.log(d.indegree+1))
-                        .attr("id", d => d.id);
+                        .attr("id", d => d.id)
+                        .on("click",d=>{
+                          var weDetail = "<h3>WE Detail</h3>";
+
+                          for (var prop in d){
+                            weDetail = weDetail+ "<br><strong>"+ prop + "</strong>: "+d[prop];
+                          }
+
+                            document.getElementById("weDetail").innerHTML = weDetail;
+                             
+                    (async function(){
+                      const whois = require('whois-json')
+
+                       var whoisDetails = await whois(d.name);
+                           
+                      var whoisResult = "<h3>Whois result</h3>";
+                      for (var prop in whoisDetails){
+                        whoisResult = whoisResult+ "<br>"+ prop + ": "+whoisDetails[prop];
+                      }
+
+                            document.getElementById("whois").innerHTML = whoisResult;
+                          })()
+
+                        });
  
 
 
@@ -1044,7 +1067,17 @@ const displayContour = (cat,tag) => {
             })
          
     },200)
-    
+   
+  nodeData.forEach(d=>{
+    delete d.x;
+    delete d.y;
+    delete d.vx;
+    delete d.vy;
+    delete d.dx;
+    delete d.box;
+    delete d._id;
+  })  
+
 
 loadType();
 document.getElementById("tooltip").innerHTML = tooltipTop;
