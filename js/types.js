@@ -579,38 +579,46 @@ const hyphotype = id => {
   
       var color =  d3.scaleOrdinal()
       .domain([0, 1])    
-      .range([
-          "#623500",
-          "#970ccd",
-          "#53fa4d",
-          "#0040bd",
-          "#d2d400",
-          "#c00092",
-          "#2d9300",
-          "#ff0d8a",
-          "#66ffbf",
-          "#ff432f",
-          "#01ab6d",
-          "#c58eff",
-          "#3b5a00",
-          "#bfb5ff",
-          "#b06500",
-          "#0079bf",
-          "#fffa94",
-          "#200026",
-          "#f4ffc7",
-          "#a40045",
-          "#01a9a4",
-          "#ff6e56",
-          "#0093b5",
-          "#ffb373",
-          "#005c77",
-          "#7b6100",
-          "#d1daff",
-          "#0a3500",
-          "#ffb8cc",
-          "#00392b"
-    ]);
+      .range(["#1d302a",
+      "#d971db",
+      "#76b940",
+      "#4a238b",
+      "#4abe73",
+      "#965bd3",
+      "#c2ae3b",
+      "#5a6bd7",
+      "#cf7f2f",
+      "#5e8adb",
+      "#d24a34",
+      "#59beaf",
+      "#dc4492",
+      "#55812f",
+      "#9f3094",
+      "#85b789",
+      "#342564",
+      "#aaaa6c",
+      "#86519a",
+      "#816e2a",
+      "#ba93d4",
+      "#364e25",
+      "#c53a5c",
+      "#43815e",
+      "#d574a8",
+      "#5cafce",
+      "#863a23",
+      "#97a0c4",
+      "#4a2023",
+      "#d1976f",
+      "#381d3d",
+      "#aca393",
+      "#802c58",
+      "#4e7a7c",
+      "#d6756d",
+      "#576095",
+      "#604b30",
+      "#d699ac",
+      "#3c4b63",
+      "#8c5f6b"]);
    
     var colorFill = d3.scaleLog()                                                 // Color is determined on a log scale
     .domain(d3.extent(d3.range(1, 11)))                           // Domain ranges from 1 to 15
@@ -776,9 +784,7 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
       "<li> In: " + weStatus.in + "</li>"+
       "<button id='resetContour'>Reset</button>"+
       "</ul><br>Filtrer par tags<br><select id='tagDiv'>"+tagDiv+"<br><div id='tagList'></div>";
-    //  "<br>Par contour<br><select id='tagDivContour'>"+tagDiv+"<br><div id='tagListContour'></div>" ;
 
-    // network graph starts here
 
       var arrows = view.append("svg:defs").selectAll("marker")
       .data(["end"])                                         // Different link/path types can be defined here
@@ -853,32 +859,32 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
                         .attr("id", d => d.id);
  
                       nodes.raise();   
-   setTimeout(() => {
-     
-               
-  document.getElementById("resetContour").addEventListener("click",e=>{
 
-    d3.selectAll(".contours").remove();
+const resetContourGraph = () => {
 
-    view.insert("g")                                     // Create contour density graph
-    .attr("fill", "none")                                          // Start by making it empty/transparent
-    .attr("class","contours")
-    .attr("stroke", "GoldenRod")                                   // Separation lines color
-    .attr("stroke-width", .5)                                      // Line thickness
-    .attr("stroke-linejoin", "round")                              // Join style
-  .selectAll("path")
-  .data(contours)
-  .enter().append("path")
-    .attr("stroke-width", .5)
-    .attr("fill",d => colorFill(d.value*100))
-    .attr("d", d3.geoPath());
+  d3.selectAll(".contours").remove();
 
-    d3.selectAll(".contours").lower();
-    d3.selectAll("circle").attr("opacity","1")
-    d3.selectAll(".hylinks").attr("opacity","1")
+  view.insert("g")                                     // Create contour density graph
+  .attr("fill", "none")                                          // Start by making it empty/transparent
+  .attr("class","contours")
+  .attr("stroke", "GoldenRod")                                   // Separation lines color
+  .attr("stroke-width", .5)                                      // Line thickness
+  .attr("stroke-linejoin", "round")                              // Join style
+      .selectAll("path")
+      .data(contours)
+      .enter().append("path")
+        .attr("stroke-width", .5)
+        .attr("fill",d => colorFill(d.value*100))
+        .attr("d", d3.geoPath());
 
-  })                    
+  d3.selectAll(".contours").lower();
+  d3.selectAll("circle").attr("opacity","1")
+  d3.selectAll(".hylinks").attr("opacity","1")
 
+}
+
+setTimeout(() => { 
+  document.getElementById("resetContour").addEventListener("click",e=>resetContourGraph)
 }, 200);  
 
 const displayContour = (cat,tag) => {
@@ -937,7 +943,7 @@ const displayContour = (cat,tag) => {
           let tagList = document.getElementById(list);
           tagList.innerHTML="";
           let thisTagList = document.createElement("UL");
-
+          let tagsArray = []
     
           for (var prop in tags) {
 
@@ -948,28 +954,59 @@ const displayContour = (cat,tag) => {
                 var thisTagOption = document.createElement("LI")
                 thisTagOption.innerText = thisTag+":"+tags[prop][thisTag];
                 thisTagOption.style.color = color(thisTag);
-                
+                thisTagOption.value = parseInt(tags[prop][thisTag]);
                 thisTagOption.addEventListener("click",e=>{
                   displayContour(criteria,thisTag)
-                })
-                thisTagList.appendChild(thisTagOption);
 
-    
+                  d3.select("#legend").remove();
+                  var legend = svg.insert("g").attr("id","legend")
+
+                  var legendText = legend.append('text').attr("fill",color(thisTag)).text(criteria+" - "+thisTag);
+
+                     let textBound=document.querySelector('#legend').getBBox()
+                    
+
+                  legend.append("rect")
+                          .attr("id","legend")
+                          .attr("fill","white")
+                          .attr("stroke","black")
+                          .attr("stroke-width",.5)
+                          .attr("x",width-toolWidth-parseInt(textBound.width)-20)
+                          .attr("y",height-30)
+                          .attr("width",parseInt(textBound.width)+20)
+                          .attr("height",30);
+                
+                     
+ 
+                          legendText.attr("x",width-toolWidth-parseInt(textBound.width)-15)
+                          .attr("y",height-30)
+                          .attr("dx",5)
+                          .attr("dy",20);
+                          legendText.raise();
+ 
+                    })
+
+                tagsArray.push(thisTagOption);
               }
     
             }
     
           }
-          tagList.appendChild(thisTagList)
+        
+          tagsArray.sort((a,b)=>d3.descending(a.value, b.value));
+          tagsArray.forEach(d=>thisTagList.appendChild(d))
+        tagList.appendChild(thisTagList)
         nodes.style('fill',d=>color(d.tags.USER[tag][0]))
            
+
          
           nodes.raise();   
         }
     
     
     setTimeout(()=> {document.getElementById('tagDiv').addEventListener("change",e=>{
-            showTags(e.srcElement.value,'tagList')
+            resetContourGraph();
+            showTags(e.srcElement.value,'tagList');
             })
          
     },200)
