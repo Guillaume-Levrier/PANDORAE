@@ -887,6 +887,7 @@ var webEntName= view.selectAll("text")
         .attr("x",d=>d.x)
         .attr("y",d=>d.y)
         .attr("dy",-.5)
+        .style("font-family","sans-serif")
         .text(d=>d.name);
 
         document.querySelectorAll(".webEntName").forEach(d=> d.__data__.dx = -d.getBBox().width/2)
