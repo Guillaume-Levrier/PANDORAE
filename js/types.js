@@ -816,7 +816,6 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
       links = workerAnswer.data.links;
       contours = workerAnswer.data.contours;
        
-
     var densityContour = view.insert("g")                                     // Create contour density graph
        .attr("fill", "none")                                          // Start by making it empty/transparent
        .attr("class","contours")
@@ -830,8 +829,6 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
        .attr("fill",d => colorFill(d.value*100))
        .attr("d", d3.geoPath());
 
-    
-
       var nodelinks = view.insert("g").selectAll("line")
                       .data(links)
                 .enter().append("line")
@@ -843,7 +840,6 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
                 .attr("x2",d=>d.target.x)
                 .attr("y2",d=>d.target.y);
              
-
     var nodes = view.insert("g")
                   .selectAll("circle")
                     .data(nodeData)
@@ -864,7 +860,7 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
                           }
 
                             document.getElementById("weDetail").innerHTML = weDetail;
-                             
+                            document.getElementById("whois").innerHTML = ""; 
                     (async function(){
                       const whois = require('whois-json')
 
@@ -872,7 +868,7 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
                            
                       var whoisResult = "<h3>Whois result</h3>";
                       for (var prop in whoisDetails){
-                        whoisResult = whoisResult+ "<br>"+ prop + ": "+whoisDetails[prop];
+                        whoisResult = whoisResult+ "<br><strong>"+ prop + "</strong>: "+whoisDetails[prop];
                       }
 
                             document.getElementById("whois").innerHTML = whoisResult;
@@ -936,10 +932,7 @@ const resetContourGraph = () => {
   d3.selectAll(".contrastRect").attr("opacity","1")
   d3.selectAll(".webEntName").attr("opacity","1")
 
-
 }
-
-
 
 const displayContour = (cat,tag) => {
 
@@ -975,22 +968,20 @@ const displayContour = (cat,tag) => {
     .attr("stroke", "GoldenRod")                                   // Separation lines color
     .attr("stroke-width", .5)                                      // Line thickness
     .attr("stroke-linejoin", "round")                              // Join style
-  .selectAll("path")
-  .data(thisContour)
-  .enter().append("path")
-    .attr("stroke-width", .5)
-    .attr("fill",d => colorFill(d.value*100))
-    .attr("d", d3.geoPath());
+        .selectAll("path")
+        .data(thisContour)
+        .enter().append("path")
+          .attr("stroke-width", .5)
+          .attr("fill",d => colorFill(d.value*100))
+          .attr("d", d3.geoPath());
 
     d3.selectAll("circle").attr("opacity",".1")
     d3.selectAll(".hylinks").attr("opacity",".1")
     d3.selectAll(".contrastRect").attr("opacity",".1")
     d3.selectAll(".webEntName").attr("opacity",".1")
-
     d3.selectAll("circle").filter(item => item.tags.USER[cat][0] === tag).attr("opacity","1");
     d3.selectAll(".contrastRect").filter(item => item.tags.USER[cat][0] === tag).attr("opacity","1");
     d3.selectAll(".webEntName").filter(item => item.tags.USER[cat][0] === tag).attr("opacity","1");
-
     d3.selectAll(".contours").lower();
 } 
 
@@ -1049,14 +1040,11 @@ const displayContour = (cat,tag) => {
             }
     
           }
-        
+      
           tagsArray.sort((a,b)=>d3.descending(a.value, b.value));
           tagsArray.forEach(d=>thisTagList.appendChild(d))
-        tagList.appendChild(thisTagList)
-        nodes.style('fill',d=>color(d.tags.USER[tag][0]))
-           
-
-         
+          tagList.appendChild(thisTagList)
+          nodes.style('fill',d=>color(d.tags.USER[tag][0]))
           nodes.raise();   
         }
     
