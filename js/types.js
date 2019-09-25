@@ -1068,17 +1068,6 @@ const displayContour = (cat,tag) => {
          
     },200)
    
-  nodeData.forEach(d=>{
-    delete d.x;
-    delete d.y;
-    delete d.vx;
-    delete d.vy;
-    delete d.dx;
-    delete d.box;
-    delete d._id;
-  })  
-
-
 loadType();
 document.getElementById("tooltip").innerHTML = tooltipTop;
 
