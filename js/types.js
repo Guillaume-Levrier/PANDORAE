@@ -559,15 +559,15 @@ const hyphotype = id => {
  //  SVG VIEW 
   var svg = d3.select(xtype)
     .append("svg")
-    .attr("id", "xtypeSVG"); // Creating the SVG DOM node
+    .attr("id", "xtypeSVG")
+    .style("cursor","move"); // Creating the SVG DOM node
 
     svg.style("background-color","#e6f3ff")
 
   svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
 
   var view = svg.append("g") // Appending a group to SVG
-    .attr("class", "view")
-    .style("cursor","move");
+    .attr("class", "view");
 
   //zoom extent
   
@@ -782,7 +782,6 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
       "<li> Undecided: " + weStatus.undecided + "</li>"+
       "<li> Out: " + weStatus.out + "</li>"+
       "<li> In: " + weStatus.in + "</li>"+
-      "<button id='resetContour'>Reset</button>"+
       "</ul><br>Filtrer par tags<br><select id='tagDiv'>"+tagDiv+"<br><div id='tagList'></div>";
 
 
@@ -858,7 +857,38 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
                         .attr("r", d=> 1+Math.log(d.indegree+1))
                         .attr("id", d => d.id);
  
-                      nodes.raise();   
+
+
+var webEntName= view.selectAll("text") 
+        .data(nodeData)
+        .enter().append("text")
+        .attr("class","webEntName")
+        .attr("id",d=>d.name)
+        .style("font-size","2px")
+        .attr("x",d=>d.x)
+        .attr("y",d=>d.y)
+        .attr("dy",-.5)
+        .text(d=>d.name);
+
+        document.querySelectorAll(".webEntName").forEach(d=> d.__data__.dx = -d.getBBox().width/2)
+        webEntName.attr("dx",d=>d.dx)
+
+        nodeData.forEach(d=>d.box=document.getElementById(d.name).getBBox());
+
+  var webEntNameRect =  view.selectAll("rect") 
+           .data(nodeData)
+           .enter().append("rect")
+           .attr("class","contrastRect")
+           .attr("fill","white")
+           .attr("stroke","black")
+           .attr("stroke-width",.1)
+           .attr("x",d=>d.box.x)
+           .attr("y",d=>d.box.y)
+           .attr("width",d=>d.box.width+1)
+           .attr("height",d=>d.box.height);  
+
+           nodes.raise();  
+           webEntName.raise()  
 
 const resetContourGraph = () => {
 
@@ -880,12 +910,13 @@ const resetContourGraph = () => {
   d3.selectAll(".contours").lower();
   d3.selectAll("circle").attr("opacity","1")
   d3.selectAll(".hylinks").attr("opacity","1")
+  d3.selectAll(".contrastRect").attr("opacity","1")
+  d3.selectAll(".webEntName").attr("opacity","1")
+
 
 }
 
-setTimeout(() => { 
-  document.getElementById("resetContour").addEventListener("click",e=>resetContourGraph)
-}, 200);  
+
 
 const displayContour = (cat,tag) => {
 
@@ -930,9 +961,12 @@ const displayContour = (cat,tag) => {
 
     d3.selectAll("circle").attr("opacity",".1")
     d3.selectAll(".hylinks").attr("opacity",".1")
+    d3.selectAll(".contrastRect").attr("opacity",".1")
+    d3.selectAll(".webEntName").attr("opacity",".1")
 
-    d3.selectAll("circle").filter(item => item.tags.USER[cat][0] === tag)
-    .attr("opacity","1");
+    d3.selectAll("circle").filter(item => item.tags.USER[cat][0] === tag).attr("opacity","1");
+    d3.selectAll(".contrastRect").filter(item => item.tags.USER[cat][0] === tag).attr("opacity","1");
+    d3.selectAll(".webEntName").filter(item => item.tags.USER[cat][0] === tag).attr("opacity","1");
 
     d3.selectAll(".contours").lower();
 } 
