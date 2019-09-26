@@ -334,7 +334,9 @@ You should use this feature with caution. It can make PANDORÆ malfunction or un
           <section id="final8" class="step centerStep">
            This <strong>CORE</strong> is now yours. <br>&nbsp;<br>
            Close the software and restart it to escape the tutorial.<br>&nbsp;<br>
-           Thank you for using PANDORÆ.
+           Thank you for using PANDORÆ.<br><br>
+         
+           <div id='restartCount' style="font-weight: bolder"></div>
           </section>
 
           <section id="last" class="step centerStep">
@@ -381,15 +383,31 @@ var sectionList = document.querySelectorAll("section");
   </div>
   <script>
       const lastScroll = () =>{
-        smoothScrollTo('final8');
-        ipcRenderer.send("cmdInputFromRenderer", "change theme blood-dragon")
+       
+       
+        smoothScrollTo('final8');       
         document.body.style.animation = "invert 2s";
         document.body.style.animationFillMode= "forwards";
         document.body.style.overflow = "hidden";
-        document.getElementById('backarrow').style.display = "none";  
+        document.getElementById('backarrow').style.display = "none";
+        
+setTimeout(() => {
+  
+        let seconds = 10;
+        const secMinus = () => {
+          seconds = seconds-1;
+          document.getElementById('restartCount').innerHTML = "Restarting in:<br>"+ seconds;
+        };
+        
+        setInterval(secMinus, 1000)
+        
         setTimeout(() => {
-          ipcRenderer.send('chaeros-notification', 'change theme normal');
-        }, 1500);
-      };        
+          const { remote } = require("electron");
+          remote.app.relaunch();
+          remote.app.exit(0);
+        }, 10000); 
+            
+    }, 7000);
+  }
   </script>
 </body>
