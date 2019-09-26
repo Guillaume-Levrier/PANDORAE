@@ -284,8 +284,6 @@ document.addEventListener("keydown",e=>{
 
 document.getElementById('fluxMenu').addEventListener('click',e=>toggleFlux());
 document.getElementById('type').addEventListener('click',e=>categoryLoader('type'));
-document.getElementById('tutostartmenu').addEventListener('click',e=>{toggleMenu();tutorialOpener();});
-document.getElementById('quitBut').addEventListener('click',e=>closeWindow());
 
 
 
@@ -432,6 +430,8 @@ const purgeCore = () => {
   }
 };
 
+document.getElementById("menu-icon").addEventListener("click",e=>toggleMenu());
+
 const selectOption = (type, id) => {
   pulse(1, 1, 10);
   document.getElementById(id).style.backgroundColor = "rgba(220,220,220,0.3)";
@@ -455,7 +455,7 @@ const selectOption = (type, id) => {
 };
 
 // ========== MAIN MENU OPTIONS ========
-
+/* 
 const categoryLoader = cat => {
 
   purgeMenuItems("secMenContent");
@@ -512,7 +512,7 @@ const categoryLoader = cat => {
   }
 
  toggleSecondaryMenu();
-};
+}; */
 
 document.getElementById("export-icon").addEventListener("click",e=>{
   toggleMenu();
@@ -1423,16 +1423,19 @@ const loadTheme = () => {
         let theme = themeData[i];
         activeTheme = theme;
 
+        normalCore()
+
+        /* 
         if (theme.hasOwnProperty("script")) {
           let themepath ="../themes/"+theme["theme-name"]+"/"+theme.script+".js"
-          import(themepath).then(modules=>console.log(modules))
+          import(themepath).then(module=>module.normalCore())
          // import * as activateThisTheme from themepath;
-        /*   var themeScripts = require(appPath +
+           var themeScripts = require(appPath +
             "/themes/" +
             theme["theme-name"] +
             "/" +
-            theme.script)(); */
-        }
+            theme.script)(); 
+        } */
 
         setTimeout(() => {
           // Give the process enough time to create the relevant DOM elements

@@ -293,5 +293,3 @@ window.onload = reloadCore();
 }
 
 
-
-export { normalCore };

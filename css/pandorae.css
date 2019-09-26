@@ -473,7 +473,7 @@ li:active {
 #coreCanvas{
   top:0;
   position: absolute;
-  display: none;
+  display: block;
   overflow: hidden;
   margin:auto;
   padding:0;
