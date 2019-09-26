@@ -373,7 +373,7 @@ const removeTooltip = () => {
 ipcRenderer.on("coreSignal", (event, fluxAction, fluxArgs, message) => {
   try {
     field.value = message;
-    pulse(1, 1, 10);
+    //pulse(1, 1, 10);
   } catch (err) {
     field.value = err;
   }
@@ -382,7 +382,7 @@ ipcRenderer.on("coreSignal", (event, fluxAction, fluxArgs, message) => {
 ipcRenderer.on("chaeros-notification", (event, message, action) => {
   field.value = message;
   if (action === "detransfect") {
-    pulse(1, 1, 10, true);
+   // pulse(1, 1, 10, true);
   }
 });
 
@@ -433,6 +433,7 @@ const purgeCore = () => {
 };
 
 const selectOption = (type, id) => {
+  pulse(1, 1, 10);
   document.getElementById(id).style.backgroundColor = "rgba(220,220,220,0.3)";
 
   toggleMenu();
