@@ -920,7 +920,7 @@ const tutorialOpener = () => {
   openTutorial(slide);
   field.value = "";
 };
-
+/*
 fs.readFile(
   userDataPath + "/userID/user-id.json", // Read the designated datafile
   "utf8",
@@ -948,6 +948,7 @@ fs.readFile(
     }
   }
 );
+*/
 
 const blinker = item => {
   let blinking;
@@ -1027,7 +1028,7 @@ var coreCanvasH = window.innerHeight;
 
 var coreDefW = 512;
 var coreDefH = 512;
-
+/*
 const selectTheme = themeName => {
   fs.readFile(userDataPath + "/themes/themes.json", "utf8", (err, data) => {
     var themeData = JSON.parse(data);
@@ -1129,7 +1130,7 @@ const zoomThemeScreen = theme => {
   }
 };
 
-
+*/
 // ====== KEYBOARD SHORTCUTS ======
 
 document.addEventListener("keydown", event => {
