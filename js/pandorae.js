@@ -8,7 +8,7 @@
 //   LICENSE : MIT
 //
 // pandorae.js is the main JS file managing what happens in the mainWindow. It communicates with the Main process
-// and with other windows through the Main process (by ipc channels). Visualisations (types) are loaded in the Main window
+// and with other windows through the Main process (by //ipc channels). Visualisations (types) are loaded in the Main window
 // through the "type" module, which computes heavier operations in a dedicated SharedWorker.
 //
 // ============ VERSION ===========
@@ -19,7 +19,7 @@ console.log(msg + version);
 
 // =========== NODE - NPM ===========
 // Loading all relevant modules
-//const { remote, ipcRenderer, shell } = require("electron");
+//const { remote, //ipcRenderer, shell } = require("electron");
 //const Request = require("request");
 //const rpn = require("request-promise-native");
 //const events = require("events");
@@ -47,14 +47,14 @@ if (!!window.SharedWorker) {
     // If multiThreader sends a message
     if (res.data.type === "notification") {
       // And the type property of this message is "notification"
-      ipcRenderer.send(res.data.dest, res.data.msg); // Send the notification to the main process for dispatch
+      //ipcRenderer.send(res.data.dest, res.data.msg); // Send the notification to the main process for dispatch
     }
   };
 
   multiThreader.onerror = err => {
     // If the multiThreader reports an error
-    ipcRenderer.send("console-logs", "Worker failed to start."); // Send an error message to the console
-    ipcRenderer.send("console-logs", JSON.stringify(err)); // Send the actual error content to the console
+    //ipcRenderer.send("console-logs", "Worker failed to start."); // Send an error message to the console
+    //ipcRenderer.send("console-logs", JSON.stringify(err)); // Send the actual error content to the console
   };
 }
 
@@ -160,7 +160,7 @@ const purgeMenuItems = menu => {
 const toggleMenu = () => {
   field.removeEventListener("click", tutorialOpener);
   if (toggledMenu) {
-    ipcRenderer.send("console-logs", "Collapsing menu");
+    //ipcRenderer.send("console-logs", "Collapsing menu");
     if (toggledSecondaryMenu) {
       toggleSecondaryMenu();
       toggleMenu();
@@ -183,7 +183,7 @@ const toggleMenu = () => {
       toggledMenu = false;
     }
   } else {
-    ipcRenderer.send("console-logs", "Opening menu");
+    //ipcRenderer.send("console-logs", "Opening menu");
       logostatus();
       document.getElementById("menu").style.left = "0px";
       document.getElementById("console").style.left = "150px";
@@ -254,14 +254,14 @@ const toggleTertiaryMenu = () => {
 };
 
 const openHelper = (helperFile, section) => {
-  ipcRenderer.send("console-logs", "Opening helper window");
-  ipcRenderer.send("window-manager", "openHelper", helperFile, "", section);
+  //ipcRenderer.send("console-logs", "Opening helper window");
+  //ipcRenderer.send("window-manager", "openHelper", helperFile, "", section);
 };
 const openModal = modalFile => {
-  ipcRenderer.send("window-manager", "openModal", modalFile);
+  //ipcRenderer.send("window-manager", "openModal", modalFile);
 };
 const toggleFlux = () => {
-  ipcRenderer.send("console-logs", "Opening Flux");
+  //ipcRenderer.send("console-logs", "Opening Flux");
   toggleMenu();
   displayCore();
   openModal("flux");
@@ -328,12 +328,12 @@ let toggledConsole = false;
 
 const toggleConsole = () => {
   if (toggledConsole) {
-    ipcRenderer.send("console-logs", "Hiding console");
+    //ipcRenderer.send("console-logs", "Hiding console");
     document.getElementById("console").style.zIndex = "-1";
     document.getElementById("console").style.display = "none";
     toggledConsole = false;
   } else {
-    ipcRenderer.send("console-logs", "Displaying console");
+    //ipcRenderer.send("console-logs", "Displaying console");
     document.getElementById("console").style.zIndex = "7";
     document.getElementById("console").style.display = "block";
     toggledConsole = true;
@@ -349,12 +349,12 @@ const addToLog = (message) => {
   log.scrollTop = log.scrollHeight;
 }
 
-ipcRenderer.on("console-messages", (event, message) => addToLog(message));
+//ipcRenderer.on("console-messages", (event, message) => addToLog(message));
 
-ipcRenderer.on("mainWindowReload", (event, message) => {
-  remote.getCurrentWindow().reload();
-  location.reload();
-});
+//ipcRenderer.on("mainWindowReload", (event, message) => {
+ // remote.getCurrentWindow().reload();
+ // location.reload();
+//});
 
 // ========== TOOLTIP ===========
 const createTooltip = () => {
@@ -369,8 +369,8 @@ const removeTooltip = () => {
 };
 
 // ========== CORE SIGNALS ===========
-
-ipcRenderer.on("coreSignal", (event, fluxAction, fluxArgs, message) => {
+/*
+//ipcRenderer.on("coreSignal", (event, fluxAction, fluxArgs, message) => {
   try {
     field.value = message;
     //pulse(1, 1, 10);
@@ -379,17 +379,17 @@ ipcRenderer.on("coreSignal", (event, fluxAction, fluxArgs, message) => {
   }
 });
 
-ipcRenderer.on("chaeros-notification", (event, message, options) => {
+//ipcRenderer.on("chaeros-notification", (event, message, options) => {
   field.value = message;
   if (message === "return to tutorial") {
     slide = options;
   }
 });
 
-ipcRenderer.on("chaeros-failure", (event, message) => {
+//ipcRenderer.on("chaeros-failure", (event, message) => {
   field.value = message;
 });
-
+*/
 // ========== CORE ACTIONS ===========
 
 var commandReturn = "";
@@ -428,7 +428,7 @@ const purgeCore = () => {
       d3.select(d.id).remove();
     });
 
-    ipcRenderer.send("console-logs", "Purging core");
+    //ipcRenderer.send("console-logs", "Purging core");
   }
 };
 
@@ -447,11 +447,11 @@ const selectOption = (type, id) => {
   );
   field.value = "starting " + type;
   types.typeSwitch(type, id);
-
-  ipcRenderer.send(
+/*
+  //ipcRenderer.send(
     "console-logs",
     "Starting with dataset: " + JSON.stringify(id)
-  );
+  );*/
 };
 
 // ========== MAIN MENU OPTIONS ========
@@ -471,7 +471,7 @@ const categoryLoader = cat => {
         "gazouillotype",
         "hyphotype"
       ];
-      ipcRenderer.send("console-logs", "Displaying available types");
+      //ipcRenderer.send("console-logs", "Displaying available types");
       blocks.forEach(block => {
         pandodb[block].toArray().then(thisBlock => {
           if (thisBlock.length > 0) {
@@ -496,7 +496,7 @@ const categoryLoader = cat => {
            'png',
            'description'
           ];
-          ipcRenderer.send("console-logs", "Displaying available export formats");
+          //ipcRenderer.send("console-logs", "Displaying available export formats");
           blocks.forEach(thisBlock => {
                 let typeContainer = document.createElement("div");
                 typeContainer.style.display = "flex";
@@ -605,14 +605,14 @@ const serialize = (svg) => {
     datasetName = datasetName.replace(/:/ig,"+");
 
     
-    ipcRenderer.send("console-logs", "Exporting snapshot of current type to SVG in the user's 'Pictures' folder.");
+    //ipcRenderer.send("console-logs", "Exporting snapshot of current type to SVG in the user's 'Pictures' folder.");
     fs.writeFile(
       remote.app.getPath('pictures') + "/"+datasetName+".svg",
       string,
       "utf8",
       err => {
         if (err) {
-          ipcRenderer.send("console-logs", JSON.stringify(err));
+          //ipcRenderer.send("console-logs", JSON.stringify(err));
         }
         
       }
@@ -622,9 +622,9 @@ const serialize = (svg) => {
 
 const openTutorial = (slide) => {
   if (slide) {
-  ipcRenderer.send("window-manager","openModal","tutorial",slide);
+  //ipcRenderer.send("window-manager","openModal","tutorial",slide);
 } else {
-  ipcRenderer.send("window-manager","openModal","tutorial");
+  //ipcRenderer.send("window-manager","openModal","tutorial");
 }
 }
 
@@ -666,10 +666,10 @@ const mainDisplay = type => {
             .getElementById("thirdMenuContent")
             .removeChild(datasetContainer);
           field.value = "Dataset removed from " + type;
-          ipcRenderer.send(
+          //ipcRenderer.send(
             "console-logs",
             "Removed " + d.id + " from database: " + type
-          );
+        //  );
         };
         datasetContainer.appendChild(removeDataset);
       });
@@ -677,7 +677,7 @@ const mainDisplay = type => {
   };
 
   field.value = "preparing " + type;
-  ipcRenderer.send("console-logs", "Preparing " + type);
+  //ipcRenderer.send("console-logs", "Preparing " + type);
   displayCore();
   purgeXtype();
   toggleTertiaryMenu();
@@ -691,7 +691,7 @@ field.addEventListener("click", ()=>{cmdinput(field.value)});
 const cmdinput = input => {
   input = input.toLowerCase();
 
-  ipcRenderer.send("console-logs", " user$ " + input);
+  //ipcRenderer.send("console-logs", " user$ " + input);
 
   // Theme change
   if (input.substring(0, 13) === "change theme ") {
@@ -743,7 +743,7 @@ const cmdinput = input => {
         document.body.style.animation = "fadeout 0.5s";
         setTimeout(() => {
           document.body.remove();
-          ipcRenderer.send("change-theme", "blood-dragon");
+          //ipcRenderer.send("change-theme", "blood-dragon");
           remote.getCurrentWindow().reload();
         }, 450);
         break;
@@ -817,7 +817,7 @@ const cmdinput = input => {
       case "open devtools":
         commandReturn = "opening devtools";
         remote.getCurrentWindow().openDevTools();
-        ipcRenderer.send("console-logs", "opening devtools");
+        //ipcRenderer.send("console-logs", "opening devtools");
         break;
 
       case "unlock menu":
@@ -973,7 +973,7 @@ const blinker = item => {
     target.style.color = "#141414";
   });
 };
-
+/*
 ipcRenderer.on("tutorial", (event, message) => {
   document.getElementById("menu-icon").onclick = toggleMenu;
   document.getElementById("menu-icon").style.cursor = "pointer";
@@ -1014,7 +1014,7 @@ ipcRenderer.on("tutorial", (event, message) => {
       break;
   }
 });
-
+*/
 // ========= THEMES =======
 
 var activeTheme;
@@ -1041,7 +1041,7 @@ const selectTheme = themeName => {
       "utf8",
       err => {
         if (err) {
-          ipcRenderer.send("console-logs", JSON.stringify(err));
+          //ipcRenderer.send("console-logs", JSON.stringify(err));
         }
       }
     );
@@ -1188,7 +1188,7 @@ const progBarSign = prog => {
     (prog + 0.1) +
     "%)";
 };
-
+/*
 ipcRenderer.on("progressBar", (event, prog) => {
   progBarSign(prog);
 });
@@ -1199,4 +1199,4 @@ ipcRenderer.on("progressBar", (event, prog) => {
 ipcRenderer.on("cmdInputFromRenderer", (event, command) => {
   cmdinput(command)
 })
-
+*/
