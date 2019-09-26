@@ -1424,7 +1424,7 @@ const loadTheme = () => {
         activeTheme = theme;
 
         if (theme.hasOwnProperty("script")) {
-          let themepath ="../themes/"+theme["theme-name"]+"/+theme.script+".js"
+          let themepath ="../themes/"+theme["theme-name"]+"/"+theme.script+".js"
           import(themepath).then(modules=>console.log(modules))
          // import * as activateThisTheme from themepath;
         /*   var themeScripts = require(appPath +
