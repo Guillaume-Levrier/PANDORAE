@@ -379,10 +379,10 @@ ipcRenderer.on("coreSignal", (event, fluxAction, fluxArgs, message) => {
   }
 });
 
-ipcRenderer.on("chaeros-notification", (event, message, action) => {
+ipcRenderer.on("chaeros-notification", (event, message, options) => {
   field.value = message;
-  if (action === "detransfect") {
-   // pulse(1, 1, 10, true);
+  if (message === "return to tutorial") {
+    slide = options;
   }
 });
 
@@ -620,6 +620,15 @@ const serialize = (svg) => {
   
 }
 
+const openTutorial = (slide) => {
+  if (slide) {
+  ipcRenderer.send("window-manager","openModal","tutorial",slide);
+} else {
+  ipcRenderer.send("window-manager","openModal","tutorial");
+}
+}
+
+
 const mainDisplay = type => {
   const listTableDatasets = table => {
     let targetType = pandodb[table];
@@ -816,7 +825,7 @@ const cmdinput = input => {
         document.getElementById("menu-icon").style.cursor = "pointer";
         document.getElementById("option-icon").style.cursor = "pointer";
         field.removeEventListener("click", () => {
-          openModal("tutorial");
+          openTutorial(slide);
         });
         break;
 
@@ -824,8 +833,11 @@ const cmdinput = input => {
         commandReturn = version;
         break;
 
+      case "return to tutorial":
+          openTutorial(slide);
+          break;
       case "start tutorial":
-        openModal("tutorial");
+        openTutorial();
         break;
       case "undefined":
         commandReturn = "";
@@ -903,7 +915,7 @@ const reframeMainWindow = () => {
 //// ========== TUTORIAL ========
 
 const tutorialOpener = () => {
-  openModal("tutorial");
+  openTutorial(slide);
   field.value = "";
 };
 
@@ -998,7 +1010,7 @@ ipcRenderer.on("tutorial", (event, message) => {
         break;
 
     case "openTutorial":
-      openModal("tutorial");
+      openTutorial(slide);
       break;
   }
 });
