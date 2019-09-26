@@ -294,4 +294,4 @@ window.onload = reloadCore();
 
 
 
-module.exports = () => {normalCore();};
+export { normalCore };
