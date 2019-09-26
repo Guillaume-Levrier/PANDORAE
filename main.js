@@ -261,8 +261,8 @@ ipcMain.on("chaeros-failure", (event, message) => {
   mainWindow.webContents.send("chaeros-failure", message);
 });
 
-ipcMain.on("chaeros-notification", (event, message, action) => {
-  mainWindow.webContents.send("chaeros-notification", message, "detransfect");
+ipcMain.on("chaeros-notification", (event, message, options) => {
+  mainWindow.webContents.send("chaeros-notification", message, options);
 });
 
 ipcMain.on("chaeros-is-ready", (event, arg) => {

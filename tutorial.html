@@ -364,17 +364,17 @@ var sectionList = document.querySelectorAll("section");
 <link rel="icon" type="image/png" href="img/AE-favicon.png"/>
 
 <script src="js/window-management.js"></script>
+<script src="js/tutorial/scroller.js"></script>
+<script src="js/tutorial/tutorial.js"></script>
+<script src="js/tutorial/cascade.js"></script>
 
 <script>
   const closeAndDisplay = () => { 
     ipcRenderer.send("window-ids","tutorial",remote.getCurrentWindow().id,false);
+    ipcRenderer.send("chaeros-notification","return to tutorial",sectionList[activeIndex].id);
     closeWindow();
   };
 </script>
-
-<script src="js/tutorial/scroller.js"></script>
-<script src="js/tutorial/tutorial.js"></script>
-<script src="js/tutorial/cascade.js"></script>
 
 <div id="dialogDiv">
     <i class="material-icons  dialog-buttons" id="backarrow" style="display:none;" onclick="smoothScrollTo(previous,true);">arrow_back</i>
