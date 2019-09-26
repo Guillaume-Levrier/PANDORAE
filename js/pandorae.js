@@ -1424,11 +1424,14 @@ const loadTheme = () => {
         activeTheme = theme;
 
         if (theme.hasOwnProperty("script")) {
-          var themeScripts = require(appPath +
+          let themepath ="../themes/"+theme["theme-author.name"]+theme.script+".js"
+          import(themepath).then(modules=>console.log(modules))
+         // import * as activateThisTheme from themepath;
+        /*   var themeScripts = require(appPath +
             "/themes/" +
             theme["theme-name"] +
             "/" +
-            theme.script)();
+            theme.script)(); */
         }
 
         setTimeout(() => {
