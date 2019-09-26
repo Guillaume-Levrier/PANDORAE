@@ -6,9 +6,9 @@ PANDORÆ is currently in beta. Available processes should be functional. Check t
 
 Releases are announced on [Twitter](https://mobile.twitter.com/PANDORAE_CORE).
 
-- Download PANDORÆ Beta 0.1.29 for [Windows](https://anthropos-ecosystems.com/pandorae/PANDORAE-win32-x64.zip) (±100 Mo)
-- Download PANDORÆ Beta 0.1.29 for [macOS](https://anthropos-ecosystems.com/pandorae/PANDORAE-darwin-x64.zip) (±100 Mo) 
-- Download PANDORÆ Beta 0.1.29 for [Linux](https://anthropos-ecosystems.com/pandorae/PANDORAE-linux-x64.zip) (±100 Mo)
+- Download PANDORÆ Beta 0.9.00 for [Windows](https://anthropos-ecosystems.com/pandorae/PANDORAE-win32-x64.zip) (±100 Mo)
+- Download PANDORÆ Beta 0.9.00 for [macOS](https://anthropos-ecosystems.com/pandorae/PANDORAE-darwin-x64.zip) (±100 Mo) 
+- Download PANDORÆ Beta 0.9.00 for [Linux](https://anthropos-ecosystems.com/pandorae/PANDORAE-linux-x64.zip) (±100 Mo)
 
 macOS starting issues: put the app in the "Applications" folder and then start again.
 

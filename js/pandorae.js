@@ -14,7 +14,7 @@
 // ============ VERSION ===========
 const msg =
   "      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ\n\n";
-const version = "BETA/DEV-V0.1.29";
+const version = "BETA/DEV-V0.9.00";
 console.log(msg + version);
 
 // =========== NODE - NPM ===========
