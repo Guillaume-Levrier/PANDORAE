@@ -689,7 +689,7 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
         headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
         body: {
           method: "store.get_webentities_by_status",
-          params: {corpus:datajson.content.corpus,status:"in", count:100000}
+          params: {corpus:datajson.content.corpus,status:"in", count:-1}
         },
         json: true
       };
@@ -726,11 +726,9 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
    
       var links = [];
 
-
       let weStatus = status[0][0].result;
 
-      let nodeData = status[1][0].result.webentities;
-   
+      let nodeData = status[1][0].result;
 
       let networkLinks = status[2][0].result;
 
