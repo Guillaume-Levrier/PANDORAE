@@ -140,6 +140,17 @@ h1 {
   z-index: 5;
 }
 
+/* ============ WEB =========== */
+#downloader{
+  position: absolute;
+  z-index:6;
+  width : 25%;
+  margin-top:40%;
+  margin-left:60%;
+  height: 20%;
+  background-color:rgba(0, 0, 0, 0.4);
+  border: 2px solid white;
+}
 
 /* ============ MENU =========== */
 
