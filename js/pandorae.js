@@ -696,7 +696,7 @@ const cmdinput = input => {
   //ipcRenderer.send("console-logs", " user$ " + input);
 
   // Theme change
-  if (input.substring(0, 13) === "change theme ") {
+/*    if (input.substring(0, 13) === "change theme ") {
     switch (input.substring(13, input.length)) {
       case "normal":
       case "blood-dragon":
@@ -713,10 +713,21 @@ const cmdinput = input => {
       default:
         commandReturn = "invalid theme name";
     }
-  } else {
+  } else {  */
     switch (input) {
       case "test":
         //loadingType();
+        break;
+
+        case "change theme blood-dragon":
+            commandReturn="";
+            field.value="";
+        loadTheme("blood-dragon")
+        break;
+
+        
+        case "change theme normal":
+        location.reload();
         break;
 
       case "zoom":
@@ -860,7 +871,7 @@ const cmdinput = input => {
   }
   field.value = commandReturn;
   document.getElementById("cli-field").value = commandReturn;
-};
+//};
 
 var pump = {};
 
@@ -1029,7 +1040,7 @@ var coreCanvasH = window.innerHeight;
 var coreDefW = 512;
 var coreDefH = 512;
 
-const selectTheme = themeName => {
+/* const selectTheme = themeName => {
   fs.readFile(userDataPath + "/themes/themes.json", "utf8", (err, data) => {
     var themeData = JSON.parse(data);
     for (let i = 0; i < themeData.length; i++) {
@@ -1049,9 +1060,9 @@ const selectTheme = themeName => {
       }
     );
   });
-};
+}; */
 
-const loadTheme = () => {
+const loadTheme = (themeName) => {
 
   var themeData = [
     {
@@ -1142,132 +1153,6 @@ const loadTheme = () => {
       "coreDefW": 512,
       "coreDefH": 512,
       "script": "normal"
-    },
-    {
-      "theme-name": "minitel-magis",
-      "selected": false,
-      "fullscreenable": false,
-      "theme-author": "GL",
-      "theme-type": "cinemagraph",
-      "theme-background": "themes/minitel-magis/minitel-magis.mp4",
-      "theme-mask": "themes/minitel-magis/masque.png",
-      "screenMachine": {
-        "position": "absolute",
-        "display": "block",
-        "z-index": 1,
-        "top": 0,
-        "right": 0,
-        "height": "800px"
-      },
-      "coreCanvas": {
-        "position": "absolute",
-        "display": "block",
-        "left": "unset",
-        "width": "255px",
-        "height": "185px",
-        "top": "95px",
-        "right": "90px",
-        "overflow": "hidden",
-        "cursor": "crosshair",
-        "z-index": 2,
-        "animation": "fadein 0.7s",
-        "transform": "rotate(3deg) skewX(-2deg)"
-      },
-      "vignette": {
-        "display": "block",
-        "width": "255px",
-        "height": "185px",
-        "top": "95px",
-        "left": "",
-        "right": "95px",
-        "box-shadow": "inset 0 0 50px rgba(0,0,0,0.65)",
-        "z-index": 2,
-        "background-color": "rgba(60, 107, 107, 0.10)",
-        "position": "absolute",
-        "transform": "rotate(3deg) skewX(-2deg)"
-      },
-      "core-logo": {
-        "position": "absolute",
-        "display": "block",
-        "top": "160px",
-        "left": "unset",
-        "width": "200px",
-        "right": "120px",
-        "font-family": "'Noto Sans', 'Noto Sans SC', sans-serif",
-        "letter-spacing": "3px",
-        "font-size": "10px",
-        "margin-left": "0px",
-        "text-align": "center",
-        "pointer-events": "all",
-        "-webkit-user-select": "none",
-        "-khtml-user-select": "none",
-        "-moz-user-select": "none",
-        "-ms-user-select": "none",
-        "user-select": "none",
-        "z-index": 7,
-        "animation": "fadein 0.7s",
-        "transform": "rotate(3deg) skewX(-2deg)"
-      },
-      "version": {
-        "position": "absolute",
-        "display": "block",
-        "top": "185px",
-        "left": "unset",
-        "right": "120px",
-        "font-size": "4px",
-        "pointer-events": "all",
-        "-webkit-user-select": "none",
-        "-khtml-user-select": "none",
-        "-moz-user-select": "none",
-        "-ms-user-select": "none",
-        "user-select": "none",
-        "z-index": 7,
-        "animation": "fadein 0.7s",
-        "transform": "rotate(3deg) skewX(-2deg)"
-      },
-      "mask": {
-        "display": "block",
-        "position": "absolute",
-        "top": "0px",
-        "right": "0px",
-        "z-index": 3,
-        "width": "1200px",
-        "height": "800px"
-      },
-      "screenZoom": {
-        "display": "block",
-        "position": "absolute",
-        "top": "0px",
-        "right": "0px",
-        "z-index": 3,
-        "width": "350px",
-        "height": "350px",
-        "border-style": "hidden"
-      },
-      "field": {
-        "position": "absolute",
-        "width": "200px",
-        "top": "190px",
-        "left": "unset",
-        "right": "120px",
-        "border": "0",
-        "pointer-events": "all",
-        "font-family": "'Noto Sans', 'Noto Sans SC', sans-serif",
-        "letter-spacing": "0.15em",
-        "font-variant": "small-caps",
-        "font-size": "12px",
-        "height": "10px",
-        "text-align": "center",
-        "padding": "2px",
-        "background": "transparent",
-        "color": "#000",
-        "z-index": 7,
-        "transform": "rotate(3deg) skewX(-2deg)"
-      },
-      "coreDefW": 256,
-      "coreDefH": 256,
-      "zoom": { "transform-origin": "top right", "transform": "scale(2.4,2.4)" },
-      "script": "minitel-magis"
     },
     {
       "theme-name": "blood-dragon",
@@ -1419,24 +1304,17 @@ const loadTheme = () => {
   ]
   
     for (let i = 0; i < themeData.length; i++) {
-      if (themeData[i].selected === true) {
+      if (themeData[i]["theme-name"] === themeName) {
         let theme = themeData[i];
         activeTheme = theme;
 
-        normalCore()
+        if (themeName ==="normal") {
+          normalCore()
+        } else if (themeName ==="blood-dragon") {
 
-        /* 
-        if (theme.hasOwnProperty("script")) {
-          let themepath ="../themes/"+theme["theme-name"]+"/"+theme.script+".js"
-          import(themepath).then(module=>module.normalCore())
-         // import * as activateThisTheme from themepath;
-           var themeScripts = require(appPath +
-            "/themes/" +
-            theme["theme-name"] +
-            "/" +
-            theme.script)(); 
-        } */
-
+          sun();cityScape();voronoiBackground();//consoleRoll();
+          document.getElementById("player").innerHTML = '<iframe width="560" height="315" style="z-index: -15;" src="https://www.youtube.com/embed/opZ1-rUFYMk?controls=0&autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
+        }
         setTimeout(() => {
           // Give the process enough time to create the relevant DOM elements
           Array.from(document.getElementsByClassName("themeCustom")).forEach(
@@ -1470,7 +1348,7 @@ const loadTheme = () => {
  
 };
 
-window.onload = loadTheme();
+window.onload = loadTheme("normal");
 
 
 
