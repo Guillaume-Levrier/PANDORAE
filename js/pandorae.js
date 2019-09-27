@@ -17,22 +17,6 @@ const msg =
 const version = "BETA/DEV-V0.9.00";
 console.log(msg + version);
 
-// =========== NODE - NPM ===========
-// Loading all relevant modules
-//const { remote, //ipcRenderer, shell } = require("electron");
-//const Request = require("request");
-//const rpn = require("request-promise-native");
-//const events = require("events");
-//const fs = require("fs");
-//const d3 = require("d3");
-//const THREE = require("three");
-//const userDataPath = remote.app.getPath("userData");
-//const appPath = remote.app.getAppPath();
-//const QRCode = require("qrcode");
-//const types = require("./js/types");
-//const keytar = require("keytar");
-//const readline = require('readline');
-
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that
 // couldn't be done in Chaeros can be long. In order not to freeze the user's mainWindow,
@@ -53,8 +37,8 @@ if (!!window.SharedWorker) {
 
   multiThreader.onerror = err => {
     // If the multiThreader reports an error
-    //ipcRenderer.send("console-logs", "Worker failed to start."); // Send an error message to the console
-    //ipcRenderer.send("console-logs", JSON.stringify(err)); // Send the actual error content to the console
+   addToLog("Worker failed to start."); // Send an error message to the console
+   addToLog(JSON.stringify(err)); // Send the actual error content to the console
   };
 }
 
@@ -160,7 +144,7 @@ const purgeMenuItems = menu => {
 const toggleMenu = () => {
   field.removeEventListener("click", tutorialOpener);
   if (toggledMenu) {
-    //ipcRenderer.send("console-logs", "Collapsing menu");
+   addToLog("Collapsing menu");
     if (toggledSecondaryMenu) {
       toggleSecondaryMenu();
       toggleMenu();
@@ -183,7 +167,7 @@ const toggleMenu = () => {
       toggledMenu = false;
     }
   } else {
-    //ipcRenderer.send("console-logs", "Opening menu");
+   addToLog("Opening menu");
       logostatus();
       document.getElementById("menu").style.left = "0px";
       document.getElementById("console").style.left = "150px";
@@ -254,14 +238,14 @@ const toggleTertiaryMenu = () => {
 };
 
 const openHelper = (helperFile, section) => {
-  //ipcRenderer.send("console-logs", "Opening helper window");
+ addToLog("Opening helper window");
   //ipcRenderer.send("window-manager", "openHelper", helperFile, "", section);
 };
 const openModal = modalFile => {
   //ipcRenderer.send("window-manager", "openModal", modalFile);
 };
 const toggleFlux = () => {
-  //ipcRenderer.send("console-logs", "Opening Flux");
+ addToLog("Opening Flux");
   toggleMenu();
   displayCore();
   openModal("flux");
@@ -326,12 +310,12 @@ let toggledConsole = false;
 
 const toggleConsole = () => {
   if (toggledConsole) {
-    //ipcRenderer.send("console-logs", "Hiding console");
+   addToLog("Hiding console");
     document.getElementById("console").style.zIndex = "-1";
     document.getElementById("console").style.display = "none";
     toggledConsole = false;
   } else {
-    //ipcRenderer.send("console-logs", "Displaying console");
+   addToLog("Displaying console");
     document.getElementById("console").style.zIndex = "7";
     document.getElementById("console").style.display = "block";
     toggledConsole = true;
@@ -342,17 +326,13 @@ var logContent = "";
 let log = document.getElementById("log");
 
 const addToLog = (message) => {
-  logContent += message;
+  logContent += message + "\n";
+  if(logContent.length>10000) {
+   logContent = logContent.substr(400);
+  }
   log.innerText = logContent
   log.scrollTop = log.scrollHeight;
 }
-
-//ipcRenderer.on("console-messages", (event, message) => addToLog(message));
-
-//ipcRenderer.on("mainWindowReload", (event, message) => {
- // remote.getCurrentWindow().reload();
- // location.reload();
-//});
 
 // ========== TOOLTIP ===========
 const createTooltip = () => {
@@ -426,7 +406,7 @@ const purgeCore = () => {
       d3.select(d.id).remove();
     });
 
-    //ipcRenderer.send("console-logs", "Purging core");
+   addToLog("Purging core");
   }
 };
 
@@ -471,7 +451,7 @@ const categoryLoader = cat => {
         "gazouillotype",
         "hyphotype"
       ];
-      //ipcRenderer.send("console-logs", "Displaying available types");
+     addToLog("Displaying available types");
       blocks.forEach(block => {
         pandodb[block].toArray().then(thisBlock => {
           if (thisBlock.length > 0) {
@@ -496,7 +476,7 @@ const categoryLoader = cat => {
            'png',
            'description'
           ];
-          //ipcRenderer.send("console-logs", "Displaying available export formats");
+         addToLog("Displaying available export formats");
           blocks.forEach(thisBlock => {
                 let typeContainer = document.createElement("div");
                 typeContainer.style.display = "flex";
@@ -606,7 +586,7 @@ const serialize = (svg) => {
     datasetName = datasetName.replace(/:/ig,"+");
 
     
-    //ipcRenderer.send("console-logs", "Exporting snapshot of current type to SVG in the user's 'Pictures' folder.");
+   addToLog("Exporting snapshot of current type to SVG in the user's 'Pictures' folder.");
  /*
     fs.writeFile(
       remote.app.getPath('pictures') + "/"+datasetName+".svg",
@@ -614,7 +594,7 @@ const serialize = (svg) => {
       "utf8",
       err => {
         if (err) {
-          //ipcRenderer.send("console-logs", JSON.stringify(err));
+         addToLog(JSON.stringify(err));
         }
         
       }
@@ -679,7 +659,7 @@ const mainDisplay = type => {
   };
 
   field.value = "preparing " + type;
-  //ipcRenderer.send("console-logs", "Preparing " + type);
+ addToLog("Preparing " + type);
   displayCore();
   purgeXtype();
   toggleTertiaryMenu();
@@ -693,7 +673,7 @@ field.addEventListener("click", ()=>{cmdinput(field.value)});
 const cmdinput = input => {
   input = input.toLowerCase();
 
-  //ipcRenderer.send("console-logs", " user$ " + input);
+ addToLog(" user$ " + input);
 
   // Theme change
 /*    if (input.substring(0, 13) === "change theme ") {
@@ -830,7 +810,7 @@ const cmdinput = input => {
       case "open devtools":
         commandReturn = "opening devtools";
         //remote.getCurrentWindow().openDevTools();
-        //ipcRenderer.send("console-logs", "opening devtools");
+       addToLog("opening devtools");
         break;
 
       case "unlock menu":
@@ -868,10 +848,10 @@ const cmdinput = input => {
         commandReturn = "command not found";
         break;
     }
-  }
+  
   field.value = commandReturn;
   document.getElementById("cli-field").value = commandReturn;
-//};
+};
 
 var pump = {};
 
@@ -926,6 +906,8 @@ const reframeMainWindow = () => {
 };
 */
 //// ========== TUTORIAL ========
+
+document.getElementById("option-icon").addEventListener("click",e=>toggleConsole());
 
 const tutorialOpener = () => {
   openTutorial(slide);
@@ -1055,7 +1037,7 @@ var coreDefH = 512;
       "utf8",
       err => {
         if (err) {
-          //ipcRenderer.send("console-logs", JSON.stringify(err));
+         addToLog(JSON.stringify(err));
         }
       }
     );
@@ -1312,7 +1294,25 @@ const loadTheme = (themeName) => {
           normalCore()
         } else if (themeName ==="blood-dragon") {
 
-          sun();cityScape();voronoiBackground();//consoleRoll();
+          sun();cityScape();voronoiBackground();
+
+          const consoleRoll = () => {
+
+          var textRoll = JSON.stringify(themeData)
+
+          let priorInd = 0
+          var rollInt = setInterval(() => {
+            let newInd = Math.random()*100;
+            addToLog(textRoll.substr(priorInd,newInd));
+            priorInd = priorInd+newInd;
+            if (priorInd>=textRoll.length) {
+              priorInd=0;
+            }
+          }, 50);
+         } 
+
+          consoleRoll();
+
           document.getElementById("player").innerHTML = '<iframe width="560" height="315" style="z-index: -15;" src="https://www.youtube.com/embed/opZ1-rUFYMk?controls=0&autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
         }
         setTimeout(() => {
