@@ -969,6 +969,9 @@ const blinker = item => {
     target.style.color = "#141414";
   });
 };
+
+blinker("menu-icon")
+
 /*
 ipcRenderer.on("tutorial", (event, message) => {
   document.getElementById("menu-icon").onclick = toggleMenu;
@@ -1313,7 +1316,7 @@ const loadTheme = (themeName) => {
 
           consoleRoll();
 
-          document.getElementById("player").innerHTML = '<iframe width="560" height="315" style="z-index: -15;" src="https://www.youtube.com/embed/opZ1-rUFYMk?controls=0&autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
+          document.getElementById("player").innerHTML = '<iframe width="30" height="30" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/290555534&color=%23ff5500&auto_play=true"></iframe>'
         }
         setTimeout(() => {
           // Give the process enough time to create the relevant DOM elements
@@ -1424,3 +1427,5 @@ ipcRenderer.on("cmdInputFromRenderer", (event, command) => {
   cmdinput(command)
 })
 */
+
+//document.getElementById("downloader").style.top = document.body.offsetHeight*.6+"px";

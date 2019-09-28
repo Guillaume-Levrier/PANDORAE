@@ -141,15 +141,15 @@ h1 {
 }
 
 /* ============ WEB =========== */
-#downloader{
+.boxes{
   position: absolute;
   z-index:6;
   width : 25%;
-  margin-top:40%;
-  margin-left:60%;
-  height: 20%;
-  background-color:rgba(0, 0, 0, 0.4);
+  top:70%;
+  font-size: 14px;
+  background-color:rgba(0, 0, 0, 0.6);
   border: 2px solid white;
+  color: #FFF;
 }
 
 /* ============ MENU =========== */
