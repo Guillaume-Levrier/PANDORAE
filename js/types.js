@@ -827,6 +827,7 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
        .attr("fill",d => colorFill(d.value*100))
        .attr("d", d3.geoPath());
 
+       /*
       var nodelinks = view.insert("g").selectAll("line")
                       .data(links)
                 .enter().append("line")
@@ -837,7 +838,7 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
                 .attr("y1",d=>d.source.y)
                 .attr("x2",d=>d.target.x)
                 .attr("y2",d=>d.target.y);
-             
+         */    
     var nodes = view.insert("g")
                   .selectAll("circle")
                     .data(nodeData)
@@ -927,7 +928,7 @@ const resetContourGraph = () => {
 
   d3.selectAll(".contours").lower();
   d3.selectAll("circle").attr("opacity","1")
-  d3.selectAll(".hylinks").attr("opacity","1")
+ // d3.selectAll(".hylinks").attr("opacity","1")
   d3.selectAll(".contrastRect").attr("opacity","1")
   d3.selectAll(".webEntName").attr("opacity","1")
 
@@ -975,7 +976,7 @@ const displayContour = (cat,tag) => {
           .attr("d", d3.geoPath());
 
     d3.selectAll("circle").attr("opacity",".1")
-    d3.selectAll(".hylinks").attr("opacity",".1")
+    //d3.selectAll(".hylinks").attr("opacity",".1")
     d3.selectAll(".contrastRect").attr("opacity",".1")
     d3.selectAll(".webEntName").attr("opacity",".1")
     d3.selectAll("circle").filter(item => item.tags.USER[cat][0] === tag).attr("opacity","1");
