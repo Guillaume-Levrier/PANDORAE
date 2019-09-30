@@ -237,18 +237,19 @@ const toggleTertiaryMenu = () => {
   }
 };
 
-const openHelper = (helperFile, section) => {
- addToLog("Opening helper window");
-  //ipcRenderer.send("window-manager", "openHelper", helperFile, "", section);
-};
-const openModal = modalFile => {
-  //ipcRenderer.send("window-manager", "openModal", modalFile);
-};
+
+
 const toggleFlux = () => {
  addToLog("Opening Flux");
   toggleMenu();
   displayCore();
-  openModal("flux");
+  
+  
+var fluxFrame = document.createElement("IFRAME");
+    fluxFrame.src = "flux.html";
+    fluxFrame.id = "fluxFrame";
+    document.body.appendChild(fluxFrame)
+
 };
 
 // =========== MENU BUTTONS ===========

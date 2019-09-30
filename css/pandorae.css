@@ -658,6 +658,15 @@ td {
   margin-left: -500px;
 }
 
+#fluxFrame {
+  z-index: 10;
+  position: absolute;
+  width: 50%;
+  height: 60%;
+  left: 25%;
+  top: 20%;
+}
+
 /* ============ XTYPE GENERAL =========== */
 
 #xtype {
