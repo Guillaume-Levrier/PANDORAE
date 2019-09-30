@@ -18,13 +18,7 @@ const rpn = require("request-promise-native"); // RPN enables to generate reques
 
 var field = document.getElementById("field");
 
-const resizer = () =>{
-  width = document.body.offsetWidth;
-  height = document.body.offsetHeight;
-  toolWidth = 0.3 * width + 20;
-  d3.select("#xtypeSVG").attr("width", width - toolWidth).attr("height", height);
-}
-
+const resizer = () =>location.reload();
 
 // =========== LOADTYPE ===========
 // LoadType is the process that removes the main display canvas and then displays
