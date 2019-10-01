@@ -411,7 +411,7 @@ const purgeCore = () => {
   }
 };
 
-document.getElementById("menu-icon").addEventListener("click",e=>toggleMenu());
+//document.getElementById("menu-icon").addEventListener("click",e=>toggleMenu());
 
 const selectOption = (type, id) => {
   pulse(1, 1, 10);
@@ -971,7 +971,7 @@ const blinker = item => {
   });
 };
 
-blinker("menu-icon")
+//blinker("menu-icon")
 
 /*
 ipcRenderer.on("tutorial", (event, message) => {
