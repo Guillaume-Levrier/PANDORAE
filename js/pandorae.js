@@ -239,7 +239,7 @@ const toggleTertiaryMenu = () => {
 
 
 
-const toggleFlux = () => {
+/* const toggleFlux = () => {
  addToLog("Opening Flux");
   toggleMenu();
   displayCore();
@@ -251,7 +251,7 @@ var fluxFrame = document.createElement("IFRAME");
     document.body.appendChild(fluxFrame)
 
 };
-
+ */
 // =========== MENU BUTTONS ===========
 
 document.addEventListener("keydown",e=>{
@@ -266,9 +266,6 @@ document.addEventListener("keydown",e=>{
     return false
   }
 });
-
-document.getElementById('fluxMenu').addEventListener('click',e=>toggleFlux());
-document.getElementById('type').addEventListener('click',e=>categoryLoader('type'));
 
 
 
@@ -411,7 +408,7 @@ const purgeCore = () => {
   }
 };
 
-//document.getElementById("menu-icon").addEventListener("click",e=>toggleMenu());
+document.getElementById("menu-icon").addEventListener("click",e=>toggleMenu());
 
 const selectOption = (type, id) => {
   pulse(1, 1, 10);
@@ -1367,7 +1364,7 @@ document.addEventListener("keydown", event => {
       break;
 
     case "Digit2":
-      toggleFlux();
+    //  toggleFlux();
       toggleMenu();
       break;
 
@@ -1377,7 +1374,7 @@ document.addEventListener("keydown", event => {
       if (toggledMenu === false) {
         toggleMenu();
       }
-      categoryLoader("type");
+     // categoryLoader("type");
     }
       break;
 
