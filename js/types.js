@@ -848,7 +848,7 @@ const drawAltitudeLevel = (selectedData) => {
               .attr("dy", "0.3em")
               .attr("transform", `translate(${xy})rotate(${parseInt(angle * (180 / Math.PI))})`)
               .text(text)
-              .style("font-size", ".9px");
+              .style("font-size", ".5px");
     }
 
 
@@ -859,7 +859,7 @@ var labels_g = view.append("g").attr("id","labels_g");
         cont.coordinates.forEach(polygon =>
           polygon.forEach((ring, j) => {
             const p = ring.slice(1, Infinity),
-              possibilities = d3.range(cont.coordinates.length, cont.coordinates.length * 1.4),
+              possibilities = d3.range(cont.coordinates.length, cont.coordinates.length * 5),
               scores = possibilities.map(d => -((p.length - 1) % d)),
               n = possibilities[d3.scan(scores)],
               start = 1 + (d3.scan(p.map(xy => (j === 0 ? -1 : 1) * xy[1])) % n),
