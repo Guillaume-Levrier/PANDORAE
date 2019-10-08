@@ -787,20 +787,20 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
 
 
       var arrows = view.append("svg:defs").selectAll("marker")
-      .data(["end"])                                         // Different link/path types can be defined here
-    .enter().append("svg:marker")                            // This section adds in the arrows
-      .attr("id", String)
-      .attr("viewBox", "0 -5 10 10")
-      .attr("refX", 150)
-      .attr("refY", 0)
-      .attr("markerWidth", 12)
-      .attr("markerHeight", 12)
-      .attr("orient", "auto")
-      .attr("stroke-width",0.5)
-      .attr("fill","#d3d3d3")
-      .attr("fill-opacity",.8)
-    .append("svg:path")
-      .attr("d", "M0,-5L10,0L0,5");
+                .data(["end"])                                         // Different link/path types can be defined here
+              .enter().append("svg:marker")                            // This section adds in the arrows
+                .attr("id", String)
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 150)
+                .attr("refY", 0)
+                .attr("markerWidth", 12)
+                .attr("markerHeight", 12)
+                .attr("orient", "auto")
+                .attr("stroke-width",0.5)
+                .attr("fill","#d3d3d3")
+                .attr("fill-opacity",.8)
+              .append("svg:path")
+                .attr("d", "M0,-5L10,0L0,5");
 
 
       multiThreader.port.postMessage({ type: "hy", nodeData:nodeData,links:links, tags:tags,width:width,height:height});
@@ -830,40 +830,38 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
        .attr("fill",d => colorFill(d.value*100))
        .attr("d", d3.geoPath());
 
-
+const drawAltitudeLevel = (selectedData) => {
 
     var thresholds = [];
 
-    contours.forEach(contour => thresholds.push(parseInt(contour.value*10000)));
-
+    selectedData.forEach(thisContour => thresholds.push(parseInt(thisContour.value*10000)));
 
     function addlabel(text, xy, angle) {
+
       angle += Math.cos(angle) < 0 ? Math.PI : 0;
       
       labels_g.append("text")
               .attr("fill", "#fff")
               .attr("stroke", "none")
+              .attr("class", "labels")
               .attr("text-anchor", "middle")
               .attr("dy", "0.3em")
-              .attr("transform", `translate(${xy})`) //rotate(${angle * (180 / Math.PI)})`)
+              .attr("transform", `translate(${xy})rotate(${parseInt(angle * (180 / Math.PI))})`)
               .text(text)
-              .style("font-size", "1.1px");
+              .style("font-size", ".9px");
     }
 
-console.log(thresholds)
 
-var labels_g = view.append("g");
+var labels_g = view.append("g").attr("id","labels_g");
 
-    for (const cont of contours) {
+    for (const cont of selectedData) {
     
         cont.coordinates.forEach(polygon =>
           polygon.forEach((ring, j) => {
             const p = ring.slice(1, Infinity),
-              // best number of steps to divide ring.length
               possibilities = d3.range(cont.coordinates.length, cont.coordinates.length * 1.4),
               scores = possibilities.map(d => -((p.length - 1) % d)),
               n = possibilities[d3.scan(scores)],
-              // best starting point: bottom for first rings, top for holes
               start = 1 + (d3.scan(p.map(xy => (j === 0 ? -1 : 1) * xy[1])) % n),
               margin = 2;
   
@@ -881,21 +879,15 @@ var labels_g = view.append("g");
                   dy = p[b][1] - p[a][1];
                 if (dx === 0 && dy === 0) return;
   
-                // add the label's contour to the path stroke clip
-           /*      mask.append("circle")
-                  .attr("r", 1.3)
-                  .attr("fill", "black")
-                  .attr("transform", `translate(${xy})`); */
-  
                 addlabel(parseInt(cont.value*10000), xy, Math.atan2(dy, dx));
               }
             });
           })
         );
     }
-
+  }
   
-
+  drawAltitudeLevel(contours);
        /*
       var nodelinks = view.insert("g").selectAll("line")
                       .data(links)
@@ -944,9 +936,9 @@ var labels_g = view.append("g");
 
                         });
  
+const addWeTitle = () =>{
 
-
-var webEntName= view.selectAll("text") 
+var webEntName= view.selectAll(".webEntName") 
         .data(nodeData)
         .enter().append("text")
         .attr("class","webEntName")
@@ -978,10 +970,15 @@ var webEntName= view.selectAll("text")
            nodes.raise();  
            webEntName.raise()  
 
+          }
+
+    addWeTitle();
+
 const resetContourGraph = () => {
 
   d3.selectAll(".contours").remove();
-
+  d3.select("#labels_g").remove();
+  
   view.insert("g")                                     // Create contour density graph
   .attr("fill", "none")                                          // Start by making it empty/transparent
   .attr("class","contours")
@@ -995,41 +992,52 @@ const resetContourGraph = () => {
         .attr("fill",d => colorFill(d.value*100))
         .attr("d", d3.geoPath());
 
+  drawAltitudeLevel(contours);
+  
   d3.selectAll(".contours").lower();
   d3.selectAll("circle").attr("opacity","1")
  // d3.selectAll(".hylinks").attr("opacity","1")
   d3.selectAll(".contrastRect").attr("opacity","1")
   d3.selectAll(".webEntName").attr("opacity","1")
+  d3.selectAll(".labels").attr("opacity","1")
 
 }
 
 const displayContour = (cat,tag) => {
 
   d3.selectAll(".contours").remove();
+  
 
   view.insert("g")                                     // Create contour density graph
   .attr("fill", "none")                                          // Start by making it empty/transparent
   .attr("class","contours")
+  .attr("id","oldContour")
   .attr("stroke", "GoldenRod")                                   // Separation lines color
   .attr("stroke-width", .5)                                      // Line thickness
   .attr("stroke-linejoin", "round")                              // Join style
-  .attr("opacity",.3)
+  .attr("opacity",.25)
     .selectAll("path")
     .data(contours)
     .enter().append("path")
       .attr("stroke-width", .5)
       .attr("fill",d => colorFill(d.value*100))
       .attr("d", d3.geoPath());
+      d3.selectAll(".contours").lower();
+
 
   var tagNodes = nodeData.filter(item => item.tags.USER[cat][0] === tag);
 
   var thisContour = d3.contourDensity()      
-  .size([width, height])                
-  .weight(d => d.indegree)              
-  .x(d => d.x)                       
-  .y(d => d.y)                       
-  .bandwidth(9)
-  .thresholds(d3.max(tagNodes,d=>d.indegree))(tagNodes);
+                      .size([width, height])                
+                      .weight(d => d.indegree)              
+                      .x(d => d.x)                       
+                      .y(d => d.y)                       
+                      .bandwidth(9)
+                      .thresholds(d3.max(tagNodes,d=>d.indegree))(tagNodes);
+
+d3.select("#labels_g").remove();
+
+
 
  var thisContourPath =  view.insert("g")                                     // Create contour density graph
     .attr("fill", "none")                                          // Start by making it empty/transparent
@@ -1044,6 +1052,10 @@ const displayContour = (cat,tag) => {
           .attr("fill",d => colorFill(d.value*100))
           .attr("d", d3.geoPath());
 
+    drawAltitudeLevel(thisContour);
+
+    d3.selectAll(".contours").lower();          
+    d3.select("#oldContour").lower();          
     d3.selectAll("circle").attr("opacity",".1")
     //d3.selectAll(".hylinks").attr("opacity",".1")
     d3.selectAll(".contrastRect").attr("opacity",".1")
@@ -1051,7 +1063,7 @@ const displayContour = (cat,tag) => {
     d3.selectAll("circle").filter(item => item.tags.USER[cat][0] === tag).attr("opacity","1");
     d3.selectAll(".contrastRect").filter(item => item.tags.USER[cat][0] === tag).attr("opacity","1");
     d3.selectAll(".webEntName").filter(item => item.tags.USER[cat][0] === tag).attr("opacity","1");
-    d3.selectAll(".contours").lower();
+    
 } 
 
 
