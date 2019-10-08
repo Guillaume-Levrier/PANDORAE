@@ -830,6 +830,72 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
        .attr("fill",d => colorFill(d.value*100))
        .attr("d", d3.geoPath());
 
+
+
+    var thresholds = [];
+
+    contours.forEach(contour => thresholds.push(parseInt(contour.value*10000)));
+
+
+    function addlabel(text, xy, angle) {
+      angle += Math.cos(angle) < 0 ? Math.PI : 0;
+      
+      labels_g.append("text")
+              .attr("fill", "#fff")
+              .attr("stroke", "none")
+              .attr("text-anchor", "middle")
+              .attr("dy", "0.3em")
+              .attr("transform", `translate(${xy})`) //rotate(${angle * (180 / Math.PI)})`)
+              .text(text)
+              .style("font-size", "1.1px");
+    }
+
+console.log(thresholds)
+
+var labels_g = view.append("g");
+
+    for (const cont of contours) {
+    
+        cont.coordinates.forEach(polygon =>
+          polygon.forEach((ring, j) => {
+            const p = ring.slice(1, Infinity),
+              // best number of steps to divide ring.length
+              possibilities = d3.range(cont.coordinates.length, cont.coordinates.length * 1.4),
+              scores = possibilities.map(d => -((p.length - 1) % d)),
+              n = possibilities[d3.scan(scores)],
+              // best starting point: bottom for first rings, top for holes
+              start = 1 + (d3.scan(p.map(xy => (j === 0 ? -1 : 1) * xy[1])) % n),
+              margin = 2;
+  
+            p.forEach((xy, i) => {
+              if (
+                i % n === start &&
+                xy[0] > margin &&
+                xy[0] < width - margin &&
+                xy[1] > margin &&
+                xy[1] < height - margin
+              ) {
+                const a = (i - 2 + p.length) % p.length,
+                  b = (i + 2) % p.length,
+                  dx = p[b][0] - p[a][0],
+                  dy = p[b][1] - p[a][1];
+                if (dx === 0 && dy === 0) return;
+  
+                // add the label's contour to the path stroke clip
+           /*      mask.append("circle")
+                  .attr("r", 1.3)
+                  .attr("fill", "black")
+                  .attr("transform", `translate(${xy})`); */
+  
+                addlabel(parseInt(cont.value*10000), xy, Math.atan2(dy, dx));
+              }
+            });
+          })
+        );
+    }
+
+  
+
        /*
       var nodelinks = view.insert("g").selectAll("line")
                       .data(links)
