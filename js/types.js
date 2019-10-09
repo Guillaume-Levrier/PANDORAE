@@ -574,7 +574,7 @@ const hyphotype = id => {
   //zoom extent
   
   var zoom = d3.zoom()                                      // Zoom ability
-      .scaleExtent([0.2, 15])                               // To which extent do we allow to zoom forward or zoom back
+      .scaleExtent([0.2, 20])                               // To which extent do we allow to zoom forward or zoom back
       .translateExtent([[-width*2,-height*2],[width*3,height*3]])
       .on("zoom", zoomed);                                  // Trigger the "zoomed" function on "zoom" behaviour
 
@@ -847,6 +847,7 @@ const drawAltitudeLevel = (selectedData) => {
               .attr("text-anchor", "middle")
               .attr("dy", "0.3em")
               .attr("transform", `translate(${xy})rotate(${parseInt(angle * (180 / Math.PI))})`)
+              .style("font-weight","bolder")
               .text(text)
               .style("font-size", ".5px");
     }
