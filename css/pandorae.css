@@ -521,68 +521,6 @@ li:active {
   text-align: center;
 }
 
-/*  NORMAL SIZE
-#core-logo{
-  position: absolute;
-  width: 800px;
-  top:40%;
-  left:50%;
-  font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
-  font-weight: 800;
-  letter-spacing: 9px;
-  font-size: 50px;
-  margin-left:-400px;
-  text-align: center;
-  pointer-events: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  z-index: 2;
-  animation: fadein 0.7s;
-}
-
-#A-e{
-  position: fixed;
-  top:40%;
-  margin-top:0;
-  margin-left:0;
-  font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
-  font-weight: 800;
-  letter-spacing: 0px;
-  font-size: 50px;
-  pointer-events: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  z-index: 2;
-  clip-path: polygon(0% 20%, 100% 20%, 100% 100%, 100% 95%,50% 38%,0% 95%,-10% 100%,0% 0%);
-  animation: fadein 0.7s;
-}
-
-#a-E{
-  position: fixed;
-  top:40%;
-  font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
-  font-weight: 800;
-  font-size: 50px;
-  letter-spacing: 0px;
-  pointer-events: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  z-index: 2;
-  clip-path: polygon(0% 20%, 100% 20%, 100% 100%, 0% 0%);
-  animation: fadein 0.7s;
-}
-*/
-
-
 .infobox{
   display: none;
   position: absolute;
