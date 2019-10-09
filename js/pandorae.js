@@ -20,18 +20,12 @@ console.log(msg + version);
 // =========== NODE - NPM ===========
 // Loading all relevant modules
 const { remote, ipcRenderer, shell } = require("electron");
-const Request = require("request");
-const rpn = require("request-promise-native");
-const events = require("events");
 const fs = require("fs");
 const d3 = require("d3");
 const THREE = require("three");
 const userDataPath = remote.app.getPath("userData");
 const appPath = remote.app.getAppPath();
-const QRCode = require("qrcode");
 const types = require("./js/types");
-const keytar = require("keytar");
-const readline = require('readline');
 
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that
@@ -90,28 +84,6 @@ let coreLogo = [
   "R",
   "&nbsp;",
   "E"
-];
-
-let chaeros = [
-  "C",
-  "H",
-  "&nbsp;",
-  "&nbsp;",
-  "&nbsp;",
-  "<div id='A-e' style='margin-left:240px;'>A</div><div id='a-E' style='margin-left:250px;'>E</div>",
-  "R",
-  "O",
-  "S",
-  " ",
-  "-",
-  " ",
-  "D",
-  "I",
-  "S",
-  "T",
-  "A",
-  "N",
-  "T"
 ];
 
 const nameDisplay = name => {

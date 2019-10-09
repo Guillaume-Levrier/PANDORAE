@@ -14,13 +14,8 @@ const keytar = require("keytar"); // Load keytar to manage user API keys
 const rpn = require("request-promise-native"); // Load RPN to manage promises
 const bottleneck = require("bottleneck"); // Load bottleneck to manage API request limits
 const fs = require("fs"); // Load filesystem to manage flatfiles
-const d3 = require("d3"); // Load d3 to manage data structures
-const wordTokenizer = require("talisman/tokenizers/words"); // Load Talisman to manage language processing
-const carryStemmer = require("talisman/stemmers/french/carry"); // idem
 const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
-
-const date =
-  new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
+const date = new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
 
 
 var currentDoc = {};
