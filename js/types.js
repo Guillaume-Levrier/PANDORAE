@@ -12,6 +12,7 @@ const d3 = require("d3");
 const csv = require("csv-parser");
 const versor = require("versor");
 const rpn = require("request-promise-native"); // RPN enables to generate requests to various APIs
+const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
 
 var field = document.getElementById("field");
 
@@ -273,8 +274,6 @@ const multiFormat = date =>
     : d3.timeYear(date) < date
     ? formatMonth
     : formatYear)(date);
-
-
 
 
 // ========= ANTHROPOTYPE =========
@@ -2350,10 +2349,34 @@ const linkLoc = () => {
             if (radius === 1) {
               city.radius = 0;
             } // if it stays at 1, no articles published
-            else {
+            else { // else, the radius is log(article number) + 1
               city.radius = Math.log(radius) + 1.5;
-            } // else, the radius is log(article number) + 1
+
+            } 
           });
+
+          cities.sort((a, b) => d3.descending(a.radius, b.radius)) // Make sure smaller nodes are above bigger nodes
+
+          var citySet = new MultiSet;
+
+          cities.forEach(city=>{
+            city.cluster = JSON.stringify(parseInt(city.lon))+"|"+JSON.stringify(parseInt(city.lat));
+            citySet.add(city.cluster)
+          })
+
+          citySet.forEachMultiplicity((count, key) => {
+            let currentCluster = [];
+            if(count>1){
+              for (let i = 0; i < cities.length; i++) {
+                if (cities[i].cluster===key){
+                  currentCluster.push(i)
+                }
+              }
+              currentCluster.forEach(cityIndex=>cities[cityIndex].smallInCluster=true);
+              currentCluster.sort((a, b) => d3.descending(a.radius, b.radius)) // Make sure smaller nodes are above bigger nodes
+              cities[currentCluster[0]].smallInCluster=false;
+            }
+          }); 
 
           var affilLinks = locGroup
             .selectAll("lines") // add the links
@@ -2380,7 +2403,13 @@ const linkLoc = () => {
             .style("fill", "black")
             .style("fond-style", "Noto Sans")
             .style("user-select", "none")
-            //.style("font-weight", "bolder")
+            .style("display",d=>{
+              if(d.hasOwnProperty("smallInCluster")&&d.smallInCluster===true) {
+                return "none"
+              } else{
+                return "block"
+              }
+            })
             .style("font-size", d => {
               if (d.radius > 0) {
                 return d.radius + 0.1 + "px";
