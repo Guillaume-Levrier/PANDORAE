@@ -879,27 +879,4 @@ setTimeout(()=> {
 
 }
 
-const consoleRoll = () => {
-
-    const readInterface = readline.createInterface({
-      input: fs.createReadStream(appPath + "/js/types.js"),
-      output: process.stdout,
-      console: false
-  });
-  
-  let rollCall = []
-  
-  readInterface.on('line', line => {
-    rollCall.push(line)
-  });
-  
-  let i = 0;
-  var rollInt = setInterval(() => {
-    addToLog(rollCall[i]+'\n')
-    i++
-    if (i===500) {clearInterval(rollInt)}
-  }, 50);
-  
-  }
-
-module.exports = () => {sun();cityScape();voronoiBackground();consoleRoll();};
+module.exports = () => {sun();cityScape();voronoiBackground();};
