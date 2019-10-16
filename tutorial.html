@@ -333,12 +333,7 @@ Once that is done, you will need to set up a <a onclick="shell.openExternal('htt
           </section>
 
           <section id="last" class="step centerStep">
-              <div style="margin:auto;font-size:10px;line-height: 15px;" >
-                PANDORÆ - BETA/DEV-V0.9.00<br>
-                Guillaume Levrier<br>-<br>
-                When you steal from one author, it's plagiarism;<br> if you steal from many, it's research. <br> W.M.<br><br>
-                               
-              </div>
+              
       </section>         
 </div>
 
@@ -352,6 +347,7 @@ var sectionList = document.querySelectorAll("section");
     let paddingTop = (window.innerHeight - thisSect.getBoundingClientRect().height)/(thisSect.getBoundingClientRect().height/100)+20;
      thisSect.style.paddingTop = paddingTop+"px";
   }
+
 </script>
 
 <link rel="icon" type="image/png" href="img/AE-favicon.png"/>
@@ -375,6 +371,20 @@ var sectionList = document.querySelectorAll("section");
   <i class="material-icons dialog-buttons" onclick="closeAndDisplay();">close</i>
   </div>
   <script>
+
+// Last slide
+const fs = require("fs");
+const appPath = remote.app.getAppPath();
+fs.readFile(appPath+"\\package.json","utf8", (err, data) => {
+  if (err) throw err;
+   let package = JSON.parse(data);
+     let version = package.version;
+     document.getElementById("last").innerHTML =  "<div style='margin:auto;font-size:10px;line-height: 15px;' >"+
+                "PANDORÆ - "+version+"<br>"+
+                "Guillaume Levrier"+
+                "</div>"
+})
+
       const lastScroll = () =>{
        
        

@@ -11,11 +11,7 @@
 // and with other windows through the Main process (by ipc channels). Visualisations (types) are loaded in the Main window
 // through the "type" module, which computes heavier operations in a dedicated SharedWorker.
 //
-// ============ VERSION ===========
-const msg =
-  "      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ\n\n";
-const version = "BETA/DEV-V0.9.00";
-console.log(msg + version);
+
 
 // =========== NODE - NPM ===========
 // Loading all relevant modules
@@ -26,6 +22,21 @@ const THREE = require("three");
 const userDataPath = remote.app.getPath("userData");
 const appPath = remote.app.getAppPath();
 const types = require("./js/types");
+
+
+// ============ VERSION ===========
+const msg =
+  "      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ";
+
+var version = '';
+
+fs.readFile(appPath+"\\package.json","utf8", (err, data) => {
+  if (err) throw err;
+   let package = JSON.parse(data);
+     let version = package.version;
+     console.log(msg + " - " + version + "\n\n");
+})
+
 
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that
@@ -760,6 +771,17 @@ const cmdinput = input => {
         }, 450);
         break;
 
+
+        case "restart":
+          document.body.style.animation = "fadeout 0.5s";
+          setTimeout(() => {
+            remote.app.relaunch();
+            remote.app.exit(0);
+          }, 450);
+          break;
+
+    
+
       case "reload core":
         pandoratio = 0;
         break;
@@ -912,9 +934,14 @@ fs.readFile(
       document.getElementById("option-icon").onclick = toggleConsole;
       document.getElementById("menu-icon").style.cursor = "pointer";
       document.getElementById("option-icon").style.cursor = "pointer";
-      document.getElementById(
-        "version"
-      ).innerHTML = user.UserName.toUpperCase();
+     
+        fs.readFile(appPath+"\\package.json","utf8", (err, data) => {
+          if (err) throw err;
+           let package = JSON.parse(data);
+             let version = package.version;
+             document.getElementById("version").innerHTML = user.UserName.toUpperCase()+" | "+version;
+        })
+        
     }
   }
 );
