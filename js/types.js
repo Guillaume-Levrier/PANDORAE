@@ -549,6 +549,118 @@ const anthropotype = datasetAT => {  // When called, draw the anthropotype
   ipcRenderer.send("console-logs", "Starting anthropotype");
 };
 
+
+
+// ========= FILOTYPE =========
+const filotype = id => {
+  
+  var svg = d3.select(xtype)
+  .append("svg")
+  .attr("id", "xtypeSVG");
+
+svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
+
+var view = svg.append("g") // Appending a group to SVG
+  .attr("class", "view");
+
+  var zoom = d3.zoom()                                      // Zoom ability
+  .scaleExtent([0.2, 20])                               // To which extent do we allow to zoom forward or zoom back
+  .translateExtent([[-width*2,-height*2],[width*3,height*3]])
+  .on("zoom", zoomed);          
+  
+     //======== DATA CALL & SORT =========
+   
+     pandodb.filotype.get(id).then(datajson => {
+     
+      console.log(datajson)
+    //https://bl.ocks.org/mbostock/2966094
+
+      
+
+    var root = d3.stratify()
+                .id(d => d.id_str)
+                .parentId(d =>d.in_reply_to_status_id_str)(datajson.content);
+
+                console.log(root)
+
+    var tree = d3.tree()
+               // .separation((a, b) => {a.parent === b.parent ? 1 : .5})
+                .size([height, width]);
+
+        root = tree(root);
+
+
+        let x0 = Infinity;
+        let x1 = -x0;
+        root.each(d => {
+          if (d.x > x1) x1 = d.x;
+          if (d.x < x0) x0 = d.x;
+        });
+
+              /*   function elbow(d, i) {
+                  return "M" + d.source.y + "," + d.source.x
+                       + "H" + d.target.y + "V" + d.target.x
+                       + (d.target.children ? "" : "h");
+                } */
+     
+              //  var nodes = tree.nodes(root);
+
+                var link = view.selectAll(".link")
+                .attr("fill", "none")
+                .attr("stroke", "#555")
+              //  .attr("stroke-opacity", 0.4)
+                .attr("stroke-width", 1.5)
+              .selectAll("path")
+                .data(root.links())
+                .join("path")
+                  .attr("d", d3.linkHorizontal()
+                      .x(d => d.y)
+                      .y(d => d.x));
+              
+                var node = view.append("g")
+                .attr("stroke-linejoin", "round")
+                .attr("stroke-width", 3)
+                    .selectAll("g")
+                    .data(root.descendants())
+                    .join("g")
+                      .attr("transform", d => `translate(${d.y},${d.x})`);
+                    
+                      node.append("circle")
+                      .attr("fill", d => d.children ? "#555" : "#999")
+                      .attr("r", 2.5);
+                
+                  node.append("text")
+                      .attr("dy", "0.31em")
+                      .attr("x", d => d.children ? -6 : 6)
+                      .attr("text-anchor", d => d.children ? "end" : "start")
+                      .text(d => d.data.user.name)
+                    .clone(true).lower()
+                      .attr("stroke", "white");
+
+
+
+      loadType();
+    
+      
+      })
+       .catch(error => {
+         console.log(error);
+         field.value = "filotype error";
+         ipcRenderer.send(
+           "console-logs",
+           "Filotype error: cannot start corpus " + id + "."
+         );
+       });
+     //======== ZOOM & RESCALE ===========
+  svg.call(zoom).on("dblclick.zoom", null);
+
+  function zoomed() {
+    view.attr("transform", d3.event.transform);
+  }
+     ipcRenderer.send("console-logs", "Starting Filotype");
+   };
+
+
 // ========= DOXATYPE =========
 const doxatype = id => {
   
@@ -561,8 +673,6 @@ var tweetList = document.createElement("div");
    pandodb.doxatype.get(id).then(datajson => {
    
     var totalTweets = datajson.content;
-
-  //  var keys = Object.keys(totalTweets);
 
     var visTweets = [];
 
@@ -3950,6 +4060,10 @@ const typeSwitch = (type, id) => {
     case "hyphotype":
       hyphotype(id);
       break;
+
+      case "filotype":
+        filotype(id);
+        break;
 
       case "doxatype":
         doxatype(id);

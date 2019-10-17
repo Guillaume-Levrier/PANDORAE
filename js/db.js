@@ -46,6 +46,7 @@ pandodb
   pandodb
   .version(3)
   .stores({
+    filotype: structureV1,
     doxatype: structureV1,
     hyphotype: structureV1,
     enriched: structureV1,
