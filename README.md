@@ -1,19 +1,24 @@
-<p align="center"><img src="./PANDORAE.png" width="200px" alt="PANDORAE Logo"></p>
+<p align="center"><img src="./PANDORAE.png" width="200px" alt="PANDORAE Logo"><br><br>🎉 PANDORÆ 1.0.00 has been released 🎉</p>
 
-# PANDORÆ Roadmap
+# PANDORÆ
 
-PANDORÆ is currently in beta. Available processes should be functional. Check the [Wiki](https://github.com/Guillaume-Levrier/PANDORAE/wiki) for more information on what it does.
+For more information on PANDORÆ, go to the [project page](https://guillaume-levrier.github.io/PANDORAE/), check the [Wiki](https://github.com/Guillaume-Levrier/PANDORAE/wiki) and the [Twitter](https://mobile.twitter.com/PANDORAE_CORE)   account.
 
-Releases are announced on [Twitter](https://mobile.twitter.com/PANDORAE_CORE).
-
-- Download PANDORÆ Beta 0.9.00 for [Windows](https://anthropos-ecosystems.com/pandorae/PANDORAE-win32-x64.zip) (±100 Mo)
-- Download PANDORÆ Beta 0.9.00 for [macOS](https://anthropos-ecosystems.com/pandorae/PANDORAE-darwin-x64.zip) (±100 Mo) 
-- Download PANDORÆ Beta 0.9.00 for [Linux](https://anthropos-ecosystems.com/pandorae/PANDORAE-linux-x64.zip) (±100 Mo)
+- Download PANDORÆ version 1.0.00 for [Windows](https://anthropos-ecosystems.com/pandorae/PANDORAE-win32-x64.zip) (±100 Mo)
+- Download PANDORÆ version 1.0.00 for [macOS](https://anthropos-ecosystems.com/pandorae/PANDORAE-darwin-x64.zip) (±100 Mo) 
+- (currently broken, see [this issue](https://github.com/Guillaume-Levrier/PANDORAE/issues/8)) Download PANDORÆ version 1.0.00 for [Linux](https://anthropos-ecosystems.com/pandorae/PANDORAE-linux-x64.zip) (±100 Mo)
 
 macOS starting issues: put the app in the "Applications" folder and then start again.
 
-### Known issues
-If you encounter an issue, please tag this [account](https://mobile.twitter.com/PANDORAE_CORE) or create an issue here on Github.
+### Roadmap
+
+#### Features
+- Consolidate Twitter data management: allow for newer gazouilloire versions, vanilla Twitter API, and twarc JSONL datasets
+- Bring back pharmacotype from PANDORAE-legacy for clinical trials exploration
+- Test hyphotype further (on larger tagged corpuses)
+
+#### Bugs
+- Fix the Linux build
 
 #### Wiki
 - API documentation (WIP)
