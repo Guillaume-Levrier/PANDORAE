@@ -75,8 +75,10 @@
 <div id="twitter" style="display:none;" class="fluxTabs">
   <span class="flux-title">TWITTER</span><br><br>
     <form id="twitter-form" autocomplete="off">
+      <br>
+      <h4>Datasets for gazouillotype</h4>   <br>
       Upload tweets to the system. Only properties consistent with the twitter API will be imported. Tweet datasets must be uploaded as CSV, queries as JSON objects (<a>read more here</a>).
-      <br><br>
+      <br>   <br>
         Twitter Dataset<br>
          <input type="file" id="twitterDataset" accept="csv"><br><br>
         Twitter Query<br>
@@ -84,7 +86,16 @@
         Dataset Name (if a dataset with the same name already exists, it will be overwritten)<br>
         <input class="fluxInput" spellcheck="false" id="twitterDatasetName" type="text" value="Enter a dataset name"><br><br>
         <br> <button type="submit" class="flux-button" id="twitterImporter" onclick='powerValve("tweetImporter",this);return false'>Import to SYSTEM</button>
-
+    </form>
+    <form id="twitter-form-cat" autocomplete="off">
+      <br>
+      <h4>Datasets for categories</h4>   <br>
+      Upload categorized tweets to the system. 
+      <br>   <br>
+        JSON Dataset<br>
+         <input type="file" id="twitterCatPathInput" accept="json"><br><br>
+        <input class="fluxInput" spellcheck="false" id="twitterCatName" type="text" value="Enter a dataset name"><br><br>
+        <br> <button type="submit" class="flux-button" id="twitterCatImporter" onclick='twitterCat();return false'>Import to SYSTEM</button>
     </form>
 </div>
 

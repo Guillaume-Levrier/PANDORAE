@@ -452,7 +452,8 @@ const categoryLoader = cat => {
         "geotype",
         "anthropotype",
         "gazouillotype",
-        "hyphotype"
+        "hyphotype",
+        "doxatype"
       ];
       ipcRenderer.send("console-logs", "Displaying available types");
       blocks.forEach(block => {

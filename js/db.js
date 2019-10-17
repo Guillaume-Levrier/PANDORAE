@@ -42,5 +42,25 @@ pandodb
     hyphe: structureV1,
     system: structureV1
   });
+  
+  pandodb
+  .version(3)
+  .stores({
+    doxatype: structureV1,
+    hyphotype: structureV1,
+    enriched: structureV1,
+    scopus: structureV1,
+    csljson: structureV1,
+    zotero: structureV1,
+    twitter: structureV1,
+    anthropotype: structureV1,
+    chronotype: structureV1,
+    geotype: structureV1,
+    pharmacotype: structureV1,
+    publicdebate: structureV1,
+    gazouillotype: structureV1,
+    hyphe: structureV1,
+    system: structureV1
+  });
 
   pandodb.open();
