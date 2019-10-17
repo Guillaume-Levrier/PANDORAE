@@ -565,7 +565,7 @@ var view = svg.append("g") // Appending a group to SVG
 
   var zoom = d3.zoom()                                      // Zoom ability
   .scaleExtent([0.2, 20])                               // To which extent do we allow to zoom forward or zoom back
-  .translateExtent([[-width*2,-height*2],[width*3,height*3]])
+  .translateExtent([[-Infinity,-Infinity],[Infinity,Infinity]])
   .on("zoom", zoomed);          
   
      //======== DATA CALL & SORT =========
@@ -575,7 +575,15 @@ var view = svg.append("g") // Appending a group to SVG
       console.log(datajson)
     //https://bl.ocks.org/mbostock/2966094
 
-      
+    datajson.content.forEach(tweet=>{
+      let line=0;
+      for (let i = 0; i < tweet.full_text.length; i+=60) {
+       line++
+       tweet["line"+line]=tweet.full_text.slice(i,i+60)
+      }
+    })  
+
+
 
     var root = d3.stratify()
                 .id(d => d.id_str)
@@ -583,9 +591,7 @@ var view = svg.append("g") // Appending a group to SVG
 
                 console.log(root)
 
-    var tree = d3.tree()
-               // .separation((a, b) => {a.parent === b.parent ? 1 : .5})
-                .size([height, width]);
+    var tree = d3.tree().size([height, width*3]);
 
         root = tree(root);
 
@@ -597,47 +603,123 @@ var view = svg.append("g") // Appending a group to SVG
           if (d.x < x0) x0 = d.x;
         });
 
-              /*   function elbow(d, i) {
+                 function elbow(d, i) {
                   return "M" + d.source.y + "," + d.source.x
                        + "H" + d.target.y + "V" + d.target.x
-                       + (d.target.children ? "" : "h");
-                } */
+                       
+                } 
      
-              //  var nodes = tree.nodes(root);
 
-                var link = view.selectAll(".link")
+                var link = view.append("g")
                 .attr("fill", "none")
-                .attr("stroke", "#555")
-              //  .attr("stroke-opacity", 0.4)
-                .attr("stroke-width", 1.5)
+                .attr("stroke", "black")
+                .attr("stroke-opacity", .5)
+                .attr("stroke-width", .2)
+                .attr("class","links")
               .selectAll("path")
                 .data(root.links())
                 .join("path")
-                  .attr("d", d3.linkHorizontal()
-                      .x(d => d.y)
-                      .y(d => d.x));
+                .attr("d", elbow);
+
               
                 var node = view.append("g")
-                .attr("stroke-linejoin", "round")
-                .attr("stroke-width", 3)
                     .selectAll("g")
                     .data(root.descendants())
                     .join("g")
                       .attr("transform", d => `translate(${d.y},${d.x})`);
-                    
-                      node.append("circle")
-                      .attr("fill", d => d.children ? "#555" : "#999")
-                      .attr("r", 2.5);
+                 
+                   
+                        
+                          node.append("clipPath")
+                              .attr("id",function(d,i){ return "node_clip"+i })
+                              .append("circle")
+                              
+                              .attr("r",5);
+
+
+                      node.append("image")
+                      .attr("y", -5)
+                      .attr("x", -5)
+                      .attr("width","10px")
+                      .attr("height","10px")
+                      .attr("xlink:href", d=>d.data.user.profile_image_url_https)
+                      .attr("clip-path",function(d,i){ return "url(#node_clip"+i+")" });
                 
                   node.append("text")
-                      .attr("dy", "0.31em")
-                      .attr("x", d => d.children ? -6 : 6)
-                      .attr("text-anchor", d => d.children ? "end" : "start")
+                      .attr("dy", -2)
+                      .attr("x", 6)
+                      .attr("text-anchor","start")
+                      .style("font-size","4px")
                       .text(d => d.data.user.name)
                     .clone(true).lower()
                       .attr("stroke", "white");
 
+                      node.append("text")
+                      .attr("dy", 5)
+                      .attr("x", 6)
+                      .attr("text-anchor","start")
+                      .style("font-size","2.5px")
+                      .text(d => d.data.line1)
 
+
+                      node.append("text")
+                      .attr("dy", 9)
+                      .attr("x", 6)
+                      .attr("text-anchor","start")
+                      .style("font-size","2.5px")
+                      .text(d => d.data.line2)
+
+
+                      node.append("text")
+                      .attr("dy", 13)
+                      .attr("x", 6)
+                      .attr("text-anchor","start")
+                      .style("font-size","2.5px")
+                      .text(d => d.data.line3)
+        
+                      
+                      node.append("text")
+                      .attr("dy", 17)
+                      .attr("x", 6)
+                      .attr("text-anchor","start")
+                      .style("font-size","2.5px")
+                      .text(d => d.data.line4)
+
+                      node.append("text")
+                      .attr("dy", 21)
+                      .attr("x", 6)
+                      .attr("text-anchor","start")
+                      .style("font-size","2.5px")
+                      .text(d => d.data.line5)
+
+                      node.append("text")
+                      .attr("dy", 25)
+                      .attr("x", 6)
+                      .attr("text-anchor","start")
+                      .style("font-size","2.5px")
+                      .text(d => d.data.line6)
+
+                      node.append("text")
+                      .attr("dy", 29)
+                      .attr("x", 6)
+                      .attr("text-anchor","start")
+                      .style("font-size","2.5px")
+                      .text(d => d.data.line7)
+
+                      node.append("text")
+                      .attr("dy", 33)
+                      .attr("x", 6)
+                      .attr("text-anchor","start")
+                      .style("font-size","2.5px")
+                      .text(d => d.data.line8)
+
+                      
+                      node.append("text")
+                      .attr("dy", 37)
+                      .attr("x", 6)
+                      .attr("text-anchor","start")
+                      .style("font-size","2.5px")
+                      .text(d => d.data.line9)
 
       loadType();
     
