@@ -895,3 +895,31 @@ cursor: pointer;
   display: none;
 }
     
+
+/* Doxatype*/
+
+#tweetList{
+  display: block;
+  padding-top: 5px;
+  padding-bottom: 50px;
+  padding-right: 15%;
+  margin-left: 10%;
+  width: 55%;
+  overflow: auto;
+  height: 100%;
+}
+
+.doxaTweet{
+  display: block;
+  padding: 5px;
+  margin: 5px;
+  font-size: 12px;
+  border: solid 1px black;
+  overflow-wrap: break-word;
+}
+
+.doxaHS{
+  float: left;
+  height:50px;
+  width:50px;
+}

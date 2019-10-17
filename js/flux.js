@@ -424,9 +424,7 @@ const powerValve = (fluxAction, item) => {
 
     case "tweetImporter":
       fluxArgs.tweetImporter = {};
-      fluxArgs.tweetImporter.dataset = document.getElementById(
-        "twitterDataset"
-      ).files[0].path;
+      fluxArgs.tweetImporter.dataset = document.getElementById("twitterDataset").files[0].path;
       fluxArgs.tweetImporter.query = document.getElementById(
         "twitterQuery"
       ).files[0].path;
@@ -1183,3 +1181,27 @@ const loadHyphe = (corpus, endpoint, pass) => {
     })
     .catch(e => {});
 };
+
+const twitterCat = () => {
+
+  var datasetName = document.getElementById("twitterCatName").value;
+  var datasetPath = document.getElementById("twitterCatPathInput").files[0].path;
+
+  fs.readFile(datasetPath,'utf8',(err,data)=>{
+    var classifiedData = JSON.parse(data);
+
+    pandodb.open();
+ let id = datasetName+date;
+    pandodb.doxatype.add({
+      id: id,
+      date: date,
+      name: datasetName,
+      content: classifiedData
+    });
+
+  })
+  ipcRenderer.send("chaeros-notification", "imported categorized tweets"); // Sending notification to console
+  ipcRenderer.send("console-logs", "Imported categorized tweets "+datasetName); // Sending notification to console
+  closeWindow();
+};
+
