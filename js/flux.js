@@ -1205,3 +1205,25 @@ const twitterCat = () => {
   closeWindow();
 };
 
+const twitterThread = () => {
+
+  var datasetName = document.getElementById("twitterThreadName").value;
+  var datasetPath = document.getElementById("twitterThread").files[0].path;
+
+  fs.readFile(datasetPath,'utf8',(err,data)=>{
+    var thread = JSON.parse(data);
+
+    pandodb.open();
+ let id = datasetName+date;
+    pandodb.filotype.add({
+      id: id,
+      date: date,
+      name: datasetName,
+      content: thread
+    });
+
+  })
+  ipcRenderer.send("chaeros-notification", "imported thread"); // Sending notification to console
+  ipcRenderer.send("console-logs", "Imported thread"+datasetName); // Sending notification to console
+  closeWindow();
+};
