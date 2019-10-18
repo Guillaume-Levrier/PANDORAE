@@ -635,7 +635,6 @@ pandodb.filotype.get(id).then(datajson => {
 
                 
 var lineFontSize = parseFloat(width/500);
-console.log(lineFontSize)
               
                 var node = view.append("g")
                     .selectAll("g")
@@ -645,8 +644,7 @@ console.log(lineFontSize)
                  
                          node.append("clipPath")
                               .attr("id",function(d,i){ return "node_clip"+i })
-                              .append("circle")
-                              
+                              .append("circle")                              
                               .attr("r",5);
 
                       node.append("image")
@@ -689,7 +687,7 @@ console.log(lineFontSize)
                       .attr("stroke", "white");
 
                       node.append("text")
-                      .attr("dy", 3)
+                      .attr("dy", 1.5)
                       .attr("x", 6)
                       .attr("text-anchor","start")
                       .style("font-size",lineFontSize/2)
