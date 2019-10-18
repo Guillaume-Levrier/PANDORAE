@@ -570,20 +570,30 @@ var view = svg.append("g") // Appending a group to SVG
   
      //======== DATA CALL & SORT =========
    
-     pandodb.filotype.get(id).then(datajson => {
+pandodb.filotype.get(id).then(datajson => {
      
-
     datajson.content.forEach(tweet=>{
+      var tweetText = tweet.full_text;
+      tweet.mentions = new Array;
+// remove mentions from tweet text
+       tweet.entities.user_mentions.forEach(user=>{
+         var thisMention = "@"+user.screen_name;
+         tweetText = tweetText.replace(thisMention,"");
+        tweet.mentions.push(user.name)
+      }) 
+
+// make several lines out of each tweet
       let line=0;
-      for (let i = 0; i < tweet.full_text.length; i+=60) {
+      for (let i = 0; i < tweetText.length; i+=60) {
        line++
-       let thisLine = tweet.full_text.slice(i,i+60)
-       if (tweet.full_text[i+59]!= " " && tweet.full_text[i+60]!= " " ) {
+       let thisLine = tweetText.slice(i,i+60)
+       if (tweetText[i+59]!= " " && tweetText[i+60]!= " " ) {
          thisLine = thisLine+"-";
        }
        tweet["line"+line] = thisLine;
       }
     })  
+
 
 
 
@@ -625,7 +635,7 @@ var view = svg.append("g") // Appending a group to SVG
 
                 
 var lineFontSize = parseFloat(width/500);
-
+console.log(lineFontSize)
               
                 var node = view.append("g")
                     .selectAll("g")
@@ -633,24 +643,42 @@ var lineFontSize = parseFloat(width/500);
                     .join("g")
                       .attr("transform", d => `translate(${d.y},${d.x})`);
                  
-                   
-                        
-                          node.append("clipPath")
+                         node.append("clipPath")
                               .attr("id",function(d,i){ return "node_clip"+i })
                               .append("circle")
                               
                               .attr("r",5);
-
 
                       node.append("image")
                       .attr("y", -lineFontSize*2)
                       .attr("x", -lineFontSize*2)
                       .attr("width",lineFontSize*4)
                       .attr("height",lineFontSize*4)
+                      .style("cursor","cell")
                       .attr("xlink:href", d=>d.data.user.profile_image_url_https)
-                      .attr("clip-path",function(d,i){ return "url(#node_clip"+i+")" });
+                      .attr("clip-path",function(d,i){ return "url(#node_clip"+i+")" })
+                      .on("click",d=>{
+                        let targetList= [];
+                       d.descendants().forEach(tweet=>targetList.push(tweet))
+                        if (document.getElementById("color"+d.data.id_str)){
+                          d3.select("#color"+d.data.id_str).remove()
+                        } else {
+                            var highlighted = view.append("g")
+                                    .attr("id","color"+d.data.id_str);
+                                  highlighted.selectAll("rect")
+                                    .data(targetList)
+                                    .enter().append("rect")
+                                    .attr("dy",-5)
+                                    .attr("dx",-15)
+                                    .attr("x",d=>d.y)
+                                    .attr("y",d=>d.x)
+                                    .attr("width",lineFontSize*35)
+                                    .attr("height",lineFontSize*12)
+                                    .attr("fill","rgba("+d.data.id_str.substring(17,19)+","+d.data.id_str.substring(16,18)+","+d.data.id_str.substring(15,17)+",.1)");
+                                    highlighted.lower();
+                          }
+                      });
                 
-
                   node.append("text")
                       .attr("dy", -2)
                       .attr("x", 6)
@@ -659,6 +687,59 @@ var lineFontSize = parseFloat(width/500);
                       .text(d => d.data.user.name)
                     .clone(true).lower()
                       .attr("stroke", "white");
+
+                      node.append("text")
+                      .attr("dy", 3)
+                      .attr("x", 6)
+                      .attr("text-anchor","start")
+                      .style("font-size",lineFontSize/2)
+                      .text(d => d.data.id_str)
+                      .style("cursor","pointer")
+                      .on("click",d=>{
+                        d3.select("#tooltip").html(
+                          '<p class="legend"><strong><a target="_blank" href="https://mobile.twitter.com/' +
+                            d.data.user.name +
+                            '">' +
+                            d.data.user.name +
+                            '</a></strong> <br/><div style="border:1px solid black;"><p>' +
+                            d.data.full_text +
+                            "</p></div><br><br> Language: " +
+                            d.data.user.lang +
+                            "<br>Mentions: " +
+                            d.data.mentions +
+                            "<br>Date: " +
+                            d.data.created_at +
+                            "<br> Favorite count: " +
+                            d.data.favorite_count +
+                            "<br>Retweet count: " +
+                            d.data.retweet_count +
+                            "<br> Source: " +
+                            d.data.source +
+                            "<br>Tweet id: <a target='_blank' href='https://mobile.twitter.com/" +
+                            d.data.user.screen_name +
+                            "/status/" +
+                            d.data.id_str +
+                            "'>" +
+                            d.data.id_str +
+                            "</a>" +
+                            "<br><br><strong>User info</strong><br><img src='" +
+                            d.data.user.profile_image_url_https +
+                            "' max-width='300'><br><br>Account creation date: " +
+                            d.data.user.created_at +
+                            "<br> Account name: " +
+                            d.data.user.screen_name +
+                            "<br> User id: " +
+                            d.data.user.id +
+                            "<br> User description: " +
+                            d.data.user.description +
+                            "<br> User follower count: " +
+                            d.data.user.followers_count +
+                            "<br> User friend count: " +
+                            d.data.user.friends_count +
+                            "<br> User tweet count: " +
+                            d.data.user.statuses_count)
+                      });
+                 
 
                       node.append("text")
                       .attr("dy", lineFontSize*2)
@@ -3481,7 +3562,6 @@ requestContent=requestContent+"</ul>"
           
           circleData = workerAnswer.data.msg; 
  
-          //display only the first day (for testing and dev purpose)
           view.selectAll("circle")
             .data(circleData)
             .enter()
