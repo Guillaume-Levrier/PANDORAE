@@ -572,14 +572,16 @@ var view = svg.append("g") // Appending a group to SVG
    
      pandodb.filotype.get(id).then(datajson => {
      
-      console.log(datajson)
-    //https://bl.ocks.org/mbostock/2966094
 
     datajson.content.forEach(tweet=>{
       let line=0;
       for (let i = 0; i < tweet.full_text.length; i+=60) {
        line++
-       tweet["line"+line]=tweet.full_text.slice(i,i+60)
+       let thisLine = tweet.full_text.slice(i,i+60)
+       if (tweet.full_text[i+59]!= " " && tweet.full_text[i+60]!= " " ) {
+         thisLine = thisLine+"-";
+       }
+       tweet["line"+line] = thisLine;
       }
     })  
 
@@ -621,6 +623,9 @@ var view = svg.append("g") // Appending a group to SVG
                 .join("path")
                 .attr("d", elbow);
 
+                
+var lineFontSize = parseFloat(width/500);
+
               
                 var node = view.append("g")
                     .selectAll("g")
@@ -638,87 +643,88 @@ var view = svg.append("g") // Appending a group to SVG
 
 
                       node.append("image")
-                      .attr("y", -5)
-                      .attr("x", -5)
-                      .attr("width","10px")
-                      .attr("height","10px")
+                      .attr("y", -lineFontSize*2)
+                      .attr("x", -lineFontSize*2)
+                      .attr("width",lineFontSize*4)
+                      .attr("height",lineFontSize*4)
                       .attr("xlink:href", d=>d.data.user.profile_image_url_https)
                       .attr("clip-path",function(d,i){ return "url(#node_clip"+i+")" });
                 
+
                   node.append("text")
                       .attr("dy", -2)
                       .attr("x", 6)
                       .attr("text-anchor","start")
-                      .style("font-size","4px")
+                      .style("font-size",lineFontSize*2)
                       .text(d => d.data.user.name)
                     .clone(true).lower()
                       .attr("stroke", "white");
 
                       node.append("text")
-                      .attr("dy", 5)
+                      .attr("dy", lineFontSize*2)
                       .attr("x", 6)
                       .attr("text-anchor","start")
-                      .style("font-size","2.5px")
+                      .style("font-size",lineFontSize)
                       .text(d => d.data.line1)
 
 
                       node.append("text")
-                      .attr("dy", 9)
+                      .attr("dy", lineFontSize*3.5)
                       .attr("x", 6)
                       .attr("text-anchor","start")
-                      .style("font-size","2.5px")
+                      .style("font-size",lineFontSize)
                       .text(d => d.data.line2)
 
 
                       node.append("text")
-                      .attr("dy", 13)
+                      .attr("dy", lineFontSize*5)
                       .attr("x", 6)
                       .attr("text-anchor","start")
-                      .style("font-size","2.5px")
+                      .style("font-size",lineFontSize)
                       .text(d => d.data.line3)
         
                       
                       node.append("text")
-                      .attr("dy", 17)
+                      .attr("dy", lineFontSize*6.5)
                       .attr("x", 6)
                       .attr("text-anchor","start")
-                      .style("font-size","2.5px")
+                      .style("font-size",lineFontSize)
                       .text(d => d.data.line4)
 
                       node.append("text")
-                      .attr("dy", 21)
+                      .attr("dy", lineFontSize*8)
                       .attr("x", 6)
                       .attr("text-anchor","start")
-                      .style("font-size","2.5px")
+                      .style("font-size",lineFontSize)
                       .text(d => d.data.line5)
 
                       node.append("text")
-                      .attr("dy", 25)
+                      .attr("dy", lineFontSize*9.5)
                       .attr("x", 6)
                       .attr("text-anchor","start")
-                      .style("font-size","2.5px")
+                      .style("font-size",lineFontSize)
                       .text(d => d.data.line6)
 
                       node.append("text")
-                      .attr("dy", 29)
+                      .attr("dy", lineFontSize*11)
                       .attr("x", 6)
                       .attr("text-anchor","start")
-                      .style("font-size","2.5px")
+                      .style("font-size",lineFontSize)
                       .text(d => d.data.line7)
 
                       node.append("text")
-                      .attr("dy", 33)
+                      .attr("dy", lineFontSize*12.5)
                       .attr("x", 6)
                       .attr("text-anchor","start")
-                      .style("font-size","2.5px")
+                      .style("font-size",lineFontSize)
                       .text(d => d.data.line8)
 
                       
                       node.append("text")
-                      .attr("dy", 37)
+                      .attr("dy", lineFontSize*14)
                       .attr("x", 6)
                       .attr("text-anchor","start")
-                      .style("font-size","2.5px")
+                      .style("font-size",lineFontSize)
                       .text(d => d.data.line9)
 
       loadType();
