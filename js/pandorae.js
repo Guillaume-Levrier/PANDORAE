@@ -23,14 +23,13 @@ const userDataPath = remote.app.getPath("userData");
 const appPath = remote.app.getAppPath();
 const types = require("./js/types");
 
-
 // ============ VERSION ===========
 const msg =
   "      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ";
 
 var version = '';
 
-fs.readFile(appPath+"\\package.json","utf8", (err, data) => {
+fs.readFile(appPath+"/package.json","utf8", (err, data) => {
   if (err) throw err;
    let package = JSON.parse(data);
      let version = package.version;
@@ -937,7 +936,7 @@ fs.readFile(
       document.getElementById("menu-icon").style.cursor = "pointer";
       document.getElementById("option-icon").style.cursor = "pointer";
      
-        fs.readFile(appPath+"\\package.json","utf8", (err, data) => {
+        fs.readFile(appPath+"/package.json","utf8", (err, data) => {
           if (err) throw err;
            let package = JSON.parse(data);
              let version = package.version;
