@@ -1197,29 +1197,27 @@ const twitterCat = () => {
       date: date,
       name: datasetName,
       content: classifiedData
+    }).then(()=>{
+      ipcRenderer.send("chaeros-notification", "imported categorized tweets"); // Sending notification to console
+      ipcRenderer.send("console-logs", "Imported categorized tweets "+datasetName); // Sending notification to console  
+      setTimeout(() => {
+        closeWindow();
+      },500)
     });
-
   })
-  ipcRenderer.send("chaeros-notification", "imported categorized tweets"); // Sending notification to console
-  ipcRenderer.send("console-logs", "Imported categorized tweets "+datasetName); // Sending notification to console
-  closeWindow();
+  
 };
 
 const twitterThread = () => {
 
   var datasetName = document.getElementById("twitterThreadName").value;
   var datasetPath = document.getElementById("twitterThread").files[0].path;
-
-var thread = []
-
-
+  var thread = []
   var lineReader = require('readline').createInterface({input: require('fs').createReadStream(datasetPath)});
   
   lineReader.on('line', line => {thread.push(JSON.parse(line))})
   
   lineReader.on('close', ()=>{
-
-    console.log(thread)
    
    let id = datasetName+date;
 
@@ -1229,7 +1227,6 @@ var thread = []
       name: datasetName,
       content: thread
     }).then(()=>{
-
       ipcRenderer.send("chaeros-notification", "imported thread"); // Sending notification to console
       ipcRenderer.send("console-logs", "Imported thread"+datasetName); // Sending notification to console
       setTimeout(() => {
