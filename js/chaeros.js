@@ -383,6 +383,109 @@ const scopusRetriever = (user, query, bottleRate) => {
   });
 };
 
+//========== Clinical trials retriever ==========
+// Once a basic scopus query has been made on an expression, the user can choose to perform the actual query.
+// This retrieves all the documents corresponding to the same query (basic query only loads one in order to get the
+// the total amount of documents). This is sent to chaeros via powerValve because it can be heavy, depending on the
+// size of the sample and the power/broadband available on the user's system.
+
+const clinTriRetriever = (query) => {
+  // user argument is passed to get keytar pass
+
+  const limiter = new bottleneck({
+    // Create a bottleneck to prevent API rate limit
+    maxConcurrent: 1, // Only one request at once
+    minTime: 300 // Every 300 milliseconds
+  });
+
+  ipcRenderer.send(
+    "console-logs",
+    "Started retrieving clinical trials data for query: " + query
+  ); // Log the process
+
+  var content = {
+    type: "clinical-trials",
+    query: query,
+    queryDate: date,
+    entries: []
+  };
+
+    // URL Building blocks
+    let rootUrl = "https://clinicaltrials.gov/api/query/full_studies?";
+    
+    let optionsRequest = {
+      // Prepare options for the Request-Promise-Native Package
+      uri:
+        rootUrl + "expr=" +
+        ctQuery +
+        "&fmt=json", // URI to be accessed
+      headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
+      json: true // Automatically parses the JSON string in the response
+    };
+
+    rpn(optionsRequest) // RPN stands for Request-promise-native (Request + Promise)
+      .then(firstResponse => {
+        // Once you get the response
+
+        let totalResults = parseInt(firstResponse.FullStudiesResponse.NStudiesFound);
+
+        var dataPromises = []; // Create empty array for the promises to come
+
+        for (let countStart = 0; countStart <= docAmount; countStart += 100) {
+          // For each page of 200 documents
+
+          // Create a specific promise
+          let scopusTotalRequest =
+            rootUrl +
+            query +
+           "&min_rnk="+ //&min_rnk=20&max_rnk=50&fmt=json
+           countStart +
+           "&max_rnk="
+           countStart+100 +
+            "&fmt=json";
+
+          let optionsTotalRequest = {
+            // Prepare options for the Request-Promise-Native Package
+            uri: scopusTotalRequest, // URI to be accessed
+            headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
+            json: true // Answer should be parsed as JSON
+          };
+          dataPromises.push(rpn(optionsTotalRequest)); // Push promise in the relevant array
+        }
+
+        limiter
+          .schedule(() => Promise.all(dataPromises))
+          .then(ctResponses => {
+            for (let i = 0; i < ctResponses.length; i++) {
+              // For each page of (max 100) results
+              
+             console.log(i)   
+              }
+            
+            
+          })
+          .then(() => {
+            // Once all entries/documents have been written
+
+            pandodb.open();
+            
+            let id = query + date;
+            
+            ipcRenderer.send("console-logs","Scopus dataset on " +query +" for user " +user +" have been successfully retrieved.");
+
+                    setTimeout(() => {
+                      win.close();
+                    }, 500); // Close Chaeros
+
+                  });
+              })
+      .catch(e => {
+        ipcRenderer.send("chaeros-failure", e); // Send error to main process
+      });
+  
+};
+
+
 //========== zoteroItemsRetriever ==========
 // zoteroItemsRetriever retrieves all the documents from one or more zotero collections. A zotero API request can only
 // retrieve 100 items, which can easily trigger the rate limiting.
@@ -765,6 +868,10 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
         fluxArgs.scopusRetriever.bottleneck
       );
       break;
+      
+      case "clinTriRetriever":
+        clinTriRetriever(fluxArgs.clinTriRetriever.query);
+        break;
 
     case "zoteroItemsRetriever":
       zoteroItemsRetriever(
