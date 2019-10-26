@@ -38,15 +38,14 @@ ipcRenderer.on("window-close", (event, message) => {
 let traces = [
   {
     hops: [
-      { root: true },
       { info: { name: "USER" }, name: "USER" },
-      { info: { name: "ZOTERO" }, name: "ZOTERO" },
+      { info: { name: "CLINICAL_TRIALS" }, name: "CLINICAL_TRIALS" },
       { info: { name: "SYSTEM" }, name: "SYSTEM" }
     ]
   },
   {
     hops: [
-      { info: { name: "DB/API" }, name: "DB/API" },
+      { info: { name: "USER" }, name: "USER" },
       { info: { name: "TWITTER" }, name: "TWITTER" },
       { info: { name: "SYSTEM" }, name: "SYSTEM" }
     ]
@@ -61,16 +60,9 @@ let traces = [
   },
   {
     hops: [
-      { info: { name: "DB/API" }, name: "DB/API" },
+      { info: { name: "USER" }, name: "USER" },
       { info: { name: "SCOPUS" }, name: "SCOPUS" },
       { info: { name: "ENRICHMENT" }, name: "ENRICHMENT" }
-    ]
-  },
-  {
-    hops: [
-      { root: true },
-      { info: { name: "USER" }, name: "USER" },
-      { info: { name: "DB/API" }, name: "DB/API" }
     ]
   },
   {
@@ -355,6 +347,12 @@ const powerValve = (fluxAction, item) => {
       ).value;
       message = "Retrieving data from Scopus";
       break;
+
+     case "clinTriRetriever" : 
+      // build query to be sent to chaeros here.
+
+
+            break;
 
     case "capcoRebuilder":
       fluxArgs.capcoRebuilder = { dataFile: "", dataMatch: "" };
@@ -778,6 +776,85 @@ const scopusBasicRetriever = checker => {
         });
     });
 };
+
+//========== clinicalBasicRetriever ==========
+
+
+const clinicTrialBasicRetriever = checker => {
+  
+
+  let ctQuery =  document.getElementById("clinical_trialslocalqueryinput").value; // Request Content
+
+  ipcRenderer.send(
+    "console-logs",
+    "Sending Clinical Trial APIs the following query : " + ctQuery
+  ); // Log query
+
+  
+      let rootUrl = "https://clinicaltrials.gov/api/query/full_studies?";
+    
+      let optionsRequest = {
+        // Prepare options for the Request-Promise-Native Package
+        uri:
+          rootUrl + "expr=" +
+          ctQuery +
+          "&fmt=json", // URI to be accessed
+        headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
+        json: true // Automatically parses the JSON string in the response
+      };
+
+      rpn(optionsRequest) // RPN stands for Request-promise-native (Request + Promise)
+        .then(firstResponse => {
+          // Then, once the response is retrieved
+          
+
+        let totalResults = parseInt(firstResponse.FullStudiesResponse.NStudiesFound);
+
+             let requestAmount = totalResults => {
+              if (totalResults > 100) {
+                return parseInt(totalResults / 200) + 1;
+              } else {
+                return 2;
+              }
+            };
+            
+            let date = new Date();
+
+            // Display metadata in a div
+            let dataBasicPreview =
+              "<strong>" +
+              ctQuery +
+              "</strong>" +
+              "<br>Expected results at request time : " +
+              totalResults +
+              "<br>Amount of requests needed to retrieve full response : " +
+              requestAmount(totalResults) +
+              "<br>Query date: " +
+              date +
+              "<br>[Reload this window to submit a different query.]<br>" +
+              "<br>Amount of requests per second: <span id='scopusRangeValue'>1</span><input style='margin-left:30px' type='range' oninput='this.previousSibling.innerText=parseInt(this.value)' id='scopusRange' min='1' step='any' max='20' value='1'><br><br>";
+
+            document.getElementById("clinical_trials-basic-previewer").innerHTML = dataBasicPreview;
+
+            // Display success in request button
+            fluxButtonAction("clinical_trials-basic-query",true,"Query Basic Info Retrieved","errorPhrase");
+
+            // Display next step option: send full request to Chæros
+            document.getElementById("clinical_trials-query").style.display = "block"; 
+          
+        })
+        .catch(function(e) {
+          fluxButtonAction(
+            "scopus-basic-query",
+            false,
+            "Query Basic Info Error",
+            e.message
+          );
+          ipcRenderer.send("console-logs", "Query error : " + e); // Log error
+        });
+  
+};
+
 
 //========== zoteroCollectionRetriever ==========
 // Retrieve collections from a Zotero user code. To be noted that a user code can be something else than a user: it can
