@@ -56,6 +56,19 @@
 
 </div>
 
+<!-- CLINICAL_TRIALS TAB -->
+<div id="clinical_trials" style="display:none;" class="fluxTabs">
+  <span class="flux-title">Clinical Trials</span>
+  <br><br>
+     <form id="clinical_trials-form" autocomplete="off">Clinical Trials Query:<br> 
+        <input class="fluxInput" spellcheck="false" id="clinical_trialslocalqueryinput" type="text" value="Enter your query"><br><br>
+        <button type="submit" class="flux-button" id="clinical_trials-basic-query" onclick="clinicTrialBasicRetriever();return false">Retrieve basic info</button>&nbsp;&nbsp;
+        <div id="clinical_trials-basic-previewer" style="position:relative;"></div>
+        <button style="display:none;" type="submit" class="flux-button" id="clinical_trials-query" onclick="powerValve('clinTriRetriever',this);return false">Submit full query to the Clinical Trials API services</button>
+        <br><br>
+     </form>
+</div>
+
 <!-- SCOPUS TAB -->
 <div id="scopus" style="display:none;" class="fluxTabs">
     <span class="flux-title">SCOPUS</span>
@@ -198,7 +211,6 @@
         <button type="submit" class="flux-button" id="" onclick='powerValve("capcoRebuilder",this);return false' disabled>Rebuild CapCo Dataset</button>
       </form>
   </div>
-
 
 <!-- SYSTEM TAB -->
 <div id="system" style="display:none;" class="fluxTabs">
