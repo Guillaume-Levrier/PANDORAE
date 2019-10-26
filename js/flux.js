@@ -349,10 +349,9 @@ const powerValve = (fluxAction, item) => {
       break;
 
      case "clinTriRetriever" : 
-      // build query to be sent to chaeros here.
-
-
-            break;
+      fluxArgs.clinTriRetriever = {};
+      fluxArgs.clinTriRetriever.query = document.getElementById("clinical_trialslocalqueryinput").value;
+      break;
 
     case "capcoRebuilder":
       fluxArgs.capcoRebuilder = { dataFile: "", dataMatch: "" };
@@ -831,8 +830,7 @@ const clinicTrialBasicRetriever = checker => {
               requestAmount(totalResults) +
               "<br>Query date: " +
               date +
-              "<br>[Reload this window to submit a different query.]<br>" +
-              "<br>Amount of requests per second: <span id='scopusRangeValue'>1</span><input style='margin-left:30px' type='range' oninput='this.previousSibling.innerText=parseInt(this.value)' id='scopusRange' min='1' step='any' max='20' value='1'><br><br>";
+              "<br>[Reload this window to submit a different query.]<br>";
 
             document.getElementById("clinical_trials-basic-previewer").innerHTML = dataBasicPreview;
 
