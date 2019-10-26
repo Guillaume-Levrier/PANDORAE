@@ -810,8 +810,8 @@ const clinicTrialBasicRetriever = checker => {
         let totalResults = parseInt(firstResponse.FullStudiesResponse.NStudiesFound);
 
              let requestAmount = totalResults => {
-              if (totalResults > 100) {
-                return parseInt(totalResults / 200) + 1;
+              if (totalResults > 95) {
+                return parseInt(totalResults / 95) + 1;
               } else {
                 return 2;
               }

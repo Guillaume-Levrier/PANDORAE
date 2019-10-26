@@ -395,7 +395,7 @@ const clinTriRetriever = (query) => {
   const limiter = new bottleneck({
     // Create a bottleneck to prevent API rate limit
     maxConcurrent: 1, // Only one request at once
-    minTime: 300 // Every 300 milliseconds
+    minTime: 500 // Every 300 milliseconds
   });
 
   ipcRenderer.send(
@@ -413,12 +413,8 @@ const clinTriRetriever = (query) => {
     // URL Building blocks
     let rootUrl = "https://clinicaltrials.gov/api/query/full_studies?";
     
-    let optionsRequest = {
-      // Prepare options for the Request-Promise-Native Package
-      uri:
-        rootUrl + "expr=" +
-        ctQuery +
-        "&fmt=json", // URI to be accessed
+    let optionsRequest = {      // Prepare options for the Request-Promise-Native Package
+      uri: rootUrl + "expr=" + query + "&fmt=json", // URI to be accessed
       headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
       json: true // Automatically parses the JSON string in the response
     };
@@ -426,56 +422,50 @@ const clinTriRetriever = (query) => {
     rpn(optionsRequest) // RPN stands for Request-promise-native (Request + Promise)
       .then(firstResponse => {
         // Once you get the response
-
+        
         let totalResults = parseInt(firstResponse.FullStudiesResponse.NStudiesFound);
 
         var dataPromises = []; // Create empty array for the promises to come
 
-        for (let countStart = 0; countStart <= docAmount; countStart += 100) {
-          // For each page of 200 documents
+        for (let countStart = 1; countStart <= totalResults; countStart += 95) {
+          // For each page of 100 documents
 
           // Create a specific promise
-          let scopusTotalRequest =
+          let clintriTotalRequest =
             rootUrl +
             query +
            "&min_rnk="+ //&min_rnk=20&max_rnk=50&fmt=json
            countStart +
-           "&max_rnk="
-           countStart+100 +
+           "&max_rnk=" +
+           parseInt(countStart+95)+
             "&fmt=json";
 
           let optionsTotalRequest = {
             // Prepare options for the Request-Promise-Native Package
-            uri: scopusTotalRequest, // URI to be accessed
+            uri: clintriTotalRequest, // URI to be accessed
             headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
             json: true // Answer should be parsed as JSON
           };
+
           dataPromises.push(rpn(optionsTotalRequest)); // Push promise in the relevant array
         }
 
-        limiter
-          .schedule(() => Promise.all(dataPromises))
-          .then(ctResponses => {
-            for (let i = 0; i < ctResponses.length; i++) {
-              // For each page of (max 100) results
-              
-             console.log(i)   
-              }
+        limiter.schedule(() => Promise.all(dataPromises))
+               .then(ctResponses => {
+                    for (let i = 0; i < ctResponses.length; i++) {
+                      ctResponses[i].FullStudiesResponse.FullStudies.forEach(study=>content.entries.push(study))
+                    }
+                }).then(() => {
             
-            
-          })
-          .then(() => {
-            // Once all entries/documents have been written
-
-            pandodb.open();
-            
-            let id = query + date;
-            
-            ipcRenderer.send("console-logs","Scopus dataset on " +query +" for user " +user +" have been successfully retrieved.");
-
-                    setTimeout(() => {
-                      win.close();
-                    }, 500); // Close Chaeros
+                let id = query + date;
+        
+                /*
+                pandodb.clintri.add({ id: id, date: date, name: query, content: content }).then(()=>{
+                  setTimeout(() => {
+                       win.close();
+                     }, 500); // Close Chaeros
+                })
+              */
 
                   });
               })
