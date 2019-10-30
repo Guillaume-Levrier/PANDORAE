@@ -336,23 +336,16 @@ const powerValve = (fluxAction, item) => {
 
     case "scopusRetriever":
       fluxArgs.scopusRetriever = { user: "", query: "" };
-      fluxArgs.scopusRetriever.user = document.getElementById(
-        "userNameInput"
-      ).value;
-      fluxArgs.scopusRetriever.query = document.getElementById(
-        "scopuslocalqueryinput"
-      ).value;
-      fluxArgs.scopusRetriever.bottleneck = document.getElementById(
-        "scopusRange"
-      ).value;
+      fluxArgs.scopusRetriever.user = document.getElementById("userNameInput").value;
+      fluxArgs.scopusRetriever.query = document.getElementById("scopuslocalqueryinput").value;
+      fluxArgs.scopusRetriever.bottleneck = document.getElementById("scopusRange").value;
       message = "Retrieving data from Scopus";
       break;
 
      case "clinTriRetriever" : 
-      // build query to be sent to chaeros here.
-
-
-            break;
+     fluxArgs.clinTriRetriever = {query :""};
+      fluxArgs.clinTriRetriever.query = document.getElementById("clinical_trialslocalqueryinput").value;
+      break;
 
     case "capcoRebuilder":
       fluxArgs.capcoRebuilder = { dataFile: "", dataMatch: "" };

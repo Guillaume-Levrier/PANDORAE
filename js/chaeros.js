@@ -730,6 +730,15 @@ const tweetImporter = (dataset, query, name) => {
   });
 };
 
+// clinTriRetriever(fluxArgs.clinTriRetriever.query)
+
+const clinTriRetriever = (query) =>{
+console.log(query)
+
+}
+
+
+
 //========== chaerosSwitch ==========
 // Switch used to choose the function to execute in CHÆROS.
 
@@ -797,6 +806,10 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
         fluxArgs.tweetImporter.query,
         fluxArgs.tweetImporter.datasetName
       );
+      break;
+
+    case "clinTriRetriever":
+        clinTriRetriever(fluxArgs.clinTriRetriever.query)
       break;
   }
 };
