@@ -2803,7 +2803,7 @@ const linkLoc = () => {
             .data(cities)
             .enter()
             .append("path")
-            .attr("id", d => d.id)
+            .attr("id", d => d.city)
             .attr("class","locations")
             .style("fill","rgba(0, 82, 158, 0.55)")
             .style("stroke","none")
@@ -3322,7 +3322,7 @@ const linkLoc = () => {
       const q1 = versor.multiply(q0, versor.delta(v0, v1));
       projection.rotate(versor.rotation(q1)); // rotate projection
 
-      view.selectAll("text")
+      d3.select("#cityLocations").selectAll("text")
         .attr("transform", d => {
           //redraw text
           var loc = projection([d.lon, d.lat]),
