@@ -4216,6 +4216,50 @@ requestContent=requestContent+"</ul>"
 }; // Close gazouillotype function
 
 
+const pharmacotype = (id) => {
+
+  var svg = d3.select(xtype)
+  .append("svg")
+  .attr("id", "xtypeSVG");
+
+svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
+
+var view = svg.append("g") // Appending a group to SVG
+  .attr("class", "view");
+
+  var zoom = d3.zoom()                                      // Zoom ability
+  .scaleExtent([0.2, 20])                               // To which extent do we allow to zoom forward or zoom back
+  .translateExtent([[-Infinity,-Infinity],[Infinity,Infinity]])
+  .on("zoom", zoomed);          
+  
+     //======== DATA CALL & SORT =========
+   
+pandodb.pharmacotype.get(id).then(datajson => {
+     
+  console.log(datajson)
+
+      loadType();
+    
+      
+      })
+       .catch(error => {
+         console.log(error);
+         field.value = " error";
+         ipcRenderer.send(
+           "console-logs",
+           " error: cannot start corpus " + id + "."
+         );
+       });
+     //======== ZOOM & RESCALE ===========
+  svg.call(zoom).on("dblclick.zoom", null);
+
+  function zoomed() {
+    view.attr("transform", d3.event.transform);
+  }
+     ipcRenderer.send("console-logs", "Starting Filotype");
+
+};
+
 //========== typesSwitch ==========
 // Switch used to which type to draw/generate
 
@@ -4223,6 +4267,11 @@ const typeSwitch = (type, id) => {
   field.value = "loading " + type;
 
   switch (type) {
+
+    case "pharmacotype":
+        pharmacotype(id);
+        break;
+
     case "hyphotype":
       hyphotype(id);
       break;
