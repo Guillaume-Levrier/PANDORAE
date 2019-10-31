@@ -294,9 +294,7 @@ const anthropotype = datasetAT => {  // When called, draw the anthropotype
   var zoom = d3.zoom() // Zoom ability
     .scaleExtent([0.2, 15]) // To which extent do we allow to zoom forward or zoom back
     .translateExtent([[-width * 2, -height * 2], [width * 3, height * 3]])
-    .on("zoom", zoomed); // Trigger the "zoomed" function on "zoom" behaviour
-
-    
+    .on("zoom", zoomed); // Trigger the "zoomed" function on "zoom" behaviour 
 
 //======== DATA CALL & SORT =========
   pandodb.anthropotype
@@ -594,19 +592,13 @@ pandodb.filotype.get(id).then(datajson => {
       }
     })  
 
-
-
-
     var root = d3.stratify()
                 .id(d => d.id_str)
                 .parentId(d =>d.in_reply_to_status_id_str)(datajson.content);
 
-                console.log(root)
-
     var tree = d3.tree().size([height, width*3]);
 
         root = tree(root);
-
 
         let x0 = Infinity;
         let x1 = -x0;
@@ -615,12 +607,9 @@ pandodb.filotype.get(id).then(datajson => {
           if (d.x < x0) x0 = d.x;
         });
 
-                 function elbow(d, i) {
-                  return "M" + d.source.y + "," + d.source.x
-                       + "H" + d.target.y + "V" + d.target.x
-                       
-                } 
-     
+      function elbow(d, i) {
+             return "M" + d.source.y + "," + d.source.x + "H" + d.target.y + "V" + d.target.x                    
+       } 
 
                 var link = view.append("g")
                 .attr("fill", "none")
@@ -632,7 +621,6 @@ pandodb.filotype.get(id).then(datajson => {
                 .data(root.links())
                 .join("path")
                 .attr("d", elbow);
-
                 
 var lineFontSize = parseFloat(width/500);
               
@@ -738,77 +726,71 @@ var lineFontSize = parseFloat(width/500);
                             d.data.user.statuses_count)
                       });
                  
+        node.append("text")
+            .attr("dy", lineFontSize*2)
+            .attr("x", 6)
+            .attr("text-anchor","start")
+            .style("font-size",lineFontSize)
+            .text(d => d.data.line1)
 
-                      node.append("text")
-                      .attr("dy", lineFontSize*2)
-                      .attr("x", 6)
-                      .attr("text-anchor","start")
-                      .style("font-size",lineFontSize)
-                      .text(d => d.data.line1)
+        node.append("text")
+            .attr("dy", lineFontSize*3.5)
+            .attr("x", 6)
+            .attr("text-anchor","start")
+            .style("font-size",lineFontSize)
+            .text(d => d.data.line2)
 
-
-                      node.append("text")
-                      .attr("dy", lineFontSize*3.5)
-                      .attr("x", 6)
-                      .attr("text-anchor","start")
-                      .style("font-size",lineFontSize)
-                      .text(d => d.data.line2)
-
-
-                      node.append("text")
-                      .attr("dy", lineFontSize*5)
-                      .attr("x", 6)
-                      .attr("text-anchor","start")
-                      .style("font-size",lineFontSize)
-                      .text(d => d.data.line3)
+        node.append("text")
+            .attr("dy", lineFontSize*5)
+            .attr("x", 6)
+            .attr("text-anchor","start")
+            .style("font-size",lineFontSize)
+            .text(d => d.data.line3)
         
-                      
-                      node.append("text")
-                      .attr("dy", lineFontSize*6.5)
-                      .attr("x", 6)
-                      .attr("text-anchor","start")
-                      .style("font-size",lineFontSize)
-                      .text(d => d.data.line4)
+        node.append("text")
+            .attr("dy", lineFontSize*6.5)
+            .attr("x", 6)
+            .attr("text-anchor","start")
+            .style("font-size",lineFontSize)
+            .text(d => d.data.line4)
 
-                      node.append("text")
-                      .attr("dy", lineFontSize*8)
-                      .attr("x", 6)
-                      .attr("text-anchor","start")
-                      .style("font-size",lineFontSize)
-                      .text(d => d.data.line5)
+        node.append("text")
+            .attr("dy", lineFontSize*8)
+            .attr("x", 6)
+            .attr("text-anchor","start")
+            .style("font-size",lineFontSize)
+            .text(d => d.data.line5)
 
-                      node.append("text")
-                      .attr("dy", lineFontSize*9.5)
-                      .attr("x", 6)
-                      .attr("text-anchor","start")
-                      .style("font-size",lineFontSize)
-                      .text(d => d.data.line6)
+        node.append("text")
+            .attr("dy", lineFontSize*9.5)
+            .attr("x", 6)
+            .attr("text-anchor","start")
+            .style("font-size",lineFontSize)
+            .text(d => d.data.line6)
 
-                      node.append("text")
-                      .attr("dy", lineFontSize*11)
-                      .attr("x", 6)
-                      .attr("text-anchor","start")
-                      .style("font-size",lineFontSize)
-                      .text(d => d.data.line7)
+        node.append("text")
+            .attr("dy", lineFontSize*11)
+            .attr("x", 6)
+            .attr("text-anchor","start")
+            .style("font-size",lineFontSize)
+            .text(d => d.data.line7)
 
-                      node.append("text")
-                      .attr("dy", lineFontSize*12.5)
-                      .attr("x", 6)
-                      .attr("text-anchor","start")
-                      .style("font-size",lineFontSize)
-                      .text(d => d.data.line8)
-
-                      
-                      node.append("text")
-                      .attr("dy", lineFontSize*14)
-                      .attr("x", 6)
-                      .attr("text-anchor","start")
-                      .style("font-size",lineFontSize)
-                      .text(d => d.data.line9)
+        node.append("text")
+            .attr("dy", lineFontSize*12.5)
+            .attr("x", 6)
+            .attr("text-anchor","start")
+            .style("font-size",lineFontSize)
+            .text(d => d.data.line8)
+        
+        node.append("text")
+            .attr("dy", lineFontSize*14)
+            .attr("x", 6)
+            .attr("text-anchor","start")
+            .style("font-size",lineFontSize)
+            .text(d => d.data.line9)
 
       loadType();
     
-      
       })
        .catch(error => {
          console.log(error);
@@ -1638,8 +1620,7 @@ const chronotype = (bibliography, links) => { // When called, draw the chronotyp
     .x(d => x(d.zone)) // The X value of each point is defined by "zone" (stable)
     .y(d => y(d.date)); // The Y value of each point is defined by "date" (changing)
 
-  svg
-    .append("rect") // Putting a rectangle above the grid to make dates easier to read
+  svg.append("rect") // Putting a rectangle above the grid to make dates easier to read
     .attr("x", 0)
     .attr("y", 0) // Rectangle starts at top left
     .attr("width", 110)
@@ -2371,17 +2352,15 @@ const chronotype = (bibliography, links) => { // When called, draw the chronotyp
     }); //======== END OF DATA CALL (PROMISES) ===========
 
   //======== ZOOM & RESCALE ===========
-  var gX = svg
-    .append("g") // Make X axis rescalable
-    .attr("class", "axis axis--x")
-    .style("stroke-opacity",.2)
-    .call(xAxis);
+  var gX = svg.append("g") // Make X axis rescalable
+              .attr("class", "axis axis--x")
+              .style("stroke-opacity",.2)
+              .call(xAxis);
 
-  var gY = svg
-    .append("g") // Make Y axis rescalable
-    .attr("class", "axis axis--y")
-    .style("stroke-opacity",.1)
-    .call(yAxis);
+  var gY = svg.append("g") // Make Y axis rescalable
+              .attr("class", "axis axis--y")
+              .style("stroke-opacity",.1)
+              .call(yAxis);
 
   svg.call(zoom).on("dblclick.zoom", null); // Zoom and deactivate doubleclick zooming
 
@@ -4230,17 +4209,138 @@ var view = svg.append("g") // Appending a group to SVG
   var zoom = d3.zoom()                                      // Zoom ability
   .scaleExtent([0.2, 20])                               // To which extent do we allow to zoom forward or zoom back
   .translateExtent([[-Infinity,-Infinity],[Infinity,Infinity]])
-  .on("zoom", zoomed);          
+  .on("zoom", zoomed);         
   
+  var x = d3.scaleTime() // Y axis scale
+  
+  var xAxis = d3.axisTop(x) // Actual Y axis
+                .scale(x) // Scale is declared just above
+                .ticks(20) // 20 ticks are displayed
+                .tickSize(height) // Ticks are vertical lines
+                .tickPadding(10 - height); // Ticks start and end out of the screen
+  
+var y = d3.scalePoint();
+
      //======== DATA CALL & SORT =========
    
 pandodb.pharmacotype.get(id).then(datajson => {
      
-  console.log(datajson)
+var data = datajson.content.entries;
+ 
+var trialNames = []
+
+const clinTriDateParser = (date) => {
+
+  var fullParseTime = d3.timeParse("%B %d, %Y");
+   var partialParseTime = d3.timeParse("%B %Y");
+
+   if (date.search(',')>-1) {
+   
+     return fullParseTime(date)
+   } else {
+     return partialParseTime(date)
+   }
+
+}
+
+ data.forEach(d=>{
+
+   // Setting up IDs
+   d.id=d.Study.ProtocolSection.IdentificationModule.BriefTitle;
+   trialNames.push(d.id);
+
+   d.StudyFirstSubmitDate = clinTriDateParser(d.Study.ProtocolSection.StatusModule.StudyFirstSubmitDate);
+   d.StartDate = clinTriDateParser(d.Study.ProtocolSection.StatusModule.StartDateStruct.StartDate);
+   if (d.Study.ProtocolSection.StatusModule.hasOwnProperty("PrimaryCompletionDateStruct")){
+      d.PrimaryCompletionDate = clinTriDateParser(d.Study.ProtocolSection.StatusModule.PrimaryCompletionDateStruct.PrimaryCompletionDate);
+    }
+
+    if (d.Study.ProtocolSection.StatusModule.hasOwnProperty("CompletionDateStruct")){
+        d.CompletionDate = clinTriDateParser(d.Study.ProtocolSection.StatusModule.CompletionDateStruct.CompletionDate);
+    }   
+
+   
+   
+  })
+  
+x.domain([data[0].StudyFirstSubmitDate, new Date('2025')]) // First shows a range from minus one year to plus one year
+ .range([0, width - toolWidth]); // Size on screen is full height of client
+
+y.domain(trialNames)
+ .rangeRound([0, 30*data.length])
+ .padding(1)
+
+var StudyFirstSubmitDate = view.append("g").attr("id","StudyFirstSubmitDate")
+
+StudyFirstSubmitDate.selectAll('.StudyFirstSubmitDate')
+                  .data(data)
+                  .enter().append("circle")
+                  .attr("cx",d=> x(d.StudyFirstSubmitDate))
+                  .attr("cy",d=> y(d.id))
+                  .attr("fill", "rgb(209, 60, 75)")
+                  .attr("r", 3.5);
+
+      var StartDate = view.append("g").attr("id","StartDate")
+
+      StartDate.selectAll('.StartDate')
+                        .data(data)
+                        .enter().append("circle")
+                        .attr("cx",d=> x(d.StartDate))
+                        .attr("cy",d=> y(d.id))
+                        .attr("fill", "rgb(252, 172, 99)")
+                        .attr("r", 3.5);
+
+    var PrimaryCompletionDate = view.append("g").attr("id","PrimaryCompletionDate")
+
+    PrimaryCompletionDate.selectAll('.CompletionDate')
+                      .data(data)
+                      .enter().append("circle")
+                      .attr("cx",d=> x(d.PrimaryCompletionDate))
+                      .attr("cy",d=> y(d.id))
+                      .attr("fill", "rgb(169, 220, 162)")
+                      .attr("r", 3.5);
+
+  var CompletionDate = view.append("g").attr("id","CompletionDate")
+
+  CompletionDate.selectAll('.CompletionDate')
+                    .data(data)
+                    .enter().append("circle")
+                    .attr("cx",d=> x(d.CompletionDate))
+                    .attr("cy",d=> y(d.id))
+                    .attr("fill", "rgb(66, 136, 181)")
+                    .attr("r", 3.5);
+
+var lines = view.append("g").attr("id","lines")
+
+lines.selectAll(".lines")
+      .data(data)
+      .enter().append("line")
+      .attr("stroke", "#aaa")
+      .attr("x1", d => x(d.StudyFirstSubmitDate))
+      .attr("x2", d => x(d.CompletionDate))
+      .attr("y1", d => y(d.id))
+      .attr("y2", d => y(d.id));
+
+lines.lower();
+
+var titles = view.append("g").attr("id","titles")
+
+titles.selectAll(".titles")
+      .data(data)
+      .enter().append("text")
+      .attr("fill", "black")
+      .style("font-size",8)
+      .attr("y", d => y(d.id))
+      .attr("x", d => x(d.CompletionDate))
+      .attr("dx",8)
+      .attr("dy",3)
+      .style("cursor","pointer")
+      .text(d=>d.id);
+ 
+      lines.lower();
 
       loadType();
     
-      
       })
        .catch(error => {
          console.log(error);
@@ -4248,15 +4348,23 @@ pandodb.pharmacotype.get(id).then(datajson => {
          ipcRenderer.send(
            "console-logs",
            " error: cannot start corpus " + id + "."
-         );
-       });
-     //======== ZOOM & RESCALE ===========
+        );
+      });
+   
+//======== ZOOM & RESCALE ===========
   svg.call(zoom).on("dblclick.zoom", null);
+
+  var gX = svg.append("g") 
+              .attr("class", "axis axis--x")
+              .attr("translate","(0,0)")
+              .style("stroke-opacity",.1)
+              .call(xAxis);
 
   function zoomed() {
     view.attr("transform", d3.event.transform);
+    gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
   }
-     ipcRenderer.send("console-logs", "Starting Filotype");
+    ipcRenderer.send("console-logs", "Starting Filotype");
 
 };
 
