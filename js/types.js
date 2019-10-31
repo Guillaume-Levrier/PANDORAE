@@ -4356,7 +4356,6 @@ titles.selectAll(".titles")
 
   var gX = svg.append("g") 
               .attr("class", "axis axis--x")
-              .attr("translate","(0,0)")
               .style("stroke-opacity",.1)
               .call(xAxis);
 
@@ -4364,7 +4363,7 @@ titles.selectAll(".titles")
     view.attr("transform", d3.event.transform);
     gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
   }
-    ipcRenderer.send("console-logs", "Starting Filotype");
+    ipcRenderer.send("console-logs", "Starting Pharmacotype");
 
 };
 
