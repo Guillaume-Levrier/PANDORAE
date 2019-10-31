@@ -423,21 +423,21 @@ const clinTriRetriever = (query) => {
       .then(firstResponse => {
         // Once you get the response
         
-        let totalResults = parseInt(firstResponse.FullStudiesResponse.NStudiesFound);
+        let totalResults = firstResponse.FullStudiesResponse.NStudiesFound;
 
         var dataPromises = []; // Create empty array for the promises to come
 
-        for (let countStart = 1; countStart <= totalResults; countStart += 95) {
+        for (let countStart = 1; countStart <= totalResults; countStart += 99) {
           // For each page of 100 documents
 
           // Create a specific promise
           let clintriTotalRequest =
-            rootUrl +
+            rootUrl + "expr=" +
             query +
            "&min_rnk="+ //&min_rnk=20&max_rnk=50&fmt=json
            countStart +
            "&max_rnk=" +
-           parseInt(countStart+95)+
+           parseInt(countStart+99)+
             "&fmt=json";
 
           let optionsTotalRequest = {
@@ -458,17 +458,16 @@ const clinTriRetriever = (query) => {
                 }).then(() => {
             
                 let id = query + date;
-        
-                pandodb.pharmacotype.add({ id: id, date: date, name: query, content: content }).then(()=>{
-                  setTimeout(() => {
-                    ipcRenderer.send(
-                      "chaeros-notification",
-                      "clinical trials for " + query + " retrieved"
-                    );
-                       win.close();
-                     }, 500); // Close Chaeros
-                })
-              
+       
+                    pandodb.pharmacotype.add({ id: id, date: date, name: query, content: content }).then(()=>{
+                      setTimeout(() => {
+                        ipcRenderer.send(
+                          "chaeros-notification",
+                          "clinical trials for " + query + " retrieved"
+                        );
+                          win.close();
+                        }, 500); // Close Chaeros
+                    })  
 
                   });
               })

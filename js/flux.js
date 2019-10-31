@@ -39,7 +39,7 @@ let traces = [
   {
     hops: [
       { info: { name: "USER" }, name: "USER" },
-      { info: { name: "CLINICAL_TRIALS" }, name: "CLINICAL_TRIALS" },
+      { info: { name: "CLINICAL⠀TRIALS" }, name: "CLINICAL⠀TRIALS" },
       { info: { name: "SYSTEM" }, name: "SYSTEM" }
     ]
   },
@@ -800,12 +800,11 @@ const clinicTrialBasicRetriever = checker => {
         .then(firstResponse => {
           // Then, once the response is retrieved
           
-
-        let totalResults = parseInt(firstResponse.FullStudiesResponse.NStudiesFound);
+        let totalResults = firstResponse.FullStudiesResponse.NStudiesFound;
 
              let requestAmount = totalResults => {
               if (totalResults > 100) {
-                return parseInt(totalResults / 200) + 1;
+                return parseInt(totalResults / 100) + 1;
               } else {
                 return 2;
               }
