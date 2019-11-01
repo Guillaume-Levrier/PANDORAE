@@ -4316,7 +4316,29 @@ const g = view.append("g")
       .text(d=>d.id)
       .on("click",d=>{     
 
-        d3.select("#tooltip").html(JSON.stringify(d))
+        let idMod = d.Study.ProtocolSection.IdentificationModule
+        let statMod = d.Study.ProtocolSection.StatusModule
+        let descMod = d.Study.ProtocolSection.DescriptionModule
+
+
+        d3.select("#tooltip").html("<h2>"+idMod.BriefTitle+"</h2>"+
+        "<h3>"+idMod.Organization.OrgFullName+" - "+idMod.Organization.OrgClass.toLowerCase()+"</h3>"+"<br>"+
+        "<strong>Full title:</strong> "+idMod.OfficialTitle+"<br>"+
+        "<strong>NCTId:</strong> "+idMod.NCTId+"<br>"+
+        "<strong>Org Id:</strong> "+idMod.OrgStudyIdInfo.OrgStudyId+"<br>"+"<br>"+
+        "<h3>Description</h3>"+
+        "<strong>Brief summary:</strong> "+descMod.BriefSummary+"<br>"+"<br>"+
+        "<strong>Detailed description:</strong> "+descMod.DetailedDescription+"<br>"+
+        "<h3>Status</h3>"+
+        "<strong>Overall status:</strong> "+statMod.OverallStatus+"<br>"+
+        "<strong>Last verified:</strong> "+statMod.StatusVerifiedDate+"<br>"+
+        "<strong>Expanded access:</strong> "+statMod.ExpandedAccessInfo.HasExpandedAccess+"<br>"
+
+
+
+
+
+        )
 
         if (document.getElementById(JSON.stringify(d.Rank)).style.fill==="black") { 
           document.getElementById(JSON.stringify(d.Rank)).style.fill="blue";
