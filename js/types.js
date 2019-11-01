@@ -4195,6 +4195,8 @@ requestContent=requestContent+"</ul>"
 }; // Close gazouillotype function
 
 
+// PHARMACOTYPE IS BACK
+
 const pharmacotype = (id) => {
 
   var svg = d3.select(xtype)
@@ -4213,9 +4215,9 @@ var view = svg.append("g") // Appending a group to SVG
   
   var x = d3.scaleTime() // Y axis scale
   
-  var xAxis = d3.axisTop(x) // Actual Y axis
+  var xAxis = d3.axisBottom(x) // Actual Y axis
                 .scale(x) // Scale is declared just above
-                .ticks(20) // 20 ticks are displayed
+                .ticks(5) // 20 ticks are displayed
                 .tickSize(height) // Ticks are vertical lines
                 .tickPadding(10 - height); // Ticks start and end out of the screen
   
@@ -4282,30 +4284,24 @@ const g = view.append("g")
       .attr("stroke", "#aaa")
       .attr("x1", d => x(d.StudyFirstSubmitDate))
       .attr("x2", d => x(d.CompletionDate));
-    //  .attr("y1", d => y(d.id))
-    //  .attr("y2", d => y(d.id));
 
     g.append("circle")
       .attr("cx",d=> x(d.StudyFirstSubmitDate))
-    //  .attr("cy",d=> y(d.id))
       .attr("fill", "rgb(209, 60, 75)")
       .attr("r", 3.5);
 
     g.append("circle")
       .attr("cx",d=> x(d.StartDate))
-    //  .attr("cy",d=> y(d.id))
       .attr("fill", "rgb(252, 172, 99)")
       .attr("r", 3.5);
 
     g.append("circle")
       .attr("cx",d=> x(d.PrimaryCompletionDate))
-     // .attr("cy",d=> y(d.id))
       .attr("fill", "rgb(169, 220, 162)")
       .attr("r", 3.5);
 
     g.append("circle")
       .attr("cx",d=> x(d.CompletionDate))
-    //  .attr("cy",d=> y(d.id))
       .attr("fill", "rgb(66, 136, 181)")
       .attr("r", 3.5);
 
@@ -4319,6 +4315,8 @@ const g = view.append("g")
       .style("cursor","pointer")
       .text(d=>d.id)
       .on("click",d=>{     
+
+        d3.select("#tooltip").html(JSON.stringify(d))
 
         if (document.getElementById(JSON.stringify(d.Rank)).style.fill==="black") { 
           document.getElementById(JSON.stringify(d.Rank)).style.fill="blue";
@@ -4414,6 +4412,25 @@ alignDiv.appendChild(align)
       });
    
 //======== ZOOM & RESCALE ===========
+
+var legend = svg.append("g").attr("id","legend")
+
+legend.append("rect").attr("x",10).attr("y",height-70).attr("width",170).attr("height",50).attr("fill","white").attr("stroke","black")
+
+legend.append("circle").attr("cx",20).attr("cy",height-60).attr("fill", "rgb(209, 60, 75)").attr("r", 3.5);
+legend.append("text").attr("x",25).attr("y",height-60).attr("dy",4).style("font-size",10).text("FIRST SUBMIT DATE");
+
+legend.append("circle").attr("cx",20).attr("cy",height-50).attr("fill", "rgb(252, 172, 99)").attr("r", 3.5);
+legend.append("text").attr("x",25).attr("y",height-50).attr("dy",4).style("font-size",10).text("START DATE");
+
+legend.append("circle").attr("cx",20).attr("cy",height-40).attr("fill", "rgb(169, 220, 162)").attr("r", 3.5);
+legend.append("text").attr("x",25).attr("y",height-40).attr("dy",4).style("font-size",10).text("PRIMARY COMPLETION DATE");
+
+legend.append("circle").attr("cx",20).attr("cy",height-30).attr("fill", "rgb(66, 136, 181)").attr("r", 3.5);
+legend.append("text").attr("x",25).attr("y",height-30).attr("dy",4).style("font-size",10).text("COMPLETION DATE");
+
+
+
   svg.call(zoom).on("dblclick.zoom", null);
 
   var gX = svg.append("g") 
@@ -4424,6 +4441,7 @@ alignDiv.appendChild(align)
   function zoomed() {
     view.attr("transform", d3.event.transform);
     gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
+    gX.lower()
   }
     ipcRenderer.send("console-logs", "Starting Pharmacotype");
 
