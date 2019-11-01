@@ -4249,6 +4249,8 @@ const clinTriDateParser = (date) => {
    d.id=d.Study.ProtocolSection.IdentificationModule.BriefTitle;
    trialNames.push(d.id);
 
+   d.highlighted =0;
+
    d.StudyFirstSubmitDate = clinTriDateParser(d.Study.ProtocolSection.StatusModule.StudyFirstSubmitDate);
    d.StartDate = clinTriDateParser(d.Study.ProtocolSection.StatusModule.StartDateStruct.StartDate);
    if (d.Study.ProtocolSection.StatusModule.hasOwnProperty("PrimaryCompletionDateStruct")){
@@ -4267,147 +4269,137 @@ x.domain([data[0].StudyFirstSubmitDate, new Date('2025')]) // First shows a rang
  .range([0, width - toolWidth]); // Size on screen is full height of client
 
 y.domain(trialNames)
- .rangeRound([0, 30*data.length])
+ .rangeRound([0, 20*data.length])
  .padding(1)
 
 const g = view.append("g")
-          .selectAll("g")
-          .data(data)
-          .join("g")
-            .attr("transform", (d, i) => `translate(0,${y(d.id)})`);
+              .selectAll("g")
+              .data(data)
+              .join("g")
+                .attr("transform", (d, i) => `translate(0,${y(d.id)})`);
 
-
-            //var lines = view.append("g").attr("id","lines")
-
-//lines.selectAll(".lines")
-  //    .data(data)
-    //  .enter()
     g.append("line")
-    .attr("stroke", "#aaa")
-    .attr("x1", d => x(d.StudyFirstSubmitDate))
-    .attr("x2", d => x(d.CompletionDate))
-    .attr("y1", d => y(d.id))
-    .attr("y2", d => y(d.id));
+      .attr("stroke", "#aaa")
+      .attr("x1", d => x(d.StudyFirstSubmitDate))
+      .attr("x2", d => x(d.CompletionDate));
+    //  .attr("y1", d => y(d.id))
+    //  .attr("y2", d => y(d.id));
 
-//var StudyFirstSubmitDate = view.append("g").attr("id","StudyFirstSubmitDate")
-
-//StudyFirstSubmitDate.selectAll('.StudyFirstSubmitDate')
-  //                .data(data)
-    //              .enter()
     g.append("circle")
-                  .attr("cx",d=> x(d.StudyFirstSubmitDate))
-                  .attr("cy",d=> y(d.id))
-                  .attr("fill", "rgb(209, 60, 75)")
-                  .attr("r", 3.5);
+      .attr("cx",d=> x(d.StudyFirstSubmitDate))
+    //  .attr("cy",d=> y(d.id))
+      .attr("fill", "rgb(209, 60, 75)")
+      .attr("r", 3.5);
 
-    //  var StartDate = view.append("g").attr("id","StartDate")
+    g.append("circle")
+      .attr("cx",d=> x(d.StartDate))
+    //  .attr("cy",d=> y(d.id))
+      .attr("fill", "rgb(252, 172, 99)")
+      .attr("r", 3.5);
 
-     // StartDate.selectAll('.StartDate')
-       //                 .data(data)
-                   //     .enter()
-                        g.append("circle")
-                        .attr("cx",d=> x(d.StartDate))
-                        .attr("cy",d=> y(d.id))
-                        .attr("fill", "rgb(252, 172, 99)")
-                        .attr("r", 3.5);
+    g.append("circle")
+      .attr("cx",d=> x(d.PrimaryCompletionDate))
+     // .attr("cy",d=> y(d.id))
+      .attr("fill", "rgb(169, 220, 162)")
+      .attr("r", 3.5);
 
- //   var PrimaryCompletionDate = view.append("g").attr("id","PrimaryCompletionDate")
+    g.append("circle")
+      .attr("cx",d=> x(d.CompletionDate))
+    //  .attr("cy",d=> y(d.id))
+      .attr("fill", "rgb(66, 136, 181)")
+      .attr("r", 3.5);
 
-   // PrimaryCompletionDate.selectAll('.CompletionDate')
-     //                 .data(data)
-                    //  .enter()
-                    g.append("circle")
-                      .attr("cx",d=> x(d.PrimaryCompletionDate))
-                      .attr("cy",d=> y(d.id))
-                      .attr("fill", "rgb(169, 220, 162)")
-                      .attr("r", 3.5);
-
-//  var CompletionDate = view.append("g").attr("id","CompletionDate")
-
-  //CompletionDate.selectAll('.CompletionDate')
-    //                .data(data)
-             //       .enter()
-                    g.append("circle")
-                    .attr("cx",d=> x(d.CompletionDate))
-                    .attr("cy",d=> y(d.id))
-                    .attr("fill", "rgb(66, 136, 181)")
-                    .attr("r", 3.5);
-
-
-
-
-
-//var titles = view.append("g").attr("id","titles")
-
-//titles.selectAll(".titles")
-  //    .data(data)
-    //  .enter()
-    g.append("text")
+  var titles = g.append("text")
       .attr("fill", "black")
       .style("font-size",8)
-      .attr("y", d => y(d.id))
+      .attr("id",d=>JSON.stringify(d.Rank))
       .attr("x", d => x(d.CompletionDate))
       .attr("dx",8)
       .attr("dy",3)
-      .text(d=>d.id);
+      .style("cursor","pointer")
+      .text(d=>d.id)
+      .on("click",d=>{     
 
-//var highlightRectangles = view.append("g").attr("id","highlightRectangle^s")
+        if (document.getElementById(JSON.stringify(d.Rank)).style.fill==="black") { 
+          document.getElementById(JSON.stringify(d.Rank)).style.fill="blue";
+          d.highlighted=1;  
+      } else { 
+          document.getElementById(JSON.stringify(d.Rank)).style.fill="black";
+          d.highlighted=0;  
+      };
+  
+          for (let i = 0; i < data.length; i++) {
+            if(data[i].highlighted){
+              document.getElementById("sort").style.opacity=1;
+              break;
+            } else {
+              document.getElementById("sort").style.opacity=.5;
+            }
+          }
+        });
+  
+     
+var titleAlignDistance = d3.max(data, d => x(d.CompletionDate)+8)
 
-//highlightRectangles.selectAll(".highlightRectangles")
-  //                .data(data)
-    //              .enter()
-    g.append("rect")
-                  .attr("id",d=>JSON.stringify(d.Rank))
-                  .attr("x", -20000)
-                  .attr("y", d => y(d.id)-10)
-                  .attr("width",40000)
-                  .attr("height",20)
-                  .attr("fill","transparent")
-                  .style("cursor","pointer")
-                  .on("click",d=>{                                   
-                  if (document.getElementById(JSON.stringify(d.Rank)).style.fill==="transparent") { document.getElementById(JSON.stringify(d.Rank)).style.fill="rgba(142,242,242,.2)";
-                  d.highlighted=1;  
-                } else { 
-                    document.getElementById(JSON.stringify(d.Rank)).style.fill="transparent";
-                    d.highlighted=0;  
-                };
+var aligned=false;
 
-                for (let i = 0; i < data.length; i++) {
-                  if(data[i].highlighted){
-                    document.getElementById("sort").style.opacity=1;
-                    break;
-                  }else{
-                    document.getElementById("sort").style.opacity=.5;
-                  }
-                  
-                }
+const alignTrialTitles = () => {
+
+  const distance = (trial) => titleAlignDistance-x(trial.CompletionDate)+8;
+
+  if(aligned) {
+    titles.transition()
+          .delay((d, i) => i * 10)
+          .attr("transform", d => `translate(${0},0)`)
+    aligned = false;
+  } else {
+    titles.transition()
+          .delay((d, i) => i * 10)
+          .attr("transform", d => `translate(${distance(d)},0)`)
+          aligned = true;
+        }
+}
+
+
+    const sortTrials = () =>{
+        y.domain(
+          d3.permute(trialNames,d3.range(data.length)
+                                  .sort((i, j) => data[j].highlighted - data[i].highlighted))
+            );
+
+      g.transition()
+        .delay((d, i) => i * 10)
+        .attr("transform", d => `translate(0,${y(d.id)})`)
       
-                    d3.select(this).lower()
-                  });
+    }
 
-      var sort = document.createElement("i")
-      sort.innerHTML = "arrow_drop_down_circle"
+  var sort = document.createElement("i")
+      sort.innerHTML = "shuffle"
       sort.id="sort"
       sort.className ="material-icons"
       sort.style ="display:flex;opacity:.5"
-      sort.addEventListener("click",e=>{
-      // y.domain(d3.permute(trialNames,d3.range(data.length).sort((i, j) => data[j].highlighted - data[i].highlighted) ));
-
-    // Transition the columns to their new position.
-    g.transition()
-        .delay((d, i) => i * 10)
-        .attr("transform", d => `translate(0,${y(d.id)})`)
-        
-        
-      })
+      sort.addEventListener("click",sortTrials)
 
 var sortDiv = document.createElement("div")
-sortDiv.className = "themeCustom"
-sortDiv.style ="left:25px;cursor:pointer;position:absolute;font-size:26px;z-index:15;top:130px;background-color:white;border: 1px solid rgb(230,230,230);"
+    sortDiv.className = "themeCustom"
+    sortDiv.style ="left:25px;cursor:pointer;position:absolute;font-size:26px;z-index:15;top:130px;background-color:white;border: 1px solid rgb(230,230,230);"
 
-sortDiv.appendChild(sort)
-document.body.appendChild(sortDiv)
+    sortDiv.appendChild(sort)
+    document.body.appendChild(sortDiv)
 
+var align = document.createElement("i")
+align.innerHTML = "toc"
+align.id="align"
+align.className ="material-icons"
+align.style ="display:flex;"
+align.addEventListener("click",alignTrialTitles)
+
+var alignDiv = document.createElement("div")
+alignDiv.className = "themeCustom"
+alignDiv.style ="left:25px;cursor:pointer;position:absolute;font-size:26px;z-index:15;top:165px;background-color:white;border: 1px solid rgb(230,230,230);"
+
+alignDiv.appendChild(align)
+  document.body.appendChild(alignDiv)
 
       loadType();
     
