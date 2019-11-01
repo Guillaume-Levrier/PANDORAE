@@ -4251,7 +4251,26 @@ const clinTriDateParser = (date) => {
    d.id=d.Study.ProtocolSection.IdentificationModule.BriefTitle;
    trialNames.push(d.id);
 
-   d.highlighted =0;
+   d.highlighted = 0;
+
+  
+
+  if(d.Study.ProtocolSection.DesignModule.hasOwnProperty("PhaseList")){
+
+   let phases = d.Study.ProtocolSection.DesignModule.PhaseList.Phase;
+  
+   let phase = phases[phases.length-1].slice(-1);
+ 
+   if (parseInt(phase)) {
+    d.currentPhase = phase;
+   } else {
+    d.currentPhase = 0;
+   }
+  
+  } else {
+    d.currentPhase = 0;
+
+  }
 
    d.StudyFirstSubmitDate = clinTriDateParser(d.Study.ProtocolSection.StatusModule.StudyFirstSubmitDate);
    d.StartDate = clinTriDateParser(d.Study.ProtocolSection.StatusModule.StartDateStruct.StartDate);
@@ -4334,10 +4353,6 @@ const g = view.append("g")
         "<strong>Last verified:</strong> "+statMod.StatusVerifiedDate+"<br>"+
         "<strong>Expanded access:</strong> "+statMod.ExpandedAccessInfo.HasExpandedAccess+"<br>"
 
-
-
-
-
         )
 
         if (document.getElementById(JSON.stringify(d.Rank)).style.fill==="black") { 
@@ -4348,14 +4363,6 @@ const g = view.append("g")
           d.highlighted=0;  
       };
   
-          for (let i = 0; i < data.length; i++) {
-            if(data[i].highlighted){
-              document.getElementById("sort").style.opacity=1;
-              break;
-            } else {
-              document.getElementById("sort").style.opacity=.5;
-            }
-          }
         });
   
      
@@ -4381,11 +4388,36 @@ const alignTrialTitles = () => {
 }
 
 
-    const sortTrials = () =>{
-        y.domain(
-          d3.permute(trialNames,d3.range(data.length)
-                                  .sort((i, j) => data[j].highlighted - data[i].highlighted))
-            );
+  const sortTrials = (criteria) =>{
+
+    var permute;
+
+  switch (criteria) {
+    case "Highlighted":
+      permute = d3.permute(trialNames,d3.range(data.length).sort((i, j) => data[j].highlighted - data[i].highlighted))
+      break;
+
+      case "Type of organisation":
+        permute = d3.permute(trialNames,d3.range(data.length).sort((i, j) => data[i].Study.ProtocolSection.IdentificationModule.Organization.OrgClass.length - data[j].Study.ProtocolSection.IdentificationModule.Organization.OrgClass.length))
+        titles.text(d=>d.id+ " - "+d.Study.ProtocolSection.IdentificationModule.Organization.OrgClass)
+        break;
+
+        case "Start date":
+        permute = d3.permute(trialNames,d3.range(data.length).sort((i, j) => data[i].StartDate - data[j].StartDate))
+        break;
+
+        case "Completion date":
+        permute = d3.permute(trialNames,d3.range(data.length).sort((i, j) => data[i].CompletionDate - data[j].CompletionDate))
+        break;
+
+        case "Phase":
+        permute = d3.permute(trialNames,d3.range(data.length).sort((i, j) => data[i].currentPhase - data[j].currentPhase))
+        titles.text(d=>d.id+ " - Phase: "+d.currentPhase)
+
+        break;
+  }
+
+        y.domain(permute);
 
       g.transition()
         .delay((d, i) => i * 10)
@@ -4393,12 +4425,39 @@ const alignTrialTitles = () => {
       
     }
 
+var criteriaList = ["Highlighted","Type of organisation","Start date","Completion date","Phase"];
+
+var sortingList = document.createElement("div");
+sortingList.id = "sortingList"
+sortingList.style = "left:50px;cursor:pointer;position:absolute;font-size:12px;text-align:center;margin:auto;z-index:15;top:130px;background-color:white;border: 1px solid rgb(230,230,230);display:none"
+
+criteriaList.forEach(crit=>{
+  var thisCrit = document.createElement("div")
+  thisCrit.id = crit;
+  thisCrit.innerText = crit;
+  thisCrit.className="dialog-buttons"
+  thisCrit.style="width:100%;text-align:center;padding:2px;margin:2px;"
+  thisCrit.addEventListener("click",e=>sortTrials(crit))
+  sortingList.appendChild(thisCrit)
+})
+
+document.body.appendChild(sortingList)
+
   var sort = document.createElement("i")
       sort.innerHTML = "shuffle"
       sort.id="sort"
       sort.className ="material-icons"
-      sort.style ="display:flex;opacity:.5"
-      sort.addEventListener("click",sortTrials)
+      sort.style ="display:flex"
+      sort.addEventListener("click",e=>{
+        if (sortingList.style.display==="none") {
+              sortingList.style.display="block"
+        } else {
+          sortingList.style.display="none"
+
+        }
+      //  sortTrials("highlighted")
+
+      })
 
 var sortDiv = document.createElement("div")
     sortDiv.className = "themeCustom"
