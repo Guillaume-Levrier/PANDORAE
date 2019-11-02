@@ -4338,20 +4338,26 @@ const g = view.append("g")
         let idMod = d.Study.ProtocolSection.IdentificationModule
         let statMod = d.Study.ProtocolSection.StatusModule
         let descMod = d.Study.ProtocolSection.DescriptionModule
+        let overSight = d.Study.ProtocolSection.OversightModule
 
 
         d3.select("#tooltip").html("<h2>"+idMod.BriefTitle+"</h2>"+
         "<h3>"+idMod.Organization.OrgFullName+" - "+idMod.Organization.OrgClass.toLowerCase()+"</h3>"+"<br>"+
+       " <input type='button' style='cursor:pointer' onclick='shell.openExternal("+JSON.stringify("https://clinicaltrials.gov/ct2/show/"+idMod.NCTId)+")' value='Open on ClinicalTrials.gov'></input><br><br>"+
         "<strong>Full title:</strong> "+idMod.OfficialTitle+"<br>"+
         "<strong>NCTId:</strong> "+idMod.NCTId+"<br>"+
         "<strong>Org Id:</strong> "+idMod.OrgStudyIdInfo.OrgStudyId+"<br>"+"<br>"+
-        "<h3>Description</h3>"+
-        "<strong>Brief summary:</strong> "+descMod.BriefSummary+"<br>"+"<br>"+
-        "<strong>Detailed description:</strong> "+descMod.DetailedDescription+"<br>"+
         "<h3>Status</h3>"+
         "<strong>Overall status:</strong> "+statMod.OverallStatus+"<br>"+
         "<strong>Last verified:</strong> "+statMod.StatusVerifiedDate+"<br>"+
-        "<strong>Expanded access:</strong> "+statMod.ExpandedAccessInfo.HasExpandedAccess+"<br>"
+        "<strong>Expanded access:</strong> "+statMod.ExpandedAccessInfo.HasExpandedAccess+"<br>"+
+        "<strong>FDA regulated:</strong> Drug ["+overSight.IsFDARegulatedDrug+"] - Device ["+overSight.IsFDARegulatedDevice+"]<br>"+
+        "<h3>Description</h3>"+
+        "<strong>Brief summary:</strong> "+descMod.BriefSummary+"<br>"+"<br>"+
+        "<strong>Detailed description:</strong> "+descMod.DetailedDescription+"<br>"
+
+      
+
 
         )
 
