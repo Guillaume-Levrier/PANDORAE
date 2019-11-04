@@ -16,6 +16,30 @@ const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage oth
 
 var field = document.getElementById("field");
 
+const dataDownload = (data) => {
+
+var source = document.getElementById("source")
+
+var datasetName = data.id;
+datasetName = datasetName.replace(/\//ig,"_");
+datasetName = datasetName.replace(/:/ig,"+");
+
+source.style.cursor = "pointer";
+
+source.addEventListener("click",e=>{
+  fs.writeFile(dialog.showSaveDialog({"defaultPath":datasetName+".json"}),JSON.stringify(data),()=>{
+    ipcRenderer.send(
+      "console-logs",
+      "Downloading dataset "+data.id+".json"
+    );
+  })
+
+})
+
+  
+
+}
+
 const resizer = () =>location.reload();
 
 // =========== LOADTYPE ===========
@@ -300,6 +324,9 @@ const anthropotype = datasetAT => {  // When called, draw the anthropotype
   pandodb.anthropotype
     .get(datasetAT)
     .then(datajson => {
+
+      dataDownload(datajson);
+
       const docData = datajson.content[0].items;
 
       var criteriaList = [];
@@ -570,6 +597,9 @@ var view = svg.append("g") // Appending a group to SVG
    
 pandodb.filotype.get(id).then(datajson => {
      
+  dataDownload(datajson);
+
+
     datajson.content.forEach(tweet=>{
       var tweetText = tweet.full_text;
       tweet.mentions = new Array;
@@ -821,6 +851,9 @@ var tweetList = document.createElement("div");
  
    pandodb.doxatype.get(id).then(datajson => {
    
+    dataDownload(datajson);
+
+
     var totalTweets = datajson.content;
 
     var visTweets = [];
@@ -995,6 +1028,9 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
   //======== DATA CALL & SORT =========
 
   pandodb.hyphotype.get(id).then(datajson => {
+
+    dataDownload(datajson);
+
 
       var corpusRequests = [];
 
@@ -1659,6 +1695,10 @@ const chronotype = (bibliography, links) => { // When called, draw the chronotyp
   pandodb.chronotype
     .get(bibliography)
     .then(datajson => {
+
+      dataDownload(datajson);
+
+
       var docs = datajson.content; // Second array is the documents (docs)
       const clusters = [];
       const links = []; // Declaring links as empty array
@@ -2423,6 +2463,10 @@ const geotype = locations => {
   pandodb.geotype
     .get(locations)
     .then(locations => {
+
+      dataDownload(locations);
+
+
       var data = [];
 
       for (let i = 0; i < locations.content.length; i++) {
@@ -3416,6 +3460,8 @@ const gazouillotype = dataset => {
   pandodb.gazouillotype.get(dataset).then(datajson => {
     // Load dataset info from pandodb
 
+    dataDownload(datajson);
+
     datajson.content.tweets = []; // Prepare array to store tweets into
 
     let tranche = { date: "", tweets: [] }; // A tranche will be a pile on the graph
@@ -4244,6 +4290,8 @@ var y = d3.scalePoint();
    
 pandodb.pharmacotype.get(id).then(datajson => {
      
+  dataDownload(datajson);
+
 var data = datajson.content.entries;
  
 var trialNames = []
