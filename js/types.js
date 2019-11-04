@@ -3305,24 +3305,11 @@ const linkLoc = () => {
 
       var globeCenter = projection.invert([document.getElementById("xtypeSVG").width.baseVal.value/2,document.getElementById("xtypeSVG").width.baseVal.value/2]);
 
-      console.log(globeCenter)
-
 d3.select("#cityLocations").selectAll("text")
       .style("display", d => {
         //hide if behind the globe
 
-        var loc = projection([d.lon, d.lat]),
-        x = loc[0],
-        y = loc[1];
-        //console.log(d.city)
-        //console.log(loc)
-
-        if ( 
-          x>globeCenter[0]-180 &&
-          x<globeCenter[0]+180 &&
-          y>globeCenter[1]+90 &&
-          y<globeCenter[1]-90 
-          ) {
+        if ( d.lon>globeCenter[0]-90 && d.lon < globeCenter[0]+90 && d.lat>globeCenter[1]-90 && d.lat < globeCenter[1]+90) {
         return "block";
       } else {
         return "none";
