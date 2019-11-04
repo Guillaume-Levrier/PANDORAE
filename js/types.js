@@ -20,9 +20,16 @@ const dataDownload = (data) => {
 
 var source = document.getElementById("source")
 
-var datasetName = data.id;
-datasetName = datasetName.replace(/\//ig,"_");
-datasetName = datasetName.replace(/:/ig,"+");
+
+
+var datasetName = "";
+
+if (data.hasOwnProperty("id")) {
+  datasetName = data.id;
+  datasetName = datasetName.replace(/\//ig,"_");
+  datasetName = datasetName.replace(/:/ig,"+");
+}
+
 
 source.style.cursor = "pointer";
 
@@ -35,8 +42,6 @@ source.addEventListener("click",e=>{
   })
 
 })
-
-  
 
 }
 
@@ -1029,7 +1034,7 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
 
   pandodb.hyphotype.get(id).then(datajson => {
 
-    dataDownload(datajson);
+   
 
 
       var corpusRequests = [];
@@ -1112,6 +1117,8 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
 
     Promise.all(corpusRequests).then(status => {
    
+      dataDownload(status);
+
       var links = [];
 
       let weStatus = status[0][0].result;
