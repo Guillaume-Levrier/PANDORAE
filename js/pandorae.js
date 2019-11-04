@@ -363,6 +363,7 @@ ipcRenderer.on("coreSignal", (event, fluxAction, fluxArgs, message) => {
 });
 
 ipcRenderer.on("chaeros-notification", (event, message, options) => {
+  pulse(1, 1, 10,true);
   field.value = message;
   if (message === "return to tutorial") {
     slide = options;

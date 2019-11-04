@@ -68,6 +68,13 @@ let traces = [
   {
     hops: [
       { info: { name: "USER" }, name: "USER" },
+      { info: { name: "LOCAL" }, name: "LOCAL" },
+      { info: { name: "SYSTEM" }, name: "SYSTEM" }
+    ]
+  },
+  {
+    hops: [
+      { info: { name: "USER" }, name: "USER" },
       { info: { name: "HYPHE" }, name: "HYPHE" }
     ]
   }
@@ -1303,4 +1310,25 @@ const twitterThread = () => {
       }, 500);
   })
 })
+};
+
+
+
+const localUpload = () => {
+
+  var datasetPath = document.getElementById("localUploadPath").files[0].path;
+
+  fs.readFile(datasetPath,'utf8',(err,data)=>{
+    var data = JSON.parse(data);
+
+    pandodb.open();
+    pandodb.system.add(data).then(()=>{
+      ipcRenderer.send("chaeros-notification", "imported local dataset"); // Sending notification to console
+      ipcRenderer.send("console-logs", "Imported local dataset "+data.id); // Sending notification to console  
+      setTimeout(() => {
+        closeWindow();
+      },500)
+    });
+  })
+  
 };
