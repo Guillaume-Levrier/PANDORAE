@@ -187,20 +187,13 @@
 <div id="local" style="display:none;" class="fluxTabs">
     <span class="flux-title">LOCAL</span><br><br>
 
-    This tab is currently disabled but will be unlocked soon.<br><br>
+<input class="fluxInput" id="localUploadPath" type="file" accept=".json"/><br><br>
 
-<input class="fluxInput" id="dataset-upload" type="file" accept=".json,.csv" multiple/><br><br>
-
-<div id="availableDestinations" style="flex:auto">
-  <input class='locDestCheck' value='geotype' name='geotype' type='checkbox'/><label>geotype</label><br>
-  <input class='locDestCheck' value='anthropotype' name='anthropotype' type='checkbox'/><label>anthropotype</label><br>
-  <input class='locDestCheck' value='pharmatype' name='pharmatype' type='checkbox'/><label>pharmatype</label><br>
-  <input class='locDestCheck' value='chronotype' name='chronotype' type='checkbox'/><label>chronotype</label><br>
-</div>
-<button type="submit" class="flux-button" id="load-local" onclick="datasetLoader();return false" disabled>Upload local datasets</button>
+<button type="submit" class="flux-button" id="load-local" onclick="localUpload();return false" >Upload local dataset to SYSTEM</button>
 </div>
 
-<!-- CAPCO TAB -->
+
+<!-- CAPCO TAB 
 <div id="capco" style="display:none;" class="fluxTabs">
     <span class="flux-title">CAPCO</span><br><br>
     This tab is currently disabled but will be unlocked soon.
@@ -211,6 +204,7 @@
         <button type="submit" class="flux-button" id="" onclick='powerValve("capcoRebuilder",this);return false' disabled>Rebuild CapCo Dataset</button>
       </form>
   </div>
+-->
 
 <!-- SYSTEM TAB -->
 <div id="system" style="display:none;" class="fluxTabs">
