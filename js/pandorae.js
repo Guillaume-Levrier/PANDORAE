@@ -22,6 +22,7 @@ const THREE = require("three");
 const userDataPath = remote.app.getPath("userData");
 const appPath = remote.app.getAppPath();
 const types = require("./js/types");
+const { dialog } = require('electron').remote;
 
 // ============ VERSION ===========
 const msg =
@@ -355,7 +356,7 @@ const removeTooltip = () => {
 ipcRenderer.on("coreSignal", (event, fluxAction, fluxArgs, message) => {
   try {
     field.value = message;
-    //pulse(1, 1, 10);
+    pulse(1, 1, 10);
   } catch (err) {
     field.value = err;
   }
@@ -503,13 +504,16 @@ document.getElementById("export-icon").addEventListener("click",e=>{
   toggleMenu();
 })
 
+
 const saveAs = (format) =>{
   toggleMenu();
 
 
 setTimeout(() => {
   switch (format) {
-    case 'svg': serialize(document.getElementById("xtypeSVG"))
+    case 'svg':
+     
+        serialize(document.getElementById("xtypeSVG"))
       break;
     
     case 'png': savePNG()
@@ -531,11 +535,14 @@ const saveToolTip = () => {
   var datasetName =document.getElementById('source').innerText.slice(8);
   datasetName = datasetName.replace(/\//ig,"_");
   datasetName = datasetName.replace(/:/ig,"+");
+
+
   remote.getCurrentWindow().capturePage({x:parseInt(tooltip.offsetLeft),y:parseInt(tooltip.offsetTop),width:parseInt(tooltip.offsetWidth),height:parseInt(tooltip.offsetHeight)}).then(img=>{
-    fs.writeFile(remote.app.getPath('pictures') + "/"+datasetName+"_tooltip.png",img.toPNG(),()=>{
+    fs.writeFile(dialog.showSaveDialog({"defaultPath":datasetName+".png"}),img.toPNG(),()=>{
       tooltip.style.overflow = "auto";
     })
   })
+
 }
 
 const savePNG = () => {
@@ -550,7 +557,7 @@ const savePNG = () => {
   datasetName = datasetName.replace(/:/ig,"+");
   setTimeout(() => {
     remote.getCurrentWindow().capturePage().then(img=>{
-      fs.writeFile(remote.app.getPath('pictures') + "/"+datasetName+"_full.png",img.toPNG(),()=>{
+      fs.writeFile(dialog.showSaveDialog({"defaultPath":datasetName+".png"}),img.toPNG(),()=>{
         
          document.getElementById('menu-icon').style.display = "flex";
           document.getElementById('option-icon').style.display = "flex";
@@ -592,7 +599,7 @@ const serialize = (svg) => {
     
     ipcRenderer.send("console-logs", "Exporting snapshot of current type to SVG in the user's 'Pictures' folder.");
     fs.writeFile(
-      remote.app.getPath('pictures') + "/"+datasetName+".svg",
+      dialog.showSaveDialog({"defaultPath":datasetName+".svg"}),
       string,
       "utf8",
       err => {
@@ -974,6 +981,8 @@ const blinker = item => {
     target.style.color = "#141414";
   });
 };
+
+
 
 ipcRenderer.on("tutorial", (event, message) => {
   document.getElementById("menu-icon").onclick = toggleMenu;
