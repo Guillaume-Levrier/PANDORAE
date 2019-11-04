@@ -3299,17 +3299,47 @@ const linkLoc = () => {
     function dragged() {
       const v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this)));
       const q1 = versor.multiply(q0, versor.delta(v0, v1));
+
+
       projection.rotate(versor.rotation(q1)); // rotate projection
 
-      d3.select("#cityLocations").selectAll("text")
+      var globeCenter = projection.invert([document.getElementById("xtypeSVG").width.baseVal.value/2,document.getElementById("xtypeSVG").width.baseVal.value/2]);
+
+      console.log(globeCenter)
+
+d3.select("#cityLocations").selectAll("text")
+      .style("display", d => {
+        //hide if behind the globe
+
+        var loc = projection([d.lon, d.lat]),
+        x = loc[0],
+        y = loc[1];
+        //console.log(d.city)
+        //console.log(loc)
+
+        if ( 
+          x>globeCenter[0]-180 &&
+          x<globeCenter[0]+180 &&
+          y>globeCenter[1]+90 &&
+          y<globeCenter[1]-90 
+          ) {
+        return "block";
+      } else {
+        return "none";
+      }
+      })
         .attr("transform", d => {
-          //redraw text
+
           var loc = projection([d.lon, d.lat]),
-            x = loc[0],
-            y = loc[1];
+          x = loc[0],
+          y = loc[1];
+          
           return "translate(" + (x + d.radius) + "," + y + ")";
         })
         .text(d => d.city);
+
+        
+        
 
       view.selectAll("path").attr("d", path);
     }
