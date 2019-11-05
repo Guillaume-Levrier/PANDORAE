@@ -124,13 +124,19 @@ aelogo.addEventListener("dblclick", () => {
 
 // =========== Global Variables ===========
 var pandoratio = 0; // Used in three.js transitions (from one shape to another)
-
 var field = document.getElementById("field"); // Field is the main field
-
 var xtypeExists = false; // xtype SVG doesn't exist on document load
 var coreExists = true; // core does exist on document load
 
 // =========== MENU ===========
+// menu elements 
+
+let menu = document.getElementById("menu");
+let menuIcon = document.getElementById("menu-icon");
+let consoleIcon = document.getElementById("option-icon");
+let exportIcon = document.getElementById("export-icon");
+let consoleDiv = document.getElementById("console");
+
 // Menu behaviors
 let toggledMenu = false;
 const purgeMenuItems = menu => {
@@ -152,11 +158,11 @@ const toggleMenu = () => {
       toggleSecondaryMenu();
       toggleMenu();
     } else {
-      document.getElementById("menu").style.left = "-150px";
-      document.getElementById("menu-icon").style.left = "25px";
-      document.getElementById("option-icon").style.left = "25px";
-      document.getElementById("export-icon").style.left = "25px";
-      document.getElementById("console").style.left = "0px";
+      menu.style.left = "-150px";
+      menuIcon.style.left = "25px";
+      consoleIcon.style.left = "25px";
+      exportIcon.style.left = "25px";
+      consoleDiv.style.left = "0px";
       xtype.style.left = "0px";
       var menuItems = document.getElementsByClassName("menu-item");
       for (let i = 0; i < menuItems.length; i++) {
@@ -168,11 +174,11 @@ const toggleMenu = () => {
   } else {
     ipcRenderer.send("console-logs", "Opening menu");
       logostatus();
-      document.getElementById("menu").style.left = "0px";
-      document.getElementById("console").style.left = "150px";
-      document.getElementById("menu-icon").style.left = "175px";
-      document.getElementById("export-icon").style.left = "175px";
-      document.getElementById("option-icon").style.left = "175px";
+      menu.style.left = "0px";
+      consoleDiv.style.left = "150px";
+      menuIcon.style.left = "175px";
+      exportIcon.style.left = "175px";
+      consoleIcon.style.left = "175px";
       xtype.style.left = "150px";
       var menuItems = document.getElementsByClassName("menu-item");
       for (let i = 0; i < menuItems.length; i++) {
@@ -192,19 +198,19 @@ const toggleSecondaryMenu = () => {
       toggleTertiaryMenu();
     }
     document.getElementById("secmenu").style.left = "-150px";
-    document.getElementById("console").style.left = "150px";
-    document.getElementById("menu-icon").style.left = "175px";
-    document.getElementById("option-icon").style.left = "175px";
-    document.getElementById("export-icon").style.left = "175px";
+    consoleDiv.style.left = "150px";
+    menuIcon.style.left = "175px";
+    consoleIcon.style.left = "175px";
+    exportIcon.style.left = "175px";
 
     xtype.style.left = "150px";
     toggledSecondaryMenu = false;
   } else {
     document.getElementById("secmenu").style.left = "150px";
-    document.getElementById("console").style.left = "300px";
-    document.getElementById("menu-icon").style.left = "325px";
-    document.getElementById("option-icon").style.left = "325px";
-    document.getElementById("export-icon").style.left = "325px";
+    consoleDiv.style.left = "300px";
+    menuIcon.style.left = "325px";
+    consoleIcon.style.left = "325px";
+    exportIcon.style.left = "325px";
 
     xtype.style.left = "300px";
     toggledSecondaryMenu = true;
@@ -217,20 +223,19 @@ const toggleTertiaryMenu = () => {
   purgeMenuItems("thirdMenuContent");
   if (toggledTertiaryMenu) {
     document.getElementById("thirdmenu").style.left = "-150px";
-    document.getElementById("console").style.left = "300px";
-    document.getElementById("menu-icon").style.left = "325px";
-    document.getElementById("option-icon").style.left = "325px";
-    document.getElementById("export-icon").style.left = "325px";
+    consoleDiv.style.left = "300px";
+    menuIcon.style.left = "325px";
+    consoleIcon.style.left = "325px";
+    exportIcon.style.left = "325px";
 
     xtype.style.left = "300px";
     toggledTertiaryMenu = false;
   } else {
     document.getElementById("thirdmenu").style.left = "300px";
-    document.getElementById("console").style.left = "450px";
-    document.getElementById("menu-icon").style.left = "475px";
-    document.getElementById("option-icon").style.left = "475px";
-    document.getElementById("export-icon").style.left = "475px";
-
+    consoleDiv.style.left = "450px";
+    menuIcon.style.left = "475px";
+    consoleIcon.style.left = "475px";
+    exportIcon.style.left = "475px";
     xtype.style.left = "450px";
     toggledTertiaryMenu = true;
   }
@@ -312,13 +317,13 @@ let toggledConsole = false;
 const toggleConsole = () => {
   if (toggledConsole) {
     ipcRenderer.send("console-logs", "Hiding console");
-    document.getElementById("console").style.zIndex = "-1";
-    document.getElementById("console").style.display = "none";
+    consoleDiv.style.zIndex = "-1";
+    consoleDiv.style.display = "none";
     toggledConsole = false;
   } else {
     ipcRenderer.send("console-logs", "Displaying console");
-    document.getElementById("console").style.zIndex = "7";
-    document.getElementById("console").style.display = "block";
+    consoleDiv.style.zIndex = "7";
+    consoleDiv.style.display = "block";
     toggledConsole = true;
   }
 };
@@ -421,8 +426,8 @@ const selectOption = (type, id) => {
   document.getElementById(id).style.backgroundColor = "rgba(220,220,220,0.3)";
 
   toggleMenu();
-  document.getElementById("menu-icon").onclick = "";
-  document.getElementById("menu-icon").addEventListener(
+  menuIcon.onclick = "";
+  menuIcon.addEventListener(
     "click",
     () => {
       location.reload();
@@ -501,7 +506,7 @@ const categoryLoader = cat => {
  toggleSecondaryMenu();
 };
 
-document.getElementById("export-icon").addEventListener("click",e=>{
+exportIcon.addEventListener("click",e=>{
   toggleMenu();
 })
 
@@ -790,25 +795,9 @@ const cmdinput = input => {
           }, 450);
           break;
 
-    
-
       case "reload core":
         pandoratio = 0;
         break;
-
-      /*
-    case  'link regex':
-          const addRegexLink = () =>{
-          let linktoadd = document.getElementById('regfield').value;
-          if (linktoadd == null || linktoadd == "") { localReturn = 'no link added';}
-          else {
-              chronoLinksKeywords.push(linktoadd);
-              localReturn = '"' + linktoadd  + '" added';
-            }
-          }
-          commandReturn = '';
-          break;
-*/
 
       case "transfect":
         pulse(1, 1, 10);
@@ -825,9 +814,9 @@ const cmdinput = input => {
         break;
 
       case "unlock menu":
-        document.getElementById("menu-icon").onclick = toggleMenu;
-        document.getElementById("menu-icon").style.cursor = "pointer";
-        document.getElementById("option-icon").style.cursor = "pointer";
+        menuIcon.onclick = toggleMenu;
+        menuIcon.style.cursor = "pointer";
+        consoleIcon.style.cursor = "pointer";
         field.removeEventListener("click", () => {
           openTutorial(slide);
         });
@@ -932,18 +921,18 @@ fs.readFile(
     let user = JSON.parse(data);
 
     if (user.UserName === "Enter your name") {
-      document.getElementById("menu-icon").style.cursor = "not-allowed";
-      document.getElementById("option-icon").style.cursor = "not-allowed";
+      menuIcon.style.cursor = "not-allowed";
+      consoleIcon.style.cursor = "not-allowed";
       document.getElementById("tutostartmenu").style.display = "block";
       field.style.pointerEvents = "all";
       field.style.cursor = "pointer";
       field.value = "start tutorial";
       
     } else {
-      document.getElementById("menu-icon").onclick = toggleMenu;
-      document.getElementById("option-icon").onclick = toggleConsole;
-      document.getElementById("menu-icon").style.cursor = "pointer";
-      document.getElementById("option-icon").style.cursor = "pointer";
+      menuIcon.onclick = toggleMenu;
+      consoleIcon.onclick = toggleConsole;
+      menuIcon.style.cursor = "pointer";
+      consoleIcon.style.cursor = "pointer";
      
         fs.readFile(appPath+"/package.json","utf8", (err, data) => {
           if (err) throw err;
@@ -986,9 +975,9 @@ const blinker = item => {
 
 
 ipcRenderer.on("tutorial", (event, message) => {
-  document.getElementById("menu-icon").onclick = toggleMenu;
-  document.getElementById("menu-icon").style.cursor = "pointer";
-  document.getElementById("option-icon").style.cursor = "pointer";
+  menuIcon.onclick = toggleMenu;
+  menuIcon.style.cursor = "pointer";
+  consoleIcon.style.cursor = "pointer";
 
   switch (message) {
     case "flux":
