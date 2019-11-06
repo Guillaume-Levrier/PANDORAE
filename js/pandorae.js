@@ -656,6 +656,7 @@ fs.readFile(appPath+'/node_modules/d3/dist/d3.min.js',"utf-8",(err,d3)=>{
 
 fs.readFile(appPath+'/js/types.js',"utf-8",(err,typesJS)=>{
   HTMLFILE.write('<script>')
+  HTMLFILE.write('let tooltip = document.createElement("div");tooltip.id = "tooltip";document.getElementById("xtype").appendChild(tooltip);')
 
   //slicing out module import & export
   typesJS = typesJS.slice(typesJS.indexOf("//END NODE MODULES"),typesJS.indexOf("// MODULE EXPORT"))
@@ -673,13 +674,25 @@ fs.readFile(appPath+'/js/types.js',"utf-8",(err,typesJS)=>{
     "pharmacotype"
   ];
 
-  blocks.forEach(block=> typesJS = typesJS.replace("pandodb."+block+".get(id).then(datajson => {","try {"))
-  typesJS = typesJS.replace(").catch(error => {","\ncatch (error) { field.value = 'error - invalid dataset'; console.log(error)}")
+  blocks.forEach(block=> {
+    typesJS = typesJS.replace("pandodb."+block+".get(id).then(datajson => {","try {")
+    typesJS = typesJS.replace(").catch(error => {","\ncatch (error) { field.value = 'error - invalid dataset'; console.log(error)} //")
+    typesJS = typesJS.replace("loadType()","")
+})
+  
+while (typesJS.indexOf("ipcRenderer.send(")>(-1)) {
+  typesJS = typesJS.replace("ipcRenderer.send(","console.log(")
+}
+
+  
 
   HTMLFILE.write(typesJS)
   
   
-  HTMLFILE.write("typeSwitch("+JSON.stringify(currentType.type)+","+JSON.stringify(currentType.id)+")")
+  HTMLFILE.write("typeSwitch("+JSON.stringify(currentType.type)+","+JSON.stringify(currentType.id)+");")
+  HTMLFILE.write('document.getElementById("field").style.zIndex = "-10";')
+  HTMLFILE.write('document.getElementById("xtype").style.opacity = "1";')
+  HTMLFILE.write('document.getElementById("xtype").style.zIndex = "3";')
   HTMLFILE.write('</script>')
 })
 })
