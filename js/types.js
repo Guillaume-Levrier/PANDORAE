@@ -1034,9 +1034,6 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
 
   pandodb.hyphotype.get(id).then(datajson => {
 
-   
-
-
       var corpusRequests = [];
 
       var tooltipTop =
@@ -1177,24 +1174,6 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
       "</ul><br>Filtrer par tags<br><select id='tagDiv'>"+tagDiv+"<br><div id='tagList'></div>"+
       "<br><br><div id='weDetail'></div><br><br><br><div id='whois'></div><br><br><br><br><br>";
 
-
-      var arrows = view.append("svg:defs").selectAll("marker")
-                .data(["end"])                                         // Different link/path types can be defined here
-              .enter().append("svg:marker")                            // This section adds in the arrows
-                .attr("id", String)
-                .attr("viewBox", "0 -5 10 10")
-                .attr("refX", 150)
-                .attr("refY", 0)
-                .attr("markerWidth", 12)
-                .attr("markerHeight", 12)
-                .attr("orient", "auto")
-                .attr("stroke-width",0.5)
-                .attr("fill","#d3d3d3")
-                .attr("fill-opacity",.8)
-              .append("svg:path")
-                .attr("d", "M0,-5L10,0L0,5");
-
-
       multiThreader.port.postMessage({ type: "hy", nodeData:nodeData,links:links, tags:tags,width:width,height:height});
 
       multiThreader.port.onmessage = workerAnswer => {
@@ -1281,18 +1260,7 @@ var labels_g = view.append("g").attr("id","labels_g");
   }
   
   drawAltitudeLevel(contours);
-       /*
-      var nodelinks = view.insert("g").selectAll("line")
-                      .data(links)
-                .enter().append("line")
-                .attr("stroke-width", .25)
-                .attr("class","hylinks")
-                .attr("stroke","#d3d3d3")
-                .attr("x1",d=>d.source.x)
-                .attr("y1",d=>d.source.y)
-                .attr("x2",d=>d.target.x)
-                .attr("y2",d=>d.target.y);
-         */    
+   
     var nodes = view.insert("g")
                   .selectAll("circle")
                     .data(nodeData)
@@ -1314,6 +1282,7 @@ var labels_g = view.append("g").attr("id","labels_g");
 
                             document.getElementById("weDetail").innerHTML = weDetail;
                             document.getElementById("whois").innerHTML = ""; 
+
                     (async function(){
                       const whois = require('whois-json')
 
@@ -1358,7 +1327,7 @@ var webEntName= view.selectAll(".webEntName")
            .attr("x",d=>d.box.x)
            .attr("y",d=>d.box.y)
            .attr("width",d=>d.box.width+1)
-           .attr("height",d=>d.box.height);  
+           .attr("height",d=>d.box.height+.2);  
 
            nodes.raise();  
            webEntName.raise()  
@@ -1389,16 +1358,26 @@ const resetContourGraph = () => {
   
   d3.selectAll(".contours").lower();
   d3.selectAll("circle").attr("opacity","1")
- // d3.selectAll(".hylinks").attr("opacity","1")
   d3.selectAll(".contrastRect").attr("opacity","1")
   d3.selectAll(".webEntName").attr("opacity","1")
   d3.selectAll(".labels").attr("opacity","1")
 
 }
 
-const displayContour = (cat,tag) => {
+const displayContour = () => {
+
+let checkTags = document.querySelectorAll("input.tagCheckbox")
+
+let cat=document.getElementById("tagDiv").value;
+
+let tags = []
+
+checkTags.forEach(box=>{if (box.checked) {tags.push(box.value)}});
+
+
 
   d3.selectAll(".contours").remove();
+
   
 
   view.insert("g")                                     // Create contour density graph
@@ -1418,7 +1397,15 @@ const displayContour = (cat,tag) => {
       d3.selectAll(".contours").lower();
 
 
-  var tagNodes = nodeData.filter(item => item.tags.USER[cat][0] === tag);
+var tagNodes=[];
+
+tags.forEach(tag=>{
+  let thisTagNodes = nodeData.filter(item => item.tags.USER[cat][0] === tag);
+  thisTagNodes.forEach(node=>tagNodes.push(node))
+})
+
+
+ 
 
   var thisContour = d3.contourDensity()      
                       .size([width, height])                
@@ -1429,8 +1416,6 @@ const displayContour = (cat,tag) => {
                       .thresholds(d3.max(tagNodes,d=>d.indegree))(tagNodes);
 
 d3.select("#labels_g").remove();
-
-
 
  var thisContourPath =  view.insert("g")                                     // Create contour density graph
     .attr("fill", "none")                                          // Start by making it empty/transparent
@@ -1450,13 +1435,46 @@ d3.select("#labels_g").remove();
     d3.selectAll(".contours").lower();          
     d3.select("#oldContour").lower();          
     d3.selectAll("circle").attr("opacity",".1")
-    //d3.selectAll(".hylinks").attr("opacity",".1")
     d3.selectAll(".contrastRect").attr("opacity",".1")
     d3.selectAll(".webEntName").attr("opacity",".1")
-    d3.selectAll("circle").filter(item => item.tags.USER[cat][0] === tag).attr("opacity","1");
-    d3.selectAll(".contrastRect").filter(item => item.tags.USER[cat][0] === tag).attr("opacity","1");
-    d3.selectAll(".webEntName").filter(item => item.tags.USER[cat][0] === tag).attr("opacity","1");
-    
+    tags.forEach(tag=>{
+      d3.selectAll("circle").filter(item => item.tags.USER[cat][0] === tag).attr("opacity","1");
+      d3.selectAll(".contrastRect").filter(item => item.tags.USER[cat][0] === tag).attr("opacity","1");
+      d3.selectAll(".webEntName").filter(item => item.tags.USER[cat][0] === tag).attr("opacity","1");
+    })
+
+  
+    d3.select("#legend").remove();
+
+    var legend = svg.insert("g").attr("id","legend")
+
+    var shownTags="";
+
+    for (let i = 0; i < tags.length; i++) {
+      shownTags = shownTags+tags[i]+" "
+    }
+
+    var legendText = legend.append('text').text(cat+" - "+shownTags);
+
+       let textBound=document.querySelector('#legend').getBBox()
+      
+        legend.append("rect")
+                .attr("id","legend")
+                .attr("fill","white")
+                .attr("stroke","black")
+                .attr("stroke-width",.5)
+                .attr("x",width-toolWidth-parseInt(textBound.width)-20)
+                .attr("y",height-30)
+                .attr("width",parseInt(textBound.width)+20)
+                .attr("height",30);
+      
+                legendText.attr("x",width-toolWidth-parseInt(textBound.width)-15)
+                .attr("y",height-30)
+                .attr("dx",5)
+                .attr("dy",20);
+
+                legendText.raise();
+
 } 
 
 
@@ -1464,7 +1482,7 @@ d3.select("#labels_g").remove();
 
           let tagList = document.getElementById(list);
           tagList.innerHTML="";
-          let thisTagList = document.createElement("UL");
+          let thisTagList = document.createElement("DIV");
           let tagsArray = []
     
           for (var prop in tags) {
@@ -1472,43 +1490,25 @@ d3.select("#labels_g").remove();
             if(prop === tag) {
             
               for (let thisTag in tags[prop]) {
-               let criteria = prop;
-                var thisTagOption = document.createElement("LI")
-                thisTagOption.innerText = thisTag+":"+tags[prop][thisTag];
-                thisTagOption.style.color = color(thisTag);
-                thisTagOption.value = parseInt(tags[prop][thisTag]);
-                thisTagOption.addEventListener("click",e=>{
-                  displayContour(criteria,thisTag)
-
-                  d3.select("#legend").remove();
-                  var legend = svg.insert("g").attr("id","legend")
-
-                  var legendText = legend.append('text').attr("fill",color(thisTag)).text(criteria+" - "+thisTag);
-
-                     let textBound=document.querySelector('#legend').getBBox()
+              // let criteria = prop;
+                var thisTagCheckbox = document.createElement("INPUT")
+                    thisTagCheckbox.type = "checkbox"
+                    thisTagCheckbox.className = "tagCheckbox"
+                    //thisTagCheckbox.id = "chck"+thisTag;
+                    thisTagCheckbox.value = thisTag;
+                    thisTagCheckbox.addEventListener("change",e=>{displayContour()})
+            
+                var thisTagOption = document.createElement("SPAN")
+                    thisTagOption.innerText = thisTag+":"+tags[prop][thisTag];
+                    thisTagOption.style.color = color(thisTag);
+                
+                var thisTagLine = document.createElement("DIV")
+                    thisTagLine.value = parseInt(tags[prop][thisTag]);
+                    thisTagLine.appendChild(thisTagCheckbox)
+                    thisTagLine.appendChild(thisTagOption)
                     
 
-                  legend.append("rect")
-                          .attr("id","legend")
-                          .attr("fill","white")
-                          .attr("stroke","black")
-                          .attr("stroke-width",.5)
-                          .attr("x",width-toolWidth-parseInt(textBound.width)-20)
-                          .attr("y",height-30)
-                          .attr("width",parseInt(textBound.width)+20)
-                          .attr("height",30);
-                
-                     
- 
-                          legendText.attr("x",width-toolWidth-parseInt(textBound.width)-15)
-                          .attr("y",height-30)
-                          .attr("dx",5)
-                          .attr("dy",20);
-                          legendText.raise();
- 
-                    })
-
-                tagsArray.push(thisTagOption);
+                tagsArray.push(thisTagLine);
               }
     
             }
@@ -3375,9 +3375,6 @@ d3.select("#cityLocations").selectAll("text")
           return "translate(" + (x + d.radius) + "," + y + ")";
         })
         .text(d => d.city);
-
-        
-        
 
       view.selectAll("path").attr("d", path);
     }
