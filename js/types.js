@@ -309,7 +309,7 @@ const multiFormat = date =>
 
 
 // ========= ANTHROPOTYPE =========
-const anthropotype = datasetAT => {  // When called, draw the anthropotype
+const anthropotype = id => {  // When called, draw the anthropotype
 
 //========== SVG VIEW =============
   var svg = d3.select(xtype)
@@ -329,9 +329,7 @@ const anthropotype = datasetAT => {  // When called, draw the anthropotype
     .on("zoom", zoomed); // Trigger the "zoomed" function on "zoom" behaviour 
 
 //======== DATA CALL & SORT =========
-  pandodb.anthropotype
-    .get(datasetAT)
-    .then(datajson => {
+  pandodb.anthropotype.get(id).then(datajson => {
 
       dataDownload(datajson);
 
@@ -564,8 +562,7 @@ const anthropotype = datasetAT => {  // When called, draw the anthropotype
       loadType();
       menuBuilder();
       cartoSorter(docData[0].title);
-    })
-    .catch(error => {
+    }).catch(error => {
       field.value = "error - invalid dataset";
       ipcRenderer.send(
         "console-logs",
@@ -829,8 +826,7 @@ var lineFontSize = parseFloat(width/500);
 
       loadType();
     
-      })
-       .catch(error => {
+      }).catch(error => {
          console.log(error);
          field.value = "filotype error";
          ipcRenderer.send(
@@ -931,8 +927,7 @@ var tweetList = document.createElement("div");
     title.innerText=datajson.name;
     document.getElementById("tooltip").appendChild(title);
     document.getElementById("tooltip").appendChild(toggleList);
-    })
-     .catch(error => {
+    }).catch(error => {
        console.log(error);
        field.value = "error - Cannot start corpus";
        ipcRenderer.send(
@@ -1543,8 +1538,7 @@ document.getElementById("tooltip").innerHTML = tooltipTop;
       })  // end of get webentities data
 
       }) // end of start corpus
-    })
-    .catch(error => {
+    }).catch(error => {
       console.log(error);
       field.value = "error - Cannot start corpus";
       ipcRenderer.send(
@@ -1607,7 +1601,7 @@ d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.
 };
 
 // ========== CHRONOTYPE ==========
-const chronotype = (bibliography, links) => { // When called, draw the chronotype
+const chronotype = (id, links) => { // When called, draw the chronotype
 
 //========== SVG VIEW =============
   var svg = d3.select(xtype)
@@ -1702,9 +1696,7 @@ const chronotype = (bibliography, links) => { // When called, draw the chronotyp
     ]);
 
   //======== DATA CALL & SORT =========
-  pandodb.chronotype
-    .get(bibliography)
-    .then(datajson => {
+  pandodb.chronotype.get(id).then(datajson => {
 
       dataDownload(datajson);
 
@@ -2392,8 +2384,7 @@ const chronotype = (bibliography, links) => { // When called, draw the chronotyp
       };
 
       loadType();
-    })
-    .catch(error => {
+    }).catch(error => {
       field.value = "error - invalid dataset";
       ipcRenderer.send(
         "console-logs",
@@ -2425,7 +2416,7 @@ const chronotype = (bibliography, links) => { // When called, draw the chronotyp
 
 // =========== GEOTYPE =========
 
-const geotype = locations => {
+const geotype = id => {
   // ========== SVG VIEW ==========
   var svg = d3.select(xtype)
     .append("svg")
@@ -2470,17 +2461,15 @@ const geotype = locations => {
     .attr("r", projection.scale());
 
   //Calling data
-  pandodb.geotype
-    .get(locations)
-    .then(locations => {
+  pandodb.geotype.get(id).then(datajson => {
 
-      dataDownload(locations);
+      dataDownload(datajson);
 
 
       var data = [];
 
-      for (let i = 0; i < locations.content.length; i++) {
-        locations.content[i].items.forEach(d => data.push(d));
+      for (let i = 0; i < datajson.content.length; i++) {
+        datajson.content[i].items.forEach(d => data.push(d));
       }
 
       Promise.all([d3.json("json/world-countries.json")]).then(geo => {
@@ -3333,8 +3322,7 @@ const linkLoc = () => {
 
         loadType();
       });
-    })
-    .catch(error => {
+    }).catch(error => {
       field.value = "error - invalid dataset";
       ipcRenderer.send(
         "console-logs",
@@ -4560,8 +4548,7 @@ alignDiv.appendChild(align)
 
       loadType();
     
-      })
-       .catch(error => {
+      }).catch(error => {
          console.log(error);
          field.value = " error";
          ipcRenderer.send(
@@ -4667,5 +4654,7 @@ const typeSwitch = (type, id) => {
 
   document.getElementById("source").innerText = "Source: " + id;
 };
+
+// MODULE EXPORT - don't removen useful for iframe export
 
 module.exports = { typeSwitch: typeSwitch }; // Export the switch as a module
