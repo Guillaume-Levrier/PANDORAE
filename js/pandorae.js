@@ -633,6 +633,9 @@ const exportToHTML=()=>{
 
  HTMLFILE.write('<!DOCTYPE html><html><meta charset="UTF-8">')
  HTMLFILE.write('<title>PANDORÆ - '+datasetName+'</title>')
+ HTMLFILE.write('<div><form autocomplete="off"><input class="themeCustom" spellcheck="false" type="text" maxlength="36" id="field" value=""></div>')
+ HTMLFILE.write('<div id="xtype"><div id="source"></div></div>')
+ 
 
 fs.readFile(appPath+'/css/pandorae.css',"utf-8",(err,css)=>{
   HTMLFILE.write('<style>')
@@ -645,17 +648,41 @@ pandodb[currentType.type].get(currentType.id).then(dataset=>{
   HTMLFILE.write(JSON.stringify(dataset))
   HTMLFILE.write('</script>')
 
-  fs.readFile(appPath+'/js/types.js',"utf-8",(err,typesJS)=>{
-    HTMLFILE.write('<script>')
-    HTMLFILE.write('<script>')
-    //Here, find the begin node module and end node module signals and slice it out
+fs.readFile(appPath+'/node_modules/d3/dist/d3.min.js',"utf-8",(err,d3)=>{
+  HTMLFILE.write('<script>')
+  HTMLFILE.write(d3)
+  HTMLFILE.write('</script>')
 
 
-    //HTMLFILE.write(typesJS)
-    HTMLFILE.write('</script>')
-    
+fs.readFile(appPath+'/js/types.js',"utf-8",(err,typesJS)=>{
+  HTMLFILE.write('<script>')
+
+  //slicing out module import & export
+  typesJS = typesJS.slice(typesJS.indexOf("//END NODE MODULES"),typesJS.indexOf("// MODULE EXPORT"))
+  
+  //remove here lines about dexie
+
+  var blocks = [
+    "chronotype",
+    "geotype",
+    "anthropotype",
+    "gazouillotype",
+    "hyphotype",
+    "doxatype",
+    "filotype",
+    "pharmacotype"
+  ];
+
+  blocks.forEach(block=> typesJS = typesJS.replace("pandodb."+block+".get(id).then(datajson => {","try {"))
+  typesJS = typesJS.replace(").catch(error => {","\ncatch (error) {console.log(error}")
+
+  HTMLFILE.write(typesJS)
+  
+  
+  HTMLFILE.write("typeSwitch("+JSON.stringify(currentType.type)+","+JSON.stringify(currentType.id)+")")
+  HTMLFILE.write('</script>')
 })
-
+})
 })
 
 
