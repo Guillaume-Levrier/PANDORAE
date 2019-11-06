@@ -674,7 +674,7 @@ fs.readFile(appPath+'/js/types.js',"utf-8",(err,typesJS)=>{
   ];
 
   blocks.forEach(block=> typesJS = typesJS.replace("pandodb."+block+".get(id).then(datajson => {","try {"))
-  typesJS = typesJS.replace(").catch(error => {","\ncatch (error) {console.log(error}")
+  typesJS = typesJS.replace(").catch(error => {","\ncatch (error) { field.value = 'error - invalid dataset'; console.log(error)}")
 
   HTMLFILE.write(typesJS)
   
