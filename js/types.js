@@ -6,6 +6,8 @@
 // discover patterns on potentially larger datasets.
 
 // =========== NODE MODULES ===========
+
+//BEGIN NODE MODULES
 const { remote, ipcRenderer, shell } = require("electron");
 const fs = require("fs");
 const d3 = require("d3");
@@ -13,6 +15,7 @@ const csv = require("csv-parser");
 const versor = require("versor");
 const rpn = require("request-promise-native"); // RPN enables to generate requests to various APIs
 const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
+//END NODE MODULES
 
 var field = document.getElementById("field");
 

@@ -37,6 +37,7 @@ fs.readFile(appPath+"/package.json","utf8", (err, data) => {
      console.log(msg + " - " + version + "\n\n");
 })
 
+var currentType;           // Once a type is started, know which one
 
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that
@@ -435,6 +436,7 @@ const selectOption = (type, id) => {
     { once: true }
   );
   field.value = "starting " + type;
+  currentType = {type:type,id:id}
   types.typeSwitch(type, id);
 
   ipcRenderer.send(
@@ -484,6 +486,7 @@ const categoryLoader = cat => {
 
          case "export": 
          blocks = [
+           'iframe',
            'svg',
            'png',
            'description'
@@ -523,6 +526,9 @@ setTimeout(() => {
       break;
     
     case 'png': savePNG()
+      break;
+
+      case 'iframe': exportToHTML()
       break;
   
     case 'description': saveToolTip()
@@ -617,6 +623,51 @@ const serialize = (svg) => {
     );
   
 }
+
+
+const exportToHTML=()=>{
+
+ var datasetName =document.getElementById('source').innerText.slice(8);
+
+ let HTMLFILE = fs.createWriteStream(dialog.showSaveDialog({"defaultPath":"iframe.html"}))
+
+ HTMLFILE.write('<!DOCTYPE html><html><meta charset="UTF-8">')
+ HTMLFILE.write('<title>PANDORÆ - '+datasetName+'</title>')
+
+fs.readFile(appPath+'/css/pandorae.css',"utf-8",(err,css)=>{
+  HTMLFILE.write('<style>')
+  HTMLFILE.write(css)
+  HTMLFILE.write('</style>')
+
+pandodb[currentType.type].get(currentType.id).then(dataset=>{
+  console.log(dataset)
+  HTMLFILE.write('<script> var datajson=')
+  HTMLFILE.write(JSON.stringify(dataset))
+  HTMLFILE.write('</script>')
+
+  fs.readFile(appPath+'/js/types.js',"utf-8",(err,typesJS)=>{
+    HTMLFILE.write('<script>')
+    HTMLFILE.write('<script>')
+    //Here, find the begin node module and end node module signals and slice it out
+
+
+    //HTMLFILE.write(typesJS)
+    HTMLFILE.write('</script>')
+    
+})
+
+})
+
+
+
+ 
+
+})
+
+}
+
+
+// TUTORIAL
 
 const openTutorial = (slide) => {
   if (slide) {
