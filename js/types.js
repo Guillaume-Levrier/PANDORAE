@@ -562,13 +562,7 @@ const anthropotype = id => {  // When called, draw the anthropotype
       loadType();
       menuBuilder();
       cartoSorter(docData[0].title);
-    }).catch(error => {
-      field.value = "error - invalid dataset";
-      ipcRenderer.send(
-        "console-logs",
-        "Anthropotype error: dataset " + datasetAT + " is invalid."
-      );
-    });
+    }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Anthropotype error: dataset " + datasetAT + " is invalid.");});
 
   //======== ZOOM & RESCALE ===========
   svg.call(zoom).on("dblclick.zoom", null);
@@ -826,14 +820,8 @@ var lineFontSize = parseFloat(width/500);
 
       loadType();
     
-      }).catch(error => {
-         console.log(error);
-         field.value = "filotype error";
-         ipcRenderer.send(
-           "console-logs",
-           "Filotype error: cannot start corpus " + id + "."
-         );
-       });
+      }).catch(error => {console.log(error);field.value = "filotype error";ipcRenderer.send("console-logs","Filotype error: cannot start corpus " + id + ".");});
+
      //======== ZOOM & RESCALE ===========
   svg.call(zoom).on("dblclick.zoom", null);
 
@@ -927,14 +915,7 @@ var tweetList = document.createElement("div");
     title.innerText=datajson.name;
     document.getElementById("tooltip").appendChild(title);
     document.getElementById("tooltip").appendChild(toggleList);
-    }).catch(error => {
-       console.log(error);
-       field.value = "error - Cannot start corpus";
-       ipcRenderer.send(
-         "console-logs",
-         "Doxa error: cannot start corpus " + id + "."
-       );
-     });
+    }).catch(error => {console.log(error);field.value = "error - Cannot start corpus";ipcRenderer.send("console-logs","Doxa error: cannot start corpus " + id + ".");});
  
    ipcRenderer.send("console-logs", "Starting Doxatype");
  };
@@ -1538,14 +1519,7 @@ document.getElementById("tooltip").innerHTML = tooltipTop;
       })  // end of get webentities data
 
       }) // end of start corpus
-    }).catch(error => {
-      console.log(error);
-      field.value = "error - Cannot start corpus";
-      ipcRenderer.send(
-        "console-logs",
-        "Hyphotype error: cannot start corpus " + id + "."
-      );
-    });
+    }).catch(error => {console.log(error);field.value = "error - Cannot start corpus";ipcRenderer.send("console-logs","Hyphotype error: cannot start corpus " + id + ".");});
 
 
   //======== ZOOM & RESCALE ===========
@@ -2384,13 +2358,8 @@ const chronotype = (id, links) => { // When called, draw the chronotype
       };
 
       loadType();
-    }).catch(error => {
-      field.value = "error - invalid dataset";
-      ipcRenderer.send(
-        "console-logs",
-        "Chronotype error: dataset " + datasetAT + " is invalid."
-      );
-    }); //======== END OF DATA CALL (PROMISES) ===========
+    }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Chronotype error: dataset " + datasetAT + " is invalid.");}); 
+//======== END OF DATA CALL (PROMISES) ===========
 
   //======== ZOOM & RESCALE ===========
   var gX = svg.append("g") // Make X axis rescalable
@@ -3322,13 +3291,7 @@ const linkLoc = () => {
 
         loadType();
       });
-    }).catch(error => {
-      field.value = "error - invalid dataset";
-      ipcRenderer.send(
-        "console-logs",
-        "Geotype error: dataset " + datasetAT + " is invalid."
-      );
-    });
+    }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Geotype error: dataset " + datasetAT + " is invalid.");});
 
   function drag() {
     let v0, q0, r0;
@@ -4548,14 +4511,7 @@ alignDiv.appendChild(align)
 
       loadType();
     
-      }).catch(error => {
-         console.log(error);
-         field.value = " error";
-         ipcRenderer.send(
-           "console-logs",
-           " error: cannot start corpus " + id + "."
-        );
-      });
+      }).catch(error => {console.log(error);field.value = " error";ipcRenderer.send("console-logs"," error: cannot start corpus " + id + ".");});
    
 //======== ZOOM & RESCALE ===========
 
