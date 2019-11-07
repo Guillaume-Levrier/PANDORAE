@@ -635,26 +635,26 @@ var thisPath = dialog.showSaveDialog({"defaultPath":"PANDORAE-"+currentType.type
 
  HTMLFILE.write('<!DOCTYPE html><html><meta charset="UTF-8">')
  HTMLFILE.write('<title>PANDORÆ - '+datasetName+'</title>')
- HTMLFILE.write('<div><form autocomplete="off"><input class="themeCustom" spellcheck="false" type="text" maxlength="36" id="field" value=""></div>')
- HTMLFILE.write('<div id="xtype"><div id="source"></div></div>')
+ HTMLFILE.write('<div><form autocomplete="off"><input class="themeCustom" spellcheck="false" type="text" maxlength="36" id="field" value=""></div><div id="xtype">')
+
+ fs.readFile(appPath+'/svg/pandorae-app-logo.svg',"utf-8",(err,pandologo)=>{
+  HTMLFILE.write(pandologo)
+
+  var logoSettings = '<script>var logo = document.getElementById("pandoraeapplogo");logo.style.zIndex=10;logo.style.padding="25px";logo.style.width="50px";logo.style.height="50px";</script>';
+  HTMLFILE.write(logoSettings)
  
+  HTMLFILE.write('<div id="source"></div></div>');
 
 fs.readFile(appPath+'/css/pandorae.css',"utf-8",(err,css)=>{
-  HTMLFILE.write('<style>')
-  HTMLFILE.write(css)
-  HTMLFILE.write('</style>')
+  HTMLFILE.write('<style>'+css+'</style>')
   HTMLFILE.write('<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">')
   HTMLFILE.write('<link href="https://fonts.googleapis.com/css?family=Noto+Serif&display=swap" rel="stylesheet">')
 
 pandodb[currentType.type].get(currentType.id).then(dataset=>{
-  HTMLFILE.write('<script> var datajson=')
-  HTMLFILE.write(JSON.stringify(dataset))
-  HTMLFILE.write('</script>')
+  HTMLFILE.write('<script> var datajson='+JSON.stringify(dataset)+'</script>')
 
 fs.readFile(appPath+'/node_modules/d3/dist/d3.min.js',"utf-8",(err,d3)=>{
-  HTMLFILE.write('<script>')
-  HTMLFILE.write(d3)
-  HTMLFILE.write('</script>')
+  HTMLFILE.write('<script>'+d3+'</script>')
 
 fs.readFile(appPath+'/js/types.js',"utf-8",(err,typesJS)=>{
   HTMLFILE.write('<script>')
@@ -663,8 +663,6 @@ fs.readFile(appPath+'/js/types.js',"utf-8",(err,typesJS)=>{
   //slicing out module import & export
   typesJS = typesJS.slice(typesJS.indexOf("//END NODE MODULES"),typesJS.indexOf("// MODULE EXPORT"))
   
-  //remove here lines about dexie
-
   var blocks = [
     "chronotype",
     "geotype",
@@ -726,28 +724,23 @@ while (typesJS.indexOf("multiThreader.port.postMessage")>(-1)) {
       typesJS = typesJS.replace(" multiThreader.port.onmessage = hyWorkerAnswer => {",workerOperations)
       typesJS = typesJS.replace("} // end of HY worker answer","")
 
-     
-
       break;
-
-  
   }
 
-
-
   HTMLFILE.write(typesJS)
-  
   HTMLFILE.write("typeSwitch("+JSON.stringify(currentType.type)+","+JSON.stringify(currentType.id)+");")
   HTMLFILE.write('document.getElementById("field").style.zIndex = "-10";')
   HTMLFILE.write('document.getElementById("xtype").style.opacity = "1";')
   HTMLFILE.write('document.getElementById("xtype").style.zIndex = "3";')
   HTMLFILE.write('</script>')
-})
-})
-})
 
-})
 
+  })
+
+       })
+     })
+   })
+  })
 }
 
 
