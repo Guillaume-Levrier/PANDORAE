@@ -1013,97 +1013,21 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
 
   pandodb.hyphotype.get(id).then(datajson => {
 
-      var corpusRequests = [];
+      var tooltipTop ="<strong>" + datajson.name.toUpperCase() + "</strong></br>";
 
-      var tooltipTop =
-        "<strong>" +
-        datajson.name.toUpperCase() +
-        "</strong></br>" +
-        "<span>" +
-        datajson.content.endpoint +
-        "</span></br>";
-
-      var startCorpus = {
-        method: "POST",
-        uri: datajson.content.endpoint + "/api/", // URI to be accessed
-        headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-        body: {
-          method: "start_corpus",
-          params: [datajson.content.corpus, datajson.content.password]
-        },
-        json: true // Automatically parses the JSON string in the response
-      };
-
-     Promise.all([rpn(startCorpus)]).then(startingCorpus => {
-
-      let corpusStatus = startingCorpus[0][0].result;
-
-
-      var getCorpusStats = {
-        method: "POST",
-        uri: datajson.content.endpoint + "/api/", // URI to be accessed
-        headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-        body: {
-          method: "store.get_webentities_stats",
-          params: [datajson.content.corpus]
-        },
-        json: true
-      };
-
-      corpusRequests.push(rpn(getCorpusStats));
-
-      var getWebEntities = {
-        method: "POST",
-        uri: datajson.content.endpoint + "/api/", // URI to be accessed
-        headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-        body: {
-          method: "store.get_webentities_by_status",
-          params: {corpus:datajson.content.corpus,status:"in", count:-1}
-        },
-        json: true
-      };
-
-      corpusRequests.push(rpn(getWebEntities));
-
-      var getNetwork = {
-        method: "POST",
-        uri: datajson.content.endpoint + "/api/", // URI to be accessed
-        headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-        body: {
-          method: "store.get_webentities_network",
-          params: {corpus:datajson.content.corpus}
-        },
-        json: true
-      };
-
-      corpusRequests.push(rpn(getNetwork));
-
-      var getTags = {
-        method: "POST",
-        uri: datajson.content.endpoint + "/api/", // URI to be accessed
-        headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-        body: {
-          method: "store.get_tags",
-          params: {namespace:null,corpus:datajson.content.corpus}
-        },
-        json: true
-      };
-
-      corpusRequests.push(rpn(getTags));
-
-    Promise.all(corpusRequests).then(status => {
-   
-      dataDownload(status);
+      dataDownload(datajson);
 
       var links = [];
 
-      let weStatus = status[0][0].result;
+      let corpusStatus = datajson.content.corpusStatus;
 
-      let nodeData = status[1][0].result;
+      let weStatus = datajson.content.weStatus;
 
-      let networkLinks = status[2][0].result;
+      let nodeData = datajson.content.nodeData;
 
-      let tags = status[3][0].result.USER;
+      let networkLinks = datajson.content.networkLinks;
+
+      let tags = datajson.content.tags;
       
        for (var subTag in tags) {
          let taggedNodes=0;
@@ -1516,9 +1440,9 @@ document.getElementById("tooltip").innerHTML = tooltipTop;
 } // end of worker answer
 
 
-      })  // end of get webentities data
+  //    })  // end of get webentities data
 
-      }) // end of start corpus
+    //  }) // end of start corpus
     }).catch(error => {console.log(error);field.value = "error - Cannot start corpus";ipcRenderer.send("console-logs","Hyphotype error: cannot start corpus " + id + ".");});
 
 

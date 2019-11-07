@@ -1229,23 +1229,108 @@ const loadHyphe = (corpus, endpoint, pass) => {
     password = document.getElementById(corpus + "pass").value;
   }
 
-  var hypheCheckOptions = {
-    method: "POST",
-    uri: endpoint + "/api/", // URI to be accessed
-    headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-    body: { method: "start_corpus", params: [corpus, password] },
-    json: true // Automatically parses the JSON string in the response
-  };
+  document.getElementById(corpus).innerHTML ="Loading corpus, please wait ...";
 
-  rpn(hypheCheckOptions) // RPN stands for Request-promise-native (ES6)
-    .then(hypheResponse => {
+
+  var corpusRequests = [];
+
+var startCorpus = {
+  method: "POST",
+  uri: endpoint + "/api/", // URI to be accessed
+  headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
+  body: {
+    method: "start_corpus",
+    params: [corpus, password]
+  },
+  json: true // Automatically parses the JSON string in the response
+};
+
+Promise.all([rpn(startCorpus)]).then(startingCorpus => {
+
+let corpusStatus = startingCorpus[0][0].result;
+
+
+var getCorpusStats = {
+  method: "POST",
+  uri: endpoint + "/api/", // URI to be accessed
+  headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
+  body: {
+    method: "store.get_webentities_stats",
+    params: [corpus]
+  },
+  json: true
+};
+
+corpusRequests.push(rpn(getCorpusStats));
+
+var getWebEntities = {
+  method: "POST",
+  uri: endpoint + "/api/", // URI to be accessed
+  headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
+  body: {
+    method: "store.get_webentities_by_status",
+    params: {corpus:corpus,status:"in", count:-1}
+  },
+  json: true
+};
+
+corpusRequests.push(rpn(getWebEntities));
+
+var getNetwork = {
+  method: "POST",
+  uri: endpoint + "/api/", // URI to be accessed
+  headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
+  body: {
+    method: "store.get_webentities_network",
+    params: {corpus:corpus}
+  },
+  json: true
+};
+
+corpusRequests.push(rpn(getNetwork));
+
+var getTags = {
+  method: "POST",
+  uri: endpoint + "/api/", // URI to be accessed
+  headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
+  body: {
+    method: "store.get_tags",
+    params: {namespace:null,corpus:corpus}
+  },
+  json: true
+};
+
+corpusRequests.push(rpn(getTags));
+
+const retrieveCorpus = () =>{
+
+Promise.all(corpusRequests).then(status => {
+
+  let success = true;
+
+  status.forEach(answer=>{
+    if(answer[0].code != "success") {success=false}
+  })
+
+   
+
+  let weStatus = status[0][0].result;
+
+  let nodeData = status[1][0].result;
+
+  let networkLinks = status[2][0].result;
+
+  let tags = status[3][0].result.USER;
+
+
+  
       // With the response
-      if (hypheResponse[0].code === "success") {
+      if (success) {
         pandodb.hyphotype.add({
           id: corpus + date,
           date: date,
           name: corpus,
-          content: { corpus: corpus, endpoint: endpoint, password: password },
+          content: { corpusStatus:corpusStatus, weStatus: weStatus, nodeData: nodeData, networkLinks: networkLinks,tags:tags },
           corpus: true
         });
         document.getElementById(corpus).innerHTML =
@@ -1254,8 +1339,13 @@ const loadHyphe = (corpus, endpoint, pass) => {
         document.getElementById(corpus).innerHTML =
           "<mark><strong>Failure</strong> - check your password or the server's endpoints</mark>";
       }
+      
+
     })
     .catch(e => {});
+  }
+    setTimeout(retrieveCorpus,2000)
+  }).catch(e => {});
 };
 
 const twitterCat = () => {
