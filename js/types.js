@@ -1077,19 +1077,17 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
       "</ul><br>Filtrer par tags<br><select id='tagDiv'>"+tagDiv+"<br><div id='tagList'></div>"+
       "<br><br><div id='weDetail'></div><br><br><br><div id='whois'></div><br><br><br><br><br>";
 
-      multiThreader.port.postMessage({ type: "hy", nodeData:nodeData,links:links, tags:tags,width:width,height:height});
+      multiThreader.port.postMessage({type:"hy", nodeData:nodeData,links:links, tags:tags,width:width,height:height});
 
-      multiThreader.port.onmessage = workerAnswer => {
+      multiThreader.port.onmessage = hyWorkerAnswer => {
       
-        if (workerAnswer.data.type==="tick") {
-         
-          progBarSign(workerAnswer.data.prog)
-         
-        } else if (workerAnswer.data.type === "hy") {
+        if (hyWorkerAnswer.data.type==="tick") {progBarSign(hyWorkerAnswer.data.prog)} else  // removed in export
 
-      nodeData = workerAnswer.data.nodeData;
-      links = workerAnswer.data.links;
-      contours = workerAnswer.data.contours;
+        if (hyWorkerAnswer.data.type === "hy") {
+
+      nodeData = hyWorkerAnswer.data.nodeData;
+      links = hyWorkerAnswer.data.links;
+      contours = hyWorkerAnswer.data.contours;
        
     var densityContour = view.insert("g")                                     // Create contour density graph
        .attr("fill", "none")                                          // Start by making it empty/transparent
@@ -1437,7 +1435,7 @@ loadType();
 document.getElementById("tooltip").innerHTML = tooltipTop;
 
 }
-} // end of worker answer
+} // end of HY worker answer
 
 
   //    })  // end of get webentities data
@@ -3277,7 +3275,7 @@ d3.select("#cityLocations").selectAll("text")
 
 
 // ========= GAZOUILLOTYPE =========
-const gazouillotype = dataset => {
+const gazouillotype = id => {
   // When called, draw the gazouillotype
 
   //========== SVG VIEW =============
@@ -3339,7 +3337,7 @@ const gazouillotype = dataset => {
 
   // LOADING DATA
 
-  pandodb.gazouillotype.get(dataset).then(datajson => {
+  pandodb.gazouillotype.get(id).then(datajson => {
     // Load dataset info from pandodb
 
     dataDownload(datajson);
@@ -3477,12 +3475,12 @@ requestContent=requestContent+"</ul>"
         ipcRenderer.send("chaeros-notification", "generating network"); // send new total to main display
 
 
-        multiThreader.port.postMessage({ type: "gz", dataset: circleData });
+        multiThreader.port.postMessage({type:"gz", dataset: circleData });
 
-        multiThreader.port.onmessage = workerAnswer => {
-        if (workerAnswer.data.type==="gz"){
+        multiThreader.port.onmessage = gzWorkerAnswer => {
+        if (gzWorkerAnswer.data.type==="gz"){
           
-          circleData = workerAnswer.data.msg; 
+          circleData = gzWorkerAnswer.data.msg; 
  
           view.selectAll("circle")
             .data(circleData)
@@ -4065,9 +4063,9 @@ requestContent=requestContent+"</ul>"
 
           keywordsDisplay();
           }
-        }; //======== END OF WORKER ANWSER ===========
+        }; //======== END OF GZ WORKER ANWSER ===========
       });
-  }); //======== END OF DATA CALL (PROMISES) ===========
+  }).catch(error => {console.log(error);field.value = " error";ipcRenderer.send("console-logs"," error: cannot start corpus " + id + ".");}); //======== END OF DATA CALL (PROMISES) ===========
 
   //======== ZOOM & RESCALE ===========
 

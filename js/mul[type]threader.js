@@ -11,6 +11,8 @@ onconnect = e => {
 
   port.onmessage = message => {
 
+// END WORKER SPECIFICITY
+
     switch (message.data.type) {
       case "gz":
          
@@ -91,5 +93,7 @@ onconnect = e => {
         }
         break;
     }
+
+    
   };
 };
