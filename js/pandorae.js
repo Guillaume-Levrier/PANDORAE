@@ -698,11 +698,15 @@ while (typesJS.indexOf("multiThreader.port.postMessage")>(-1)) {
 
 }
 
+
+
+
   switch (currentType.type) {
     case "gazouillotype":   // won't work for now because the data files are flat files
     
       typesJS = typesJS.replace('multiThreader.port.onmessage = workerAnswer => {','d3.forceSimulation(circleData).force("x", d3.forceX()).force("y", d3.forceY()).stop(); var gzWorkerAnswer = { type: "gz", msg: circleData }; ')
       typesJS = typesJS.replace("}; //======== END OF GZ WORKER ANWSER ===========","")
+
       break;
 
       case "hyphotype": 
@@ -726,15 +730,45 @@ while (typesJS.indexOf("multiThreader.port.postMessage")>(-1)) {
       typesJS = typesJS.replace("} // end of HY worker answer","")
 
       break;
+
+      case "geotype": 
+
+      fs.readFile(appPath+'/node_modules/versor/src/versor.js',"utf-8",(err,versor)=>{
+
+        versor = versor.replace("export default versor;","")
+
+        typesJS = typesJS.replace('//versor insertion signal for interactive exports',versor)
+        typesJS = typesJS.replace("<img src='././svg/OAlogo.svg' height='16px'/>","[OA]")
+        
+
+    fs.readFile(appPath+'/json/world-countries.json',"utf-8",(err,world)=>{
+
+      typesJS = typesJS.replace('Promise.all([d3.json("json/world-countries.json")]).then(geo => {','var geo=['+world+'];')
+      typesJS = typesJS.replace( "});// end of world-country call",'')
+     
+    HTMLFILE.write(typesJS)
+    HTMLFILE.write("typeSwitch("+JSON.stringify(currentType.type)+","+JSON.stringify(currentType.id)+");")
+    HTMLFILE.write('document.getElementById("field").style.zIndex = "-10";')
+    HTMLFILE.write('document.getElementById("xtype").style.opacity = "1";')
+    HTMLFILE.write('document.getElementById("xtype").style.zIndex = "3";')
+    HTMLFILE.write('</script>')
+    HTMLFILE.end()
+      })
+    })
+      break;
+
   }
 
-  HTMLFILE.write(typesJS)
-  HTMLFILE.write("typeSwitch("+JSON.stringify(currentType.type)+","+JSON.stringify(currentType.id)+");")
-  HTMLFILE.write('document.getElementById("field").style.zIndex = "-10";')
-  HTMLFILE.write('document.getElementById("xtype").style.opacity = "1";')
-  HTMLFILE.write('document.getElementById("xtype").style.zIndex = "3";')
-  HTMLFILE.write('</script>')
-
+  if (currentType.type!= "geotype") {
+  
+    HTMLFILE.write(typesJS)
+    HTMLFILE.write("typeSwitch("+JSON.stringify(currentType.type)+","+JSON.stringify(currentType.id)+");")
+    HTMLFILE.write('document.getElementById("field").style.zIndex = "-10";')
+    HTMLFILE.write('document.getElementById("xtype").style.opacity = "1";')
+    HTMLFILE.write('document.getElementById("xtype").style.zIndex = "3";')
+    HTMLFILE.write('</script>')
+    HTMLFILE.end()
+  }
 
   })
 
