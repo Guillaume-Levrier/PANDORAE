@@ -37,7 +37,9 @@ fs.readFile(appPath+"/package.json","utf8", (err, data) => {
      console.log(msg + " - " + version + "\n\n");
 })
 
+// for export purposes
 var currentType;           // Once a type is started, know which one
+var presentationStep = [];
 
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that
@@ -635,7 +637,9 @@ var thisPath = dialog.showSaveDialog({"defaultPath":"PANDORAE-"+currentType.type
 
  HTMLFILE.write('<!DOCTYPE html><html><meta charset="UTF-8">')
  HTMLFILE.write('<title>PANDORÆ - '+datasetName+'</title>')
- HTMLFILE.write('<div><form autocomplete="off"><input class="themeCustom" spellcheck="false" type="text" maxlength="36" id="field" value=""></div><div id="xtype">')
+ HTMLFILE.write('<div id="step-icon" class="themeCustom" ><i class="material-icons">control_camera</i></div><div><form autocomplete="off"><input class="themeCustom" spellcheck="false" type="text" maxlength="36" id="field" value=""></div><div id="xtype">')
+
+
 
  fs.readFile(appPath+'/svg/pandorae-app-logo.svg',"utf-8",(err,pandologo)=>{
   HTMLFILE.write(pandologo)
@@ -659,6 +663,7 @@ fs.readFile(appPath+'/node_modules/d3/dist/d3.min.js',"utf-8",(err,d3)=>{
 
 fs.readFile(appPath+'/js/types.js',"utf-8",(err,typesJS)=>{
   HTMLFILE.write('<script>')
+  //HTMLFILE.write('var presentationStep='+JSON.parse(presentationStep)+";")
   HTMLFILE.write('let tooltip = document.createElement("div");tooltip.id = "tooltip";document.getElementById("xtype").appendChild(tooltip);')
 
   //slicing out module import & export
