@@ -13,8 +13,6 @@ const fs = require("fs");
 const d3 = require("d3");
 const csv = require("csv-parser");
 const versor = require("versor");
-const rpn = require("request-promise-native"); // RPN enables to generate requests to various APIs
-const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
 
 //END NODE MODULES
 
@@ -2642,14 +2640,23 @@ const linkLoc = () => {
 
           cities.sort((a, b) => d3.descending(a.radius, b.radius)) // Make sure smaller nodes are above bigger nodes
 
-          var citySet = new MultiSet;
+
+         var areaList = new Object;
 
           cities.forEach(city=>{
             city.cluster = JSON.stringify(parseInt(city.lon))+"|"+JSON.stringify(parseInt(city.lat));
-            citySet.add(city.cluster)
+
+            if (areaList[city.cluster]===undefined){
+              areaList[city.cluster]=1;
+            } else {
+              areaList[city.cluster]= areaList[city.cluster]+1;
+            }
           })
 
-          citySet.forEachMultiplicity((count, key) => {
+           for (var key in areaList){
+            
+            let count = areaList[key]
+
             let currentCluster = [];
             if(count>1){
               for (let i = 0; i < cities.length; i++) {
@@ -2661,7 +2668,7 @@ const linkLoc = () => {
               currentCluster.sort((a, b) => d3.descending(a.radius, b.radius)) // Make sure smaller nodes are above bigger nodes
               cities[currentCluster[0]].smallInCluster=false;
             }
-          }); 
+          }; 
 
           var affilLinks = locGroup
             .selectAll("lines") // add the links
