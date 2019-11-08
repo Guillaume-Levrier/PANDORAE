@@ -1534,6 +1534,8 @@ d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.
 // Presentation Recorder
 
 presentationBox.style.width = (width*.6) + "px";
+document.getElementById("step-icon").style.display = "flex"
+
 
 const moveTo = (target) => {
   

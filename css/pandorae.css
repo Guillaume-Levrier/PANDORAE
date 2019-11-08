@@ -205,8 +205,8 @@ h1 {
 }
 
 #step-icon{
-  top:95px;
-  left:65px;
+  top:25px;
+  left:70px;
   position: absolute;
   font-size: 26px;
   display: flex;
@@ -215,7 +215,7 @@ h1 {
   cursor: pointer;
   background-color: white;
   border: 1px solid rgb(230,230,230);
-  display: black;
+  display: none;
 }
 
 
