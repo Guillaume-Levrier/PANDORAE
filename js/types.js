@@ -1537,8 +1537,20 @@ presentationBox.style.width = (width*.6) + "px";
 document.getElementById("step-icon").style.display = "flex"
 
 
-const moveTo = (target) => {
+const moveTo = (step) => {
   
+  let buttons = document.querySelectorAll("div.presentationStep");
+
+buttons.forEach(but=>{
+  but.style.backgroundColor="white";
+  but.style.color="black";
+})
+
+  buttons[parseInt(step.stepIndex)].style.backgroundColor="black";
+  buttons[parseInt(step.stepIndex)].style.color="white";
+
+  let target = step.zoom;
+
   view.transition().duration(2000).attr("transform", target);
   gXGrid.transition().duration(2000).call(xGrid.scale(target.rescaleX(x)));
   gYGrid.transition().duration(2000).call(yGrid.scale(target.rescaleY(y)));
@@ -1548,24 +1560,28 @@ const moveTo = (target) => {
   gY.transition().duration(2000).call(yAxis.scale(target.rescaleY(y)));
   d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.5)")
 
+tooltip.innerHTML = JSON.parse(step.tooltip);
+
 }
 
 
 
-
-var presentationStep = [];
-
-
 const addPresentationStep = () => {
 
-presentationStep.push(currentZoom)
+  
 
-var stepIndex = presentationStep.length
+  let stepData={zoom:currentZoom,tooltip:JSON.stringify(tooltip.innerHTML),stepIndex:presentationStep.length}
+
+  presentationStep.push(stepData)
+
+  var stepIndex = presentationStep.length; 
 
 var step = document.createElement("DIV")
   step.innerText= stepIndex;
   step.className="presentationStep";
-  step.addEventListener("click",()=>{moveTo(presentationStep[stepIndex])})
+  step.id="presentationStep"+parseInt(stepIndex);
+
+  step.addEventListener("click",()=>{moveTo(presentationStep[parseInt(stepIndex)-1])})
 
   presentationBox.appendChild(step)
   
