@@ -3240,9 +3240,15 @@ const linkLoc = () => {
 
       var globeCenter = projection.invert([document.getElementById("xtypeSVG").width.baseVal.value/2,document.getElementById("xtypeSVG").width.baseVal.value/2]);
 
+ 
+
 d3.select("#cityLocations").selectAll("text")
       .style("display", d => {
-        //hide if behind the globe
+        //hide if behind the globe or in cluster
+
+        if(d.hasOwnProperty("smallInCluster")&&d.smallInCluster===true) {
+          return "none"
+        } 
 
         if ( d.lon>globeCenter[0]-90 && d.lon < globeCenter[0]+90 && d.lat>globeCenter[1]-90 && d.lat < globeCenter[1]+90) {
         return "block";
