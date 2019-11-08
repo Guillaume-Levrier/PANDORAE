@@ -45,6 +45,35 @@ source.addEventListener("click",e=>{
 
 }
 
+const localDownload = (data) => {         //same but for exports
+
+setTimeout(()=>{
+  var source = document.getElementById("source")
+  
+  
+  var datasetName = "";
+  
+  if (data.hasOwnProperty("id")) {
+    datasetName = data.id;
+    datasetName = datasetName.replace(/\//ig,"_");
+    datasetName = datasetName.replace(/:/ig,"+");
+  }
+  
+  source.style.cursor = "pointer";
+  
+  var a = document.createElement('a');
+
+    var json = JSON.stringify(data);
+    var blob = new Blob([json], {type: "application/json"});
+    var url  = URL.createObjectURL(blob);    
+    a.href=url;
+    a.download= datasetName+".json";
+    a.textContent = source.innerText;
+    source.innerText = ""
+    source.appendChild(a)
+  },300)
+  }
+
 const resizer = () =>location.reload();
 
 // =========== LOADTYPE ===========
@@ -2797,7 +2826,7 @@ const linkLoc = () => {
           let chartHeight = 100;
           let startSelection = 100;
 
-          const argumentsArr = [...arguments];
+          const argumentsArr = [initialDataArray];
 
           const initialData = initialDataArray;
           const accessor = accessorFunction;
@@ -2890,7 +2919,7 @@ const linkLoc = () => {
             middleHandlerStroke = "#8E8E8E",
             middleHandlerFill = "#EFF4F7";
 
-          const svg = d3.select(xtypeSVG);
+          const svg = d3.select("#xtypeSVG");
 
           let sliderOffsetHeight = document.body.offsetHeight - 120;
 
