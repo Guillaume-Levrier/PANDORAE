@@ -1364,4 +1364,3 @@ ipcRenderer.on("progressBar", (event, prog) => {
 ipcRenderer.on("cmdInputFromRenderer", (event, command) => {
   cmdinput(command)
 })
-

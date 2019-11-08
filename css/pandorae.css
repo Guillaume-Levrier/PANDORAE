@@ -169,6 +169,26 @@ h1 {
   border: 1px solid rgb(230,230,230);
 }
 
+#presentationBox {
+  position: absolute;
+  margin: auto;
+  top: 15px;
+  left:20%;
+  display: block;
+  z-index: 15;
+}
+
+.presentationStep{
+  margin-left:6px;
+  padding:2px;
+  background-color:white;
+  border: 1px solid black;
+  font-size:8px;
+  cursor: pointer;
+
+  display: inline-block;
+}
+
 
 #export-icon{
   top:95px;
@@ -183,6 +203,21 @@ h1 {
   border: 1px solid rgb(230,230,230);
   display: none;
 }
+
+#step-icon{
+  top:95px;
+  left:65px;
+  position: absolute;
+  font-size: 26px;
+  display: flex;
+  transition: 0.3s;
+  z-index: 15;
+  cursor: pointer;
+  background-color: white;
+  border: 1px solid rgb(230,230,230);
+  display: black;
+}
+
 
 #aelogo {
   padding: 20%;
