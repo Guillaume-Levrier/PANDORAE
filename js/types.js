@@ -15,6 +15,7 @@ const csv = require("csv-parser");
 const versor = require("versor");
 const rpn = require("request-promise-native"); // RPN enables to generate requests to various APIs
 const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
+
 //END NODE MODULES
 
 var field = document.getElementById("field");
@@ -22,8 +23,6 @@ var field = document.getElementById("field");
 const dataDownload = (data) => {
 
 var source = document.getElementById("source")
-
-
 
 var datasetName = "";
 
@@ -562,7 +561,7 @@ const anthropotype = id => {  // When called, draw the anthropotype
       loadType();
       menuBuilder();
       cartoSorter(docData[0].title);
-    }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Anthropotype error: dataset " + datasetAT + " is invalid.");});
+    }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Anthropotype error: dataset " + id + " is invalid.");});
 
   //======== ZOOM & RESCALE ===========
   svg.call(zoom).on("dblclick.zoom", null);
@@ -2280,7 +2279,7 @@ const chronotype = (id, links) => { // When called, draw the chronotype
       };
 
       loadType();
-    }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Chronotype error: dataset " + datasetAT + " is invalid.");}); 
+    }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Chronotype error: dataset " + id + " is invalid.");}); 
 //======== END OF DATA CALL (PROMISES) ===========
 
   //======== ZOOM & RESCALE ===========
@@ -2350,6 +2349,8 @@ const geotype = id => {
     .attr("cx", width - toolWidth * 2)
     .attr("cy", height / 2)
     .attr("r", projection.scale());
+
+  //versor insertion signal for interactive exports
 
   //Calling data
   pandodb.geotype.get(id).then(datajson => {
@@ -3212,8 +3213,8 @@ const linkLoc = () => {
         barRangeSlider(data);
 
         loadType();
-      });
-    }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Geotype error: dataset " + datasetAT + " is invalid.");});
+      });// end of world-country call
+    }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Geotype error: dataset " + id + " is invalid.");});
 
   function drag() {
     let v0, q0, r0;
