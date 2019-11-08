@@ -16,6 +16,9 @@ const versor = require("versor");
 
 //END NODE MODULES
 
+
+
+
 var field = document.getElementById("field");
 
 const dataDownload = (data) => {
@@ -115,6 +118,11 @@ const xtype = document.getElementById("xtype"); // xtype is a div containing eac
 var width = xtype.clientWidth; // Fetching client width
 var height = xtype.clientHeight; // Fetching client height
 var toolWidth = 0.3 * width + 20; // The tooltip is around a third of total available screen width
+
+// =========== PRESENTATION BOX ===========
+var presentationBox = document.createElement("div")
+presentationBox.id = "presentationBox"
+document.body.appendChild(presentationBox)
 
 // ========== TIME ===========
 const currentTime = new Date(); // Precise time when the page has loaded
@@ -346,7 +354,7 @@ const anthropotype = id => {  // When called, draw the anthropotype
 
   var view = svg
     .append("g") // Appending a group to SVG
-    .attr("class", "view"); // CSS viewfinder properties
+    .attr("id", "view"); // CSS viewfinder properties
 
   //zoom extent
   var zoom = d3.zoom() // Zoom ability
@@ -611,7 +619,7 @@ const filotype = id => {
 svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
 
 var view = svg.append("g") // Appending a group to SVG
-  .attr("class", "view");
+  .attr("id", "view");
 
   var zoom = d3.zoom()                                      // Zoom ability
   .scaleExtent([0.2, 20])                               // To which extent do we allow to zoom forward or zoom back
@@ -961,7 +969,7 @@ const hyphotype = id => {
   svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
 
   var view = svg.append("g") // Appending a group to SVG
-    .attr("class", "view");
+    .attr("id", "view");
 
   //zoom extent
   
@@ -1506,8 +1514,11 @@ d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.
 
 
   svg.call(zoom).on("dblclick.zoom", null);
-  
+
+  var currentZoom;
+
   function zoomed() {
+    currentZoom = d3.event.transform;
      view.attr("transform", d3.event.transform);
      gXGrid.call(xGrid.scale(d3.event.transform.rescaleX(x)));
      gYGrid.call(yGrid.scale(d3.event.transform.rescaleY(y)));
@@ -1516,8 +1527,50 @@ d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.
      gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
      gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
      d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.5)")
-
   }
+
+
+  
+// Presentation Recorder
+
+presentationBox.style.width = (width*.6) + "px";
+
+const moveTo = (target) => {
+  
+  view.transition().duration(2000).attr("transform", target);
+  gXGrid.transition().duration(2000).call(xGrid.scale(target.rescaleX(x)));
+  gYGrid.transition().duration(2000).call(yGrid.scale(target.rescaleY(y)));
+  gX2.transition().duration(2000).call(xAxis2.scale(target.rescaleX(x)));
+  gY2.transition().duration(2000).call(yAxis2.scale(target.rescaleY(y)));
+  gX.transition().duration(2000).call(xAxis.scale(target.rescaleX(x)));
+  gY.transition().duration(2000).call(yAxis.scale(target.rescaleY(y)));
+  d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.5)")
+
+}
+
+
+
+
+var presentationStep = [];
+
+
+const addPresentationStep = () => {
+
+presentationStep.push(currentZoom)
+
+var stepIndex = presentationStep.length
+
+var step = document.createElement("DIV")
+  step.innerText= stepIndex;
+  step.className="presentationStep";
+  step.addEventListener("click",()=>{moveTo(presentationStep[stepIndex])})
+
+  presentationBox.appendChild(step)
+  
+}
+
+document.getElementById("step-icon").addEventListener("click",addPresentationStep)
+
   
   ipcRenderer.send("console-logs", "Starting Hyphotype");
 };
@@ -1533,7 +1586,7 @@ const chronotype = (id, links) => { // When called, draw the chronotype
   svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
 
   var view = svg.append("g") // Appending a group to SVG
-                .attr("class", "view"); // CSS viewfinder properties
+                .attr("id", "view"); // CSS viewfinder properties
 
   var zoom = d3.zoom()
                 .scaleExtent([0.1, 20]) // Extent to which one can zoom in or out
@@ -2343,7 +2396,7 @@ const geotype = id => {
 
   var view = svg
     .append("g") // Appending a group to SVG
-    .attr("class", "view")
+    .attr("id", "view")
     .attr("id", "view"); // CSS viewfinder properties
 
   //globe properties and beginning aspect
@@ -3330,7 +3383,7 @@ const gazouillotype = id => {
 
   var view = svg
     .append("g") // Appending a group to SVG
-    .attr("class", "view")
+    .attr("id", "view")
     .attr("id", "piles");
 
   var brushHeight = 150; // Hardcoding brush height
@@ -4192,7 +4245,7 @@ const pharmacotype = (id) => {
 svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
 
 var view = svg.append("g") // Appending a group to SVG
-  .attr("class", "view");
+  .attr("id", "view");
 
   var zoom = d3.zoom()                                      // Zoom ability
   .scaleExtent([0.2, 20])                               // To which extent do we allow to zoom forward or zoom back
