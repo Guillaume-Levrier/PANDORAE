@@ -681,6 +681,8 @@ fs.readFile(appPath+'/js/types.js',"utf-8",(err,typesJS)=>{
     typesJS = typesJS.replace(").catch(error => {","\ncatch (error) { field.value = 'error - invalid dataset'; console.log(error)} //")
     // remove loadType function
     typesJS = typesJS.replace("loadType()","")
+    typesJS = typesJS.replace("dataDownload(","localDownload(")
+    
 })
   
 // remove ipcRenderer communication channels
