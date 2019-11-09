@@ -1517,7 +1517,7 @@ d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.
 
   svg.call(zoom).on("dblclick.zoom", null);
 
-// Narrative function
+// ===== NARRATIVE =====
 
   var currentZoom;
 
@@ -4222,19 +4222,6 @@ requestContent=requestContent+"</ul>"
 
           barRangeSlider(areaData);
 
-          /* function narrative(focused) {
-            // Experimental narrative function
-            d3.select("#xtypeSVG").call(
-              zoom.transform,
-              d3.zoomIdentity
-                .translate(width / 2, height / 2)
-                .scale(10 / radius)
-                .translate(-x(focused.timespan), -y(focused.indexPosition))
-            );
-          }
-
-          narrative(circleData[0]);
- */
           loadType();
 
           keywordsDisplay();
@@ -4273,11 +4260,14 @@ requestContent=requestContent+"</ul>"
 
   svg.call(zoom).on("dblclick.zoom", null); // Zoom and deactivate doubleclick zooming
 
+  var currentZoom;
+
   function zoomed() {
     
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
     
     var t = d3.event.transform;
+    currentZoom = t;
 
     view.attr("transform", t);
 
@@ -4309,6 +4299,153 @@ requestContent=requestContent+"</ul>"
         "translate(" + ext2 + ",50)"
       );
   }
+
+// ===== NARRATIVE =====
+
+
+
+
+// Presentation Recorder
+
+document.getElementById("step-icon").style.display = "flex"
+
+window.addEventListener("keydown", e=> {
+
+let buttons = document.querySelectorAll("div.presentationStep");
+let currentButtonId=0;
+
+for (let i = 0; i < buttons.length; i++) {
+if(buttons[i].style.backgroundColor==="black"){
+  currentButtonId=i;
+}
+}
+
+switch (e.key) {
+  case "ArrowRight":
+    if(currentButtonId+1>buttons.length-1){currentButtonId=currentButtonId-1}
+       moveTo(presentationStep[currentButtonId+1])
+    break;
+
+  case "ArrowLeft" :
+      if (currentButtonId<1){currentButtonId=1}
+      moveTo(presentationStep[currentButtonId-1])
+    break;
+
+  case "Backspace" : 
+    presentationStep.splice(currentButtonId,1)
+    regenerateSteps()
+  break;
+}
+
+
+
+
+})
+
+
+const moveTo = (step) => {
+
+let buttons = document.querySelectorAll("div.presentationStep");
+
+buttons.forEach(but=>{
+but.style.backgroundColor="white";
+but.style.color="black";
+})
+
+buttons[parseInt(step.stepIndex)-1].style.backgroundColor="black";
+buttons[parseInt(step.stepIndex)-1].style.color="white";
+
+var t = step.zoom;
+
+view.transition().duration(2000).attr("transform", t);
+
+gX.transition().duration(2000).call(xAxis.scale(t.rescaleX(x)));
+gY.transition().duration(2000).call(yAxis.scale(t.rescaleY(y)));
+
+let ext1 = parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[0])));
+let ext2 = parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[1])));
+
+d3.select("#selectionBrush")
+  .select(".selection")
+  .transition().duration(2000)
+  .attr("x",ext1)
+  .attr("width",parseInt(ext2-ext1));
+
+d3.select("#selectionBrush")
+  .select("g")
+  .transition().duration(2000)
+  .attr(
+    "transform",
+    "translate(" + ext1 + ",50)"
+  );
+
+d3.select("#selectionBrush")
+  .selectAll("g")
+  .select(function() {
+    return this.nextElementSibling;
+  })
+  .transition().duration(2000)
+  .attr(
+    "transform",
+    "translate(" + ext2 + ",50)"
+  );
+
+tooltip.innerHTML = JSON.parse(step.tooltip);
+
+}
+
+
+
+
+const stepCreator = (thisStep) => {
+
+let stepIndex = thisStep.stepIndex
+
+var step = document.createElement("DIV")
+step.innerText= stepIndex;
+step.className="presentationStep";
+step.id="presentationStep"+parseInt(stepIndex);
+
+step.addEventListener("click",()=>{moveTo(presentationStep[parseInt(stepIndex)-1])})
+
+presentationBox.appendChild(step)
+
+}
+
+const addPresentationStep = () => {
+
+let stepData={zoom:currentZoom,tooltip:JSON.stringify(tooltip.innerHTML)}
+
+
+let buttons = document.querySelectorAll("div.presentationStep");
+let currentButtonId=0;
+
+for (let i = 0; i < buttons.length; i++) {
+if(buttons[i].style.backgroundColor==="black"){
+  currentButtonId=i;
+}
+}
+
+presentationStep.splice(currentButtonId+1,0,stepData)
+
+regenerateSteps();
+}
+
+const regenerateSteps = () => {
+
+    while (presentationBox.firstChild) {
+      presentationBox.removeChild(presentationBox.firstChild)
+    }
+
+    for (let i = 0; i < presentationStep.length; i++) {
+      presentationStep[i].stepIndex=i+1;
+      stepCreator(presentationStep[i])
+    }
+}
+
+regenerateSteps();
+
+document.getElementById("step-icon").addEventListener("click",addPresentationStep)
 
   ipcRenderer.send("console-logs", "Starting gazouillotype"); // Starting gazouillotype
 }; // Close gazouillotype function
