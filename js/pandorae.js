@@ -39,7 +39,7 @@ fs.readFile(appPath+"/package.json","utf8", (err, data) => {
 
 // for export purposes
 var currentType;           // Once a type is started, know which one
-var presentationStep = [];
+var presentationStep = new Array;
 
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that

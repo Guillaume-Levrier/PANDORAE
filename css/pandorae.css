@@ -176,6 +176,7 @@ h1 {
   left:20%;
   display: block;
   z-index: 15;
+  width: 40%;
 }
 
 .presentationStep{

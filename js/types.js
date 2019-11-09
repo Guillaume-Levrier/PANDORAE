@@ -1053,6 +1053,8 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
 
       var links = [];
 
+      if (datajson.hasOwnProperty("presentationStep")) { presentationStep = datajson.narrative};
+
       let corpusStatus = datajson.content.corpusStatus;
 
       let weStatus = datajson.content.weStatus;
@@ -1515,6 +1517,8 @@ d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.
 
   svg.call(zoom).on("dblclick.zoom", null);
 
+// Narrative function
+
   var currentZoom;
 
   function zoomed() {
@@ -1529,25 +1533,55 @@ d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.
      d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.5)")
   }
 
-
-  
 // Presentation Recorder
 
-presentationBox.style.width = (width*.6) + "px";
 document.getElementById("step-icon").style.display = "flex"
+
+window.addEventListener("keydown", e=> {
+
+ let buttons = document.querySelectorAll("div.presentationStep");
+ let currentButtonId=0;
+
+ for (let i = 0; i < buttons.length; i++) {
+  if(buttons[i].style.backgroundColor==="black"){
+    currentButtonId=i;
+  }
+ }
+
+  switch (e.key) {
+    case "ArrowRight":
+      if(currentButtonId+1>buttons.length-1){currentButtonId=currentButtonId-1}
+         moveTo(presentationStep[currentButtonId+1])
+      break;
+  
+    case "ArrowLeft" :
+        if (currentButtonId<1){currentButtonId=1}
+        moveTo(presentationStep[currentButtonId-1])
+      break;
+
+    case "Backspace" : 
+      presentationStep.splice(currentButtonId,1)
+      regenerateSteps()
+    break;
+  }
+
+
+
+
+})
 
 
 const moveTo = (step) => {
   
-  let buttons = document.querySelectorAll("div.presentationStep");
+let buttons = document.querySelectorAll("div.presentationStep");
 
 buttons.forEach(but=>{
   but.style.backgroundColor="white";
   but.style.color="black";
 })
 
-  buttons[parseInt(step.stepIndex)].style.backgroundColor="black";
-  buttons[parseInt(step.stepIndex)].style.color="white";
+  buttons[parseInt(step.stepIndex)-1].style.backgroundColor="black";
+  buttons[parseInt(step.stepIndex)-1].style.color="white";
 
   let target = step.zoom;
 
@@ -1566,17 +1600,12 @@ tooltip.innerHTML = JSON.parse(step.tooltip);
 
 
 
-const addPresentationStep = () => {
 
-  
+const stepCreator = (thisStep) => {
 
-  let stepData={zoom:currentZoom,tooltip:JSON.stringify(tooltip.innerHTML),stepIndex:presentationStep.length}
+  let stepIndex = thisStep.stepIndex
 
-  presentationStep.push(stepData)
-
-  var stepIndex = presentationStep.length; 
-
-var step = document.createElement("DIV")
+  var step = document.createElement("DIV")
   step.innerText= stepIndex;
   step.className="presentationStep";
   step.id="presentationStep"+parseInt(stepIndex);
@@ -1584,8 +1613,41 @@ var step = document.createElement("DIV")
   step.addEventListener("click",()=>{moveTo(presentationStep[parseInt(stepIndex)-1])})
 
   presentationBox.appendChild(step)
-  
+
 }
+
+const addPresentationStep = () => {
+
+  let stepData={zoom:currentZoom,tooltip:JSON.stringify(tooltip.innerHTML)}
+
+ 
+  let buttons = document.querySelectorAll("div.presentationStep");
+ let currentButtonId=0;
+
+ for (let i = 0; i < buttons.length; i++) {
+  if(buttons[i].style.backgroundColor==="black"){
+    currentButtonId=i;
+  }
+ }
+
+ presentationStep.splice(currentButtonId+1,0,stepData)
+
+ regenerateSteps();
+}
+
+const regenerateSteps = () => {
+
+      while (presentationBox.firstChild) {
+        presentationBox.removeChild(presentationBox.firstChild)
+      }
+
+      for (let i = 0; i < presentationStep.length; i++) {
+        presentationStep[i].stepIndex=i+1;
+        stepCreator(presentationStep[i])
+      }
+}
+
+regenerateSteps();
 
 document.getElementById("step-icon").addEventListener("click",addPresentationStep)
 
