@@ -61,6 +61,7 @@ if (!!window.SharedWorker) {
 
   multiThreader.onerror = err => {
     // If the multiThreader reports an error
+    ipcRenderer.send("audio-channel", "error");
     ipcRenderer.send("console-logs", "Worker failed to start."); // Send an error message to the console
     ipcRenderer.send("console-logs", JSON.stringify(err)); // Send the actual error content to the console
   };
@@ -380,6 +381,7 @@ ipcRenderer.on("chaeros-notification", (event, message, options) => {
 
 ipcRenderer.on("chaeros-failure", (event, message) => {
   field.value = message;
+  ipcRenderer.send("audio-channel", "error");
 });
 
 // ========== CORE ACTIONS ===========
@@ -440,6 +442,7 @@ const selectOption = (type, id) => {
   field.value = "starting " + type;
   currentType = {type:type,id:id}
   types.typeSwitch(type, id);
+  ipcRenderer.send("audio-channel", "button2");
 
   ipcRenderer.send(
     "console-logs",
