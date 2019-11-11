@@ -3,10 +3,9 @@
 <audio id="button2"><source src="audio/Button_2.m4a" type="audio/mpeg"></audio>
 <audio id="complete"><source src="audio/Complete_3.m4a" type="audio/mpeg"></audio>
 <audio id="error"><source src="audio/Error_1.m4a" type="audio/mpeg"></audio>
+<audio id="alert1"><source src="audio/Alert_1.m4a" type="audio/mpeg"></audio>
 
 <script>
 const { ipcRenderer } = require("electron");
-
 ipcRenderer.on("audio-channel",(event, audio) => document.getElementById(audio).play());
-    
 </script>
