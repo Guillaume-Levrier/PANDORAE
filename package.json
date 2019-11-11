@@ -22,7 +22,8 @@
 		"request-promise-native": "^1.0.0",
 		"three": "^0.108.0",
 		"versor": "^0.0.4",
-		"whois-json": "^2.0.4"
+		"whois-json": "^2.0.4",
+		"postprocessing": "^6.8.8"
 	},
 	"devDependencies": {
 		"electron": "^5.0.3",

@@ -1,5 +1,34 @@
 const normalCore = () => {
 
+ const { BokehEffect, EffectComposer, EffectPass, RenderPass } = require("postprocessing");
+
+var composer;
+
+var bokeh = new BokehEffect({focus:.1,dof:1,aperture:.1,maxBlur:1});
+
+var uniforms = bokeh.uniforms;
+var focusCore;
+
+
+
+
+
+setTimeout(() => {
+    document.getElementById("coreCanvas").addEventListener("wheel",e=>{
+        if (e.wheelDeltaY>0) {
+            uniforms.get("focus").value = uniforms.get("focus").value+.001
+        } else {
+            uniforms.get("focus").value = uniforms.get("focus").value-.001
+        }
+console.log(uniforms.get("focus").value)
+    })
+}, 500);
+
+const effectPass = new EffectPass(camera, bokeh);
+effectPass.renderToScreen = true;
+ 
+const clock = new THREE.Clock();
+
 // SHADERLOADER
 var ShaderLoader = function()
 {
@@ -100,7 +129,7 @@ var FBO = function(exports){
 
         var cell = new THREE.Group();
 
-        var cellGeometry = new THREE.SphereBufferGeometry(3,512,512);
+        var cellGeometry = new THREE.SphereBufferGeometry(300,512,512);
         var cellMaterial = new THREE.MeshPhongMaterial( { color: 0x156289, transparent: true, opacity: 0.7, emissive: 0x072534, side: THREE.DoubleSide, flatShading: true } );
         var sphere = new THREE.Mesh( cellGeometry, cellMaterial );
         cell.add( sphere );
@@ -155,6 +184,8 @@ var scene, camera, renderer, controls;
 var simulationShader, automatic;
 var zoomFactor = 1;
 
+
+
 const reloadCore = () => {
            var sl = new ShaderLoader();
            sl.loadShaders({
@@ -184,12 +215,12 @@ window.onload = reloadCore();
 
 
            scene = new THREE.Scene();
-           camera = new THREE.PerspectiveCamera(60,w/h, 1,1000 );
+           camera = new THREE.PerspectiveCamera(45,w/h, 1,10000 );
 
-           controls = new THREE.OrbitControls(camera);
-           camera.position.z =
-           controls.minDistance = 
-           controls.maxDistance = 400;
+           controls = new THREE.OrbitControls(camera, renderer.domElement);
+           camera.position.z = 450;
+           controls.minDistance = 450;
+           controls.maxDistance = 450;
 
            camera.zoom = zoomFactor;
 
@@ -237,6 +268,28 @@ window.onload = reloadCore();
            FBO.init( width,height, renderer, simulationShader, renderShader );
            scene.add( FBO.particles );
 
+/*
+           setTimeout(() => {
+    
+            focusCore = setInterval(() => {
+                if(uniforms.get("focus").value<1){
+               uniforms.get("focus").value=uniforms.get("focus").value+0.006;
+               if(camera.position.z>450){
+                   camera.position.z=camera.position.z-2.4;  
+               }
+               
+           } else {
+               clearInterval(focusCore)
+           }
+             }, 1);
+       
+       }, 100);
+*/
+          composer = new EffectComposer( renderer );
+
+           composer.addPass(new RenderPass(scene, camera));
+           composer.addPass(effectPass);
+
            window.addEventListener( "resize", onResize );
            onResize();
            update();
@@ -274,6 +327,7 @@ window.onload = reloadCore();
            camera.updateProjectionMatrix();        
            
        }
+
        function update()
        {
            requestAnimationFrame(update);
@@ -286,8 +340,10 @@ window.onload = reloadCore();
            //update simulation
            FBO.update();
            //render the particles at the new location
-           renderer.render( scene, camera );
+           //renderer.render( scene, camera );
+            composer.render(clock.getDelta());
        }
+
 
 
 }
