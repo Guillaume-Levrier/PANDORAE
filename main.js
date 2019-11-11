@@ -92,6 +92,7 @@ function createWindow() {
   //mainWindow.webContents.openDevTools();
   mainWindow.on("closed", () => {
     mainWindow = null;
+  
   });
 }
 
@@ -105,17 +106,14 @@ app.on("ready", () => {
   createUserId();
   createThemes();
   createWindow();
+  createAudioManager();
 
   mainWindow.onbeforeunload = e => {
     BrowserView.getAllViews().forEach(view => view.destroy());
   };
 });
 
-app.on("activate", () => {
-  if (mainWindow === null) {
-    createWindow();
-  }
-});
+
 
 var windowIds = [
   { name: "flux", id: 0, open: false },
@@ -275,7 +273,6 @@ ipcMain.on("chaeros-is-ready", (event, arg) => {
   );
 });
 
-let chaerosWindow;
 
 const chaerosCalculator = () => {
   let chaerosWindow = new BrowserWindow({
@@ -296,6 +293,44 @@ const chaerosCalculator = () => {
     //chaerosWindow.webContents.openDevTools();
   });
 };
+
+
+
+
+const createAudioManager = () => {
+  let audioManager = new BrowserWindow({
+    width: 10,
+    height: 10,
+    frame: false,
+    transparent: true,
+    show: false,
+    webPreferences: {
+      nodeIntegration: true,
+      nodeIntegrationInWorker: true
+    }
+  });
+
+audioManager.loadFile("audioManager.html")
+audioManager.webContents.on("did-finish-load", function() {
+ // audioManager.webContents.openDevTools();
+});
+ipcMain.on("audio-channel", (event, audio) => {
+  audioManager.webContents.send("audio-channel", audio);
+});
+
+mainWindow.on("closed", () => {
+  audioManager.close();
+});
+
+};
+
+
+
+app.on("activate", () => {
+  if (mainWindow === null) {
+    createWindow();    
+  }
+});
 
 // Quit when all windows are closed.
 app.on("window-all-closed", function() {
@@ -333,3 +368,4 @@ ipcMain.on("progress", (event, message) => {
 ipcMain.on("cmdInputFromRenderer", (event, theme) => {
   mainWindow.webContents.send("cmdInputFromRenderer", theme);
 });
+

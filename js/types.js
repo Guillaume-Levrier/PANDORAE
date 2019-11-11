@@ -89,6 +89,7 @@ const loadType = () => {
   purgeCore();
   xtypeExists = true;
   coreExists = false;
+  ipcRenderer.send("audio-channel", "button1");
   field.value = "";
   document.getElementById('export-icon').style.display = "flex";
   document.getElementById('fluxMenu').style.display = "none";
