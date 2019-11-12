@@ -452,10 +452,11 @@ const clinTriRetriever = (query) => {
 
         limiter.schedule(() => Promise.all(dataPromises))
                .then(ctResponses => {
+
                     for (let i = 0; i < ctResponses.length; i++) {
                       ctResponses[i].FullStudiesResponse.FullStudies.forEach(study=>content.entries.push(study))
                     }
-                }).then(() => {
+               
             
                 let id = query + date;
        
@@ -469,12 +470,12 @@ const clinTriRetriever = (query) => {
                         }, 500); // Close Chaeros
                     })  
 
-                  });
+                  
               })
       .catch(e => {
         ipcRenderer.send("chaeros-failure", e); // Send error to main process
       });
-  
+    });
 };
 
 
