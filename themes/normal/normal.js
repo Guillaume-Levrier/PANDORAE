@@ -4,32 +4,35 @@ const normalCore = () => {
 
 var composer;
 
-var bokeh = new RealisticBokehEffect({focus:20,//dof:.5,aperture:.1,maxBlur:1
-                                      focalLength:35,
+var bokeh = new RealisticBokehEffect({focus:12,//dof:.5,aperture:.1,maxBlur:1
+                                      focalLength:20,
                                       luminanceThreshold:1,
                                       showFocus:false,
-                                      manualDoF:false
+                                    //  manualDoF:true,
+                                     // dof:{x: 5.2, y: 4, z: 5.2, w: 8}
 });
 
 // pop menu
 
 var uniforms = bokeh.uniforms;
+console.log(uniforms)
 var focusCore;
-/*
+
 setTimeout(() => {
     document.getElementById("coreCanvas").addEventListener("wheel",e=>{
         if (e.wheelDeltaY>0) {
-           // uniforms.get("focus").value = uniforms.get("focus").value+.01
-           camera.position.z=camera.position.z+10
+           uniforms.get("focus").value = uniforms.get("focus").value+.01
+           //camera.position.z=camera.position.z+10
         } else {
-            //uniforms.get("focus").value = uniforms.get("focus").value-.01
-            camera.position.z = camera.position.z-10
+            uniforms.get("focus").value = uniforms.get("focus").value-.01
+            //camera.position.z = camera.position.z-10
         }
-//console.log(uniforms.get("focus").value)
+console.log(uniforms.get("focus").value)
     })
 }, 500);
-*/
+
 const effectPass = new EffectPass(camera, bokeh);
+
 effectPass.renderToScreen = true;
  
 const clock = new THREE.Clock();
