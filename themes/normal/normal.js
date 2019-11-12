@@ -1,29 +1,34 @@
 const normalCore = () => {
 
- const { BokehEffect, EffectComposer, EffectPass, RenderPass } = require("postprocessing");
+ const { RealisticBokehEffect, EffectComposer, EffectPass, RenderPass } = require("postprocessing");
 
 var composer;
 
-var bokeh = new BokehEffect({focus:.1,dof:1,aperture:.1,maxBlur:1});
+var bokeh = new RealisticBokehEffect({focus:20,//dof:.5,aperture:.1,maxBlur:1
+                                      focalLength:35,
+                                      luminanceThreshold:1,
+                                      showFocus:false,
+                                      manualDoF:false
+});
+
+// pop menu
 
 var uniforms = bokeh.uniforms;
 var focusCore;
-
-
-
-
-
+/*
 setTimeout(() => {
     document.getElementById("coreCanvas").addEventListener("wheel",e=>{
         if (e.wheelDeltaY>0) {
-            uniforms.get("focus").value = uniforms.get("focus").value+.001
+           // uniforms.get("focus").value = uniforms.get("focus").value+.01
+           camera.position.z=camera.position.z+10
         } else {
-            uniforms.get("focus").value = uniforms.get("focus").value-.001
+            //uniforms.get("focus").value = uniforms.get("focus").value-.01
+            camera.position.z = camera.position.z-10
         }
-console.log(uniforms.get("focus").value)
+//console.log(uniforms.get("focus").value)
     })
 }, 500);
-
+*/
 const effectPass = new EffectPass(camera, bokeh);
 effectPass.renderToScreen = true;
  
@@ -215,12 +220,12 @@ window.onload = reloadCore();
 
 
            scene = new THREE.Scene();
-           camera = new THREE.PerspectiveCamera(45,w/h, 1,10000 );
+           camera = new THREE.PerspectiveCamera(45,w/h, 1,1000 );
 
            controls = new THREE.OrbitControls(camera, renderer.domElement);
            camera.position.z = 450;
-           controls.minDistance = 450;
-           controls.maxDistance = 450;
+           controls.minDistance = 0;
+           controls.maxDistance = 4500;
 
            camera.zoom = zoomFactor;
 
