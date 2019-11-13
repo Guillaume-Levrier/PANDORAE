@@ -4,32 +4,19 @@ const normalCore = () => {
 
 var composer;
 
-var bokeh = new RealisticBokehEffect({focus:12,//dof:.5,aperture:.1,maxBlur:1
-                                      focalLength:20,
-                                      luminanceThreshold:1,
-                                      showFocus:false,
-                                    //  manualDoF:true,
-                                     // dof:{x: 5.2, y: 4, z: 5.2, w: 8}
+var bokeh = new RealisticBokehEffect({focus:100,
+                                      focalLength:1,
+                                      luminanceThreshold: 1,
+                                      luminanceGain: -.2,
+                                      rings:3,
+                                    //  showFocus:true,
+                                      maxBlur: 1,
+                                      manualDoF:true
+                                      
 });
 
-// pop menu
-
 var uniforms = bokeh.uniforms;
-console.log(uniforms)
-var focusCore;
-
-setTimeout(() => {
-    document.getElementById("coreCanvas").addEventListener("wheel",e=>{
-        if (e.wheelDeltaY>0) {
-           uniforms.get("focus").value = uniforms.get("focus").value+.01
-           //camera.position.z=camera.position.z+10
-        } else {
-            uniforms.get("focus").value = uniforms.get("focus").value-.01
-            //camera.position.z = camera.position.z-10
-        }
-console.log(uniforms.get("focus").value)
-    })
-}, 500);
+uniforms.get("dof").value={x: 1, y: 0.1, z: 100, w: 30};
 
 const effectPass = new EffectPass(camera, bokeh);
 
@@ -40,8 +27,6 @@ const clock = new THREE.Clock();
 // SHADERLOADER
 var ShaderLoader = function()
 {
-    // Shaders
-
     ShaderLoader.get = function( id )
     {
         return ShaderLoader.shaders[ id ];
@@ -276,23 +261,6 @@ window.onload = reloadCore();
            FBO.init( width,height, renderer, simulationShader, renderShader );
            scene.add( FBO.particles );
 
-/*
-           setTimeout(() => {
-    
-            focusCore = setInterval(() => {
-                if(uniforms.get("focus").value<1){
-               uniforms.get("focus").value=uniforms.get("focus").value+0.006;
-               if(camera.position.z>450){
-                   camera.position.z=camera.position.z-2.4;  
-               }
-               
-           } else {
-               clearInterval(focusCore)
-           }
-             }, 1);
-       
-       }, 100);
-*/
           composer = new EffectComposer( renderer );
 
            composer.addPass(new RenderPass(scene, camera));
