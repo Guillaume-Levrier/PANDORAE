@@ -11,14 +11,7 @@ For more information on PANDORÆ, go to the [project page](https://guillaume-lev
 macOS starting issues: put the app in the "Applications" folder and then start again.
 
 ### Roadmap
-
-#### Features
-- Consolidate Twitter data management: allow for newer gazouilloire versions, vanilla Twitter API, and twarc JSONL datasets
-- Bring back pharmacotype from PANDORAE-legacy for clinical trials exploration
-- Test hyphotype further (on larger tagged corpuses)
-
-#### Bugs
-- Fix the Linux build
+Prepare for next release.
 
 #### Wiki
 - API documentation (WIP)
