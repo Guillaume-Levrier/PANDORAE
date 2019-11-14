@@ -8,9 +8,9 @@ var bokeh = new RealisticBokehEffect({focus:100,
                                       focalLength:1,
                                       luminanceThreshold: 1,
                                       luminanceGain: -.2,
-                                      rings:3,
+                                      rings:5,
                                     //  showFocus:true,
-                                      maxBlur: 1,
+                                      maxBlur: 1.2,
                                       manualDoF:true
                                       
 });
@@ -237,8 +237,8 @@ window.onload = reloadCore();
                    timer: { type: "f", value: 0},
                    frequency: { type: "f", value: 0.01 },
                    amplitude: { type: "f", value: 96 },
-                   maxDistanceA: { type: "f", value: 48 },
-                   maxDistanceB: { type: "f", value: 148 }
+                   maxDistanceA: { type: "f", value: 85 },
+                   maxDistanceB: { type: "f", value: 150 }
                },
                vertexShader: ShaderLoader.get( "simulation_vs"),
                fragmentShader:  ShaderLoader.get( "simulation_fs")
