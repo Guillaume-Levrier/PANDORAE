@@ -4,6 +4,7 @@
  uniform sampler2D textureA;
  uniform sampler2D textureB;
  uniform float timer;
+ uniform float fastParticle;
  uniform float frequency;
  uniform float amplitude;
  uniform float maxDistanceA;
@@ -86,9 +87,9 @@
      float	eps	= 1., eps2 = 2. * eps;
      float	n1,	n2,	a,	b;
 
-     x += timer * .05;
-     y += timer * .05;
-     z += timer * .05;
+     x += fastParticle * .05;
+     y += fastParticle * .05;
+     z += fastParticle * .05;
 
      vec3	curl = vec3(0.);
 
