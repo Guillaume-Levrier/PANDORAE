@@ -249,8 +249,8 @@ window.onload = reloadCore();
            var renderShader = new THREE.ShaderMaterial( {
              uniforms: {
                  positions: { type: "t", value: null },
-                 pointSize: { type: "f", value: 1 },
-                 big: { type: "v3", value: new THREE.Vector3(207,221,212).multiplyScalar(1/0xFF) },
+                 pointSize: { type: "f", value: 3 },
+                 big: { type: "v3", value: new THREE.Vector3(170,170,170).multiplyScalar(1/0xFF) },
                  small: { type: "v3", value: new THREE.Vector3(80,80,80).multiplyScalar(1/0xFF) }
              },
                vertexShader: ShaderLoader.get( "render_vs"),
@@ -317,7 +317,7 @@ window.onload = reloadCore();
            simulationShader.uniforms.timer.value = parseFloat( pandoratio );
 
            
-           simulationShader.uniforms.fastParticle.value += 0.01;
+           simulationShader.uniforms.fastParticle.value += (0.02+pandoratio*2);
            FBO.particles.rotation.x = Math.cos( Date.now() *.001 ) * Math.PI / 180 * 2;
            FBO.particles.rotation.y -= Math.PI / 180 * .1;
 
