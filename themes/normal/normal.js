@@ -235,6 +235,7 @@ window.onload = reloadCore();
                    textureA: { type: "t", value: textureA },
                    textureB: { type: "t", value: textureB },
                    timer: { type: "f", value: 0},
+                   fastParticle: { type: "f", value: 0},
                    frequency: { type: "f", value: 0.01 },
                    amplitude: { type: "f", value: 96 },
                    maxDistanceA: { type: "f", value: 85 },
@@ -243,6 +244,7 @@ window.onload = reloadCore();
                vertexShader: ShaderLoader.get( "simulation_vs"),
                fragmentShader:  ShaderLoader.get( "simulation_fs")
            });
+           
 
            var renderShader = new THREE.ShaderMaterial( {
              uniforms: {
@@ -304,15 +306,22 @@ window.onload = reloadCore();
            
        }
 
+
+
        function update()
        {
            requestAnimationFrame(update);
 
-
+            //console.log(simulationShader.uniforms)
            //update params
            simulationShader.uniforms.timer.value = parseFloat( pandoratio );
+
+           
+           simulationShader.uniforms.fastParticle.value += 0.01;
            FBO.particles.rotation.x = Math.cos( Date.now() *.001 ) * Math.PI / 180 * 2;
            FBO.particles.rotation.y -= Math.PI / 180 * .1;
+
+           
            //update simulation
            FBO.update();
            //render the particles at the new location
