@@ -538,6 +538,7 @@ li:active {
   user-select: none;
   z-index: 2;
   animation: fadein 0.7s;
+  text-shadow: 0px 0px 5px #FFF;
 }
 
 #version{
