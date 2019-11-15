@@ -216,9 +216,11 @@ window.onload = reloadCore();
            controls.maxDistance = 4500;
 
            camera.zoom = zoomFactor;
-
-           var width  = 512;
-           var height = 512;
+       
+           var textureSize=Math.pow(2,Math.round(Math.log(parseInt(document.body.offsetWidth/3))/Math.log(2)));
+         
+           var width  = textureSize;
+           var height = textureSize;
 
            //first model
            var dataA = getSphere( width * height, 128 );
@@ -312,15 +314,11 @@ window.onload = reloadCore();
        {
            requestAnimationFrame(update);
 
-            //console.log(simulationShader.uniforms)
            //update params
            simulationShader.uniforms.timer.value = parseFloat( pandoratio );
-
-           
            simulationShader.uniforms.fastParticle.value += (0.02+pandoratio*2);
            FBO.particles.rotation.x = Math.cos( Date.now() *.001 ) * Math.PI / 180 * 2;
            FBO.particles.rotation.y -= Math.PI / 180 * .1;
-
            
            //update simulation
            FBO.update();

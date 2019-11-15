@@ -3858,7 +3858,6 @@ requestContent=requestContent+"</ul>"
             .attr("cx", d => x(d.timespan))
             .attr("cy", d => y(d.indexPosition))
             .on("click", d => {
-              console.log(d)
               d3.select("#linktosource").remove();
               lineData = [];
               lineData.push(d);
