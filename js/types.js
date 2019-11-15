@@ -3683,7 +3683,6 @@ const gazouillotype = id => {
 
   var domainDates = [];
   var bufferData = [];
-  let radius = 1;
   var lineData = [];
 
   const scrapToApiFormat = data => {
@@ -3711,6 +3710,7 @@ const gazouillotype = id => {
     let tranche = { date: "", tweets: [] }; // A tranche will be a pile on the graph
     let twDate = 0; // Date variable
     let twtAmount = 0; // Tweet amount variable
+    let radius = parseFloat(width/1200);
 
     fs.createReadStream(datajson.content.path) // Read the flatfile dataset provided by the user
       .pipe(csv()) // pipe buffers to csv parser
@@ -3858,6 +3858,7 @@ requestContent=requestContent+"</ul>"
             .attr("cx", d => x(d.timespan))
             .attr("cy", d => y(d.indexPosition))
             .on("click", d => {
+              console.log(d)
               d3.select("#linktosource").remove();
               lineData = [];
               lineData.push(d);
@@ -3980,7 +3981,14 @@ requestContent=requestContent+"</ul>"
               );
             });
 
-         
+
+        
+        
+
+
+
+           
+
   // === Bar Range Slider ===
   // adapted from https://observablehq.com/@bumbeishvili/data-driven-range-sliders
 
