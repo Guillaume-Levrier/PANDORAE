@@ -959,6 +959,13 @@ const cmdinput = input => {
         }, 450);
         break;
 
+        case "fullscreen":
+          if(remote.getCurrentWindow().isFullScreen()){
+            remote.getCurrentWindow().setFullScreen(false);
+          } else {
+            remote.getCurrentWindow().setFullScreen(true);
+          }
+            break;
 
         case "restart":
           document.body.style.animation = "fadeout 0.5s";
