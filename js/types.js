@@ -1652,8 +1652,11 @@ const addPresentationStep = () => {
   }
  }
 
- presentationStep.splice(currentButtonId+1,0,stepData)
-
+ if (currentButtonId===0){
+  presentationStep.push(stepData)
+} else {
+presentationStep.splice(currentButtonId+1,0,stepData)
+}
  regenerateSteps();
 }
 
@@ -3612,8 +3615,11 @@ if(buttons[i].style.backgroundColor==="black"){
 }
 }
 
+if (currentButtonId===0){
+  presentationStep.push(stepData)
+} else {
 presentationStep.splice(currentButtonId+1,0,stepData)
-
+}
 regenerateSteps();
 }
 
@@ -4613,12 +4619,16 @@ let buttons = document.querySelectorAll("div.presentationStep");
 let currentButtonId=0;
 
 for (let i = 0; i < buttons.length; i++) {
-if(buttons[i].style.backgroundColor==="black"){
-  currentButtonId=i;
-}
+  if(buttons[i].style.backgroundColor==="black"){
+    currentButtonId=i;
+  }
 }
 
+if (currentButtonId===0){
+  presentationStep.push(stepData)
+} else {
 presentationStep.splice(currentButtonId+1,0,stepData)
+}
 
 regenerateSteps();
 }

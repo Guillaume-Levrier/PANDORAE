@@ -271,7 +271,7 @@ window.onload = reloadCore();
            composer.addPass(effectPass);
 
            window.addEventListener( "resize", onResize );
-           onResize();
+          // onResize();
            update();
        }
 
@@ -305,6 +305,12 @@ window.onload = reloadCore();
            renderer.setSize(w,h);
            camera.aspect = w/h;
            camera.updateProjectionMatrix();        
+
+           document.body.style.animation="fadeout 0.45s";
+           setTimeout(()=>{
+            document.body.style.opacity = 0;
+               location.reload()
+            },400)
            
        }
 
