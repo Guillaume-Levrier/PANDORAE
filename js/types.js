@@ -615,7 +615,8 @@ const filotype = id => {
   
   var svg = d3.select(xtype)
   .append("svg")
-  .attr("id", "xtypeSVG");
+  .attr("id", "xtypeSVG")
+  .style("font-family","sans-serif");
 
 svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
 
@@ -632,7 +633,6 @@ var view = svg.append("g") // Appending a group to SVG
 pandodb.filotype.get(id).then(datajson => {
      
   dataDownload(datajson);
-
 
     datajson.content.forEach(tweet=>{
       var tweetText = tweet.full_text;
@@ -656,26 +656,29 @@ pandodb.filotype.get(id).then(datajson => {
       }
     })  
 
-    var root = d3.stratify()
-                .id(d => d.id_str)
-                .parentId(d =>d.in_reply_to_status_id_str)(datajson.content);
+    var tree = data => {
+      var root = d3.stratify()
+                    .id(d => d.id_str)
+                    .parentId(d =>d.in_reply_to_status_id_str)(data);
+      root.dx = 100;
+      root.dy = 30;
+      return d3.tree().nodeSize([root.dx, root.dy])(root);
+    }
 
-    var tree = d3.tree().size([height, width*3]);
+      const root = tree(datajson.content);
 
-        root = tree(root);
-
-        let x0 = Infinity;
-        let x1 = -x0;
+      let x0 = Infinity;
+      let x1 = -x0;
         root.each(d => {
           if (d.x > x1) x1 = d.x;
           if (d.x < x0) x0 = d.x;
         });
 
       function elbow(d, i) {
-             return "M" + d.source.y + "," + d.source.x + "H" + d.target.y + "V" + d.target.x                    
+             return "M" + d.source.x + "," + d.source.y + "H" + d.target.x + "V" + d.target.y                    
        } 
 
-                var link = view.append("g")
+          var link = view.append("g")
                 .attr("fill", "none")
                 .attr("stroke", "black")
                 .attr("stroke-opacity", .5)
@@ -692,7 +695,7 @@ var lineFontSize = parseFloat(width/500);
                     .selectAll("g")
                     .data(root.descendants())
                     .join("g")
-                      .attr("transform", d => `translate(${d.y},${d.x})`);
+                      .attr("transform", d => `translate(${d.x},${d.y})`);
                  
                          node.append("clipPath")
                               .attr("id",function(d,i){ return "node_clip"+i })
@@ -720,8 +723,8 @@ var lineFontSize = parseFloat(width/500);
                                     .enter().append("rect")
                                     .attr("dy",-5)
                                     .attr("dx",-15)
-                                    .attr("x",d=>d.y)
-                                    .attr("y",d=>d.x)
+                                    .attr("x",d=>d.x)
+                                    .attr("y",d=>d.y)
                                     .attr("width",lineFontSize*35)
                                     .attr("height",lineFontSize*12)
                                     .attr("fill","rgba("+d.data.id_str.substring(17,19)+","+d.data.id_str.substring(16,18)+","+d.data.id_str.substring(15,17)+",.1)");
@@ -796,6 +799,8 @@ var lineFontSize = parseFloat(width/500);
             .attr("text-anchor","start")
             .style("font-size",lineFontSize)
             .text(d => d.data.line1)
+            .clone(true).lower()
+            .attr("stroke", "white");
 
         node.append("text")
             .attr("dy", lineFontSize*3.5)
@@ -803,6 +808,8 @@ var lineFontSize = parseFloat(width/500);
             .attr("text-anchor","start")
             .style("font-size",lineFontSize)
             .text(d => d.data.line2)
+            .clone(true).lower()
+            .attr("stroke", "white");
 
         node.append("text")
             .attr("dy", lineFontSize*5)
@@ -810,6 +817,8 @@ var lineFontSize = parseFloat(width/500);
             .attr("text-anchor","start")
             .style("font-size",lineFontSize)
             .text(d => d.data.line3)
+            .clone(true).lower()
+            .attr("stroke", "white");
         
         node.append("text")
             .attr("dy", lineFontSize*6.5)
@@ -817,6 +826,8 @@ var lineFontSize = parseFloat(width/500);
             .attr("text-anchor","start")
             .style("font-size",lineFontSize)
             .text(d => d.data.line4)
+            .clone(true).lower()
+            .attr("stroke", "white");
 
         node.append("text")
             .attr("dy", lineFontSize*8)
@@ -824,6 +835,8 @@ var lineFontSize = parseFloat(width/500);
             .attr("text-anchor","start")
             .style("font-size",lineFontSize)
             .text(d => d.data.line5)
+            .clone(true).lower()
+            .attr("stroke", "white");
 
         node.append("text")
             .attr("dy", lineFontSize*9.5)
@@ -831,6 +844,8 @@ var lineFontSize = parseFloat(width/500);
             .attr("text-anchor","start")
             .style("font-size",lineFontSize)
             .text(d => d.data.line6)
+            .clone(true).lower()
+            .attr("stroke", "white");
 
         node.append("text")
             .attr("dy", lineFontSize*11)
@@ -838,6 +853,8 @@ var lineFontSize = parseFloat(width/500);
             .attr("text-anchor","start")
             .style("font-size",lineFontSize)
             .text(d => d.data.line7)
+            .clone(true).lower()
+            .attr("stroke", "white");
 
         node.append("text")
             .attr("dy", lineFontSize*12.5)
@@ -845,6 +862,8 @@ var lineFontSize = parseFloat(width/500);
             .attr("text-anchor","start")
             .style("font-size",lineFontSize)
             .text(d => d.data.line8)
+            .clone(true).lower()
+            .attr("stroke", "white");
         
         node.append("text")
             .attr("dy", lineFontSize*14)
@@ -852,6 +871,8 @@ var lineFontSize = parseFloat(width/500);
             .attr("text-anchor","start")
             .style("font-size",lineFontSize)
             .text(d => d.data.line9)
+            .clone(true).lower()
+            .attr("stroke", "white");
 
       loadType();
     
