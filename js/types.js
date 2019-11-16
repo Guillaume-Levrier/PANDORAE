@@ -628,6 +628,8 @@ var view = svg.append("g") // Appending a group to SVG
   .translateExtent([[-Infinity,-Infinity],[Infinity,Infinity]])
   .on("zoom", zoomed);          
   
+  var color = d3.scaleOrdinal(d3.schemeAccent);
+
      //======== DATA CALL & SORT =========
    
 pandodb.filotype.get(id).then(datajson => {
@@ -660,9 +662,9 @@ pandodb.filotype.get(id).then(datajson => {
       var root = d3.stratify()
                     .id(d => d.id_str)
                     .parentId(d =>d.in_reply_to_status_id_str)(data);
-      root.dx = 100;
-      root.dy = 30;
-      return d3.tree().nodeSize([root.dx, root.dy])(root);
+      root.x = 100;
+      root.y = 30;
+      return d3.tree().nodeSize([root.x, root.y])(root);
     }
 
       const root = tree(datajson.content);
@@ -711,25 +713,38 @@ var lineFontSize = parseFloat(width/500);
                       .attr("xlink:href", d=>d.data.user.profile_image_url_https)
                       .attr("clip-path",function(d,i){ return "url(#node_clip"+i+")" })
                       .on("click",d=>{
-                        let targetList= [];
-                       d.descendants().forEach(tweet=>targetList.push(tweet))
-                        if (document.getElementById("color"+d.data.id_str)){
-                          d3.select("#color"+d.data.id_str).remove()
+
+                      var id = d.data.id_str;
+                      var targets=d.descendants();
+                      let polyPoints = []
+                      let targetsY = d3.nest().key(d => d.y).entries(targets);
+                  
+                      for (let i = 0; i < targetsY.length; i++) {
+                        let x = d3.min(targetsY[i].values, d => d.x);
+                        let y = parseFloat(targetsY[i].key);
+                        polyPoints.push([x,y])
+                      }
+
+                      for (let i = targetsY.length-1; i > 0; i=i-1) {                       
+                        let x = d3.max(targetsY[i].values, d => d.x)+100;
+                        let y = parseFloat(targetsY[i].key);
+                        polyPoints.push([x,y])
+                      }
+
+                     var line = d3.line().curve(d3.curveCardinalClosed)(polyPoints);
+     
+                        if (document.getElementById(id)){
+                          var element = document.getElementById(id);
+                          element.parentNode.removeChild(element);
                         } else {
-                            var highlighted = view.append("g")
-                                    .attr("id","color"+d.data.id_str);
-                                  highlighted.selectAll("rect")
-                                    .data(targetList)
-                                    .enter().append("rect")
-                                    .attr("dy",-5)
-                                    .attr("dx",-15)
-                                    .attr("x",d=>d.x)
-                                    .attr("y",d=>d.y)
-                                    .attr("width",lineFontSize*35)
-                                    .attr("height",lineFontSize*12)
-                                    .attr("fill","rgba("+d.data.id_str.substring(17,19)+","+d.data.id_str.substring(16,18)+","+d.data.id_str.substring(15,17)+",.1)");
+                            var highlighted = view.append("path")
+                                                  .attr("d",line)
+                                                  .attr("id",id)
+                                                  .attr("stroke", color(id))
+                                                  .style("fill","transparent");
                                     highlighted.lower();
                           }
+                          
                       });
                 
                   node.append("text")
