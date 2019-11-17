@@ -1437,6 +1437,8 @@ else{
 
 const showSlide = (text) => {
 
+  if (document.getElementById("slide")) {hideSlide()}
+  
   var slide = document.createElement("div");
   slide.id ="slide";
 
