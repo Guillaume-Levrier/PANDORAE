@@ -136,12 +136,13 @@ var coreExists = true; // core does exist on document load
 // =========== Icons ===========
 
 const iconTypes = [
-      {name:"menu-icon",code:"menu",exists:false},
-      {name:"option-icon",code:"code",exists:false},
-      {name:"export-icon",code:"save_alt",exists:false},
-      {name:"step-icon",code:"control_camera",exists:false},
-      {name:"sort-icon",code:"shuffle",exists:false},
-      {name:"align-icon",code:"toc",exists:false}
+      {name:"menu-icon",code:"menu"},
+      {name:"option-icon",code:"code"},
+      {name:"export-icon",code:"save_alt"},
+      {name:"step-icon",code:"control_camera"},
+      {name:"sort-icon",code:"shuffle"},
+      {name:"align-icon",code:"toc"},
+      {name:"slide-icon",code:"create"}
     ]
 
 const iconCreator = (target,action) => {
@@ -1405,9 +1406,14 @@ ipcRenderer.on("cmdInputFromRenderer", (event, command) => {
 
 // text slides
 
-var slideShown = false;
+//var slideShown = false;
+
+
 
 const createSlide = () => {
+
+if (document.getElementById("slide")) {}
+else{
 
   var slide = document.createElement("div");
   slide.id ="slide";
@@ -1424,10 +1430,10 @@ const createSlide = () => {
       slide.style.animation = "darken 1s forwards";
       slideText.style.animation = "slideIn 1s forwards";
 
-
       slideShown = true;
-
+  }
 };
+
 
 const showSlide = (text) => {
 
@@ -1452,13 +1458,15 @@ const showSlide = (text) => {
 
 const hideSlide = () => {
   
-  slide.style.animation = "brighten 1s forwards";
-  slideText.style.animation = "slideOut 1s forwards";
+if (document.getElementById("slide")) {
 
-  setTimeout(() => {
-    document.getElementById("slide").remove();
-    slideShown = false;
-  }, 1100);
+    slide.style.animation = "brighten 1s forwards";
+    slideText.style.animation = "slideOut 1s forwards";
 
+    setTimeout(() => {
+      document.getElementById("slide").remove();
+      slideShown = false;
+    }, 1100);
+  }
 }
 
