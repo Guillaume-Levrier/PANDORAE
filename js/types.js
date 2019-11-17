@@ -3522,17 +3522,17 @@ switch (e.key) {
     break;
 
   case "Backspace" : 
+    if (currentButtonId>0){
     presentationStep.splice(currentButtonId,1)
     regenerateSteps()
+    }
   break;
 }
 
-
 })
 
-
 const moveTo = (step) => {
-
+  
 if (step.hasOwnProperty("slideContent")) {
   showSlide(step.slideContent)
 } else {
