@@ -15,10 +15,6 @@ const csv = require("csv-parser");
 const versor = require("versor");
 
 //END NODE MODULES
-
-
-
-
 var field = document.getElementById("field");
 
 const dataDownload = (data) => {
@@ -32,7 +28,6 @@ if (data.hasOwnProperty("id")) {
   datasetName = datasetName.replace(/\//ig,"_");
   datasetName = datasetName.replace(/:/ig,"+");
 }
-
 
 source.style.cursor = "pointer";
 
@@ -79,6 +74,9 @@ setTimeout(()=>{
 
 const resizer = () =>location.reload();
 
+
+
+
 // =========== LOADTYPE ===========
 // LoadType is the process that removes the main display canvas and then displays
 // the xtype div and xtype SVG element. It is usually called when the data has been
@@ -91,7 +89,8 @@ const loadType = () => {
   coreExists = false;
   ipcRenderer.send("audio-channel", "button1");
   field.value = "";
-  document.getElementById('export-icon').style.display = "flex";
+  const exporter = () => categoryLoader('export');
+ iconCreator("export-icon",toggleMenu)
   document.getElementById('fluxMenu').style.display = "none";
   document.getElementById('type').style.display = "none";
   document.getElementById('menu-icon').addEventListener("click", ()=>{
@@ -101,6 +100,7 @@ const loadType = () => {
       remote.getCurrentWindow().reload();
     }, 100);
   })
+
 
 var exportButton = document.createElement("DIV");
 exportButton.innerText = "export"
@@ -1572,7 +1572,7 @@ d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.
 
 // Presentation Recorder
 
-document.getElementById("step-icon").style.display = "flex"
+
 
 window.addEventListener("keydown", e=> {
 
@@ -1689,7 +1689,7 @@ const regenerateSteps = () => {
 
 regenerateSteps();
 
-document.getElementById("step-icon").addEventListener("click",addPresentationStep)
+iconCreator("step-icon",addPresentationStep)
 
   
   ipcRenderer.send("console-logs", "Starting Hyphotype");
@@ -3495,7 +3495,7 @@ d3.select("#cityLocations").selectAll("text")
 
 // Presentation Recorder
 
-document.getElementById("step-icon").style.display = "flex"
+
 
 window.addEventListener("keydown", e=> {
 
@@ -3638,6 +3638,7 @@ presentationStep.splice(currentButtonId+1,0,stepData)
 regenerateSteps();
 }
 
+
 const regenerateSteps = () => {
 
     while (presentationBox.firstChild) {
@@ -3652,8 +3653,7 @@ const regenerateSteps = () => {
 
 regenerateSteps();
 
-document.getElementById("step-icon").addEventListener("click",addPresentationStep)
-
+iconCreator("step-icon",addPresentationStep)
 
   ipcRenderer.send("console-logs", "Starting geotype");
 };
@@ -4520,7 +4520,7 @@ requestContent=requestContent+"</ul>"
 
 // Presentation Recorder
 
-document.getElementById("step-icon").style.display = "flex"
+
 
 window.addEventListener("keydown", e=> {
 
@@ -4549,8 +4549,6 @@ switch (e.key) {
     regenerateSteps()
   break;
 }
-
-
 
 
 })
@@ -4662,7 +4660,7 @@ const regenerateSteps = () => {
 
 regenerateSteps();
 
-document.getElementById("step-icon").addEventListener("click",addPresentationStep)
+iconCreator("step-icon",addPresentationStep)
 
   ipcRenderer.send("console-logs", "Starting gazouillotype"); // Starting gazouillotype
 }; // Close gazouillotype function
@@ -4924,42 +4922,18 @@ criteriaList.forEach(crit=>{
 
 document.body.appendChild(sortingList)
 
-  var sort = document.createElement("i")
-      sort.innerHTML = "shuffle"
-      sort.id="sort"
-      sort.className ="material-icons"
-      sort.style ="display:flex"
-      sort.addEventListener("click",e=>{
-        if (sortingList.style.display==="none") {
-              sortingList.style.display="block"
-        } else {
-          sortingList.style.display="none"
 
-        }
-      //  sortTrials("highlighted")
+const trialSorter = () => {
+  if (sortingList.style.display==="none") {
+    sortingList.style.display="block"
+    } else {
+      sortingList.style.display="none"
+  }
+}
 
-      })
+iconCreator("sort-icon",trialSorter)
+iconCreator("align-icon",alignTrialTitles)
 
-var sortDiv = document.createElement("div")
-    sortDiv.className = "themeCustom"
-    sortDiv.style ="left:25px;cursor:pointer;position:absolute;font-size:26px;z-index:15;top:130px;background-color:white;border: 1px solid rgb(230,230,230);"
-
-    sortDiv.appendChild(sort)
-    document.body.appendChild(sortDiv)
-
-var align = document.createElement("i")
-align.innerHTML = "toc"
-align.id="align"
-align.className ="material-icons"
-align.style ="display:flex;"
-align.addEventListener("click",alignTrialTitles)
-
-var alignDiv = document.createElement("div")
-alignDiv.className = "themeCustom"
-alignDiv.style ="left:25px;cursor:pointer;position:absolute;font-size:26px;z-index:15;top:165px;background-color:white;border: 1px solid rgb(230,230,230);"
-
-alignDiv.appendChild(align)
-  document.body.appendChild(alignDiv)
 
       loadType();
     
