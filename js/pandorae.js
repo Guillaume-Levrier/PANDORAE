@@ -132,14 +132,48 @@ var field = document.getElementById("field"); // Field is the main field
 var xtypeExists = false; // xtype SVG doesn't exist on document load
 var coreExists = true; // core does exist on document load
 
+
+// =========== Icons ===========
+
+const iconTypes = [
+      {name:"menu-icon",code:"menu",exists:false},
+      {name:"option-icon",code:"code",exists:false},
+      {name:"export-icon",code:"save_alt",exists:false},
+      {name:"step-icon",code:"control_camera",exists:false},
+      {name:"sort-icon",code:"shuffle",exists:false},
+      {name:"align-icon",code:"toc",exists:false}
+    ]
+
+const iconCreator = (target,action) => {
+  iconTypes.forEach(icon=>{
+    if (target===icon.name) {
+
+  var thisIcon = document.createElement("i")
+      thisIcon.innerHTML = icon.code;
+      thisIcon.id=icon.name
+      thisIcon.className ="material-icons"
+      thisIcon.style ="display:flex;"
+      thisIcon.onclick = action; 
+
+  var thisIconDiv = document.createElement("div")
+      thisIconDiv.className = "themeCustom"
+     thisIconDiv.style = "margin-bottom:10px;background-color:white;border: 1px solid rgb(230,230,230);cursor:pointer;";
+      thisIconDiv.appendChild(thisIcon)
+      document.getElementById("icons").appendChild(thisIconDiv)
+      
+    }
+  })
+}
+
+let iconDiv = document.getElementById("icons");
+
+
+
 // =========== MENU ===========
 // menu elements 
 
 let menu = document.getElementById("menu");
-let menuIcon = document.getElementById("menu-icon");
-let consoleIcon = document.getElementById("option-icon");
-let exportIcon = document.getElementById("export-icon");
-let consoleDiv = document.getElementById("console");
+let consoleDiv =document.getElementById("console")
 
 // Menu behaviors
 let toggledMenu = false;
@@ -163,9 +197,7 @@ const toggleMenu = () => {
       toggleMenu();
     } else {
       menu.style.left = "-150px";
-      menuIcon.style.left = "25px";
-      consoleIcon.style.left = "25px";
-      exportIcon.style.left = "25px";
+      iconDiv.style.left = "25px";
       consoleDiv.style.left = "0px";
       xtype.style.left = "0px";
       var menuItems = document.getElementsByClassName("menu-item");
@@ -180,9 +212,7 @@ const toggleMenu = () => {
       logostatus();
       menu.style.left = "0px";
       consoleDiv.style.left = "150px";
-      menuIcon.style.left = "175px";
-      exportIcon.style.left = "175px";
-      consoleIcon.style.left = "175px";
+      iconDiv.style.left = "175px";
       xtype.style.left = "150px";
       var menuItems = document.getElementsByClassName("menu-item");
       for (let i = 0; i < menuItems.length; i++) {
@@ -191,6 +221,8 @@ const toggleMenu = () => {
     }
   }
 };
+
+iconCreator("menu-icon",toggleMenu);
 
 let toggledSecondaryMenu = false;
 
@@ -203,19 +235,14 @@ const toggleSecondaryMenu = () => {
     }
     document.getElementById("secmenu").style.left = "-150px";
     consoleDiv.style.left = "150px";
-    menuIcon.style.left = "175px";
-    consoleIcon.style.left = "175px";
-    exportIcon.style.left = "175px";
+    iconDiv.style.left = "175px";
 
     xtype.style.left = "150px";
     toggledSecondaryMenu = false;
   } else {
     document.getElementById("secmenu").style.left = "150px";
     consoleDiv.style.left = "300px";
-    menuIcon.style.left = "325px";
-    consoleIcon.style.left = "325px";
-    exportIcon.style.left = "325px";
-
+    iconDiv.style.left = "325px";
     xtype.style.left = "300px";
     toggledSecondaryMenu = true;
   }
@@ -228,18 +255,14 @@ const toggleTertiaryMenu = () => {
   if (toggledTertiaryMenu) {
     document.getElementById("thirdmenu").style.left = "-150px";
     consoleDiv.style.left = "300px";
-    menuIcon.style.left = "325px";
-    consoleIcon.style.left = "325px";
-    exportIcon.style.left = "325px";
+    iconDiv.style.left = "325px";
 
     xtype.style.left = "300px";
     toggledTertiaryMenu = false;
   } else {
     document.getElementById("thirdmenu").style.left = "300px";
     consoleDiv.style.left = "450px";
-    menuIcon.style.left = "475px";
-    consoleIcon.style.left = "475px";
-    exportIcon.style.left = "475px";
+    iconDiv.style.left = "475px";
     xtype.style.left = "450px";
     toggledTertiaryMenu = true;
   }
@@ -331,6 +354,9 @@ const toggleConsole = () => {
     toggledConsole = true;
   }
 };
+
+iconCreator("option-icon",toggleConsole);
+
 
 var logContent = "";
 let log = document.getElementById("log");
@@ -431,8 +457,8 @@ const selectOption = (type, id) => {
   document.getElementById(id).style.backgroundColor = "rgba(220,220,220,0.3)";
 
   toggleMenu();
-  menuIcon.onclick = "";
-  menuIcon.addEventListener(
+  document.getElementById("menu-icon").onclick = "";
+  document.getElementById("menu-icon").addEventListener(
     "click",
     () => {
       location.reload();
@@ -513,11 +539,6 @@ const categoryLoader = cat => {
 
  toggleSecondaryMenu();
 };
-
-exportIcon.addEventListener("click",e=>{
-  toggleMenu();
-})
-
 
 const saveAs = (format) =>{
   toggleMenu();
@@ -1109,10 +1130,10 @@ fs.readFile(
       field.value = "start tutorial";
       
     } else {
-      menuIcon.onclick = toggleMenu;
-      consoleIcon.onclick = toggleConsole;
-      menuIcon.style.cursor = "pointer";
-      consoleIcon.style.cursor = "pointer";
+      document.getElementById("menu-icon").onclick = toggleMenu;
+      document.getElementById("option-icon").onclick = toggleConsole;
+      document.getElementById("menu-icon").style.cursor = "pointer";
+      document.getElementById("option-icon").style.cursor = "pointer";
      
         fs.readFile(appPath+"/package.json","utf8", (err, data) => {
           if (err) throw err;
@@ -1248,7 +1269,9 @@ const loadTheme = () => {
           // Give the process enough time to create the relevant DOM elements
           Array.from(document.getElementsByClassName("themeCustom")).forEach(
             d => {
-              Object.assign(document.getElementById(d.id).style, theme[d.id]);
+              if (document.getElementById(d.id)){
+               Object.assign(document.getElementById(d.id).style, theme[d.id]);
+              }
             }
           );
 
@@ -1379,3 +1402,63 @@ ipcRenderer.on("progressBar", (event, prog) => {
 ipcRenderer.on("cmdInputFromRenderer", (event, command) => {
   cmdinput(command)
 })
+
+// text slides
+
+var slideShown = false;
+
+const createSlide = () => {
+
+  var slide = document.createElement("div");
+  slide.id ="slide";
+
+  var slideText = document.createElement("input");
+      slideText.type = "textarea";
+      slideText.id = "slideText";
+     
+
+      slide.appendChild(slideText);
+
+      document.body.appendChild(slide);
+
+      slide.style.animation = "darken 1s forwards";
+      slideText.style.animation = "slideIn 1s forwards";
+
+
+      slideShown = true;
+
+};
+
+const showSlide = (text) => {
+
+  var slide = document.createElement("div");
+  slide.id ="slide";
+
+  var slideText = document.createElement("div");
+      slideText.id = "slideText"
+      slideText.innerHTML= text;
+
+      slide.appendChild(slideText);
+
+      document.body.appendChild(slide);
+
+      slide.style.animation = "darken 1s forwards";
+      slideText.style.animation = "slideIn 1s forwards";
+
+
+      slideShown = true;
+
+};
+
+const hideSlide = () => {
+  
+  slide.style.animation = "brighten 1s forwards";
+  slideText.style.animation = "slideOut 1s forwards";
+
+  setTimeout(() => {
+    document.getElementById("slide").remove();
+    slideShown = false;
+  }, 1100);
+
+}
+
