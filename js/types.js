@@ -3510,13 +3510,15 @@ if(buttons[i].style.backgroundColor==="black"){
 
 switch (e.key) {
   case "ArrowRight":
-    if(currentButtonId+1>buttons.length-1){currentButtonId=currentButtonId-1}
+    if(currentButtonId<=buttons.length-1){
        moveTo(presentationStep[currentButtonId+1])
+      }
     break;
 
   case "ArrowLeft" :
-      if (currentButtonId<1){currentButtonId=1}
+      if (currentButtonId>=1){
       moveTo(presentationStep[currentButtonId-1])
+      }
     break;
 
   case "Backspace" : 
@@ -3530,6 +3532,12 @@ switch (e.key) {
 
 
 const moveTo = (step) => {
+
+if (step.hasOwnProperty("slideContent")) {
+  showSlide(step.slideContent)
+} else {
+  hideSlide()
+}
 
 let buttons = document.querySelectorAll("div.presentationStep");
 
@@ -3549,7 +3557,6 @@ var t = step.zoom;
 
   d3.transition()
   .duration(2000)
-  //.call(()=>{projection.rotate(step.drag)})
   .attrTween("render", () => t => {
   
       var x = d3.interpolateNumber(currentDrag[0],step.drag[0])(t)
@@ -3587,19 +3594,12 @@ var t = step.zoom;
                 return "translate(" + (x + d.radius) + "," + y + ")";
               })
               .text(d => d.city);
-
-              
                 
   }).on("end",()=>{
 currentDrag = coord;
   })
-
   tooltip.innerHTML = JSON.parse(step.tooltip);
-
 }
-
-
-
 
 const stepCreator = (thisStep) => {
 
@@ -3620,6 +3620,10 @@ const addPresentationStep = () => {
 
 let stepData={zoom:currentZoom,tooltip:JSON.stringify(tooltip.innerHTML),drag:currentDrag}
 
+if (document.getElementById("slide")) {
+  stepData.slideContent = document.getElementById("slideText").value;
+  hideSlide();
+}
 
 let buttons = document.querySelectorAll("div.presentationStep");
 let currentButtonId=0;
@@ -3654,6 +3658,13 @@ const regenerateSteps = () => {
 regenerateSteps();
 
 iconCreator("step-icon",addPresentationStep)
+iconCreator("slide-icon",createSlide)
+
+document.getElementById("slide-icon").addEventListener("dblclick",e=>{
+  if (document.getElementById("slide")) {
+    addPresentationStep();
+  }
+})
 
   ipcRenderer.send("console-logs", "Starting geotype");
 };
