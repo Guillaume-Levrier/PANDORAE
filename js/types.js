@@ -232,6 +232,9 @@ const createSlide = () => {
   
     let stepData={zoom:currentZoom,tooltip:JSON.stringify(tooltip.innerHTML),drag:currentDrag}
   
+    if (document.getElementById("slideText")){
+      stepData.slideContent =document.getElementById("slideText").value;
+    }
    
     let buttons = document.querySelectorAll("div.presentationStep");
    let currentButtonId=0;
@@ -283,11 +286,15 @@ const loadType = () => {
  iconCreator("export-icon",toggleMenu)
  iconCreator("step-icon",addPresentationStep)
  iconCreator("slide-icon",createSlide)
- document.getElementById("slide-icon").addEventListener("dblclick",e=>{
-  if (document.getElementById("slide")) {
-    addPresentationStep();
-  }
-})
+ setTimeout(() => {
+  document.getElementById("slide-icon").addEventListener("dblclick",e=>{
+    if (document.getElementById("slide")) {
+      addPresentationStep();
+      hideSlide();
+    }
+  })
+ }, 200);
+ 
   document.getElementById('fluxMenu').style.display = "none";
   document.getElementById('type').style.display = "none";
   document.getElementById('menu-icon').addEventListener("click", ()=>{
@@ -3505,19 +3512,12 @@ const linkLoc = () => {
       });// end of world-country call
     }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Geotype error: dataset " + id + " is invalid.");});
 
-//var currentZoom;
-//var currentDrag;
-
 let v0, q0, r0;
-
-  // drag = (targetDrag,transTime) => {
 
     function dragstarted() {
       v0 = versor.cartesian(projection.invert(d3.mouse(this)));
       q0 = versor((r0 = projection.rotate()));
     }
-
-   // dragged = (targetDrag,transTime) => {thisdragged(targetDrag,transTime)};
 
    dragged = function (targetDrag,transTime) {
      
@@ -3604,17 +3604,9 @@ d3.select("#cityLocations").selectAll("text")
     }
   }
 
-   //return 
-  //}
-
     view.call(d3.drag()
                 .on("start", dragstarted)
                 .on("drag", dragged));
-                            
-
-
-  //console.log(drag)
-
 
   view.style("transform-origin", "50% 50% 0");
   view.call(zoom);
@@ -3624,144 +3616,6 @@ d3.select("#cityLocations").selectAll("text")
     view.transition().duration(transTime).style("transform", "scale(" + thatZoom.k + ")");
   }
  
-
-// ===== NARRATIVE =====
-
-// Presentation Recorder
-
-
-
-/*
-
-const moveTo = (step) => {
-  
-if (step.hasOwnProperty("slideContent")) {
-  showSlide(step.slideContent)
-} else {
-  hideSlide()
-}
-
-let buttons = document.querySelectorAll("div.presentationStep");
-
-buttons.forEach(but=>{
-    but.style.backgroundColor="white";
-    but.style.color="black";
-})
-
-buttons[parseInt(step.stepIndex)-1].style.backgroundColor="black";
-buttons[parseInt(step.stepIndex)-1].style.color="white";
-
-var t = step.zoom;
-
-  view.transition().duration(2000).style("transform", "scale(" + t.k + ")");
-
-  var coord;
-
-  d3.transition()
-  .duration(2000)
-  .attrTween("render", () => t => {
-  
-      var x = d3.interpolateNumber(currentDrag[0],step.drag[0])(t)
-      var y = d3.interpolateNumber(currentDrag[1],step.drag[1])(t)
-      var z = d3.interpolateNumber(currentDrag[2],step.drag[2])(t)
-
-     coord = [x,y,z]
-
-      projection.rotate(coord)
-      view.selectAll("path").attr("d", path);
-  
-
-      var globeCenter = projection.invert([document.getElementById("xtypeSVG").width.baseVal.value/2,document.getElementById("xtypeSVG").width.baseVal.value/2]);
-
-      d3.select("#cityLocations").selectAll("text")
-            .style("display", d => {
-              //hide if behind the globe or in cluster
-      
-              if(d.hasOwnProperty("smallInCluster")&&d.smallInCluster===true) {
-                return "none"
-              } 
-      
-              if ( d.lon>globeCenter[0]-90 && d.lon < globeCenter[0]+90 && d.lat>globeCenter[1]-90 && d.lat < globeCenter[1]+90) {
-              return "block";
-            } else {
-              return "none";
-            }
-            })
-              .attr("transform", d => {
-      
-                var loc = projection([d.lon, d.lat]),
-                x = loc[0],
-                y = loc[1];
-                
-                return "translate(" + (x + d.radius) + "," + y + ")";
-              })
-              .text(d => d.city);
-                
-  }).on("end",()=>{
-currentDrag = coord;
-  })
-  tooltip.innerHTML = JSON.parse(step.tooltip);
-}
-
-const stepCreator = (thisStep) => {
-
-let stepIndex = thisStep.stepIndex
-
-var step = document.createElement("DIV")
-step.innerText= stepIndex;
-step.className="presentationStep";
-step.id="presentationStep"+parseInt(stepIndex);
-
-step.addEventListener("click",()=>{moveTo(presentationStep[parseInt(stepIndex)-1])})
-
-presentationBox.appendChild(step)
-
-}
-
-const addPresentationStep = () => {
-
-let stepData={zoom:currentZoom,tooltip:JSON.stringify(tooltip.innerHTML),drag:currentDrag}
-
-if (document.getElementById("slide")) {
-  stepData.slideContent = document.getElementById("slideText").value;
-  hideSlide();
-}
-
-let buttons = document.querySelectorAll("div.presentationStep");
-let currentButtonId=0;
-
-for (let i = 0; i < buttons.length; i++) {
-if(buttons[i].style.backgroundColor==="black"){
-  currentButtonId=i;
-}
-}
-
-if (currentButtonId===0){
-  presentationStep.push(stepData)
-} else {
-presentationStep.splice(currentButtonId+1,0,stepData)
-}
-regenerateSteps();
-}
-
-
-const regenerateSteps = () => {
-
-    while (presentationBox.firstChild) {
-      presentationBox.removeChild(presentationBox.firstChild)
-    }
-
-    for (let i = 0; i < presentationStep.length; i++) {
-      presentationStep[i].stepIndex=i+1;
-      stepCreator(presentationStep[i])
-    }
-}
-
-regenerateSteps();
-
-
-
-*/
   ipcRenderer.send("console-logs", "Starting geotype");
 };
 
