@@ -79,10 +79,16 @@ const resizer = () =>location.reload();
 
 
 const zoom = d3.zoom();
+//var drag = d3.drag(); 
 
-var zoomed = (thatZoom,transTime) =>{
+var zoomed = (targetDrag,transTime) =>{
   console.log("error: zoom couldn't load")
 }
+
+var dragged = (target,transTime) =>{
+  console.log("error: drag couldn't load")
+}
+
 
 var currentZoom;
 var currentDrag;
@@ -111,8 +117,8 @@ const moveTo = (step) => {
     }
 
     if (step.hasOwnProperty("drag")){
-      //drag(step.drag,2000);
-      currentDrag=step.drag;
+      dragged(step.drag,2000);
+     // currentDrag=step.drag;
     }
 
 }
@@ -163,7 +169,6 @@ const createSlide = () => {
         slideText.type = "textarea";
         slideText.id = "slideText";
        
-  
         slide.appendChild(slideText);
   
         document.body.appendChild(slide);
@@ -171,7 +176,6 @@ const createSlide = () => {
         slide.style.animation = "darken 1s forwards";
         slideText.style.animation = "slideIn 1s forwards";
   
-      
     }
   };
   
@@ -226,7 +230,7 @@ const createSlide = () => {
   
   const addPresentationStep = () => {
   
-    let stepData={zoom:currentZoom,tooltip:JSON.stringify(tooltip.innerHTML)}
+    let stepData={zoom:currentZoom,tooltip:JSON.stringify(tooltip.innerHTML),drag:currentDrag}
   
    
     let buttons = document.querySelectorAll("div.presentationStep");
@@ -279,6 +283,11 @@ const loadType = () => {
  iconCreator("export-icon",toggleMenu)
  iconCreator("step-icon",addPresentationStep)
  iconCreator("slide-icon",createSlide)
+ document.getElementById("slide-icon").addEventListener("dblclick",e=>{
+  if (document.getElementById("slide")) {
+    addPresentationStep();
+  }
+})
   document.getElementById('fluxMenu').style.display = "none";
   document.getElementById('type').style.display = "none";
   document.getElementById('menu-icon').addEventListener("click", ()=>{
@@ -3496,27 +3505,75 @@ const linkLoc = () => {
       });// end of world-country call
     }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Geotype error: dataset " + id + " is invalid.");});
 
-var currentZoom;
-var currentDrag;
+//var currentZoom;
+//var currentDrag;
 
 let v0, q0, r0;
 
-  function drag() {
+  // drag = (targetDrag,transTime) => {
 
     function dragstarted() {
       v0 = versor.cartesian(projection.invert(d3.mouse(this)));
       q0 = versor((r0 = projection.rotate()));
     }
 
-    function dragged() {
-      const v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this)));
-      const q1 = versor.multiply(q0, versor.delta(v0, v1));
+   // dragged = (targetDrag,transTime) => {thisdragged(targetDrag,transTime)};
 
+   dragged = function (targetDrag,transTime) {
+     
+      if (targetDrag){
+       
 
-      projection.rotate(versor.rotation(q1)); // rotate projection
+  
+        d3.transition()
+  .duration(2000)
+  .attrTween("render", () => t => {
+  
+      var x = d3.interpolateNumber(currentDrag[0],targetDrag[0])(t)
+      var y = d3.interpolateNumber(currentDrag[1],targetDrag[1])(t)
+      var z = d3.interpolateNumber(currentDrag[2],targetDrag[2])(t)
 
-      currentDrag = versor.rotation(q1);
+     coord = [x,y,z]
 
+      projection.rotate(coord)
+      view.selectAll("path").attr("d", path);
+  
+
+      var globeCenter = projection.invert([document.getElementById("xtypeSVG").width.baseVal.value/2,document.getElementById("xtypeSVG").width.baseVal.value/2]);
+
+      d3.select("#cityLocations").selectAll("text")
+            .style("display", d => {
+              //hide if behind the globe or in cluster
+      
+              if(d.hasOwnProperty("smallInCluster")&&d.smallInCluster===true) {
+                return "none"
+              } 
+      
+              if ( d.lon>globeCenter[0]-90 && d.lon < globeCenter[0]+90 && d.lat>globeCenter[1]-90 && d.lat < globeCenter[1]+90) {
+              return "block";
+            } else {
+              return "none";
+            }
+            })
+              .attr("transform", d => {
+      
+                var loc = projection([d.lon, d.lat]),
+                x = loc[0],
+                y = loc[1];
+                
+                return "translate(" + (x + d.radius) + "," + y + ")";
+              })
+              .text(d => d.city);
+                
+  }).on("end",()=>{
+currentDrag = coord;
+  })
+      } else {
+        const v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this)));
+        const q1 = versor.multiply(q0, versor.delta(v0, v1));  
+        projection.rotate(versor.rotation(q1)); // rotate projection
+        currentDrag = versor.rotation(q1);
+   
       var globeCenter = projection.invert([document.getElementById("xtypeSVG").width.baseVal.value/2,document.getElementById("xtypeSVG").width.baseVal.value/2]);
 
 d3.select("#cityLocations").selectAll("text")
@@ -3545,20 +3602,26 @@ d3.select("#cityLocations").selectAll("text")
 
       view.selectAll("path").attr("d", path);
     }
-
-    return d3.drag()
-      .on("start", dragstarted)
-      .on("drag", dragged);
   }
 
-  view.call(drag());
+   //return 
+  //}
+
+    view.call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged));
+                            
+
+
+  //console.log(drag)
+
 
   view.style("transform-origin", "50% 50% 0");
   view.call(zoom);
 
    zoomed = (thatZoom,transTime) => {
     currentZoom =  thatZoom;
-    view.style("transform", "scale(" + thatZoom.k + ")");
+    view.transition().duration(transTime).style("transform", "scale(" + thatZoom.k + ")");
   }
  
 
@@ -3568,7 +3631,7 @@ d3.select("#cityLocations").selectAll("text")
 
 
 
-
+/*
 
 const moveTo = (step) => {
   
@@ -3696,12 +3759,9 @@ const regenerateSteps = () => {
 
 regenerateSteps();
 
-document.getElementById("slide-icon").addEventListener("dblclick",e=>{
-  if (document.getElementById("slide")) {
-    addPresentationStep();
-  }
-})
 
+
+*/
   ipcRenderer.send("console-logs", "Starting geotype");
 };
 
