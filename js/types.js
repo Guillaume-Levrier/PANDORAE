@@ -15,6 +15,8 @@ const csv = require("csv-parser");
 const versor = require("versor");
 
 //END NODE MODULES
+
+
 var field = document.getElementById("field");
 
 const dataDownload = (data) => {
@@ -48,7 +50,6 @@ const localDownload = (data) => {         //same but for exports
 setTimeout(()=>{
   var source = document.getElementById("source")
   
-  
   var datasetName = "";
   
   if (data.hasOwnProperty("id")) {
@@ -74,7 +75,192 @@ setTimeout(()=>{
 
 const resizer = () =>location.reload();
 
+//======= NARRATIVE FUNCTIONS =======
 
+
+const zoom = d3.zoom();
+
+var zoomed = (thatZoom,transTime) =>{
+  console.log("error: zoom couldn't load")
+}
+
+var currentZoom;
+var currentDrag;
+
+const moveTo = (step) => {
+ 
+  let buttons = document.querySelectorAll("div.presentationStep");
+
+  buttons.forEach(but=>{
+      but.style.backgroundColor="white";
+      but.style.color="black";
+  })
+
+  buttons[parseInt(step.stepIndex)-1].style.backgroundColor="black";
+  buttons[parseInt(step.stepIndex)-1].style.color="white";
+
+    if (step.hasOwnProperty("slideContent")) {
+      showSlide(step.slideContent)
+    } else {
+      hideSlide()
+    }
+
+    if (step.hasOwnProperty("zoom")){
+      zoomed(step.zoom,2000);
+      currentZoom=step.zoom;
+    }
+
+    if (step.hasOwnProperty("drag")){
+      //drag(step.drag,2000);
+      currentDrag=step.drag;
+    }
+
+}
+
+window.addEventListener("keydown", e=> {
+
+  let buttons = document.querySelectorAll("div.presentationStep");
+  let currentButtonId=0;
+  
+  for (let i = 0; i < buttons.length; i++) {
+  if(buttons[i].style.backgroundColor==="black"){
+    currentButtonId=i;
+  }
+  }
+  
+  switch (e.key) {
+    case "ArrowRight":
+      if(currentButtonId<=buttons.length-1){
+         moveTo(presentationStep[currentButtonId+1])
+        }
+      break;
+  
+    case "ArrowLeft" :
+        if (currentButtonId>=1){
+        moveTo(presentationStep[currentButtonId-1])
+        }
+      break;
+  
+    case "Backspace" : 
+      if (currentButtonId>0){
+      presentationStep.splice(currentButtonId,1)
+      regenerateSteps()
+      }
+    break;
+  }
+  })
+
+// text slides
+const createSlide = () => {
+
+  if (document.getElementById("slide")) {}
+  else{
+  
+    var slide = document.createElement("div");
+    slide.id ="slide";
+  
+    var slideText = document.createElement("input");
+        slideText.type = "textarea";
+        slideText.id = "slideText";
+       
+  
+        slide.appendChild(slideText);
+  
+        document.body.appendChild(slide);
+  
+        slide.style.animation = "darken 1s forwards";
+        slideText.style.animation = "slideIn 1s forwards";
+  
+      
+    }
+  };
+  
+  
+  const showSlide = (text) => {
+  
+    if (document.getElementById("slide")) {hideSlide()}
+    
+    var slide = document.createElement("div");
+    slide.id ="slide";
+  
+    var slideText = document.createElement("div");
+        slideText.id = "slideText"
+        slideText.innerHTML= text;
+  
+        slide.appendChild(slideText);
+  
+        document.body.appendChild(slide);
+  
+        slide.style.animation = "darken 1s forwards";
+        slideText.style.animation = "slideIn 1s forwards";
+  
+  };
+  
+  const hideSlide = () => {
+    
+  if (document.getElementById("slide")) {
+  
+      slide.style.animation = "brighten 1s forwards";
+      slideText.style.animation = "slideOut 1s forwards";
+  
+      setTimeout(() => {
+        document.getElementById("slide").remove();
+      }, 1100);
+    }
+  }
+  
+  const stepCreator = (thisStep) => {
+
+    let stepIndex = thisStep.stepIndex
+  
+    var step = document.createElement("DIV")
+    step.innerText= stepIndex;
+    step.className="presentationStep";
+    step.id="presentationStep"+parseInt(stepIndex);
+  
+    step.addEventListener("click",()=>{moveTo(presentationStep[parseInt(stepIndex)-1])})
+  
+    presentationBox.appendChild(step)
+  
+  }
+  
+  const addPresentationStep = () => {
+  
+    let stepData={zoom:currentZoom,tooltip:JSON.stringify(tooltip.innerHTML)}
+  
+   
+    let buttons = document.querySelectorAll("div.presentationStep");
+   let currentButtonId=0;
+  
+   for (let i = 0; i < buttons.length; i++) {
+    if(buttons[i].style.backgroundColor==="black"){
+      currentButtonId=i;
+    }
+   }
+  
+   if (currentButtonId===0){
+    presentationStep.push(stepData)
+  } else {
+  presentationStep.splice(currentButtonId+1,0,stepData)
+  }
+   regenerateSteps();
+  }
+  
+  const regenerateSteps = () => {
+  
+        while (presentationBox.firstChild) {
+          presentationBox.removeChild(presentationBox.firstChild)
+        }
+  
+        for (let i = 0; i < presentationStep.length; i++) {
+          presentationStep[i].stepIndex=i+1;
+          stepCreator(presentationStep[i])
+        }
+  }
+  
+  //regenerateSteps();
+  
+  //
 
 
 // =========== LOADTYPE ===========
@@ -91,6 +277,8 @@ const loadType = () => {
   field.value = "";
   const exporter = () => categoryLoader('export');
  iconCreator("export-icon",toggleMenu)
+ iconCreator("step-icon",addPresentationStep)
+ iconCreator("slide-icon",createSlide)
   document.getElementById('fluxMenu').style.display = "none";
   document.getElementById('type').style.display = "none";
   document.getElementById('menu-icon').addEventListener("click", ()=>{
@@ -358,10 +546,10 @@ const anthropotype = id => {  // When called, draw the anthropotype
     .attr("id", "view"); // CSS viewfinder properties
 
   //zoom extent
-  var zoom = d3.zoom() // Zoom ability
+  zoom
     .scaleExtent([0.2, 15]) // To which extent do we allow to zoom forward or zoom back
     .translateExtent([[-width * 2, -height * 2], [width * 3, height * 3]])
-    .on("zoom", zoomed); // Trigger the "zoomed" function on "zoom" behaviour 
+    .on("zoom", e=> {zoomed(d3.event.transform)}); 
 
 //======== DATA CALL & SORT =========
   pandodb.anthropotype.get(id).then(datajson => {
@@ -602,9 +790,10 @@ const anthropotype = id => {  // When called, draw the anthropotype
   //======== ZOOM & RESCALE ===========
   svg.call(zoom).on("dblclick.zoom", null);
 
-  function zoomed() {
-    view.attr("transform", d3.event.transform);
+   zoomed = (thatZoom,transTime) =>{
+    view.attr("transform", thatZoom);
   }
+
   ipcRenderer.send("console-logs", "Starting anthropotype");
 };
 
@@ -623,11 +812,10 @@ svg.attr("width", width - toolWidth).attr("height", height); // Attributing widt
 var view = svg.append("g") // Appending a group to SVG
   .attr("id", "view");
 
-  var zoom = d3.zoom()                                      // Zoom ability
-  .scaleExtent([0.2, 20])                               // To which extent do we allow to zoom forward or zoom back
-  .translateExtent([[-Infinity,-Infinity],[Infinity,Infinity]])
-  .on("zoom", zoomed);          
-  
+  zoom.scaleExtent([0.2, 20])                               // To which extent do we allow to zoom forward or zoom back
+      .translateExtent([[-Infinity,-Infinity],[Infinity,Infinity]])
+      .on("zoom", e=> {zoomed(d3.event.transform)}); 
+
   var color = d3.scaleOrdinal(d3.schemeAccent);
 
      //======== DATA CALL & SORT =========
@@ -896,9 +1084,8 @@ var lineFontSize = parseFloat(width/500);
      //======== ZOOM & RESCALE ===========
   svg.call(zoom).on("dblclick.zoom", null);
 
-  function zoomed() {
-    view.attr("transform", d3.event.transform);
-  }
+  zoomed = (thatZoom,transTime) => view.attr("transform", thatZoom);
+  
      ipcRenderer.send("console-logs", "Starting Filotype");
    };
 
@@ -1010,10 +1197,9 @@ const hyphotype = id => {
 
   //zoom extent
   
-  var zoom = d3.zoom()                                      // Zoom ability
-      .scaleExtent([0.2, 20])                               // To which extent do we allow to zoom forward or zoom back
+  zoom.scaleExtent([0.2, 20])                               // To which extent do we allow to zoom forward or zoom back
       .translateExtent([[-width*2,-height*2],[width*3,height*3]])
-      .on("zoom", zoomed);                                  // Trigger the "zoomed" function on "zoom" behaviour
+      .on("zoom", e=> {zoomed(d3.event.transform)});                                  // Trigger the "zoomed" function on "zoom" behaviour
 
   
       var color =  d3.scaleOrdinal()
@@ -1556,140 +1742,27 @@ d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.
 
 // ===== NARRATIVE =====
 
-  var currentZoom;
 
-  function zoomed() {
-    currentZoom = d3.event.transform;
-     view.attr("transform", d3.event.transform);
-     gXGrid.call(xGrid.scale(d3.event.transform.rescaleX(x)));
-     gYGrid.call(yGrid.scale(d3.event.transform.rescaleY(y)));
-     gX2.call(xAxis2.scale(d3.event.transform.rescaleX(x)));
-     gY2.call(yAxis2.scale(d3.event.transform.rescaleY(y)));
-     gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
-     gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
-     d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.5)")
+  zoomed = (thatZoom,transTime) => {
+    currentZoom = thatZoom;
+     view.transition().duration(transTime).attr("transform", thatZoom);
+     gXGrid.transition().duration(transTime).call(xGrid.scale(thatZoom.rescaleX(x)));
+     gYGrid.transition().duration(transTime).call(yGrid.scale(thatZoom.rescaleY(y)));
+     gX2.transition().duration(transTime).call(xAxis2.scale(thatZoom.rescaleX(x)));
+     gY2.transition().duration(transTime).call(yAxis2.scale(thatZoom.rescaleY(y)));
+     gX.transition().duration(transTime).call(xAxis.scale(thatZoom.rescaleX(x)));
+     gY.transition().duration(transTime).call(yAxis.scale(thatZoom.rescaleY(y)));
+     d3.transition().duration(transTime).selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.5)")
   }
 
 // Presentation Recorder
 
 
 
-window.addEventListener("keydown", e=> {
-
- let buttons = document.querySelectorAll("div.presentationStep");
- let currentButtonId=0;
-
- for (let i = 0; i < buttons.length; i++) {
-  if(buttons[i].style.backgroundColor==="black"){
-    currentButtonId=i;
-  }
- }
-
-  switch (e.key) {
-    case "ArrowRight":
-      if(currentButtonId+1>buttons.length-1){currentButtonId=currentButtonId-1}
-         moveTo(presentationStep[currentButtonId+1])
-      break;
-  
-    case "ArrowLeft" :
-        if (currentButtonId<1){currentButtonId=1}
-        moveTo(presentationStep[currentButtonId-1])
-      break;
-
-    case "Backspace" : 
-      presentationStep.splice(currentButtonId,1)
-      regenerateSteps()
-    break;
-  }
 
 
 
 
-})
-
-
-const moveTo = (step) => {
-  
-let buttons = document.querySelectorAll("div.presentationStep");
-
-buttons.forEach(but=>{
-  but.style.backgroundColor="white";
-  but.style.color="black";
-})
-
-  buttons[parseInt(step.stepIndex)-1].style.backgroundColor="black";
-  buttons[parseInt(step.stepIndex)-1].style.color="white";
-
-  let target = step.zoom;
-
-  view.transition().duration(2000).attr("transform", target);
-  gXGrid.transition().duration(2000).call(xGrid.scale(target.rescaleX(x)));
-  gYGrid.transition().duration(2000).call(yGrid.scale(target.rescaleY(y)));
-  gX2.transition().duration(2000).call(xAxis2.scale(target.rescaleX(x)));
-  gY2.transition().duration(2000).call(yAxis2.scale(target.rescaleY(y)));
-  gX.transition().duration(2000).call(xAxis.scale(target.rescaleX(x)));
-  gY.transition().duration(2000).call(yAxis.scale(target.rescaleY(y)));
-  d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.5)")
-
-tooltip.innerHTML = JSON.parse(step.tooltip);
-
-}
-
-
-
-
-const stepCreator = (thisStep) => {
-
-  let stepIndex = thisStep.stepIndex
-
-  var step = document.createElement("DIV")
-  step.innerText= stepIndex;
-  step.className="presentationStep";
-  step.id="presentationStep"+parseInt(stepIndex);
-
-  step.addEventListener("click",()=>{moveTo(presentationStep[parseInt(stepIndex)-1])})
-
-  presentationBox.appendChild(step)
-
-}
-
-const addPresentationStep = () => {
-
-  let stepData={zoom:currentZoom,tooltip:JSON.stringify(tooltip.innerHTML)}
-
- 
-  let buttons = document.querySelectorAll("div.presentationStep");
- let currentButtonId=0;
-
- for (let i = 0; i < buttons.length; i++) {
-  if(buttons[i].style.backgroundColor==="black"){
-    currentButtonId=i;
-  }
- }
-
- if (currentButtonId===0){
-  presentationStep.push(stepData)
-} else {
-presentationStep.splice(currentButtonId+1,0,stepData)
-}
- regenerateSteps();
-}
-
-const regenerateSteps = () => {
-
-      while (presentationBox.firstChild) {
-        presentationBox.removeChild(presentationBox.firstChild)
-      }
-
-      for (let i = 0; i < presentationStep.length; i++) {
-        presentationStep[i].stepIndex=i+1;
-        stepCreator(presentationStep[i])
-      }
-}
-
-regenerateSteps();
-
-iconCreator("step-icon",addPresentationStep)
 
   
   ipcRenderer.send("console-logs", "Starting Hyphotype");
@@ -1708,10 +1781,9 @@ const chronotype = (id, links) => { // When called, draw the chronotype
   var view = svg.append("g") // Appending a group to SVG
                 .attr("id", "view"); // CSS viewfinder properties
 
-  var zoom = d3.zoom()
-                .scaleExtent([0.1, 20]) // Extent to which one can zoom in or out
+  zoom.scaleExtent([0.1, 20]) // Extent to which one can zoom in or out
                 .translateExtent([[0, 0], [width - toolWidth, height * height]]) // Extent to which one can go up/down/left/right
-                .on("zoom", zoomed); // Trigger the actual zooming function
+.on("zoom", e=> {zoomed(d3.event.transform)}); 
 
   //============ RESET ============
   d3.select("#reset").on("click", resetted); // Clicking the button "reset" triggers the "resetted" function
@@ -2495,10 +2567,10 @@ const chronotype = (id, links) => { // When called, draw the chronotype
 
   svg.call(zoom).on("dblclick.zoom", null); // Zoom and deactivate doubleclick zooming
 
-  function zoomed() {
-    view.attr("transform", d3.event.transform);
-    gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
-    gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
+   zoomed =(thatZoom) => {
+    view.attr("transform", thatZoom);
+    gX.call(xAxis.scale(thatZoom.rescaleX(x)));
+    gY.call(yAxis.scale(thatZoom.rescaleY(y)));
   }
 
   ipcRenderer.send("console-logs", "Starting chronotype"); // Starting Chronotype
@@ -2535,11 +2607,10 @@ const geotype = id => {
 
   var velocity = 0.02;
 
-  var zoom = d3.zoom()
-    .scaleExtent([0, 50])
+  zoom.scaleExtent([0, 50])
     .translateExtent([[0, 0], [1200, 900]])
     .extent([[0, 0], [1200, 900]])
-    .on("zoom", zoomed);
+    .on("zoom", e=> {zoomed(d3.event.transform)}); 
 
   //globe outline and background
   view.append("circle")
@@ -3426,11 +3497,11 @@ const linkLoc = () => {
     }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Geotype error: dataset " + id + " is invalid.");});
 
 var currentZoom;
-
 var currentDrag;
 
+let v0, q0, r0;
+
   function drag() {
-    let v0, q0, r0;
 
     function dragstarted() {
       v0 = versor.cartesian(projection.invert(d3.mouse(this)));
@@ -3485,9 +3556,9 @@ d3.select("#cityLocations").selectAll("text")
   view.style("transform-origin", "50% 50% 0");
   view.call(zoom);
 
-  function zoomed() {
-    currentZoom =  d3.event.transform;
-    view.style("transform", "scale(" + d3.event.transform.k + ")");
+   zoomed = (thatZoom,transTime) => {
+    currentZoom =  thatZoom;
+    view.style("transform", "scale(" + thatZoom.k + ")");
   }
  
 
@@ -3497,39 +3568,7 @@ d3.select("#cityLocations").selectAll("text")
 
 
 
-window.addEventListener("keydown", e=> {
 
-let buttons = document.querySelectorAll("div.presentationStep");
-let currentButtonId=0;
-
-for (let i = 0; i < buttons.length; i++) {
-if(buttons[i].style.backgroundColor==="black"){
-  currentButtonId=i;
-}
-}
-
-switch (e.key) {
-  case "ArrowRight":
-    if(currentButtonId<=buttons.length-1){
-       moveTo(presentationStep[currentButtonId+1])
-      }
-    break;
-
-  case "ArrowLeft" :
-      if (currentButtonId>=1){
-      moveTo(presentationStep[currentButtonId-1])
-      }
-    break;
-
-  case "Backspace" : 
-    if (currentButtonId>0){
-    presentationStep.splice(currentButtonId,1)
-    regenerateSteps()
-    }
-  break;
-}
-
-})
 
 const moveTo = (step) => {
   
@@ -3541,11 +3580,9 @@ if (step.hasOwnProperty("slideContent")) {
 
 let buttons = document.querySelectorAll("div.presentationStep");
 
-var coord;
-
 buttons.forEach(but=>{
-but.style.backgroundColor="white";
-but.style.color="black";
+    but.style.backgroundColor="white";
+    but.style.color="black";
 })
 
 buttons[parseInt(step.stepIndex)-1].style.backgroundColor="black";
@@ -3554,6 +3591,8 @@ buttons[parseInt(step.stepIndex)-1].style.color="white";
 var t = step.zoom;
 
   view.transition().duration(2000).style("transform", "scale(" + t.k + ")");
+
+  var coord;
 
   d3.transition()
   .duration(2000)
@@ -3657,9 +3696,6 @@ const regenerateSteps = () => {
 
 regenerateSteps();
 
-iconCreator("step-icon",addPresentationStep)
-iconCreator("slide-icon",createSlide)
-
 document.getElementById("slide-icon").addEventListener("dblclick",e=>{
   if (document.getElementById("slide")) {
     addPresentationStep();
@@ -3697,9 +3733,9 @@ const gazouillotype = id => {
     .style("fill", "white") // Rectangle background color
     .style("stroke-width", "0"); // Invisible borders
 
-  var zoom = d3.zoom();
+  
 
-  svg.call(zoom.on("zoom", zoomed));
+  svg.call(zoom.on("zoom", e=> {zoomed(d3.event.transform)})); 
 
   var brushXscale;
 
@@ -4489,28 +4525,30 @@ requestContent=requestContent+"</ul>"
 
   var currentZoom;
 
-  function zoomed() {
+   zoomed = (thatZoom,transTime) => {
     
-    if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+   // if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
     
-    var t = d3.event.transform;
+    var t = thatZoom;
     currentZoom = t;
+    
+    view.transition().duration(transTime).attr("transform", t);
 
-    view.attr("transform", t);
-
-    gX.call(xAxis.scale(t.rescaleX(x)));
-    gY.call(yAxis.scale(t.rescaleY(y)));
+    gX.transition().duration(transTime).call(xAxis.scale(t.rescaleX(x)));
+    gY.transition().duration(transTime).call(yAxis.scale(t.rescaleY(y)));
   
     let ext1 = parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[0])));
     let ext2 = parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[1])));
 
     d3.select("#selectionBrush")
       .select(".selection")
+      .transition().duration(transTime)
       .attr("x",ext1)
       .attr("width",parseInt(ext2-ext1));
 
     d3.select("#selectionBrush")
       .select("g")
+      .transition().duration(transTime)
       .attr(
         "transform",
         "translate(" + ext1 + ",50)"
@@ -4518,6 +4556,7 @@ requestContent=requestContent+"</ul>"
 
     d3.select("#selectionBrush")
       .selectAll("g")
+      .transition().duration(transTime)
       .select(function() {
         return this.nextElementSibling;
       })
@@ -4530,42 +4569,8 @@ requestContent=requestContent+"</ul>"
 // ===== NARRATIVE =====
 
 // Presentation Recorder
-
-
-
-window.addEventListener("keydown", e=> {
-
-let buttons = document.querySelectorAll("div.presentationStep");
-let currentButtonId=0;
-
-for (let i = 0; i < buttons.length; i++) {
-if(buttons[i].style.backgroundColor==="black"){
-  currentButtonId=i;
-}
-}
-
-switch (e.key) {
-  case "ArrowRight":
-    if(currentButtonId+1>buttons.length-1){currentButtonId=currentButtonId-1}
-       moveTo(presentationStep[currentButtonId+1])
-    break;
-
-  case "ArrowLeft" :
-      if (currentButtonId<1){currentButtonId=1}
-      moveTo(presentationStep[currentButtonId-1])
-    break;
-
-  case "Backspace" : 
-    presentationStep.splice(currentButtonId,1)
-    regenerateSteps()
-  break;
-}
-
-
-})
-
-
-const moveTo = (step) => {
+/*
+ moveTo = (step) => {
 
 let buttons = document.querySelectorAll("div.presentationStep");
 
@@ -4615,7 +4620,7 @@ d3.select("#selectionBrush")
 tooltip.innerHTML = JSON.parse(step.tooltip);
 
 }
-
+*/
 
 
 
@@ -4671,8 +4676,6 @@ const regenerateSteps = () => {
 
 regenerateSteps();
 
-iconCreator("step-icon",addPresentationStep)
-
   ipcRenderer.send("console-logs", "Starting gazouillotype"); // Starting gazouillotype
 }; // Close gazouillotype function
 
@@ -4690,11 +4693,10 @@ svg.attr("width", width - toolWidth).attr("height", height); // Attributing widt
 var view = svg.append("g") // Appending a group to SVG
   .attr("id", "view");
 
-  var zoom = d3.zoom()                                      // Zoom ability
-  .scaleExtent([0.2, 20])                               // To which extent do we allow to zoom forward or zoom back
-  .translateExtent([[-Infinity,-Infinity],[Infinity,Infinity]])
-  .on("zoom", zoomed);         
-  
+  zoom.scaleExtent([0.2, 20])                               // To which extent do we allow to zoom forward or zoom back
+      .translateExtent([[-Infinity,-Infinity],[Infinity,Infinity]])
+      .on("zoom", e=> {zoomed(d3.event.transform)}); 
+
   var x = d3.scaleTime() // Y axis scale
   
   var xAxis = d3.axisBottom(x) // Actual Y axis
@@ -4977,9 +4979,9 @@ legend.append("text").attr("x",25).attr("y",height-30).attr("dy",4).style("font-
               .style("stroke-opacity",.1)
               .call(xAxis);
 
-  function zoomed() {
-    view.attr("transform", d3.event.transform);
-    gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
+   zoomed = (thatZoom,transTime) => {
+    view.attr("transform", thatZoom);
+    gX.call(xAxis.scale(thatZoom.rescaleX(x)));
     gX.lower()
   }
     ipcRenderer.send("console-logs", "Starting Pharmacotype");
