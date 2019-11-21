@@ -585,9 +585,8 @@ const saveToolTip = () => {
 }
 
 const savePNG = () => {
-  document.getElementById('menu-icon').style.display = "none";
-  document.getElementById('option-icon').style.display = "none";
-  document.getElementById('export-icon').style.display = "none";
+  document.getElementById('icons').style.display = "none";
+
   document.getElementById('tooltip').style.overflow = "hidden";
 
 
@@ -598,9 +597,7 @@ const savePNG = () => {
     remote.getCurrentWindow().capturePage().then(img=>{
       fs.writeFile(dialog.showSaveDialog({"defaultPath":datasetName+".png"}),img.toPNG(),()=>{
         
-         document.getElementById('menu-icon').style.display = "flex";
-          document.getElementById('option-icon').style.display = "flex";
-          document.getElementById('export-icon').style.display = "flex";
+        document.getElementById('icons').style.display = "block";
           document.getElementById('tooltip').style.overflow = "auto"; 
       
       })
