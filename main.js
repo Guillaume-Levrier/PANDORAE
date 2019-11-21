@@ -319,12 +319,11 @@ ipcMain.on("audio-channel", (event, audio) => {
 });
 
 mainWindow.on("closed", () => {
-  audioManager.close();
-});
-
-};
-
-
+            setTimeout(() => {
+                app.quit();
+            }, 1000);
+        });
+    };
 
 app.on("activate", () => {
   if (mainWindow === null) {
@@ -344,7 +343,7 @@ app.on("window-all-closed", function() {
       if (err) throw err;
       setTimeout(() => {
         app.quit();
-      }, 100);
+      }, 1000);
     }
   );
 });

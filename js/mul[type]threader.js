@@ -52,6 +52,7 @@ onconnect = e => {
               }
             }
           });
+          
           var simulation = d3.forceSimulation(nodeData) // Start the force graph
             .force("link",d3.forceLink(links)
                 .id(d => d.id)
