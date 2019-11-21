@@ -1,10 +1,36 @@
 const normalCore = () => {
 
+    //import { RealisticBokehEffect, EffectComposer, EffectPass, RenderPass } from "postprocessing";
+
+var composer;
+
+var bokeh = new POSTPROCESSING.RealisticBokehEffect({focus:100,
+                                      focalLength:1,
+                                      luminanceThreshold: 1,
+                                      luminanceGain: -.2,
+                                      rings:5,
+                                    //  showFocus:true,
+                                      maxBlur: 1.2,
+                                      manualDoF:true
+                                      
+});
+
+var uniforms = bokeh.uniforms;
+uniforms.get("dof").value={x: 1, y: 0.1, z: 100, w: 30};
+
+const effectPass = new POSTPROCESSING.EffectPass(camera, bokeh);
+
+effectPass.renderToScreen = true;
+
+
+
+const clock = new THREE.Clock();
+
+//console.log(clock)
+
 // SHADERLOADER
 var ShaderLoader = function()
 {
-    // Shaders
-
     ShaderLoader.get = function( id )
     {
         return ShaderLoader.shaders[ id ];
@@ -100,7 +126,7 @@ var FBO = function(exports){
 
         var cell = new THREE.Group();
 
-        var cellGeometry = new THREE.SphereBufferGeometry(3,512,512);
+        var cellGeometry = new THREE.SphereBufferGeometry(300,512,512);
         var cellMaterial = new THREE.MeshPhongMaterial( { color: 0x156289, transparent: true, opacity: 0.7, emissive: 0x072534, side: THREE.DoubleSide, flatShading: true } );
         var sphere = new THREE.Mesh( cellGeometry, cellMaterial );
         cell.add( sphere );
@@ -155,6 +181,8 @@ var scene, camera, renderer, controls;
 var simulationShader, automatic;
 var zoomFactor = 1;
 
+
+
 const reloadCore = () => {
            var sl = new ShaderLoader();
            sl.loadShaders({
@@ -184,17 +212,19 @@ window.onload = reloadCore();
 
 
            scene = new THREE.Scene();
-           camera = new THREE.PerspectiveCamera(60,w/h, 1,1000 );
+           camera = new THREE.PerspectiveCamera(45,w/h, 1,1000 );
 
-           controls = new THREE.OrbitControls(camera);
-           camera.position.z =
-           controls.minDistance = 
-           controls.maxDistance = 400;
+           controls = new THREE.OrbitControls(camera, renderer.domElement);
+           camera.position.z = 450;
+           controls.minDistance = 0;
+           controls.maxDistance = 4500;
 
            camera.zoom = zoomFactor;
-
-           var width  = 512;
-           var height = 512;
+       
+           var textureSize=Math.pow(2,Math.round(Math.log(parseInt(document.body.offsetWidth/3))/Math.log(2)));
+         
+           var width  = textureSize;
+           var height = textureSize;
 
            //first model
            var dataA = getSphere( width * height, 128 );
@@ -211,20 +241,22 @@ window.onload = reloadCore();
                    textureA: { type: "t", value: textureA },
                    textureB: { type: "t", value: textureB },
                    timer: { type: "f", value: 0},
+                   fastParticle: { type: "f", value: 0},
                    frequency: { type: "f", value: 0.01 },
                    amplitude: { type: "f", value: 96 },
-                   maxDistanceA: { type: "f", value: 48 },
-                   maxDistanceB: { type: "f", value: 148 }
+                   maxDistanceA: { type: "f", value: 85 },
+                   maxDistanceB: { type: "f", value: 150 }
                },
                vertexShader: ShaderLoader.get( "simulation_vs"),
                fragmentShader:  ShaderLoader.get( "simulation_fs")
            });
+           
 
            var renderShader = new THREE.ShaderMaterial( {
              uniforms: {
                  positions: { type: "t", value: null },
-                 pointSize: { type: "f", value: 1 },
-                 big: { type: "v3", value: new THREE.Vector3(207,221,212).multiplyScalar(1/0xFF) },
+                 pointSize: { type: "f", value: 3 },
+                 big: { type: "v3", value: new THREE.Vector3(170,170,170).multiplyScalar(1/0xFF) },
                  small: { type: "v3", value: new THREE.Vector3(80,80,80).multiplyScalar(1/0xFF) }
              },
                vertexShader: ShaderLoader.get( "render_vs"),
@@ -237,8 +269,13 @@ window.onload = reloadCore();
            FBO.init( width,height, renderer, simulationShader, renderShader );
            scene.add( FBO.particles );
 
+          composer = new POSTPROCESSING.EffectComposer( renderer );
+
+           composer.addPass(new POSTPROCESSING.RenderPass(scene, camera));
+           composer.addPass(effectPass);
+
            window.addEventListener( "resize", onResize );
-           onResize();
+          // onResize();
            update();
        }
 
@@ -272,24 +309,38 @@ window.onload = reloadCore();
            renderer.setSize(w,h);
            camera.aspect = w/h;
            camera.updateProjectionMatrix();        
+
+           document.body.style.animation="fadeout 0.45s";
+           setTimeout(()=>{
+            document.body.style.opacity = 0;
+               location.reload()
+            },400)
            
        }
+
+
+
        function update()
        {
            requestAnimationFrame(update);
 
-
            //update params
            simulationShader.uniforms.timer.value = parseFloat( pandoratio );
+           simulationShader.uniforms.fastParticle.value += (0.02+pandoratio*2);
            FBO.particles.rotation.x = Math.cos( Date.now() *.001 ) * Math.PI / 180 * 2;
            FBO.particles.rotation.y -= Math.PI / 180 * .1;
+           
            //update simulation
            FBO.update();
            //render the particles at the new location
-           renderer.render( scene, camera );
+           //renderer.render( scene, camera );
+            composer.render(clock.getDelta());
        }
+
 
 
 }
 
 
+
+//module.exports = () => {normalCore();};

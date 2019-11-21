@@ -22,6 +22,7 @@ console.log(msg + version);
 // couldn't be done in Chaeros can be long. In order not to freeze the user's mainWindow,
 // most of the math to be done is sent to a Shared Worker which loads the data and sends
 // back to Types only what it needs to know.
+/*
 if (!!window.SharedWorker) {
   // If the SharedWorker doesn't exist yet
   var multiThreader = new SharedWorker("js/mul[type]threader.js"); // Create a SharedWorker named multiThreader based on that file
@@ -41,7 +42,7 @@ if (!!window.SharedWorker) {
    addToLog(JSON.stringify(err)); // Send the actual error content to the console
   };
 }
-
+*/
 // =========== MAIN LOGO ===========
 // Main logo is a text that can be changed through the nameDisplay function
 let coreLogoArchive = "";
