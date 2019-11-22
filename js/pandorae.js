@@ -666,7 +666,7 @@ var thisPath = dialog.showSaveDialog({"defaultPath":"PANDORAE-"+currentType.type
  fs.readFile(appPath+'/svg/pandorae-app-logo.svg',"utf-8",(err,pandologo)=>{
   HTMLFILE.write(pandologo)
 
-  var logoSettings = '<script>var logo = document.getElementById("pandoraeapplogo");logo.style.zIndex=10;logo.style.padding="25px";logo.style.width="50px";logo.style.height="50px";logo.style.cursor="pointer";logo.style.position="absolute";logo.addEventListener("click",e=>{window.open("https://guillaume-levrier.github.io/PANDORAE/")})</script>';
+  var logoSettings = '<script>var logo = document.getElementById("pandoraeapplogo");logo.style.zIndex=10;logo.style.padding="5px";logo.style.width="15px";logo.style.height="15px";logo.style.cursor="pointer";logo.style.position="absolute";logo.addEventListener("click",e=>{window.open("https://guillaume-levrier.github.io/PANDORAE/")})</script>';
 
   HTMLFILE.write(logoSettings)
  
