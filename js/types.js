@@ -1106,6 +1106,56 @@ var lineFontSize = parseFloat(width/500);
    };
 
 
+// ========= CALENDOTYPE =========
+// a better way to manage events rather than documents.
+const calendotype = id => {
+  
+  var svg = d3.select(xtype)
+  .append("svg")
+  .attr("id", "xtypeSVG")
+  .style("font-family","sans-serif");
+
+svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
+
+var view = svg.append("g") // Appending a group to SVG
+  .attr("id", "view");
+
+  zoom.scaleExtent([0.2, 20])                               // To which extent do we allow to zoom forward or zoom back
+      .translateExtent([[-Infinity,-Infinity],[Infinity,Infinity]])
+      .on("zoom", e=> {zoomed(d3.event.transform)}); 
+
+  var color = d3.scaleOrdinal(d3.schemeAccent);
+
+     //======== DATA CALL & SORT =========
+   
+pandodb.calendotype.get(id).then(datajson => {
+     
+  dataDownload(datajson);
+
+  //parse dates into actual js dates
+  //datajson.forEach()
+
+ // parse by day
+ const data = d3.nest().key(d.date.getUTCDate()).entries(datajson);
+
+  const years = d3.nest()
+      .key(d => d.date.getUTCFullYear())
+    .entries(data)
+    .reverse();
+
+
+      loadType();
+    
+      }).catch(error => {console.log(error);field.value = "filotype error";ipcRenderer.send("console-logs","Filotype error: cannot start corpus " + id + ".");});
+
+     //======== ZOOM & RESCALE ===========
+  svg.call(zoom).on("dblclick.zoom", null);
+
+  zoomed = (thatZoom,transTime) => view.attr("transform", thatZoom);
+  
+     ipcRenderer.send("console-logs", "Starting Filotype");
+   };
+
 // ========= DOXATYPE =========
 const doxatype = id => {
   
