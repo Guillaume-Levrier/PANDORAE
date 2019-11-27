@@ -10,6 +10,7 @@ Download **PANDORÆ version 1.0.01** for [Windows](https://anthropos-ecosystems.
 Please put your extracted PANDORÆ folder/app where you usually put apps on your computer (i.e. Program Files on Windows, Applications on macOS). It might work if you don't, but this will solve starting issues.
 
 #### Roadmap for v1.0.02
+- update tutorial
 - build calendotype
 - presentation mode:
     1. better function standardisation
@@ -18,6 +19,7 @@ Please put your extracted PANDORÆ folder/app where you usually put apps on your
     4. presentation chaining/sequencing (+ export?)
 - continuous integration
 - direct Twitter and WoS API requests
+- HAL/ARXIV requests?
 
 #### Wiki
 - API documentation (WIP)
