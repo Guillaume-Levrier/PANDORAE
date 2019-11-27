@@ -14,7 +14,7 @@
 // ============ VERSION ===========
 const msg =
   "      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ\n\n";
-const version = "BETA/DEV-V0.9.00";
+const version = "STABLE-v1.0.01";
 console.log(msg + version);
 
 // =========== SHARED WORKER ===========
