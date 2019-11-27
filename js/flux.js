@@ -38,16 +38,14 @@ ipcRenderer.on("window-close", (event, message) => {
 let traces = [
   {
     hops: [
-      { info: { name: "USER" }, name: "USER" },
-      { info: { name: "CLINICAL⠀TRIALS" }, name: "CLINICAL⠀TRIALS" },
-      { info: { name: "SYSTEM" }, name: "SYSTEM" }
+      { info: { name: "OPEN" }, name: "OPEN" },
+      { info: { name: "CLINICAL⠀TRIALS" }, name: "CLINICAL⠀TRIALS" }     
     ]
   },
   {
     hops: [
       { info: { name: "USER" }, name: "USER" },
-      { info: { name: "TWITTER" }, name: "TWITTER" },
-      { info: { name: "SYSTEM" }, name: "SYSTEM" }
+      { info: { name: "TWITTER" }, name: "TWITTER" }
     ]
   },
   {
@@ -67,14 +65,28 @@ let traces = [
   },
   {
     hops: [
-      { info: { name: "USER" }, name: "USER" },
-      { info: { name: "LOCAL" }, name: "LOCAL" },
-      { info: { name: "SYSTEM" }, name: "SYSTEM" }
+      { info: { name: "OPEN" }, name: "OPEN" },
+      { info: { name: "HAL" }, name: "HAL" },
+      { info: { name: "ENRICHMENT" }, name: "ENRICHMENT" }
     ]
   },
   {
     hops: [
       { info: { name: "USER" }, name: "USER" },
+      { info: { name: "WoS" }, name: "WoS" },
+      { info: { name: "ENRICHMENT" }, name: "ENRICHMENT" }
+    ]
+  },
+  {
+    hops: [
+      { info: { name: "OPEN" }, name: "OPEN" },
+      { info: { name: "ARXIV" }, name: "ARXIV" },
+      { info: { name: "ENRICHMENT" }, name: "ENRICHMENT" }
+    ]
+  },
+  {
+    hops: [
+      { info: { name: "OPEN" }, name: "OPEN" },
       { info: { name: "HYPHE" }, name: "HYPHE" }
     ]
   }
