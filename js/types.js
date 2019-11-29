@@ -1843,13 +1843,17 @@ const chronotype = (id, links) => { // When called, draw the chronotype
     .attr("id", "xtypeSVG"); 
 
   svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
-
+      
   var view = svg.append("g") // Appending a group to SVG
                 .attr("id", "view"); // CSS viewfinder properties
 
   zoom.scaleExtent([0.1, 20]) // Extent to which one can zoom in or out
                 .translateExtent([[0, 0], [width - toolWidth, height * height]]) // Extent to which one can go up/down/left/right
 .on("zoom", e=> {zoomed(d3.event.transform)}); 
+
+
+var innerRadius = (width - toolWidth)/8;
+var outerRadius = (width - toolWidth)/2.5;
 
   //============ RESET ============
   d3.select("#reset").on("click", resetted); // Clicking the button "reset" triggers the "resetted" function
@@ -1868,7 +1872,6 @@ const chronotype = (id, links) => { // When called, draw the chronotype
 
   //========== X & Y AXIS  ============
   var x = d3.scaleLinear() // X axis scale (each area has its own attributed value)
-    .domain([-0.3, 1.3])
     .range([0, width - toolWidth]); // Graph size is 0.7 times the client width (0.3 -> tooltip)
 
   var xAxis = d3.axisBottom(x) // Actual X axis
@@ -1879,7 +1882,8 @@ const chronotype = (id, links) => { // When called, draw the chronotype
 
   var y = d3.scaleTime() // Y axis scale
     .domain([Past, Future]) // First shows a range from minus one year to plus one year
-    .range([height, 0]); // Size on screen is full height of client
+    .range([innerRadius, outerRadius]);
+    //.range([height, 0]); // Size on screen is full height of client
 
   var yAxis = d3.axisRight(y) // Actual Y axis
     .scale(y) // Scale is declared just above
@@ -1889,9 +1893,15 @@ const chronotype = (id, links) => { // When called, draw the chronotype
     .tickFormat(multiFormat); // Custom legend declared in a different file
 
   //========= LINES & INFO ============
+  /*
   var chrono = d3.line() // Each zone is represented by a curve, or a "line"
     .x(d => x(d.zone)) // The X value of each point is defined by "zone" (stable)
     .y(d => y(d.date)); // The Y value of each point is defined by "date" (changing)
+*/
+var chrono  = d3.lineRadial()
+    //.curve(d3.curveLinearClosed)
+    .radius(d => x(d.zone))
+    .angle(d => y(d.date))
 
   svg.append("rect") // Putting a rectangle above the grid to make dates easier to read
     .attr("x", 0)
@@ -1928,11 +1938,11 @@ const chronotype = (id, links) => { // When called, draw the chronotype
       "#a68199"
     ]);
 
+
   //======== DATA CALL & SORT =========
   pandodb.chronotype.get(id).then(datajson => {
 
       dataDownload(datajson);
-
 
       var docs = datajson.content; // Second array is the documents (docs)
       const clusters = [];
@@ -2043,6 +2053,15 @@ const chronotype = (id, links) => { // When called, draw the chronotype
         .key(d => d.category) // Sorting them by category
         .entries(clusters); // Selecting relevant data
 
+        x.domain([0, clustersNest.length+1])
+
+        console.log(x)
+
+      for (let i = 0; i < clustersNest.length; i++) {
+        clustersNest[i].values.forEach(doc=>doc.date=parseTime(doc.date));
+        clustersNest[i].zone=i+1;
+      }
+
       const clusterData = [];
 
       const clusterSorter = () => {
@@ -2056,18 +2075,22 @@ const chronotype = (id, links) => { // When called, draw the chronotype
           clusterData.push(clustersNest[i]);
         }
       };
-      clusterSorter();
+      //clusterSorter();
 
       const zonePropagation = () => {
         nodeDocs.forEach(d => {
-          for (let i = 0; i < clusterData.length; i++) {
-            if (clusterData[i].key === d.category) {
-              d.zone = clusterData[i].zone;
+          for (let i = 0; i < clustersNest.length; i++) {
+            if (clustersNest[i].key === d.category) {
+              d.zone = clustersNest[i].zone;
             }
           }
         });
       };
       zonePropagation();
+
+
+console.log(clustersNest)
+//console.log(clusterData)
 
       //Generate the list of items (titles) contained in each circle, i.e. sharing the same code
       const titleList = [];
@@ -2121,8 +2144,21 @@ const chronotype = (id, links) => { // When called, draw the chronotype
         .style("font-size", "0.3em") // Font size
         .text(d => currentTime); // Actual date string
 
+  var catCircles = view.selectAll("catCircles")
+  .data(clustersNest)
+  .enter()
+  .append("circle") 
+    .attr("cx",(width-toolWidth)/2)
+    .attr("cy",height/2)
+    .attr("r",d=>innerRadius+((outerRadius-innerRadius)/clustersNest.length)*d.zone)
+    .style("stroke", d => color(d.zone)) // Color according to key
+    .attr("fill","none")
+    .style("stroke-width", 2); // Stroke width
+
+/*
       var lines = view.selectAll("lines") // Lines by category
-        .data(clusterData) // Loading relevant data, ie nested clusters
+        //.data(clusterData) // Loading relevant data, ie nested clusters
+        .data(clustersNest)
         .enter()
         .append("path") // Lines are paths
         .attr("class", "line") // CSS style of the lines
@@ -2132,8 +2168,9 @@ const chronotype = (id, links) => { // When called, draw the chronotype
         .attr("d", d => chrono(d.values)) //Values of each point/cluster of the lines
         .style("stroke", d => color(d.zone)) // Color according to key
         .style("stroke-width", 1.5); // Stroke width
-
-      var shadowLineData = Array.from(clusterData);
+*/
+        /*
+      var shadowLineData = Array.from(clustersNest) //clusterData);
 
       shadowLineData.forEach(d => {
         let shadowTop = {};
@@ -2157,9 +2194,11 @@ const chronotype = (id, links) => { // When called, draw the chronotype
         .style("opacity", 0.5)
         .style("stroke", "#d3d3d3") // Color according to key
         .style("stroke-width", 0.5); // Stroke width
-
+*/
+/*
       var categories = view.selectAll("categoriesText") // Display category name
-        .data(clusterData) // Loading relevant data, ie nested clusters
+       // .data(clusterData) // Loading relevant data, ie nested clusters
+       .data(clustersNest)
         .enter()
         .append("text") // Lines are paths
        // .attr("class", "categories") // CSS style of the lines
@@ -2170,8 +2209,8 @@ const chronotype = (id, links) => { // When called, draw the chronotype
         .attr("fill", d => color(d.zone)) // Color according to key
         .attr("transform", "translate(12,5) rotate(90)")
         .text(d => d.key); // Category content
-
-      d3.select(lines).lower();
+*/
+    //  d3.select(lines).lower();
 
       //======== CIRCLES/CLUSTERS =========
       var circle = view.selectAll("circle") // Clusters are represented as circles
@@ -2617,7 +2656,7 @@ const chronotype = (id, links) => { // When called, draw the chronotype
       };
 
       loadType();
-    }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Chronotype error: dataset " + id + " is invalid.");}); 
+    }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Chronotype error: dataset " + id + " is invalid.");console.log(error);}); 
 //======== END OF DATA CALL (PROMISES) ===========
 
   //======== ZOOM & RESCALE ===========
