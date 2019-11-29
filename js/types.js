@@ -1842,7 +1842,8 @@ const chronotype = (id, links) => { // When called, draw the chronotype
     .append("svg")
     .attr("id", "xtypeSVG"); 
 
-  svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
+  svg.attr("width", width - toolWidth).attr("height", height) // Attributing width and height to svg
+      .attr("viewBox", [-(width - toolWidth) / 2, -height / 2, (width - toolWidth), height])
       
   var view = svg.append("g") // Appending a group to SVG
                 .attr("id", "view"); // CSS viewfinder properties
@@ -1852,8 +1853,8 @@ const chronotype = (id, links) => { // When called, draw the chronotype
 .on("zoom", e=> {zoomed(d3.event.transform)}); 
 
 
-var innerRadius = (width - toolWidth)/8;
-var outerRadius = (width - toolWidth)/2.5;
+var innerRadius = height/3.5;
+var outerRadius = height/2;
 
   //============ RESET ============
   d3.select("#reset").on("click", resetted); // Clicking the button "reset" triggers the "resetted" function
@@ -1871,26 +1872,28 @@ var outerRadius = (width - toolWidth)/2.5;
   }
 
   //========== X & Y AXIS  ============
-  var x = d3.scaleLinear() // X axis scale (each area has its own attributed value)
-    .range([0, width - toolWidth]); // Graph size is 0.7 times the client width (0.3 -> tooltip)
-
+  var x = d3.scaleUtc()
+            .range([0, 2 * Math.PI])
+/*
   var xAxis = d3.axisBottom(x) // Actual X axis
     .scale(x) // Scale has been declared just above
     .ticks(12) // Amount of ticks displayed
     .tickSize(0) // 0 = no vertical lines ; height = vertical lines
     .tickFormat(""); // No legend
-
-  var y = d3.scaleTime() // Y axis scale
-    .domain([Past, Future]) // First shows a range from minus one year to plus one year
-    .range([innerRadius, outerRadius]);
+*/
+  var y = d3.scaleLinear() // Y axis scale
+            .range([innerRadius, outerRadius]);
+   // .domain([Past, Future]) // First shows a range from minus one year to plus one year
+    
     //.range([height, 0]); // Size on screen is full height of client
-
+/*
   var yAxis = d3.axisRight(y) // Actual Y axis
     .scale(y) // Scale is declared just above
     .ticks(20) // 20 ticks are displayed
     .tickSize(width) // Ticks are horizontal lines
     .tickPadding(10 - width) // Ticks start and end out of the screen
     .tickFormat(multiFormat); // Custom legend declared in a different file
+*/
 
   //========= LINES & INFO ============
   /*
@@ -1898,11 +1901,13 @@ var outerRadius = (width - toolWidth)/2.5;
     .x(d => x(d.zone)) // The X value of each point is defined by "zone" (stable)
     .y(d => y(d.date)); // The Y value of each point is defined by "date" (changing)
 */
+/*
 var chrono  = d3.lineRadial()
     //.curve(d3.curveLinearClosed)
     .radius(d => x(d.zone))
     .angle(d => y(d.date))
-
+*/
+/*
   svg.append("rect") // Putting a rectangle above the grid to make dates easier to read
     .attr("x", 0)
     .attr("y", 0) // Rectangle starts at top left
@@ -1911,7 +1916,7 @@ var chrono  = d3.lineRadial()
     .style("fill", "white")
     .style("opacity", 0.8) // Rectangle background color and opacity
     .style("stroke-width", "0"); // Invisible borders
-
+*/
   var color = d3.scaleOrdinal() // Line colors
     .domain([0, 1])
     .range([
@@ -2053,13 +2058,13 @@ var chrono  = d3.lineRadial()
         .key(d => d.category) // Sorting them by category
         .entries(clusters); // Selecting relevant data
 
-        x.domain([0, clustersNest.length+1])
+        y.domain([0, clustersNest.length+1])
 
-        console.log(x)
+        x.domain([d3.min(nodeDocs, d => d.date),d3.max(nodeDocs, d => d.date)]).nice()
 
       for (let i = 0; i < clustersNest.length; i++) {
         clustersNest[i].values.forEach(doc=>doc.date=parseTime(doc.date));
-        clustersNest[i].zone=i+1;
+        clustersNest[i].zone=i;
       }
 
       const clusterData = [];
@@ -2085,12 +2090,19 @@ var chrono  = d3.lineRadial()
             }
           }
         });
+
+        clusters.forEach(d=> {
+          for (let i = 0; i < clustersNest.length; i++) {
+            if (clustersNest[i].key === d.category) {
+              d.zone = clustersNest[i].zone;
+            }
+          }
+         } )
+
       };
       zonePropagation();
 
 
-console.log(clustersNest)
-//console.log(clusterData)
 
       //Generate the list of items (titles) contained in each circle, i.e. sharing the same code
       const titleList = [];
@@ -2128,11 +2140,12 @@ console.log(clustersNest)
       });
 
       //========= CHART DISPLAY ===========
+/*
       var now = view.append("line") // Red line indicating current time
-        .attr("x1", -1) // X coordinate of point of origin
-        .attr("y1", d => y(currentTime)) // Y -> current time, declared above
+        .attr("x1", (width-toolWidth)/2) // X coordinate of point of origin
+        .attr("y1", height/2) // Y -> current time, declared above
         .attr("x2", 99999) // X coordinate of point of destination
-        .attr("y2", d => y(currentTime)) // Y -> current time, declared above
+        .attr("y2", d => x(currentTime)) // Y -> current time, declared above
         .style("stroke", "DarkRed") // Line color
         .style("stroke-width", 0.5); // Line thickness
 
@@ -2143,18 +2156,19 @@ console.log(clustersNest)
         .style("fill", "darkred") // Font color
         .style("font-size", "0.3em") // Font size
         .text(d => currentTime); // Actual date string
-
-  var catCircles = view.selectAll("catCircles")
-  .data(clustersNest)
-  .enter()
-  .append("circle") 
-    .attr("cx",(width-toolWidth)/2)
-    .attr("cy",height/2)
-    .attr("r",d=>innerRadius+((outerRadius-innerRadius)/clustersNest.length)*d.zone)
-    .style("stroke", d => color(d.zone)) // Color according to key
-    .attr("fill","none")
-    .style("stroke-width", 2); // Stroke width
-
+*/
+/*
+var catCircles = view.selectAll("catCircles")
+.data(clustersNest)
+.enter()
+.append("circle") 
+  .attr("cx",(width-toolWidth)/2)
+  .attr("cy",height/2)
+  .attr("r",d=>innerRadius+((outerRadius-innerRadius)/clustersNest.length)*d.zone)
+  .style("stroke", d => color(d.zone)) // Color according to key
+  .attr("fill","none")
+  .style("stroke-width", 2); // Stroke width
+*/
 /*
       var lines = view.selectAll("lines") // Lines by category
         //.data(clusterData) // Loading relevant data, ie nested clusters
@@ -2213,7 +2227,9 @@ console.log(clustersNest)
     //  d3.select(lines).lower();
 
       //======== CIRCLES/CLUSTERS =========
-      var circle = view.selectAll("circle") // Clusters are represented as circles
+      var circle = view.append("g") // Clusters are represented as circles
+         .attr("id","nodeClusters");
+         circle.selectAll("circle")
         .data(clusters) // From the "clusters" array of objects
         .enter()
         .append("circle") // Clusters are circles
@@ -2224,8 +2240,12 @@ console.log(clustersNest)
             k = 10;
           return Math.log((k * n) / Math.PI);
         })
-        .attr("cx", d => x(d.zone)) // Their relative X positions are by zone
-        .attr("cy", d => y(d.date)) // Their relative Y positions are by date
+        //.attr("cx", d => x(d.zone)) // Their relative X positions are by zone
+        //.attr("cy", d => y(d.date)) // Their relative Y positions are by date
+
+        .attr("cx", d =>  d3.pointRadial(x(d.date), y(d.zone))[0])
+        .attr("cy", d =>  d3.pointRadial(x(d.date), y(d.zone))[1])
+       // .attr("transform", "translate("+(width-toolWidth)/2+"," + height/2  + ")")
         .attr("id", d => d.code) // Their ID are their codes
         .style("fill", d => color(d.zone)) // Their color is by zone
         .each(d => d.circleexpanded === false) // Their are by default NOT expanded
@@ -2380,13 +2400,18 @@ console.log(clustersNest)
           "x",
           d3.forceX()
             .strength(d => (d.expanded ? 0.03 : 0.15)) // nodes are attracted to their X origin
-            .x(d => x(d.zone))
+            .x(//d => x(d.zone)
+            d3.pointRadial(d=>x(d.date), d=>d.zone)[0]
+            )
         ) // X origin data
         .force(
           "y",
           d3.forceY()
             .strength(d => (d.expanded ? 0.03 : 0.15)) // nodes are attracted to their Y origin
-            .y(d => y(d.clusterDate))
+            .y(
+              //d => y(d.clusterDate)
+              d3.pointRadial(d=>x(d.date), d=>d.zone)[1]
+              )
         ); // Y origin data
 
       //Declaring node variables
@@ -2655,29 +2680,102 @@ console.log(clustersNest)
         d3.select("#tooltip").style("display", "none");
       };
 
+     
+
+    var xAxis = g => g
+      .attr("font-family", "sans-serif")
+      .attr("font-size", 10)
+      .call(g => g.selectAll("g")
+        .data(x.ticks(18))
+        .join("g")
+          .each((d, i) => d.id = JSON.stringify(d))
+          .call(g => g.append("path")
+              .attr("stroke", "#000")
+              .attr("stroke-opacity", 0.2)
+              .attr("d", d => `
+                M${d3.pointRadial(x(d), innerRadius-20)}
+                L${d3.pointRadial(x(d), outerRadius+20)}
+              `))).lower();
+         /* .call(g => g.append("path")
+              .attr("id", d => d.id.id)
+              .datum(d => [d, d3.utcMonth.offset(d, 1)])
+              .attr("fill", "none")
+              .attr("d", ([a, b]) => `
+                M${d3.pointRadial(x(a), innerRadius)}
+                A${innerRadius},${innerRadius} 0,0,1 ${d3.pointRadial(x(b), innerRadius)}
+              `))
+
+          .call(g => g.append("text")
+            .append("text")
+              //.attr("startOffset", 6)
+              .attr("xlink:href", d => d.id.href)
+             .attr("x",d=> d3.pointRadial(x(d), innerRadius-30)[0])
+             .attr("y",d=> d3.pointRadial(x(d), innerRadius-30)[1])
+              .text(d3.utcFormat("%Y"))))
+*/
+              view.append("g").call(xAxis);
+
+
+            var  yAxis = g => g
+              .attr("text-anchor", "middle")
+              .attr("font-family", "sans-serif")
+              .attr("font-size", 10)
+              .call(g => g.selectAll("g")
+                .data(y.ticks().reverse())
+                .join("g")
+                  .attr("fill", "none")
+                  .call(g => g.append("circle")
+                      .attr("stroke",  d=>{
+                        if(Number.isInteger(d)&&d<clustersNest.length){
+                         return color(d)
+                      } else {return "rgba(0,0,0,.2)"}
+                    }
+                      )
+                      
+                      .attr("r", y))
+                  .call(g => g.append("text")
+                      .attr("y", d => -y(d+.5))
+                      .attr("dy", "0.35em")
+                      .attr("stroke", "#fff") 
+                      .attr("stroke-width", 5)
+                      .text(d =>{ if(Number.isInteger(d)&&d<clustersNest.length){ return clustersNest[d].key }})
+                    .clone(true)
+                      .attr("y", d => y(d+.5))
+                    .selectAll(function() { return [this, this.previousSibling]; })
+                    .clone(true)
+                      .attr("fill", "currentColor")
+                      .attr("stroke", "none")))
+
+                      view.append("g").call(yAxis);
+
+
       loadType();
     }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Chronotype error: dataset " + id + " is invalid.");console.log(error);}); 
 //======== END OF DATA CALL (PROMISES) ===========
 
   //======== ZOOM & RESCALE ===========
-  var gX = svg.append("g") // Make X axis rescalable
+  /*
+  var gX = svg.append("g") 
               .attr("class", "axis axis--x")
               .style("stroke-opacity",.2)
               .call(xAxis);
 
-  var gY = svg.append("g") // Make Y axis rescalable
+  var gY = svg.append("g") 
               .attr("class", "axis axis--y")
               .style("stroke-opacity",.1)
               .call(yAxis);
-
+*/
+              
   svg.call(zoom).on("dblclick.zoom", null); // Zoom and deactivate doubleclick zooming
 
+/*
    zoomed =(thatZoom) => {
+    
     view.attr("transform", thatZoom);
-    gX.call(xAxis.scale(thatZoom.rescaleX(x)));
-    gY.call(yAxis.scale(thatZoom.rescaleY(y)));
+    //gX.call(xAxis.scale(thatZoom.rescaleX(x)));
+    //gY.call(yAxis.scale(thatZoom.rescaleY(y)));
   }
-
+*/
   ipcRenderer.send("console-logs", "Starting chronotype"); // Starting Chronotype
 }; // Close Chronotype function
 
