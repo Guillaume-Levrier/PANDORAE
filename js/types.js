@@ -1105,7 +1105,7 @@ var lineFontSize = parseFloat(width/500);
      ipcRenderer.send("console-logs", "Starting Filotype");
    };
 
-
+/*
 // ========= CALENDOTYPE =========
 // a better way to manage events rather than documents.
 const calendotype = id => {
@@ -1155,7 +1155,7 @@ pandodb.calendotype.get(id).then(datajson => {
   
      ipcRenderer.send("console-logs", "Starting Filotype");
    };
-
+*/
 // ========= DOXATYPE =========
 const doxatype = id => {
   

@@ -11,7 +11,7 @@ Please put your extracted PANDORÆ folder/app where you usually put apps on your
 
 #### Roadmap for v1.0.02
 - update tutorial
-- build calendotype
+- make chronotype radial
 - presentation mode:
     1. better function standardisation
     2. slide saving in type memory
