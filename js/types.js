@@ -1962,10 +1962,10 @@ var chrono  = d3.lineRadial()
       dataDownload(datajson);
 
       var docs = datajson.content; // Second array is the documents (docs)
-      const clusters = [];
+     // const clusters = [];
       const links = []; // Declaring links as empty array
       const nodeDocs = [];
-      var codeFreq = {};
+     // var codeFreq = {};
       const csl_material = {
         "paper-conference": "event",
         NA2: "dns",
@@ -2039,9 +2039,9 @@ console.log(datajson)
                   }
                 }
 
-                codeFreq[d.code] = codeFreq[d.code] || 0;
-                codeFreq[d.code] += 1;
-
+               // codeFreq[d.code] = codeFreq[d.code] || 0;
+               // codeFreq[d.code] += 1;
+/*
                 let clusterItem = {};
                 clusterItem.date = d.clusterDate;
                 clusterItem.code = d.code;
@@ -2057,7 +2057,7 @@ console.log(datajson)
                 }
 
                 d.clusterDate = parseTime(d.clusterDate);
-
+*/
                 nodeDocs.push(d);
               }
             } else {
@@ -2067,51 +2067,71 @@ console.log(datajson)
         }
       };
 
-      dataSorter();
+     dataSorter();
 
 var firstDate = d3.min(nodeDocs, d => d.date);
 var lastDate = d3.max(nodeDocs, d => d.date);
 
-const blankCreator = () =>{
+console.log(nodeDocs)
+
 
   var dateAmount=[];
 
   let currentDate = firstDate;
 
-while (currentDate<lastDate) {
-  var month = currentDate.getUTCMonth();
-  var year = currentDate.getFullYear();
-  var thisDate="-"+JSON.stringify(year)+"-"+JSON.stringify(month)+"-15";
-  dateAmount.push(thisDate);
- currentDate.setMonth(currentDate.getMonth()+1);
-}
+  while (currentDate<lastDate) {
+    var month = currentDate.getUTCMonth();
+    var year = currentDate.getFullYear();
+    var thisDate=JSON.stringify(year)+"-"+JSON.stringify(month)+"-15";
+    dateAmount.push(thisDate);
+  currentDate.setMonth(currentDate.getMonth()+1);
+  }   
 
-dateAmount.forEach(dateComp=>{
- for (let i = 0; i < clustersNest.length; i++) {
-   let propName = clustersNest[i].key+dateComp;
-    if(codeFreq.hasOwnProperty(propName)){
+  var dateBuffer=[]
 
-    } else {
-      codeFreq[propName] = 0;
-    }
-   
- }
+  dateAmount.forEach(date=>{
+    dateBuffer.push({key:date,value:0})
+  })
 
-})
-
-
-
-}
-
+console.log(dateBuffer)
 
       const clustersNest = d3.nest() // Sorting clusters
         .key(d => d.category) // Sorting them by category
-        .entries(clusters); // Selecting relevant data
+        .entries(nodeDocs); // Selecting relevant data
 
         y.domain([0, clustersNest.length+1])
 
         x.domain([d3.min(nodeDocs, d => d.date),d3.max(nodeDocs, d => d.date)]).nice()
 
+        console.log(clustersNest)
+
+        clustersNest.forEach(cluster=>{
+          let nestedCluster = d3.nest()
+                                .key(d=>d.clusterDate)
+                                .entries(cluster.values)
+                    cluster.values=nestedCluster;
+        })
+
+   // clustersNest.forEach(cluster=>{
+     for (let i = 0; i < clustersNest.length; i++) {
+         
+      let radialVal=[...dateBuffer];
+
+      clustersNest[i].values.forEach(val=>{
+        let valIndex = dateAmount.indexOf(val.key);
+       // console.log(valIndex)
+       if (valIndex>-1){
+          radialVal[valIndex].value = val.values.length;
+       }
+      })   
+      radialVal.forEach(d=>{d.zone=i;d.date=parseTime(d.key)})
+      clustersNest[i].radialVal =radialVal;
+
+    }
+
+console.log(clustersNest)
+
+/*
       for (let i = 0; i < clustersNest.length; i++) {
         clustersNest[i].values.forEach(doc=>doc.date=parseTime(doc.date));
         clustersNest[i].zone=i;
@@ -2153,7 +2173,8 @@ dateAmount.forEach(dateComp=>{
       zonePropagation();
 
       blankCreator();
-
+*/
+/*
       //Generate the list of items (titles) contained in each circle, i.e. sharing the same code
       const titleList = [];
 
@@ -2188,11 +2209,10 @@ dateAmount.forEach(dateComp=>{
       titleNest.forEach(d => {
         titlesIndex[d.key] = d.titles;
       });
-
+*/
       //========= CHART DISPLAY ===========
 
-      console.log(clustersNest)
-      console.log(codeFreq)
+      
 
       var lineRadial = d3.lineRadial()
       .curve(d3.curveLinear)
@@ -2207,10 +2227,8 @@ var radialLines= view.append("g")
         .attr("fill","transparent")
         .attr("d", chronoArea
         .innerRadius(d => y(d.zone))
-        .outerRadius(d => y(parseFloat(d.zone+ parseFloat("0."+codeFreq[d.code]))))
-      (corpus.values));
-
-
+        .outerRadius(d => y(parseFloat(d.zone+(d.value/10))))
+      (corpus.radialVal));
       })
 
       /*
@@ -2363,6 +2381,7 @@ var catCircles = view.selectAll("catCircles")
         .text(d => codeFreq[d.code]);
 */
       //======== DOC LIST =========
+      /*
       function listDisplay(d) {
         // Expanding a cluster displays the list of docs it contains
 
@@ -2774,10 +2793,12 @@ var catCircles = view.selectAll("catCircles")
         nodetext.style("opacity", 1);
         d3.select("#tooltip").style("display", "none");
       };
+*/
 
      var xticks = x.ticks(18);
      xticks.shift()
      
+     /*
 
     var xAxis = g => g
       .attr("font-family", "sans-serif")
@@ -2795,15 +2816,7 @@ var catCircles = view.selectAll("catCircles")
                 M${d3.pointRadial(x(d), innerRadius-10)}
                 L${d3.pointRadial(x(d), outerRadius+20)}
               `))
-              /*
-          .call(g => g.append("path")
-              .attr("id", d => d.id.id)
-              .datum(d => [d, d3.utcMonth.offset(d, 1)])
-              .attr("fill", "none")
-              .attr("d", ([a, b]) => `
-                M${d3.pointRadial(x(a), innerRadius)}
-                A${innerRadius},${innerRadius} 0,0,1 ${d3.pointRadial(x(b), innerRadius)}
-              `))*/
+            
 
           .call(g => g.append("text")
             //.append("text")
@@ -2848,7 +2861,7 @@ var catCircles = view.selectAll("catCircles")
                       .attr("stroke", "none")))
 
                       view.append("g").call(yAxis);
-
+*/
         
 
       loadType();
