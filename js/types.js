@@ -1837,6 +1837,13 @@ d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.
 // ========== CHRONOTYPE ==========
 const chronotype = (id, links) => { // When called, draw the chronotype
 
+/* CHRONOTYPE REVAMP TO DO LIST
+- exit clusters, use radial area chart instead to figure amount of docs per week
+- create a disk selection tool
+- push/pop documents according to period selected
+- select several periods at once
+- add option to display doc titles
+*/
 //========== SVG VIEW =============
   var svg = d3.select(xtype)
     .append("svg")
@@ -1849,7 +1856,7 @@ const chronotype = (id, links) => { // When called, draw the chronotype
                 .attr("id", "view"); // CSS viewfinder properties
 
   zoom.scaleExtent([0.1, 20]) // Extent to which one can zoom in or out
-                .translateExtent([[0, 0], [width - toolWidth, height * height]]) // Extent to which one can go up/down/left/right
+                .translateExtent([[-Infinity, -Infinity], [Infinity, Infinity]]) // Extent to which one can go up/down/left/right
 .on("zoom", e=> {zoomed(d3.event.transform)}); 
 
 
@@ -2401,7 +2408,7 @@ var catCircles = view.selectAll("catCircles")
           d3.forceX()
             .strength(d => (d.expanded ? 0.03 : 0.15)) // nodes are attracted to their X origin
             .x(//d => x(d.zone)
-            d3.pointRadial(d=>x(d.date), d=>d.zone)[0]
+            d=>d3.pointRadial(x(d.date), y(d.zone))[0]
             )
         ) // X origin data
         .force(
@@ -2410,9 +2417,9 @@ var catCircles = view.selectAll("catCircles")
             .strength(d => (d.expanded ? 0.03 : 0.15)) // nodes are attracted to their Y origin
             .y(
               //d => y(d.clusterDate)
-              d3.pointRadial(d=>x(d.date), d=>d.zone)[1]
+              d=>d3.pointRadial(x(d.date), y(d.zone))[1]
               )
-        ); // Y origin data
+        );//.force("center", d3.forceCenter((width-toolWidth) / 2, height / 2));
 
       //Declaring node variables
       var node = view.selectAll("nodes").append("g"),
@@ -2737,7 +2744,7 @@ var catCircles = view.selectAll("catCircles")
                       .attr("y", d => -y(d+.5))
                       .attr("dy", "0.35em")
                       .attr("stroke", "#fff") 
-                      .attr("stroke-width", 5)
+                      .attr("stroke-width", 1)
                       .text(d =>{ if(Number.isInteger(d)&&d<clustersNest.length){ return clustersNest[d].key }})
                     .clone(true)
                       .attr("y", d => y(d+.5))
@@ -2748,6 +2755,7 @@ var catCircles = view.selectAll("catCircles")
 
                       view.append("g").call(yAxis);
 
+        
 
       loadType();
     }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Chronotype error: dataset " + id + " is invalid.");console.log(error);}); 
@@ -2768,14 +2776,14 @@ var catCircles = view.selectAll("catCircles")
               
   svg.call(zoom).on("dblclick.zoom", null); // Zoom and deactivate doubleclick zooming
 
-/*
+
    zoomed =(thatZoom) => {
     
     view.attr("transform", thatZoom);
     //gX.call(xAxis.scale(thatZoom.rescaleX(x)));
     //gY.call(yAxis.scale(thatZoom.rescaleY(y)));
   }
-*/
+
   ipcRenderer.send("console-logs", "Starting chronotype"); // Starting Chronotype
 }; // Close Chronotype function
 
