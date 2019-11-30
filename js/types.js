@@ -1903,6 +1903,11 @@ var outerRadius = height/2;
 */
 
   //========= LINES & INFO ============
+
+  var chronoArea = d3.areaRadial()
+                     .curve(d3.curveLinearClosed)
+                     .angle(d => x(d.date));
+
   /*
   var chrono = d3.line() // Each zone is represented by a curve, or a "line"
     .x(d => x(d.zone)) // The X value of each point is defined by "zone" (stable)
@@ -1995,6 +2000,8 @@ var chrono  = d3.lineRadial()
         bill: "account_balance"
       };
 
+console.log(datajson)
+
       const dataSorter = () => {
         for (let i = 0; i < docs.length; i++) {
           // loop on main array
@@ -2039,6 +2046,7 @@ var chrono  = d3.lineRadial()
                 clusterItem.date = d.clusterDate;
                 clusterItem.code = d.code;
                 clusterItem.category = d.category;
+              
 
                 if (
                   clusters.findIndex(
@@ -2060,6 +2068,41 @@ var chrono  = d3.lineRadial()
       };
 
       dataSorter();
+
+var firstDate = d3.min(nodeDocs, d => d.date);
+var lastDate = d3.max(nodeDocs, d => d.date);
+
+const blankCreator = () =>{
+
+  var dateAmount=[];
+
+  let currentDate = firstDate;
+
+while (currentDate<lastDate) {
+  var month = currentDate.getUTCMonth();
+  var year = currentDate.getFullYear();
+  var thisDate="-"+JSON.stringify(year)+"-"+JSON.stringify(month)+"-15";
+  dateAmount.push(thisDate);
+ currentDate.setMonth(currentDate.getMonth()+1);
+}
+
+dateAmount.forEach(dateComp=>{
+ for (let i = 0; i < clustersNest.length; i++) {
+   let propName = clustersNest[i].key+dateComp;
+    if(codeFreq.hasOwnProperty(propName)){
+
+    } else {
+      codeFreq[propName] = 0;
+    }
+   
+ }
+
+})
+
+
+
+}
+
 
       const clustersNest = d3.nest() // Sorting clusters
         .key(d => d.category) // Sorting them by category
@@ -2109,7 +2152,7 @@ var chrono  = d3.lineRadial()
       };
       zonePropagation();
 
-
+      blankCreator();
 
       //Generate the list of items (titles) contained in each circle, i.e. sharing the same code
       const titleList = [];
@@ -2147,6 +2190,49 @@ var chrono  = d3.lineRadial()
       });
 
       //========= CHART DISPLAY ===========
+
+      console.log(clustersNest)
+      console.log(codeFreq)
+
+      var lineRadial = d3.lineRadial()
+      .curve(d3.curveLinear)
+      .angle(d => x(d.date))
+
+var radialLines= view.append("g")
+                      .attr("id","radialLines")
+
+      clustersNest.forEach(corpus=>{
+        radialLines.append("path")
+        .attr("stroke","black")
+        .attr("fill","transparent")
+        .attr("d", chronoArea
+        .innerRadius(d => y(d.zone))
+        .outerRadius(d => y(parseFloat(d.zone+ parseFloat("0."+codeFreq[d.code]))))
+      (corpus.values));
+
+
+      })
+
+      /*
+
+
+    var radialLines= view.append("g")
+      .attr("id","radialAreas")
+
+      radialLines.append("path")  
+      .attr("fill", "transparent")
+      .attr("stroke","black")
+    .attr("d", lineRadial.radius(d => y(parseFloat(d.zone+ parseFloat("0."+codeFreq[d.code]))))
+      (clusters));
+*/
+     // .attr("fill", d => color(d.zone))
+     // .attr("fill-opacity", 0.2)
+     /*
+      .attr("d", chronoArea
+          .innerRadius(d => y(d.zone))
+          .outerRadius(d => y(parseFloat(d.zone+ parseFloat("0."+codeFreq[d.code]))))
+        (clusters));
+*/
 /*
       var now = view.append("line") // Red line indicating current time
         .attr("x1", (width-toolWidth)/2) // X coordinate of point of origin
@@ -2234,6 +2320,7 @@ var catCircles = view.selectAll("catCircles")
     //  d3.select(lines).lower();
 
       //======== CIRCLES/CLUSTERS =========
+      /*
       var circle = view.append("g") // Clusters are represented as circles
          .attr("id","nodeClusters");
          circle.selectAll("circle")
@@ -2257,7 +2344,8 @@ var catCircles = view.selectAll("catCircles")
         .style("fill", d => color(d.zone)) // Their color is by zone
         .each(d => d.circleexpanded === false) // Their are by default NOT expanded
         .on("click", CellSelect); // Clicking one circle triggers CellSelect
-
+*/
+        /*
       var circleContent = view.selectAll("textAmount") // Clusters are represented as circles
         .data(clusters) // From the "clusters" array of objects
         .enter()
@@ -2273,7 +2361,7 @@ var catCircles = view.selectAll("catCircles")
         .style("fill", "white") // Their color is by zone
         .style("font-size", "2px")
         .text(d => codeFreq[d.code]);
-
+*/
       //======== DOC LIST =========
       function listDisplay(d) {
         // Expanding a cluster displays the list of docs it contains
@@ -2356,7 +2444,7 @@ var catCircles = view.selectAll("catCircles")
           regroup(d); // Trigger node regrouping function
           setTimeout(function() {
             thisCluster.raise();
-            circleContent.raise();
+           // circleContent.raise();
           }, 500); // Put it above the rest (links)
           ipcRenderer.send(
             "console-logs",
@@ -2553,8 +2641,8 @@ var catCircles = view.selectAll("catCircles")
         .attr("stroke", "#d3d3d3") // Links color
         .style("opacity", 0.5); // Links opacity
 
-      circle.raise(); // Circles are raised above links
-      circleContent.raise();
+      //circle.raise(); // Circles are raised above links
+     // circleContent.raise();
 
       simulation
         .nodes(nodeDocs) // Start the force graph with "docs" as data
@@ -2687,39 +2775,44 @@ var catCircles = view.selectAll("catCircles")
         d3.select("#tooltip").style("display", "none");
       };
 
+     var xticks = x.ticks(18);
+     xticks.shift()
      
 
     var xAxis = g => g
       .attr("font-family", "sans-serif")
       .attr("font-size", 10)
+      .attr("text-anchor", "middle")
+      .attr("id","xAxis")
       .call(g => g.selectAll("g")
-        .data(x.ticks(18))
+        .data(xticks)
         .join("g")
           .each((d, i) => d.id = JSON.stringify(d))
           .call(g => g.append("path")
               .attr("stroke", "#000")
               .attr("stroke-opacity", 0.2)
               .attr("d", d => `
-                M${d3.pointRadial(x(d), innerRadius-20)}
+                M${d3.pointRadial(x(d), innerRadius-10)}
                 L${d3.pointRadial(x(d), outerRadius+20)}
-              `))).lower();
-         /* .call(g => g.append("path")
+              `))
+              /*
+          .call(g => g.append("path")
               .attr("id", d => d.id.id)
               .datum(d => [d, d3.utcMonth.offset(d, 1)])
               .attr("fill", "none")
               .attr("d", ([a, b]) => `
                 M${d3.pointRadial(x(a), innerRadius)}
                 A${innerRadius},${innerRadius} 0,0,1 ${d3.pointRadial(x(b), innerRadius)}
-              `))
+              `))*/
 
           .call(g => g.append("text")
-            .append("text")
-              //.attr("startOffset", 6)
-              .attr("xlink:href", d => d.id.href)
+            //.append("text")
+              
+             // .attr("xlink:href", d => d.id.href)
              .attr("x",d=> d3.pointRadial(x(d), innerRadius-30)[0])
              .attr("y",d=> d3.pointRadial(x(d), innerRadius-30)[1])
-              .text(d3.utcFormat("%Y"))))
-*/
+              .text(d3.utcFormat("%Y"))));
+
               view.append("g").call(xAxis);
 
 
@@ -2727,6 +2820,7 @@ var catCircles = view.selectAll("catCircles")
               .attr("text-anchor", "middle")
               .attr("font-family", "sans-serif")
               .attr("font-size", 10)
+              .attr("id","yAxis")
               .call(g => g.selectAll("g")
                 .data(y.ticks().reverse())
                 .join("g")
