@@ -1854,11 +1854,11 @@ const chronotype = (id, links) => { // When called, draw the chronotype
       
   var view = svg.append("g") // Appending a group to SVG
                 .attr("id", "view"); // CSS viewfinder properties
-
+/*
   zoom.scaleExtent([0.1, 20]) // Extent to which one can zoom in or out
                 .translateExtent([[-Infinity, -Infinity], [Infinity, Infinity]]) // Extent to which one can go up/down/left/right
 .on("zoom", e=> {zoomed(d3.event.transform)}); 
-
+*/
 
 var innerRadius = height/3.5;
 var outerRadius = height/2;
@@ -2206,8 +2206,6 @@ var maxDocs=0;
 var radialLines= view.append("g")
                       .attr("id","radialLines")
                      
-
-
       clustersNest.forEach(corpus=>{
         radialLines.append("path")
         .attr("stroke",color(corpus.zone))
@@ -2219,7 +2217,6 @@ var radialLines= view.append("g")
       (corpus.radialVal));
       })
 
-radialLines.on("mouseover", d=>{console.log("mouseover")})
 
       /*
 
@@ -2816,6 +2813,12 @@ var catCircles = view.selectAll("catCircles")
              .attr("y",d=> d3.pointRadial(x(d), innerRadius-30)[1])
               .text(d3.utcFormat("%Y"))));
 
+              svg.on("mousemove", d=>{
+                    //absurd results for now
+                   console.log(x.invert(d3.event.x));
+                
+              });
+
               view.append("g").call(xAxis);
 
 
@@ -2871,6 +2874,7 @@ var catCircles = view.selectAll("catCircles")
               .call(yAxis);
 */
               
+/*
   svg.call(zoom).on("dblclick.zoom", null); // Zoom and deactivate doubleclick zooming
 
 
@@ -2880,7 +2884,7 @@ var catCircles = view.selectAll("catCircles")
     //gX.call(xAxis.scale(thatZoom.rescaleX(x)));
     //gY.call(yAxis.scale(thatZoom.rescaleY(y)));
   }
-
+*/
   ipcRenderer.send("console-logs", "Starting chronotype"); // Starting Chronotype
 }; // Close Chronotype function
 
