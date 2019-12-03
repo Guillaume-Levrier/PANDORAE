@@ -2000,8 +2000,6 @@ var chrono  = d3.lineRadial()
         bill: "account_balance"
       };
 
-console.log(datajson)
-
       const dataSorter = () => {
         for (let i = 0; i < docs.length; i++) {
           // loop on main array
@@ -2071,10 +2069,7 @@ console.log(datajson)
 
 var firstDate = d3.min(nodeDocs, d => d.date);
 var lastDate = d3.max(nodeDocs, d => d.date);
-var maxDocs; 
-
-console.log(nodeDocs)
-
+var maxDocs=0; 
 
   var dateAmount=[];
 
@@ -2088,8 +2083,6 @@ console.log(nodeDocs)
   currentDate.setMonth(currentDate.getMonth()+1);
   }   
 
-
-
       const clustersNest = d3.nest() // Sorting clusters
         .key(d => d.category) // Sorting them by category
         .entries(nodeDocs); // Selecting relevant data
@@ -2097,8 +2090,6 @@ console.log(nodeDocs)
         y.domain([0, clustersNest.length+1])
 
         x.domain([d3.min(nodeDocs, d => d.date),d3.max(nodeDocs, d => d.date)]).nice()
-
-
 
         clustersNest.forEach(cluster=>{
           let nestedCluster = d3.nest()
@@ -2129,10 +2120,7 @@ console.log(nodeDocs)
           })   
           radialVal.forEach(d=>{;})
           clustersNest[i].radialVal=radialVal;
-
     }
-
-
 
 /*
       for (let i = 0; i < clustersNest.length; i++) {
@@ -2213,19 +2201,12 @@ console.log(nodeDocs)
         titlesIndex[d.key] = d.titles;
       });
 */
-      //========= CHART DISPLAY ===========
-
-
-      
-
-      var lineRadial = d3.lineRadial()
-      .curve(d3.curveLinear)
-      .angle(d => x(d.date))
+//========= CHART DISPLAY ===========
 
 var radialLines= view.append("g")
                       .attr("id","radialLines")
+                     
 
-console.log(clustersNest)
 
       clustersNest.forEach(corpus=>{
         radialLines.append("path")
@@ -2234,9 +2215,11 @@ console.log(clustersNest)
         .style("opacity",.5)
         .attr("d", chronoArea
         .innerRadius(d => y(d.zone))
-        .outerRadius(d => y(parseFloat(d.zone+(d.value/10))))
+        .outerRadius(d => y(parseFloat(d.zone+(d.value/(maxDocs+1)))))
       (corpus.radialVal));
       })
+
+radialLines.on("mouseover", d=>{console.log("mouseover")})
 
       /*
 
