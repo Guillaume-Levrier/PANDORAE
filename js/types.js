@@ -2071,6 +2071,7 @@ console.log(datajson)
 
 var firstDate = d3.min(nodeDocs, d => d.date);
 var lastDate = d3.max(nodeDocs, d => d.date);
+var maxDocs; 
 
 console.log(nodeDocs)
 
@@ -2087,13 +2088,7 @@ console.log(nodeDocs)
   currentDate.setMonth(currentDate.getMonth()+1);
   }   
 
-  var dateBuffer=[]
 
-  dateAmount.forEach(date=>{
-    dateBuffer.push({key:date,value:0})
-  })
-
-console.log(dateBuffer)
 
       const clustersNest = d3.nest() // Sorting clusters
         .key(d => d.category) // Sorting them by category
@@ -2103,7 +2098,7 @@ console.log(dateBuffer)
 
         x.domain([d3.min(nodeDocs, d => d.date),d3.max(nodeDocs, d => d.date)]).nice()
 
-        console.log(clustersNest)
+
 
         clustersNest.forEach(cluster=>{
           let nestedCluster = d3.nest()
@@ -2112,24 +2107,32 @@ console.log(dateBuffer)
                     cluster.values=nestedCluster;
         })
 
-   // clustersNest.forEach(cluster=>{
-     for (let i = 0; i < clustersNest.length; i++) {
-         
-      let radialVal=[...dateBuffer];
 
-      clustersNest[i].values.forEach(val=>{
-        let valIndex = dateAmount.indexOf(val.key);
-       // console.log(valIndex)
-       if (valIndex>-1){
-          radialVal[valIndex].value = val.values.length;
-       }
-      })   
-      radialVal.forEach(d=>{d.zone=i;d.date=parseTime(d.key)})
-      clustersNest[i].radialVal =radialVal;
+     for (let i = 0; i < clustersNest.length; i++) {
+      
+      clustersNest[i].zone=i;
+          let radialVal=[];
+
+          dateAmount.forEach(d=>{
+            radialVal.push({key:d,date:parseTime(d),value:0,zone:i})
+          })
+          
+          clustersNest[i].values.forEach(val=>{
+            let valIndex = dateAmount.indexOf(val.key);
+
+            if (valIndex>-1){
+              radialVal[valIndex].value = val.values.length;
+              if (val.values.length>maxDocs) {
+                maxDocs = val.values.length;
+              }
+            }
+          })   
+          radialVal.forEach(d=>{;})
+          clustersNest[i].radialVal=radialVal;
 
     }
 
-console.log(clustersNest)
+
 
 /*
       for (let i = 0; i < clustersNest.length; i++) {
@@ -2212,6 +2215,7 @@ console.log(clustersNest)
 */
       //========= CHART DISPLAY ===========
 
+
       
 
       var lineRadial = d3.lineRadial()
@@ -2221,10 +2225,13 @@ console.log(clustersNest)
 var radialLines= view.append("g")
                       .attr("id","radialLines")
 
+console.log(clustersNest)
+
       clustersNest.forEach(corpus=>{
         radialLines.append("path")
-        .attr("stroke","black")
-        .attr("fill","transparent")
+        .attr("stroke",color(corpus.zone))
+        .attr("fill",color(corpus.zone))
+        .style("opacity",.5)
         .attr("d", chronoArea
         .innerRadius(d => y(d.zone))
         .outerRadius(d => y(parseFloat(d.zone+(d.value/10))))
@@ -2798,7 +2805,7 @@ var catCircles = view.selectAll("catCircles")
      var xticks = x.ticks(18);
      xticks.shift()
      
-     /*
+     
 
     var xAxis = g => g
       .attr("font-family", "sans-serif")
@@ -2861,7 +2868,7 @@ var catCircles = view.selectAll("catCircles")
                       .attr("stroke", "none")))
 
                       view.append("g").call(yAxis);
-*/
+
         
 
       loadType();
