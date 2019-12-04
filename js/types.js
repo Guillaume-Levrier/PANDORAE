@@ -1912,6 +1912,16 @@ var outerRadius = height/2.25;
                      .curve(d3.curveLinear)
                      .angle(d => x(d.date));
 
+    var maxDocs=0;
+
+     var arcBars = d3.arc()
+                     .innerRadius(d => y(d.zone))
+                     .outerRadius(d => y(parseFloat(d.zone+(d.value/(maxDocs+1)))))
+                     .startAngle(d => x(d.date))
+                     .endAngle(d => x(d.date.setMonth(d.date.getMonth()+1)))
+                     .padAngle(0)
+                     .padRadius(innerRadius)
+
   /*
   var chrono = d3.line() // Each zone is represented by a curve, or a "line"
     .x(d => x(d.zone)) // The X value of each point is defined by "zone" (stable)
@@ -2074,7 +2084,7 @@ var chrono  = d3.lineRadial()
 
 var firstDate = d3.min(nodeDocs, d => d.date);
 var lastDate = d3.max(nodeDocs, d => d.date);
-var maxDocs=0; 
+ 
 
   var dateAmount=[];
 
@@ -2208,28 +2218,35 @@ var maxDocs=0;
 */
 //========= CHART DISPLAY ===========
 
-var radialLines= view.append("g")
-                      .attr("id","radialLines")
+var radialBars= view.append("g")
+                      .attr("id","radialBars")
                      
       clustersNest.forEach(corpus=>{
-        radialLines.append("path")
-        .attr("stroke",color(corpus.zone))
-        .attr("fill",color(corpus.zone))
-        .style("opacity",.5)
+
+        radialBars.append("g")
+                  .selectAll("path")
+                  .data(corpus.radialVal)
+                  .enter().append("path")
+                      .attr("stroke",color(corpus.zone))
+                      .attr("fill",color(corpus.zone))
+                      .style("opacity",.5)
+                      .attr("d",arcBars)
+      })
+        /*
         .attr("d", chronoArea
         .innerRadius(d => y(d.zone))
         .outerRadius(d => y(parseFloat(d.zone+(d.value/(maxDocs+1)))))
       (corpus.radialVal));
-      })
-
+     
+*/
 
       /*
 
 
-    var radialLines= view.append("g")
+    var radialBars= view.append("g")
       .attr("id","radialAreas")
 
-      radialLines.append("path")  
+      radialBars.append("path")  
       .attr("fill", "transparent")
       .attr("stroke","black")
     .attr("d", lineRadial.radius(d => y(parseFloat(d.zone+ parseFloat("0."+codeFreq[d.code]))))
