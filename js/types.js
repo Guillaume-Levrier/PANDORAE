@@ -1822,25 +1822,14 @@ d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.
   }
 
 // Presentation Recorder
-
-
-
-
-
-
-
-
   
   ipcRenderer.send("console-logs", "Starting Hyphotype");
 };
 
 // ========== CHRONOTYPE ==========
-const chronotype = (id, links) => { // When called, draw the chronotype
+const chronotype = (id) => { // When called, draw the chronotype
 
 /* CHRONOTYPE REVAMP TO DO LIST
-- exit clusters, use radial area chart instead to figure amount of docs per week
-- create a disk selection tool
-- push/pop documents according to period selected
 - select several periods at once
 - add option to display doc titles
 */
@@ -1857,8 +1846,7 @@ const chronotype = (id, links) => { // When called, draw the chronotype
 
   zoom.scaleExtent([0.1, 20]) // Extent to which one can zoom in or out
                 .translateExtent([[-Infinity, -Infinity], [Infinity, Infinity]]) // Extent to which one can go up/down/left/right
-.on("zoom", e=> {zoomed(d3.event.transform)}); 
-
+                .on("zoom", e=> {zoomed(d3.event.transform)}); 
 
 var innerRadius = height/3.5;
 var outerRadius = height/2.25;
@@ -1878,71 +1866,24 @@ var outerRadius = height/2.25;
     ); // Send message in the "console"
   }
 
-  //========== X & Y AXIS  ============
+  //========== X & Y  ============
   var x = d3.scaleUtc()
             .range([0, 2 * Math.PI])
-/*
-  var xAxis = d3.axisBottom(x) // Actual X axis
-    .scale(x) // Scale has been declared just above
-    .ticks(12) // Amount of ticks displayed
-    .tickSize(0) // 0 = no vertical lines ; height = vertical lines
-    .tickFormat(""); // No legend
-*/
 
   var y = d3.scaleLinear() // Y axis scale
             .range([innerRadius, outerRadius]);
 
-   
-
-   // .domain([Past, Future]) // First shows a range from minus one year to plus one year
-    
-    //.range([height, 0]); // Size on screen is full height of client
-/*
-  var yAxis = d3.axisRight(y) // Actual Y axis
-    .scale(y) // Scale is declared just above
-    .ticks(20) // 20 ticks are displayed
-    .tickSize(width) // Ticks are horizontal lines
-    .tickPadding(10 - width) // Ticks start and end out of the screen
-    .tickFormat(multiFormat); // Custom legend declared in a different file
-*/
-
   //========= LINES & INFO ============
+  var maxDocs=0;
 
-  var chronoArea = d3.areaRadial()
-                     .curve(d3.curveLinear)
-                     .angle(d => x(d.date));
+  var arcBars = d3.arc()
+                  .innerRadius(d => y(d.zone))
+                  .outerRadius(d => y(parseFloat(d.zone+(d.value/(maxDocs+1)))))
+                  .startAngle(d => x(d.date))
+                  .endAngle(d => x(d.date.setMonth(d.date.getMonth()+1)))
+                  .padAngle(0)
+                  .padRadius(innerRadius)
 
-    var maxDocs=0;
-
-     var arcBars = d3.arc()
-                     .innerRadius(d => y(d.zone))
-                     .outerRadius(d => y(parseFloat(d.zone+(d.value/(maxDocs+1)))))
-                     .startAngle(d => x(d.date))
-                     .endAngle(d => x(d.date.setMonth(d.date.getMonth()+1)))
-                     .padAngle(0)
-                     .padRadius(innerRadius)
-
-  /*
-  var chrono = d3.line() // Each zone is represented by a curve, or a "line"
-    .x(d => x(d.zone)) // The X value of each point is defined by "zone" (stable)
-    .y(d => y(d.date)); // The Y value of each point is defined by "date" (changing)
-*/
-/*
-var chrono  = d3.lineRadial()
-    //.curve(d3.curveLinearClosed)
-    .radius(d => x(d.zone))
-    .angle(d => y(d.date))
-*/
-/*
-  svg.append("rect") // Putting a rectangle above the grid to make dates easier to read
-    .attr("x", 0)
-    .attr("y", 0) // Rectangle starts at top left
-    .attr("width", 110)
-    .attr("height", 9999) // Rectangle dimensions
-    .style("fill", "white")
-    .style("opacity", 0.8) // Rectangle background color and opacity
-    .style("stroke-width", "0"); // Invisible borders
-*/
   var color = d3.scaleOrdinal() // Line colors
     .domain([0, 1])
     .range([
@@ -2017,7 +1958,7 @@ var chrono  = d3.lineRadial()
 
       const dataSorter = () => {
         for (let i = 0; i < docs.length; i++) {
-          // loop on main array
+        
 
           let doc = docs[i].items;
 
@@ -2052,25 +1993,6 @@ var chrono  = d3.lineRadial()
                   }
                 }
 
-               // codeFreq[d.code] = codeFreq[d.code] || 0;
-               // codeFreq[d.code] += 1;
-/*
-                let clusterItem = {};
-                clusterItem.date = d.clusterDate;
-                clusterItem.code = d.code;
-                clusterItem.category = d.category;
-              
-
-                if (
-                  clusters.findIndex(
-                    clusterItem => clusterItem.code === d.code
-                  ) < 0
-                ) {
-                  clusters.push(clusterItem);
-                }
-
-                d.clusterDate = parseTime(d.clusterDate);
-*/
                 nodeDocs.push(d);
               }
             } else {
@@ -2113,15 +2035,12 @@ var midDate;
 
         y.domain([0, clustersNest.length+1])
 
-      
-
         clustersNest.forEach(cluster=>{
           let nestedCluster = d3.nest()
                                 .key(d=>d.clusterDate)
                                 .entries(cluster.values)
                     cluster.values=nestedCluster;
         })
-
 
      for (let i = 0; i < clustersNest.length; i++) {
       
@@ -2146,28 +2065,6 @@ var midDate;
           clustersNest[i].radialVal=radialVal;
     }
 
-/*
-      for (let i = 0; i < clustersNest.length; i++) {
-        clustersNest[i].values.forEach(doc=>doc.date=parseTime(doc.date));
-        clustersNest[i].zone=i;
-      }
-
-      const clusterData = [];
-
-      const clusterSorter = () => {
-        for (let i = 0; i < clustersNest.length; i++) {
-          let zone = i * (1 / clustersNest.length);
-          clustersNest[i].zone = zone;
-          clustersNest[i].values.forEach(d => {
-            d.zone = zone;
-            d.date = parseTime(d.date);
-          });
-          clusterData.push(clustersNest[i]);
-        }
-      };
-      //clusterSorter();
-*/
-      //const zonePropagation = () => {
         nodeDocs.forEach(d => {
           for (let i = 0; i < clustersNest.length; i++) {
             if (clustersNest[i].key === d.category) {
@@ -2175,59 +2072,8 @@ var midDate;
             }
           }
         });
-       // zonePropagation();
-/*
-        clusters.forEach(d=> {
-          for (let i = 0; i < clustersNest.length; i++) {
-            if (clustersNest[i].key === d.category) {
-              d.zone = clustersNest[i].zone;
-            }
-          }
-         } )
 
-      };
-      zonePropagation();
-
-      blankCreator();
-*/
-/*
-      //Generate the list of items (titles) contained in each circle, i.e. sharing the same code
-      const titleList = [];
-
-      const docTitleLister = () => {
-        for (let i = 0; i < docs.length; i++) {
-          // loop on main array
-          for (let j = 0; j < docs[i].items.length; j++) {
-            // loop
-            let doc = {};
-            doc.title = docs[i].items[j].title;
-            doc.code = docs[i].items[j].code;
-            if (docs[i].items[j].hasOwnProperty("enrichement")) {
-              doc.OA = docs[i].items[j].enrichment.OA;
-            } else {
-              doc.OA = false;
-            }
-            titleList.push(doc);
-          }
-        }
-      };
-
-      docTitleLister();
-
-      var titlesIndex = {};
-
-      var titleNest = d3.nest()
-        .key(d => d.code)
-        .entries(titleList);
-      titleNest.forEach(d => {
-        d.titles = d.values.map(d => d.title);
-      });
-      titleNest.forEach(d => {
-        titlesIndex[d.key] = d.titles;
-      });
-*/
 //========= CHART DISPLAY ===========
-
 var radialBars= view.append("g")
                       .attr("id","radialBars")
                      
@@ -2242,275 +2088,7 @@ var radialBars= view.append("g")
                       .style("opacity",.5)
                       .attr("d",arcBars)
       })
-        /*
-        .attr("d", chronoArea
-        .innerRadius(d => y(d.zone))
-        .outerRadius(d => y(parseFloat(d.zone+(d.value/(maxDocs+1)))))
-      (corpus.radialVal));
-     
-*/
 
-      /*
-
-
-    var radialBars= view.append("g")
-      .attr("id","radialAreas")
-
-      radialBars.append("path")  
-      .attr("fill", "transparent")
-      .attr("stroke","black")
-    .attr("d", lineRadial.radius(d => y(parseFloat(d.zone+ parseFloat("0."+codeFreq[d.code]))))
-      (clusters));
-*/
-     // .attr("fill", d => color(d.zone))
-     // .attr("fill-opacity", 0.2)
-     /*
-      .attr("d", chronoArea
-          .innerRadius(d => y(d.zone))
-          .outerRadius(d => y(parseFloat(d.zone+ parseFloat("0."+codeFreq[d.code]))))
-        (clusters));
-*/
-/*
-      var now = view.append("line") // Red line indicating current time
-        .attr("x1", (width-toolWidth)/2) // X coordinate of point of origin
-        .attr("y1", height/2) // Y -> current time, declared above
-        .attr("x2", 99999) // X coordinate of point of destination
-        .attr("y2", d => x(currentTime)) // Y -> current time, declared above
-        .style("stroke", "DarkRed") // Line color
-        .style("stroke-width", 0.5); // Line thickness
-
-      var displayDate = view.append("text") // Precise date (page loading timestamp)
-        .attr("x", width / 1.7) // X coordinate, centre-right
-        .attr("y", d => y(currentTime)) // Y coordinate, current time
-        .attr("dy", -5) // Place it above the "now" line
-        .style("fill", "darkred") // Font color
-        .style("font-size", "0.3em") // Font size
-        .text(d => currentTime); // Actual date string
-*/
-/*
-var catCircles = view.selectAll("catCircles")
-.data(clustersNest)
-.enter()
-.append("circle") 
-  .attr("cx",(width-toolWidth)/2)
-  .attr("cy",height/2)
-  .attr("r",d=>innerRadius+((outerRadius-innerRadius)/clustersNest.length)*d.zone)
-  .style("stroke", d => color(d.zone)) // Color according to key
-  .attr("fill","none")
-  .style("stroke-width", 2); // Stroke width
-*/
-/*
-      var lines = view.selectAll("lines") // Lines by category
-        //.data(clusterData) // Loading relevant data, ie nested clusters
-        .data(clustersNest)
-        .enter()
-        .append("path") // Lines are paths
-        .attr("class", "line") // CSS style of the lines
-        .style("pointer-events","none")
-        .style("shape-rendering","crispEdges")
-        .style("fill","none")
-        .attr("d", d => chrono(d.values)) //Values of each point/cluster of the lines
-        .style("stroke", d => color(d.zone)) // Color according to key
-        .style("stroke-width", 1.5); // Stroke width
-*/
-        /*
-      var shadowLineData = Array.from(clustersNest) //clusterData);
-
-      shadowLineData.forEach(d => {
-        let shadowTop = {};
-        shadowTop.date = parseTime("2100-01-01");
-        shadowTop.zone = d.zone;
-
-        let shadowBot = {};
-        shadowBot.date = parseTime("1800-01-01");
-        shadowBot.zone = d.zone;
-
-        d.values.push(shadowTop);
-        d.values.push(shadowBot);
-      });
-
-      var shadowLines = view.selectAll("shadowLines") // Lines by category
-        .data(shadowLineData) // Loading relevant data, ie nested clusters
-        .enter()
-        .append("path") // Lines are paths
-        .attr("class", "shadowLines") // CSS style of the lines
-        .attr("d", d => chrono(d.values)) //Values of each point/cluster of the lines
-        .style("opacity", 0.5)
-        .style("stroke", "#d3d3d3") // Color according to key
-        .style("stroke-width", 0.5); // Stroke width
-*/
-/*
-      var categories = view.selectAll("categoriesText") // Display category name
-       // .data(clusterData) // Loading relevant data, ie nested clusters
-       .data(clustersNest)
-        .enter()
-        .append("text") // Lines are paths
-       // .attr("class", "categories") // CSS style of the lines
-        .style("font-size","20px")
-        .style("font-family","sans-serif")
-        .attr("y", d => -x(d.zone)) // The X value of each category is defined by "zone"
-        .attr("x", d => y(currentTime)) // Y coordinate, current time
-        .attr("fill", d => color(d.zone)) // Color according to key
-        .attr("transform", "translate(12,5) rotate(90)")
-        .text(d => d.key); // Category content
-*/
-    //  d3.select(lines).lower();
-
-      //======== CIRCLES/CLUSTERS =========
-      /*
-      var circle = view.append("g") // Clusters are represented as circles
-         .attr("id","nodeClusters");
-         circle.selectAll("circle")
-        .data(clusters) // From the "clusters" array of objects
-        .enter()
-        .append("circle") // Clusters are circles
-        .attr("class", "dot") // They have a css class
-        .attr("r", d => {
-          // Their radius is computed as follows
-          var n = codeFreq[d.code],
-            k = 10;
-          return Math.log((k * n) / Math.PI);
-        })
-        //.attr("cx", d => x(d.zone)) // Their relative X positions are by zone
-        //.attr("cy", d => y(d.date)) // Their relative Y positions are by date
-
-        .attr("cx", d =>  d3.pointRadial(x(d.date), y(d.zone))[0])
-        .attr("cy", d =>  d3.pointRadial(x(d.date), y(d.zone))[1])
-       // .attr("transform", "translate("+(width-toolWidth)/2+"," + height/2  + ")")
-        .attr("id", d => d.code) // Their ID are their codes
-        .style("fill", d => color(d.zone)) // Their color is by zone
-        .each(d => d.circleexpanded === false) // Their are by default NOT expanded
-        .on("click", CellSelect); // Clicking one circle triggers CellSelect
-*/
-        /*
-      var circleContent = view.selectAll("textAmount") // Clusters are represented as circles
-        .data(clusters) // From the "clusters" array of objects
-        .enter()
-        .append("text") // Clusters are circles
-        .attr("x", d => x(d.zone)) // Their relative X positions are by zone
-        .attr("y", d => y(d.date)) // Their relative Y positions are by date
-        .style("font-familey","sans-serif")
-        .attr(
-          "dx",
-          d => "-" + JSON.stringify(codeFreq[d.code]).length / 2 + "px"
-        )
-        .attr("dy", "1px")
-        .style("fill", "white") // Their color is by zone
-        .style("font-size", "2px")
-        .text(d => codeFreq[d.code]);
-*/
-      //======== DOC LIST =========
-      /*
-      function listDisplay(d) {
-        // Expanding a cluster displays the list of docs it contains
-
-        function listToNode() {} // Hovering a title highlights the corresponding node
-        function listToDoc() {
-          // Clicking a title displays the doc's info in tooltip
-          for (var i = nodeData.length - 1; i >= 0; i--) {
-            // Iterating on the potential docs' data
-            if (this.id === nodeData[i].title) {
-              // Looking for the index of the relevant title
-              d3.select("#tooltip")
-                .transition() // Once found, display the tooltip
-                .duration(200)
-                .style("display", "block");
-              d3.select("#tooltip").html(
-                "<strong>" +
-                  nodeData[i].title +
-                  "</strong> <br/>" +
-                  nodeData[i].authors +
-                  "<br/>" +
-                  formatTime(nodeData[i].date) +
-                  "<br/>" +
-                  nodeData[i].category +
-                  " | " +
-                  nodeData[i].type +
-                  '<br/><i class="material-icons">' +
-                  nodeData[i].num +
-                  "</i><br/>" // +
-                //  '<img src="././svg/OAlogo.svg" height="16px"/>'
-                //  nodeData[i].desc + '<br/><br/>' +
-                //  nodeData[i].DOI + '<br/>' +
-                //  'Source: <a target="_blank" href="'+
-                //  nodeData[i].URL+'">'+
-                //  nodeData[i].URL+'</a>'
-              );
-            }
-          }
-        }
-
-        var docTitles = titlesIndex[d.code];
-
-       
-         d3.select("#tooltip")
-          .style("display", "block")
-          .html(
-            "<ul>" +
-              docTitles
-                .map(
-                  title =>
-                    '<li id="' + title + '" class="doc">' + title + "</li>"
-                )
-                .join("\n") +
-              "</ul>"
-          ); 
-        for (var i = 0; i < docTitles.length; i++) {
-          document
-            .getElementById(docTitles[i])
-            .addEventListener("mouseover", listToNode);
-          document
-            .getElementById(docTitles[i])
-            .addEventListener("click", listToDoc);
-        }
-      }
-
-      function CellSelect(d) {
-        if (d.circleexpanded) {
-          // Check if expanded, and if it is, regroup
-          let thisCluster = d3.select(this);
-          thisCluster // Apply the following to this selected object
-            .each(d => (d.circleexpanded = false)) // Circle isn't considered expanded anymore
-            .transition()
-            .duration(500) // Circle reduction isn't instantaneous
-            .attr("r", d => {
-              // Circle reduction = its radius reduction
-              var n = codeFreq[d.code],
-                k = 10; // Variables used to determine radius
-              return Math.log((k * n) / Math.PI);
-            }); // Formula used to compute radius
-          regroup(d); // Trigger node regrouping function
-          setTimeout(function() {
-            thisCluster.raise();
-           // circleContent.raise();
-          }, 500); // Put it above the rest (links)
-          ipcRenderer.send(
-            "console-logs",
-            "Closing chronotype cluster " + d.code
-          ); // Send message in the "console"
-        } else {
-          // Else expand the node
-          d3.select(this) // Apply the following to this selected object
-            //.lower()                                                      // Put it below other objects
-            .each(d => (d.circleexpanded = true)) // Circle is considered expanded
-            .transition()
-            .duration(100) // Circle expansion is fast
-            .attr("r", d => {
-              // Circle expands as its radius rises
-              var n = codeFreq[d.code],
-                k = 18; // Variables used to determine radiu
-              return Math.sqrt((k * n) / Math.PI);
-            }); // Formula used to compute radius
-          expand(d); // Trigger node expanding funciton
-          listDisplay(d); // Opening cluster lists all its nodes' titles
-          d3.select(this).on("mouseover", listDisplay); // Hovering cluster does the same
-          ipcRenderer.send(
-            "console-logs",
-            "Opening chronotype cluster " + d.code
-          ); // Send message in the "console"
-        }
-      }
-*/
       //==========  NODE SUB-GRAPHS =======
       // Each cluster contains documents, i.e. each "circle" contains "nodes" which are force graphs
       var simulation = d3.forceSimulation() // starting simulation
@@ -2545,129 +2123,8 @@ var catCircles = view.selectAll("catCircles")
 
       //Declaring node variables
       var node = view.selectAll("nodes").append("g"),
-        nodetext = view.selectAll("nodetext").append("g"),
-        nodeData = [];
+        nodetext = view.selectAll("nodetext").append("g");
 
-/*
-      //=============  EXPAND  ============
-      // When a shrinked circle is clicked, its nodes come appear and then it expands
-
-      const expand = d => {
-        simulation.alpha(1).restart();
-
-        // First the relevant nodes in the data, i.e. those whose code is exactly the same as the clicked circle.
-        var focusNodes = nodeDocs.filter(item => item.code === d.code);
-
-        // Then, add those nodes to the group of nodes which are to be displayed by the graph
-        nodeData.push.apply(nodeData, focusNodes);
-
-        //Nodes
-        node = node
-          .data(nodeData, item => item) // Select all relevant nodes
-          .exit()
-          .remove() // Remove them all
-          .data(nodeData, item => item) // Reload the data
-          .enter()
-          .append("circle") // Append the nodes
-          .attr("r", 1) // Node radius
-          .attr("fill", "#bfbfbf") // Node color
-          .attr("cx", d => x(d.zone)) // Node X coordinate
-          .attr("cy", d => y(d.clusterDate)) // Node Y coordinate
-          .attr("id", d => d.code) // Node ID (based on code)
-          .style("stroke", d => color(d.zone)) // Node stroke color
-          .style("stroke-width", 0.1) // Node stroke width
-          .style("cursor", "context-menu") // Type of cursor on node hover
-          .style("opacity", 0.9) // Node opacity
-          .each(d => (d.expanded = true)) // All those nodes are "expanded"
-          .raise() // Nodes are displayed above the rest
-          .merge(node); // Merge the nodes
-
-        //Node icons are nodes displayed on top of Nodes
-        nodetext = nodetext
-          .data(nodeData, item => item) // Select all relevant nodes
-          .exit()
-          .remove() // Remove them all
-          .data(nodeData, item => item) // Reload the data
-          .enter()
-          .append("text") // Append the text
-          .attr("class", "material-icons") // Icons are material-icons
-          .attr("dy", 0.7) // Relative Y position to each node
-          .attr("dx", -0.7) // Relative X position to each node
-          .attr("id", d => d.code) // ID
-          .style("fill", "white") // Icon color
-          .style("font-size", "1.4px") // Icon size
-          .text(d => d.type) // Icon
-          .on("click", d => {
-            shell.openExternal("https://dx.doi.org/" + d.DOI);
-          }) // On click, open url in new tab
-          .on("mouseover", HighLightandDisplay(0.2)) // On hover, HighLightandDisplay
-          .on("mouseout", mouseOut) // On mouseout, mouseOute
-          .raise() // Display above nodes and the rest
-          .merge(nodetext) // Merge the nodes
-          .call(
-            d3.drag() // Dragging behaviour
-              .on("start", forcedragstarted)
-              .on("drag", forcedragged)
-              .on("end", forcedragended)
-          );
-
-        nodetext.append("title").text(d => d.title); // Hovering a node displays its title as "alt"
-
-        simulation.nodes(nodeData); // Load new simulation data
-      };
-
-      //============  REGROUP  ============
-      // When an expanded circle is clicked, its nodes regroup and then disappear
-
-      const regroup = d => {
-        simulation.alpha(1).restart();
-
-        node
-          .filter(function() {
-            return d3.select(this).attr("id") === d.code;
-          }) // Find relevant nodes
-          .each(d => (d.expanded = false)) // Remove colliding
-          .transition()
-          .delay(450)
-          .remove(); // Delay then remove nodes
-        nodetext
-          .filter(function() {
-            return d3.select(this).attr("id") === d.code;
-          }) // Find relevant nodetext
-          .transition()
-          .delay(450)
-          .remove(); // Delay dans remove nodetexts
-
-        // First move the nodes either at the end of the array in order not to change any onther nodes'
-        // index as the D3 simulation properties are attributed by index then injected to svg
-        nodeData.sort(
-          // Literally sorts arrays
-          function nodeSort(a, b) {
-            // Comparing values to each other
-            return b.expanded - a.expanded; // Place expanded = false at the end
-          }
-        );
-
-        // Splicing out removed nodes from nodeData just after they've been removed
-        setTimeout(
-          // Delay erasal to allow regrouping
-          function nodeEraser(i, d) {
-            // Call the function
-            for (var i = nodeData.length - 1; i >= 0; i--) {
-              // Iterate through all elements
-              if (nodeData[i].expanded === false) {
-                // Everytime one is not expanded
-                nodeData.splice(i, 1); // It gets removed from data
-              }
-            }
-          },
-          500
-        ); // Delay value in milliseconds
-
-        simulation.nodes(nodeData); // Simulation with updated data
-      };
-
-  */
       var link = view.selectAll("link") // Create links
         .data(links) // With data created above
         .enter()
@@ -2676,8 +2133,6 @@ var catCircles = view.selectAll("catCircles")
         .attr("stroke", "#d3d3d3") // Links color
         .style("opacity", 0.5); // Links opacity
 
-      //circle.raise(); // Circles are raised above links
-     // circleContent.raise();
 
       simulation
         .nodes(currentNodes) // Start the force graph with "docs" as data
@@ -2799,13 +2254,10 @@ var catCircles = view.selectAll("catCircles")
 
 // Circular Brush, based on Elijah Meeks https://github.com/emeeks/d3.svg.circularbrush
 
-
-
 var currentBrush;
 
 function circularbrush() {
 	var _extent = [0,Math.PI * 2];
- // var _circularbrushDispatch = d3.dispatch('brushstart', 'brushend', 'brush');
 	var _arc = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius);
 	var _brushData = [
 		{startAngle: _extent[0], endAngle: _extent[1], class: "extent"},
@@ -2944,18 +2396,6 @@ function circularbrush() {
 
   }
   
-/*
-  function d3_rebind(target, source, method) {
-    return function() {
-      var value = method.apply(source, arguments);
-      return value === source ? target : value;
-    };
-  };
-  
-
-    d3_rebind(_circularbrush, _circularbrushDispatch, "on");
-*/
-
 	return _circularbrush;
 
 	function resizeDown(d) {
@@ -2968,8 +2408,6 @@ function circularbrush() {
 
     _origin = _mouse;
     
-
-
 		if (d.class == "resize e") {
 			d3_window
 			.on("mousemove.brush", function() {resizeMove("e")})
@@ -2985,8 +2423,6 @@ function circularbrush() {
 			.on("mousemove.brush", function() {resizeMove("extent")})
 			.on("mouseup.brush", extentUp);
 		}
-
-		//_circularbrushDispatch.brushstart();
 
 	}
 
@@ -3051,8 +2487,6 @@ function circularbrush() {
 
 		_extent = ([_newStartAngle,_newEndAngle]);
 
-		//_circularbrushDispatch.brush();
-
 	}
 
 	function brushRefresh() {
@@ -3073,7 +2507,6 @@ function circularbrush() {
           .attr("text-anchor",()=>{if(currentBrush[1]<midDate){return "start"}else{return"end"}})
           .text(currentBrush[1].getDate()+"/"+currentBrush[1].getMonth()+"/"+currentBrush[1].getFullYear())
       
-
 	}
 
 
@@ -3081,9 +2514,6 @@ function circularbrush() {
 
 		_brushData = _newBrushData;
 		d3_window.on("mousemove.brush", null).on("mouseup.brush", null);
-
-   
-
 
     currentNodes=[];
 
@@ -3095,9 +2525,6 @@ function circularbrush() {
 
     currentNodes = nodeDocs.filter(d=>dateTest(d));
 
-   // simulation.alpha(1).restart();
-
-
     node = node
     .data(currentNodes, item => item) // Select all relevant nodes
     .exit()
@@ -3107,12 +2534,8 @@ function circularbrush() {
     .append("circle") // Append the nodes
     .attr("r",2) // Node radius
     .attr("fill",  d => color(d.zone)) // Node color
-   // .attr("cx", d => x(d.zone)) // Node X coordinate
-   // .attr("cy", d => y(d.date)) // Node Y coordinate
-    //.attr("cx", d => d3.pointRadial(x(d.date), y(d.zone))[0]) // Node X coordinate
-    //.attr("cy", d => d3.pointRadial(x(d.date), y(d.zone))[1]) // Node Y coordinate
     .attr("id", d => d.id) // Node ID (based on code)
-    //.style("stroke", d => color(d.zone)) // Node stroke color
+    .style("stroke", "white") // Node stroke color
     .style("stroke-width", 0.1) // Node stroke width
     .style("cursor", "context-menu") // Type of cursor on node hover
     .style("opacity", 0.9) // Node opacity
@@ -3148,20 +2571,11 @@ function circularbrush() {
         .on("end", forcedragended)
     );
 
-  nodetext.append("title").text(d => d.title); // Hovering a node displays its title as "alt"
-
-  
+    nodetext.append("title").text(d => d.title); // Hovering a node displays its title as "alt"
 
     simulation.nodes(currentNodes);
-
     simulation.alpha(1).restart();
     
-
-
-
-    // restart simulation here
-
-		//_circularbrushDispatch.brushend();
 	}
 
 	function updateBrushData() {
@@ -3171,32 +2585,16 @@ function circularbrush() {
 		{startAngle: _extent[1], endAngle: _extent[1] + _handleSize, class: "resize w"}
 		];
 	}
-
-
 }
 
 //cf http://bl.ocks.org/emeeks/5850fa6583bfd90e7899
 
-                  
-var brush = circularbrush()
-.range([0, 2 * Math.PI])
-.innerRadius(innerRadius-5)
-.outerRadius(outerRadius+15);
+                            
+          var brush = circularbrush()
+                      .range([0, 2 * Math.PI])
+                      .innerRadius(innerRadius-5)
+                      .outerRadius(outerRadius+15);
 
-
-var brushCircle = view.append("path")
-                      .attr("fill","transparent")
-                      .attr("class","brushCircle")
-                      .attr("d",d3.arc()
-                      .innerRadius(innerRadius-30)
-                      .outerRadius(outerRadius+50)
-                      .startAngle(0)
-                      .endAngle(2*Math.PI)
-                      .padAngle(0))
-                      //.on("mousedown",d=>{radialBrush.call(brush);})
-                     
-                     // .call(brush);
-                     
 
           var brushLegendE = view.append("g")
                                   .attr("id","brushLegendE")
@@ -3217,9 +2615,7 @@ var brushCircle = view.append("path")
                         .style("opacity",.5)
                         .attr("fill","transparent")
                         .attr("id","brush")
-                        .call(brush);
-                      
-                                          
+                        .call(brush);           
 
             d3.selectAll("path.resize")
               .attr("fill","gray")
@@ -3228,14 +2624,9 @@ var brushCircle = view.append("path")
 
             d3.select("path.extent").style("cursor","move")
 
-                     
-
-
      var xticks = x.ticks(18);
      xticks.shift()
      
-    
-
     var xAxis = g => g
       .attr("font-family", "sans-serif")
       .attr("font-size", 10)
@@ -3299,27 +2690,12 @@ var brushCircle = view.append("path")
 //======== END OF DATA CALL (PROMISES) ===========
 
   //======== ZOOM & RESCALE ===========
-  /*
-  var gX = svg.append("g") 
-              .attr("class", "axis axis--x")
-              .style("stroke-opacity",.2)
-              .call(xAxis);
+        
+  svg.call(zoom).on("dblclick.zoom", null) // Zoom and deactivate doubleclick zooming
+                .on("mousedown.zoom", null)
 
-  var gY = svg.append("g") 
-              .attr("class", "axis axis--y")
-              .style("stroke-opacity",.1)
-              .call(yAxis);
-*/
-              
-
-  //svg.call(zoom).on("dblclick.zoom", null); // Zoom and deactivate doubleclick zooming
-
-
-   zoomed =(thatZoom) => {
-    
+   zoomed = (thatZoom) => {
     view.attr("transform", thatZoom);
-    //gX.call(xAxis.scale(thatZoom.rescaleX(x)));
-    //gY.call(yAxis.scale(thatZoom.rescaleY(y)));
   }
 
   ipcRenderer.send("console-logs", "Starting chronotype"); // Starting Chronotype
