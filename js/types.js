@@ -2822,7 +2822,8 @@ function circularbrush() {
 	var _brushG;
 	var _handleSize = .1;
 	var _scale = d3.scaleLinear().domain(_extent).range(_extent);
-	var _tolerance = 0.00001;
+  var _tolerance = 0.00001;
+  //var _brushLegend = _brushG.append(g).attr("id","brushLegend")
 
 	function _circularbrush(_container) {
 
@@ -3058,7 +3059,17 @@ function circularbrush() {
 		_brushG
 			.selectAll("path.circularbrush")
 			.data(_newBrushData)
-			.attr("d", _arc)
+      .attr("d", _arc)
+    
+      _brushG.selectAll("path")
+              .attr("id","brushLegend")
+                  .append("text")
+                  .attr("x",d=> d3.pointRadial(x(x.invert(brush.extent()[0])), outerRadius+10)[0])
+                  .attr("y",d=> d3.pointRadial(x(x.invert(brush.extent()[0])), outerRadius+10)[1])
+                  .text(brush.extent()[0])
+      
+      
+    
 	}
 
 
@@ -3111,7 +3122,10 @@ view.append("g")
 
     
   
-    d3.selectAll("path.resize").attr("fill","darkgray").style("cursor","grab")
+    d3.selectAll("path.resize")
+      .attr("fill","darkgray")
+      .style("cursor","grab");
+
     d3.select("path.extent").style("cursor","move")
 
 
