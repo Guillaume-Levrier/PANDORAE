@@ -2084,7 +2084,14 @@ var chrono  = d3.lineRadial()
 
 var firstDate = d3.min(nodeDocs, d => d.date);
 var lastDate = d3.max(nodeDocs, d => d.date);
- 
+x.domain([firstDate,lastDate]).nice()
+var midDate;
+//Dates can be negative, which can make midDate trickier than usual to find
+  let d1=firstDate.getTime();
+  let d2=lastDate.getTime();
+
+  if (d1>0&&d2>0||d1<0&&d2<0){midDate= new Date(d1+((d2-d1)/2))}
+  else if (d1<0&&d2>0){midDate= new Date (d1+((Math.abs(d1)+d2)/2))}
 
   var dateAmount=[];
 
@@ -2104,7 +2111,7 @@ var lastDate = d3.max(nodeDocs, d => d.date);
 
         y.domain([0, clustersNest.length+1])
 
-        x.domain([d3.min(nodeDocs, d => d.date),d3.max(nodeDocs, d => d.date)]).nice()
+      
 
         clustersNest.forEach(cluster=>{
           let nestedCluster = d3.nest()
@@ -2824,6 +2831,7 @@ function circularbrush() {
 	var _scale = d3.scaleLinear().domain(_extent).range(_extent);
   var _tolerance = 0.00001;
   //var _brushLegend = _brushG.append(g).attr("id","brushLegend")
+  
 
 	function _circularbrush(_container) {
 
@@ -3061,15 +3069,19 @@ function circularbrush() {
 			.data(_newBrushData)
       .attr("d", _arc)
     
-      _brushG.selectAll("path")
-              .attr("id","brushLegend")
-                  .append("text")
-                  .attr("x",d=> d3.pointRadial(x(x.invert(brush.extent()[0])), outerRadius+10)[0])
-                  .attr("y",d=> d3.pointRadial(x(x.invert(brush.extent()[0])), outerRadius+10)[1])
-                  .text(brush.extent()[0])
-      
-      
+      currentBrush = [x.invert(brush.extent()[0]),x.invert(brush.extent()[1])];
     
+      brushLegendE.attr("x",d=> d3.pointRadial(x(currentBrush[0]), outerRadius+10)[0])
+          .attr("y",d=> d3.pointRadial(x(currentBrush[0]), outerRadius+10)[1])
+          .attr("text-anchor",()=>{if(currentBrush[0]<midDate){return "start"}else{return"end"}})
+          .text(currentBrush[0].getDate()+"/"+currentBrush[0].getMonth()+"/"+currentBrush[0].getFullYear())
+          
+      brushLegendW.attr("x",d=> d3.pointRadial(x(currentBrush[1]), outerRadius+10)[0])
+          .attr("y",d=> d3.pointRadial(x(currentBrush[1]), outerRadius+10)[1])
+          .attr("text-anchor",()=>{if(currentBrush[1]<midDate){return "start"}else{return"end"}})
+          .text(currentBrush[1].getDate()+"/"+currentBrush[1].getMonth()+"/"+currentBrush[1].getFullYear())
+      
+
 	}
 
 
@@ -3078,8 +3090,9 @@ function circularbrush() {
 		_brushData = _newBrushData;
 		d3_window.on("mousemove.brush", null).on("mouseup.brush", null);
 
-    currentBrush = [x.invert(brush.extent()[0]),x.invert(brush.extent()[1])];
-    
+   
+
+
     currentNodes=[];
 
     function dateTest(node){
@@ -3111,19 +3124,34 @@ function circularbrush() {
 var brush = circularbrush()
   .range([0, 2 * Math.PI])
   .innerRadius(innerRadius-5)
-  .outerRadius(outerRadius+15)
+  .outerRadius(outerRadius+15);
 
-view.append("g")
-    .attr("stroke","darkgray")
-    .attr("fill","transparent")
-    .attr("id","brush")
-    .call(brush)
-    .lower();
+  var brushLegendE = view.append("g")
+                          .attr("id","brushLegendE")
+                          .attr("font-family", "sans-serif")
+                              .attr("font-size", 10)
+                              .append("text")
+                              .text("");
+  var brushLegendW = view.append("g")
+  .attr("id","brushLegendW")
+  .attr("font-family", "sans-serif")
+      .attr("font-size", 10)
+      .append("text").text("");
+ 
+
+var radialBrush= view.append("g")
+                .attr("stroke","gray")
+                .style("opacity",.5)
+                .attr("fill","transparent")
+                .attr("id","brush")
+                .call(brush);
+             
 
     
   
     d3.selectAll("path.resize")
-      .attr("fill","darkgray")
+      .attr("fill","gray")
+      .style("opacity",.5)
       .style("cursor","grab");
 
     d3.select("path.extent").style("cursor","move")
@@ -3132,7 +3160,7 @@ view.append("g")
      var xticks = x.ticks(18);
      xticks.shift()
      
-     
+    
 
     var xAxis = g => g
       .attr("font-family", "sans-serif")
@@ -3189,7 +3217,7 @@ view.append("g")
                       view.append("g").call(yAxis);
                       
                       d3.selectAll("text").style("user-select","none")
-
+                      radialBrush.raise();
       loadType();
 
     }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Chronotype error: dataset " + id + " is invalid.");console.log(error);}); 
