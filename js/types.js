@@ -2084,7 +2084,9 @@ var chrono  = d3.lineRadial()
 
 var firstDate = d3.min(nodeDocs, d => d.date);
 var lastDate = d3.max(nodeDocs, d => d.date);
+
 x.domain([firstDate,lastDate]).nice()
+
 var midDate;
 //Dates can be negative, which can make midDate trickier than usual to find
   let d1=firstDate.getTime();
@@ -2102,7 +2104,7 @@ var midDate;
     var year = currentDate.getFullYear();
     var thisDate=JSON.stringify(year)+"-"+JSON.stringify(month)+"-15";
     dateAmount.push(thisDate);
-  currentDate.setMonth(currentDate.getMonth()+1);
+    currentDate.setMonth(currentDate.getMonth()+1);
   }   
 
       const clustersNest = d3.nest() // Sorting clusters
@@ -2164,8 +2166,8 @@ var midDate;
         }
       };
       //clusterSorter();
-
-      const zonePropagation = () => {
+*/
+      //const zonePropagation = () => {
         nodeDocs.forEach(d => {
           for (let i = 0; i < clustersNest.length; i++) {
             if (clustersNest[i].key === d.category) {
@@ -2173,7 +2175,8 @@ var midDate;
             }
           }
         });
-
+       // zonePropagation();
+/*
         clusters.forEach(d=> {
           for (let i = 0; i < clustersNest.length; i++) {
             if (clustersNest[i].key === d.category) {
@@ -2507,12 +2510,12 @@ var catCircles = view.selectAll("catCircles")
           ); // Send message in the "console"
         }
       }
-
+*/
       //==========  NODE SUB-GRAPHS =======
       // Each cluster contains documents, i.e. each "circle" contains "nodes" which are force graphs
       var simulation = d3.forceSimulation() // starting simulation
         .alphaMin(0.1) // Each action starts at 1 and decrements "Decay" per Tick
-        .alphaDecay(0.035) // "Decay" value
+        .alphaDecay(0.04) // "Decay" value
         .force(
           "link",
           d3.forceLink()
@@ -2523,32 +2526,29 @@ var catCircles = view.selectAll("catCircles")
         .force(
           "collision",
           d3.forceCollide() // nodes can collide
-            .radius(d => (d.expanded ? 1.8 : 0)) // if expanded is true, they collide with a force superior to 0
+            .radius(2) // if expanded is true, they collide with a force superior to 0
             .iterations(3)
+            .strength(.15)
         )
         .force(
           "x",
           d3.forceX()
-            .strength(d => (d.expanded ? 0.03 : 0.15)) // nodes are attracted to their X origin
-            .x(//d => x(d.zone)
-            d=>d3.pointRadial(x(d.date), y(d.zone))[0]
-            )
-        ) // X origin data
-        .force(
-          "y",
-          d3.forceY()
-            .strength(d => (d.expanded ? 0.03 : 0.15)) // nodes are attracted to their Y origin
-            .y(
-              //d => y(d.clusterDate)
-              d=>d3.pointRadial(x(d.date), y(d.zone))[1]
-              )
-        );//.force("center", d3.forceCenter((width-toolWidth) / 2, height / 2));
+            .strength(.1) // nodes are attracted to their X origin
+            .x(d=>d3.pointRadial(x(d.date), y(d.zone-clustersNest.length))[0])
+            )    
+            .force(
+              "y",
+              d3.forceY()
+                .strength(.1) // nodes are attracted to their X origin
+                .y(d=>d3.pointRadial(x(d.date), y(d.zone-clustersNest.length))[1])
+                )
 
       //Declaring node variables
       var node = view.selectAll("nodes").append("g"),
         nodetext = view.selectAll("nodetext").append("g"),
         nodeData = [];
 
+/*
       //=============  EXPAND  ============
       // When a shrinked circle is clicked, its nodes come appear and then it expands
 
@@ -2667,7 +2667,7 @@ var catCircles = view.selectAll("catCircles")
         simulation.nodes(nodeData); // Simulation with updated data
       };
 
-  
+  */
       var link = view.selectAll("link") // Create links
         .data(links) // With data created above
         .enter()
@@ -2680,7 +2680,7 @@ var catCircles = view.selectAll("catCircles")
      // circleContent.raise();
 
       simulation
-        .nodes(nodeDocs) // Start the force graph with "docs" as data
+        .nodes(currentNodes) // Start the force graph with "docs" as data
         .on("tick", ticked); // Start the "tick" for the first time
 
       simulation
@@ -2688,6 +2688,7 @@ var catCircles = view.selectAll("catCircles")
         .links(links); // Data for those links is "links"
 
       function ticked() {
+      
         // Actual force function
         link // Links coordinates
           .attr("x1", d => d.source.x)
@@ -2721,21 +2722,6 @@ var catCircles = view.selectAll("catCircles")
         if (!d3.event.active) simulation.alpha(1).restart(); // When dragging stops, reheat force graph
         d.fx = null;
         d.fy = null;
-      }
-
-      //============ NARRATIVE ============
-      function narrative(focused) {
-        // Experimental narrative function
-        d3.select("#xtypeSVG")
-          .transition()
-          .duration(5000)
-          .call(
-            zoom.transform,
-            d3.zoomIdentity
-              .translate(width / 2, height / 2)
-              .scale(8)
-              .translate(-x(focused.zone), -y(focused.date))
-          );
       }
 
       //============== HOVER ==============
@@ -2784,7 +2770,7 @@ var catCircles = view.selectAll("catCircles")
             //d.URL+'</a>'
           );
 
-          ipcRenderer.send("console-logs", "Hovering " + JSON.stringify(d)); // Send message in the "console"
+//          ipcRenderer.send("console-logs", "Hovering " + JSON.stringify(d)); // Send message in the "console"
 
           // check all other nodes to see if they're connected
           node.style("opacity", function(o) {
@@ -2809,14 +2795,17 @@ var catCircles = view.selectAll("catCircles")
         nodetext.style("opacity", 1);
         d3.select("#tooltip").style("display", "none");
       };
-*/
+
 
 // Circular Brush, based on Elijah Meeks https://github.com/emeeks/d3.svg.circularbrush
+
+
+
 var currentBrush;
 
 function circularbrush() {
 	var _extent = [0,Math.PI * 2];
-    var _circularbrushDispatch = d3.dispatch('brushstart', 'brushend', 'brush');
+ // var _circularbrushDispatch = d3.dispatch('brushstart', 'brushend', 'brush');
 	var _arc = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius);
 	var _brushData = [
 		{startAngle: _extent[0], endAngle: _extent[1], class: "extent"},
@@ -2830,8 +2819,7 @@ function circularbrush() {
 	var _handleSize = .1;
 	var _scale = d3.scaleLinear().domain(_extent).range(_extent);
   var _tolerance = 0.00001;
-  //var _brushLegend = _brushG.append(g).attr("id","brushLegend")
-  
+
 
 	function _circularbrush(_container) {
 
@@ -2956,6 +2944,7 @@ function circularbrush() {
 
   }
   
+/*
   function d3_rebind(target, source, method) {
     return function() {
       var value = method.apply(source, arguments);
@@ -2965,18 +2954,21 @@ function circularbrush() {
   
 
     d3_rebind(_circularbrush, _circularbrushDispatch, "on");
+*/
 
 	return _circularbrush;
 
 	function resizeDown(d) {
-		var _mouse = d3.mouse(_brushG.node());
-
+    var _mouse = d3.mouse(_brushG.node());
+    
 		if (_brushData[0] === undefined) {
 			_brushData[0] = d;
 		}
 		_originalBrushData = {startAngle: _brushData[0].startAngle, endAngle: _brushData[0].endAngle};
 
-		_origin = _mouse;
+    _origin = _mouse;
+    
+
 
 		if (d.class == "resize e") {
 			d3_window
@@ -3103,6 +3095,70 @@ function circularbrush() {
 
     currentNodes = nodeDocs.filter(d=>dateTest(d));
 
+   // simulation.alpha(1).restart();
+
+
+    node = node
+    .data(currentNodes, item => item) // Select all relevant nodes
+    .exit()
+    .remove() // Remove them all
+    .data(currentNodes, item => item) // Reload the data
+    .enter()
+    .append("circle") // Append the nodes
+    .attr("r",2) // Node radius
+    .attr("fill",  d => color(d.zone)) // Node color
+   // .attr("cx", d => x(d.zone)) // Node X coordinate
+   // .attr("cy", d => y(d.date)) // Node Y coordinate
+    //.attr("cx", d => d3.pointRadial(x(d.date), y(d.zone))[0]) // Node X coordinate
+    //.attr("cy", d => d3.pointRadial(x(d.date), y(d.zone))[1]) // Node Y coordinate
+    .attr("id", d => d.id) // Node ID (based on code)
+    //.style("stroke", d => color(d.zone)) // Node stroke color
+    .style("stroke-width", 0.1) // Node stroke width
+    .style("cursor", "context-menu") // Type of cursor on node hover
+    .style("opacity", 0.9) // Node opacity
+    .raise() // Nodes are displayed above the rest
+    .merge(node); // Merge the nodes
+
+  //Node icons are nodes displayed on top of Nodes
+  nodetext = nodetext
+    .data(currentNodes, item => item) // Select all relevant nodes
+    .exit()
+    .remove() // Remove them all
+    .data(currentNodes, item => item) // Reload the data
+    .enter()
+    .append("text") // Append the text
+    .attr("class", "material-icons") // Icons are material-icons
+    .attr("dy", 0.7) // Relative Y position to each node
+    .attr("dx", -0.7) // Relative X position to each node
+    .attr("id", d => d.id) // ID
+    .style("fill", "white") // Icon color
+    .style("font-size", "1.4px") // Icon size
+    .text(d => d.type) // Icon
+    .on("click", d => {
+      shell.openExternal("https://dx.doi.org/" + d.DOI);
+    }) // On click, open url in new tab
+    .on("mouseover", HighLightandDisplay(0.2)) // On hover, HighLightandDisplay
+    .on("mouseout", mouseOut) // On mouseout, mouseOute
+    .raise() // Display above nodes and the rest
+    .merge(nodetext) // Merge the nodes
+    .call(
+      d3.drag() // Dragging behaviour
+        .on("start", forcedragstarted)
+        .on("drag", forcedragged)
+        .on("end", forcedragended)
+    );
+
+  nodetext.append("title").text(d => d.title); // Hovering a node displays its title as "alt"
+
+  
+
+    simulation.nodes(currentNodes);
+
+    simulation.alpha(1).restart();
+    
+
+
+
     // restart simulation here
 
 		//_circularbrushDispatch.brushend();
@@ -3121,40 +3177,58 @@ function circularbrush() {
 
 //cf http://bl.ocks.org/emeeks/5850fa6583bfd90e7899
 
+                  
 var brush = circularbrush()
-  .range([0, 2 * Math.PI])
-  .innerRadius(innerRadius-5)
-  .outerRadius(outerRadius+15);
+.range([0, 2 * Math.PI])
+.innerRadius(innerRadius-5)
+.outerRadius(outerRadius+15);
 
-  var brushLegendE = view.append("g")
-                          .attr("id","brushLegendE")
-                          .attr("font-family", "sans-serif")
-                              .attr("font-size", 10)
-                              .append("text")
-                              .text("");
-  var brushLegendW = view.append("g")
-  .attr("id","brushLegendW")
-  .attr("font-family", "sans-serif")
-      .attr("font-size", 10)
-      .append("text").text("");
- 
 
-var radialBrush= view.append("g")
-                .attr("stroke","gray")
-                .style("opacity",.5)
-                .attr("fill","transparent")
-                .attr("id","brush")
-                .call(brush);
-             
+var brushCircle = view.append("path")
+                      .attr("fill","transparent")
+                      .attr("class","brushCircle")
+                      .attr("d",d3.arc()
+                      .innerRadius(innerRadius-30)
+                      .outerRadius(outerRadius+50)
+                      .startAngle(0)
+                      .endAngle(2*Math.PI)
+                      .padAngle(0))
+                      //.on("mousedown",d=>{radialBrush.call(brush);})
+                     
+                     // .call(brush);
+                     
 
-    
-  
-    d3.selectAll("path.resize")
-      .attr("fill","gray")
-      .style("opacity",.5)
-      .style("cursor","grab");
+          var brushLegendE = view.append("g")
+                                  .attr("id","brushLegendE")
+                                  .attr("font-family", "sans-serif")
+                                      .attr("font-size", 10)
+                                      .append("text")
+                                      .text("");
 
-    d3.select("path.extent").style("cursor","move")
+          var brushLegendW = view.append("g")
+          .attr("id","brushLegendW")
+          .attr("font-family", "sans-serif")
+              .attr("font-size", 10)
+              .append("text").text("");
+
+
+          var radialBrush= view.append("g")
+                        .attr("stroke","gray")
+                        .style("opacity",.5)
+                        .attr("fill","transparent")
+                        .attr("id","brush")
+                        .call(brush);
+                      
+                                          
+
+            d3.selectAll("path.resize")
+              .attr("fill","gray")
+              .style("opacity",.5)
+              .style("cursor","grab");
+
+            d3.select("path.extent").style("cursor","move")
+
+                     
 
 
      var xticks = x.ticks(18);
@@ -3218,6 +3292,7 @@ var radialBrush= view.append("g")
                       
                       d3.selectAll("text").style("user-select","none")
                       radialBrush.raise();
+                     // brushCircle.lower();
       loadType();
 
     }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Chronotype error: dataset " + id + " is invalid.");console.log(error);}); 
