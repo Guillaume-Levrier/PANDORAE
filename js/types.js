@@ -1969,6 +1969,7 @@ var chrono  = d3.lineRadial()
      // const clusters = [];
       const links = []; // Declaring links as empty array
       const nodeDocs = [];
+      var currentNodes = [];
      // var codeFreq = {};
       const csl_material = {
         "paper-conference": "event",
@@ -3050,7 +3051,18 @@ function circularbrush() {
 		d3_window.on("mousemove.brush", null).on("mouseup.brush", null);
 
     currentBrush = [x.invert(brush.extent()[0]),x.invert(brush.extent()[1])];
-    console.log(currentBrush)
+    
+    currentNodes=[];
+
+    function dateTest(node){
+      if (node.date>currentBrush[0]&&node.date<currentBrush[1]) {
+        return true
+      } else return false;
+    }
+
+    currentNodes = nodeDocs.filter(d=>dateTest(d));
+
+    // restart simulation here
 
 		//_circularbrushDispatch.brushend();
 	}
@@ -3077,9 +3089,13 @@ view.append("g")
     .attr("stroke","darkgray")
     .attr("fill","transparent")
     .attr("id","brush")
-    .call(brush);
+    .call(brush)
+    .lower();
+
+    
   
     d3.selectAll("path.resize").attr("fill","darkgray").style("cursor","grab")
+    d3.select("path.extent").style("cursor","move")
 
 
      var xticks = x.ticks(18);
@@ -3103,25 +3119,12 @@ view.append("g")
                 M${d3.pointRadial(x(d), innerRadius-10)}
                 L${d3.pointRadial(x(d), outerRadius+20)}
               `))
-            
-
           .call(g => g.append("text")
-            //.append("text")
-              
-             // .attr("xlink:href", d => d.id.href)
              .attr("x",d=> d3.pointRadial(x(d), innerRadius-30)[0])
              .attr("y",d=> d3.pointRadial(x(d), innerRadius-30)[1])
               .text(d3.utcFormat("%Y"))));
-              
-              view.on("mousemove", d=>{
-                    //absurd results for now
-                    
-                  // console.log(x.invert(d3.event.x));
-                
-              });
 
               view.append("g").call(xAxis);
-
 
             var  yAxis = g => g
               .attr("text-anchor", "middle")
@@ -3137,9 +3140,7 @@ view.append("g")
                         if(Number.isInteger(d)&&d<clustersNest.length){
                          return color(d)
                       } else {return "rgba(0,0,0,.2)"}
-                    }
-                      )
-                      
+                    })
                       .attr("r", y))
                   .call(g => g.append("text")
                       .attr("y", d => -y(d+.5))
@@ -3155,10 +3156,11 @@ view.append("g")
                       .attr("stroke", "none")))
 
                       view.append("g").call(yAxis);
-
-        
+                      
+                      d3.selectAll("text").style("user-select","none")
 
       loadType();
+
     }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Chronotype error: dataset " + id + " is invalid.");console.log(error);}); 
 //======== END OF DATA CALL (PROMISES) ===========
 
