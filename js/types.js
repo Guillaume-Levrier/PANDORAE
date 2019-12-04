@@ -1854,14 +1854,14 @@ const chronotype = (id, links) => { // When called, draw the chronotype
       
   var view = svg.append("g") // Appending a group to SVG
                 .attr("id", "view"); // CSS viewfinder properties
-/*
+
   zoom.scaleExtent([0.1, 20]) // Extent to which one can zoom in or out
                 .translateExtent([[-Infinity, -Infinity], [Infinity, Infinity]]) // Extent to which one can go up/down/left/right
 .on("zoom", e=> {zoomed(d3.event.transform)}); 
-*/
+
 
 var innerRadius = height/3.5;
-var outerRadius = height/2;
+var outerRadius = height/2.25;
 
   //============ RESET ============
   d3.select("#reset").on("click", resetted); // Clicking the button "reset" triggers the "resetted" function
@@ -2787,6 +2787,7 @@ var catCircles = view.selectAll("catCircles")
 */
 
 // Circular Brush, based on Elijah Meeks https://github.com/emeeks/d3.svg.circularbrush
+var currentBrush;
 
 function circularbrush() {
 	var _extent = [0,Math.PI * 2];
@@ -2801,7 +2802,7 @@ function circularbrush() {
 	var d3_window = d3.select(window);
 	var _origin;
 	var _brushG;
-	var _handleSize = .2;
+	var _handleSize = .1;
 	var _scale = d3.scaleLinear().domain(_extent).range(_extent);
 	var _tolerance = 0.00001;
 
@@ -2818,7 +2819,7 @@ function circularbrush() {
 		.data(_brushData)
 		.enter()
 		.insert("path", "path.resize")
-		.attr("d", _arc)
+    .attr("d", _arc)
 		.attr("class", function(d) {return d.class + " circularbrush"})
 
 		_brushG.select("path.extent")
@@ -2966,7 +2967,7 @@ function circularbrush() {
 			.on("mouseup.brush", extentUp);
 		}
 
-		_circularbrushDispatch.brushstart();
+		//_circularbrushDispatch.brushstart();
 
 	}
 
@@ -3031,7 +3032,7 @@ function circularbrush() {
 
 		_extent = ([_newStartAngle,_newEndAngle]);
 
-		_circularbrushDispatch.brush();
+		//_circularbrushDispatch.brush();
 
 	}
 
@@ -3048,7 +3049,10 @@ function circularbrush() {
 		_brushData = _newBrushData;
 		d3_window.on("mousemove.brush", null).on("mouseup.brush", null);
 
-		_circularbrushDispatch.brushend();
+    currentBrush = [x.invert(brush.extent()[0]),x.invert(brush.extent()[1])];
+    console.log(currentBrush)
+
+		//_circularbrushDispatch.brushend();
 	}
 
 	function updateBrushData() {
@@ -3059,27 +3063,24 @@ function circularbrush() {
 		];
 	}
 
+
 }
 
 //cf http://bl.ocks.org/emeeks/5850fa6583bfd90e7899
 
 var brush = circularbrush()
   .range([0, 2 * Math.PI])
-  .innerRadius(innerRadius)
-  .outerRadius(outerRadius+15);
-  //.on("brush", pieBrush);
+  .innerRadius(innerRadius-5)
+  .outerRadius(outerRadius+15)
 
 view.append("g")
-    .attr("fill","rgba(25,85,122,.3)")
+    .attr("stroke","darkgray")
+    .attr("fill","transparent")
     .attr("id","brush")
     .call(brush);
   
-    view.on("click",d=>{console.log(brush.extent()[0])})
+    d3.selectAll("path.resize").attr("fill","darkgray").style("cursor","grab")
 
-  function pieBrush() {
-    //var extent = ;
-    console.log("From " + months[Math.round(extent[0])] + " till " + months[Math.round(extent[1])] + "")
-  }
 
      var xticks = x.ticks(18);
      xticks.shift()
@@ -3174,8 +3175,8 @@ view.append("g")
               .call(yAxis);
 */
               
-/*
-  svg.call(zoom).on("dblclick.zoom", null); // Zoom and deactivate doubleclick zooming
+
+  //svg.call(zoom).on("dblclick.zoom", null); // Zoom and deactivate doubleclick zooming
 
 
    zoomed =(thatZoom) => {
@@ -3184,7 +3185,7 @@ view.append("g")
     //gX.call(xAxis.scale(thatZoom.rescaleX(x)));
     //gY.call(yAxis.scale(thatZoom.rescaleY(y)));
   }
-*/
+
   ipcRenderer.send("console-logs", "Starting chronotype"); // Starting Chronotype
 }; // Close Chronotype function
 
