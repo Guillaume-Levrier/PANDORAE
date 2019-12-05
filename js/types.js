@@ -2525,6 +2525,26 @@ function circularbrush() {
 
     currentNodes = nodeDocs.filter(d=>dateTest(d));
 
+    var currentList = [];
+    
+    currentNodes.forEach(d=>currentList.push({title:d.title,id:d.id}))
+
+    var currentDocList = "<ul>";
+
+    currentList.forEach(d=>{
+      currentDocList = currentDocList + "<li id="+d.id+">"+d.title+"</li>";
+    })
+
+    currentDocList= currentDocList + "<ul>";
+    
+    tooltip.innerHTML = currentDocList;
+
+    currentList.forEach(d=>{
+      document.getElementById(d.id).addEventListener("click",e=>{
+        
+           })
+        })
+    
     node = node
     .data(currentNodes, item => item) // Select all relevant nodes
     .exit()
@@ -2560,8 +2580,8 @@ function circularbrush() {
     .on("click", d => {
       shell.openExternal("https://dx.doi.org/" + d.DOI);
     }) // On click, open url in new tab
-    .on("mouseover", HighLightandDisplay(0.2)) // On hover, HighLightandDisplay
-    .on("mouseout", mouseOut) // On mouseout, mouseOute
+    //.on("mouseover", HighLightandDisplay(0.2)) // On hover, HighLightandDisplay
+    //.on("mouseout", mouseOut) // On mouseout, mouseOute
     .raise() // Display above nodes and the rest
     .merge(nodetext) // Merge the nodes
     .call(
