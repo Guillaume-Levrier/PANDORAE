@@ -2624,16 +2624,12 @@ function circularbrush() {
   //======== ZOOM & RESCALE ===========
         
   svg.call(zoom).on("dblclick.zoom", null) // Zoom and deactivate doubleclick zooming
-                //.on("mousedown.zoom", d=>{if(brushing){return null}})
+                .on("mousedown.zoom", d=>{if(brushing){return null}})
 
    zoomed = (thatZoom) => {
-    if(brushing){
       thatZoom.x=0;
       thatZoom.y=0,
       view.attr("transform", thatZoom);  
-    } else {
-      view.attr("transform", thatZoom);
-    }
   }
 
   ipcRenderer.send("console-logs", "Starting chronotype"); // Starting Chronotype
