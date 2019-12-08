@@ -1833,6 +1833,7 @@ const chronotype = (id) => { // When called, draw the chronotype
 - select several periods at once
 - add option to display doc titles
 */
+
 //========== SVG VIEW =============
   var svg = d3.select(xtype)
     .append("svg")
@@ -1850,7 +1851,7 @@ const chronotype = (id) => { // When called, draw the chronotype
 
 var innerRadius = height/3.5;
 var outerRadius = height/2.25;
-
+var brushing;
   //============ RESET ============
   d3.select("#reset").on("click", resetted); // Clicking the button "reset" triggers the "resetted" function
 
@@ -2074,11 +2075,9 @@ var midDate;
         });
 
 //========= CHART DISPLAY ===========
-var radialBars= view.append("g")
-                      .attr("id","radialBars")
+var radialBars = view.append("g").attr("id","radialBars")
                      
-      clustersNest.forEach(corpus=>{
-
+    clustersNest.forEach(corpus=>{
         radialBars.append("g")
                   .selectAll("path")
                   .data(corpus.radialVal)
@@ -2160,101 +2159,12 @@ var radialBars= view.append("g")
           .attr("y", d => d.y);
       }
 
-      function forcedragstarted(d) {
-        // On drag, start dragging behaviour
-        if (!d3.event.active) simulation.alpha(1).restart(); // Reheat all force graph
-        d.fx = d.x;
-        d.fy = d.y;
-      }
-
-      function forcedragged(d) {
-        // When dragged, the coordinates of the
-        d.fx = d3.event.x; // dragged node is relatively modified
-        d.fy = d3.event.y; // based on pointer position
-      }
-
-      function forcedragended(d) {
-        if (!d3.event.active) simulation.alpha(1).restart(); // When dragging stops, reheat force graph
-        d.fx = null;
-        d.fy = null;
-      }
-
-      //============== HOVER ==============
-      var linkedByIndex = {}; // No links are highlight by default
-
-      links.forEach(d => {
-        linkedByIndex[d.source.index + "," + d.target.index] = 1;
-      }); //
-
-      // Check the dictionary to see if nodes are linked
-      function isConnected(a, b) {
-        return (
-          linkedByIndex[a.index + "," + b.index] ||
-          linkedByIndex[b.index + "," + a.index] ||
-          a.index == b.index
-        );
-      }
-
-      // Fade nodes on hover
-      var HighLightandDisplay = opacity => {
-        return function(d) {
-          // Display tooltip
-          d3.select("#tooltip")
-            .transition()
-            .duration(200)
-            .style("display", "block");
-          d3.select("#tooltip").html(
-            "<strong>" +
-              d.title +
-              "</strong> <br/>" +
-              d.authors +
-              "<br/>" +
-              formatTime(d.date) +
-              "<br/>" +
-              d.category +
-              " | " +
-              d.type +
-              '<br/><i class="material-icons">' +
-              d.num +
-              "</i><br/>" //+
-            //d.desc + '<br/><br/>' +
-            // d.DOI + '<br/>'
-            // +
-            //'Source: <a target="_blank" href="'+
-            //d.URL+'">'+
-            //d.URL+'</a>'
-          );
-
-//          ipcRenderer.send("console-logs", "Hovering " + JSON.stringify(d)); // Send message in the "console"
-
-          // check all other nodes to see if they're connected
-          node.style("opacity", function(o) {
-            thisOpacity = isConnected(d, o) ? 1 : opacity;
-            return thisOpacity;
-          });
-          nodetext.style("opacity", function(o) {
-            thisOpacity = isConnected(d, o) ? 1 : opacity;
-            return thisOpacity;
-          });
-          link.style("stroke-opacity", function(o) {
-            return o.source === d || o.target === d ? 1 : opacity;
-          });
-        };
-      };
-
-      const mouseOut = () => {
-        node.style("stroke-opacity", 1);
-        node.style("opacity", 1);
-        link.style("stroke-opacity", 1);
-        link.style("stroke", "#ddd");
-        nodetext.style("opacity", 1);
-        d3.select("#tooltip").style("display", "none");
-      };
 
 
 // Circular Brush, based on Elijah Meeks https://github.com/emeeks/d3.svg.circularbrush
 
 var currentBrush;
+
 
 function circularbrush() {
 	var _extent = [0,Math.PI * 2];
@@ -2400,7 +2310,8 @@ function circularbrush() {
 
 	function resizeDown(d) {
     var _mouse = d3.mouse(_brushG.node());
-    
+    brushing=true;
+
 		if (_brushData[0] === undefined) {
 			_brushData[0] = d;
 		}
@@ -2411,7 +2322,7 @@ function circularbrush() {
 		if (d.class == "resize e") {
 			d3_window
 			.on("mousemove.brush", function() {resizeMove("e")})
-			.on("mouseup.brush", extentUp);
+      .on("mouseup.brush", extentUp);   
 		}
 		else if (d.class == "resize w") {
 			d3_window
@@ -2515,6 +2426,8 @@ function circularbrush() {
 		_brushData = _newBrushData;
 		d3_window.on("mousemove.brush", null).on("mouseup.brush", null);
 
+    brushing=false;
+
     currentNodes=[];
 
     function dateTest(node){
@@ -2560,7 +2473,8 @@ function circularbrush() {
     .style("cursor", "context-menu") // Type of cursor on node hover
     .style("opacity", 0.9) // Node opacity
     .raise() // Nodes are displayed above the rest
-    .merge(node); // Merge the nodes
+    .merge(node)
+    .lower(); // Merge the nodes
 
   //Node icons are nodes displayed on top of Nodes
   nodetext = nodetext
@@ -2583,13 +2497,8 @@ function circularbrush() {
     //.on("mouseover", HighLightandDisplay(0.2)) // On hover, HighLightandDisplay
     //.on("mouseout", mouseOut) // On mouseout, mouseOute
     .raise() // Display above nodes and the rest
-    .merge(nodetext) // Merge the nodes
-    .call(
-      d3.drag() // Dragging behaviour
-        .on("start", forcedragstarted)
-        .on("drag", forcedragged)
-        .on("end", forcedragended)
-    );
+    .merge(nodetext); // Merge the nodes
+   
 
     nodetext.append("title").text(d => d.title); // Hovering a node displays its title as "alt"
 
@@ -2666,7 +2575,10 @@ function circularbrush() {
           .call(g => g.append("text")
              .attr("x",d=> d3.pointRadial(x(d), innerRadius-30)[0])
              .attr("y",d=> d3.pointRadial(x(d), innerRadius-30)[1])
-              .text(d3.utcFormat("%Y"))));
+              .text(d3.utcFormat("%Y"))
+              .clone(true).lower()
+                      .attr("stroke", "white")
+                ));
 
               view.append("g").call(xAxis);
 
@@ -2712,10 +2624,16 @@ function circularbrush() {
   //======== ZOOM & RESCALE ===========
         
   svg.call(zoom).on("dblclick.zoom", null) // Zoom and deactivate doubleclick zooming
-                .on("mousedown.zoom", null)
+                //.on("mousedown.zoom", d=>{if(brushing){return null}})
 
    zoomed = (thatZoom) => {
-    view.attr("transform", thatZoom);
+    if(brushing){
+      thatZoom.x=0;
+      thatZoom.y=0,
+      view.attr("transform", thatZoom);  
+    } else {
+      view.attr("transform", thatZoom);
+    }
   }
 
   ipcRenderer.send("console-logs", "Starting chronotype"); // Starting Chronotype
