@@ -93,6 +93,7 @@ const scopusConverter = dataset => {
       }
     } catch (err) {
       ipcRenderer.send("chaeros-failure", JSON.stringify(err)); // On failure, send error notification to main process
+      ipcRenderer.send("unpulse", true);
       ipcRenderer.send("console-logs", JSON.stringify(err)); // On failure, send error to console
     } finally {
       pandodb.open();
@@ -107,6 +108,7 @@ const scopusConverter = dataset => {
   });
 
   ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
+  ipcRenderer.send("unpulse", true);
   ipcRenderer.send(
     "console-logs",
     "scopusConverter successfully converted " + dataset
@@ -229,6 +231,7 @@ const scopusGeolocate = dataset => {
         pandodb.enriched.put(doc);
 
         ipcRenderer.send("chaeros-notification", "Affiliations geolocated"); //Send success message to main process
+        ipcRenderer.send("unpulse", true);
         ipcRenderer.send(
           "console-logs",
           "scopusGeolocate successfully added geolocations on " + dataset
@@ -362,6 +365,7 @@ const scopusRetriever = (user, query, bottleRate) => {
                       "chaeros-notification",
                       "Scopus API data retrieved"
                     ); // signal success to main process
+                    ipcRenderer.send("unpulse", true);
                     ipcRenderer.send(
                       "console-logs",
                       "Scopus dataset on " +
@@ -379,6 +383,7 @@ const scopusRetriever = (user, query, bottleRate) => {
       })
       .catch(e => {
         ipcRenderer.send("chaeros-failure", e); // Send error to main process
+        ipcRenderer.send("unpulse", true);
       });
   });
 };
@@ -466,6 +471,7 @@ const clinTriRetriever = (query) => {
                           "chaeros-notification",
                           "clinical trials for " + query + " retrieved"
                         );
+                        ipcRenderer.send("unpulse", true);
                           win.close();
                         }, 500); // Close Chaeros
                     })  
@@ -474,6 +480,7 @@ const clinTriRetriever = (query) => {
               })
       .catch(e => {
         ipcRenderer.send("chaeros-failure", e); // Send error to main process
+        ipcRenderer.send("unpulse", true);
       });
     });
 };
@@ -599,6 +606,7 @@ const dataWriter = (destination, importName, content) => {
     "chaeros-notification",
     "dataset loaded into " + destination
   );
+  ipcRenderer.send("unpulse", true);
   setTimeout(() => {
     win.close();
   }, 1000);
@@ -622,6 +630,7 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
     "chaeros-notification",
     "Creating collection " + collectionName
   ); // Send message to main Display
+  
 
   pandodb.csljson.get(id).then(data => {
     let timer = 2000;
@@ -706,6 +715,7 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
                       "chaeros-notification",
                       "Collection created"
                     ); // Send success message to main Display
+                    ipcRenderer.send("unpulse", true);
                     win.close();
                   }, 2000);
                 } // If all responses have been recieved, delay then close chaeros
@@ -778,6 +788,7 @@ const altmetricRetriever = (id, user) => {
                     "chaeros-notification",
                     count + " Altmetric references added"
                   );
+                  ipcRenderer.send("unpulse", true);
                   file.altmetricData = res;
                 }
               });
@@ -795,6 +806,7 @@ const altmetricRetriever = (id, user) => {
             "chaeros-notification",
             "Altmetric enrichment successful"
           ); // Send success message to main Display
+          ipcRenderer.send("unpulse", true);
           ipcRenderer.send(
             "console-logs",
             "Altmetric enrichment of " + id + " successful."

@@ -1377,6 +1377,7 @@ const twitterCat = () => {
       content: classifiedData
     }).then(()=>{
       ipcRenderer.send("chaeros-notification", "imported categorized tweets"); // Sending notification to console
+      ipcRenderer.send("unpulse", true);
       ipcRenderer.send("console-logs", "Imported categorized tweets "+datasetName); // Sending notification to console  
       setTimeout(() => {
         closeWindow();
@@ -1406,6 +1407,7 @@ const twitterThread = () => {
       content: thread
     }).then(()=>{
       ipcRenderer.send("chaeros-notification", "imported thread"); // Sending notification to console
+      ipcRenderer.send("unpulse", true);
       ipcRenderer.send("console-logs", "Imported thread"+datasetName); // Sending notification to console
       setTimeout(() => {
          closeWindow();
@@ -1426,6 +1428,7 @@ const localUpload = () => {
     pandodb.open();
     pandodb.system.add(data).then(()=>{
       ipcRenderer.send("chaeros-notification", "imported local dataset"); // Sending notification to console
+      ipcRenderer.send("unpulse", true);
       ipcRenderer.send("console-logs", "Imported local dataset "+data.id); // Sending notification to console  
       setTimeout(() => {
         closeWindow();

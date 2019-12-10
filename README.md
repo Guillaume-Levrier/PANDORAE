@@ -11,7 +11,7 @@ Please put your extracted PANDORÆ folder/app where you usually put apps on your
 
 #### Roadmap for v1.0.02
 - update tutorial
-- make chronotype radial
+- make chronotype radial (WIP)
 - presentation mode:
     1. better function standardisation
     2. slide saving in type memory
@@ -20,6 +20,7 @@ Please put your extracted PANDORÆ folder/app where you usually put apps on your
 - continuous integration
 - direct Twitter and WoS API requests
 - HAL/ARXIV requests?
+- Localize main field/console commands
 
 #### Wiki
 - API documentation (WIP)
