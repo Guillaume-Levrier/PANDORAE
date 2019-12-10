@@ -263,6 +263,10 @@ ipcMain.on("chaeros-notification", (event, message, options) => {
   mainWindow.webContents.send("chaeros-notification", message, options);
 });
 
+ipcMain.on("unpulse", (event, message, options) => {
+  mainWindow.webContents.send("unpulse", message, options);
+});
+
 ipcMain.on("chaeros-is-ready", (event, arg) => {
   let action = powerValveArgsArray[powerValveArgsArray.length - 1];
   event.sender.send(

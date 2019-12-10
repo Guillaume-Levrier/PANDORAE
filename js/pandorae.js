@@ -411,6 +411,13 @@ ipcRenderer.on("chaeros-failure", (event, message) => {
   ipcRenderer.send("audio-channel", "error");
 });
 
+ipcRenderer.on("unpulse", (event, message) => {
+  pulse(1, 1, 10,true);
+});
+
+
+
+
 // ========== CORE ACTIONS ===========
 
 var commandReturn = "";
