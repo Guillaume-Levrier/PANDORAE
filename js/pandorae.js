@@ -78,33 +78,7 @@ let coreLogoArchive = "";
 
 document.getElementById("version").innerHTML = version;
 
-let coreLogo = [
-  "P",
-  "&nbsp;",
-  "A",
-  "&nbsp;",
-  "N",
-  "&nbsp;",
-  "D",
-  "&nbsp;",
-  "O",
-  "&nbsp;",
-  "R",
-  "&nbsp;",
-  "Æ",
-  "&nbsp;",
-  " ",
-  "-",
-  " ",
-  "&nbsp;",
-  "C",
-  "&nbsp;",
-  "O",
-  "&nbsp;",
-  "R",
-  "&nbsp;",
-  "E"
-];
+let coreLogo = CM.global.coreLogo;
 
 const nameDisplay = name => {
   document
@@ -180,6 +154,11 @@ let iconDiv = document.getElementById("icons");
 
 let menu = document.getElementById("menu");
 let consoleDiv =document.getElementById("console")
+
+document.getElementById("fluxMenu").innerText=CM.menu.flux;
+document.getElementById("type").innerText=CM.menu.type;
+document.getElementById("quitBut").innerText=CM.menu.quit;
+document.getElementById("tutostartmenu").innerText=CM.menu.returnToTutorial;
 
 // Menu behaviors
 let toggledMenu = false;
