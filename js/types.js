@@ -35,10 +35,7 @@ source.style.cursor = "pointer";
 
 source.addEventListener("click",e=>{
   fs.writeFile(dialog.showSaveDialog({"defaultPath":datasetName+".json"}),JSON.stringify(data),()=>{
-    ipcRenderer.send(
-      "console-logs",
-      "Downloading dataset "+data.id+".json"
-    );
+    ipcRenderer.send("console-logs","Downloading dataset "+data.id+".json");
   })
 
 })
@@ -4995,14 +4992,6 @@ const typeSwitch = (type, id) => {
       break;
 
   }
-
-  ipcRenderer.send(
-    "console-logs",
-    "typesSwitch started a " +
-      type +
-      " process using the following dataset(s) : " +
-      JSON.stringify(id)
-  );
 
   document.getElementById("source").innerText = "Source: " + id;
 };

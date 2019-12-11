@@ -39,7 +39,9 @@ fs.readFile(appPath+"/package.json","utf8", (err, data) => {
 
 // for export purposes
 var currentType;           // Once a type is started, know which one
-var presentationStep = new Array;
+var presentationStep = [];
+
+var CM = CMT["EN"];
 
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that
@@ -50,6 +52,7 @@ if (!!window.SharedWorker) {
   // If the SharedWorker doesn't exist yet
   var multiThreader = new SharedWorker("js/mul[type]threader.js"); // Create a SharedWorker named multiThreader based on that file
 
+  multiThreader.port.postMessage({type:"checkup", validation:CM.global.console.workerValidation});
   multiThreader.port.onmessage = res => {
   
     // If multiThreader sends a message
@@ -59,10 +62,12 @@ if (!!window.SharedWorker) {
     }
   };
 
+
   multiThreader.onerror = err => {
     // If the multiThreader reports an error
     ipcRenderer.send("audio-channel", "error");
-    ipcRenderer.send("console-logs", "Worker failed to start."); // Send an error message to the console
+    field.value=CM.global.field.workerError;
+    ipcRenderer.send("console-logs", CM.global.console.workerError); // Send an error message to the console
     ipcRenderer.send("console-logs", JSON.stringify(err)); // Send the actual error content to the console
   };
 }
@@ -188,7 +193,7 @@ const purgeMenuItems = menu => {
 const toggleMenu = () => {
   field.removeEventListener("click", tutorialOpener);
   if (toggledMenu) {
-    ipcRenderer.send("console-logs", "Collapsing menu");
+    ipcRenderer.send("console-logs", CM.global.console.menu.closing);
     if (toggledSecondaryMenu) {
       toggleSecondaryMenu();
       toggleMenu();
@@ -209,7 +214,7 @@ const toggleMenu = () => {
       toggledMenu = false;
     }
   } else {
-    ipcRenderer.send("console-logs", "Opening menu");
+    ipcRenderer.send("console-logs", CM.global.console.menu.opening);
       logostatus();
       menu.style.left = "0px";
       consoleDiv.style.left = "150px";
@@ -454,8 +459,6 @@ const purgeCore = () => {
       document.body.removeChild(document.getElementById(d.id));
       d3.select(d.id).remove();
     });
-
-    ipcRenderer.send("console-logs", "Purging core");
   }
 };
 
@@ -472,14 +475,14 @@ const selectOption = (type, id) => {
     },
     { once: true }
   );
-  field.value = "starting " + type;
+  field.value = CM.global.field.starting + type;
   currentType = {type:type,id:id}
   types.typeSwitch(type, id);
   ipcRenderer.send("audio-channel", "button2");
 
   ipcRenderer.send(
     "console-logs",
-    "Starting with dataset: " + JSON.stringify(id)
+    CM.global.console.starting[0]+ type + CM.global.console.starting[1] + JSON.stringify(id)
   );
 };
 

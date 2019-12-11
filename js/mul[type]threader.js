@@ -5,7 +5,7 @@ onconnect = e => {
     port.postMessage({ type: "notification", dest: dest, msg: msg });
   };
 
-  notifySystem("console-logs", "Multithreading enabled");
+  //notifySystem("console-logs", "Multithreading enabled");
 
   importScripts("../node_modules/d3/dist/d3.min.js");
 
@@ -14,6 +14,13 @@ onconnect = e => {
 // END WORKER SPECIFICITY
 
     switch (message.data.type) {
+
+      case "checkup":
+          notifySystem("console-logs", message.data.validation);
+
+
+      break;
+
       case "gz":
          
         try {
