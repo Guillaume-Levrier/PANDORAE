@@ -445,17 +445,9 @@ const powerValve = (fluxAction, item) => {
       break;
   }
 
-  // Send a carbon-copy of the orders sent to chaeros to the logs
-  ipcRenderer.send(
-    "console-logs",
-    "Sending to CHÆROS action " +
-      fluxAction +
-      " with arguments " +
-      JSON.stringify(fluxArgs) +
-      " " +
-      message
-  );
+  ipcRenderer.send("console-logs","Sending to CHÆROS action " + fluxAction + " with arguments " +JSON.stringify(fluxArgs) + " " + message );
   ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
+  ipcRenderer.send("pulsar", false);
   ipcRenderer.send("window-ids", "flux", remote.getCurrentWindow().id, false);
   remote.getCurrentWindow().close(); // Close flux modal window
 };
@@ -1361,6 +1353,8 @@ Promise.all(corpusRequests).then(status => {
 };
 
 const twitterCat = () => {
+  ipcRenderer.send("coreSignal", "importing categorized tweets"); // Sending notification to console
+  ipcRenderer.send("pulsar", false);
 
   var datasetName = document.getElementById("twitterCatName").value;
   var datasetPath = document.getElementById("twitterCatPathInput").files[0].path;
@@ -1376,8 +1370,8 @@ const twitterCat = () => {
       name: datasetName,
       content: classifiedData
     }).then(()=>{
-      ipcRenderer.send("chaeros-notification", "imported categorized tweets"); // Sending notification to console
-      ipcRenderer.send("unpulse", true);
+      ipcRenderer.send("coreSignal", "imported categorized tweets"); // Sending notification to console
+      ipcRenderer.send("pulsar", true);
       ipcRenderer.send("console-logs", "Imported categorized tweets "+datasetName); // Sending notification to console  
       setTimeout(() => {
         closeWindow();
@@ -1388,6 +1382,9 @@ const twitterCat = () => {
 };
 
 const twitterThread = () => {
+
+  ipcRenderer.send("coreSignal", "importing thread"); // Sending notification to console
+  ipcRenderer.send("pulsar", false);
 
   var datasetName = document.getElementById("twitterThreadName").value;
   var datasetPath = document.getElementById("twitterThread").files[0].path;
@@ -1406,8 +1403,8 @@ const twitterThread = () => {
       name: datasetName,
       content: thread
     }).then(()=>{
-      ipcRenderer.send("chaeros-notification", "imported thread"); // Sending notification to console
-      ipcRenderer.send("unpulse", true);
+      ipcRenderer.send("coreSignal", "imported thread"); // Sending notification to console
+      ipcRenderer.send("pulsar", true);
       ipcRenderer.send("console-logs", "Imported thread"+datasetName); // Sending notification to console
       setTimeout(() => {
          closeWindow();
@@ -1419,7 +1416,8 @@ const twitterThread = () => {
 
 
 const localUpload = () => {
-
+  ipcRenderer.send("coreSignal", "importing local dataset"); // Sending notification to console
+  ipcRenderer.send("pulsar", false);
   var datasetPath = document.getElementById("localUploadPath").files[0].path;
 
   fs.readFile(datasetPath,'utf8',(err,data)=>{
@@ -1427,8 +1425,8 @@ const localUpload = () => {
 
     pandodb.open();
     pandodb.system.add(data).then(()=>{
-      ipcRenderer.send("chaeros-notification", "imported local dataset"); // Sending notification to console
-      ipcRenderer.send("unpulse", true);
+      ipcRenderer.send("coreSignal", "imported local dataset"); // Sending notification to console
+      ipcRenderer.send("pulsar", true);
       ipcRenderer.send("console-logs", "Imported local dataset "+data.id); // Sending notification to console  
       setTimeout(() => {
         closeWindow();

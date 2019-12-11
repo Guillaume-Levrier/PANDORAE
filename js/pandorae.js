@@ -392,14 +392,12 @@ const removeTooltip = () => {
 ipcRenderer.on("coreSignal", (event, fluxAction, fluxArgs, message) => {
   try {
     field.value = message;
-    pulse(1, 1, 10);
   } catch (err) {
     field.value = err;
   }
 });
 
 ipcRenderer.on("chaeros-notification", (event, message, options) => {
-  //pulse(1, 1, 10,true);
   field.value = message;
   if (message === "return to tutorial") {
     slide = options;
@@ -411,8 +409,9 @@ ipcRenderer.on("chaeros-failure", (event, message) => {
   ipcRenderer.send("audio-channel", "error");
 });
 
-ipcRenderer.on("unpulse", (event, message) => {
-  pulse(1, 1, 10,true);
+
+ipcRenderer.on("pulsar", (event, message) => {
+  pulse(1, 1, 10,message);
 });
 
 
