@@ -263,8 +263,8 @@ ipcMain.on("chaeros-notification", (event, message, options) => {
   mainWindow.webContents.send("chaeros-notification", message, options);
 });
 
-ipcMain.on("unpulse", (event, message, options) => {
-  mainWindow.webContents.send("unpulse", message, options);
+ipcMain.on("pulsar", (event, message) => {
+  mainWindow.webContents.send("pulsar", message);
 });
 
 ipcMain.on("chaeros-is-ready", (event, arg) => {
