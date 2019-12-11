@@ -52,7 +52,7 @@ if (!!window.SharedWorker) {
   // If the SharedWorker doesn't exist yet
   var multiThreader = new SharedWorker("js/mul[type]threader.js"); // Create a SharedWorker named multiThreader based on that file
 
-  multiThreader.port.postMessage({type:"checkup", validation:CM.global.console.workerValidation});
+  multiThreader.port.postMessage({type:"checkup", validation:CM.console.workerValidation});
   multiThreader.port.onmessage = res => {
   
     // If multiThreader sends a message
