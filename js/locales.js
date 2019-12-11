@@ -1,5 +1,12 @@
 const CMT = {"EN":{
+        "menu":{
+            "flux":"flux",
+            "type":"type",
+            "quit":"quit",
+            "returnToTutorial":"return to tutorial"
+        },
         "global":{
+            "coreLogo":["P","&nbsp;","A","&nbsp;","N","&nbsp;","D","&nbsp;","O","&nbsp;","R","&nbsp;","Æ","&nbsp;"," ","-"," ","&nbsp;","C","&nbsp;","O","&nbsp;","R","&nbsp;","E"],
             "field":{
             "starting":"starting",
             "error": "system error",
