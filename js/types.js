@@ -2556,8 +2556,8 @@ var lastDate = d3.max(nodeDocs, d => d.date);
 
 x.domain([firstDate,lastDate]).nice()
 
-     var xticks = x.ticks(d3.timeYear.every(1));
-     //xticks.shift()
+     var xticks = x.ticks(20);
+     xticks.shift();
      
     var xAxis = g => g
       .attr("font-family", "sans-serif")
