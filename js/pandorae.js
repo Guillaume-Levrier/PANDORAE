@@ -67,7 +67,7 @@ if (!!window.SharedWorker) {
     // If the multiThreader reports an error
     ipcRenderer.send("audio-channel", "error");
     field.value=CM.global.field.workerError;
-    ipcRenderer.send("console-logs", CM.global.console.workerError); // Send an error message to the console
+    ipcRenderer.send("console-logs", CM.console.workerError); // Send an error message to the console
     ipcRenderer.send("console-logs", JSON.stringify(err)); // Send the actual error content to the console
   };
 }
@@ -172,7 +172,7 @@ const purgeMenuItems = menu => {
 const toggleMenu = () => {
   field.removeEventListener("click", tutorialOpener);
   if (toggledMenu) {
-    ipcRenderer.send("console-logs", CM.global.console.menu.closing);
+    ipcRenderer.send("console-logs", CM.console.menu.closing);
     if (toggledSecondaryMenu) {
       toggleSecondaryMenu();
       toggleMenu();
@@ -193,7 +193,7 @@ const toggleMenu = () => {
       toggledMenu = false;
     }
   } else {
-    ipcRenderer.send("console-logs", CM.global.console.menu.opening);
+    ipcRenderer.send("console-logs", CM.console.menu.opening);
       logostatus();
       menu.style.left = "0px";
       consoleDiv.style.left = "150px";
@@ -461,7 +461,7 @@ const selectOption = (type, id) => {
 
   ipcRenderer.send(
     "console-logs",
-    CM.global.console.starting[0]+ type + CM.global.console.starting[1] + JSON.stringify(id)
+    CM.console.starting[0]+ type + CM.console.starting[1] + JSON.stringify(id)
   );
 };
 
