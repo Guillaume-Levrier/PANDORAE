@@ -1878,7 +1878,7 @@ var brushing;
                   .innerRadius(d => y(d.zone))
                   .outerRadius(d => y(parseFloat(d.zone+(d.value/(maxDocs+1)))))
                   .startAngle(d => x(d.date))
-                  .endAngle(d => x(d.date.setMonth(d.date.getMonth()+1)))
+                  .endAngle(d => x(d.date.setMonth(d.date.getMonth()+.2)))
                   .padAngle(0)
                   .padRadius(innerRadius)
 
@@ -2550,8 +2550,14 @@ function circularbrush() {
 
             d3.select("path.extent").style("cursor","move")
 
-     var xticks = x.ticks(18);
-     xticks.shift()
+// cheap hack to recompute relevant domain
+var firstDate = d3.min(nodeDocs, d => d.date);
+var lastDate = d3.max(nodeDocs, d => d.date);
+
+x.domain([firstDate,lastDate]).nice()
+
+     var xticks = x.ticks(d3.timeYear.every(1));
+     //xticks.shift()
      
     var xAxis = g => g
       .attr("font-family", "sans-serif")
@@ -2576,6 +2582,8 @@ function circularbrush() {
               .clone(true).lower()
                       .attr("stroke", "white")
                 ));
+
+
 
               view.append("g").call(xAxis);
 
