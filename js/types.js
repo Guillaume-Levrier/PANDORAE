@@ -2437,7 +2437,7 @@ function circularbrush() {
 
     var currentList = [];
     
-    currentNodes.forEach(d=>currentList.push({title:d.title,id:d.id,zone:d.zone}))
+    currentNodes.forEach(d=>currentList.push({title:d.title,id:d.id,zone:d.zone,DOI:d.DOI}))
 
     var currentDocList = "<ul>";
 
@@ -2451,8 +2451,18 @@ function circularbrush() {
 
     currentList.forEach(d=>{
       document.getElementById(d.id).addEventListener("click",e=>{
-        
-           })
+         shell.openExternal("https://dx.doi.org/" + d.DOI);
+          })
+
+           document.getElementById(d.id).addEventListener("mouseover",e=>{
+              node.style("opacity",".2");
+              document.getElementById("node"+e.target.id).style.opacity = 1;
+            })
+
+            document.getElementById(d.id).addEventListener("mouseout",e=>{
+              node.style("opacity",1);
+            })
+
         })
     
     node = node
@@ -2464,7 +2474,7 @@ function circularbrush() {
     .append("circle") // Append the nodes
     .attr("r",2) // Node radius
     .attr("fill",  d => color(d.zone)) // Node color
-    .attr("id", d => d.id) // Node ID (based on code)
+    .attr("id", d => "node"+d.id) // Node ID (based on code)
     .style("stroke", "white") // Node stroke color
     .style("stroke-width", 0.1) // Node stroke width
     .style("cursor", "context-menu") // Type of cursor on node hover
@@ -2488,9 +2498,9 @@ function circularbrush() {
     .style("fill", "white") // Icon color
     .style("font-size", "1.4px") // Icon size
     .text(d => d.type) // Icon
-    .on("click", d => {
-      shell.openExternal("https://dx.doi.org/" + d.DOI);
-    }) // On click, open url in new tab
+    //.on("click", d => {
+     // shell.openExternal("https://dx.doi.org/" + d.DOI);
+   // }) // On click, open url in new tab
     //.on("mouseover", HighLightandDisplay(0.2)) // On hover, HighLightandDisplay
     //.on("mouseout", mouseOut) // On mouseout, mouseOute
     .raise() // Display above nodes and the rest
