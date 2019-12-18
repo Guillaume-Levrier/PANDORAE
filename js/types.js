@@ -2437,12 +2437,12 @@ function circularbrush() {
 
     var currentList = [];
     
-    currentNodes.forEach(d=>currentList.push({title:d.title,id:d.id}))
+    currentNodes.forEach(d=>currentList.push({title:d.title,id:d.id,zone:d.zone}))
 
     var currentDocList = "<ul>";
 
     currentList.forEach(d=>{
-      currentDocList = currentDocList + "<li id="+d.id+">"+d.title+"</li>";
+      currentDocList = currentDocList + "<li style='color:"+color(d.zone)+"' id="+d.id+">"+d.title+"</li>";
     })
 
     currentDocList= currentDocList + "<ul>";
