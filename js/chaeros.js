@@ -257,7 +257,7 @@ const scopusRetriever = (user, query, bottleRate) => {
   const limiter = new bottleneck({
     // Create a bottleneck to prevent API rate limit
     maxConcurrent: 1, // Only one request at once
-    minTime: 1 / parseInt(bottleRate) // Every 500 milliseconds
+    minTime: 1000
   });
 
   ipcRenderer.send(
@@ -330,12 +330,12 @@ const scopusRetriever = (user, query, bottleRate) => {
             headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
             json: true // Answer should be parsed as JSON
           };
-          dataPromises.push(rpn(optionsTotalRequest)); // Push promise in the relevant array
+          dataPromises.push(limiter.schedule(()=>rpn(optionsTotalRequest))); // Push promise in the relevant array
         }
 
-        limiter
-          .schedule(() => Promise.all(dataPromises))
-          .then(scopusResponse => {
+        //limiter
+        //  .schedule(() => Promise.all(dataPromises))
+        Promise.all(dataPromises).then(scopusResponse => {
             for (let i = 0; i < scopusResponse.length; i++) {
               // For each page of (max 200) results
               let retrievedDocuments =
