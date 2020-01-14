@@ -2162,7 +2162,6 @@ var radialBars = view.append("g").attr("id","radialBars")
 
 var currentBrush;
 
-
 function circularbrush() {
 	var _extent = [0,Math.PI * 2];
 	var _arc = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius);
@@ -2522,9 +2521,6 @@ function circularbrush() {
 		];
 	}
 }
-
-//cf http://bl.ocks.org/emeeks/5850fa6583bfd90e7899
-
                             
           var brush = circularbrush()
                       .range([0, 2 * Math.PI])
@@ -2564,6 +2560,20 @@ function circularbrush() {
 var firstDate = d3.min(nodeDocs, d => d.date);
 var lastDate = d3.max(nodeDocs, d => d.date);
 
+ 
+function dateFormat() {
+                if (lastDate.getYear()-firstDate.getYear()>20){
+                  return d3.utcFormat("%Y")
+                } else if (lastDate.getYear()-firstDate.getYear()>2) {
+                  return d3.utcFormat("%m/%Y")
+                } else {
+                  return d3.utcFormat("%d/%m/%Y")
+                }
+              }
+
+
+
+
 x.domain([firstDate,lastDate]).nice()
 
      var xticks = x.ticks(20);
@@ -2571,7 +2581,7 @@ x.domain([firstDate,lastDate]).nice()
      
     var xAxis = g => g
       .attr("font-family", "sans-serif")
-      .attr("font-size", 10)
+      .attr("font-size", 8)
       .attr("text-anchor", "middle")
       .attr("id","xAxis")
       .call(g => g.selectAll("g")
@@ -2588,7 +2598,7 @@ x.domain([firstDate,lastDate]).nice()
           .call(g => g.append("text")
              .attr("x",d=> d3.pointRadial(x(d), innerRadius-30)[0])
              .attr("y",d=> d3.pointRadial(x(d), innerRadius-30)[1])
-              .text(d3.utcFormat("%Y"))
+              .text(dateFormat())
               .clone(true).lower()
                       .attr("stroke", "white")
                 ));
