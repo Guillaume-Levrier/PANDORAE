@@ -9,7 +9,7 @@ Download **PANDORÆ version 1.0.01** for [Windows](https://anthropos-ecosystems.
 
 Please put your extracted PANDORÆ folder/app where you usually put apps on your computer (i.e. Program Files on Windows, Applications on macOS). It might work if you don't, but this will solve starting issues.
 
-#### Roadmap for v1.0.02
+#### Roadmap
 - update tutorial
 - make chronotype radial (WIP)
 - presentation mode:
