@@ -11,7 +11,6 @@ Please put your extracted PANDORÆ folder/app where you usually put apps on your
 
 #### Roadmap
 - update tutorial
-- make chronotype radial (WIP)
 - presentation mode:
     1. better function standardisation
     2. slide saving in type memory

@@ -3932,8 +3932,10 @@ requestContent=requestContent+"</ul>"
               });
 
               if (parseInt(d.retweeted_id)) {             // if it is a NaN, returns false
-                document.getElementById(d.retweeted_id).style = "fill : red";
-
+                if (document.getElementById(d.retweeted_id)) {
+                 document.getElementById(d.retweeted_id).style = "fill : red";
+                }
+               
                 var line = (line = d3.line()
                   .x(line => x(line.timespan))
                   .y(line => y(line.indexPosition)));
