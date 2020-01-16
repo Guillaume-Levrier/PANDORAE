@@ -876,7 +876,8 @@ const cmdinput = input => {
     switch (input.substring(13, input.length)) {
       case "normal":
       case "blood-dragon":
-      case "minitel-magis":
+      case "vega":
+      //case "minitel-magis":
         document.body.style.animation = "fadeout 0.5s";
         setTimeout(() => {
           document.body.remove();

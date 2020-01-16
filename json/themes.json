@@ -234,5 +234,74 @@
       "position":"fixed"
     },
     "script": "blood-dragon"
+  },
+  {
+    "theme-name": "vega",
+    "selected": false,
+    "fullscreenable": true,
+    "theme-author": "GL",
+    "theme-type": "svg-canvas",
+    "menu-icon": {},
+    "option-icon": {},
+    "export-icon": {},
+    "theme-background": null,
+    "vega": {
+      "cursor": "crosshair",
+      "z-index": "3",
+      "animation": "fadein 0.7s"
+    },
+    "core-logo": {
+      "position": "absolute",
+      "display": "block",
+      "width": "800px",
+      "top": "2%",
+      "left": "50%",
+      "font-family": "'Noto Sans', 'Noto Sans SC', sans-serif",
+      "letter-spacing": "7px",
+      "font-size": "25px",
+      "margin-left": "-400px",
+      "text-align": "center",
+      "pointer-events": "all",
+      "-webkit-user-select": "none",
+      "-khtml-user-select": "none",
+      "-moz-user-select": "none",
+      "-ms-user-select": "none",
+      "user-select": "none",
+      "z-index": "6",
+      "animation": "fadein 0.7s",
+      "transform": "rotate(0deg) skewX(0deg)"
+    },
+    "version": {  
+      "position": "absolute",
+      "display": "block",
+      "width": "200px",
+      "left": "calc(50% - 100px)",
+      "text-align": "center",
+      "color": "black",
+      "top": "92%",
+      "height":"30px",
+      "font-size": "0.8em",
+      "pointer-events": "all",
+      "-webkit-user-select": "none",
+      "-khtml-user-select": "none",
+      "-moz-user-select": "none",
+      "-ms-user-select": "none",
+      "user-select": "none",
+      "z-index": "6",
+      "animation": "fadein 0.7s",
+      "transform": "rotate(0deg) skewX(0deg)"
+    },
+    "field": {
+      "top": "calc(50% - 30px)",
+      "font-size": "25px",
+      "height":"30px",
+      "color":"white"
+    },
+    "mask": {},
+    "menu": {},
+    "secmenu": {},
+    "thirdmenu": {},
+    "console": {},
+    "script": "vega"
   }
 ]
