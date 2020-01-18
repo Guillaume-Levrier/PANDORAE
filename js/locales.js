@@ -10,8 +10,24 @@ const CMT = {"EN":{
             "field":{
             "starting":"starting",
             "error": "system error",
-            "workerError":"multithreading disabled"
+            "workerError":"multithreading disabled",
+            "loading":"loading"
             }
+        },"mainField":{
+            "changeTheme": "change theme ",
+            "invalidTheme": "invalid theme name",
+            "toggleConsole": "toggle console",
+            "toggleMenu": "toggle menu",
+            "reload": "reload",
+            "fullscreen":"fullscreen",
+            "restart":"restart",
+            "reloadCore":"reload core",
+            "openDevtools":"open devtools",
+            "unlockMenu":"unlock menu",
+            "version":"version",
+            "returnTutorial":"return to tutorial",
+            "startTutorial":"start tutorial",
+            "comNotFound":"command not found"
         },
             "console":{
                 "starting":["Starting process "," using dataset "],
@@ -38,14 +54,13 @@ const CMT = {"EN":{
 
         }},
         "types":{ 
-            "field":{
-
-        },
         "console":{
 
-        }}
+        },
+        "tooltip":{
 
-        ,
+        }
+    },
     "tutorial":{
         "sections":{
             "s1":"Welcome to PANDORÆ<br>&nbsp;<br>&nbsp;<br>",
@@ -56,5 +71,7 @@ const CMT = {"EN":{
 
         }
     
+},"FR":{
+
 }
 }

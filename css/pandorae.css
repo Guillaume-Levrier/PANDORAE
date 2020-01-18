@@ -162,33 +162,8 @@ h1 {
 
 
 /* ============ MENU =========== */
-/*
-#menu-icon{
-  top:25px;
-  left:25px;
-  position: absolute;
-  font-size: 26px;
-  display: flex;
-  transition: 0.3s;
-  z-index: 15;
-  cursor: pointer;
-  background-color: white;
-  border: 1px solid rgb(230,230,230);
-}
 
-#option-icon{
-  top:60px;
-  left:25px;
-  position: absolute;
-  font-size: 26px;
-  display: flex;
-  transition: 0.3s;
-  z-index: 15;
-  cursor: pointer;
-  background-color: white;
-  border: 1px solid rgb(230,230,230);
-}
-*/
+
 #presentationBox {
   position: absolute;
   margin: auto;
@@ -210,36 +185,6 @@ h1 {
   display: inline-block;
 }
 
-/*
-#export-icon{
-  top:95px;
-  left:25px;
-  position: absolute;
-  font-size: 26px;
-  display: flex;
-  transition: 0.3s;
-  z-index: 15;
-  cursor: pointer;
-  background-color: white;
-  border: 1px solid rgb(230,230,230);
-  display: none;
-}
-
-#step-icon{
-  top:25px;
-  left:70px;
-  position: absolute;
-  font-size: 26px;
-  display: flex;
-  transition: 0.3s;
-  z-index: 15;
-  cursor: pointer;
-  background-color: white;
-  border: 1px solid rgb(230,230,230);
-  display: none;
-}
-
-*/
 #aelogo {
   padding: 20%;
   width: 60%;
@@ -375,11 +320,31 @@ h1 {
   transition: 0.3s;
 }
 
-#radiolocale {
+#lang {
+  margin-top : 30px;
   font-size: 10px;
-  padding-top: 50%;
-  display: none;
+  width: 60%;
+  margin-left: 20%;
+  display: flex;
+  justify-content: space-between;
 }
+
+.locale{
+  text-align:center;
+  border: 1px solid black;
+  padding: 3px;
+  cursor: pointer;
+}
+
+.locale:hover{
+  text-align:center;
+  background-color: #141414;
+  color: #FFF;
+  border: 1px solid black;
+  padding: 3px;
+  cursor: pointer;
+}
+
 .tabs {
   text-align: left;
   padding: 10px;

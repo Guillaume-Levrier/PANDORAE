@@ -41,7 +41,32 @@ fs.readFile(appPath+"/package.json","utf8", (err, data) => {
 var currentType;           // Once a type is started, know which one
 var presentationStep = [];
 
-var CM = CMT["EN"];
+
+// =========== LANGUAGE SELECTION ===========
+var CM = CMT["EN"];                                            // Load the EN locale at start
+
+fs.readFile(userDataPath + "/userID/user-id.json", "utf8",     // Check if the user uses another one
+      (err, data) => {
+        data = JSON.parse(data);
+        CM = CMT[data.locale]
+      })
+
+document.getElementById("lang").childNodes.forEach(lg=>{
+  lg.addEventListener("click",e=>{
+    CM=CMT[lg.innerText];
+    fs.readFile(userDataPath + "/userID/user-id.json", "utf8",
+      (err, data) => {
+        data = JSON.parse(data);
+        data.locale=lg.innerText;
+        data = JSON.stringify(data);
+        fs.writeFile(userDataPath + "/userID/user-id.json", data, "utf8", err => {
+          if (err) throw err;
+        });
+      })
+  })
+})
+
+
 
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that
@@ -578,7 +603,6 @@ const savePNG = () => {
 
   document.getElementById('tooltip').style.overflow = "hidden";
 
-
   var datasetName =document.getElementById('source').innerText.slice(8);
   datasetName = datasetName.replace(/\//ig,"_");
   datasetName = datasetName.replace(/:/ig,"+");
@@ -873,7 +897,7 @@ const cmdinput = input => {
   ipcRenderer.send("console-logs", " user$ " + input);
 
   // Theme change
-  if (input.substring(0, 13) === "change theme ") {
+  if (input.substring(0, 13) === CM.mainField.changeTheme) {
     switch (input.substring(13, input.length)) {
       case "normal":
       case "blood-dragon":
@@ -889,7 +913,7 @@ const cmdinput = input => {
         break;
 
       default:
-        commandReturn = "invalid theme name";
+        commandReturn = CM.mainField.invalidTheme;
     }
   } else {
     switch (input) {
@@ -905,18 +929,8 @@ const cmdinput = input => {
         zoomThemeScreen(activeTheme);
         break;
 
-      case "toggle console":
+      case CM.mainField.toggleConsole:
         toggleConsole();
-        break;
-
-      case "menu select type":
-        toggleMenu();
-        categoryLoader("type");
-        break;
-
-      case "menu select ext":
-        toggleMenu();
-        categoryLoader("ext");
         break;
 
       case "hypercore":
@@ -928,7 +942,7 @@ const cmdinput = input => {
         }, 450);
         break;
 
-      case "toggle menu":
+      case CM.mainField.toggleMenu:
         toggleMenu();
         break;
 
@@ -960,7 +974,7 @@ const cmdinput = input => {
         mainDisplay("gazouillotype");
         break;
 
-      case "reload":
+      case CM.mainField.reload:
         document.body.style.animation = "fadeout 0.5s";
         setTimeout(() => {
           document.body.remove();
@@ -968,7 +982,7 @@ const cmdinput = input => {
         }, 450);
         break;
 
-        case "fullscreen":
+        case CM.mainField.fullscreen:
           if(remote.getCurrentWindow().isFullScreen()){
             remote.getCurrentWindow().setFullScreen(false);
           } else {
@@ -976,7 +990,7 @@ const cmdinput = input => {
           }
             break;
 
-        case "restart":
+        case CM.mainField.restart:
           document.body.style.animation = "fadeout 0.5s";
           setTimeout(() => {
             remote.app.relaunch();
@@ -984,7 +998,7 @@ const cmdinput = input => {
           }, 450);
           break;
 
-      case "reload core":
+      case CM.mainField.reloadCore:
         pandoratio = 0;
         break;
 
@@ -996,13 +1010,13 @@ const cmdinput = input => {
         pulse(1, 1, 10, true);
         break;
 
-      case "open devtools":
+      case CM.mainField.openDevtools:
         commandReturn = "opening devtools";
         remote.getCurrentWindow().openDevTools();
         ipcRenderer.send("console-logs", "opening devtools");
         break;
 
-      case "unlock menu":
+      case CM.mainField.unlockMenu:
         menuIcon.onclick = toggleMenu;
         menuIcon.style.cursor = "pointer";
         consoleIcon.style.cursor = "pointer";
@@ -1011,16 +1025,17 @@ const cmdinput = input => {
         });
         break;
 
-      case "version":
+      case CM.mainField.version:
         commandReturn = version;
         break;
 
-      case "return to tutorial":
+      case CM.mainField.returnTutorial:
           openTutorial(slide);
           break;
-      case "start tutorial":
+      case CM.mainField.startTutorial:
         openTutorial();
         break;
+
       case "undefined":
         commandReturn = "";
         break;
@@ -1029,12 +1044,12 @@ const cmdinput = input => {
         commandReturn = "";
         break;
 
-      case "command not found":
+      case CM.mainField.comNotFound:
         commandReturn = "";
         break;
 
       default:
-        commandReturn = "command not found";
+        commandReturn = CM.mainField.comNotFound;
         break;
     }
   }
