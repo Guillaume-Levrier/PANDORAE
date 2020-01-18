@@ -118,10 +118,11 @@ const iconTypes = [
       {name:"menu-icon",code:"menu"},
       {name:"option-icon",code:"code"},
       {name:"export-icon",code:"save_alt"},
-      {name:"step-icon",code:"control_camera"},
+      {name:"step-icon",code:"aspect_ratio"},
       {name:"sort-icon",code:"shuffle"},
       {name:"align-icon",code:"toc"},
-      {name:"slide-icon",code:"create"}
+      {name:"slide-icon",code:"create"},
+      {name:"save-icon",code:"done"}
     ]
 
 const iconCreator = (target,action) => {

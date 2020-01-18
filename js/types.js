@@ -13,9 +13,9 @@ const fs = require("fs");
 const d3 = require("d3");
 const csv = require("csv-parser");
 const versor = require("versor");
+const Quill = require("quill");
 
 //END NODE MODULES
-
 
 var field = document.getElementById("field");
 
@@ -74,9 +74,7 @@ const resizer = () =>location.reload();
 
 //======= NARRATIVE FUNCTIONS =======
 
-
 const zoom = d3.zoom();
-//var drag = d3.drag(); 
 
 var zoomed = (targetDrag,transTime) =>{
   console.log("error: zoom couldn't load")
@@ -115,7 +113,6 @@ const moveTo = (step) => {
 
     if (step.hasOwnProperty("drag")){
       dragged(step.drag,2000);
-     // currentDrag=step.drag;
     }
 
 }
@@ -145,7 +142,7 @@ window.addEventListener("keydown", e=> {
       break;
   
     case "Backspace" : 
-      if (currentButtonId>0){
+      if (currentButtonId>0){ //issue here to remove last remaining slide
       presentationStep.splice(currentButtonId,1)
       regenerateSteps()
       }
@@ -162,16 +159,41 @@ const createSlide = () => {
     var slide = document.createElement("div");
     slide.id ="slide";
   
-    var slideText = document.createElement("input");
-        slideText.type = "textarea";
+    var slideText = document.createElement("div");
         slideText.id = "slideText";
-       
+
+    var textcontainer = document.createElement("div");
+        textcontainer.id = "textcontainer";
+     
+
+    var validateSlide = document.createElement("div");
+    validateSlide.id = "validSlide"
+    validateSlide.innerText = "✓";
+    validateSlide.onclick= () => {addPresentationStep();hideSlide();};
+        
+        slideText.appendChild(textcontainer)
         slide.appendChild(slideText);
+        slide.appendChild(validateSlide);
   
         document.body.appendChild(slide);
-  
+
+        var quillEdit = new Quill('#textcontainer', {
+                      modules: {
+                        toolbar: [
+                          [{ header: [1, 2,3, false] }],
+                          ['bold', 'italic', 'underline'],
+                          ['image', 'code-block'],
+                          [{ 'color': [] }, { 'background': [] }],          
+                          [{ 'font': [] }],
+                          [{ 'align': [] }],
+                        ]},
+                          placeholder: 'Write here...',
+                          theme: 'snow'
+                        });
+
         slide.style.animation = "darken 1s forwards";
         slideText.style.animation = "slideIn 1s forwards";
+        validateSlide.style.animation = "slideIn 1s forwards";
   
     }
   };
@@ -185,7 +207,8 @@ const createSlide = () => {
     slide.id ="slide";
   
     var slideText = document.createElement("div");
-        slideText.id = "slideText"
+        slideText.id = "slideText";
+        slideText.className="ql-snow ql-editor";
         slideText.innerHTML= text;
   
         slide.appendChild(slideText);
@@ -194,16 +217,14 @@ const createSlide = () => {
   
         slide.style.animation = "darken 1s forwards";
         slideText.style.animation = "slideIn 1s forwards";
+       
   
   };
   
   const hideSlide = () => {
-    
   if (document.getElementById("slide")) {
-  
       slide.style.animation = "brighten 1s forwards";
-      slideText.style.animation = "slideOut 1s forwards";
-  
+      slideText.style.animation = "slideOut 1s forwards";  
       setTimeout(() => {
         document.getElementById("slide").remove();
       }, 1100);
@@ -230,7 +251,7 @@ const createSlide = () => {
     let stepData={zoom:currentZoom,tooltip:JSON.stringify(tooltip.innerHTML),drag:currentDrag}
   
     if (document.getElementById("slideText")){
-      stepData.slideContent =document.getElementById("slideText").value;
+      stepData.slideContent = document.getElementsByClassName("ql-editor")[0].innerHTML;
     }
    
     let buttons = document.querySelectorAll("div.presentationStep");
@@ -262,9 +283,19 @@ const createSlide = () => {
         }
   }
   
-  //regenerateSteps();
-  
-  //
+  const regenPrevSteps = (data) => {
+    if (data.hasOwnProperty("presentation")){
+      presentationStep=data.presentation;
+      regenerateSteps();
+    }
+  }
+
+  const savePresentation = () => {
+    pandodb[currentType.type].get(currentType.id).then(data=>{
+      data.presentation=presentationStep;
+      pandodb[currentType.type].put(data);
+    })  
+  }
 
 
 // =========== LOADTYPE ===========
@@ -272,7 +303,10 @@ const createSlide = () => {
 // the xtype div and xtype SVG element. It is usually called when the data has been
 // loaded and rekindled by the type function, i.e. when the visualisation is (almost)
 // ready to show
-const loadType = () => {
+const loadType = (type,id) => {
+  type=type;
+  id=id;
+
   xtypeDisplay();
   purgeCore();
   xtypeExists = true;
@@ -283,6 +317,7 @@ const loadType = () => {
  iconCreator("export-icon",toggleMenu)
  iconCreator("step-icon",addPresentationStep)
  iconCreator("slide-icon",createSlide)
+ iconCreator("save-icon",savePresentation)
  setTimeout(() => {
   document.getElementById("slide-icon").addEventListener("dblclick",e=>{
     if (document.getElementById("slide")) {
@@ -312,6 +347,8 @@ document.getElementById("menu").insertBefore(exportButton,document.getElementByI
 
 window.onresize = resizer;
 };
+
+
 
 
 
@@ -2710,6 +2747,7 @@ const geotype = id => {
   //Calling data
   pandodb.geotype.get(id).then(datajson => {
 
+      regenPrevSteps(datajson);
       dataDownload(datajson);
 
 
@@ -3576,7 +3614,7 @@ const linkLoc = () => {
 
         barRangeSlider(data);
 
-        loadType();
+        loadType("geotype",id);
       });// end of world-country call
     }).catch(error => {field.value = "error - invalid dataset";ipcRenderer.send("console-logs","Geotype error: dataset " + id + " is invalid.");});
 
