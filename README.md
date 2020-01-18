@@ -12,10 +12,11 @@ Please put your extracted PANDORÆ folder/app where you usually put apps on your
 #### Roadmap
 - update tutorial
 - presentation mode:
-    1. better function standardisation
-    2. slide saving in type memory
-    3. type presentation html export
-    4. presentation chaining/sequencing (+ export?)
+    1. better function standardisation - done
+    2. slide saving in type memory - done
+    3. slide saving img in memory using FS
+    4. presentation chaining/sequencing 
+    5. long shot : presentation HTML export
 - continuous integration
 - direct Twitter and WoS API requests
 - HAL/ARXIV requests?
