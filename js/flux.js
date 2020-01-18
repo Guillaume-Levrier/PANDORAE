@@ -39,13 +39,15 @@ let traces = [
   {
     hops: [
       { info: { name: "OPEN" }, name: "OPEN" },
-      { info: { name: "CLINICAL⠀TRIALS" }, name: "CLINICAL⠀TRIALS" }     
+      { info: { name: "CLINICAL⠀TRIALS" }, name: "CLINICAL⠀TRIALS" },
+      { info: { name: "SYSTEM" }, name: "SYSTEM" }     
     ]
   },
   {
     hops: [
       { info: { name: "USER" }, name: "USER" },
-      { info: { name: "TWITTER" }, name: "TWITTER" }
+      { info: { name: "TWITTER" }, name: "TWITTER" },
+      { info: { name: "SYSTEM" }, name: "SYSTEM" }
     ]
   },
   {
@@ -59,31 +61,31 @@ let traces = [
   {
     hops: [
       { info: { name: "USER" }, name: "USER" },
-      { info: { name: "SCOPUS" }, name: "SCOPUS" },
+      { info: { name: "SCOPUS/WoS" }, name: "SCOPUS/WoS" },
       { info: { name: "ENRICHMENT" }, name: "ENRICHMENT" }
     ]
   },
   {
     hops: [
       { info: { name: "OPEN" }, name: "OPEN" },
-      { info: { name: "HAL" }, name: "HAL" },
+      { info: { name: "HAL/ARXIV" }, name: "HAL/ARXIV" },
       { info: { name: "ENRICHMENT" }, name: "ENRICHMENT" }
     ]
   },
-  {
+  /* {
     hops: [
       { info: { name: "USER" }, name: "USER" },
       { info: { name: "WoS" }, name: "WoS" },
       { info: { name: "ENRICHMENT" }, name: "ENRICHMENT" }
     ]
-  },
+  }, 
   {
     hops: [
       { info: { name: "OPEN" }, name: "OPEN" },
       { info: { name: "ARXIV" }, name: "ARXIV" },
       { info: { name: "ENRICHMENT" }, name: "ENRICHMENT" }
     ]
-  },
+  },*/
   {
     hops: [
       { info: { name: "OPEN" }, name: "OPEN" },
