@@ -4755,36 +4755,29 @@ if (date) {
 
  data.forEach(d=>{
 
-   // Setting up IDs
    d.id=d.Study.ProtocolSection.IdentificationModule.BriefTitle;
    trialNames.push(d.id);
-
    d.highlighted = 0;
 
-  
-
   if(d.Study.ProtocolSection.DesignModule.hasOwnProperty("PhaseList")){
-
    let phases = d.Study.ProtocolSection.DesignModule.PhaseList.Phase;
-  
    let phase = phases[phases.length-1].slice(-1);
  
    if (parseInt(phase)) {
-    d.currentPhase = phase;
+      d.currentPhase = phase;
    } else {
-    d.currentPhase = 0;
+      d.currentPhase = 0;
    }
   
   } else {
     d.currentPhase = 0;
-
   }
 
    d.StudyFirstSubmitDate = clinTriDateParser(d.Study.ProtocolSection.StatusModule.StudyFirstSubmitDate);
+
    if (d.Study.ProtocolSection.StatusModule.hasOwnProperty("StartDateStruct")){
     d.StartDate = clinTriDateParser(d.Study.ProtocolSection.StatusModule.StartDateStruct.StartDate);
   }
-
 
    if (d.Study.ProtocolSection.StatusModule.hasOwnProperty("PrimaryCompletionDateStruct")){
       d.PrimaryCompletionDate = clinTriDateParser(d.Study.ProtocolSection.StatusModule.PrimaryCompletionDateStruct.PrimaryCompletionDate);
@@ -4793,8 +4786,6 @@ if (date) {
     if (d.Study.ProtocolSection.StatusModule.hasOwnProperty("CompletionDateStruct")){
         d.CompletionDate = clinTriDateParser(d.Study.ProtocolSection.StatusModule.CompletionDateStruct.CompletionDate);
     }   
-
-   
    
   })
   
@@ -4852,7 +4843,6 @@ const g = view.append("g")
         let descMod = d.Study.ProtocolSection.DescriptionModule
         let overSight = d.Study.ProtocolSection.OversightModule
 
-
         d3.select("#tooltip").html("<h2>"+idMod.BriefTitle+"</h2>"+
         "<h3>"+idMod.Organization.OrgFullName+" - "+idMod.Organization.OrgClass.toLowerCase()+"</h3>"+"<br>"+
        " <input type='button' style='cursor:pointer' onclick='shell.openExternal("+JSON.stringify("https://clinicaltrials.gov/ct2/show/"+idMod.NCTId)+")' value='Open on ClinicalTrials.gov'></input><br><br>"+
@@ -4867,10 +4857,6 @@ const g = view.append("g")
         "<h3>Description</h3>"+
         "<strong>Brief summary:</strong> "+descMod.BriefSummary+"<br>"+"<br>"+
         "<strong>Detailed description:</strong> "+descMod.DetailedDescription+"<br>"
-
-      
-
-
         )
 
         if (document.getElementById(JSON.stringify(d.Rank)).style.fill==="black") { 

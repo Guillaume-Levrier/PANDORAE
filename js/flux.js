@@ -20,6 +20,8 @@ const userDataPath = remote.app.getPath("userData");
 const { ipcRenderer } = require("electron"); // ipcRenderer manages messages with Main Process
 const d3 = require("d3");
 
+var CM = CMT["EN"];
+
 var db = "";
 
 const date =
@@ -72,20 +74,6 @@ let traces = [
       { info: { name: "ENRICHMENT" }, name: "ENRICHMENT" }
     ]
   },
-  /* {
-    hops: [
-      { info: { name: "USER" }, name: "USER" },
-      { info: { name: "WoS" }, name: "WoS" },
-      { info: { name: "ENRICHMENT" }, name: "ENRICHMENT" }
-    ]
-  }, 
-  {
-    hops: [
-      { info: { name: "OPEN" }, name: "OPEN" },
-      { info: { name: "ARXIV" }, name: "ARXIV" },
-      { info: { name: "ENRICHMENT" }, name: "ENRICHMENT" }
-    ]
-  },*/
   {
     hops: [
       { info: { name: "OPEN" }, name: "OPEN" },

@@ -5,8 +5,10 @@ const getUserData = () => {
     userDataPath + "/userID/user-id.json", // Read the designated datafile
     "utf8",
     (err, data) => {
-      // Additional options for readFile
+
       if (err) throw err;
+
+
 
       let user = JSON.parse(data);
 
@@ -29,8 +31,6 @@ const getUserData = () => {
         "Altmetric",
         userName
       );
-      //document.getElementById("twitterkeyinput").value =    keytar.getPassword("Twitter",userName);
-      //document.getElementById("OAbutton").value =    keytar.getPassword("OAbutton",userName);
     }
   );
 };
@@ -41,8 +41,9 @@ const basicUserData = () => {
   let userMail = document.getElementById("userMailInput").value;
   let zoteroUser = document.getElementById("zoterouserinput").value;
 
-  var user = { UserName: userName, UserMail: userMail, ZoteroID: zoteroUser };
+  var user = { UserName: userName, UserMail: userMail, ZoteroID: zoteroUser, locale: "EN" };
   var data = JSON.stringify(user);
+  
   fs.writeFile(userDataPath + "/userID/user-id.json", data, "utf8", err => {
     if (err) throw err;
   });
