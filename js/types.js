@@ -4740,7 +4740,7 @@ var data = datajson.content.entries;
 var trialNames = []
 
 const clinTriDateParser = (date) => {
-
+if (date) {
   var fullParseTime = d3.timeParse("%B %d, %Y");
    var partialParseTime = d3.timeParse("%B %Y");
 
@@ -4750,7 +4750,7 @@ const clinTriDateParser = (date) => {
    } else {
      return partialParseTime(date)
    }
-
+}
 }
 
  data.forEach(d=>{
@@ -4781,7 +4781,11 @@ const clinTriDateParser = (date) => {
   }
 
    d.StudyFirstSubmitDate = clinTriDateParser(d.Study.ProtocolSection.StatusModule.StudyFirstSubmitDate);
-   d.StartDate = clinTriDateParser(d.Study.ProtocolSection.StatusModule.StartDateStruct.StartDate);
+   if (d.Study.ProtocolSection.StatusModule.hasOwnProperty("StartDateStruct")){
+    d.StartDate = clinTriDateParser(d.Study.ProtocolSection.StatusModule.StartDateStruct.StartDate);
+  }
+
+
    if (d.Study.ProtocolSection.StatusModule.hasOwnProperty("PrimaryCompletionDateStruct")){
       d.PrimaryCompletionDate = clinTriDateParser(d.Study.ProtocolSection.StatusModule.PrimaryCompletionDateStruct.PrimaryCompletionDate);
     }

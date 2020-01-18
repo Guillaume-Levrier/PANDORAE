@@ -11,6 +11,8 @@ Please put your extracted PANDORÆ folder/app where you usually put apps on your
 
 #### Roadmap
 - update tutorial
+- flux complex request builder
+- revamp exports
 - presentation mode:
     1. better function standardisation - done
     2. slide saving in type memory - done
