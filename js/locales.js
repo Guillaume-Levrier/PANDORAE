@@ -46,7 +46,10 @@ const CMT = {"EN":{
             "console":{
 
         }},
-        "flux":{ 
+        "flux":{
+            "divs":{
+                "hyphendpoint":"Enter your Hyphe endpoint below :"
+            }, 
             "field":{
 
         },
@@ -71,7 +74,28 @@ const CMT = {"EN":{
 
         }
     
-},"FR":{
+},
+"FR":{
+    "menu":{
+        "flux":"flux",
+        "type":"type",
+        "quit":"quitter",
+        "returnToTutorial":"retour au tutoriel"
+    },
 
-}
+    "tutorial":{
+        "sections":{
+            "s1":"Bienvenue sur PANDORAE<br>&nbsp;<br>&nbsp;<br>",
+            "s2":"<span class='title'>Ce bref tutoriel a pour but de vous montrer ce que peut faire PANDORÆ.</span>",
+            "s3":"<span class='title'>Comme vous vous en êtes aperçu, les <strong>flêches</strong> to go down or back.</span><br>You can also use your <strong>mouse wheel</strong> to navigate up and down.&nbsp;<br><br>            You can skip specific chapters and come back to this <strong>tutorial</strong> later.<br><br>            If you're unsure of how to proceed, you can watch the step-by-step video of this tutorial while you interact with it."
+        }
+    }
+ },"中文":{
+    "menu":{
+        "flux":"流动",
+        "type":"显示",
+        "quit":"关闭",
+        "returnToTutorial":"回教程"
+    }
+ }
 }

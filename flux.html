@@ -32,19 +32,11 @@
     </form>
 </div>
 
-<!-- DB API TAB -->
-<div id="db/api" style="display:none;" class="fluxTabs">
-  <span class="flux-title">DB/API</span><br><br>
-    Flux can interrogate for you a series of databases :
-    <li onclick="fluxDisplay(this.innerText)">scopus</li>
-   <!--  <li onclick="fluxDisplay(this.innerText)">twitter</li> -->
-</div>
-
 <!-- HYPHE TAB -->
 <div id="hyphe" style="display:none;" class="fluxTabs">
   
   <span class="flux-title">Hyphe</span><br><br>
-    Enter your Hyphe endpoint below :
+  <p id="hyphendpoint"></p>
   <input class="fluxInput" spellcheck="false" id="hypheaddress" type="text" value="https://hyphe.medialab.sciences-po.fr/demo"><br><br>
   <button type="submit" class="flux-button" id="hyphe-checker" onclick="hypheCheck(document.getElementById('hypheaddress').value);return false">Check Hyphe endpoint</button><br><br>
   <button type="submit" style="display:none;" class="flux-button" id="hyphe-exporter" onclick="endpointConnector('hyphe',document.getElementById('hypheaddress').value);return false">Add to Hyphe endpoints</button><br><br>
@@ -251,6 +243,8 @@ const refreshWindow = () => {
 const reframeMainWindow = () => {
         remote.mainWindow({frame: true})
 }
+
+
 </script>
 <script src="js/flux.js"></script>
 <script src="js/userdata.js"></script>
