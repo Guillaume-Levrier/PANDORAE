@@ -65,6 +65,7 @@ font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
         padding: 5px;
         right:0px;
         top:0px;
+        width:60px;
       }
       
 .arrowDown{
@@ -341,16 +342,33 @@ var sectionList = document.querySelectorAll("section");
 
   for (let sect of sectionList) {
     let thisSect = document.getElementById(sect.id);
-    let paddingTop = (window.innerHeight - thisSect.getBoundingClientRect().height)/(thisSect.getBoundingClientRect().height/100)+20;
-     thisSect.style.paddingTop = paddingTop+"px";
-  }
 
+     //let sectHeight =  window.innerHeight - 100;
+     
+     (window.innerHeight - thisSect.getBoundingClientRect().height)/(thisSect.getBoundingClientRect().height*.015);
+    
+     thisSect.style.paddingTop = (window.innerHeight-thisSect.getBoundingClientRect().height)/2+"px";
+     //thisSect.style.height=window.innerHeight-100+"px" 
+  }
+const fs = require("fs");
 </script>
+
+<div id="dialogDiv">
+  <i class="material-icons  dialog-buttons" id="backarrow" style="display:none;" onclick="smoothScrollTo(previous,true);">arrow_back</i>
+<i class="material-icons dialog-buttons" onclick="refreshWindow();">refresh</i>
+<i class="material-icons dialog-buttons" onclick="closeAndDisplay();">close</i>
+<div id="lang" style="margin-top:0px;margin-left:30px;width:30px;display: block;">
+  <div class="locale">FR</div>
+  <div class="locale">EN</div>
+  <div class="locale">中文</div>
+</div>
+</div>
+
 
 <link rel="icon" type="image/png" href="img/AE-favicon.png"/>
 <script src="js/locales.js"></script>
-<script src="js/tutorial/textcontent.js"></script>
 <script src="js/window-management.js"></script>
+<script src="js/tutorial/textcontent.js"></script>
 <script src="js/tutorial/scroller.js"></script>
 <script src="js/tutorial/tutorial.js"></script>
 <script src="js/tutorial/cascade.js"></script>
@@ -363,17 +381,12 @@ var sectionList = document.querySelectorAll("section");
   };
 </script>
 
-<div id="dialogDiv">
-    <i class="material-icons  dialog-buttons" id="backarrow" style="display:none;" onclick="smoothScrollTo(previous,true);">arrow_back</i>
-  <i class="material-icons dialog-buttons" onclick="refreshWindow();">refresh</i>
-  <i class="material-icons dialog-buttons" onclick="closeAndDisplay();">close</i>
-  </div>
   <script>
 
 // Last slide
-const fs = require("fs");
+
 const appPath = remote.app.getAppPath();
-fs.readFile(appPath+"\\package.json","utf8", (err, data) => {
+fs.readFile(appPath+"\/package.json","utf8", (err, data) => {
   if (err) throw err;
    let package = JSON.parse(data);
      let version = package.version;
