@@ -32,14 +32,14 @@ function scroller() {
       if (i === 0) {
         startPos = top;
       }
-      sectionPositions.push(top - startPos);
+      sectionPositions.push(top - startPos-(window.innerHeight-this.getBoundingClientRect().height)/2);
     });
     containerStart =
       container.node().getBoundingClientRect().top + window.pageYOffset;
   }
 
   function position() {
-    var pos = window.pageYOffset - containerStart - 400;
+    var pos = window.pageYOffset - containerStart-window.innerHeight;
     var sectionIndex = d3.bisect(sectionPositions, pos);
     sectionIndex = Math.min(sections.size() - 1, sectionIndex);
 

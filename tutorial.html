@@ -132,7 +132,7 @@ cursor:pointer;
      <section id="Chapter1" class="step">
        <span class="title"><strong>Chapter 1: Loading data</strong></span><br>
 PANDORÆ enables you to load data from <strong>different types of sources</strong>.<br><br>
-Those sources can be online databases that aggregate documents such as <strong>scientific articles</strong>.<br> <br>But you can really add <strong>any kind of document</strong>. Those can be <strong>related or unrelated</strong> to science articles.<br> <br>PANDORÆ also supports some specific <strong>social-media data</strong> and <strong>online public debate platforms</strong>.
+Those sources can be online databases that aggregate documents such as <strong>scientific articles</strong>.<br> <br>But you can really add <strong>any kind of document</strong>. Those can be <strong>related or unrelated</strong> to science articles.<br> <br>PANDORÆ also supports some specific <strong>clinical trial data</strong>, <strong>social-media data</strong> and <strong>online public debate platforms</strong>.
         <br>&nbsp;<br>
       <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('flux')">arrow_downward</a></i></div>
      </section>
@@ -341,14 +341,8 @@ Once that is done, you will need to set up a <a onclick="shell.openExternal('htt
 var sectionList = document.querySelectorAll("section");
 
   for (let sect of sectionList) {
-    let thisSect = document.getElementById(sect.id);
-
-     //let sectHeight =  window.innerHeight - 100;
-     
-     (window.innerHeight - thisSect.getBoundingClientRect().height)/(thisSect.getBoundingClientRect().height*.015);
-    
+    let thisSect = document.getElementById(sect.id);     
      thisSect.style.paddingTop = (window.innerHeight-thisSect.getBoundingClientRect().height)/2+"px";
-     //thisSect.style.height=window.innerHeight-100+"px" 
   }
 const fs = require("fs");
 </script>

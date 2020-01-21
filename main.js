@@ -140,7 +140,7 @@ const openHelper = helperFile => {
     frame: true,
     width: 350,
     height: 700,
-    alwaysOnTop: false,
+    alwaysOnTop: true,
     autoHideMenuBar: true,
     x: screenWidth - 350,
     y: 100,

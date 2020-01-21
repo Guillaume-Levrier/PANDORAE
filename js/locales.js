@@ -66,7 +66,7 @@ const CMT = {"EN":{
     },
     "tutorial":{
         "sections":{
-            "s1":"Welcome to PANDORÆ<br>&nbsp;<br>&nbsp;<br>",
+            "s1":"Welcome to PANDORÆ<br>&nbsp;<br>&nbsp;<br><br>&nbsp;<br>",
             "s2":"<span class='title'>This brief tutorial will show you what PANDORÆ does.</span>",
             "s3":"<span class='title'>As you noticed, you can click on the <strong>arrows</strong> to go down or back.</span><br>You can also use your <strong>mouse wheel</strong> to navigate up and down.&nbsp;<br><br>            You can skip specific chapters and come back to this <strong>tutorial</strong> later.<br><br>            If you're unsure of how to proceed, you can watch the step-by-step video of this tutorial while you interact with it."
 
