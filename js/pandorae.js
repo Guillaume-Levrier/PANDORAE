@@ -41,6 +41,7 @@ fs.readFile(appPath+"/package.json","utf8", (err, data) => {
 var currentType;           // Once a type is started, know which one
 var presentationStep = [];
 
+var slide;
 
 // =========== LANGUAGE SELECTION ===========
 var CM = CMT["EN"];                                            // Load the EN locale at start
@@ -906,6 +907,9 @@ field.addEventListener("click", ()=>{cmdinput(field.value)});
 
 // ========== MAIN FIELD COMMAND INPUT ========
 
+var menuIcon = document.getElementById("menu-icon");
+var consoleIcon = document.getElementById("option-icon");
+
 const cmdinput = input => {
   input = input.toLowerCase();
 
@@ -1197,6 +1201,10 @@ ipcRenderer.on("tutorial", (event, message) => {
   menuIcon.onclick = toggleMenu;
   menuIcon.style.cursor = "pointer";
   consoleIcon.style.cursor = "pointer";
+
+  slide = "message";
+
+  console.log(slide)
 
   switch (message) {
     case "flux":
