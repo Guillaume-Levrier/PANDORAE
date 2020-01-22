@@ -4,7 +4,7 @@ const userDataPath = remote.app.getPath("userData"); // Find userData folder Pat
 
 var CM = CMT["EN"];
 
-var divs = ['s1','s2','s3']
+var divs = ['s1','s2','s2b','s3','s4']
 
 const populateTutorial = divs => {
     divs.forEach(div=>{

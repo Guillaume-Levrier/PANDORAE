@@ -2,6 +2,16 @@ const d3 = require("d3");
 
 let activeIndex = 0;
 
+var sectionList = document.querySelectorAll("section");
+
+
+const addPadding = () => {
+  for (let sect of sectionList) {
+    sect.style.paddingTop=parseInt((document.body.offsetHeight-sect.clientHeight)/2)+"px";
+  }       
+}
+  
+
 function scroller() {
   let container = d3.select("body"),
     dispatch = d3.dispatch("active", "progress"),
@@ -39,9 +49,9 @@ function scroller() {
   }
 
   function position() {
-    var pos = window.pageYOffset - containerStart-window.innerHeight;
-    var sectionIndex = d3.bisect(sectionPositions, pos);
-    sectionIndex = Math.min(sections.size() - 1, sectionIndex);
+    var pos = window.pageYOffset - containerStart; 
+    var sectionIndex = d3.bisect(sectionPositions, pos);    
+    sectionIndex = Math.min(sections.size() - 1, sectionIndex)-1;
 
     if (currentIndex !== sectionIndex) {
       dispatch.call("active", this, sectionIndex);
@@ -74,7 +84,6 @@ function scroller() {
 var previous = "";
 
 const smoothScrollTo = (target, hide) => {
-  var sectionList = document.querySelectorAll("section"); // Create an array with all sections
   previous = sectionList[activeIndex].id; // Store current section ID
   document.getElementById("backarrow").style.display = "inline-block"; // Display "previous" arrow button
   document
@@ -98,7 +107,7 @@ const display = () => {
   });
 };
 
-display();
+
 
 const progress = index => {
   var sectionList = document.querySelectorAll("section");
@@ -121,3 +130,4 @@ const progress = index => {
     }
   }
 };
+

@@ -66,9 +66,11 @@ const CMT = {"EN":{
     },
     "tutorial":{
         "sections":{
-            "s1":"Welcome to PANDORÆ<br>&nbsp;<br>&nbsp;<br><br>&nbsp;<br>",
+            "s1":"Welcome to PANDORÆ<br>",
             "s2":"<span class='title'>This brief tutorial will show you what PANDORÆ does.</span>",
-            "s3":"<span class='title'>As you noticed, you can click on the <strong>arrows</strong> to go down or back.</span><br>You can also use your <strong>mouse wheel</strong> to navigate up and down.&nbsp;<br><br>            You can skip specific chapters and come back to this <strong>tutorial</strong> later.<br><br>            If you're unsure of how to proceed, you can watch the step-by-step video of this tutorial while you interact with it."
+            "s2b":"<span class='title'>As you noticed, you can click on the <strong>arrows</strong> to go down or back.</span><br>You can also use your <strong>mouse wheel</strong> to navigate up and down.&nbsp;<br><br>            You can skip specific chapters and come back to this <strong>tutorial</strong> later.<br><br>            If you're unsure of how to proceed, you can watch the step-by-step video of this tutorial while you interact with it.",
+            "s3":"<span class='title'>PANDORÆ is a <strong>data exploration tool.</strong></span><br><br>It has been designed to investigate how <strong>science</strong> sometimes changes <strong>humans</strong>.&nbsp;<br>&nbsp;<br>Some people also use PANDORÆ to build their <strong>literature reviews</strong>.",
+            "s4":"<span class='title'>PANDORÆ  allows you to perform three main kinds of operations :</span><br><br><a onclick=\"smoothScrollTo('Chapter1')\">Load & enrich data</a><br><br><a onclick=\"smoothScrollTo('Chapter2')\">Explore data</a><br><br>&nbsp;"
 
         }
 
