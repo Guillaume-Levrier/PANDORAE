@@ -7,7 +7,7 @@ body{
   overflow: scroll;
   text-align: justify;
   color: black;
-  animation: fadein .7s;
+  opacity: 0;
   background-color:white;
 }
 
@@ -15,24 +15,14 @@ body{
     display: none;
 }
 #tutorialSections {
-  padding: 40px;
-}
-
-#sections {
-  position: relative;
-  display: inline-block;
-  width: 350px;
-  top: 0px;
-  z-index: 90;
-  padding-bottom: 200px;
-  padding-right: 20px;
+  padding-left: 40px;
+  padding-right: 40px;
 }
 
 .step {
   font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
   font-size: 16px;
   line-height: 26px;
-  padding-bottom: 100px;
 }
 
 .centerStep{
@@ -97,7 +87,7 @@ cursor:pointer;
 
      <section id="mainTitle" class="step centerStep">
        <div id="s1" class="title" style="font-size:36px;font-weight: bold;"></div>
-         <i class="material-icons arrowDown"><a class="arrowDown" onclick="smoothScrollTo('slide2')">arrow_downward</a></i>
+       <br><i class="material-icons arrowDown"><a class="arrowDown" onclick="smoothScrollTo('slide2')">arrow_downward</a></i>
        
      </section>
 
@@ -107,70 +97,65 @@ cursor:pointer;
      </section>
 
      <section id="slide2bis" class="step centerStep">
-       <div id="s3"></div>
-     <br><br>
+       <div id="s2b"></div>
       <br>
       <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('slide3')">arrow_downward</a></i>
     </section>
 
      <section id="slide3" class="step centerStep">
-       <span class="title">PANDORÆ is a <strong>data exploration tool.</strong></span><br>
-        It has been designed to investigate how <strong>science</strong> sometimes changes <strong>humans</strong>.&nbsp;<br>&nbsp;<br>
-        Some people also use PANDORÆ to build their <strong>literature reviews</strong>.<br>&nbsp;<br>
+       <div id="s3"></div>
+       <br>
       <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('slide4')">arrow_downward</a></i>
      </section>
 
      <section id="slide4" class="step centerStep">
-       <span class="title">PANDORÆ  allows you to perform three main kinds operations:</span><br>
-    <a onclick="smoothScrollTo('Chapter1')">Load data</a><br>
-       <a onclick="smoothScrollTo('Chapter2')">Enrich data</a><br>
-    <a onclick="smoothScrollTo('Chapter3')">Explore data</a><br>
-        <br>&nbsp;<br>
+      <div id="s4"></div>
+       <br>
   <i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('Chapter1')">arrow_downward</a></i>
      </section>
 
      <section id="Chapter1" class="step">
-       <span class="title"><strong>Chapter 1: Loading data</strong></span><br>
+       <span class="title"><strong>Chapter 1: Loading & enriching data</strong></span><br>
 PANDORÆ enables you to load data from <strong>different types of sources</strong>.<br><br>
 Those sources can be online databases that aggregate documents such as <strong>scientific articles</strong>.<br> <br>But you can really add <strong>any kind of document</strong>. Those can be <strong>related or unrelated</strong> to science articles.<br> <br>PANDORÆ also supports some specific <strong>clinical trial data</strong>, <strong>social-media data</strong> and <strong>online public debate platforms</strong>.
         <br>&nbsp;<br>
-      <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('flux')">arrow_downward</a></i></div>
+      <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('Cascade')">arrow_downward</a></i></div>
      </section>
 
+     <section id="Cascade" class="step">
+      <span class="title"><strong>Cascade: Available data flows</strong></span><br>
+      <div style="display: inline-flex">
+      <div style="flex:auto">   <strong>Cascade</strong> is how <a onclick="smoothScrollTo('flux')">Flux</a> displays its data flows. As you can see, the data flows from you to the system. Hovering a process shows to which other process it is linked.  <br>&nbsp;<br> 
+        Cascade behaves like menu: click on a process and its options will be displayed.<br>&nbsp;<br> <br>&nbsp;<br> 
+        <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('flux')">arrow_downward</a></i></div>
+      </div>
+<div style="flex:auto"><svg></svg></div>
+</div>
+       <br>&nbsp;<br>
+    </section>
+
      <section id="flux" class="step">
-       <span class="title"><strong>Using Flux</strong></span><br>
+       <span class="title"><strong>Using Flux</strong></span><br><br>
 Loading data happens in the <strong>Flux</strong> tab of PANDORÆ's menu.<br><br>
 Click <a onclick="tuto('flux');">here</a> to learn how to open Flux.
         <br>&nbsp;<br>
-      <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('flux2')">arrow_downward</a></i></div>
+      <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('Cascade')">arrow_downward</a></i></div>
      </section>
 
      <section id="flux2" class="step">
        <span class="title"><strong>Flux sections</strong></span><br>
-          Flux has different sections. Each section has its own purpose, and relies on different services:
+          Flux has different types of processes. Each section has its own purpose, and relies on different services:
           <ul style="list-style-type: square;">
-          <li><a onclick="smoothScrollTo('Cascade')">Cascade</a> displays available paths to guide your data through.</li>
-          <li>User lets you insert your API keys and credentials.</li>
-          <li><a onclick="smoothScrollTo('Bibliometric-databases')">Bibliometric databases</a> allow you to request science articles, preview the amount of results and trigger the actual request.</li>
-          <li><a onclick="smoothScrollTo('enrichment')">Enrichment</a> tries to geolocate each paper's affiliations and request Altmetric API to retrieve relevant metadata.</li>
-          <li>CSL-JSON converts your datasets to make them uploadable to Zotero.</li>
-          <li><a onclick="smoothScrollTo('Zotero1')">Zotero</a> upload datasets to and/or download collections from your Zotero library.</li>
+          <li><a onclick="smoothScrollTo('user')">User</a> lets you insert your API keys and credentials.</li>
+          <li><a onclick="smoothScrollTo('databases')">Databases requests</a> allow you to retrieve data from various online sources.</li>
+          <li><a onclick="smoothScrollTo('enriching')">Enriching</a> allows you to edit and enrich datasets.</li>
+          <li><a onclick="smoothScrollTo('system')">System</a> sends your data to PANDORAE visualisation features.</li>
 </ul>
     Detail about the other sections will become available when they will be rolled out. Click on a section name to learn more about that section right now, or simply click on the arrow to continue.   <br>&nbsp;<br>
       <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('Cascade')">arrow_downward</a></i></div>
      </section>
 
-     <section id="Cascade" class="step">
-        <span class="title"><strong>Cascade: Available data flows</strong></span><br>
-        <div style="display: inline-flex">
-        <div style="flex:auto">   <strong>Cascade</strong> is how <a onclick="smoothScrollTo('flux')">Flux</a> displays its data flows. As you can see, the data flows from you to the system. Hovering a process shows to which other process it is linked.  <br>&nbsp;<br> 
-          Cascade behaves like menu: click on a process and its options will be displayed.<br>&nbsp;<br> <br>&nbsp;<br> 
-          <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('Bibliometric-databases')">arrow_downward</a></i></div>
-        </div>
-<div style="flex:auto"><svg></svg></div>
-</div>
-         <br>&nbsp;<br>
-      </section>
+     
 
       <section id="Bibliometric-databases" class="step">
           <span class="title"><strong>Bibliometric databases</strong></span><br>
@@ -182,8 +167,8 @@ Click <a onclick="tuto('flux');">here</a> to learn how to open Flux.
           </div>
         </section>
 
-     <section id="Chapter2" class="step">
-       <span class="title"><strong>Chapter 2: Enriching data</strong></span><br>
+     <section id="Enriching" class="step">
+       <span class="title"><strong>Enriching data</strong></span><br>
           <strong>Flux</strong> enables you do retrieve data from different kinds of <a onclick="smoothScrollTo('Bibliometric-databases')">databases</a>. 
           Articles can be <a onclick="smoothScrollTo('enrichment')">enriched</a> by <strong>geolocating</strong> their affiliation and retrieving additional <strong>metadata</strong>. But you will often have to curate your data and enrich its content by hand. PANDORÆ therefore helps you send your datasets to <a onclick="smoothScrollTo('Zotero1')">Zotero</a> and download them back into the system when you're done cleaning your dataset.
         <br>&nbsp;<br>
@@ -219,8 +204,7 @@ Once that is done, you will need to set up a <a onclick="shell.openExternal('htt
   <div class="arrowDown"><i class="material-icons"><a class="arrowDown" onclick="smoothScrollTo('Chapter3')">arrow_downward</a></i></div>
  </section>
 
-
-<section id="Chapter3" class="step">
+<section id="Chapter2" class="step">
     <span class="title"><strong>Chapter 3: Exploring data</strong></span><br>
     PANDORÆ's main purpose is to enable you to explore large and/or complex datasets. It features several different kinds 
     of "<strong>types</strong>", that is ways to display your data:
@@ -338,12 +322,7 @@ Once that is done, you will need to set up a <a onclick="shell.openExternal('htt
 <div id="progressBar"></div>
 
 <script>
-var sectionList = document.querySelectorAll("section");
 
-  for (let sect of sectionList) {
-    let thisSect = document.getElementById(sect.id);     
-     thisSect.style.paddingTop = (window.innerHeight-thisSect.getBoundingClientRect().height)/2+"px";
-  }
 const fs = require("fs");
 </script>
 
@@ -417,5 +396,16 @@ setTimeout(() => {
             
     }, 7000);
   }
+
+setTimeout(() => { //This is important because otherwise the padding is messed up and no event listener will do
+  addPadding();
+  display();  
+  document.body.style.animation="fadein 1s";
+  setTimeout(() => {
+    document.body.style.opacity = 1;
+  }, 950);
+}, 200);
+
+
   </script>
 </body>

@@ -5054,6 +5054,6 @@ const typeSwitch = (type, id) => {
   document.getElementById("source").innerText = "Source: " + id;
 };
 
-// MODULE EXPORT - don't removen useful for iframe export
+// MODULE EXPORT - don't remove useful for iframe export
 
 module.exports = { typeSwitch: typeSwitch }; // Export the switch as a module
