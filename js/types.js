@@ -1139,57 +1139,6 @@ var lineFontSize = parseFloat(width/500);
      ipcRenderer.send("console-logs", "Starting Filotype");
    };
 
-/*
-// ========= CALENDOTYPE =========
-// a better way to manage events rather than documents.
-const calendotype = id => {
-  
-  var svg = d3.select(xtype)
-  .append("svg")
-  .attr("id", "xtypeSVG")
-  .style("font-family","sans-serif");
-
-svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
-
-var view = svg.append("g") // Appending a group to SVG
-  .attr("id", "view");
-
-  zoom.scaleExtent([0.2, 20])                               // To which extent do we allow to zoom forward or zoom back
-      .translateExtent([[-Infinity,-Infinity],[Infinity,Infinity]])
-      .on("zoom", e=> {zoomed(d3.event.transform)}); 
-
-  var color = d3.scaleOrdinal(d3.schemeAccent);
-
-     //======== DATA CALL & SORT =========
-   
-pandodb.calendotype.get(id).then(datajson => {
-     
-  dataDownload(datajson);
-
-  //parse dates into actual js dates
-  //datajson.forEach()
-
- // parse by day
- const data = d3.nest().key(d.date.getUTCDate()).entries(datajson);
-
-  const years = d3.nest()
-      .key(d => d.date.getUTCFullYear())
-    .entries(data)
-    .reverse();
-
-
-      loadType();
-    
-      }).catch(error => {console.log(error);field.value = "filotype error";ipcRenderer.send("console-logs","Filotype error: cannot start corpus " + id + ".");});
-
-     //======== ZOOM & RESCALE ===========
-  svg.call(zoom).on("dblclick.zoom", null);
-
-  zoomed = (thatZoom,transTime) => view.attr("transform", thatZoom);
-  
-     ipcRenderer.send("console-logs", "Starting Filotype");
-   };
-*/
 // ========= DOXATYPE =========
 const doxatype = id => {
   
@@ -4732,7 +4681,7 @@ var y = d3.scalePoint();
      //======== DATA CALL & SORT =========
    
 pandodb.pharmacotype.get(id).then(datajson => {
-     
+     /* 
   dataDownload(datajson);
 
 var data = datajson.content.entries;
@@ -4956,12 +4905,13 @@ const trialSorter = () => {
   }
 }
 
+
 iconCreator("sort-icon",trialSorter)
 iconCreator("align-icon",alignTrialTitles)
 
 
       loadType();
-    
+     */
       }).catch(error => {console.log(error);field.value = " error";ipcRenderer.send("console-logs"," error: cannot start corpus " + id + ".");});
    
 //======== ZOOM & RESCALE ===========
@@ -4998,7 +4948,7 @@ legend.append("text").attr("x",25).attr("y",height-30).attr("dy",4).style("font-
   }
     ipcRenderer.send("console-logs", "Starting Pharmacotype");
 
-};
+}; 
 
 //========== typesSwitch ==========
 // Switch used to which type to draw/generate
