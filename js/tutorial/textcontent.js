@@ -4,18 +4,14 @@ const userDataPath = remote.app.getPath("userData"); // Find userData folder Pat
 
 var CM = CMT["EN"];
 
-var divs = ['s1','s2','s2b','s3','s4']
+var divs = document.querySelectorAll("section")
 
 const populateTutorial = divs => {
     divs.forEach(div=>{
-        document.getElementById(div).innerHTML=CM.tutorial.sections[div]
+        div.innerHTML=CM.tutorial.sections[div.id]
     })
 }
 
-/* document.getElementById("s1").innerHTML = CM.tutorial.sections.s1;
-document.getElementById("s2").innerHTML = CM.tutorial.sections.s2;
-document.getElementById("s3").innerHTML = CM.tutorial.sections.s3;
- */
 // =========== LANGUAGE SELECTION ===========
 
 fs.readFile(userDataPath + "/userID/user-id.json", "utf8",     // Check if the user uses another one
@@ -23,6 +19,8 @@ fs.readFile(userDataPath + "/userID/user-id.json", "utf8",     // Check if the u
         data = JSON.parse(data);
         CM = CMT[data.locale];
         populateTutorial(divs);
+        const svg = d3.select("svg");
+        drawFlux(svg, traces, false, true);
       })
 
 document.getElementById("lang").childNodes.forEach(lg=>{

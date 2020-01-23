@@ -4,7 +4,7 @@ const vega = () => {
 
     let canvas = document.createElement("CANVAS");
     canvas.id ="vega";
-    canvas.className +="purgeable";
+    canvas.className +="purgeable themeCustom";
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
