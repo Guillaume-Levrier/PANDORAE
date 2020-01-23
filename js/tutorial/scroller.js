@@ -1,9 +1,8 @@
-const d3 = require("d3");
-
 let activeIndex = 0;
 
 var sectionList = document.querySelectorAll("section");
 
+console.log(sectionList);
 
 const addPadding = () => {
   for (let sect of sectionList) {
@@ -95,7 +94,7 @@ const smoothScrollTo = (target, hide) => {
 };
 
 const display = () => {
-  var scroll = scroller().container(d3.select("#tutorialSections"));
+  var scroll = scroller().container(d3.select("#slideSections"));
 
   scroll(d3.selectAll(".step"));
 
