@@ -226,6 +226,4 @@ const drawFlux = (svg, traces, horizontal, showTexts) => {
     .attr("cy", d => d.bounds.cy);
 };
 
-const svg = d3.select("svg");
 
-drawFlux(svg, traces, false, true);
