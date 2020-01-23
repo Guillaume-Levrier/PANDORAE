@@ -10,9 +10,8 @@ Download **PANDORÆ version 1.0.01** for [Windows](https://anthropos-ecosystems.
 Please put your extracted PANDORÆ folder/app where you usually put apps on your computer (i.e. Program Files on Windows, Applications on macOS). It might work if you don't, but this will solve starting issues.
 
 #### Roadmap
-- update tutorial
+- update/localize tutorial
 - flux complex request builder
-- revamp exports
 - presentation mode:
     1. better function standardisation - done
     2. slide saving in type memory - done
