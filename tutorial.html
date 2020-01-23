@@ -14,7 +14,7 @@ body{
 ::-webkit-scrollbar {
     display: none;
 }
-#tutorialSections {
+#slideSections {
   padding-left: 40px;
   padding-right: 40px;
 }
@@ -83,32 +83,7 @@ cursor:pointer;
 </style>
 <body>
 
-<div id='tutorialSections'>
-        <section id='mainTitle' class='step centerStep'></section>
-        <section id='slide2' class='step centerStep'></section>
-        <section id='slide2bis' class='step centerStep'></section>
-        <section id='slide3' class='step centerStep'></section>
-        <section id='slide4' class='step centerStep'></section>
-        <section id='Chapter1' class='step'></section>
-        <section id='Cascade' class='step'></section>
-        <section id='flux2' class='step'></section>
-        <section id='databases' class='step'></section>
-        <section id='Enriching' class='step'></section>
-        <section id='enrichment' class='step'></section>
-        <section id='Zotero1' class='step'></section>
-        <section id='Zotero2' class='step'></section>
-        <section id='Chapter2' class='step'></section>
-        <section id='chronotype' class='step'></section>
-        <section id='geotype' class='step'></section>
-        <section id='FinalChap' class='step centerStep'></section>
-        <section id='final2' class='step centerStep'></section>  
-        <section id='final3' class='step centerStep'></section>
-        <section id='final4' class='step centerStep'></section>
-        <section id='final5' class='step centerStep'></section>
-        <section id='final6' class='step centerStep'></section>
-        <section id='final7' class='step centerStep'></section>
-        <section id='final8' class='step centerStep'></section>
-        <section id='last' class='step centerStep'></section>         
+<div id='slideSections'>
 </div>
 <div id='progressBar'></div>
 
@@ -125,7 +100,10 @@ cursor:pointer;
 
 
 <link rel='icon' type='image/png' href='img/AE-favicon.png'/>
-<script>const fs = require('fs');</script>
+<script>
+const fs = require('fs');
+const d3 = require('d3');
+</script>
 <script src='js/locales.js'></script>
 <script src='js/window-management.js'></script>
 <script src='js/tutorial/cascade.js'></script>
@@ -144,30 +122,14 @@ cursor:pointer;
 
 <script>
 
-// Last slide
-
-const appPath = remote.app.getAppPath();
-fs.readFile(appPath+'\/package.json','utf8', (err, data) => {
-  if (err) throw err;
-   let package = JSON.parse(data);
-     let version = package.version;
-     document.getElementById('last').innerHTML =  '<div style="margin:auto;font-size:10px;line-height: 15px;" >'+
-                'PANDORÆ - '+version+'<br>'+
-                'Guillaume Levrier'+
-                '</div>'
-})
-
-      const lastScroll = () =>{
-       
-       
+const lastScroll = () =>{
         smoothScrollTo('final8');       
         document.body.style.animation = 'invert 2s';
         document.body.style.animationFillMode= 'forwards';
         document.body.style.overflow = 'hidden';
         document.getElementById('backarrow').style.display = 'none';
         
-setTimeout(() => {
-  
+setTimeout(() => {  
         let seconds = 10;
         const secMinus = () => {
           seconds = seconds-1;
@@ -193,7 +155,6 @@ setTimeout(() => { //This is important because otherwise the padding is messed u
     document.body.style.opacity = 1;
   }, 950);
 }, 200);
-
 
   </script>
 </body>

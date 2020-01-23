@@ -246,7 +246,7 @@ h1 {
 
 #menu {
   position: absolute;
-  background-color: rgb(243,243,243);
+  background-color: rgba(243,243,243,.7);
   left: -150px;
   top:0;
   width: 150px;
@@ -259,13 +259,26 @@ h1 {
 
 #secmenu {
   position: absolute;
-  background-color: rgb(243,243,243);
+  background-color: rgba(243,243,243,.7);
   left: -150px;
   top:0;
   width: 150px;
   height: 100%;
   cursor: auto;
   z-index: 9;
+  border-right: 1px solid rgb(230,230,230);
+  transition: 0.3s;
+}
+
+#thirdmenu {
+  position: absolute;
+  background-color: rgba(243,243,243,.7);
+  left: -150px;
+  top:0;
+  width: 150px;
+  height: 100%;
+  cursor: auto;
+  z-index: 8;
   border-right: 1px solid rgb(230,230,230);
   transition: 0.3s;
 }
@@ -307,18 +320,7 @@ h1 {
   cursor: pointer;
 }
 
-#thirdmenu {
-  position: absolute;
-  background-color: rgb(243,243,243);
-  left: -150px;
-  top:0;
-  width: 150px;
-  height: 100%;
-  cursor: auto;
-  z-index: 8;
-  border-right: 1px solid rgb(230,230,230);
-  transition: 0.3s;
-}
+
 
 #lang {
   margin-top : 30px;
@@ -579,7 +581,6 @@ td {
   left:50%;
   margin-left:-40%;
   border: 0;
-  pointer-events: none;
   font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
   letter-spacing: 0.15em;
   font-variant: small-caps;
@@ -590,6 +591,7 @@ td {
   background: transparent;
   color: #000;
   z-index: 3;
+  cursor:pointer;
 }
 
 #field:focus {

@@ -4,21 +4,29 @@ const userDataPath = remote.app.getPath("userData"); // Find userData folder Pat
 
 var CM = CMT["EN"];
 
-var divs = document.querySelectorAll("section")
+const populateTutorial = () => {
 
-const populateTutorial = divs => {
-    divs.forEach(div=>{
-        div.innerHTML=CM.tutorial.sections[div.id]
-    })
+  for (let sect in CM.tutorial.sections) {
+    let section = document.createElement("SECTION");
+        section.id = sect;
+        section.className += "step";
+        section.innerHTML=CM.tutorial.sections[sect];
+
+    document.getElementById("slideSections").appendChild(section);
+  }
 }
 
 // =========== LANGUAGE SELECTION ===========
 
-fs.readFile(userDataPath + "/userID/user-id.json", "utf8",     // Check if the user uses another one
+populateTutorial();
+const svg = d3.select("svg");
+drawFlux(svg, traces, false, true);
+
+fs.readFileSync(userDataPath + "/userID/user-id.json", "utf8",     // Check if the user uses another one
       (err, data) => {
         data = JSON.parse(data);
         CM = CMT[data.locale];
-        populateTutorial(divs);
+        populateTutorial();
         const svg = d3.select("svg");
         drawFlux(svg, traces, false, true);
       })
@@ -26,7 +34,9 @@ fs.readFile(userDataPath + "/userID/user-id.json", "utf8",     // Check if the u
 document.getElementById("lang").childNodes.forEach(lg=>{
   lg.addEventListener("click",e=>{
     CM=CMT[lg.innerText];
-    populateTutorial(divs);
+    populateTutorial();
+    const svg = d3.select("svg");
+        drawFlux(svg, traces, false, true);
     fs.readFile(userDataPath + "/userID/user-id.json", "utf8",
       (err, data) => {
         data = JSON.parse(data);

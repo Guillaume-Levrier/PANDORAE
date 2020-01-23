@@ -10,18 +10,23 @@ Download **PANDORÆ version 1.0.01** for [Windows](https://anthropos-ecosystems.
 Please put your extracted PANDORÆ folder/app where you usually put apps on your computer (i.e. Program Files on Windows, Applications on macOS). It might work if you don't, but this will solve starting issues.
 
 #### Roadmap
-- update/localize tutorial
+
+#### Current issues
 - flux complex request builder
+- continuous integration
+- direct Twitter and WoS API requests
+- HAL/ARXIV requests?
+- Localize main field/console commands
+- drag&drop PÆ dataset
+
+#### Transform tutorial into presentation mode
+- update/localize tutorial
 - presentation mode:
     1. better function standardisation - done
     2. slide saving in type memory - done
     3. slide saving img in memory using FS
     4. presentation chaining/sequencing 
     5. long shot : presentation HTML export
-- continuous integration
-- direct Twitter and WoS API requests
-- HAL/ARXIV requests?
-- Localize main field/console commands
 
 #### Wiki
 - API documentation (WIP)

@@ -298,9 +298,9 @@
       "color":"white"
     },
     "mask": {},
-    "menu": {},
-    "secmenu": {},
-    "thirdmenu": {},
+    "menu": {"background-color": "rgb(243,243,243)"},
+    "secmenu": {"background-color": "rgb(243,243,243)"},
+    "thirdmenu": {"background-color": "rgb(243,243,243)"},
     "console": {},
     "script": "vega"
   }
