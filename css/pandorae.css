@@ -185,6 +185,10 @@ h1 {
   display: inline-block;
 }
 
+.slideStep{
+  margin:15%;
+}
+
 #aelogo {
   padding: 20%;
   width: 60%;
@@ -245,7 +249,7 @@ h1 {
 }
 
 #menu {
-  position: absolute;
+  position: fixed;
   background-color: rgba(243,243,243,.7);
   left: -150px;
   top:0;
@@ -258,7 +262,7 @@ h1 {
 }
 
 #secmenu {
-  position: absolute;
+  position: fixed;
   background-color: rgba(243,243,243,.7);
   left: -150px;
   top:0;
@@ -271,7 +275,7 @@ h1 {
 }
 
 #thirdmenu {
-  position: absolute;
+  position: fixed;
   background-color: rgba(243,243,243,.7);
   left: -150px;
   top:0;
@@ -495,7 +499,7 @@ li:active {
 
 #coreCanvas{
   top:0;
-  position: absolute;
+  position: fixed;
   display: none;
   overflow: hidden;
   margin:auto;
@@ -950,8 +954,14 @@ cursor: pointer;
   width:50px;
 }
 
-/*TEXT SLIDE*/
+#mainSlideSections{
+  position: absolute;
+  top:0px;
+  z-index: 5;
+}
 
+/*TEXT SLIDE*/
+/* 
 #slide {
 width: 100%;
 height: 100%;
@@ -970,7 +980,7 @@ z-index: 20;
   position: absolute;
   z-index: 21;
   border: 1px solid black;
-}
+} */
 #validSlide {
   background-color:#FFF;
   margin-left: 75%;
@@ -982,5 +992,5 @@ z-index: 20;
 }
 
 #icons {
-  left:25px;position:absolute;font-size:26px;z-index:22;top:25px;transition: 0.3s;
+  left:25px;position:fixed;font-size:26px;z-index:22;top:25px;transition: 0.3s;
 }

@@ -19,14 +19,9 @@ Please put your extracted PANDORÆ folder/app where you usually put apps on your
 - Localize main field/console commands
 - drag&drop PÆ dataset
 
-#### Transform tutorial into presentation mode
+#### Tutorial -> presentation mode
 - update/localize tutorial
-- presentation mode:
-    1. better function standardisation - done
-    2. slide saving in type memory - done
-    3. slide saving img in memory using FS
-    4. presentation chaining/sequencing 
-    5. long shot : presentation HTML export
+- presentation mode (WIP)
 
 #### Wiki
 - API documentation (WIP)

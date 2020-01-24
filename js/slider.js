@@ -1,3 +1,6 @@
+
+
+
 let activeIndex = 0;
 
 var sectionList = document.querySelectorAll("section");
@@ -10,7 +13,7 @@ const addPadding = () => {
   
 
 function scroller() {
-  let container = d3.select("body"),
+  let container = d3.select("#mainSlideSections"),
     dispatch = d3.dispatch("active", "progress"),
     sections = null,
     sectionPositions = [],
@@ -42,11 +45,13 @@ function scroller() {
       sectionPositions.push(top - startPos-(window.innerHeight-this.getBoundingClientRect().height)/2);
     });
     containerStart =
-      container.node().getBoundingClientRect().top + window.pageYOffset;
+      d3.select("#mainSlideSections").node().getBoundingClientRect().top + window.pageYOffset;
+      console.log(containerStart)
   }
 
   function position() {
-    var pos = window.pageYOffset - containerStart; 
+    var pos = window.pageYOffset - containerStart+document.body.offsetHeight*.15;
+    console.log(pos) 
     var sectionIndex = d3.bisect(sectionPositions, pos);    
     sectionIndex = Math.min(sections.size() - 1, sectionIndex)-1;
 
@@ -81,13 +86,16 @@ function scroller() {
 var previous = "";
 
 const smoothScrollTo = (target, hide) => {
-  previous = sectionList[activeIndex].id; // Store current section ID
-  document.getElementById("backarrow").style.display = "inline-block"; // Display "previous" arrow button
-  document
-    .getElementById(target)
-    .scrollIntoView({ block: "start", behavior: "smooth" }); // Scroll smoothly to target
+  var sectionList = document.querySelectorAll("section");
+
+  console.log(activeIndex)
+
+//  previous = sectionList[activeIndex].id; // Store current section ID
+  //document.getElementById("backarrow").style.display = "inline-block"; // Display "previous" arrow button
+  document.getElementById(target)
+          .scrollIntoView({ block: "start", behavior: "smooth" }); // Scroll smoothly to target
   if (hide === true) {
-    document.getElementById("backarrow").style.display = "none";
+    //document.getElementById("backarrow").style.display = "none";
   } // If order comes from the "previous" arrow button, hide this button
 };
 
@@ -120,11 +128,33 @@ const progress = index => {
       clearInterval(progProc);
     } else if (progBasis < progNext) {
       progBasis++;
-      document.getElementById("progressBar").style.height = progBasis + "px";
+      //document.getElementById("progressBar").style.height = progBasis + "px";
     } else if (progBasis > progNext) {
       progBasis--;
-      document.getElementById("progressBar").style.height = progBasis + "px";
+      //document.getElementById("progressBar").style.height = progBasis + "px";
     }
   }
 };
+
+
+const populateSlides = slides => {
+
+  for (let slide in slides) {
+    let section = document.createElement("SECTION");
+        section.id = slide;
+        section.className += "slideStep";
+        section.innerHTML=slides[slide];
+
+    document.getElementById("mainSlideSections").appendChild(section);
+  }
+  sectionList = document.querySelectorAll("section");
+
+  addPadding();
+  display();
+
+sectionList.forEach(sect=>sect.firstElementChild.style.backgroundColor= "rgba(255, 255, 255, .8)");
+    
+  
+  }
+
 

@@ -41,7 +41,7 @@ fs.readFile(appPath+"/package.json","utf8", (err, data) => {
 var currentType;           // Once a type is started, know which one
 var presentationStep = [];
 
-var slide;
+var tutoSlide;
 
 // =========== LANGUAGE SELECTION ===========
 var CM = CMT["EN"];                                            // Load the EN locale at start
@@ -53,7 +53,6 @@ fs.readFile(userDataPath + "/userID/user-id.json", "utf8",     // Check if the u
       })
 
 const populateLocale = divlist => {
-
    divlist.forEach(div=>{
     document.getElementById(div.id).innerText=CM.menu[div.path];
   }) 
@@ -63,6 +62,7 @@ const populateLocale = divlist => {
 var divlist = [
   {id:"fluxMenu",path:"flux"},
   {id:"type",path:"type"},
+  {id:"slideBut",path:"slide"},
   {id:"quitBut",path:"quit"},
   {id:"tutostartmenu",path:"returnToTutorial"}
 ]
@@ -166,7 +166,7 @@ const iconTypes = [
       {name:"step-icon",code:"aspect_ratio"},
       {name:"sort-icon",code:"shuffle"},
       {name:"align-icon",code:"toc"},
-      {name:"slide-icon",code:"create"},
+      {name:"tutoSlide-icon",code:"create"},
       {name:"save-icon",code:"done"}
     ]
 
@@ -426,7 +426,7 @@ ipcRenderer.on("coreSignal", (event, fluxAction, fluxArgs, message) => {
 ipcRenderer.on("chaeros-notification", (event, message, options) => {
   field.value = message;
   if (message === "return to tutorial") {
-    slide = options;
+    tutoSlide = options;
   }
 });
 
@@ -839,9 +839,9 @@ while (typesJS.indexOf("multiThreader.port.postMessage")>(-1)) {
 
 // TUTORIAL
 
-const openTutorial = (slide) => {
-  if (slide) {
-  ipcRenderer.send("window-manager","openModal","tutorial",slide);
+const openTutorial = (tutoSlide) => {
+  if (tutoSlide) {
+  ipcRenderer.send("window-manager","openModal","tutorial",tutoSlide);
 } else {
   ipcRenderer.send("window-manager","openModal","tutorial");
 }
@@ -1040,7 +1040,7 @@ const cmdinput = input => {
         menuIcon.style.cursor = "pointer";
         consoleIcon.style.cursor = "pointer";
         field.removeEventListener("click", () => {
-          openTutorial(slide);
+          openTutorial(tutoSlide);
         });
         break;
 
@@ -1049,7 +1049,7 @@ const cmdinput = input => {
         break;
 
       case CM.mainField.returnTutorial:
-          openTutorial(slide);
+          openTutorial(tutoSlide);
           break;
       case CM.mainField.startTutorial:
         openTutorial();
@@ -1131,7 +1131,7 @@ const reframeMainWindow = () => {
 //// ========== TUTORIAL ========
 
 const tutorialOpener = () => {
-  openTutorial(slide);
+  openTutorial(tutoSlide);
   field.value = "";
 };
 
@@ -1202,9 +1202,7 @@ ipcRenderer.on("tutorial", (event, message) => {
   menuIcon.style.cursor = "pointer";
   consoleIcon.style.cursor = "pointer";
 
-  slide = "message";
-
-  console.log(slide)
+  tutoSlide = "message";
 
   switch (message) {
     case "flux":
@@ -1237,7 +1235,7 @@ ipcRenderer.on("tutorial", (event, message) => {
         break;
 
     case "openTutorial":
-      openTutorial(slide);
+      openTutorial(tutoSlide);
       break;
   }
 });
