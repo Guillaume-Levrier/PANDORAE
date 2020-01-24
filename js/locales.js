@@ -2,8 +2,8 @@ const CMT = {"EN":{
         "menu":{
             "flux":"flux",
             "type":"type",
-            "quit":"quit",
-            "returnToTutorial":"return to tutorial"
+            "slide":"slide",
+            "quit":"quit"
         },
         "global":{
             "coreLogo":["P","&nbsp;","A","&nbsp;","N","&nbsp;","D","&nbsp;","O","&nbsp;","R","&nbsp;","Æ","&nbsp;"," ","-"," ","&nbsp;","C","&nbsp;","O","&nbsp;","R","&nbsp;","E"],
