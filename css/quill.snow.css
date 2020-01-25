@@ -6,7 +6,7 @@
  */
 .ql-container {
   box-sizing: border-box;
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
   font-size: 13px;
   height: 90%;
   margin: 0px;
@@ -359,7 +359,7 @@
   color: #93f;
 }
 .ql-editor .ql-font-serif {
-  font-family: Georgia, Times New Roman, serif;
+  font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
 }
 .ql-editor .ql-font-monospace {
   font-family: Monaco, Courier New, monospace;
@@ -378,6 +378,9 @@
   text-align: inherit;
 }
 .ql-editor .ql-align-center {
+  text-align: center;
+}
+.ql-align-center {
   text-align: center;
 }
 .ql-editor .ql-align-justify {
@@ -806,7 +809,7 @@
   content: 'Monospace';
 }
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value=serif]::before {
-  font-family: Georgia, Times New Roman, serif;
+  font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
 }
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value=monospace]::before {
   font-family: Monaco, Courier New, monospace;
@@ -848,7 +851,7 @@
 .ql-toolbar.ql-snow {
   border: 1px solid #ccc;
   box-sizing: border-box;
-  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
   padding: 8px;
 }
 .ql-toolbar.ql-snow .ql-formats {
