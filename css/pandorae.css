@@ -216,6 +216,13 @@ h1 {
   animation: status 3s linear infinite;
 }
 
+.arrowDown{
+  text-align: center;
+  text-decoration: none;
+  cursor:pointer;
+  width:100%;
+  }
+
 .lifelinerror{
   stroke : rgb(243,100,100);
   stroke-width : 2px;
@@ -958,6 +965,8 @@ cursor: pointer;
   position: absolute;
   top:0px;
   z-index: 5;
+  width: 100%;
+  pointer-events: none;
 }
 
 /*TEXT SLIDE*/

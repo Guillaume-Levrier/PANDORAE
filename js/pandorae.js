@@ -23,6 +23,7 @@ const userDataPath = remote.app.getPath("userData");
 const appPath = remote.app.getAppPath();
 const types = require("./js/types");
 const { dialog } = require('electron').remote;
+const Quill = require("quill");
 
 // ============ VERSION ===========
 const msg =
@@ -167,7 +168,8 @@ const iconTypes = [
       {name:"sort-icon",code:"shuffle"},
       {name:"align-icon",code:"toc"},
       {name:"tutoSlide-icon",code:"create"},
-      {name:"save-icon",code:"done"}
+      {name:"save-icon",code:"save"}
+
     ]
 
 const iconCreator = (target,action) => {
@@ -326,6 +328,7 @@ document.addEventListener("keydown",e=>{
 
 document.getElementById('fluxMenu').addEventListener('click',e=>toggleFlux());
 document.getElementById('type').addEventListener('click',e=>categoryLoader('type'));
+document.getElementById('slideBut').addEventListener('click',e=>categoryLoader('slide'));
 document.getElementById('tutostartmenu').addEventListener('click',e=>{toggleMenu();tutorialOpener();});
 document.getElementById('quitBut').addEventListener('click',e=>closeWindow());
 
@@ -537,15 +540,27 @@ const categoryLoader = cat => {
             typeContainer.id = block;
             typeContainer.className += "tabs menu-item";
             typeContainer.innerText = block;
-            typeContainer.onclick = function() {
-              mainDisplay(block);
-            };
+            typeContainer.addEventListener("click",e=>{mainDisplay(block);}) 
             document.getElementById("secMenContent").appendChild(typeContainer);
           }
         });
       });
       break;
+      case "slide":
+      blocks=['load','edit','create'];
 
+      blocks.forEach(thisBlock => {
+        let typeContainer = document.createElement("div");
+        typeContainer.style.display = "flex";
+        typeContainer.style.borderBottom = "1px solid rgba(192,192,192,0.3)";
+        typeContainer.id = thisBlock;
+        typeContainer.className += "tabs menu-item";
+        typeContainer.innerText = thisBlock;
+        typeContainer.addEventListener("click",e=>{slideDisp(thisBlock);}) 
+        document.getElementById("secMenContent").append(typeContainer);    
+  });
+
+      break;
          case "export": 
          blocks = [
            'interactive',
@@ -570,6 +585,180 @@ const categoryLoader = cat => {
 
  toggleSecondaryMenu();
 };
+
+const listTableDatasets = table => {
+  let targetType = pandodb[table];
+
+  targetType.toArray().then(e => {
+    if (e.length===0){
+      field.value = "no dataset in " + table;
+        ipcRenderer.send(
+          "console-logs",
+          "No dataset in " + table
+        );
+    } else {
+      
+    e.forEach(d => {
+      
+
+      // datasetContainer
+      let datasetContainer = document.createElement("div");
+      datasetContainer.style.display = "flex";
+      datasetContainer.style.borderBottom = "1px solid rgba(192,192,192,0.3)";
+      document
+        .getElementById("thirdMenuContent")
+        .appendChild(datasetContainer);
+
+      // Dataset
+      let dataset = document.createElement("div");
+      dataset.className = "secContentTabs";
+      dataset.id = d.id;
+      dataset.innerHTML =
+        "<span><strong>" + d.name + "</strong><br>" + d.date + "</span>";
+        if (table==="slider") {
+          dataset.onclick = function() {
+            populateSlides(d.id);
+            toggleMenu();
+          };
+        } else {
+          dataset.onclick = function() {
+            selectOption(type, d.id);
+          };
+        }
+      
+      datasetContainer.appendChild(dataset);
+
+      // Remove dataset
+      let removeDataset = document.createElement("div");
+      removeDataset.className = "secContentDel";
+      removeDataset.id = "del" + d.id;
+      removeDataset.innerHTML =
+        "<span><strong><i class='material-icons'>delete_forever</i></strong><br></span>";
+        if (table==="slider") {
+          removeDataset.onclick = () => {
+            pandodb.slider.delete(d.id);
+            document
+              .getElementById("thirdMenuContent")
+              .removeChild(datasetContainer);
+            field.value = "dataset removed from slider";
+            ipcRenderer.send(
+              "console-logs",
+              "Removed " + d.id + " from slider database"
+            );
+          };
+        } else {
+      removeDataset.onclick = () => {
+        pandodb[type].delete(d.id);
+        document
+          .getElementById("thirdMenuContent")
+          .removeChild(datasetContainer);
+        field.value = "dataset removed from " + type;
+        ipcRenderer.send(
+          "console-logs",
+          "Removed " + d.id + " from database: " + type
+        );
+      };
+    }
+      datasetContainer.appendChild(removeDataset);
+    });
+  }
+  });
+
+};
+
+const saveSlides = () => {
+  let name = document.getElementById("presNamer").value;
+  let date = new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
+  let id = name + date;
+  pandodb.slider.add({ id: id, date: date, name: name, content: mainPresContent });
+}
+
+var mainPresContent = [];
+
+const slideDisp = (block) => {
+
+  document.body.style.overflow="auto"; 
+
+switch (block) {
+  case "load":
+    listTableDatasets("slider")
+    toggleTertiaryMenu();
+    
+    break;
+    case "edit":
+      break;
+    case "create":
+      nameDisplay("")
+      document.getElementById("version").innerHTML="";
+      field.style.display="none";
+      document.removeEventListener("keydown",keyShortCuts);
+
+      iconCreator("save-icon",saveSlides)
+      
+      var quillCont = document.createElement("div");
+      quillCont.style.margin="15%";
+      quillCont.style.height="400px";
+      quillCont.style.backgroundColor="white";
+      quillCont.style.zIndex="7";
+      quillCont.style.pointerEvents="all";
+      
+      var textCont = document.createElement("div")
+      textCont.id = "textcontainer";
+      
+      quillCont.appendChild(textCont)
+
+      document.getElementById("mainSlideSections").appendChild(quillCont);
+      var quillEdit = new Quill('#textcontainer', {
+        modules: {
+          toolbar: [
+            [{ header: [1, 2,3, false] }],
+            ['bold', 'italic', 'underline'],
+            ['image', 'code-block'],
+            [{ 'color': [] }, { 'background': [] }],                    
+            [{ 'align': [] }],
+          ]},
+            placeholder: 'Write here...',
+            theme: 'snow'
+          });
+
+          var presNamer = document.createElement("input");
+          presNamer.id ="presNamer";
+          presNamer.type="field";
+          presNamer.placeholder="Presentation Name";
+          presNamer.style.float="center";
+
+
+          var slidetitle = document.createElement("input");
+          slidetitle.type="field";
+          slidetitle.placeholder="slide reference name";
+          slidetitle.style.float="right";
+
+          document.getElementsByClassName("ql-toolbar")[0].appendChild(presNamer)
+          document.getElementsByClassName("ql-toolbar")[0].appendChild(slidetitle)
+          
+
+          const saveThisSlide = () => {
+            
+            if (slidetitle.value.length>0) {
+              mainPresContent.push({title:slidetitle.value,text:document.getElementsByClassName("ql-editor")[0].innerHTML});
+            } else {
+              mainPresContent.push({title:mainPresContent.length+1,text:document.getElementsByClassName("ql-editor")[0].innerHTML});
+            }
+            slidetitle.value="";
+            quillEdit.deleteText(0,99999);
+            
+          }
+          var arrowSave = document.createElement("div")
+          arrowSave.innerHTML="<br><i class='material-icons arrowDown'><a class='arrowDown'>arrow_downward</a></i>"
+          arrowSave.addEventListener("click",saveThisSlide);
+          quillCont.appendChild(arrowSave)
+          toggleMenu();
+    break;
+}
+
+}
+
+
 
 const saveAs = (format) =>{
   toggleMenu();
@@ -849,51 +1038,7 @@ const openTutorial = (tutoSlide) => {
 
 
 const mainDisplay = type => {
-  const listTableDatasets = table => {
-    let targetType = pandodb[table];
-
-    targetType.toArray().then(e => {
-      e.forEach(d => {
-        // datasetContainer
-        let datasetContainer = document.createElement("div");
-        datasetContainer.style.display = "flex";
-        datasetContainer.style.borderBottom = "1px solid rgba(192,192,192,0.3)";
-        document
-          .getElementById("thirdMenuContent")
-          .appendChild(datasetContainer);
-
-        // Dataset
-        let dataset = document.createElement("div");
-        dataset.className = "secContentTabs";
-        dataset.id = d.id;
-        dataset.innerHTML =
-          "<span><strong>" + d.name + "</strong><br>" + d.date + "</span>";
-        dataset.onclick = function() {
-          selectOption(type, d.id);
-        };
-        datasetContainer.appendChild(dataset);
-
-        // Remove dataset
-        let removeDataset = document.createElement("div");
-        removeDataset.className = "secContentDel";
-        removeDataset.id = "del" + d.id;
-        removeDataset.innerHTML =
-          "<span><strong><i class='material-icons'>delete_forever</i></strong><br></span>";
-        removeDataset.onclick = () => {
-          pandodb[type].delete(d.id);
-          document
-            .getElementById("thirdMenuContent")
-            .removeChild(datasetContainer);
-          field.value = "Dataset removed from " + type;
-          ipcRenderer.send(
-            "console-logs",
-            "Removed " + d.id + " from database: " + type
-          );
-        };
-        datasetContainer.appendChild(removeDataset);
-      });
-    });
-  };
+  
 
   field.value = "preparing " + type;
   ipcRenderer.send("console-logs", "Preparing " + type);
@@ -1357,7 +1502,7 @@ const zoomThemeScreen = theme => {
 
 // ====== KEYBOARD SHORTCUTS ======
 
-document.addEventListener("keydown", event => {
+const keyShortCuts = event => {
   switch (event.isComposing || event.code) {
     case "Digit1":
       if (coreExists){
@@ -1399,7 +1544,11 @@ document.addEventListener("keydown", event => {
     
       break;
   }
-});
+
+
+}
+
+document.addEventListener("keydown",keyShortCuts);
 
 // ====== PROGRESS BAR ======
 

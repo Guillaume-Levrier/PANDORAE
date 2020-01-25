@@ -46,12 +46,12 @@ function scroller() {
     });
     containerStart =
       d3.select("#mainSlideSections").node().getBoundingClientRect().top + window.pageYOffset;
-      console.log(containerStart)
+      
   }
 
   function position() {
     var pos = window.pageYOffset - containerStart+document.body.offsetHeight*.15;
-    console.log(pos) 
+    
     var sectionIndex = d3.bisect(sectionPositions, pos);    
     sectionIndex = Math.min(sections.size() - 1, sectionIndex)-1;
 
@@ -87,8 +87,6 @@ var previous = "";
 
 const smoothScrollTo = (target, hide) => {
   var sectionList = document.querySelectorAll("section");
-
-  console.log(activeIndex)
 
 //  previous = sectionList[activeIndex].id; // Store current section ID
   //document.getElementById("backarrow").style.display = "inline-block"; // Display "previous" arrow button
@@ -137,24 +135,40 @@ const progress = index => {
 };
 
 
-const populateSlides = slides => {
+const populateSlides = id => {
 
-  for (let slide in slides) {
+  pandodb.slider.get(id).then(presentation=>{
+    let slides = presentation.content;
+
+    var nextSlide = i => "<br><i class='material-icons arrowDown'><a class='arrowDown' onclick='smoothScrollTo(\""+slides[i].title+"\")'>arrow_downward</a></i>";
+
     let section = document.createElement("SECTION");
-        section.id = slide;
-        section.className += "slideStep";
-        section.innerHTML=slides[slide];
+      section.id = "startPres";
+      section.className += "slideStep";
+      section.innerHTML="<div> "+nextSlide(0)+"<div>";
+      section.style.pointerEvents="all";
+      field.value="start presentation";
+      field.style.pointerEvents="none";
 
     document.getElementById("mainSlideSections").appendChild(section);
-  }
+
+        for (let i = 0; i < slides.length-1; i++) {
+          
+          let section = document.createElement("SECTION");
+            section.id = slides[i].title;
+            section.style.pointerEvents="all";
+            section.className += "slideStep";
+            section.innerHTML="<div style='background-color:rgba(255, 255, 255, .8)'>"+slides[i].text+"</div>"+nextSlide(i+1);
+
+        document.getElementById("mainSlideSections").appendChild(section);
+
+    }
+    
   sectionList = document.querySelectorAll("section");
 
   addPadding();
   display();
-
-sectionList.forEach(sect=>sect.firstElementChild.style.backgroundColor= "rgba(255, 255, 255, .8)");
-    
-  
+    })
   }
 
 
