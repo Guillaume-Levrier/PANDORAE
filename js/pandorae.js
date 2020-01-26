@@ -281,19 +281,22 @@ let toggledTertiaryMenu = false;
 
 const toggleTertiaryMenu = () => {
   purgeMenuItems("thirdMenuContent");
+  
   if (toggledTertiaryMenu) {
+    pulse(1, 1, 10,true);
     document.getElementById("thirdmenu").style.left = "-150px";
     consoleDiv.style.left = "300px";
     iconDiv.style.left = "325px";
-
     xtype.style.left = "300px";
     toggledTertiaryMenu = false;
+    
   } else {
     document.getElementById("thirdmenu").style.left = "300px";
     consoleDiv.style.left = "450px";
     iconDiv.style.left = "475px";
     xtype.style.left = "450px";
     toggledTertiaryMenu = true;
+    pulse(1, 1, 10);
   }
 };
 
@@ -487,7 +490,7 @@ const purgeCore = () => {
 };
 
 const selectOption = (type, id) => {
-  pulse(1, 1, 10);
+  //pulse(1, 1, 10);
   document.getElementById(id).style.backgroundColor = "rgba(220,220,220,0.3)";
 
   toggleMenu();
@@ -503,7 +506,7 @@ const selectOption = (type, id) => {
   currentType = {type:type,id:id}
   types.typeSwitch(type, id);
   ipcRenderer.send("audio-channel", "button2");
-
+  pulse(1, 1, 10);
   ipcRenderer.send(
     "console-logs",
     CM.console.starting[0]+ type + CM.console.starting[1] + JSON.stringify(id)
@@ -622,7 +625,7 @@ const listTableDatasets = table => {
           };
         } else {
           dataset.onclick = function() {
-            selectOption(type, d.id);
+            selectOption(table, d.id);
           };
         }
       
@@ -648,14 +651,14 @@ const listTableDatasets = table => {
           };
         } else {
       removeDataset.onclick = () => {
-        pandodb[type].delete(d.id);
+        pandodb[table].delete(d.id);
         document
           .getElementById("thirdMenuContent")
           .removeChild(datasetContainer);
-        field.value = "dataset removed from " + type;
+        field.value = "dataset removed from " + table;
         ipcRenderer.send(
           "console-logs",
-          "Removed " + d.id + " from database: " + type
+          "Removed " + d.id + " from database: " + table
         );
       };
     }
@@ -681,17 +684,22 @@ const slideDisp = (block) => {
 
 switch (block) {
   case "load":
+    field.value = "loading presentations";
     listTableDatasets("slider")
     toggleTertiaryMenu();
     
     break;
     case "edit":
+      field.value = "loading presentations";
+      listTableDatasets("slider")
+      toggleTertiaryMenu();
       break;
     case "create":
       nameDisplay("")
       document.getElementById("version").innerHTML="";
       field.style.display="none";
       document.removeEventListener("keydown",keyShortCuts);
+      
 
       iconCreator("save-icon",saveSlides)
       
@@ -1038,8 +1046,6 @@ const openTutorial = (tutoSlide) => {
 
 
 const mainDisplay = type => {
-  
-
   field.value = "preparing " + type;
   ipcRenderer.send("console-logs", "Preparing " + type);
   displayCore();

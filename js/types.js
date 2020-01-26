@@ -4681,7 +4681,7 @@ var y = d3.scalePoint();
      //======== DATA CALL & SORT =========
    
 pandodb.pharmacotype.get(id).then(datajson => {
-     /* 
+     
   dataDownload(datajson);
 
 var data = datajson.content.entries;
@@ -4911,7 +4911,7 @@ iconCreator("align-icon",alignTrialTitles)
 
 
       loadType();
-     */
+     
       }).catch(error => {console.log(error);field.value = " error";ipcRenderer.send("console-logs"," error: cannot start corpus " + id + ".");});
    
 //======== ZOOM & RESCALE ===========

@@ -3,6 +3,8 @@
 
 let activeIndex = 0;
 
+let currentIndex;
+
 var sectionList = document.querySelectorAll("section");
 
 const addPadding = () => {
@@ -17,8 +19,9 @@ function scroller() {
     dispatch = d3.dispatch("active", "progress"),
     sections = null,
     sectionPositions = [],
-    currentIndex = -1,
     containerStart = 0;
+    currentIndex = -1;
+    
 
   function scroll(els) {
     sections = els;
@@ -42,18 +45,19 @@ function scroller() {
       if (i === 0) {
         startPos = top;
       }
-      sectionPositions.push(top - startPos-(window.innerHeight-this.getBoundingClientRect().height)/2);
+      sectionPositions.push(top - startPos);
     });
     containerStart =
       d3.select("#mainSlideSections").node().getBoundingClientRect().top + window.pageYOffset;
-      
+   
   }
 
   function position() {
-    var pos = window.pageYOffset - containerStart+document.body.offsetHeight*.15;
-    
+    var pos = window.pageYOffset - containerStart;//+document.body.offsetHeight*.3;
     var sectionIndex = d3.bisect(sectionPositions, pos);    
     sectionIndex = Math.min(sections.size() - 1, sectionIndex)-1;
+
+   
 
     if (currentIndex !== sectionIndex) {
       dispatch.call("active", this, sectionIndex);
@@ -98,13 +102,13 @@ const smoothScrollTo = (target, hide) => {
 };
 
 const display = () => {
-  var scroll = scroller().container(d3.select("#slideSections"));
+  var scroll = scroller().container(d3.select("#mainSlideSections"));
 
-  scroll(d3.selectAll(".step"));
+  scroll(d3.selectAll(".slideStep"));
 
   scroll.on("active", function(index) {
-    d3.selectAll(".step").style("opacity", function(d, i) {
-      return i === index ? 1 : 0.1;
+    d3.selectAll(".slideStep").style("opacity", function(d, i) {
+      return i === index ? 1 : 0.4;
     });
     progress(index);
   });
@@ -134,6 +138,23 @@ const progress = index => {
   }
 };
 
+const slideControl = event => {
+
+  switch (event.isComposing || event.code) {
+    case "ArrowDown":
+    case "ArrowRight":
+      event.preventDefault();
+      smoothScrollTo(sectionList[currentIndex+1].id)
+      break;
+
+      case "ArrowUp":
+      case "ArrowLeft":
+      event.preventDefault();
+      smoothScrollTo(sectionList[currentIndex-1].id)
+        break;
+  }
+}
+
 
 const populateSlides = id => {
 
@@ -158,16 +179,26 @@ const populateSlides = id => {
             section.id = slides[i].title;
             section.style.pointerEvents="all";
             section.className += "slideStep";
-            section.innerHTML="<div style='background-color:rgba(255, 255, 255, .8)'>"+slides[i].text+"</div>"+nextSlide(i+1);
+            section.innerHTML="<div style='background-color:rgba(255, 255, 255, .8);box-shadow: 0px 0px 20px darkgray;border-radius:10px;padding:10px;'>"+slides[i].text+"</div>"+nextSlide(i+1);
 
         document.getElementById("mainSlideSections").appendChild(section);
 
     }
     
+    document.querySelectorAll("p").forEach(p=>p.style.fontSize="20px");
+
   sectionList = document.querySelectorAll("section");
 
   addPadding();
   display();
+  document.addEventListener("keydown",slideControl);
+  document.getElementById('menu-icon').addEventListener("click", ()=>{
+    document.body.style.animation = "fadeout 0.1s";
+    setTimeout(() => {
+      document.body.remove();
+      remote.getCurrentWindow().reload();
+    }, 100);
+  })
     })
   }
 
