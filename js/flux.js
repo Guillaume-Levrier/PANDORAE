@@ -354,6 +354,7 @@ const powerValve = (fluxAction, item) => {
      case "clinTriRetriever" : 
      fluxArgs.clinTriRetriever = {query :""};
       fluxArgs.clinTriRetriever.query = document.getElementById("clinical_trialslocalqueryinput").value;
+      message = "retrieving clinical trials info";
       break;
 
     case "capcoRebuilder":
