@@ -193,7 +193,7 @@ const populateSlides = id => {
             section.className += "slideStep";
           if (slides[i].text) {                     //stop for last slide (empty)
             section.id = slides[i].title;
-            section.innerHTML="<div style='background-color:rgba(255, 255, 255, .8);box-shadow: 0px 0px 20px darkgray;border-radius:10px;padding:10px;'>"+slides[i].text+"</div>"+nextSlide(i+1);
+            section.innerHTML="<div style='background-color:rgba(0, 10, 10, .8);padding:10px;color:white'>"+slides[i].text+"</div>"+nextSlide(i+1);
           }
 
         document.getElementById("mainSlideSections").appendChild(section);
