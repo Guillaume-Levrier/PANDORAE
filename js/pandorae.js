@@ -514,10 +514,15 @@ const selectOption = (type, id) => {
 };
 
 // ========== MAIN MENU OPTIONS ========
+let notLoadingMenu=true;
 
 const categoryLoader = cat => {
 
+if (notLoadingMenu) {
+
   purgeMenuItems("secMenContent");
+
+  notLoadingMenu=false;
 
   let blocks;
 
@@ -533,6 +538,7 @@ const categoryLoader = cat => {
         "filotype",
         "pharmacotype"
       ];
+      let loadingCount=0;
       ipcRenderer.send("console-logs", "Displaying available types");
       blocks.forEach(block => {
         pandodb[block].toArray().then(thisBlock => {
@@ -545,6 +551,8 @@ const categoryLoader = cat => {
             typeContainer.innerText = block;
             typeContainer.addEventListener("click",e=>{mainDisplay(block);}) 
             document.getElementById("secMenContent").appendChild(typeContainer);
+            loadingCount+=1;
+            if (loadingCount===blocks.length){notLoadingMenu=true;}
           }
         });
       });
@@ -562,7 +570,7 @@ const categoryLoader = cat => {
         typeContainer.addEventListener("click",e=>{slideDisp(thisBlock);}) 
         document.getElementById("secMenContent").append(typeContainer);    
   });
-
+  notLoadingMenu=true;
       break;
          case "export": 
          blocks = [
@@ -582,11 +590,13 @@ const categoryLoader = cat => {
                 typeContainer.addEventListener("click",e=>saveAs(thisBlock))
                 document.getElementById("secMenContent").append(typeContainer);    
           });
-
+          notLoadingMenu=true;
                   break; 
   }
 
+  
  toggleSecondaryMenu();
+}  
 };
 
 const listTableDatasets = table => {
@@ -711,9 +721,9 @@ const slideCreator = () => {
   
   var textCont = document.createElement("div")
   textCont.id = "textcontainer";
-  textCont.style="background-color:rgba(0, 10, 10, .8);padding:10px;color:white;"
+  textCont.style="background-color:rgba(0, 10, 10, .8);padding:10px;color:white;";
   
-  quillCont.appendChild(textCont)
+  quillCont.appendChild(textCont);
 
   document.getElementById("mainSlideSections").appendChild(quillCont);
   var quillEdit = new Quill('#textcontainer', {
