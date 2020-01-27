@@ -109,7 +109,10 @@ const display = () => {
 
   scroll.on("active", function(index) {
     d3.selectAll(".slideStep").style("opacity", function(d, i) {
-      return i === index ? 1 : 0.4;
+      return i === index ? 1 : 0.3;
+    });
+    d3.selectAll(".slideStep").style("filter", function(d, i) {
+      return i === index ? 'blur(0px)' : 'blur(4px)';
     });
     progress(index);
   });
@@ -204,8 +207,11 @@ const populateSlides = id => {
 
   sectionList = document.querySelectorAll("section");
 
-  addPadding();
-  display();
+  setTimeout(() => {
+    addPadding();
+    display();  
+  }, 50);
+  
   document.addEventListener("keydown",slideControl);
   document.getElementById('menu-icon').addEventListener("click", ()=>{
     document.body.style.animation = "fadeout 0.1s";
