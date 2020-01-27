@@ -594,6 +594,7 @@ const listTableDatasets = table => {
 
   targetType.toArray().then(e => {
     if (e.length===0){
+      pulse(10,1,1,true);
       field.value = "no dataset in " + table;
         ipcRenderer.send(
           "console-logs",
@@ -672,11 +673,105 @@ const listTableDatasets = table => {
 const saveSlides = () => {
   let name = document.getElementById("presNamer").value;
   let date = new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
+  if (priorDate) {
+    date =priorDate;
+  }
   let id = name + date;
-  pandodb.slider.add({ id: id, date: date, name: name, content: mainPresContent });
+  pandodb.slider.put({ id: id, date: date, name: name, content: mainPresContent });
 }
 
 var mainPresContent = [];
+var mainPresEdit=false;
+var priorDate=false;
+
+const slideCreator = () => {
+
+  nameDisplay("")
+  document.getElementById("version").innerHTML="";
+  field.style.display="none";
+  document.removeEventListener("keydown",keyShortCuts);
+  document.getElementById('menu-icon').addEventListener("click", ()=>{
+    document.body.style.animation = "fadeout 0.1s";
+    setTimeout(() => {
+      document.body.remove();
+      remote.getCurrentWindow().reload();
+    }, 100);
+  })
+
+  iconCreator("save-icon",saveSlides)
+  
+  var quillCont = document.createElement("div");
+  quillCont.style.margin="15%";
+  quillCont.style.width="70%";
+  quillCont.style.height="400px";
+  quillCont.style.backgroundColor="white";
+  quillCont.style.zIndex="7";
+  quillCont.style.pointerEvents="all";
+  quillCont.style.position="fixed";
+  
+  var textCont = document.createElement("div")
+  textCont.id = "textcontainer";
+  
+  quillCont.appendChild(textCont)
+
+  document.getElementById("mainSlideSections").appendChild(quillCont);
+  var quillEdit = new Quill('#textcontainer', {
+    modules: {
+      toolbar: [
+        [{ header: [1, 2,3, false] }],
+        ['bold', 'italic', 'underline'],
+        ['image', 'code-block'],
+        [{ 'color': [] }, { 'background': [] }],                    
+        [{ 'align': [] }],
+      ]},
+        placeholder: 'Write here...',
+        theme: 'snow'
+      });
+
+      var slideToolbar = document.createElement("div");
+      slideToolbar.style.float="right";
+      slideToolbar.innerHTML = "<input type='field' placeholder='Presentation name' id='presNamer'>"+
+                               " <input type='button' id='▲' value='▲'>"+
+                               " <input type='button' id='▼' value='▼'>"+
+                               " <input type='button' id='+' value='+'>"+
+                               " <input type='button' id='-' value='-'>"+
+                               " <input type='field' placeholder='Slide reference name' value='begin' id='slidetitle'>"
+
+mainPresContent.push({title:"begin",text:""})
+
+                              
+document.getElementsByClassName("ql-toolbar")[0].appendChild(slideToolbar)
+document.getElementById("▲").addEventListener("click",e=>{slideSaver(-1)})
+document.getElementById("▼").addEventListener("click",e=>{slideSaver(1)})
+document.getElementById("+").addEventListener("click",e=>{
+  
+  let newSlideTitle="slide"+parseInt(activeIndex+1);
+                                    mainPresContent.splice(activeIndex+1,0,{title:newSlideTitle,text:""});
+                                    slideSaver(1)
+  //                                  activeIndex+=1;
+                                  })
+document.getElementById("-").addEventListener("click",e=>{
+                                    mainPresContent.splice(activeIndex,1);
+                                    slideSaver(-1);
+                                  })
+
+      const slideSaver = delta => {
+        
+         let editor =document.getElementsByClassName("ql-editor")[0]
+        let slidetitle = document.getElementById("slidetitle");
+        if (activeIndex>-1) {
+        
+         // save current slide
+        mainPresContent[activeIndex].title=slidetitle.value;
+        mainPresContent[activeIndex].text=editor.innerHTML;
+        // add delta
+        activeIndex+=delta;
+        // display next slide
+        slidetitle.value=mainPresContent[activeIndex].title;
+        editor.innerHTML=mainPresContent[activeIndex].text;
+      }
+      }
+}
 
 const slideDisp = (block) => {
 
@@ -691,82 +786,16 @@ switch (block) {
     break;
     case "edit":
       field.value = "loading presentations";
+      mainPresEdit=true;
       listTableDatasets("slider")
       toggleTertiaryMenu();
       break;
     case "create":
-      nameDisplay("")
-      document.getElementById("version").innerHTML="";
-      field.style.display="none";
-      document.removeEventListener("keydown",keyShortCuts);
-      
-
-      iconCreator("save-icon",saveSlides)
-      
-      var quillCont = document.createElement("div");
-      quillCont.style.margin="15%";
-      quillCont.style.height="400px";
-      quillCont.style.backgroundColor="white";
-      quillCont.style.zIndex="7";
-      quillCont.style.pointerEvents="all";
-      
-      var textCont = document.createElement("div")
-      textCont.id = "textcontainer";
-      
-      quillCont.appendChild(textCont)
-
-      document.getElementById("mainSlideSections").appendChild(quillCont);
-      var quillEdit = new Quill('#textcontainer', {
-        modules: {
-          toolbar: [
-            [{ header: [1, 2,3, false] }],
-            ['bold', 'italic', 'underline'],
-            ['image', 'code-block'],
-            [{ 'color': [] }, { 'background': [] }],                    
-            [{ 'align': [] }],
-          ]},
-            placeholder: 'Write here...',
-            theme: 'snow'
-          });
-
-          var presNamer = document.createElement("input");
-          presNamer.id ="presNamer";
-          presNamer.type="field";
-          presNamer.placeholder="Presentation Name";
-          presNamer.style.float="center";
-
-
-          var slidetitle = document.createElement("input");
-          slidetitle.type="field";
-          slidetitle.placeholder="slide reference name";
-          slidetitle.style.float="right";
-
-          document.getElementsByClassName("ql-toolbar")[0].appendChild(presNamer)
-          document.getElementsByClassName("ql-toolbar")[0].appendChild(slidetitle)
-          
-
-          const saveThisSlide = () => {
-            
-            if (slidetitle.value.length>0) {
-              mainPresContent.push({title:slidetitle.value,text:document.getElementsByClassName("ql-editor")[0].innerHTML});
-            } else {
-              mainPresContent.push({title:mainPresContent.length+1,text:document.getElementsByClassName("ql-editor")[0].innerHTML});
-            }
-            slidetitle.value="";
-            quillEdit.deleteText(0,99999);
-            
-          }
-          var arrowSave = document.createElement("div")
-          arrowSave.innerHTML="<br><i class='material-icons arrowDown'><a class='arrowDown'>arrow_downward</a></i>"
-          arrowSave.addEventListener("click",saveThisSlide);
-          quillCont.appendChild(arrowSave)
-          toggleMenu();
+      slideCreator();
+      toggleMenu();
     break;
 }
-
 }
-
-
 
 const saveAs = (format) =>{
   toggleMenu();

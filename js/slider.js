@@ -9,6 +9,7 @@ var sectionList = document.querySelectorAll("section");
 
 const addPadding = () => {
   for (let sect of sectionList) {
+    sect.style.paddingTop = '0px'; //remove all previous padding;
     sect.style.paddingTop=parseInt((document.body.offsetHeight-sect.clientHeight)/2)+"px";
   }       
 }
@@ -161,6 +162,17 @@ const populateSlides = id => {
   pandodb.slider.get(id).then(presentation=>{
     let slides = presentation.content;
 
+    if (mainPresEdit) {
+        slideCreator()
+        priorDate=presentation.date;
+        mainPresContent=slides;
+        document.getElementsByClassName("ql-editor")[0].innerHTML=mainPresContent[0].text;
+        document.getElementById("slidetitle").value=mainPresContent[0].title;
+        document.getElementById("presNamer").value=presentation.name;
+    } else {
+
+      slides.push({})
+
     var nextSlide = i => "<br><i class='material-icons arrowDown'><a class='arrowDown' onclick='smoothScrollTo(\""+slides[i].title+"\")'>arrow_downward</a></i>";
 
     let section = document.createElement("SECTION");
@@ -176,10 +188,13 @@ const populateSlides = id => {
         for (let i = 0; i < slides.length-1; i++) {
           
           let section = document.createElement("SECTION");
-            section.id = slides[i].title;
+          
             section.style.pointerEvents="all";
             section.className += "slideStep";
+          if (slides[i].text) {                     //stop for last slide (empty)
+            section.id = slides[i].title;
             section.innerHTML="<div style='background-color:rgba(255, 255, 255, .8);box-shadow: 0px 0px 20px darkgray;border-radius:10px;padding:10px;'>"+slides[i].text+"</div>"+nextSlide(i+1);
+          }
 
         document.getElementById("mainSlideSections").appendChild(section);
 
@@ -199,7 +214,9 @@ const populateSlides = id => {
       remote.getCurrentWindow().reload();
     }, 100);
   })
+}
     })
+  
   }
 
 
