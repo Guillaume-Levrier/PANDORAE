@@ -711,6 +711,7 @@ const slideCreator = () => {
   
   var textCont = document.createElement("div")
   textCont.id = "textcontainer";
+  textCont.style="background-color:rgba(0, 10, 10, .8);padding:10px;color:white;"
   
   quillCont.appendChild(textCont)
 
@@ -724,7 +725,7 @@ const slideCreator = () => {
         [{ 'color': [] }, { 'background': [] }],                    
         [{ 'align': [] }],
       ]},
-        placeholder: 'Write here...',
+        placeholder: '',
         theme: 'snow'
       });
 
