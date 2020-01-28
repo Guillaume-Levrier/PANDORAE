@@ -109,10 +109,34 @@ const display = () => {
 
   scroll.on("active", function(index) {
     d3.selectAll(".slideStep").style("opacity", function(d, i) {
-      return i === index ? 1 : 0.3;
+      switch (i) {
+        case index: return 1
+            break;
+      
+        case index-1: return .3
+            break;
+
+        case index+1: return .3
+            break;
+
+        default: return 1
+            break;
+      }
     });
     d3.selectAll(".slideStep").style("filter", function(d, i) {
-      return i === index ? 'blur(0px)' : 'blur(4px)';
+      switch (i) {
+        case index: return 'blur(0px)';
+            break;
+      
+        case index-1: return 'blur(4px)'
+            break;
+
+        case index+1: return 'blur(4px)'
+            break;
+        
+            default :return 'blur(0px)'
+            break;
+      }
     });
     progress(index);
   });
@@ -174,8 +198,17 @@ const populateSlides = id => {
         document.getElementById("presNamer").value=presentation.name;
     } else {
 
-      slides.push({})
+      
 
+      slides.forEach(slide=>{
+        
+        for (let i = 0; i < (slide.text.match(/\[actionType:/g) || []).length; i++) {
+          slide.text=slide.text.replace('[actionType:','<a style="filter:invert(1);cursor:pointer;" onclick=selectOption(')  
+          slide.text=slide.text.replace(']',')><i class="material-icons">flip</i></a>');
+        }
+      })
+
+      slides.push({})
     var nextSlide = i => "<br><i class='material-icons arrowDown'><a class='arrowDown' onclick='smoothScrollTo(\""+slides[i].title+"\")'>arrow_downward</a></i>";
 
     let section = document.createElement("SECTION");

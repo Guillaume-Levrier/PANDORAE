@@ -15,7 +15,7 @@
 
 // =========== NODE - NPM ===========
 // Loading all relevant modules
-const { remote, ipcRenderer, shell } = require("electron");
+const { remote, ipcRenderer, shell, clipboard } = require("electron");
 const fs = require("fs");
 const d3 = require("d3");
 const THREE = require("three");
@@ -489,11 +489,19 @@ const purgeCore = () => {
   }
 };
 
-const selectOption = (type, id) => {
-  //pulse(1, 1, 10);
-  document.getElementById(id).style.backgroundColor = "rgba(220,220,220,0.3)";
+var quillEdit;
 
-  toggleMenu();
+const selectOption = (type, id) => {
+  if (typeSelector) {
+    let order = "[actionType:"+JSON.stringify(type)+","+JSON.stringify(id)+"]";
+    let editor =document.getElementsByClassName("ql-editor")[0]
+    editor.innerHTML=editor.innerHTML+order;
+    typeSelector=false;
+    toggleMenu();
+  } else {
+
+  if (toggledMenu) {toggleMenu();}
+
   document.getElementById("menu-icon").onclick = "";
   document.getElementById("menu-icon").addEventListener(
     "click",
@@ -511,6 +519,7 @@ const selectOption = (type, id) => {
     "console-logs",
     CM.console.starting[0]+ type + CM.console.starting[1] + JSON.stringify(id)
   );
+  }
 };
 
 // ========== MAIN MENU OPTIONS ========
@@ -690,6 +699,14 @@ const saveSlides = () => {
   pandodb.slider.put({ id: id, date: date, name: name, content: mainPresContent });
 }
 
+var typeSelector = false
+
+const typeSelect = () => {
+  toggleMenu();
+  typeSelector=true;
+  categoryLoader("type")
+}
+
 var mainPresContent = [];
 var mainPresEdit=false;
 var priorDate=false;
@@ -726,12 +743,12 @@ const slideCreator = () => {
   quillCont.appendChild(textCont);
 
   document.getElementById("mainSlideSections").appendChild(quillCont);
-  var quillEdit = new Quill('#textcontainer', {
+  quillEdit = new Quill('#textcontainer', {
     modules: {
       toolbar: [
         [{ header: [1, 2,3, false] }],
         ['bold', 'italic', 'underline'],
-        ['image', 'code-block'],
+        ['image', 'code-block','link'],
         [{ 'color': [] }, { 'background': [] }],                    
         [{ 'align': [] }],
       ]},
@@ -746,12 +763,13 @@ const slideCreator = () => {
                                " <input type='button' id='▼' value='▼'>"+
                                " <input type='button' id='+' value='+'>"+
                                " <input type='button' id='-' value='-'>"+
+                               " <input type='button' id='typeSelector' value='TYPE'>"+
                                " <input type='field' placeholder='Slide reference name' value='begin' id='slidetitle'>"
 
 mainPresContent.push({title:"begin",text:""})
-
-                              
+              
 document.getElementsByClassName("ql-toolbar")[0].appendChild(slideToolbar)
+document.getElementById("typeSelector").addEventListener("click",typeSelect)
 document.getElementById("▲").addEventListener("click",e=>{slideSaver(-1)})
 document.getElementById("▼").addEventListener("click",e=>{slideSaver(1)})
 document.getElementById("+").addEventListener("click",e=>{
