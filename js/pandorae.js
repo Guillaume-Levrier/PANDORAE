@@ -168,7 +168,8 @@ const iconTypes = [
       {name:"sort-icon",code:"shuffle"},
       {name:"align-icon",code:"toc"},
       {name:"tutoSlide-icon",code:"create"},
-      {name:"save-icon",code:"save"}
+      {name:"save-icon",code:"save"},
+      {name:"back-to-pres",code:"arrow_back_ios"}
 
     ]
 
@@ -490,6 +491,15 @@ const purgeCore = () => {
 };
 
 var quillEdit;
+
+ipcRenderer.on("backToPres", (event, message) => {
+  setTimeout(() => {
+    populateSlides(message.currentMainPresStep.id);
+    setTimeout(() => {
+      smoothScrollTo(message.currentMainPresStep.step);    
+    }, 1000);
+  }, 500);
+});
 
 const selectOption = (type, id) => {
   if (typeSelector) {

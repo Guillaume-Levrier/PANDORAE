@@ -297,6 +297,11 @@ const createSlide = () => {
     })  
   }
 
+// =========== LOADTYPE ===========  
+const backToPres = () => {
+ipcRenderer.send("backToPres",{currentMainPresStep})
+}
+
 
 // =========== LOADTYPE ===========
 // LoadType is the process that removes the main display canvas and then displays
@@ -314,10 +319,15 @@ const loadType = (type,id) => {
   ipcRenderer.send("audio-channel", "button1");
   field.value = "";
   const exporter = () => categoryLoader('export');
- iconCreator("export-icon",toggleMenu)
- iconCreator("step-icon",addPresentationStep)
- iconCreator("slide-icon",createSlide)
- iconCreator("save-icon",savePresentation)
+
+  if(currentMainPresStep) {
+    iconCreator("back-to-pres",backToPres)
+  } else {
+  iconCreator("export-icon",toggleMenu)
+  iconCreator("step-icon",addPresentationStep)
+  iconCreator("slide-icon",createSlide)
+  iconCreator("save-icon",savePresentation)
+}
  setTimeout(() => {
   document.getElementById("slide-icon").addEventListener("dblclick",e=>{
     if (document.getElementById("slide")) {
