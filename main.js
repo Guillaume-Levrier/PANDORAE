@@ -372,3 +372,9 @@ ipcMain.on("cmdInputFromRenderer", (event, theme) => {
   mainWindow.webContents.send("cmdInputFromRenderer", theme);
 });
 
+ipcMain.on("backToPres", (event, message) => {
+  mainWindow.reload()
+  setTimeout(() => {
+    mainWindow.webContents.send("backToPres", message);
+  }, 1000);
+})

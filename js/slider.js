@@ -5,6 +5,8 @@ let activeIndex = 0;
 
 let currentIndex;
 
+let currentMainPresStep={};
+
 var sectionList = document.querySelectorAll("section");
 
 const addPadding = () => {
@@ -91,10 +93,11 @@ function scroller() {
 var previous = "";
 
 const smoothScrollTo = (target, hide) => {
-  var sectionList = document.querySelectorAll("section");
+  //var sectionList = document.querySelectorAll("section");
 
 //  previous = sectionList[activeIndex].id; // Store current section ID
   //document.getElementById("backarrow").style.display = "inline-block"; // Display "previous" arrow button
+
   document.getElementById(target)
           .scrollIntoView({ block: "start", behavior: "smooth" }); // Scroll smoothly to target
   if (hide === true) {
@@ -108,6 +111,7 @@ const display = () => {
   scroll(d3.selectAll(".slideStep"));
 
   scroll.on("active", function(index) {
+    currentMainPresStep.step=sectionList[index].id;
     d3.selectAll(".slideStep").style("opacity", function(d, i) {
       switch (i) {
         case index: return 1
@@ -185,7 +189,7 @@ const slideControl = event => {
 
 
 const populateSlides = id => {
-
+      currentMainPresStep.id=id;
   pandodb.slider.get(id).then(presentation=>{
     let slides = presentation.content;
 
@@ -198,10 +202,7 @@ const populateSlides = id => {
         document.getElementById("presNamer").value=presentation.name;
     } else {
 
-      
-
       slides.forEach(slide=>{
-        
         for (let i = 0; i < (slide.text.match(/\[actionType:/g) || []).length; i++) {
           slide.text=slide.text.replace('[actionType:','<a style="filter:invert(1);cursor:pointer;" onclick=selectOption(')  
           slide.text=slide.text.replace(']',')><i class="material-icons">flip</i></a>');
