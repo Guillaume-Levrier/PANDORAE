@@ -302,7 +302,8 @@ const backToPres = () => {
   document.body.style.animation = "fadeout 0.7s";
   setTimeout(() => {
     document.body.remove();
-    ipcRenderer.send("backToPres",{currentMainPresStep})
+    console.log(currentMainPresStep)
+    ipcRenderer.send("backToPres",currentMainPresStep)
   }, 700);
 }
 
