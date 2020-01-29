@@ -12,16 +12,24 @@ Please put your extracted PANDORÆ folder/app where you usually put apps on your
 #### Roadmap
 
 #### Current issues
-- flux complex request builder
+
 - continuous integration
+
+#### FLUX/CHAEROS
+- flux complex request builder
 - direct Twitter and WoS API requests
-- HAL/ARXIV requests?
+- HAL/ARXIV requests
+
+#### Main/PANDORAE.JS
 - Localize main field/console commands
 - drag&drop PÆ dataset
 
-#### Tutorial -> presentation mode
+#### Tutorial 
 - update/localize tutorial
-- presentation mode (WIP)
+
+#### Presentation mode
+- alpha test presentation mode
+- solve the conflict between main slides and type slides (arrow event listeners)
 
 #### Wiki
 - API documentation (WIP)
