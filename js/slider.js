@@ -92,18 +92,7 @@ function scroller() {
 
 var previous = "";
 
-const smoothScrollTo = (target, hide) => {
-  //var sectionList = document.querySelectorAll("section");
-
-//  previous = sectionList[activeIndex].id; // Store current section ID
-  //document.getElementById("backarrow").style.display = "inline-block"; // Display "previous" arrow button
-
-  document.getElementById(target)
-          .scrollIntoView({ block: "start", behavior: "smooth" }); // Scroll smoothly to target
-  if (hide === true) {
-    //document.getElementById("backarrow").style.display = "none";
-  } // If order comes from the "previous" arrow button, hide this button
-};
+const smoothScrollTo = target => document.getElementById(target) ? document.getElementById(target).scrollIntoView({ block: "start", behavior: "smooth" }) : false; // Scroll smoothly to target
 
 const display = () => {
   var scroll = scroller().container(d3.select("#mainSlideSections"));
@@ -230,7 +219,7 @@ const populateSlides = id => {
             section.className += "slideStep";
           if (slides[i].text) {                     //stop for last slide (empty)
             section.id = slides[i].title;
-            section.innerHTML="<div style='background-color:rgba(0, 10, 10, .8);padding:10px;color:white'>"+slides[i].text+"</div>"+nextSlide(i+1);
+            section.innerHTML="<div style='background-color:rgba(0, 10, 10, .8);border-radius:4px;padding:10px;color:white'>"+slides[i].text+"</div>"+nextSlide(i+1);
           }
 
         document.getElementById("mainSlideSections").appendChild(section);
@@ -244,6 +233,8 @@ const populateSlides = id => {
   setTimeout(() => {
     addPadding();
     display();  
+    let lastArrow=document.querySelectorAll("i .arrowDown")[document.querySelectorAll("i .arrowDown").length-1];
+    lastArrow.innerText="done_outline";
   }, 50);
   
   document.addEventListener("keydown",slideControl);
