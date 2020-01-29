@@ -299,7 +299,11 @@ const createSlide = () => {
 
 // =========== LOADTYPE ===========  
 const backToPres = () => {
-ipcRenderer.send("backToPres",{currentMainPresStep})
+  document.body.style.animation = "fadeout 0.7s";
+  setTimeout(() => {
+    document.body.remove();
+    ipcRenderer.send("backToPres",{currentMainPresStep})
+  }, 700);
 }
 
 
