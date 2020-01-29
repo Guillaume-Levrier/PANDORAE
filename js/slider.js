@@ -171,7 +171,9 @@ const slideControl = event => {
       case "ArrowUp":
       case "ArrowLeft":
       event.preventDefault();
-      smoothScrollTo(sectionList[currentIndex-1].id)
+      if (sectionList[currentIndex-1]) {
+        smoothScrollTo(sectionList[currentIndex-1].id)
+      }
         break;
   }
 }

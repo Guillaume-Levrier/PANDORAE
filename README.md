@@ -12,8 +12,8 @@ Please put your extracted PANDORÆ folder/app where you usually put apps on your
 #### Roadmap
 
 #### Current issues
-
 - continuous integration
+- transform as many setTimeouts as possible into promises
 
 #### FLUX/CHAEROS
 - flux complex request builder
@@ -26,10 +26,6 @@ Please put your extracted PANDORÆ folder/app where you usually put apps on your
 
 #### Tutorial 
 - update/localize tutorial
-
-#### Presentation mode
-- alpha test presentation mode
-- solve the conflict between main slides and type slides (arrow event listeners)
 
 #### Wiki
 - API documentation (WIP)
