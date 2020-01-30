@@ -16,7 +16,7 @@ Please put your extracted PANDORÆ folder/app where you usually put apps on your
 - transform as many setTimeouts as possible into promises
 
 #### FLUX/CHAEROS
-- flux complex request builder
+- flux complex request helpers
 - direct Twitter and WoS API requests
 - HAL/ARXIV requests
 

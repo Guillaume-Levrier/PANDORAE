@@ -332,15 +332,16 @@ const loadType = (type,id) => {
   iconCreator("step-icon",addPresentationStep)
   iconCreator("slide-icon",createSlide)
   iconCreator("save-icon",savePresentation)
+  setTimeout(() => {
+    document.getElementById("slide-icon").addEventListener("dblclick",e=>{
+      if (document.getElementById("slide")) {
+        addPresentationStep();
+        hideSlide();
+      }
+    })
+   }, 400);
 }
- setTimeout(() => {
-  document.getElementById("slide-icon").addEventListener("dblclick",e=>{
-    if (document.getElementById("slide")) {
-      addPresentationStep();
-      hideSlide();
-    }
-  })
- }, 200);
+ 
  
   document.getElementById('fluxMenu').style.display = "none";
   document.getElementById('type').style.display = "none";
@@ -2684,6 +2685,13 @@ const geotype = id => {
     .precision(0.01)
     .rotate([-20, -40, 0]);
 
+  const loftedProjection = d3.geoOrthographic()
+    .scale(850)
+    .translate([width - toolWidth * 2, height / 2])
+    .clipAngle(90)
+    .precision(0.01)
+    .rotate([-20, -40, 0]);
+
   //globe, as well as surface projects
   var path = d3.geoPath().projection(projection);
 
@@ -2969,6 +2977,43 @@ const geotype = id => {
         ); // Make all cities visible at first
         links.forEach(link => (link.visibility = true)); // Make all links visibile at first
 
+        // ===== FLYING ARCS
+        var swoosh = d3.line()
+        .curve(d3.curveNatural)
+        .defined(d=> projection.invert(d));
+
+        const flyingArc = link => {
+          // start with multiline links
+          
+          if (typeof link.coordinates[0][0]==="object"){
+            var returnPath = [];
+            link.coordinates.forEach(subLink=>{
+              let source = subLink[0];
+              let target = subLink[1];              
+              let middle = d3.geoInterpolate(source,target)(.5);
+              returnPath.push(
+              projection(source),
+              loftedProjection(middle),
+              projection(target)
+              )
+            })
+            
+            return returnPath;
+          
+          } else {
+            let source = link.coordinates[0];
+            let target = link.coordinates[1];
+            let middle = d3.geoInterpolate(source,target)(.5);
+
+          return [ 
+              projection(source),
+              loftedProjection(middle),
+              projection(target)
+          ];
+        }
+      }
+
+
 const linkLoc = () => {
           // generate links and cities
 
@@ -3029,17 +3074,41 @@ const linkLoc = () => {
             }
           }; 
 
-          var affilLinks = locGroup
+
+
+       
+      
+// ===== 
+
+var affilLinks = locGroup.selectAll("lines") // add the links
+                          .data(links)
+                          .enter()
+                          .append("path")
+                          .attr("class","arc")
+                          .style("fill","none")
+                          .style("stroke-width",".2")
+                          .style("stroke-linecap","round")
+                            .style("stroke", d => {
+                              if (d.visibility) {
+                                return "crimson";
+                              } else {
+                                return "transparent";
+                              }
+                            })
+                          .attr("d", d=> swoosh(flyingArc(d)))
+
+          var affilShadows = locGroup
             .selectAll("lines") // add the links
             .data(links)
             .enter()
             .append("path")
            .style("fill","none")
-           .style("stroke-width",".1")
+           .attr("class","arc")
+           .style("stroke-width",".2")
            .style("stroke-linecap","round")
             .style("stroke", d => {
               if (d.visibility) {
-                return "crimson";
+                return "#141414";
               } else {
                 return "transparent";
               }
@@ -3592,10 +3661,8 @@ let v0, q0, r0;
    dragged = function (targetDrag,transTime) {
      
       if (targetDrag){
-       
-
-  
-        d3.transition()
+    
+    d3.transition()
   .duration(2000)
   .attrTween("render", () => t => {
   
@@ -3605,6 +3672,7 @@ let v0, q0, r0;
 
      coord = [x,y,z]
 
+      loftedProjection.rotate(coord)
       projection.rotate(coord)
       view.selectAll("path").attr("d", path);
   
@@ -3635,13 +3703,12 @@ let v0, q0, r0;
               })
               .text(d => d.city);
                 
-  }).on("end",()=>{
-currentDrag = coord;
-  })
+  }).on("end",()=>{currentDrag = coord;})
       } else {
         const v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this)));
         const q1 = versor.multiply(q0, versor.delta(v0, v1));  
-        projection.rotate(versor.rotation(q1)); // rotate projection
+        projection.rotate(versor.rotation(q1)); 
+        loftedProjection.rotate(versor.rotation(q1));
         currentDrag = versor.rotation(q1);
    
       var globeCenter = projection.invert([document.getElementById("xtypeSVG").width.baseVal.value/2,document.getElementById("xtypeSVG").width.baseVal.value/2]);
