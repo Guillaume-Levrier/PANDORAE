@@ -1,5 +1,47 @@
+const {Runtime, Inspector} = require("@observablehq/runtime");
+const rpn = require("request-promise-native"); // RPN enables to generate requests to various APIs
 
+// test importcell
+const createObsCell = (slide,id,userName,notebookName) => {
+  // Create a DIV in the DOM
+  var cell = document.createElement("DIV");
+  cell.id = "observablehq-"+id; 
+  document.getElementById(slide).append(cell);
 
+  // Create a path for the define script
+  let modStorePath = userDataPath + "/flatDatasets/"+userName+"+"+notebookName+".js";
+
+  // Check if already accessed in the past and hence already available
+  if (fs.existsSync(modStorePath)) {
+    
+    require = require('esm')(module);
+    var define = require(modStorePath);
+    const inspect = Inspector.into("#observablehq-"+id);
+    (new Runtime).module(define, name => (name === "chart") && inspect());
+  
+  // If not, download it from the Observable API  
+  } else {
+    
+  let optionsRequest = {
+    // Prepare options for the Request-Promise-Native Package
+    uri:"https://api.observablehq.com/"+userName+"/"+notebookName+".js?v=3", // URI to be accessed
+    headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
+    json: false // don't automatically parse as JSON
+  };
+
+  rpn(optionsRequest) // RPN stands for Request-promise-native (Request + Promise)
+    .then(mod =>{
+      // Write the file in the app's user directory
+      fs.writeFile(modStorePath, mod, "utf8", err => {
+        if (err) throw err;
+        require = require('esm')(module);
+        var define = require(modStorePath);
+        const inspect = Inspector.into("#observablehq-"+id);
+        (new Runtime).module(define, name => (name === "chart") && inspect());
+      });
+    })
+  }
+}
 
 let activeIndex = 0;
 
