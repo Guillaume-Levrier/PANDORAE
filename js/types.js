@@ -2714,6 +2714,43 @@ const geotype = id => {
     .attr("cy", height / 2)
     .attr("r", projection.scale());
 
+// ===== FLYING ARCS
+var swoosh = d3.line()
+.curve(d3.curveNatural)
+.defined(d=> projection.invert(d));
+
+const flyingArc = link => {
+  // start with multiline links
+  
+  if (typeof link.coordinates[0][0]==="object"){
+    var returnPath = [];
+    link.coordinates.forEach(subLink=>{
+      let source = subLink[0];
+      let target = subLink[1];              
+      let middle = d3.geoInterpolate(source,target)(.5);
+      returnPath.push(
+      projection(source),
+      loftedProjection(middle),
+      projection(target)
+      )
+    })
+    
+    return returnPath;
+  
+  } else {
+    let source = link.coordinates[0];
+    let target = link.coordinates[1];
+    let middle = d3.geoInterpolate(source,target)(.5);
+
+  return [ 
+      projection(source),
+      loftedProjection(middle),
+      projection(target)
+  ];
+}
+}
+
+
   //versor insertion signal for interactive exports
 
   //Calling data
@@ -2977,41 +3014,7 @@ const geotype = id => {
         ); // Make all cities visible at first
         links.forEach(link => (link.visibility = true)); // Make all links visibile at first
 
-        // ===== FLYING ARCS
-        var swoosh = d3.line()
-        .curve(d3.curveNatural)
-        .defined(d=> projection.invert(d));
-
-        const flyingArc = link => {
-          // start with multiline links
-          
-          if (typeof link.coordinates[0][0]==="object"){
-            var returnPath = [];
-            link.coordinates.forEach(subLink=>{
-              let source = subLink[0];
-              let target = subLink[1];              
-              let middle = d3.geoInterpolate(source,target)(.5);
-              returnPath.push(
-              projection(source),
-              loftedProjection(middle),
-              projection(target)
-              )
-            })
-            
-            return returnPath;
-          
-          } else {
-            let source = link.coordinates[0];
-            let target = link.coordinates[1];
-            let middle = d3.geoInterpolate(source,target)(.5);
-
-          return [ 
-              projection(source),
-              loftedProjection(middle),
-              projection(target)
-          ];
-        }
-      }
+        
 
 
 const linkLoc = () => {
@@ -3084,9 +3087,9 @@ var affilLinks = locGroup.selectAll("lines") // add the links
                           .data(links)
                           .enter()
                           .append("path")
-                          .attr("class","arc")
+                          .attr("class","arc fly_arcs")
                           .style("fill","none")
-                          .style("stroke-width",".2")
+                          .style("stroke-width",".5")
                           .style("stroke-linecap","round")
                             .style("stroke", d => {
                               if (d.visibility) {
@@ -3104,11 +3107,11 @@ var affilLinks = locGroup.selectAll("lines") // add the links
             .append("path")
            .style("fill","none")
            .attr("class","arc")
-           .style("stroke-width",".2")
+           .style("stroke-width","1")
            .style("stroke-linecap","round")
             .style("stroke", d => {
               if (d.visibility) {
-                return "#141414";
+                return "rgba(200,200,200,.6)";
               } else {
                 return "transparent";
               }
@@ -3737,7 +3740,8 @@ d3.select("#cityLocations").selectAll("text")
         })
         .text(d => d.city);
 
-      view.selectAll("path").attr("d", path);
+        view.selectAll("path").attr("d", path); 
+        view.selectAll(".fly_arcs").attr("d", d=> swoosh(flyingArc(d)))
     }
   }
 
