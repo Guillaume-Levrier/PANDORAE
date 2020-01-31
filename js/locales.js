@@ -112,7 +112,7 @@ const CMT = {"EN":{
  },"中文":{
     "menu":{
         "flux":"流动",
-        "type":"显示",
+        "type":"类型",
         "quit":"关闭",
         "returnToTutorial":"回教程"
     }
