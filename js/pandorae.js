@@ -572,8 +572,8 @@ if (notLoadingMenu) {
       let loadingCount=0;
       ipcRenderer.send("console-logs", "Displaying available types");
       blocks.forEach(block => {
-        pandodb[block].toArray().then(thisBlock => {
-          if (thisBlock.length > 0) {
+        pandodb[block].count().then(thisBlock => {
+          if (thisBlock > 0) {
             let typeContainer = document.createElement("div");
             typeContainer.style.display = "flex";
             typeContainer.style.borderBottom = "1px solid rgba(192,192,192,0.3)";
@@ -624,9 +624,7 @@ if (notLoadingMenu) {
           notLoadingMenu=true;
                   break; 
   }
-
-  
- toggleSecondaryMenu();
+    toggleSecondaryMenu();    
 }  
 };
 
