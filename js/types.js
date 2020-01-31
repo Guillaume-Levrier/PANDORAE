@@ -302,7 +302,6 @@ const backToPres = () => {
   document.body.style.animation = "fadeout 0.7s";
   setTimeout(() => {
     document.body.remove();
-    console.log(currentMainPresStep)
     ipcRenderer.send("backToPres",currentMainPresStep)
   }, 700);
 }
@@ -325,21 +324,21 @@ const loadType = (type,id) => {
   field.value = "";
   const exporter = () => categoryLoader('export');
 
-  if(currentMainPresStep) {
+  if(currentMainPresStep.step) {
     iconCreator("back-to-pres",backToPres)
   } else {
   iconCreator("export-icon",toggleMenu)
   iconCreator("step-icon",addPresentationStep)
   iconCreator("slide-icon",createSlide)
   iconCreator("save-icon",savePresentation)
-  setTimeout(() => {
+  /* setTimeout(() => {
     document.getElementById("slide-icon").addEventListener("dblclick",e=>{
       if (document.getElementById("slide")) {
         addPresentationStep();
         hideSlide();
       }
     })
-   }, 400);
+   }, 1000); */
 }
  
  
@@ -2721,7 +2720,9 @@ var swoosh = d3.line()
 
 const flyingArc = link => {
   // start with multiline links
-  
+    
+  var globeCenter = projection.invert([document.getElementById("xtypeSVG").width.baseVal.value/2,document.getElementById("xtypeSVG").width.baseVal.value/2]);
+
   if (typeof link.coordinates[0][0]==="object"){
     var returnPath = [];
     link.coordinates.forEach(subLink=>{
@@ -2747,7 +2748,8 @@ const flyingArc = link => {
       loftedProjection(middle),
       projection(target)
   ];
-}
+
+  }
 }
 
 
@@ -3014,15 +3016,11 @@ const flyingArc = link => {
         ); // Make all cities visible at first
         links.forEach(link => (link.visibility = true)); // Make all links visibile at first
 
-        
-
-
 const linkLoc = () => {
           // generate links and cities
 
-          document
-            .getElementById("view")
-            .removeChild(document.getElementById("cityLocations")); // remove all cities & links
+          document.getElementById("view")
+                  .removeChild(document.getElementById("cityLocations")); // remove all cities & links
 
           var locGroup = view.append("g").attr("id", "cityLocations"); // recreate the cities & links svg group
 
@@ -3046,7 +3044,6 @@ const linkLoc = () => {
           });
 
           cities.sort((a, b) => d3.descending(a.radius, b.radius)) // Make sure smaller nodes are above bigger nodes
-
 
          var areaList = new Object;
 
@@ -3076,10 +3073,6 @@ const linkLoc = () => {
               cities[currentCluster[0]].smallInCluster=false;
             }
           }; 
-
-
-
-       
       
 // ===== 
 
@@ -3116,7 +3109,9 @@ var affilLinks = locGroup.selectAll("lines") // add the links
                 return "transparent";
               }
             }) // links always exist, they just become transparent if the articles are not in the timeframe
+            
             .attr("d", path);
+            affilLinks.raise()
 
           var locNames = locGroup
             .selectAll("text")
@@ -3161,8 +3156,6 @@ var affilLinks = locGroup.selectAll("lines") // add the links
             .style("stroke","none")
             .style("cursor","help");
 
-
-
           locations
             .datum(d =>
               d3.geoCircle()
@@ -3171,8 +3164,7 @@ var affilLinks = locGroup.selectAll("lines") // add the links
             )
             .attr("d", path);
 
-          locations.on("mouseover", d => {
-           
+          locations.on("mouseover", d => {           
 
             d3.selectAll(".arc").style("opacity",".15"); 
             d3.selectAll(".locations").style("opacity",".4"); 
@@ -3656,6 +3648,17 @@ var affilLinks = locGroup.selectAll("lines") // add the links
 
 let v0, q0, r0;
 
+const clamper = c => {
+  var globeCenter = projection.invert([document.getElementById("xtypeSVG").width.baseVal.value/2,document.getElementById("xtypeSVG").width.baseVal.value/2]);
+  let lon=c[0],lat=c[1];
+  let clampLevel=125;
+  if ( lon>globeCenter[0]-clampLevel && lon < globeCenter[0]+clampLevel && lat>globeCenter[1]-clampLevel && lat < globeCenter[1]+clampLevel) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
     function dragstarted() {
       v0 = versor.cartesian(projection.invert(d3.mouse(this)));
       q0 = versor((r0 = projection.rotate()));
@@ -3679,9 +3682,6 @@ let v0, q0, r0;
       projection.rotate(coord)
       view.selectAll("path").attr("d", path);
   
-
-      var globeCenter = projection.invert([document.getElementById("xtypeSVG").width.baseVal.value/2,document.getElementById("xtypeSVG").width.baseVal.value/2]);
-
       d3.select("#cityLocations").selectAll("text")
             .style("display", d => {
               //hide if behind the globe or in cluster
@@ -3689,8 +3689,9 @@ let v0, q0, r0;
               if(d.hasOwnProperty("smallInCluster")&&d.smallInCluster===true) {
                 return "none"
               } 
-      
-              if ( d.lon>globeCenter[0]-90 && d.lon < globeCenter[0]+90 && d.lat>globeCenter[1]-90 && d.lat < globeCenter[1]+90) {
+            var city = [d.lon,d.lat]
+             //if ( d.lon>globeCenter[0]-90 && d.lon < globeCenter[0]+90 && d.lat>globeCenter[1]-90 && d.lat < globeCenter[1]+90) {
+               if (clamper(city)){
               return "block";
             } else {
               return "none";
@@ -3704,8 +3705,10 @@ let v0, q0, r0;
                 
                 return "translate(" + (x + d.radius) + "," + y + ")";
               })
-              .text(d => d.city);
-                
+              .text(d => d.city)
+              .raise();
+              view.selectAll(".fly_arcs").attr("d", d=> swoosh(flyingArc(d))).raise()
+
   }).on("end",()=>{currentDrag = coord;})
       } else {
         const v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this)));
@@ -3716,6 +3719,27 @@ let v0, q0, r0;
    
       var globeCenter = projection.invert([document.getElementById("xtypeSVG").width.baseVal.value/2,document.getElementById("xtypeSVG").width.baseVal.value/2]);
 
+      view.selectAll("path")
+          .attr("d", path); 
+
+      view.selectAll(".fly_arcs")
+          .attr("d", d=> swoosh(flyingArc(d)))
+          .raise();
+
+      view.selectAll(".fly_arcs")
+          .style("display",d=>{
+            let disp = "block";
+            d.coordinates.forEach(pt=>{
+              let ptLink=[pt[0],pt[1]];
+              if (clamper(ptLink)) { 
+
+              } else {
+                disp="none"
+              }
+            })
+          return disp;
+          })
+
 d3.select("#cityLocations").selectAll("text")
       .style("display", d => {
         //hide if behind the globe or in cluster
@@ -3724,7 +3748,9 @@ d3.select("#cityLocations").selectAll("text")
           return "none"
         } 
 
-        if ( d.lon>globeCenter[0]-90 && d.lon < globeCenter[0]+90 && d.lat>globeCenter[1]-90 && d.lat < globeCenter[1]+90) {
+        //if ( d.lon>globeCenter[0]-90 && d.lon < globeCenter[0]+90 && d.lat>globeCenter[1]-90 && d.lat < globeCenter[1]+90) {
+      var city = [d.lon,d.lat]
+      if (clamper(city)){
         return "block";
       } else {
         return "none";
@@ -3738,10 +3764,23 @@ d3.select("#cityLocations").selectAll("text")
           
           return "translate(" + (x + d.radius) + "," + y + ")";
         })
-        .text(d => d.city);
+        .text(d => d.city)
+        .raise();
 
-        view.selectAll("path").attr("d", path); 
-        view.selectAll(".fly_arcs").attr("d", d=> swoosh(flyingArc(d)))
+        
+         /* view.selectAll(".fly_arcs").style("display", d=>{
+          
+
+           d.points.forEach(f=>{ 
+          if (f.lon>globeCenter[0]-90 && f.lon < globeCenter[0]+90 && f.lat>globeCenter[1]-90 && f.lat < globeCenter[1]+90) {
+              return "block";
+            } else {
+              return "none";
+            } 
+          }) 
+          
+        }) 
+        */
     }
   }
 
