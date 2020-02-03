@@ -17,6 +17,7 @@ Please put your extracted PANDORÆ folder/app where you usually put apps on your
 
 #### FLUX/CHAEROS
 - flux complex request helpers
+- calculate flux based on available services
 - direct Twitter and WoS API requests
 - HAL/ARXIV requests
 

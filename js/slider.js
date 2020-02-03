@@ -9,7 +9,7 @@ const createObsCell = (slide,id,userName,notebookName) => {
   document.getElementById(slide).append(cell);
 
   // Create a path for the define script
-  let modStorePath = userDataPath + "/flatDatasets/"+userName+"+"+notebookName+".js";
+  let modStorePath = userDataPath + "/flatDatasets/"+userName+"+"+notebookName+".js?v=3";
 
   // Check if already accessed in the past and hence already available
   if (fs.existsSync(modStorePath)) {
