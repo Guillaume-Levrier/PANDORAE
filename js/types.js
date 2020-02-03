@@ -663,19 +663,11 @@ const anthropotype = id => {  // When called, draw the anthropotype
         ) // Adding ManyBody to repel nodes from each other
         .force("center", d3.forceCenter(width / 2, height / 2)); // The graph tends towards the center of the svg
 
-      var nodeImage = view.selectAll("nodeImage");
-          nodeImage.append("title").text(d => d.name);
-      var link = view.selectAll("link");
-      var masks = view.selectAll("masks");
-      var sortInfo = view.selectAll("sortInfo");
-      var name = view.selectAll("name");
+      var link = view.append("g").selectAll("link");
+      var node = view.append("g");
 
       const ticked = () => {
-        nodeImage.attr("x", d => d.x).attr("y", d => d.y);
-        masks.attr("cx", d => d.x).attr("cy", d => d.y);
-        name.attr("x", d => d.x).attr("y", d => d.y);
-        sortInfo.attr("x", d => d.x).attr("y", d => d.y);
-
+        node.attr("transform", d => `translate(${d.x},${d.y})`);
         link
           .attr("x1", d => d.source.x)
           .attr("y1", d => d.source.y)
@@ -684,10 +676,7 @@ const anthropotype = id => {  // When called, draw the anthropotype
       };
 
       const cartoSorter = criteria => {
-        nodeImage.remove();
-        masks.remove();
-        name.remove();
-        sortInfo.remove();
+        node.remove();
         link.remove();
         simulation.alpha(1).restart();
 
@@ -753,17 +742,6 @@ const anthropotype = id => {  // When called, draw the anthropotype
           }
         });
 
-        nodeImage = view.selectAll("nodeImage") // Create nodeImage variable
-          .exit()
-          .remove()
-          .data(data) // Using the "humans" variable data
-          .enter()
-          .append("image") // Append images
-          .attr("class", "nodeImage") // This class contains the circular clip path
-          .attr("height", 40) // Image height
-          .attr("width", 40); // Image width
-
-        nodeImage.append("title").text(d => d.name);
 
         link = view.selectAll("link") // Creatin the link variable
           .exit().remove()
@@ -773,21 +751,11 @@ const anthropotype = id => {  // When called, draw the anthropotype
             .attr("stroke","#d3d3d3")
             .style("fill", "none");
 
-        masks = view.selectAll("masks")
-          .exit().remove()
-          .data(data)
-          .enter()
-            .append("circle")
-            .attr("r", d => {
-              let r = 7;
-              if (d.hasOwnProperty("author")) {
-                r = r + d.author.length * 4;
-              }
-              return r;
-            })
-            .attr("fill", "rgba(63, 191, 191, 0.20)")
-            .attr("stroke", "white")
-            .attr("stroke-width", 2)
+node = view.selectAll("g")
+            .exit().remove()
+            .data(data)
+            .join("g")
+            .attr("id",d=>d.id)
             .call(
               d3.drag()
                 .on("start", forcedragstarted)
@@ -795,40 +763,80 @@ const anthropotype = id => {  // When called, draw the anthropotype
                 .on("end", forcedragended)
             );
 
-        sortInfo = view.selectAll("sortInfo")
-          .exit().remove()
-          .data(data)
-            .enter()
-            .append("text")
-            .attr("pointer-events", "none")
-            .attr("dx", 0)
-            .attr("dy", 0)
-            .style("fill", "black");
+node.append("circle")
+            .attr("r", d => {
+              let r = 7;
+              if (d.hasOwnProperty("author")) { r = r + d.author.length * 4;} 
+              return r;
+            })
+            .attr("fill", "rgba(63, 191, 191, 0.20)")
+            .attr("stroke", "white")
+            .attr("stroke-width", 2);
 
-        name = view.selectAll("name")
-          .exit().remove()
-          .data(data)
-          .enter()
-            .append("text")
+        node.append("text")
             .attr("class", "humans")
-            .attr("dx", 7)
-            .attr("dy", -5)
+            .attr("dx", "10")
+            .attr("dy", "4")
             .style("fill", "black")
             .style("cursor", "pointer")
             .style("font-size", "15px")
             .style("font-family","sans-serif")
-            .on("click", d => {
-              name.filter(e => e === d).style("fill", "DeepSkyBlue");
+            .text(d => d.id)
+            .clone(true).lower()
+              .attr("fill", "none")
+              .attr("stroke", "white")
+              .attr("stroke-width", 4);
+
+         // The data selection below is very suboptimal, this is a quick hack that needs to be refactored    
+         node.on("click",d=>{
+           if (d.hasOwnProperty("title")) { // If it's a document
+                d3.select(document.getElementById(d.id)).select("circle").attr("fill", "rgba(220,20,60,.5)");
+                d.author.forEach(auth=>{
+                    let nodeGroup = document.getElementById(auth.id);
+                    d3.select(nodeGroup).select("circle").attr("fill", "rgba(220,20,60,.5)");	
+           }) 
+           } else { // Else it's an author
+           d.crit.forEach(e=>{
+            d3.select(document.getElementById(e)).select("circle").attr("fill", "rgba(220,20,60,.5)");
+            data.forEach(f=>{
+              if (f.title===e){
+                f.author.forEach(auth=>{
+                  let nodeGroup = document.getElementById(auth.id);
+                  d3.select(nodeGroup).select("circle").attr("fill", "rgba(220,20,60,.5)");	
+                }) 
+              }
             })
-            .on("dblclick", d => {
-              name.filter(e => e === d).style("fill", "black");
-            })
-            .text(d => d.id);
+           })
+           }
+         })
+         .on("dblclick",d=>{
+          if (d.hasOwnProperty("title")) { // If it's a document
+          d3.select(document.getElementById(d.id)).select("circle").attr("fill", "rgba(63, 191, 191, 0.20)");
+          d.author.forEach(auth=>{
+              let nodeGroup = document.getElementById(auth.id);
+              d3.select(nodeGroup).select("circle").attr("fill", "rgba(63, 191, 191, 0.20)");	
+     }) 
+     } else { // Else it's an author
+     d.crit.forEach(e=>{
+      d3.select(document.getElementById(e)).select("circle").attr("fill", "rgba(63, 191, 191, 0.20)");
+      data.forEach(f=>{
+        if (f.title===e){
+          f.author.forEach(auth=>{
+            let nodeGroup = document.getElementById(auth.id);
+            d3.select(nodeGroup).select("circle").attr("fill", "rgba(63, 191, 191, 0.20)");	
+          }) 
+        }
+      })
+     })
+     }
+             
+      })          
 
         simulation.nodes(data).on("tick", ticked);
         simulation.force("link").links(links);
         simulation.alpha(1).restart();
       };
+
 
       function forcedragstarted(d) {
         if (!d3.event.active) simulation.alpha(1).restart();
