@@ -4,9 +4,11 @@ const rpn = require("request-promise-native"); // RPN enables to generate reques
 // test importcell
 const createObsCell = (slide,id,userName,notebookName,cellName) => {
   // Create a DIV in the DOM
+  let DOMSlide = document.getElementById(slide);
   var cell = document.createElement("DIV");
+  cell.style.width=parseInt(window.innerWidth*.7)+"px";   
   cell.id = "observablehq-"+id; 
-  document.getElementById(slide).appendChild(cell);
+  DOMSlide.appendChild(cell);
 
   // Create a path for the define script
   let modStorePath = userDataPath + "/flatDatasets/"+userName+"+"+notebookName+".js?v=3";
@@ -40,6 +42,13 @@ const createObsCell = (slide,id,userName,notebookName,cellName) => {
       });
     })
   }
+  
+  cell.style.height=(window.innerHeight*.7-DOMSlide.firstChild.firstChild.offsetHeight)+"px"; // height is available slide height minus slide text height
+  setTimeout(() => {
+    cell.firstChild.firstChild.style.height=(window.innerHeight*.7-DOMSlide.firstChild.firstChild.offsetHeight)+"px";  
+    cell.firstChild.firstChild.style.width="100%";  
+  }, 800);
+  
 }
 
 let activeIndex = 0;
@@ -221,6 +230,9 @@ const slideControl = event => {
 
 
 const populateSlides = id => {
+
+  field.value= "loading presentation";
+
       currentMainPresStep.id=id;
   pandodb.slider.get(id).then(presentation=>{
     let slides = presentation.content;
@@ -293,12 +305,15 @@ const populateSlides = id => {
     createObsCell(cellArg[0],cellArg[1],cellArg[2],cellArg[3],cellArg[4])
   }
   
+  document.getElementById("mainSlideSections").style.opacity = 0;
+  
   setTimeout(() => {
     addPadding();
     display();  
     let lastArrow=document.querySelectorAll("i .arrowDown")[document.querySelectorAll("i .arrowDown").length-1];
     lastArrow.innerText="done_outline";
-  }, 50);
+    document.getElementById("mainSlideSections").style.opacity = 1;
+  }, 1000);
   
   document.addEventListener("keydown",slideControl);
   document.getElementById('menu-icon').addEventListener("click", ()=>{

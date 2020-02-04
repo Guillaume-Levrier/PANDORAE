@@ -1017,5 +1017,5 @@ z-index: 20;
 
 .observablehq{
   margin:auto;
-  max-width: calc(100vw * .3);
+  padding:10px
 }
