@@ -13,11 +13,10 @@ const createObsCell = (slide,id,userName,notebookName) => {
 
   // Check if already accessed in the past and hence already available
   if (fs.existsSync(modStorePath)) {
-    
     require = require('esm')(module);
-    var define = require(modStorePath);
+    var define = require(modStorePath);  
     const inspect = Inspector.into("#observablehq-"+id);
-    (new Runtime).module(define, name => (name === "chart") && inspect());
+    (new Runtime).module(define.default, name => (name === "chart") && inspect());
   
   // If not, download it from the Observable API  
   } else {
@@ -37,7 +36,7 @@ const createObsCell = (slide,id,userName,notebookName) => {
         require = require('esm')(module);
         var define = require(modStorePath);
         const inspect = Inspector.into("#observablehq-"+id);
-        (new Runtime).module(define, name => (name === "chart") && inspect());
+        (new Runtime).module(define.default, name => (name === "chart") && inspect());
       });
     })
   }
