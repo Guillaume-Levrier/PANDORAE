@@ -2,11 +2,11 @@ const {Runtime, Inspector} = require("@observablehq/runtime");
 const rpn = require("request-promise-native"); // RPN enables to generate requests to various APIs
 
 // test importcell
-const createObsCell = (slide,id,userName,notebookName) => {
+const createObsCell = (slide,id,userName,notebookName,cellName) => {
   // Create a DIV in the DOM
   var cell = document.createElement("DIV");
   cell.id = "observablehq-"+id; 
-  document.getElementById(slide).append(cell);
+  document.getElementById(slide).appendChild(cell);
 
   // Create a path for the define script
   let modStorePath = userDataPath + "/flatDatasets/"+userName+"+"+notebookName+".js?v=3";
@@ -16,7 +16,7 @@ const createObsCell = (slide,id,userName,notebookName) => {
     require = require('esm')(module);
     var define = require(modStorePath);  
     const inspect = Inspector.into("#observablehq-"+id);
-    (new Runtime).module(define.default, name => (name === "chart") && inspect());
+    (new Runtime).module(define.default, name => (name === cellName) && inspect());
   
   // If not, download it from the Observable API  
   } else {
@@ -36,7 +36,7 @@ const createObsCell = (slide,id,userName,notebookName) => {
         require = require('esm')(module);
         var define = require(modStorePath);
         const inspect = Inspector.into("#observablehq-"+id);
-        (new Runtime).module(define.default, name => (name === "chart") && inspect());
+        (new Runtime).module(define.default, name => (name === cellName) && inspect());
       });
     })
   }
@@ -224,6 +224,7 @@ const populateSlides = id => {
       currentMainPresStep.id=id;
   pandodb.slider.get(id).then(presentation=>{
     let slides = presentation.content;
+    let obsCellBuffer = {};
 
     if (mainPresEdit) {
         slideCreator()
@@ -235,19 +236,33 @@ const populateSlides = id => {
     } else {
 
       slides.forEach(slide=>{
+        // Create action buttons for types
         for (let i = 0; i < (slide.text.match(/\[actionType:/g) || []).length; i++) {
           slide.text=slide.text.replace('[actionType:','<a style="filter:invert(1);cursor:pointer;" onclick=selectOption(')  
-          slide.text=slide.text.replace(']',')><i class="material-icons">flip</i></a>');
+          slide.text=slide.text.replace('/actionType]',')><i class="material-icons">flip</i></a>');
+        }
+        // Load observable cells
+        for (let i = 0; i < (slide.text.match(/\[obsCell:/g) || []).length; i++) {
+          let beginIndex = slide.text.search(/\[obsCell:/g);
+          let endIndex = slide.text.search(/\/obsCell]/g);
+          let cellArgsArray= slide.text.slice(beginIndex+9,endIndex).split(',')
+          slide.text=slide.text.replace(slide.text.slice(beginIndex,endIndex+9),'');
+          obsCellBuffer[slide.title]=[slide.title,cellArgsArray[0],cellArgsArray[1],cellArgsArray[2],cellArgsArray[3]];
         }
       })
 
       slides.push({})
+     var previousSlide = i => { 
+       if (slides[i]&&slides[i].title){
+         return "<br><i class='material-icons arrowUp'><a class='arrowUp' onclick='smoothScrollTo(\""+slides[i].title+"\")'>arrow_upward</a></i>"
+      } else {return ""};
+    }; 
     var nextSlide = i => "<br><i class='material-icons arrowDown'><a class='arrowDown' onclick='smoothScrollTo(\""+slides[i].title+"\")'>arrow_downward</a></i>";
 
     let section = document.createElement("SECTION");
       section.id = "startPres";
       section.className += "slideStep";
-      section.innerHTML="<div> "+nextSlide(0)+"<div>";
+      section.innerHTML="<div style='width:70%;'> "+nextSlide(0)+"<div>";
       section.style.pointerEvents="all";
       field.value="start presentation";
       field.style.pointerEvents="none";
@@ -262,7 +277,7 @@ const populateSlides = id => {
             section.className += "slideStep";
           if (slides[i].text) {                     //stop for last slide (empty)
             section.id = slides[i].title;
-            section.innerHTML="<div style='background-color:rgba(0, 10, 10, .8);border-radius:4px;padding:10px;color:white'>"+slides[i].text+"</div>"+nextSlide(i+1);
+            section.innerHTML="<div style='display:inline-flex;align-items:center;'><div style='background-color:rgba(0, 10, 10, .8);border-radius:4px;padding:10px;margin-right:10%;color:white;display:inline-block;width:"+parseInt(window.innerWidth*.75)+"px;'>"+slides[i].text+"</div><div>"+previousSlide(i-1)+"<br>"+nextSlide(i+1)+"</div></div>";
           }
 
         document.getElementById("mainSlideSections").appendChild(section);
@@ -273,6 +288,11 @@ const populateSlides = id => {
 
   sectionList = document.querySelectorAll("section");
 
+  for (let slide in obsCellBuffer){
+    let cellArg=obsCellBuffer[slide]
+    createObsCell(cellArg[0],cellArg[1],cellArg[2],cellArg[3],cellArg[4])
+  }
+  
   setTimeout(() => {
     addPadding();
     display();  

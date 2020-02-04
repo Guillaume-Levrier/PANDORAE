@@ -515,7 +515,7 @@ ipcRenderer.on("backToPres", (event, message) => {
 
 const selectOption = (type, id) => {
   if (typeSelector) {
-    let order = "[actionType:"+JSON.stringify(type)+","+JSON.stringify(id)+"]";
+    let order = "[actionType:"+JSON.stringify(type)+","+JSON.stringify(id)+"/actionType]";
     let editor =document.getElementsByClassName("ql-editor")[0]
     editor.innerHTML=editor.innerHTML+order;
     typeSelector=false;
@@ -711,6 +711,7 @@ const listTableDatasets = table => {
 
 const saveSlides = () => {
   let name = document.getElementById("presNamer").value;
+  mainPresContent[activeIndex].text=document.getElementsByClassName("ql-editor")[0].innerHTML;
   let date = new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
   if (priorDate) {
     date =priorDate;
@@ -1030,9 +1031,6 @@ while (typesJS.indexOf("multiThreader.port.postMessage")>(-1)) {
   typesJS = typesJS.replace("multiThreader.port.postMessage","//")
 
 }
-
-
-
 
   switch (currentType.type) {
     case "gazouillotype":   // won't work for now because the data files are flat files

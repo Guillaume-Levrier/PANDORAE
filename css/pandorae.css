@@ -187,7 +187,10 @@ h1 {
 }
 
 .slideStep{
-  margin:15%;
+  margin-left:15%;
+  margin-top:15%;
+  margin-bottom:15%;
+  width: 100%;
 }
 
 #aelogo {
@@ -223,6 +226,13 @@ h1 {
   cursor:pointer;
   width:100%;
   }
+
+  .arrowUp{
+    text-align: center;
+    text-decoration: none;
+    cursor:pointer;
+    width:100%;
+    }
 
 .lifelinerror{
   stroke : rgb(243,100,100);
@@ -1003,4 +1013,9 @@ z-index: 20;
 
 #icons {
   left:25px;position:fixed;font-size:26px;z-index:22;top:25px;transition: 0.3s;
+}
+
+.observablehq{
+  margin:auto;
+  max-width: calc(100vw * .3);
 }
