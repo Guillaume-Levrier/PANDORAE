@@ -2,16 +2,29 @@ const {Runtime, Inspector} = require("@observablehq/runtime");
 const rpn = require("request-promise-native"); // RPN enables to generate requests to various APIs
 
 // test importcell
-const createObsCell = (slide,id,userName,notebookName,cellName) => {
+const createObsCell = (slide,id,userName,notebookName,cellName,notebookVersion) => {
   // Create a DIV in the DOM
   let DOMSlide = document.getElementById(slide);
   var cell = document.createElement("DIV");
-  cell.style.width=parseInt(window.innerWidth*.7)+"px";   
-  cell.id = "observablehq-"+id; 
+  cell.style.width=parseInt(window.innerWidth*.7)+"px"; 
+  cell.id = "observablehq-"+id;
   DOMSlide.appendChild(cell);
-
+  let version="";
+  if (notebookVersion){
+    version="@"+notebookVersion;
+  }
+  
   // Create a path for the define script
-  let modStorePath = userDataPath + "/flatDatasets/"+userName+"+"+notebookName+".js?v=3";
+  let modStorePath = userDataPath + "/flatDatasets/"+userName+"+"+notebookName+version+".js?v=3";
+
+const adjustSize = () => {
+  cell.style.height=(window.innerHeight*.7-DOMSlide.firstChild.firstChild.offsetHeight)+"px"; // height is available slide height minus slide text height
+  setTimeout(() => {
+    cell.firstChild.firstChild.style.height=(window.innerHeight*.7-DOMSlide.firstChild.firstChild.offsetHeight)+"px";  
+    cell.firstChild.firstChild.style.width="100%"; 
+    //d3.select("#observablehq-"+id).selectAll("svg").attr("width",window.innerHeight*.7);
+  }, 800);
+}
 
   // Check if already accessed in the past and hence already available
   if (fs.existsSync(modStorePath)) {
@@ -19,7 +32,7 @@ const createObsCell = (slide,id,userName,notebookName,cellName) => {
     var define = require(modStorePath);  
     const inspect = Inspector.into("#observablehq-"+id);
     (new Runtime).module(define.default, name => (name === cellName) && inspect());
-  
+    adjustSize();
   // If not, download it from the Observable API  
   } else {
     
@@ -39,16 +52,10 @@ const createObsCell = (slide,id,userName,notebookName,cellName) => {
         var define = require(modStorePath);
         const inspect = Inspector.into("#observablehq-"+id);
         (new Runtime).module(define.default, name => (name === cellName) && inspect());
+        adjustSize();
       });
     })
-  }
-  
-  cell.style.height=(window.innerHeight*.7-DOMSlide.firstChild.firstChild.offsetHeight)+"px"; // height is available slide height minus slide text height
-  setTimeout(() => {
-    cell.firstChild.firstChild.style.height=(window.innerHeight*.7-DOMSlide.firstChild.firstChild.offsetHeight)+"px";  
-    cell.firstChild.firstChild.style.width="100%";  
-  }, 800);
-  
+  }  
 }
 
 let activeIndex = 0;
@@ -110,12 +117,20 @@ function scroller() {
     var sectionIndex = d3.bisect(sectionPositions, pos);    
     sectionIndex = Math.min(sections.size() - 1, sectionIndex)-1;
 
-   
-
     if (currentIndex !== sectionIndex) {
       dispatch.call("active", this, sectionIndex);
       currentIndex = sectionIndex;
       activeIndex = currentIndex;
+      if (activeIndex>1){
+        document.getElementById("prevSlideArr").innerHTML = 'arrow_upward';
+      } else {
+        document.getElementById("prevSlideArr").innerHTML = '&nbsp;';
+      }
+      if (activeIndex>=0&&activeIndex<=sectionList.length-2){
+        document.getElementById("nextSlideArr").innerHTML = 'arrow_downward';
+      } else {
+        document.getElementById("nextSlideArr").innerHTML = 'arrow_downward';
+      }
     }
 
     var prevIndex = Math.max(sectionIndex - 1, 0);
@@ -231,6 +246,8 @@ const slideControl = event => {
 
 const populateSlides = id => {
 
+let mainSliSect=document.getElementById("mainSlideSections");
+
   field.value= "loading presentation";
 
       currentMainPresStep.id=id;
@@ -261,25 +278,61 @@ const populateSlides = id => {
           slide.text=slide.text.replace(slide.text.slice(beginIndex,endIndex+9),'');
           obsCellBuffer[slide.title]=[slide.title,cellArgsArray[0],cellArgsArray[1],cellArgsArray[2],cellArgsArray[3]];
         }
+        // create intra-slide references
+        for (let i = 0; i < (slide.text.match(/\[refSlider:/g) || []).length; i++) {
+          slide.text=slide.text.replace('[refSlider:','<a style="filter:invert(1);cursor:pointer;" onclick=smoothScrollTo(')  
+          slide.text=slide.text.replace('/refSlider]',')><i class="material-icons">picture_in_picture_alt</i></a>');
+        }
       })
 
       slides.push({})
-     var previousSlide = i => { 
-       if (slides[i]&&slides[i].title){
-         return "<br><i class='material-icons arrowUp'><a class='arrowUp' onclick='smoothScrollTo(\""+slides[i].title+"\")'>arrow_upward</a></i>"
-      } else {return ""};
-    }; 
-    var nextSlide = i => "<br><i class='material-icons arrowDown'><a class='arrowDown' onclick='smoothScrollTo(\""+slides[i].title+"\")'>arrow_downward</a></i>";
+     
+      let controlDiv = document.createElement("DIV")
+      controlDiv.id="slideControlDiv"
+      let arrowUp= document.createElement("I")
+      arrowUp.className +="material-icons controlSlide";
+      arrowUp.id='prevSlideArr';
+      arrowUp.onclick = function () {smoothScrollTo(slides[activeIndex-2].title)}
+      arrowUp.addEventListener("mouseover",e=>{
+        if (arrowUp.innerHTML.length>1){
+          arrowUp.style="background-color:#141414;color:white"
+        }
+      })
+      arrowUp.addEventListener("mouseout",e=>{
+        if (arrowUp.innerHTML.length>1){
+          arrowUp.style="background-color:transparent;color:#141414"
+        }
+      })
+      
+      let arrowDown= document.createElement("I")
+      arrowDown.className +="material-icons controlSlide";
+      arrowDown.id='nextSlideArr';
+      arrowDown.onclick = function () {smoothScrollTo(slides[activeIndex].title)}
+      arrowDown.addEventListener("mouseover",e=>{
+        if (arrowDown.innerHTML.length>1){
+          arrowDown.style="background-color:#141414;color:white"
+        }
+      })
+      arrowDown.addEventListener("mouseout",e=>{
+        if (arrowDown.innerHTML.length>1){
+          arrowDown.style="background-color:transparent;color:#141414"
+        }
+      })
+      
+      controlDiv.appendChild(arrowUp)
+      controlDiv.appendChild(arrowDown)
+      mainSliSect.appendChild(controlDiv)
+      
 
     let section = document.createElement("SECTION");
       section.id = "startPres";
       section.className += "slideStep";
-      section.innerHTML="<div style='width:70%;'> "+nextSlide(0)+"<div>";
+      section.innerHTML="<div style='width:100%;'><div>";
       section.style.pointerEvents="all";
       field.value="start presentation";
       field.style.pointerEvents="none";
 
-    document.getElementById("mainSlideSections").appendChild(section);
+      mainSliSect.appendChild(section);
 
         for (let i = 0; i < slides.length-1; i++) {
           
@@ -289,10 +342,11 @@ const populateSlides = id => {
             section.className += "slideStep";
           if (slides[i].text) {                     //stop for last slide (empty)
             section.id = slides[i].title;
-            section.innerHTML="<div style='display:inline-flex;align-items:center;'><div style='background-color:rgba(0, 10, 10, .8);border-radius:4px;padding:10px;margin-right:10%;color:white;display:inline-block;width:"+parseInt(window.innerWidth*.75)+"px;'>"+slides[i].text+"</div><div>"+previousSlide(i-1)+"<br>"+nextSlide(i+1)+"</div></div>";
+            section.innerHTML="<div style='display:inline-flex;align-items:center;'><div style='background-color:rgba(0, 10, 10, .8);border-radius:4px;padding:10px;margin-right:10%;color:white;display:inline-block;width:"+parseInt(window.innerWidth*.75)+"px;'>"+slides[i].text+"</div></div>";
           }
+          
 
-        document.getElementById("mainSlideSections").appendChild(section);
+          mainSliSect.appendChild(section);
 
     }
     
@@ -305,16 +359,12 @@ const populateSlides = id => {
     createObsCell(cellArg[0],cellArg[1],cellArg[2],cellArg[3],cellArg[4])
   }
   
-  document.getElementById("mainSlideSections").style.opacity = 0;
+  mainSliSect.style.opacity = 0;
   
   setTimeout(() => {
     addPadding();
     display();  
-    let lastArrow=document.querySelectorAll("i .arrowDown")[document.querySelectorAll("i .arrowDown").length-1];
-    lastArrow.innerText="done_outline";
-    document.getElementById("mainSlideSections").style.opacity = 1;
-  }, 1000);
-  
+    mainSliSect.style.opacity = 1;
   document.addEventListener("keydown",slideControl);
   document.getElementById('menu-icon').addEventListener("click", ()=>{
     document.body.style.animation = "fadeout 0.1s";
@@ -322,8 +372,11 @@ const populateSlides = id => {
       document.body.remove();
       remote.getCurrentWindow().reload();
     }, 100);
-  })
+  
+  }, 1000);
+})
 }
+  
     })
   
   }

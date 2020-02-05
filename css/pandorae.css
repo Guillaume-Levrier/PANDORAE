@@ -190,8 +190,31 @@ h1 {
   margin-left:15%;
   margin-top:15%;
   margin-bottom:15%;
-  width: 100%;
 }
+
+#slideControlDiv{
+  position: fixed;
+  top:45%;
+  left:95%;
+  display: flex;
+  flex-direction: column;
+  pointer-events: all;
+  z-index: 15;
+}
+
+.controlSlide{
+  cursor: pointer;
+  color: #141414;
+  background-color: transparent;
+  
+}
+
+/* .controlSlide :hover{
+  cursor: pointer;
+  color: white;
+  background-color: #141414;
+} */
+
 
 #aelogo {
   padding: 20%;
