@@ -22,7 +22,6 @@ const adjustSize = () => {
   setTimeout(() => {
     cell.firstChild.firstChild.style.height=(window.innerHeight*.7-DOMSlide.firstChild.firstChild.offsetHeight)+"px";  
     cell.firstChild.firstChild.style.width="100%"; 
-    //d3.select("#observablehq-"+id).selectAll("svg").attr("width",window.innerHeight*.7);
   }, 800);
 }
 
@@ -46,14 +45,14 @@ const adjustSize = () => {
   rpn(optionsRequest) // RPN stands for Request-promise-native (Request + Promise)
     .then(mod =>{
       // Write the file in the app's user directory
-      fs.writeFile(modStorePath, mod, "utf8", err => {
+       fs.writeFile(modStorePath, mod, "utf8", err => {
         if (err) throw err;
         require = require('esm')(module);
         var define = require(modStorePath);
         const inspect = Inspector.into("#observablehq-"+id);
         (new Runtime).module(define.default, name => (name === cellName) && inspect());
         adjustSize();
-      });
+      }); 
     })
   }  
 }
@@ -166,7 +165,19 @@ const display = () => {
 
   scroll.on("active", function(index) {
     currentMainPresStep.step=sectionList[index].id;
+
+    d3.selectAll(".slideStep").style("visibility", function(d, i) {
+      if (i<index-1||i>index+1){
+        return "hidden";
+      } else {
+      return "visible"
+      }
+    });
+
     d3.selectAll(".slideStep").style("opacity", function(d, i) {
+      if (i<index-1||i>index+1){
+        return 0;
+      } else {
       switch (i) {
         case index: return 1
             break;
@@ -176,10 +187,10 @@ const display = () => {
 
         case index+1: return .3
             break;
-
         default: return 1
             break;
       }
+  }
     });
     d3.selectAll(".slideStep").style("filter", function(d, i) {
       switch (i) {
@@ -372,9 +383,9 @@ let mainSliSect=document.getElementById("mainSlideSections");
       document.body.remove();
       remote.getCurrentWindow().reload();
     }, 100);
-  
+  })  
   }, 1000);
-})
+
 }
   
     })
