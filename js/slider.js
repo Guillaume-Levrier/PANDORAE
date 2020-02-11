@@ -26,7 +26,7 @@ const adjustSize = () => {
 }
 
   // Check if already accessed in the past and hence already available
-  if (fs.existsSync(modStorePath)) {
+  if (/* fs.existsSync(modStorePath) */ false) {
     require = require('esm')(module);
     var define = require(modStorePath);  
     const inspect = Inspector.into("#observablehq-"+id);
@@ -163,7 +163,7 @@ const display = () => {
 
   scroll(d3.selectAll(".slideStep"));
 
-  scroll.on("active", function(index) {
+  scroll.on("active", index => {
     currentMainPresStep.step=sectionList[index].id;
 
     d3.selectAll(".slideStep").style("visibility", function(d, i) {
@@ -253,7 +253,6 @@ const slideControl = event => {
         break;
   }
 }
-
 
 const populateSlides = id => {
 
@@ -353,7 +352,12 @@ let mainSliSect=document.getElementById("mainSlideSections");
             section.className += "slideStep";
           if (slides[i].text) {                     //stop for last slide (empty)
             section.id = slides[i].title;
+           
+          if (slides[i].text[slides[i].text.indexOf(">")+1]==="<"){ //hide box if text area now empty
+            section.innerHTML="<div style='display:inline-flex;align-items:center;'><div style='background-color:rgba(0, 10, 10, .8);border-radius:4px;padding:10px;margin-right:10%;color:white;display:none;width:"+parseInt(window.innerWidth*.75)+"px;'></div></div>";
+           } else {
             section.innerHTML="<div style='display:inline-flex;align-items:center;'><div style='background-color:rgba(0, 10, 10, .8);border-radius:4px;padding:10px;margin-right:10%;color:white;display:inline-block;width:"+parseInt(window.innerWidth*.75)+"px;'>"+slides[i].text+"</div></div>";
+          }
           }
           
 
