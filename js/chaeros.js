@@ -417,7 +417,7 @@ const clinTriRetriever = (query) => {
 
     // URL Building blocks
     let rootUrl = "https://clinicaltrials.gov/api/query/full_studies?";
-    
+
     let optionsRequest = {      // Prepare options for the Request-Promise-Native Package
       uri: rootUrl + "expr=" + query + "&fmt=json", // URI to be accessed
       headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
@@ -427,7 +427,7 @@ const clinTriRetriever = (query) => {
     rpn(optionsRequest) // RPN stands for Request-promise-native (Request + Promise)
       .then(firstResponse => {
         // Once you get the response
-        
+
         let totalResults = firstResponse.FullStudiesResponse.NStudiesFound;
 
         var dataPromises = []; // Create empty array for the promises to come
@@ -461,10 +461,10 @@ const clinTriRetriever = (query) => {
                     for (let i = 0; i < ctResponses.length; i++) {
                       ctResponses[i].FullStudiesResponse.FullStudies.forEach(study=>content.entries.push(study))
                     }
-               
-            
+
+
                 let id = query + date;
-       
+
                     pandodb.pharmacotype.add({ id: id, date: date, name: query, content: content }).then(()=>{
                       setTimeout(() => {
                         ipcRenderer.send(
@@ -474,9 +474,9 @@ const clinTriRetriever = (query) => {
                         ipcRenderer.send("pulsar", true);
                           win.close();
                         }, 500); // Close Chaeros
-                    })  
+                    })
 
-                  
+
               })
       .catch(e => {
         ipcRenderer.send("chaeros-failure", e); // Send error to main process
@@ -630,7 +630,7 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
     "chaeros-notification",
     "Creating collection " + collectionName
   ); // Send message to main Display
-  
+
 
   pandodb.csljson.get(id).then(data => {
     let timer = 2000;
@@ -874,7 +874,7 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
         fluxArgs.scopusRetriever.bottleneck
       );
       break;
-      
+
       case "clinTriRetriever":
         clinTriRetriever(fluxArgs.clinTriRetriever.query);
         break;
