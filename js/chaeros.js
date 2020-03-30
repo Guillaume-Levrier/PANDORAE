@@ -388,6 +388,120 @@ const scopusRetriever = (user, query, bottleRate) => {
   });
 };
 
+//========== biorxivRetriever ==========
+
+const biorxivRetriever = (query) => {
+
+  const limiter = new bottleneck({
+    // Create a bottleneck to prevent API rate limit
+    maxConcurrent: 1, // Only one request at once
+    minTime: 500
+  });
+
+  ipcRenderer.send(
+    "console-logs",
+    "Started biorxivRetriever on " + query + " for user " + user
+  ); // Log the process
+
+  var content = {
+    type: "biorxiv-dataset",
+    query: query,
+    queryDate: date,
+    altmetricEnriched: false,
+    articleGeoloc: false,
+    entries: []
+  };
+
+    // URL Building blocks
+    let rootUrl ="https://api.rxivist.org/v1/papers?q=";
+
+    let optionsRequest = {
+      // Prepare options for the Request-Promise-Native Package
+      uri:
+        rootUrl +
+        query ,
+      headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
+      json: true // Automatically parses the JSON string in the response
+    };
+
+    rpn(optionsRequest) // RPN stands for Request-promise-native (Request + Promise)
+      .then(firstResponse => {
+
+        let finpag= firstResponse.query.final_page;
+
+        var dataPromises = []; // Create empty array for the promises to come
+
+        for (let countStart = 0; countStart < finpage; countStart += 1) {          
+
+          // Create a specific promise
+          let scopusTotalRequest =
+            rootUrl +
+            query +
+            "&page="
+            +finpage;
+
+          let optionsTotalRequest = {
+            // Prepare options for the Request-Promise-Native Package
+            uri: scopusTotalRequest, // URI to be accessed
+            headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
+            json: true // Answer should be parsed as JSON
+          };
+          dataPromises.push(limiter.schedule(()=>rpn(optionsTotalRequest))); // Push promise in the relevant array
+        }
+
+        limiter.schedule(() => Promise.all(dataPromises))
+        //Promise.all(dataPromises)
+        .then(response => {
+            for (let i = 0; i < response.length; i++) {
+              // For each page of (max 200) results
+              let retrievedDocuments = response.results;
+
+              if (retrievedDocuments != undefined) {
+                for (let j = 0; j < retrievedDocuments.length; j++) {
+                  // For each document
+                  content.entries.push(retrievedDocuments[j]); // Write it in the "entries" array
+                }
+              }
+            }
+            return;
+          })
+          .then(() => {
+            // Once all entries/documents have been written
+
+            pandodb.open();
+            let id = query + date;
+            pandodb.biorxiv
+              .add({ id: id, date: date, name: query, content: content })
+              .then(res1 => {
+                pandodb.enriched
+                  .add({ id: id, date: date, name: query, content: content })
+                  .then(res2 => {
+                    ipcRenderer.send(
+                      "chaeros-notification",
+                      "Scopus API data retrieved"
+                    ); // signal success to main process
+                    ipcRenderer.send("pulsar", true);
+                    ipcRenderer.send(
+                      "console-logs",
+                      "Scopus dataset on " +
+                        query +
+                        " for user " +
+                        user +
+                        " have been successfully retrieved."
+                    );
+                    setTimeout(() => {
+                      win.close();
+                    }, 500); // Close Chaeros
+                  });
+              });
+          });
+      })
+      .catch(e => {
+        ipcRenderer.send("chaeros-failure", e); // Send error to main process
+        ipcRenderer.send("pulsar", true);
+      });
+};
+
 //========== Clinical trials retriever ==========
 // Once a basic scopus query has been made on an expression, the user can choose to perform the actual query.
 // This retrieves all the documents corresponding to the same query (basic query only loads one in order to get the
@@ -895,6 +1009,12 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
         fluxArgs.zoteroCollectionBuilder.id
       );
       break;
+
+      case "biorxivRetriever":
+        biorxivRetriever(
+          fluxArgs.biorxivRetriever.query
+        );
+        break;
 
     case "sysExport":
       sysExport(

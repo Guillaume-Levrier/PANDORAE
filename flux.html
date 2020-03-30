@@ -78,6 +78,18 @@ const {shell}=require("electron");
        </form>
 </div>
 
+<!-- BIORXIV TAB -->
+<div id="biorxiv" style="display:none;" class="fluxTabs">
+  <span class="flux-title">BIORXIV</span>
+  <br><br>
+     <form id="biorxiv-form" autocomplete="off">BIORXIV Query:<br> 
+        <input class="fluxInput" spellcheck="false" id="biorxivlocalqueryinput" type="text" value="Enter your biorxiv Query (title/abstract search)."><br><br>
+        <button type="submit" class="flux-button" id="biorxiv-basic-query" onclick="biorxivBasicRetriever();return false">Retrieve basic info</button>&nbsp;&nbsp;
+        <div id="biorxiv-basic-previewer" style="position:relative;"></div>
+        <button style="display:none;" type="submit" class="flux-button" id="biorxiv-query" onclick="powerValve('biorxivRetriever',this);return false">Submit BIORXIV Query</button>
+        <br><br>
+     </form>
+</div>
 
 
 <!-- TWITTER TAB -->

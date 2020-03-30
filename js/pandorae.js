@@ -56,7 +56,7 @@ fs.readFile(userDataPath + "/userID/user-id.json", "utf8",     // Check if the u
 const populateLocale = divlist => {
    divlist.forEach(div=>{
     document.getElementById(div.id).innerText=CM.menu[div.path];
-  }) 
+  })
 
 }
 
@@ -100,7 +100,7 @@ if (!!window.SharedWorker) {
 
   multiThreader.port.postMessage({type:"checkup", validation:CM.console.workerValidation});
   multiThreader.port.onmessage = res => {
-  
+
     // If multiThreader sends a message
     if (res.data.type === "notification") {
       // And the type property of this message is "notification"
@@ -182,14 +182,14 @@ const iconCreator = (target,action) => {
       thisIcon.id=icon.name
       thisIcon.className ="material-icons"
       thisIcon.style ="display:flex;"
-      thisIcon.onclick = action; 
+      thisIcon.onclick = action;
 
   var thisIconDiv = document.createElement("div")
       thisIconDiv.className = "themeCustom"
      thisIconDiv.style = "margin-bottom:10px;background-color:white;border: 1px solid rgb(230,230,230);cursor:pointer;";
       thisIconDiv.appendChild(thisIcon)
       document.getElementById("icons").appendChild(thisIconDiv)
-      
+
     }
   })
 }
@@ -199,7 +199,7 @@ let iconDiv = document.getElementById("icons");
 
 
 // =========== MENU ===========
-// menu elements 
+// menu elements
 
 let menu = document.getElementById("menu");
 let consoleDiv =document.getElementById("console")
@@ -257,7 +257,7 @@ iconCreator("menu-icon",toggleMenu);
 let toggledSecondaryMenu = false;
 
 const toggleSecondaryMenu = () => {
-  
+
   purgeMenuItems("thirdMenuContent");
   if (toggledSecondaryMenu) {
     if (toggledTertiaryMenu) {
@@ -282,7 +282,7 @@ let toggledTertiaryMenu = false;
 
 const toggleTertiaryMenu = () => {
   purgeMenuItems("thirdMenuContent");
-  
+
   if (toggledTertiaryMenu) {
     pulse(1, 1, 10,true);
     document.getElementById("thirdmenu").style.left = "-150px";
@@ -290,7 +290,7 @@ const toggleTertiaryMenu = () => {
     iconDiv.style.left = "325px";
     xtype.style.left = "300px";
     toggledTertiaryMenu = false;
-    
+
   } else {
     document.getElementById("thirdmenu").style.left = "300px";
     consoleDiv.style.left = "450px";
@@ -325,7 +325,7 @@ document.addEventListener("keydown",e=>{
   } else if (field.value.length===0 && document.getElementById('cli-field').value.length>0) {
     cmdinput(document.getElementById('cli-field').value);
   }
-  
+
     return false
   }
 });
@@ -481,7 +481,7 @@ const purgeCore = () => {
     d3.select("canvas").remove();
     document.body.removeChild(document.getElementById("core-logo"));
     document.body.removeChild(document.getElementById("version"));
-    
+
     // If the mainSlideSections DIV is removed, the slider detects it as sliding back to 1st slide.
     // So the cheapest solution is probably to "deep copy" the element storing the current slide,
     // remove the div, then wait for the slider to "acknowledge" that it's gone back to the 1st slide,
@@ -490,9 +490,9 @@ const purgeCore = () => {
     let currentStepBuffer = JSON.parse(JSON.stringify(currentMainPresStep))
     document.getElementById("mainSlideSections").remove();
     setTimeout(() => {
-      currentMainPresStep = currentStepBuffer;  
+      currentMainPresStep = currentStepBuffer;
     }, 200);
-    
+
     field.style.display = "none";
 
     Array.from(document.getElementsByClassName("purgeable")).forEach(d => {
@@ -508,7 +508,7 @@ ipcRenderer.on("backToPres", (event, message) => {
   setTimeout(() => {
     populateSlides(message.id);
     setTimeout(() => {
-      smoothScrollTo(message.step);    
+      smoothScrollTo(message.step);
     }, 1000);
   }, 500);
 });
@@ -580,7 +580,7 @@ if (notLoadingMenu) {
             typeContainer.id = block;
             typeContainer.className += "tabs menu-item";
             typeContainer.innerText = block;
-            typeContainer.addEventListener("click",e=>{mainDisplay(block);}) 
+            typeContainer.addEventListener("click",e=>{mainDisplay(block);})
             document.getElementById("secMenContent").appendChild(typeContainer);
             loadingCount+=1;
             if (loadingCount===blocks.length){notLoadingMenu=true;}
@@ -598,12 +598,12 @@ if (notLoadingMenu) {
         typeContainer.id = thisBlock;
         typeContainer.className += "tabs menu-item";
         typeContainer.innerText = thisBlock;
-        typeContainer.addEventListener("click",e=>{slideDisp(thisBlock);}) 
-        document.getElementById("secMenContent").append(typeContainer);    
+        typeContainer.addEventListener("click",e=>{slideDisp(thisBlock);})
+        document.getElementById("secMenContent").append(typeContainer);
   });
   notLoadingMenu=true;
       break;
-         case "export": 
+         case "export":
          blocks = [
            'interactive',
            'svg',
@@ -619,13 +619,13 @@ if (notLoadingMenu) {
                 typeContainer.className += "tabs menu-item";
                 typeContainer.innerText = thisBlock;
                 typeContainer.addEventListener("click",e=>saveAs(thisBlock))
-                document.getElementById("secMenContent").append(typeContainer);    
+                document.getElementById("secMenContent").append(typeContainer);
           });
           notLoadingMenu=true;
-                  break; 
+                  break;
   }
-    toggleSecondaryMenu();    
-}  
+    toggleSecondaryMenu();
+}
 };
 
 const listTableDatasets = table => {
@@ -640,10 +640,8 @@ const listTableDatasets = table => {
           "No dataset in " + table
         );
     } else {
-      
-    e.forEach(d => {
-      
 
+    e.forEach(d => {
       // datasetContainer
       let datasetContainer = document.createElement("div");
       datasetContainer.style.display = "flex";
@@ -668,7 +666,7 @@ const listTableDatasets = table => {
             selectOption(table, d.id);
           };
         }
-      
+
       datasetContainer.appendChild(dataset);
 
       // Remove dataset
@@ -747,7 +745,7 @@ const slideCreator = () => {
   })
 
   iconCreator("save-icon",saveSlides)
-  
+
   var quillCont = document.createElement("div");
   quillCont.style.margin="15%";
   quillCont.style.width="70%";
@@ -756,11 +754,11 @@ const slideCreator = () => {
   quillCont.style.zIndex="7";
   quillCont.style.pointerEvents="all";
   quillCont.style.position="fixed";
-  
+
   var textCont = document.createElement("div")
   textCont.id = "textcontainer";
   textCont.style="background-color:rgba(0, 10, 10, .8);padding:10px;color:white;";
-  
+
   quillCont.appendChild(textCont);
 
   document.getElementById("mainSlideSections").appendChild(quillCont);
@@ -770,7 +768,7 @@ const slideCreator = () => {
         [{ header: [1, 2,3, false] }],
         ['bold', 'italic', 'underline'],
         ['image', 'code-block','link'],
-        [{ 'color': [] }, { 'background': [] }],                    
+        [{ 'color': [] }, { 'background': [] }],
         [{ 'align': [] }],
       ]},
         placeholder: '',
@@ -788,13 +786,13 @@ const slideCreator = () => {
                                " <input type='field' placeholder='Slide reference name' value='begin' id='slidetitle'>"
 
 mainPresContent.push({title:"begin",text:""})
-              
+
 document.getElementsByClassName("ql-toolbar")[0].appendChild(slideToolbar)
 document.getElementById("typeSelector").addEventListener("click",typeSelect)
 document.getElementById("▲").addEventListener("click",e=>{slideSaver(-1)})
 document.getElementById("▼").addEventListener("click",e=>{slideSaver(1)})
 document.getElementById("+").addEventListener("click",e=>{
-  
+
   let newSlideTitle="slide"+parseInt(activeIndex+1);
                                     mainPresContent.splice(activeIndex+1,0,{title:newSlideTitle,text:""});
                                     slideSaver(1)
@@ -806,11 +804,11 @@ document.getElementById("-").addEventListener("click",e=>{
                                   })
 
       const slideSaver = delta => {
-        
+
          let editor =document.getElementsByClassName("ql-editor")[0]
         let slidetitle = document.getElementById("slidetitle");
         if (activeIndex>-1) {
-        
+
          // save current slide
         mainPresContent[activeIndex].title=slidetitle.value;
         mainPresContent[activeIndex].text=editor.innerHTML;
@@ -825,14 +823,14 @@ document.getElementById("-").addEventListener("click",e=>{
 
 const slideDisp = (block) => {
 
-  document.body.style.overflow="auto"; 
+  document.body.style.overflow="auto";
 
 switch (block) {
   case "load":
     field.value = "loading presentations";
     listTableDatasets("slider")
     toggleTertiaryMenu();
-    
+
     break;
     case "edit":
       field.value = "loading presentations";
@@ -854,19 +852,19 @@ const saveAs = (format) =>{
 setTimeout(() => {
   switch (format) {
     case 'svg':
-     
+
         serialize(document.getElementById("xtypeSVG"))
       break;
-    
+
     case 'png': savePNG()
       break;
 
       case 'interactive': exportToHTML()
       break;
-  
+
     case 'description': saveToolTip()
       break;
-  
+
     default:
       break;
   }
@@ -901,15 +899,15 @@ const savePNG = () => {
   setTimeout(() => {
     remote.getCurrentWindow().capturePage().then(img=>{
       fs.writeFile(dialog.showSaveDialog({"defaultPath":datasetName+".png"}),img.toPNG(),()=>{
-        
+
         document.getElementById('icons').style.display = "block";
-          document.getElementById('tooltip').style.overflow = "auto"; 
-      
+          document.getElementById('tooltip').style.overflow = "auto";
+
       })
     })
   }, 250);
-  
- 
+
+
 }
 
 
@@ -917,7 +915,7 @@ const serialize = (svg) => {
   const xmlns = "http://www.w3.org/2000/xmlns/";
   const xlinkns = "http://www.w3.org/1999/xlink";
   const svgns = "http://www.w3.org/2000/svg";
- 
+
     svg = svg.cloneNode(true);
     const fragment = window.location.href + "#";
     const walker = document.createTreeWalker(svg, NodeFilter.SHOW_ELEMENT, null, false);
@@ -937,7 +935,7 @@ const serialize = (svg) => {
     datasetName = datasetName.replace(/\//ig,"_");
     datasetName = datasetName.replace(/:/ig,"+");
 
-    
+
     ipcRenderer.send("console-logs", "Exporting snapshot of current type to SVG in the user's 'Pictures' folder.");
     fs.writeFile(
       dialog.showSaveDialog({"defaultPath":datasetName+".svg"}),
@@ -947,10 +945,10 @@ const serialize = (svg) => {
         if (err) {
           ipcRenderer.send("console-logs", JSON.stringify(err));
         }
-        
+
       }
     );
-  
+
 }
 
 
@@ -974,7 +972,7 @@ var thisPath = dialog.showSaveDialog({"defaultPath":"PANDORAE-"+currentType.type
   var logoSettings = '<script>var logo = document.getElementById("pandoraeapplogo");logo.style.zIndex=10;logo.style.padding="5px";logo.style.width="15px";logo.style.height="15px";logo.style.cursor="pointer";logo.style.position="absolute";logo.addEventListener("click",e=>{window.open("https://guillaume-levrier.github.io/PANDORAE/")})</script>';
 
   HTMLFILE.write(logoSettings)
- 
+
   HTMLFILE.write('<div id="source"></div></div>');
 
 fs.readFile(appPath+'/css/pandorae.css',"utf-8",(err,css)=>{
@@ -995,7 +993,7 @@ fs.readFile(appPath+'/js/types.js',"utf-8",(err,typesJS)=>{
 
   //slicing out module import & export
   typesJS = typesJS.slice(typesJS.indexOf("//END NODE MODULES"),typesJS.indexOf("// MODULE EXPORT"))
-  
+
   var blocks = [
     "chronotype",
     "geotype",
@@ -1014,9 +1012,9 @@ fs.readFile(appPath+'/js/types.js',"utf-8",(err,typesJS)=>{
     // remove loadType function
     typesJS = typesJS.replace("loadType()","")
     typesJS = typesJS.replace("dataDownload(","localDownload(")
-    
+
 })
-  
+
 // remove ipcRenderer communication channels
 while (typesJS.indexOf("ipcRenderer.send(")>(-1)) {
   typesJS = typesJS.replace("ipcRenderer.send(","console.log(")
@@ -1034,13 +1032,13 @@ while (typesJS.indexOf("multiThreader.port.postMessage")>(-1)) {
 
   switch (currentType.type) {
     case "gazouillotype":   // won't work for now because the data files are flat files
-    
+
       typesJS = typesJS.replace('multiThreader.port.onmessage = workerAnswer => {','d3.forceSimulation(circleData).force("x", d3.forceX()).force("y", d3.forceY()).stop(); var gzWorkerAnswer = { type: "gz", msg: circleData }; ')
       typesJS = typesJS.replace("}; //======== END OF GZ WORKER ANWSER ===========","")
 
       break;
 
-      case "hyphotype": 
+      case "hyphotype":
 
       typesJS = typesJS.replace('if (hyWorkerAnswer.data.type==="tick") {progBarSign(hyWorkerAnswer.data.prog)} else',"")
 
@@ -1062,7 +1060,7 @@ while (typesJS.indexOf("multiThreader.port.postMessage")>(-1)) {
 
       break;
 
-      case "geotype": 
+      case "geotype":
 
       fs.readFile(appPath+'/node_modules/versor/src/versor.js',"utf-8",(err,versor)=>{
 
@@ -1070,13 +1068,13 @@ while (typesJS.indexOf("multiThreader.port.postMessage")>(-1)) {
 
         typesJS = typesJS.replace('//versor insertion signal for interactive exports',versor)
         typesJS = typesJS.replace("<img src='././svg/OAlogo.svg' height='16px'/>","[OA]")
-        
+
 
     fs.readFile(appPath+'/json/world-countries.json',"utf-8",(err,world)=>{
 
       typesJS = typesJS.replace('Promise.all([d3.json("json/world-countries.json")]).then(geo => {','var geo=['+world+'];')
       typesJS = typesJS.replace( "});// end of world-country call",'')
-     
+
     HTMLFILE.write(typesJS)
     HTMLFILE.write("typeSwitch("+JSON.stringify(currentType.type)+","+JSON.stringify(currentType.id)+");")
     HTMLFILE.write('document.getElementById("field").style.zIndex = "-10";')
@@ -1091,7 +1089,7 @@ while (typesJS.indexOf("multiThreader.port.postMessage")>(-1)) {
   }
 
   if (currentType.type!= "geotype") {
-  
+
     HTMLFILE.write(typesJS)
     HTMLFILE.write("typeSwitch("+JSON.stringify(currentType.type)+","+JSON.stringify(currentType.id)+");")
     HTMLFILE.write('document.getElementById("field").style.zIndex = "-10";')
@@ -1377,20 +1375,20 @@ fs.readFile(
       field.style.pointerEvents = "all";
       field.style.cursor = "pointer";
       field.value = "start tutorial";
-      
+
     } else {
       document.getElementById("menu-icon").onclick = toggleMenu;
       document.getElementById("option-icon").onclick = toggleConsole;
       document.getElementById("menu-icon").style.cursor = "pointer";
       document.getElementById("option-icon").style.cursor = "pointer";
-     
+
         fs.readFile(appPath+"/package.json","utf8", (err, data) => {
           if (err) throw err;
            let package = JSON.parse(data);
              let version = package.version;
              document.getElementById("version").innerHTML = user.UserName.toUpperCase()+" | "+version;
         })
-        
+
     }
   }
 );
@@ -1599,7 +1597,7 @@ const keyShortCuts = event => {
 
     case "Digit3":
         if (coreExists){
-  
+
       if (toggledMenu === false) {
         toggleMenu();
       }
@@ -1623,7 +1621,7 @@ const keyShortCuts = event => {
         }
       categoryLoader("export");
       }
-    
+
       break;
   }
 

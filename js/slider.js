@@ -295,8 +295,6 @@ const slideControl = event => {
 const populateSlides = id => {
     let mainSliSect = document.getElementById("mainSlideSections");
 
-    field.value = "loading presentation";
-
     currentMainPresStep.id = id;
     pandodb.slider.get(id).then(presentation => {
         let slides = presentation.content;
@@ -417,7 +415,7 @@ const populateSlides = id => {
             section.className += "slideStep";
             section.innerHTML = "<div style='width:100%;'><div>";
             section.style.pointerEvents = "all";
-            field.value = "start presentation";
+
             field.style.pointerEvents = "none";
 
             mainSliSect.appendChild(section);
@@ -472,6 +470,7 @@ const populateSlides = id => {
                 addPadding();
                 display();
                 mainSliSect.style.opacity = 1;
+                field.value = "start presentation";
                 document.addEventListener("keydown", slideControl);
                 document
                     .getElementById("menu-icon")

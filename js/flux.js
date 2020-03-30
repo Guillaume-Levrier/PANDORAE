@@ -70,7 +70,7 @@ let traces = [
   {
     hops: [
       { info: { name: "OPEN" }, name: "OPEN" },
-      { info: { name: "HAL/ARXIV" }, name: "HAL/ARXIV" },
+      { info: { name: "BIORXIV" }, name: "BIORXIV" },
       { info: { name: "ENRICHMENT" }, name: "ENRICHMENT" }
     ]
   },
@@ -770,6 +770,64 @@ const scopusBasicRetriever = checker => {
           ipcRenderer.send("console-logs", "Query error : " + e); // Log error
         });
     });
+};
+
+
+//========== biorxivBasicRetriever ==========
+
+
+const biorxivBasicRetriever = checker => {
+
+  let query = document.getElementById("biorxivlocalqueryinput").value; // Request Content
+
+  ipcRenderer.send(
+    "console-logs",
+    "Sending biorxiv the following query : " + query
+  ); // Log query
+
+      // URL Building blocks
+      let rootUrl ="https://api.rxivist.org/v1/papers?q=";
+
+      let optionsRequest = {
+        // Prepare options for the Request-Promise-Native Package
+        uri:
+          rootUrl +
+          query,
+        headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
+        json: true // Automatically parses the JSON string in the response
+      };
+  
+      rpn(optionsRequest) // RPN stands for Request-promise-native (Request + Promise)
+        .then(response => {
+          
+
+          let dataBasicPreview =
+          "<strong>" +
+          response.query.text_search +
+          "</strong>" +
+          "<br>Expected results at request time : " +
+          response.query.total_results +
+          "<br>Amount of requests needed to retrieve full response : " +
+          parseInt(response.query.final_page+1) +
+          "<br>[Reload this window to submit a different query.]<br>";
+          
+
+        document.getElementById(
+          "biorxiv-basic-previewer"
+        ).innerHTML = dataBasicPreview;
+
+        // Display success in request button
+        fluxButtonAction(
+          "scopus-basic-query",
+          true,
+          "Query Basic Info Retrieved",
+          "errorPhrase"
+        );
+
+        // Display next step option: send full request to Chæros
+        document.getElementById("biorxiv-query").style.display = "block"; 
+
+        })
 };
 
 //========== clinicalBasicRetriever ==========
