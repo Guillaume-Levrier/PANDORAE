@@ -2,6 +2,7 @@ const electron = require("electron");
 const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog } = electron;
 const fs = require("fs");
 const userDataPath = app.getPath("userData");
+const keytar = require("keytar"); // Load keytar to manage user API keys
 
 let mainWindow;
 
@@ -266,6 +267,26 @@ ipcMain.on("chaeros-notification", (event, message, options) => {
 ipcMain.on("pulsar", (event, message) => {
   mainWindow.webContents.send("pulsar", message);
 });
+
+ipcMain.on("keytar", (event, request) => {
+
+switch (request.type) {
+  case "setPassword":
+    keytar
+    .setPassword(request.service, request.user,request.value)
+    .then(password => event.returnValue = password);
+    break;
+
+  case "getPassword":
+    keytar
+    .getPassword(request.service, request.user)
+    .then(password => event.returnValue = password);
+    break;
+}
+
+ 
+
+}); 
 
 ipcMain.on("chaeros-is-ready", (event, arg) => {
   let action = powerValveArgsArray[powerValveArgsArray.length - 1];
