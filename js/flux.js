@@ -19,6 +19,7 @@ const fs = require("fs"); // FileSystem reads/writes files and directories
 const userDataPath = remote.app.getPath("userData");
 const { ipcRenderer } = require("electron"); // ipcRenderer manages messages with Main Process
 const d3 = require("d3");
+const artoo = require("artoo-js")
 
 var CM = CMT["EN"];
 
@@ -680,9 +681,7 @@ const scopusBasicRetriever = checker => {
     "Sending Scopus the following query : " + scopusQuery
   ); // Log query
 
-  keytar
-    .getPassword("Scopus", document.getElementById("userNameInput").value)
-    .then(scopusApiKey => {
+      let scopusApiKey = getPassword("Scopus", document.getElementById("userNameInput").value);
       let rootUrl = "https://api.elsevier.com/content/search/scopus?query=";
       let apiProm = "&apiKey=";
       let urlCount = "&count=";
@@ -769,16 +768,21 @@ const scopusBasicRetriever = checker => {
           );
           ipcRenderer.send("console-logs", "Query error : " + e); // Log error
         });
-    });
+  
 };
 
 
 //========== biorxivBasicRetriever ==========
 
 
+
+/*
 const biorxivBasicRetriever = checker => {
 
+
   let query = document.getElementById("biorxivlocalqueryinput").value; // Request Content
+
+
 
   ipcRenderer.send(
     "console-logs",
@@ -792,14 +796,14 @@ const biorxivBasicRetriever = checker => {
         // Prepare options for the Request-Promise-Native Package
         uri:
           rootUrl +
-          query,
+          query+"&page_size=1",
         headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
         json: true // Automatically parses the JSON string in the response
       };
   
       rpn(optionsRequest) // RPN stands for Request-promise-native (Request + Promise)
         .then(response => {
-          
+          console.log(response)
 
           let dataBasicPreview =
           "<strong>" +
@@ -828,8 +832,9 @@ const biorxivBasicRetriever = checker => {
         document.getElementById("biorxiv-query").style.display = "block"; 
 
         })
+        
 };
-
+*/
 //========== clinicalBasicRetriever ==========
 
 
@@ -920,8 +925,7 @@ const zoteroCollectionRetriever = () => {
     "Retrieving collections for Zotero id " + zoteroUser
   ); // Log collection request
 
-  // Ask keytar for zotero API key
-  keytar.getPassword("Zotero", zoteroUser).then(zoteroApiKey => {
+let zoteroApiKey = getPassword("Zotero", zoteroUser);
     // URL Building blocks
     let rootUrl = "https://api.zotero.org/groups/";
     let urlCollections = "/collections";
@@ -1011,7 +1015,7 @@ const zoteroCollectionRetriever = () => {
             err
         ); // Log error
       });
-  });
+  
 };
 
 //========== zoteroLocalRetriever ==========
@@ -1022,8 +1026,7 @@ const zoteroCollectionRetriever = () => {
 const zoteroLocalRetriever = () => {
   ipcRenderer.send("console-logs", "Retrieving local Zotero collections."); // Log collection request
 
-  // Ask keytar for zotero API key
-  //keytar.getPassword("Zotero",zoteroUser).then((zoteroApiKey) => {
+  let zoteroApiKey =  getPassword("Zotero",zoteroUser)
 
   // URL Building blocks
   let rootUrl = "http://127.0.0.1:23119/";
@@ -1098,7 +1101,7 @@ const zoteroLocalRetriever = () => {
       /*   fluxButtonAction ("zotcolret",false,"Zotero Collections Successfully Retrieved",err);
         ipcRenderer.send('console-logs',"Error in retrieving collections for Zotero id "+ zoteroUser + " : "+err); //  */
     });
-  //  })
+   
 };
 
 //========== datasetLoader ==========

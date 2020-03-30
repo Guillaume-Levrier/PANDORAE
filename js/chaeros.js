@@ -10,18 +10,19 @@
 const { remote, ipcRenderer } = require("electron"); // Load ipc to communicate with main process
 const userDataPath = remote.app.getPath("userData"); // Find userData folder Path
 const appPath = remote.app.getAppPath();
-const keytar = require("keytar"); // Load keytar to manage user API keys
 const rpn = require("request-promise-native"); // Load RPN to manage promises
 const bottleneck = require("bottleneck"); // Load bottleneck to manage API request limits
 const fs = require("fs"); // Load filesystem to manage flatfiles
 const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
 const date = new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
 
-
 var currentDoc = {};
 
 var geolocationActive = false;
 var altmetricActive = false;
+
+const getPassword = (service,user) =>ipcRenderer.sendSync("keytar",{user:user,service:service,type:"getPassword"});
+
 
 //========== scopusConverter ==========
 //scopusConverter converts a scopus JSON dataset into a Zotero CSL-JSON dataset.
@@ -252,7 +253,7 @@ const scopusGeolocate = dataset => {
 // size of the sample and the power/broadband available on the user's system.
 
 const scopusRetriever = (user, query, bottleRate) => {
-  // user argument is passed to get keytar pass
+ 
 
   const limiter = new bottleneck({
     // Create a bottleneck to prevent API rate limit
@@ -276,8 +277,7 @@ const scopusRetriever = (user, query, bottleRate) => {
     entries: []
   };
 
-  keytar.getPassword("Scopus", user).then(scopusApiKey => {
-    // Get the password through keytar
+   let scopusApiKey = getPassword("Scopus", user);
 
     // URL Building blocks
     let rootUrl = "https://api.elsevier.com/content/search/scopus?query=";
@@ -385,13 +385,16 @@ const scopusRetriever = (user, query, bottleRate) => {
         ipcRenderer.send("chaeros-failure", e); // Send error to main process
         ipcRenderer.send("pulsar", true);
       });
-  });
 };
 
 //========== biorxivRetriever ==========
 
-const biorxivRetriever = (query) => {
+const biorxivRetriever = query => {
 
+
+
+
+/* // PRIOR VERSION USING BIORXIVIST 
   const limiter = new bottleneck({
     // Create a bottleneck to prevent API rate limit
     maxConcurrent: 1, // Only one request at once
@@ -500,6 +503,8 @@ const biorxivRetriever = (query) => {
         ipcRenderer.send("chaeros-failure", e); // Send error to main process
         ipcRenderer.send("pulsar", true);
       });
+
+      */
 };
 
 //========== Clinical trials retriever ==========
@@ -508,9 +513,8 @@ const biorxivRetriever = (query) => {
 // the total amount of documents). This is sent to chaeros via powerValve because it can be heavy, depending on the
 // size of the sample and the power/broadband available on the user's system.
 
-const clinTriRetriever = (query) => {
-  // user argument is passed to get keytar pass
-
+const clinTriRetriever = query => {
+  
   const limiter = new bottleneck({
     // Create a bottleneck to prevent API rate limit
     maxConcurrent: 1, // Only one request at once
@@ -620,8 +624,7 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
 
   let zoteroItemsResponse;
 
-  keytar.getPassword("Zotero", zoteroUser).then(zoteroApiKey => {
-    // Open keytar
+let zoteroApiKey =getPassword("Zotero", zoteroUser); 
 
     for (let j = 0; j < collections.length; j++) {
       // Loop on collections
@@ -692,7 +695,6 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
         });
       });
     });
-  });
 };
 
 //========== sysExport ==========
@@ -759,8 +761,8 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
         minTime: 500 // Every 150 milliseconds
       });
 
-      keytar.getPassword("Zotero", zoteroUser).then(zoteroApiKey => {
-        // Retrieve password through keytar
+      
+      let zoteroApiKey = getPassword("Zotero", zoteroUser);
 
         // URL Building blocks
         var rootUrl = "https://api.zotero.org/groups/";
@@ -840,8 +842,7 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
             "console-logs",
             "Collection " + JSON.stringify(collectionName) + " built."
           ); // Send success message to console
-        }); //end of keytar
-      });
+        }); 
     } catch (e) {
       ipcRenderer.send("console-logs", e);
     } finally {
@@ -851,7 +852,7 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
 
 //========== altmetricRetriever ==========
 // Get altmetric data through the Altmetric API.
-
+/*
 const altmetricRetriever = (id, user) => {
   altmetricActive = true;
   ipcRenderer.send("chaeros-notification", "Starting Altmetric enrichment"); // Send message to main Display
@@ -933,6 +934,7 @@ const altmetricRetriever = (id, user) => {
     }); // End of Keytar
   }); // End of pandodb request
 }; // End of altmetricRetriever function
+*/
 
 //========== tweetImporter ==========
 

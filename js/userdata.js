@@ -1,4 +1,11 @@
-const keytar = require("keytar");
+//const keytar = require("keytar");
+
+//const { ipcRenderer } = require("electron");
+
+const getPassword = (service,user) =>ipcRenderer.sendSync("keytar",{user:user,service:service,type:"getPassword"});
+const setPassword = (service,user,value) => ipcRenderer.sendSync("keytar",{user:user,service:service,value:value,type:"setPassword"}); 
+
+
 
 const getUserData = () => {
   fs.readFile(
@@ -19,18 +26,9 @@ const getUserData = () => {
       document.getElementById("userNameInput").value = userName;
       document.getElementById("userMailInput").value = userMail;
       document.getElementById("zoterouserinput").value = zoteroUser;
-      document.getElementById("zoterokeyinput").value = keytar.getPassword(
-        "Zotero",
-        zoteroUser
-      );
-      document.getElementById("scopuskeyinput").value = keytar.getPassword(
-        "Scopus",
-        userName
-      );
-      document.getElementById("altmetrickeyinput").value = keytar.getPassword(
-        "Altmetric",
-        userName
-      );
+      document.getElementById("zoterokeyinput").value = getPassword("Zotero",zoteroUser);
+      document.getElementById("scopuskeyinput").value = getPassword("Scopus",userName);
+      
     }
   );
 };
@@ -63,7 +61,7 @@ const updateUserData = service => {
 
   switch (service) {
     case "Zotero":
-      keytar.setPassword(
+      setPassword(
         "Zotero",
         zoteroUser,
         document.getElementById("zoterokeyinput").value
@@ -72,14 +70,14 @@ const updateUserData = service => {
       break;
 
     case "Scopus":
-      keytar.setPassword(
+      setPassword(
         "Scopus",
         userName,
         document.getElementById("scopuskeyinput").value
       );
       checkKey("scopusValidation");
       break;
-
+/*
     case "Altmetric":
       keytar.setPassword(
         "Altmetric",
@@ -106,6 +104,7 @@ const updateUserData = service => {
       );
       checkKey("openAccessValidation");
       break;
+      */
   }
 
   getUserData();
@@ -127,6 +126,7 @@ const checkKey = (service, status) => {
       }
 
       break;
+      /*
     case "altmetricValidation":
       break;
 
@@ -134,7 +134,7 @@ const checkKey = (service, status) => {
       break;
 
     case "openAccessValidation":
-      break;
+      break;*/
   }
 
   success = status;
