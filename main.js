@@ -119,7 +119,8 @@ app.on("ready", () => {
 var windowIds = [
   { name: "flux", id: 0, open: false },
   { name: "tutorialHelper", id: 0, open: false },
-  { name: "tutorial", id: 0, open: false }
+  { name: "tutorial", id: 0, open: false },
+  { name: "chaeros", id: 0, open: false }
 ];
 
 ipcMain.on("window-ids", (event, window, id, open) => {
@@ -315,7 +316,7 @@ const chaerosCalculator = () => {
   chaerosWindow.loadFile("chaeros.html");
 
   chaerosWindow.webContents.on("did-finish-load", function() {
-    //chaerosWindow.webContents.openDevTools();
+    chaerosWindow.webContents.openDevTools();
   });
 };
 
@@ -399,3 +400,51 @@ ipcMain.on("backToPres", (event, message) => {
     mainWindow.webContents.send("backToPres", message);
   }, 1000);
 })
+
+
+const artooScraper = (model,address) => {
+  let artooWindow = new BrowserWindow({
+    width: 10,
+    height: 10,
+    frame: false,
+    transparent: true,
+    show: false,
+    webPreferences: {
+      nodeIntegration: true,
+      nodeIntegrationInWorker: true,
+      preload: basePath+'/js/artoo-models/'+model+'.js',
+      webSecurity:false
+    }
+  });
+
+  artooWindow.loadURL(address);
+
+  artooWindow.webContents.on("did-finish-load", function() {
+    //artooWindow.webContents.openDevTools();
+  });
+};
+
+ipcMain.on("artoo", (event, message) => {
+  switch (message.type) {
+    case "request":
+      artooScraper(message.model,message.address) 
+      break;
+  
+    case 'biorxiv-amount':
+      for (var i = 0; i < windowIds.length; i++) {
+        if (windowIds[i].name === "flux") {
+          BrowserWindow.fromId(windowIds[i].id).webContents.send('artoo',message)
+        }
+      }
+     
+      case 'biorxiv-content':
+      for (var i = 0; i < windowIds.length; i++) {
+        if (windowIds[i].name === "chaeros" && windowIds[i].id>0) {
+          BrowserWindow.fromId(windowIds[i].id).webContents.send('artoo',message)
+        }
+      }
+
+      break;
+  }
+
+});

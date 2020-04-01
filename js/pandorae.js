@@ -96,9 +96,11 @@ document.getElementById("lang").childNodes.forEach(lg=>{
 // back to Types only what it needs to know.
 if (!!window.SharedWorker) {
   // If the SharedWorker doesn't exist yet
+  /* 
   var multiThreader = new SharedWorker("js/mul[type]threader.js"); // Create a SharedWorker named multiThreader based on that file
 
   multiThreader.port.postMessage({type:"checkup", validation:CM.console.workerValidation});
+  
   multiThreader.port.onmessage = res => {
 
     // If multiThreader sends a message
@@ -106,8 +108,8 @@ if (!!window.SharedWorker) {
       // And the type property of this message is "notification"
       ipcRenderer.send(res.data.dest, res.data.msg); // Send the notification to the main process for dispatch
     }
-  };
 
+  };
 
   multiThreader.onerror = err => {
     // If the multiThreader reports an error
@@ -116,6 +118,7 @@ if (!!window.SharedWorker) {
     ipcRenderer.send("console-logs", CM.console.workerError); // Send an error message to the console
     ipcRenderer.send("console-logs", JSON.stringify(err)); // Send the actual error content to the console
   };
+ */
 }
 
 // =========== MAIN LOGO ===========
@@ -1655,5 +1658,4 @@ ipcRenderer.on("progressBar", (event, prog) => {
 ipcRenderer.on("cmdInputFromRenderer", (event, command) => {
   cmdinput(command)
 })
-
 
