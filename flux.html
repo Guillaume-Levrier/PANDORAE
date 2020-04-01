@@ -80,13 +80,20 @@ const {shell}=require("electron");
 
 <!-- BIORXIV TAB -->
 <div id="biorxiv" style="display:none;" class="fluxTabs">
-  <span class="flux-title">BIORXIV</span>
+  <span class="flux-title">bioRxiv</span>
   <br><br>
-     <form id="biorxiv-form" autocomplete="off">BIORXIV Query:<br> 
-        <input class="fluxInput" spellcheck="false" id="biorxivlocalqueryinput" type="text" value="Enter your biorxiv Query (title/abstract search)."><br><br>
-        <button type="submit" class="flux-button" id="biorxiv-basic-query" onclick="biorxivBasicRetriever();return false">Retrieve basic info</button>&nbsp;&nbsp;
-        <div id="biorxiv-basic-previewer" style="position:relative;"></div>
-        <button style="display:none;" type="submit" class="flux-button" id="biorxiv-query" onclick="powerValve('biorxivRetriever',this);return false">Submit BIORXIV Query</button>
+     <form id="biorxiv-form" autocomplete="off">Query:<br> 
+        <input class="fluxInput" spellcheck="false" id="biorxivlocalqueryinput" type="text" value=""><br><br>
+          From: <input type="date" id="biorxiv-date-from"> - To: <input type="date" id="biorxiv-date-to"><br>
+          <br> Database: <input list="biorxiv-medrxiv" id="biorxiv-list" value="biorxiv"/><br><br>
+            <datalist id="biorxiv-medrxiv">
+                <option value="biorxiv">
+            </datalist>
+            Author: <input class="fluxInput" spellcheck="false" id="biorxiv-author" type="text" value=""><br><br>
+            DOI : <input class="fluxInput" spellcheck="false" id="biorxiv-doi" type="text" value=""><br><br>
+            <button type="submit" class="flux-button" id="biorxiv-basic-query" onclick="biorxivBasicRetriever();return false">Retrieve basic info</button>&nbsp;&nbsp;
+        <div id="biorxiv-basic-previewer" style="position:relative;"></div><br><br>
+        <button style="display: none;" type="submit" class="flux-button" id="biorxiv-query" onclick="powerValve('biorxivRetriever',this);return false">Submit bioRxiv Query</button>
         <br><br>
      </form>
 </div>

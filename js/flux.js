@@ -19,7 +19,6 @@ const fs = require("fs"); // FileSystem reads/writes files and directories
 const userDataPath = remote.app.getPath("userData");
 const { ipcRenderer } = require("electron"); // ipcRenderer manages messages with Main Process
 const d3 = require("d3");
-const artoo = require("artoo-js")
 
 var CM = CMT["EN"];
 
@@ -35,6 +34,8 @@ ipcRenderer.on("window-close", (event, message) => {
   ipcRenderer.send("window-ids", "flux", remote.getCurrentWindow().id, false);
   closeWindow();
 });
+
+
 
 //========== Tracegraph ==========
 
@@ -424,6 +425,20 @@ const powerValve = (fluxAction, item) => {
       ).value;
       break;
 
+case "biorxivRetriever":
+        fluxArgs.biorxivRetriever={query:{}}
+        fluxArgs.biorxivRetriever.query={
+          amount:bioRxivAmount,
+          terms:document.getElementById("biorxivlocalqueryinput").value,
+          doi:document.getElementById("biorxiv-doi").value,
+          author:document.getElementById("biorxiv-author").value,
+          jcode:document.getElementById("biorxiv-list").value,
+          from:document.getElementById("biorxiv-date-from").value,
+          to:document.getElementById("biorxiv-date-to").value
+        };
+        message="retrieving bioRxiv data";
+  break;
+
     case "tweetImporter":
       fluxArgs.tweetImporter = {};
       fluxArgs.tweetImporter.dataset = document.getElementById("twitterDataset").files[0].path;
@@ -773,8 +788,62 @@ const scopusBasicRetriever = checker => {
 
 
 //========== biorxivBasicRetriever ==========
+let bioRxivAmount=0;
+const biorxivBasicRetriever = () => {
+ 
+  let endUrl = "%20numresults%3A1%20sort%3Apublication-date%20direction%3Adescending%20format_result%3Acondensed"
+  let jcode="%20jcode%3Abiorxiv";
 
+  let reqURL = 'https://www.biorxiv.org/search/'+
+  document.getElementById("biorxivlocalqueryinput").value;
+  
+  if (document.getElementById("biorxiv-doi").value.length>0){
+      reqURL=reqURL+'%20doi%3A'+document.getElementById("biorxiv-doi").value
+  }
+if (document.getElementById("biorxiv-author").value.length>0) {
+  reqURL=reqURL+'%20author1%3A'+document.getElementById("biorxiv-author").value;
+}  
+  
+  
+ reqURL=reqURL+'%20jcode%3A'+document.getElementById("biorxiv-list").value+
+  '%20limit_from%3A'+document.getElementById("biorxiv-date-from").value+
+  '%20limit_to%3A'+document.getElementById("biorxiv-date-to").value+
+  '%20numresults%3A1%20sort%3Apublication-date%20direction%3Adescending%20format_result%3Acondensed';
 
+  document.getElementById(
+    "biorxiv-basic-previewer"
+  ).innerHTML = "Retrieving amount of results...";
+
+  ipcRenderer.send("artoo",{type:"request",model:"biorxiv-amount-injector",address:reqURL})
+  console.log(reqURL)
+}
+
+ipcRenderer.on("artoo",(event,message)=>{
+  switch (message.type) {
+    case "biorxiv-amount":
+      
+      
+      let dataBasicPreview =
+      "Expected amount of results: " +
+      message.content;
+
+      
+
+    document.getElementById(
+      "biorxiv-basic-previewer"
+    ).innerHTML = dataBasicPreview;
+
+    bioRxivAmount=message.content.match( /\d+/g ).join('');
+
+    document.getElementById(
+      "biorxiv-query"
+    ).style.display = "block"; 
+      break;
+  
+    default:
+      break;
+  }
+})
 
 /*
 const biorxivBasicRetriever = checker => {

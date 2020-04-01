@@ -391,7 +391,99 @@ const scopusRetriever = (user, query, bottleRate) => {
 
 const biorxivRetriever = query => {
 
+  ipcRenderer.send("window-ids", "chaeros", remote.getCurrentWindow().id, false);
 
+  let amount = query.amount;
+  let totalrequests = Math.ceil(query.amount/75);
+  let doiBuffer=[];
+  
+
+let terms = query.terms,
+    doi = query.doi,
+    author = query.author,
+    jcode= query.jcode,
+    from = query.from,
+    to = query.to;
+
+    let baseUrl = 'https://www.biorxiv.org/search/'+query.terms;
+    
+    if (doi.length>0){
+      baseUrl=baseUrl+'%20doi%3A'+document.getElementById("biorxiv-doi").value
+  }
+if (author.length>0) {
+  baseUrl=baseUrl+'%20author1%3A'+document.getElementById("biorxiv-author").value;
+}  
+  
+  
+baseUrl=baseUrl+'%20jcode%3A'+jcode+
+  '%20limit_from%3A'+from+
+  '%20limit_to%3A'+to+
+  '%20numresults%3A75%20sort%3Apublication-date%20direction%3Adescending%20format_result%3Acondensed';
+    
+let requestArray = [];
+  requestArray.push(baseUrl+'?page=0')
+    for (let i = 1; i < totalrequests; i++) {
+      requestArray.push(baseUrl+'?page='+i)
+    }
+    
+    requestArray.forEach(req=>{
+      let requestContent ={type:"request",model:"biorxiv-content-injector",count:parseInt(req.slice(-1))+1,address:req}
+      ipcRenderer.send("artoo",requestContent)
+    })
+    
+    let count=0;
+
+    ipcRenderer.on("artoo",(event,message)=>{
+      message.content.forEach(d=>doiBuffer.push(d.replace('doi: https://doi.org/','').replace(' ','')))
+      count++
+      ipcRenderer.send(
+        "chaeros-notification",
+        "scraping page "+count+" of "+totalrequests
+      );
+      if (count===totalrequests) {
+       retrievedDocs(doiBuffer); 
+      }
+    })
+
+const retrievedDocs = dois => {
+  const limiter = new bottleneck({
+    // Create a bottleneck to prevent API rate limit
+    maxConcurrent: 1, // Only one request at once
+    minTime: 200
+  });
+
+setTimeout(() => {
+  ipcRenderer.send(
+    "chaeros-notification",
+    "interrogating bioRxiv api (0/"+amount+")"
+  );
+}, 200);
+  
+
+  ipcRenderer.send(
+    "console-logs",
+    "biorxivRetriever has retrieved DOIs and will now interrogate bioRxiv database"
+  ); // Log the process
+
+
+
+bioRxivPromises=[];
+
+dois.forEach(d=>{
+  let optionsRequest = {
+    uri:"https://api.biorxiv.org/details/biorxiv/"+d,
+    headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
+    json: true // Automatically parses the JSON string in the response
+  };
+  bioRxivPromises.push(rpn(optionsRequest))
+})
+
+
+limiter.schedule(() => Promise.all(bioRxivPromises)).then(res=>{
+  console.log(res)
+
+})
+}
 
 
 /* // PRIOR VERSION USING BIORXIVIST 
@@ -959,6 +1051,7 @@ const tweetImporter = (dataset, query, name) => {
 // Switch used to choose the function to execute in CHÆROS.
 
 const chaerosSwitch = (fluxAction, fluxArgs) => {
+  
   ipcRenderer.send(
     "console-logs",
     "CHÆROS started a " +

@@ -18,7 +18,7 @@ Please put your extracted PANDORÆ folder/app where you usually put apps on your
 #### FLUX/CHAEROS
 - calculate flux based on available services
 - direct Twitter and WoS API requests
-- HAL/ARXIV requests
+- HAL requests 
 
 #### Main/PANDORAE.JS
 - Localize main field/console commands
