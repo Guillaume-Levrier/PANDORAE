@@ -514,8 +514,6 @@ const datasetDisplay = (divId, kind) => {
             "<i class='fluxDelDataset material-icons' onclick=datasetRemove(" +
             JSON.stringify(kind) +
             "," +
-            JSON.stringify(db) +
-            "," +
             JSON.stringify(file.id) +
             ")>close</i></li>"
         );
@@ -540,18 +538,21 @@ const datasetDisplay = (divId, kind) => {
   }
 };
 
-const datasetRemove = (kind, db, id) => {
-  pandodb[db].get(id).then(dataset => {
+const datasetRemove = (kind, id) => {
+  
+  pandodb[kind].get(id).then(dataset => {
     if (dataset.content.hasOwnProperty("path")) {
       fs.unlink(dataset.content.path, err => {
         if (err) throw err;
       });
     }
+  
+    pandodb[kind].delete(id);
+
     document
       .getElementById(id)
       .parentNode.removeChild(document.getElementById(id));
-    pandodb[db].delete(id);
-    ipcRenderer.send("console-logs", "Removed " + id + " from database: " + db);
+    ipcRenderer.send("console-logs", "Removed " + id + " from database: " + kind);
     datasetDetail(null, kind, null, null);
   });
 };

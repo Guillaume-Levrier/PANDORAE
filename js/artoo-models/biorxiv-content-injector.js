@@ -41,10 +41,20 @@
     injectScript("jQuery",'https://code.jquery.com/jquery-2.1.3.min.js'); 
     injectScript("artoo","file://"+appPath+'/node_modules/artoo-js/build/artoo.chrome.js');
    
+      const plug = () => {
+        let content = artoo.scrape('.highwire-cite-metadata-doi');
+        ipcRenderer.send('artoo',{type:"biorxiv-content",content:content});
+        setTimeout(() => {
+          remote.getCurrentWindow().close();
+        }, 200);
+      }
+
     window.addEventListener('load', e=> {
-      let content = artoo.scrape('.highwire-cite-metadata-doi');
-      ipcRenderer.send('artoo',{type:"biorxiv-content",content:content});
+      if (artoo.loaded) {
+        plug();
+      } else {
+      artoo.on('ready',plug)
+    }      
     })
-    
 
   }).call(this);
