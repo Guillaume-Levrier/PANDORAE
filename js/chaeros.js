@@ -436,13 +436,15 @@ let requestArray = [];
         "scraping page "+count+" of "+totalrequests
       );
       if (count===totalrequests) {
+        
        retrievedDocs(doiBuffer); 
       }
     })
 
 const retrievedDocs = dois => {
   const limiter = new bottleneck({
-    minTime: 300
+    maxConcurrent:1,
+    minTime: 200
   });
 
 ipcRenderer.send(
@@ -456,24 +458,25 @@ ipcRenderer.send(
 
 bioRxivPromises=[];
 
-dois.forEach(d=>{
-  let optionsRequest = {
-    uri:"https://api.biorxiv.org/details/biorxiv/"+d,
-    headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-    json: true // Automatically parses the JSON string in the response
-  };
-  bioRxivPromises.push(rpn(optionsRequest))
-})
+Promise.all(
+  dois.map(d => {
+    // Send all requests as promises (bottlenecked)
 
+    let req = {
+      // Designing promises
+      uri:"https://api.biorxiv.org/details/biorxiv/"+d,
+      headers: { "User-Agent": "Request-Promise" },
+      json: true
+    };
 
-limiter.schedule(() => Promise.all(bioRxivPromises))
+    return limiter.schedule(rpn, req)
+  }))
+//limiter.schedule(() => Promise.all(bioRxivPromises))
   .catch(error=>{
     console.log(error)
   })
   .then(res=>{
-  
-    console.log(res)
-
+    
     var articles = [];
 
     res.forEach(d=>articles.push(d.collection[0]))
