@@ -44,6 +44,9 @@
     window.addEventListener('load', e=> {
       let amount =artoo.scrape('#page-title','text')[0];
       ipcRenderer.send('artoo',{type:"biorxiv-amount",content:amount});
+      setTimeout(() => {
+        remote.getCurrentWindow().close();
+      }, 200);
     })
     
 

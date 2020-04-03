@@ -254,7 +254,6 @@ const scopusGeolocate = dataset => {
 
 const scopusRetriever = (user, query, bottleRate) => {
  
-
   const limiter = new bottleneck({
     // Create a bottleneck to prevent API rate limit
     maxConcurrent: 1, // Only one request at once
@@ -334,7 +333,6 @@ const scopusRetriever = (user, query, bottleRate) => {
         }
 
         //limiter
-        //  .schedule(() => Promise.all(dataPromises))
         Promise.all(dataPromises).then(scopusResponse => {
             for (let i = 0; i < scopusResponse.length; i++) {
               // For each page of (max 200) results
@@ -388,7 +386,6 @@ const scopusRetriever = (user, query, bottleRate) => {
 };
 
 //========== biorxivRetriever ==========
-
 const biorxivRetriever = query => {
 
   ipcRenderer.send("window-ids", "chaeros", remote.getCurrentWindow().id, false);
@@ -397,7 +394,6 @@ const biorxivRetriever = query => {
   let totalrequests = Math.ceil(query.amount/75);
   let doiBuffer=[];
   
-
 let terms = query.terms,
     doi = query.doi,
     author = query.author,
@@ -413,7 +409,6 @@ let terms = query.terms,
 if (author.length>0) {
   baseUrl=baseUrl+'%20author1%3A'+document.getElementById("biorxiv-author").value;
 }  
-  
   
 baseUrl=baseUrl+'%20jcode%3A'+jcode+
   '%20limit_from%3A'+from+
@@ -447,25 +442,17 @@ let requestArray = [];
 
 const retrievedDocs = dois => {
   const limiter = new bottleneck({
-    // Create a bottleneck to prevent API rate limit
-    maxConcurrent: 1, // Only one request at once
-    minTime: 200
+    minTime: 300
   });
 
-setTimeout(() => {
-  ipcRenderer.send(
-    "chaeros-notification",
-    "interrogating bioRxiv api (0/"+amount+")"
-  );
-}, 200);
-  
-
+ipcRenderer.send(
+  "chaeros-notification",
+  "hydrating via bioRxiv api"
+)
   ipcRenderer.send(
     "console-logs",
     "biorxivRetriever has retrieved DOIs and will now interrogate bioRxiv database"
   ); // Log the process
-
-
 
 bioRxivPromises=[];
 
@@ -479,124 +466,97 @@ dois.forEach(d=>{
 })
 
 
-limiter.schedule(() => Promise.all(bioRxivPromises)).then(res=>{
-  console.log(res)
+limiter.schedule(() => Promise.all(bioRxivPromises))
+  .catch(error=>{
+    console.log(error)
+  })
+  .then(res=>{
+  
+    console.log(res)
 
-})
-}
+    var articles = [];
 
+    res.forEach(d=>articles.push(d.collection[0]))
 
-/* // PRIOR VERSION USING BIORXIVIST 
-  const limiter = new bottleneck({
-    // Create a bottleneck to prevent API rate limit
-    maxConcurrent: 1, // Only one request at once
-    minTime: 500
-  });
-
-  ipcRenderer.send(
-    "console-logs",
-    "Started biorxivRetriever on " + query + " for user " + user
-  ); // Log the process
-
-  var content = {
-    type: "biorxiv-dataset",
-    query: query,
-    queryDate: date,
-    altmetricEnriched: false,
-    articleGeoloc: false,
-    entries: []
-  };
-
-    // URL Building blocks
-    let rootUrl ="https://api.rxivist.org/v1/papers?q=";
-
-    let optionsRequest = {
-      // Prepare options for the Request-Promise-Native Package
-      uri:
-        rootUrl +
-        query ,
-      headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-      json: true // Automatically parses the JSON string in the response
+    var cslArticles=[];
+  
+   articles.forEach(d=>{
+    
+    let e = {
+      itemType: "journalArticle",
+      title: "",
+      creators: [],
+      abstractNote: "",
+      publicationTitle: "",
+      volume: "",
+      issue: "",
+      pages: "",
+      date: "",
+      series: "",
+      seriesTitle: "",
+      seriesText: "",
+      journalAbbreviation: "",
+      language: "",
+      DOI: "",
+      ISSN: "",
+      shortTitle: "",
+      url: "",
+      accessDate: "",
+      archive: "",
+      archiveLocation: "",
+      libraryCatalog: "",
+      callNumber: "",
+      rights: "",
+      extra: "",
+      tags: [],
+      collections: [],
+      relations: {}
     };
 
-    rpn(optionsRequest) // RPN stands for Request-promise-native (Request + Promise)
-      .then(firstResponse => {
+    e.DOI=d.doi;
+    e.title=d.title;
+    e.date=d.date;
+    e.abstractNote=d.abstract;
+    e.shortTitle=d.author_corresponding_institution;
 
-        let finpag= firstResponse.query.final_page;
+    let pos=0;
+   
+    e.creators.push({ creatorType: "author", firstName: d.author_corresponding.substring(0,d.author_corresponding.indexOf(" ")), lastName: d.author_corresponding.substring(d.author_corresponding.indexOf(" ")+1,d.author_corresponding.length-1)})
+    while (pos !== -1) {
+      if (pos===0) {} else {pos=pos+2}
+      let endpos = d.authors.indexOf(';',pos);
+      if (endpos===-1) {endpos = d.authors.length}
+      let auth = {creatorType: "author",
+      lastName:d.authors.substring(pos,d.authors.indexOf(',',pos)),
+      firstName:d.authors.substring(d.authors.indexOf(',',pos)+1,endpos)}
+      e.creators.push(auth);
+      pos = d.authors.indexOf(';', pos)
+      
+    }
 
-        var dataPromises = []; // Create empty array for the promises to come
+    cslArticles.push(e);
+   }) 
 
-        for (let countStart = 0; countStart < finpage; countStart += 1) {          
+   pandodb.open();
 
-          // Create a specific promise
-          let scopusTotalRequest =
-            rootUrl +
-            query +
-            "&page="
-            +finpage;
+   let id = query.terms+date;
 
-          let optionsTotalRequest = {
-            // Prepare options for the Request-Promise-Native Package
-            uri: scopusTotalRequest, // URI to be accessed
-            headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-            json: true // Answer should be parsed as JSON
-          };
-          dataPromises.push(limiter.schedule(()=>rpn(optionsTotalRequest))); // Push promise in the relevant array
-        }
+   pandodb.csljson.add({
+     id: id,
+     date: date,
+     name: query.terms,
+     content: cslArticles
+   }); // Save array in local database
+ 
+      ipcRenderer.send("chaeros-notification", "bioRxiv results poured in csl-json"); // Send a success message
+      ipcRenderer.send("pulsar", true);
+      ipcRenderer.send("console-logs","bioRxiv results successfully poured in CSL-JSON database"); // Log success
+      setTimeout(() => {
+      win.close();
+      }, 500);
+    })
+ }
 
-        limiter.schedule(() => Promise.all(dataPromises))
-        //Promise.all(dataPromises)
-        .then(response => {
-            for (let i = 0; i < response.length; i++) {
-              // For each page of (max 200) results
-              let retrievedDocuments = response.results;
-
-              if (retrievedDocuments != undefined) {
-                for (let j = 0; j < retrievedDocuments.length; j++) {
-                  // For each document
-                  content.entries.push(retrievedDocuments[j]); // Write it in the "entries" array
-                }
-              }
-            }
-            return;
-          })
-          .then(() => {
-            // Once all entries/documents have been written
-
-            pandodb.open();
-            let id = query + date;
-            pandodb.biorxiv
-              .add({ id: id, date: date, name: query, content: content })
-              .then(res1 => {
-                pandodb.enriched
-                  .add({ id: id, date: date, name: query, content: content })
-                  .then(res2 => {
-                    ipcRenderer.send(
-                      "chaeros-notification",
-                      "Scopus API data retrieved"
-                    ); // signal success to main process
-                    ipcRenderer.send("pulsar", true);
-                    ipcRenderer.send(
-                      "console-logs",
-                      "Scopus dataset on " +
-                        query +
-                        " for user " +
-                        user +
-                        " have been successfully retrieved."
-                    );
-                    setTimeout(() => {
-                      win.close();
-                    }, 500); // Close Chaeros
-                  });
-              });
-          });
-      })
-      .catch(e => {
-        ipcRenderer.send("chaeros-failure", e); // Send error to main process
-        ipcRenderer.send("pulsar", true);
-      });
-
-      */
 };
 
 //========== Clinical trials retriever ==========
