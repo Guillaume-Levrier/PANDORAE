@@ -1,24 +1,17 @@
 const normalCore = () => {
 
- const { RealisticBokehEffect, EffectComposer, EffectPass, RenderPass } = require("postprocessing");
+ const { DepthOfFieldEffect, EffectComposer, EffectPass, RenderPass } = require("postprocessing");
 
 var composer;
 
-var bokeh = new RealisticBokehEffect({focus:100,
-                                      focalLength:1,
-                                      luminanceThreshold: 1,
-                                      luminanceGain: -.2,
-                                      rings:5,
-                                      showFocus:true,
-                                      maxBlur: 1.2,
-                                      manualDoF:true
-                                    });
+const depthOfFieldEffect = new DepthOfFieldEffect(camera, {
+            focusDistance: .998,
+			focalLength: .0025,
+			bokehScale: 4.0,
+		});
 
-var uniforms = bokeh.uniforms;
 
-uniforms.get("dof").value={x: 1, y: 0.1, z: 100, w: 30};
-
-const effectPass = new EffectPass(camera, bokeh);
+const effectPass = new EffectPass(camera, depthOfFieldEffect );
 
 effectPass.renderToScreen = true;
  
