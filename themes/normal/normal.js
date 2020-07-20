@@ -210,7 +210,7 @@ window.onload = reloadCore();
 
            camera.zoom = zoomFactor;
        
-           var textureSize=Math.pow(2,Math.round(Math.log(parseInt(document.body.offsetWidth/3))/Math.log(2)));
+           var textureSize=Math.pow(2,Math.round(Math.log(parseInt(document.body.offsetWidth/1.6))/Math.log(2)));
          
            var width  = textureSize;
            var height = textureSize;
