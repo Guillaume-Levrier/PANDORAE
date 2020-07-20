@@ -9,13 +9,13 @@ var bokeh = new RealisticBokehEffect({focus:100,
                                       luminanceThreshold: 1,
                                       luminanceGain: -.2,
                                       rings:5,
-                                    //  showFocus:true,
+                                      showFocus:true,
                                       maxBlur: 1.2,
                                       manualDoF:true
-                                      
-});
+                                    });
 
 var uniforms = bokeh.uniforms;
+
 uniforms.get("dof").value={x: 1, y: 0.1, z: 100, w: 30};
 
 const effectPass = new EffectPass(camera, bokeh);

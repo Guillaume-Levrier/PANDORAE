@@ -26,7 +26,8 @@ const createUserId = () => {
     UserName: "Enter your name",
     UserMail: "Enter your e-mail (not required)",
     ZoteroID: "Enter your Zotero ID (required to use Flux features)",
-    theme: "normal"
+    theme: "normal",
+    locale:"EN"
   };
 
   if (!fs.existsSync(userDataPath + "/userID/user-id.json")) {
@@ -90,7 +91,7 @@ function createWindow() {
   );
 
   mainWindow.setMenu(null);
-  //mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
   mainWindow.on("closed", () => {
     mainWindow = null;
   
