@@ -15,7 +15,7 @@
 
 // =========== NODE - NPM ===========
 // Loading all relevant modules
-const { remote, ipcRenderer, shell, clipboard } = require("electron");
+const { remote, ipcRenderer, shell, clipboard, webFrame } = require("electron");
 const fs = require("fs");
 const d3 = require("d3");
 const THREE = require("three");
@@ -24,6 +24,7 @@ const appPath = remote.app.getAppPath();
 const types = require("./js/types");
 const { dialog } = require('electron').remote;
 const Quill = require("quill");
+const { zoomIdentity } = require("d3");
 
 // ============ VERSION ===========
 const msg =
@@ -46,7 +47,6 @@ var tutoSlide;
 
 // =========== LANGUAGE SELECTION ===========
 var CM = CMT["EN"];                                            // Load the EN locale at start
-
 fs.readFile(userDataPath + "/userID/user-id.json", "utf8",     // Check if the user uses another one
       (err, data) => {
         data = JSON.parse(data);
@@ -206,6 +206,15 @@ let iconDiv = document.getElementById("icons");
 
 let menu = document.getElementById("menu");
 let consoleDiv =document.getElementById("console")
+
+// Zoom factors
+document.getElementById("zoomIn").addEventListener("click",e=>{
+  webFrame.setZoomFactor(webFrame.getZoomFactor()+.1);
+})
+
+document.getElementById("zoomOut").addEventListener("click",e=>{
+  webFrame.setZoomFactor(webFrame.getZoomFactor()-.1);
+})
 
 
 // Menu behaviors
