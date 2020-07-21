@@ -1,15 +1,15 @@
-onconnect = e => {
-  var port = e.ports[0];
+//onconnect = e => {
+ // var port = e.ports[0];
 
   const notifySystem = (dest, msg) => {
-    port.postMessage({ type: "notification", dest: dest, msg: msg });
+    postMessage({ type: "notification", dest: dest, msg: msg });
   };
 
   //notifySystem("console-logs", "Multithreading enabled");
 
   importScripts("../node_modules/d3/dist/d3.min.js");
 
-  port.onmessage = message => {
+  onmessage = message => {
 
 // END WORKER SPECIFICITY
 
@@ -31,10 +31,10 @@ onconnect = e => {
             .force("y", d3.forceY())
             .stop(); 
 
-          port.postMessage({ type: "gz", msg: circleData });
+          postMessage({ type: "gz", msg: circleData });
         
         } catch (error) {
-          port.postMessage({ type: "gz", msg: error });
+          postMessage({ type: "gz", msg: error });
         }
         break;
 
@@ -81,7 +81,7 @@ onconnect = e => {
           ) {
             simulation.tick();
             let prog = (i/n)*100;
-            port.postMessage({ type: "tick", prog:prog});
+            postMessage({ type: "tick", prog:prog});
           }
 
              
@@ -94,14 +94,14 @@ onconnect = e => {
           .thresholds(d3.max(nodeData,d=>d.indegree))(nodeData);
      
 
-                port.postMessage({ type: "hy", nodeData: nodeData, links: links, contours:contours });
+          postMessage({ type: "hy", nodeData: nodeData, links: links, contours:contours });
 
         } catch (error) {
-          port.postMessage({ type: "hy", msg: error });
+          postMessage({ type: "hy", msg: error });
         }
         break;
     }
 
     
   };
-};
+//};
