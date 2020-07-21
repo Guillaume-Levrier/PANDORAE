@@ -1408,9 +1408,9 @@ var yGrid = d3.axisRight(y).tickSize(width);                                // S
       "</ul><br>Filtrer par tags<br><select id='tagDiv'>"+tagDiv+"<br><div id='tagList'></div>"+
       "<br><br><div id='weDetail'></div><br><br><br><div id='whois'></div><br><br><br><br><br>";
 
-      multiThreader.port.postMessage({type:"hy", nodeData:nodeData,links:links, tags:tags,width:width,height:height});
+      multiThreader.postMessage({type:"hy", nodeData:nodeData,links:links, tags:tags,width:width,height:height});
 
-      multiThreader.port.onmessage = hyWorkerAnswer => {
+      multiThreader.onmessage = hyWorkerAnswer => {
       
         if (hyWorkerAnswer.data.type==="tick") {progBarSign(hyWorkerAnswer.data.prog)} else  // removed in export
 
@@ -4009,9 +4009,9 @@ requestContent=requestContent+"</ul>"
         ipcRenderer.send("chaeros-notification", "generating network"); // send new total to main display
 
 
-        multiThreader.port.postMessage({type:"gz", dataset: circleData });
+        multiThreader.postMessage({type:"gz", dataset: circleData });
 
-        multiThreader.port.onmessage = gzWorkerAnswer => {
+        multiThreader.onmessage = gzWorkerAnswer => {
         if (gzWorkerAnswer.data.type==="gz"){
           
           circleData = gzWorkerAnswer.data.msg; 
