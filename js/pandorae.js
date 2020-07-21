@@ -96,11 +96,13 @@ document.getElementById("lang").childNodes.forEach(lg=>{
 // back to Types only what it needs to know.
 if (!!window.SharedWorker) {
   // If the SharedWorker doesn't exist yet
-  /* 
-  var multiThreader = new SharedWorker("js/mul[type]threader.js"); // Create a SharedWorker named multiThreader based on that file
-
-  multiThreader.port.postMessage({type:"checkup", validation:CM.console.workerValidation});
   
+  //var multiThreader = new SharedWorker("js/mul[type]threader.js"); // Create a SharedWorker named multiThreader based on that file
+
+  //console.log(multiThreader)
+
+  //multiThreader.port.postMessage({type:"checkup", validation:CM.console.workerValidation});
+/*  
   multiThreader.port.onmessage = res => {
 
     // If multiThreader sends a message
@@ -118,7 +120,7 @@ if (!!window.SharedWorker) {
     ipcRenderer.send("console-logs", CM.console.workerError); // Send an error message to the console
     ipcRenderer.send("console-logs", JSON.stringify(err)); // Send the actual error content to the console
   };
- */
+*/
 }
 
 // =========== MAIN LOGO ===========
@@ -200,22 +202,11 @@ const iconCreator = (target,action) => {
 let iconDiv = document.getElementById("icons");
 
 
-
 // =========== MENU ===========
 // menu elements
 
 let menu = document.getElementById("menu");
 let consoleDiv =document.getElementById("console")
-
-// Zoom factors
-document.getElementById("zoomIn").addEventListener("click",e=>{
-  webFrame.setZoomFactor(webFrame.getZoomFactor()+.1);
-})
-
-document.getElementById("zoomOut").addEventListener("click",e=>{
-  webFrame.setZoomFactor(webFrame.getZoomFactor()-.1);
-})
-
 
 // Menu behaviors
 let toggledMenu = false;

@@ -29,7 +29,7 @@
 		"whois-json": "^2.0.4"
 	},
 	"devDependencies": {
-		"electron": "8.2.0",
+		"electron": "8.4.0",
 		"electron-rebuild": "^1.10.1",
 		"node-abi": "^2.15.0"
 	}
