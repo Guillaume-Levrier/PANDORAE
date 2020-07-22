@@ -4033,8 +4033,8 @@ requestContent=requestContent+"</ul>"
               lineData = [];
               lineData.push(d);
               circleData.forEach(tweet => {
-                document.getElementById(tweet.id).style =
-                  "fill :" + color(tweet.retweet_count);
+                document.getElementById(tweet.id).style.fill =
+                  color(tweet.retweet_count);
 
                 if (tweet.id === d.retweeted_id) {
                   lineData.push(tweet);
@@ -4044,17 +4044,17 @@ requestContent=requestContent+"</ul>"
                   d.retweeted_id.length > 1 &&
                   tweet.retweeted_id === d.retweeted_id
                 ) {
-                  document.getElementById(tweet.id).style = "fill : salmon";
+                  document.getElementById(tweet.id).style.fill = "salmon";
                 }
                 if (tweet.from_user_id === d.from_user_id) {
-                  document.getElementById(tweet.id).style =
-                    "fill : " + altColor(tweet.retweet_count);
+                  document.getElementById(tweet.id).style.fill =
+                    altColor(tweet.retweet_count);
                 }
               });
 
               if (parseInt(d.retweeted_id)) {             // if it is a NaN, returns false
                 if (document.getElementById(d.retweeted_id)) {
-                 document.getElementById(d.retweeted_id).style = "fill : red";
+                 document.getElementById(d.retweeted_id).style.fill = "red";
                 }
                
                 var line = (line = d3.line()
