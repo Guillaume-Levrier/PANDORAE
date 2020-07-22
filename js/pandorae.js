@@ -50,7 +50,11 @@ var CM = CMT["EN"];                                            // Load the EN lo
 fs.readFile(userDataPath + "/userID/user-id.json", "utf8",     // Check if the user uses another one
       (err, data) => {
         data = JSON.parse(data);
-        CM = CMT[data.locale]
+        if (data.locale){
+          CM = CMT[data.locale]
+        } else {
+          CM=CMT.EN
+        }
       })
 
 const populateLocale = divlist => {
@@ -1514,7 +1518,7 @@ const loadTheme = () => {
             "/themes/" +
             theme["theme-name"] +
             "/" +
-            theme.script)();
+            theme.script)();          
         }
 
         setTimeout(() => {
