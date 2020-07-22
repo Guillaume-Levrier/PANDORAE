@@ -55,7 +55,32 @@ setInterval(changeAnimationTime, Math.random()*1000);
            .append("defs")
            .append("mask")
            .attr("id", "sunMask");
-      
+
+
+        mask.append("rect")
+          .attr("x", 0)
+          .attr("y", 0)
+          .attr("width", window.innerWidth)
+          .attr("height", window.innerHeight/3)
+          .style("fill", "white")
+          .style("opacity", 0.9);
+
+
+let maskOffset=window.innerHeight/3;
+
+    for (let i = 2; i < 15; i++) {
+        
+        mask.append("rect")
+          .attr("x", 0)
+          .attr("y", maskOffset)
+          .attr("width", window.innerWidth)
+          .attr("height", (window.innerHeight/i)/8)
+          .style("fill", "white")
+          .style("opacity", 0.9);
+          maskOffset+=((window.innerHeight/i)/6);
+        
+    }
+/*
         mask.append("rect")
           .attr("x", 0)
           .attr("y", 0)
@@ -88,15 +113,16 @@ setInterval(changeAnimationTime, Math.random()*1000);
           .attr("height", 30)
           .style("fill", "white")
           .style("opacity", 0.9);
-      
+     
+          
           mask.append("rect")
           .attr("x", 0)
           .attr("y", (window.innerHeight/3)+160)
           .attr("width", window.innerWidth)
-          .attr("height", 25)
+          .attr("height", 50)
           .style("fill", "white")
           .style("opacity", 0.9);
-      
+*/      
 
 var g = svg.append("g"); // Create a SVG group to host the sun
 
