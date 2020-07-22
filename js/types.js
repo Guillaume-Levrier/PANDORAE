@@ -3742,7 +3742,8 @@ const clamper = c => {
               if (clamper(ptLink)) { 
 
               } else {
-                disp="none"
+                // HIDE ARCS BY UNCOMMENTING HERE
+               // disp="none"
               }
             })
           return disp;
