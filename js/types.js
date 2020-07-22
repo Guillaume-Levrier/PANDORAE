@@ -3817,7 +3817,9 @@ const gazouillotype = id => {
     .append("svg")
     .attr("id", "xtypeSVG"); // Creating the SVG node
 
-  svg.attr("width", width-toolWidth).attr("height", height); // Attributing width and height to svg
+  svg.attr("width", width-toolWidth)
+     .attr("height", height) // Attributing width and height to svg
+     .style("cursor", "all-scroll"); 
 
   var view = svg
     .append("g") // Appending a group to SVG
@@ -4020,10 +4022,9 @@ requestContent=requestContent+"</ul>"
             .data(circleData)
             .enter()
             .append("circle")
-            .attr("class", "circle")
+            .style("cursor", "pointer")
             .attr("id", d => d.id)
             .style("fill", d => color(d.retweet_count))
-            .style("cursor", "pointer")
             .attr("r", radius)
             .attr("cx", d => x(d.timespan))
             .attr("cy", d => y(d.indexPosition))
