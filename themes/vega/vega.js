@@ -7,10 +7,11 @@ const vega = () => {
     canvas.className +="purgeable themeCustom";
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
+    //canvas.style.imageRendering="crisp-edges";
     document.body.insertBefore(canvas,document.getElementById("signal"));
     var ctx = canvas.getContext('2d');
-    
+    var scale = window.devicePixelRatio;
+    ctx.scale(scale, scale);
     var etalon = window.innerHeight/2;
 
     function circleDrawer(rayon) {
