@@ -14,6 +14,7 @@ const d3 = require("d3");
 const csv = require("csv-parser");
 const versor = require("versor");
 const Quill = require("quill");
+const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
 
 //END NODE MODULES
 
@@ -1835,10 +1836,6 @@ d3.selectAll(".tick:not(:first-of-type) line").attr("stroke","rgba(100,100,100,.
 // ========== CHRONOTYPE ==========
 const chronotype = (id) => { // When called, draw the chronotype
 
-/* CHRONOTYPE REVAMP TO DO LIST
-- select several periods at once
-- add option to display doc titles
-*/
 
 //========== SVG VIEW =============
   var svg = d3.select(xtype)
@@ -1887,11 +1884,11 @@ var brushing;
                   .innerRadius(d => y(d.zone))
                   .outerRadius(d => y(parseFloat(d.zone+(d.value/(maxDocs+1)))))
                   .startAngle(d => x(d.date))
-                  .endAngle(d => x(d.date.setMonth(d.date.getMonth()+.2)))
+                  .endAngle(d => x(d.date.setMonth(d.date.getMonth()+1)))
                   .padAngle(0)
                   .padRadius(innerRadius)
 
-  var color = d3.scaleOrdinal() // Line colors
+var color = d3.scaleOrdinal() // Line colors
     .domain([0, 1])
     .range([
       "#08154a",
@@ -1925,9 +1922,10 @@ var brushing;
 
       var docs = datajson.content; // Second array is the documents (docs)
      // const clusters = [];
-      const links = []; // Declaring links as empty array
+      var links = []; // Declaring links as empty array
       const nodeDocs = [];
       var currentNodes = [];
+      var authors;
      // var codeFreq = {};
       const csl_material = {
         "paper-conference": "event",
@@ -1966,7 +1964,6 @@ var brushing;
       const dataSorter = () => {
         for (let i = 0; i < docs.length; i++) {
         
-
           let doc = docs[i].items;
 
           doc.forEach(d => {
@@ -2109,7 +2106,7 @@ var radialBars = view.append("g").attr("id","radialBars")
         .force(
           "collision",
           d3.forceCollide() // nodes can collide
-            .radius(2) // if expanded is true, they collide with a force superior to 0
+            .radius(4) // if expanded is true, they collide with a force superior to 0
             .iterations(3)
             .strength(.15)
         )
@@ -2434,6 +2431,9 @@ function circularbrush() {
     brushing=false;
 
     currentNodes=[];
+    links=[];
+    authors = new MultiSet;
+    let buffLinks = [];
 
     function dateTest(node){
       if (node.date>currentBrush[0]&&node.date<currentBrush[1]) {
@@ -2443,9 +2443,38 @@ function circularbrush() {
 
     currentNodes = nodeDocs.filter(d=>dateTest(d));
 
+
     var currentList = [];
     
-    currentNodes.forEach(d=>currentList.push({title:d.title,id:d.id,zone:d.zone,DOI:d.DOI}))
+    currentNodes.forEach(d=>{
+      // add doc to current list  
+      currentList.push({title:d.title,id:d.id,zone:d.zone,DOI:d.DOI})
+      
+      // add authors to multiset list
+      d.authors.forEach(aut=>authors.add(aut))
+  })
+
+    authors.forEachMultiplicity((ct,key)=>{
+        if (ct>1){ // if an author as authored more than 1 document
+          let linkBase = [];
+      currentNodes.forEach(d=>{ //iterate on documents
+          d.authors.forEach(e=>{ // iterate on authors
+              if (e===key){     // if this doc has this author
+                linkBase.push(d)
+              }
+          })
+          })
+          buffLinks.push(linkBase)
+        }
+    })
+
+    //Create links among all 
+    buffLinks.forEach(bf=>{ // for each array of articles by the same author(s)
+      for (let i = 1; i < bf.length; i++) {
+        links.push({source:bf[i-1].id,target:bf[i].id})
+      }
+    })
+      console.log(links)
 
     var currentDocList = "<ul>";
 

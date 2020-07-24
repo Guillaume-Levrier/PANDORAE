@@ -57,7 +57,7 @@ function createWindow() {
     height: 800,
     fullscreenable: true,
     backgroundColor: "white",
-    titleBarStyle: "hidden",
+    //titleBarStyle: "hidden",
     frame: true,
     resizable: true,
     webPreferences: {
