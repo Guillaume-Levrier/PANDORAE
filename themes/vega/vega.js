@@ -5,13 +5,17 @@ const vega = () => {
     let canvas = document.createElement("CANVAS");
     canvas.id ="vega";
     canvas.className +="purgeable themeCustom";
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    //canvas.style.imageRendering="crisp-edges";
+    canvas.style.width = window.innerWidth+"px";
+    canvas.style.height = window.innerHeight+"px";
+    
     document.body.insertBefore(canvas,document.getElementById("signal"));
+
     var ctx = canvas.getContext('2d');
     var scale = window.devicePixelRatio;
+    canvas.width = window.innerWidth*scale;
+    canvas.height = window.innerHeight*scale;
     ctx.scale(scale, scale);
+    
     var etalon = window.innerHeight/2;
 
     function circleDrawer(rayon) {
@@ -35,6 +39,5 @@ const vega = () => {
     }
     for (let i = .1; i < .9; i=i+.1) {circleDrawer(etalon*(i))};
 }
-
 
 module.exports = () => {vega();};
