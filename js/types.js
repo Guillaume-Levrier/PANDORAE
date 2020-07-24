@@ -2101,7 +2101,7 @@ var radialBars = view.append("g").attr("id","radialBars")
           d3.forceLink()
             .distance(0)
             .strength(0)
-            .id(d => d.title)
+            .id(d => d.id)
         )
         .force(
           "collision",
@@ -2124,16 +2124,15 @@ var radialBars = view.append("g").attr("id","radialBars")
                 )
 
       //Declaring node variables
-      var node = view.selectAll("nodes").append("g"),
-        nodetext = view.selectAll("nodetext").append("g");
-
-      var link = view.selectAll("link") // Create links
-        .data(links) // With data created above
-        .enter()
-        .append("line") // Links are SVG lines
-        .attr("stroke-width", 0.15) // Links stroke width
-        .attr("stroke", "#d3d3d3") // Links color
-        .style("opacity", 0.5); // Links opacity
+      var node = view.selectAll("nodes"),
+          nodetext = view.selectAll("nodetext"),
+          link = view.selectAll("link");
+       // .data(links) // With data created above
+        //.enter()
+        //.append("line") // Links are SVG lines
+        //.attr("stroke-width", 0.15) // Links stroke width
+        //.attr("stroke", "#d3d3d3") // Links color
+        //.style("opacity", 0.5); // Links opacity
 
 
       simulation
@@ -2520,6 +2519,24 @@ function circularbrush() {
     .merge(node)
     .lower(); // Merge the nodes
 
+    link = link
+    .data(links, item => item) // Select all relevant nodes
+    .exit()
+    .remove() // Remove them all
+    .data(links, item => item) // Reload the data
+    .enter()
+    .append("line") // Append the nodes
+    .attr("r",2) // Node radius
+    .attr("fill","red") // Node color
+    .attr("id", d => "link"+d.source) // Node ID (based on code)
+    .style("stroke", "red") // Node stroke color
+    .style("stroke-width", 1) // Node stroke width
+    //.style("cursor", "context-menu") // Type of cursor on node hover
+    //.style("opacity", 0.9) // Node opacity
+    .raise() // Nodes are displayed above the rest
+    .merge(link)
+    .lower(); 
+
   //Node icons are nodes displayed on top of Nodes
   nodetext = nodetext
     .data(currentNodes, item => item) // Select all relevant nodes
@@ -2528,13 +2545,20 @@ function circularbrush() {
     .data(currentNodes, item => item) // Reload the data
     .enter()
     .append("text") // Append the text
-    .attr("class", "material-icons") // Icons are material-icons
+    //.attr("class", "material-icons") // Icons are material-icons
     .attr("dy", 0.7) // Relative Y position to each node
-    .attr("dx", -0.7) // Relative X position to each node
+    //.attr("dx", -0.) // Relative X position to each node
     .attr("id", d => d.id) // ID
     .style("fill", "white") // Icon color
-    .style("font-size", "1.4px") // Icon size
-    .text(d => d.type) // Icon
+    .style("font-size", "1.5px") // Icon size
+    .attr("text-anchor","middle")
+    .text(d => { 
+      for (let i = 0; i < currentNodes.length; i++) {
+        if (d.id===currentNodes[i].id){
+            return JSON.stringify(i+1)
+        }
+    }    
+          }) // Icon
     //.on("click", d => {
      // shell.openExternal("https://dx.doi.org/" + d.DOI);
    // }) // On click, open url in new tab
@@ -2547,6 +2571,7 @@ function circularbrush() {
     nodetext.append("title").text(d => d.title); // Hovering a node displays its title as "alt"
 
     simulation.nodes(currentNodes);
+    simulation.force("link").links(links);
     simulation.alpha(1).restart();
     
 	}
