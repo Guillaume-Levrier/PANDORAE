@@ -2441,7 +2441,9 @@ function circularbrush() {
     }
 
     currentNodes = nodeDocs.filter(d=>dateTest(d));
-
+  
+    // sort Nodes by date 
+  currentNodes=currentNodes.sort((a,b)=>a.date-b.date)
 
     var currentList = [];
     
