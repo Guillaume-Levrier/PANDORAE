@@ -2473,7 +2473,6 @@ function circularbrush() {
         links.push({source:bf[i-1].id,target:bf[i].id})
       }
     })
-      console.log(links)
 
     var currentDocList = "<ul>";
 
@@ -2526,13 +2525,10 @@ function circularbrush() {
     .data(links, item => item) // Reload the data
     .enter()
     .append("line") // Append the nodes
-    .attr("r",2) // Node radius
     .attr("fill","red") // Node color
     .attr("id", d => "link"+d.source) // Node ID (based on code)
     .style("stroke", "red") // Node stroke color
-    .style("stroke-width", 1) // Node stroke width
-    //.style("cursor", "context-menu") // Type of cursor on node hover
-    //.style("opacity", 0.9) // Node opacity
+    .style("stroke-width", .5) // Node stroke width
     .raise() // Nodes are displayed above the rest
     .merge(link)
     .lower(); 
@@ -2545,9 +2541,7 @@ function circularbrush() {
     .data(currentNodes, item => item) // Reload the data
     .enter()
     .append("text") // Append the text
-    //.attr("class", "material-icons") // Icons are material-icons
     .attr("dy", 0.7) // Relative Y position to each node
-    //.attr("dx", -0.) // Relative X position to each node
     .attr("id", d => d.id) // ID
     .style("fill", "white") // Icon color
     .style("font-size", "1.5px") // Icon size
@@ -2562,8 +2556,6 @@ function circularbrush() {
     //.on("click", d => {
      // shell.openExternal("https://dx.doi.org/" + d.DOI);
    // }) // On click, open url in new tab
-    //.on("mouseover", HighLightandDisplay(0.2)) // On hover, HighLightandDisplay
-    //.on("mouseout", mouseOut) // On mouseout, mouseOute
     .raise() // Display above nodes and the rest
     .merge(nodetext); // Merge the nodes
    
@@ -2710,13 +2702,18 @@ x.domain([firstDate,lastDate]).nice()
 //======== END OF DATA CALL (PROMISES) ===========
 
   //======== ZOOM & RESCALE ===========
-        
-  svg.call(zoom).on("dblclick.zoom", null) // Zoom and deactivate doubleclick zooming
-                .on("mousedown.zoom", d=>{if(brushing){return null}})
+  let dragger = svg.append("rect")
+                   .attr("x",-width).attr("y",-height).attr("width",width*2).attr("height",height*2)
+                   .attr("fill","white")
+                   .style("cursor","all-scroll")
+                   .lower()
+
+  dragger.call(zoom).on("dblclick.zoom", null) // Zoom and deactivate doubleclick zooming
+                //.on("mousedown.zoom", d=>{if(brushing){return null}})
 
    zoomed = (thatZoom) => {
-      thatZoom.x=0;
-      thatZoom.y=0,
+      //thatZoom.x=0;
+      //thatZoom.y=0,
       view.attr("transform", thatZoom);  
   }
 
