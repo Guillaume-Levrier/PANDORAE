@@ -2474,13 +2474,13 @@ function circularbrush() {
       }
     })
 
-    var currentDocList = "<ul>";
+    var currentDocList = "<ol>";
 
-    currentList.forEach(d=>{
+      currentList.forEach(d=>{
       currentDocList = currentDocList + "<li style='color:"+color(d.zone)+"' id="+d.id+">"+d.title+"</li>";
     })
 
-    currentDocList= currentDocList + "<ul>";
+    currentDocList= currentDocList + "<ol>";
     
     tooltip.innerHTML = currentDocList;
 
