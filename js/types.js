@@ -2031,8 +2031,10 @@ var midDate;
 
   var dateAmount=[];
 
-/*
-  let currentDate = firstDate;
+
+  let currentDate = new Date(firstDate.getTime()); // duplicate date
+
+      
 
   while (currentDate<lastDate) {
     var month = currentDate.getUTCMonth();
@@ -2040,11 +2042,13 @@ var midDate;
     var thisDate=JSON.stringify(year)+"-"+JSON.stringify(month)+"-15";
     dateAmount.push(thisDate);
     currentDate.setMonth(currentDate.getMonth()+1);
-  }   */
+  }   
 
       const clustersNest = d3.nest() // Sorting clusters
         .key(d => d.category) // Sorting them by category
         .entries(nodeDocs); // Selecting relevant data
+
+
 
         y.domain([0, clustersNest.length+1])
 
@@ -2089,7 +2093,9 @@ var midDate;
 //========= CHART DISPLAY ===========
 var radialBars = view.append("g").attr("id","radialBars")
                      
+
     clustersNest.forEach(corpus=>{
+     
         radialBars.append("g")
                   .selectAll("path")
                   .data(corpus.radialVal)
