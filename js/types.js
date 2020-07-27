@@ -2512,8 +2512,9 @@ function circularbrush() {
     .attr("r",2) // Node radius
     .attr("fill",  d => color(d.zone)) // Node color
     .attr("id", d => "node"+d.id) // Node ID (based on code)
-    .style("stroke", "white") // Node stroke color
-    .style("stroke-width", 0.1) // Node stroke width
+    .attr("stroke",  d => color(d.zone)) // Node stroke color
+    .attr("stroke-opacity",  .6) // Node stroke color
+    .attr("stroke-width", 0.1) // Node stroke width
     .style("cursor", "context-menu") // Type of cursor on node hover
     .style("opacity", 0.9) // Node opacity
     .raise() // Nodes are displayed above the rest
@@ -2543,10 +2544,13 @@ function circularbrush() {
     .data(currentNodes, item => item) // Reload the data
     .enter()
     .append("text") // Append the text
-    .attr("dy", 0.7) // Relative Y position to each node
+    .attr("dy", .8) // Relative Y position to each node
     .attr("id", d => d.id) // ID
     .style("fill", "white") // Icon color
-    .style("font-size", "1.5px") // Icon size
+    //.style("stroke", "black")
+    //.style("stroke-width", "1px")
+    .style("font-size", "2.5px") // Icon size
+    .style("font-weight", "bolder") // Icon size
     .attr("text-anchor","middle")
     .text(d => { 
       for (let i = 0; i < currentNodes.length; i++) {
@@ -2559,8 +2563,7 @@ function circularbrush() {
      // shell.openExternal("https://dx.doi.org/" + d.DOI);
    // }) // On click, open url in new tab
     .raise() // Display above nodes and the rest
-    .merge(nodetext); // Merge the nodes
-   
+    .merge(nodetext) // Merge the nodes
 
     nodetext.append("title").text(d => d.title); // Hovering a node displays its title as "alt"
 
