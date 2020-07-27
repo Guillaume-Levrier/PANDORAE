@@ -1920,6 +1920,8 @@ var color = d3.scaleOrdinal() // Line colors
 
       dataDownload(datajson);
 
+
+
       var docs = datajson.content; // Second array is the documents (docs)
      // const clusters = [];
       var links = []; // Declaring links as empty array
@@ -1978,7 +1980,9 @@ var color = d3.scaleOrdinal() // Line colors
                   d.issued["date-parts"][0][1] +
                   "-" +
                   d.issued["date-parts"][0][2];
+                 
                 d.date = parseTime(d.date);
+             
                 d.category = docs[i].name;
                 d.clusterDate =
                   d.issued["date-parts"][0][0] +
@@ -1998,6 +2002,9 @@ var color = d3.scaleOrdinal() // Line colors
                 }
 
                 nodeDocs.push(d);
+              } else {
+             
+                d.toPurge = true;
               }
             } else {
               d.toPurge = true;
@@ -2007,6 +2014,7 @@ var color = d3.scaleOrdinal() // Line colors
       };
 
      dataSorter();
+
 
 var firstDate = d3.min(nodeDocs, d => d.date);
 var lastDate = d3.max(nodeDocs, d => d.date);
@@ -2023,6 +2031,7 @@ var midDate;
 
   var dateAmount=[];
 
+/*
   let currentDate = firstDate;
 
   while (currentDate<lastDate) {
@@ -2031,7 +2040,7 @@ var midDate;
     var thisDate=JSON.stringify(year)+"-"+JSON.stringify(month)+"-15";
     dateAmount.push(thisDate);
     currentDate.setMonth(currentDate.getMonth()+1);
-  }   
+  }   */
 
       const clustersNest = d3.nest() // Sorting clusters
         .key(d => d.category) // Sorting them by category
@@ -2127,14 +2136,7 @@ var radialBars = view.append("g").attr("id","radialBars")
       var node = view.selectAll("nodes"),
           nodetext = view.selectAll("nodetext"),
           link = view.selectAll("link");
-       // .data(links) // With data created above
-        //.enter()
-        //.append("line") // Links are SVG lines
-        //.attr("stroke-width", 0.15) // Links stroke width
-        //.attr("stroke", "#d3d3d3") // Links color
-        //.style("opacity", 0.5); // Links opacity
-
-
+     
       simulation
         .nodes(currentNodes) // Start the force graph with "docs" as data
         .on("tick", ticked); // Start the "tick" for the first time
@@ -2616,25 +2618,26 @@ function circularbrush() {
 
             d3.select("path.extent").style("cursor","move")
 
+//console.log(nodeDocs)
+            
 // cheap hack to recompute relevant domain
 var firstDate = d3.min(nodeDocs, d => d.date);
 var lastDate = d3.max(nodeDocs, d => d.date);
 
- 
-function dateFormat() {
-                if (lastDate.getYear()-firstDate.getYear()>20){
-                  return d3.utcFormat("%Y")
-                } else if (lastDate.getYear()-firstDate.getYear()>2) {
-                  return d3.utcFormat("%m/%Y")
-                } else {
-                  return d3.utcFormat("%d/%m/%Y")
-                }
-              }
-
-
-
+//console.log(firstDate,lastDate)
 
 x.domain([firstDate,lastDate]).nice()
+
+
+function dateFormat() {
+  if (lastDate.getYear()-firstDate.getYear()>20){
+    return d3.utcFormat("%Y")
+  } else if (lastDate.getYear()-firstDate.getYear()>2) {
+    return d3.utcFormat("%m/%Y")
+  } else {
+    return d3.utcFormat("%d/%m/%Y")
+  }
+}
 
      var xticks = x.ticks(20);
      xticks.shift();
