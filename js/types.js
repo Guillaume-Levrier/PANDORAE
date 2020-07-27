@@ -2432,6 +2432,8 @@ function circularbrush() {
 
 	function extentUp() {
 
+// there is an update pattern issue. To be continued.
+
 		_brushData = _newBrushData;
 		d3_window.on("mousemove.brush", null).on("mouseup.brush", null);
 
