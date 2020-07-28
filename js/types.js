@@ -15,6 +15,7 @@ const csv = require("csv-parser");
 const versor = require("versor");
 const Quill = require("quill");
 const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
+const { color } = require("d3");
 
 //END NODE MODULES
 
@@ -622,7 +623,18 @@ const anthropotype = id => {  // When called, draw the anthropotype
 
       dataDownload(datajson);
 
-      const docData = datajson.content[0].items;
+      var docData=[];
+
+    if (datajson.content.length===1){
+      docData = datajson.content[0].items;
+    } else {
+      for (let i = 0; i < datajson.content.length; i++) {
+        datajson.content[i].items.forEach(e=>{
+        e.color=i;
+        docData.push(e)
+        }) 
+      }
+    }
 
       var criteriaList = [];
 
@@ -757,6 +769,7 @@ node = view.selectAll("g")
             .data(data)
             .join("g")
             .attr("id",d=>d.id)
+            
             .call(
               d3.drag()
                 .on("start", forcedragstarted)
@@ -764,13 +777,41 @@ node = view.selectAll("g")
                 .on("end", forcedragended)
             );
 
+var color = d3.scaleOrdinal() // Line colors
+            .domain([0, 1])
+            .range([
+              "#08154a",
+              "#490027",
+              "#5c7a38",
+              "#4f4280",
+              "#6f611b",
+              "#5b7abd",
+              "#003f13",
+              "#b479a9",
+              "#3a2e00",
+              "#017099",
+              "#845421",
+              "#008b97",
+              "#460d00",
+              "#62949e",
+              "#211434",
+              "#af8450",
+              "#30273c",
+              "#bd7b70",
+              "#005b5c",
+              "#c56883",
+              "#a68199"
+            ]);
+
 node.append("circle")
             .attr("r", d => {
               let r = 7;
               if (d.hasOwnProperty("author")) { r = r + d.author.length * 4;} 
               return r;
             })
-            .attr("fill", "rgba(63, 191, 191, 0.20)")
+           // .attr("fill", "rgba(63, 191, 191, 0.20)")
+            .attr("fill", d=>d.color?color(d.color):"rgb(63, 191, 191)")
+            .attr("opacity",.3)
             .attr("stroke", "white")
             .attr("stroke-width", 2);
 
