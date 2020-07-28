@@ -2078,11 +2078,8 @@ var color = d3.scaleOrdinal() // Line colors
 
      dataSorter();
 
-
 var firstDate = d3.min(nodeDocs, d => d.date);
 var lastDate = d3.max(nodeDocs, d => d.date);
-
-console.log(lastDate)
 
 x.domain([firstDate,lastDate]).nice()
 
@@ -2099,10 +2096,13 @@ var midDate;
   let currentDate = new Date(firstDate.getTime()); // duplicate date
   let finalDate = new Date(lastDate.getTime()); // duplicate date
 
+  currentDate.setMonth(currentDate.getMonth()-1); //add starting offset to make sure borders are included
+  finalDate.setMonth(finalDate.getMonth()+1);
+
   while (currentDate<finalDate) {
     var month = currentDate.getUTCMonth();
     var year = currentDate.getFullYear();
-    var thisDate=JSON.stringify(year)+"-"+JSON.stringify(month)+"-15";
+    var thisDate=JSON.stringify(year)+"-"+JSON.stringify(month+1)+"-15";
     dateAmount.push(thisDate);
     currentDate.setMonth(currentDate.getMonth()+1);
   }   
@@ -2133,6 +2133,8 @@ var midDate;
           clustersNest[i].values.forEach(val=>{
             if (radialVal[val.key] && val.values){
               radialVal[val.key].value = val.values.length;
+            } else {
+              ipcRenderer.send("console-logs", "error generating bar at"+ JSON.stringify(val));
             }
 
               if (val.values.length>maxDocs) {
@@ -2155,9 +2157,7 @@ var midDate;
 //========= CHART DISPLAY ===========
 var radialBars = view.append("g").attr("id","radialBars")
                      
-
     clustersNest.forEach(corpus=>{
-     // console.log(corpus.radialVal)
         radialBars.append("g")
                   .selectAll("path")
                   .data(corpus.radialVal)
@@ -2482,12 +2482,12 @@ function circularbrush() {
       brushLegendE.attr("x",d=> d3.pointRadial(x(currentBrush[0]), outerRadius+10)[0])
           .attr("y",d=> d3.pointRadial(x(currentBrush[0]), outerRadius+10)[1])
           .attr("text-anchor",()=>{if(currentBrush[0]<midDate){return "start"}else{return"end"}})
-          .text(currentBrush[0].getDate()+"/"+currentBrush[0].getMonth()+"/"+currentBrush[0].getFullYear())
+          .text(currentBrush[0].getDate()+"/"+currentBrush[0].getMonth()+1+"/"+currentBrush[0].getFullYear())
           
       brushLegendW.attr("x",d=> d3.pointRadial(x(currentBrush[1]), outerRadius+10)[0])
           .attr("y",d=> d3.pointRadial(x(currentBrush[1]), outerRadius+10)[1])
           .attr("text-anchor",()=>{if(currentBrush[1]<midDate){return "start"}else{return"end"}})
-          .text(currentBrush[1].getDate()+"/"+currentBrush[1].getMonth()+"/"+currentBrush[1].getFullYear())
+          .text(currentBrush[1].getDate()+"/"+currentBrush[1].getMonth()+1+"/"+currentBrush[1].getFullYear())
       
 	}
 
@@ -2673,17 +2673,11 @@ function circularbrush() {
               .style("cursor","grab");
 
             d3.select("path.extent").style("cursor","move")
-
-//console.log(nodeDocs)
             
-// cheap hack to recompute relevant domain
 var firstDate = d3.min(nodeDocs, d => d.date);
 var lastDate = d3.max(nodeDocs, d => d.date);
 
-//console.log(firstDate,lastDate)
-
 x.domain([firstDate,lastDate]).nice()
-
 
 function dateFormat() {
   if (lastDate.getYear()-firstDate.getYear()>20){
