@@ -615,8 +615,11 @@ const anthropotype = id => {  // When called, draw the anthropotype
   //zoom extent
   zoom
     .scaleExtent([0.2, 15]) // To which extent do we allow to zoom forward or zoom back
-    .translateExtent([[-width * 2, -height * 2], [width * 3, height * 3]])
+    .translateExtent([[-Infinity, -Infinity], [Infinity, Infinity]])
     .on("zoom", e=> {zoomed(d3.event.transform)}); 
+
+    var criteriaList = [];
+    var currentCriteria = [];
 
 //======== DATA CALL & SORT =========
   pandodb.anthropotype.get(id).then(datajson => {
@@ -630,17 +633,17 @@ const anthropotype = id => {  // When called, draw the anthropotype
     } else {
       for (let i = 0; i < datajson.content.length; i++) {
         datajson.content[i].items.forEach(e=>{
-        e.color=i;
+        e.color=i+1;
         docData.push(e)
         }) 
       }
     }
 
-      var criteriaList = [];
+    
 
       docData.forEach(d => criteriaList.push(d.title));
 
-      var currentCriteria = [];
+      
 
       const menuBuilder = () => {
         criteriaList.forEach(d => {
@@ -810,7 +813,7 @@ node.append("circle")
               return r;
             })
            // .attr("fill", "rgba(63, 191, 191, 0.20)")
-            .attr("fill", d=>d.color?color(d.color):"rgb(63, 191, 191)")
+            .attr("fill", d=>d.color?color(d.color):"gray")
             .attr("opacity",.3)
             .attr("stroke", "white")
             .attr("stroke-width", 2);
@@ -853,19 +856,23 @@ node.append("circle")
          })
          .on("dblclick",d=>{
           if (d.hasOwnProperty("title")) { // If it's a document
-          d3.select(document.getElementById(d.id)).select("circle").attr("fill", "rgba(63, 191, 191, 0.20)");
+          d3.select(document.getElementById(d.id)).select("circle")
+            .attr("fill", d=>d.color?color(d.color):"gray")
           d.author.forEach(auth=>{
               let nodeGroup = document.getElementById(auth.id);
-              d3.select(nodeGroup).select("circle").attr("fill", "rgba(63, 191, 191, 0.20)");	
+              d3.select(nodeGroup).select("circle")
+            .attr("fill", d=>d.color?color(d.color):"gray")
      }) 
      } else { // Else it's an author
      d.crit.forEach(e=>{
-      d3.select(document.getElementById(e)).select("circle").attr("fill", "rgba(63, 191, 191, 0.20)");
+      d3.select(document.getElementById(e)).select("circle")
+            .attr("fill", d=>d.color?color(d.color):"gray")
       data.forEach(f=>{
         if (f.title===e){
           f.author.forEach(auth=>{
             let nodeGroup = document.getElementById(auth.id);
-            d3.select(nodeGroup).select("circle").attr("fill", "rgba(63, 191, 191, 0.20)");	
+            d3.select(nodeGroup).select("circle")
+            .attr("fill", d=>d.color?color(d.color):"gray")
           }) 
         }
       })
@@ -896,6 +903,21 @@ node.append("circle")
         d.fx = null;
         d.fy = null;
       }
+
+
+
+
+
+function toggleCrit(){
+
+  if (currentCriteria.length>0){
+    currentCriteria=[];
+  } else{
+    criteriaList.forEach(d=>cartoSorter(d)) 
+  }
+ }
+
+      iconCreator("sort-icon",toggleCrit)
 
       loadType();
       menuBuilder();
