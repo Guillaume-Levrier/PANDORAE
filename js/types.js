@@ -2121,29 +2121,28 @@ var midDate;
                     cluster.values=nestedCluster;
         })
 
-     for (let i = 0; i < clustersNest.length; i++) {
+    for (let i = 0; i < clustersNest.length; i++) {
 
-      
       clustersNest[i].zone=i;
-          let radialVal=[];
+          let radialVal={};
 
-          dateAmount.forEach(d=>{
-            radialVal.push({key:d,date:parseTime(d),value:0,zone:i})
-          })
+          dateAmount.forEach(d=> 
+              radialVal[d]={key:d,date:parseTime(d),value:0,zone:i}
+          )
           
           clustersNest[i].values.forEach(val=>{
-            let valIndex = dateAmount.indexOf(val.key);
+            if (radialVal[val.key] && val.values){
+              radialVal[val.key].value = val.values.length;
+            }
 
-            if (valIndex>-1){
-              radialVal[valIndex].value = val.values.length;
               if (val.values.length>maxDocs) {
                 maxDocs = val.values.length;
               }
-            }
           })   
-          //radialVal.forEach(d=>{})
-          clustersNest[i].radialVal=radialVal;
+
+          clustersNest[i].radialVal= Object.values(radialVal);          
     }
+    
 
         nodeDocs.forEach(d => {
           for (let i = 0; i < clustersNest.length; i++) {
