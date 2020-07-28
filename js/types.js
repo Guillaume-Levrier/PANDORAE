@@ -2577,11 +2577,7 @@ function circularbrush() {
     
     node = node
     .data(currentNodes, item => item) // Select all relevant nodes
-    .exit()
-    .remove() // Remove them all
-    .data(currentNodes, item => item) // Reload the data
-    .enter()
-    .append("circle") // Append the nodes
+    .join("circle") // Append the nodes
     .attr("r",2) // Node radius
     .attr("fill",  d => color(d.zone)) // Node color
     .attr("id", d => "node"+d.id) // Node ID (based on code)
@@ -2596,11 +2592,7 @@ function circularbrush() {
 
     link = link
     .data(links, item => item) // Select all relevant nodes
-    .exit()
-    .remove() // Remove them all
-    .data(links, item => item) // Reload the data
-    .enter()
-    .append("line") // Append the nodes
+    .join("line") // Append the nodes
     .attr("fill","red") // Node color
     .attr("id", d => "link"+d.source) // Node ID (based on code)
     .style("stroke", "red") // Node stroke color
@@ -2612,16 +2604,10 @@ function circularbrush() {
   //Node icons are nodes displayed on top of Nodes
   nodetext = nodetext
     .data(currentNodes, item => item) // Select all relevant nodes
-    .exit()
-    .remove() // Remove them all
-    .data(currentNodes, item => item) // Reload the data
-    .enter()
-    .append("text") // Append the text
+    .join("text") // Append the text
     .attr("dy", .8) // Relative Y position to each node
     .attr("id", d => d.id) // ID
     .style("fill", "white") // Icon color
-    //.style("stroke", "black")
-    //.style("stroke-width", "1px")
     .style("font-size", "2.5px") // Icon size
     .style("font-weight", "bolder") // Icon size
     .attr("text-anchor","middle")
