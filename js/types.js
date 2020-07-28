@@ -2082,6 +2082,8 @@ var color = d3.scaleOrdinal() // Line colors
 var firstDate = d3.min(nodeDocs, d => d.date);
 var lastDate = d3.max(nodeDocs, d => d.date);
 
+console.log(lastDate)
+
 x.domain([firstDate,lastDate]).nice()
 
 var midDate;
@@ -2094,12 +2096,10 @@ var midDate;
 
   var dateAmount=[];
 
-
   let currentDate = new Date(firstDate.getTime()); // duplicate date
+  let finalDate = new Date(lastDate.getTime()); // duplicate date
 
-      
-
-  while (currentDate<lastDate) {
+  while (currentDate<finalDate) {
     var month = currentDate.getUTCMonth();
     var year = currentDate.getFullYear();
     var thisDate=JSON.stringify(year)+"-"+JSON.stringify(month)+"-15";
@@ -2112,7 +2112,6 @@ var midDate;
         .entries(nodeDocs); // Selecting relevant data
 
 
-
         y.domain([0, clustersNest.length+1])
 
         clustersNest.forEach(cluster=>{
@@ -2123,6 +2122,7 @@ var midDate;
         })
 
      for (let i = 0; i < clustersNest.length; i++) {
+
       
       clustersNest[i].zone=i;
           let radialVal=[];
@@ -2141,7 +2141,7 @@ var midDate;
               }
             }
           })   
-          radialVal.forEach(d=>{;})
+          //radialVal.forEach(d=>{})
           clustersNest[i].radialVal=radialVal;
     }
 
@@ -2158,7 +2158,7 @@ var radialBars = view.append("g").attr("id","radialBars")
                      
 
     clustersNest.forEach(corpus=>{
-     
+     // console.log(corpus.radialVal)
         radialBars.append("g")
                   .selectAll("path")
                   .data(corpus.radialVal)
