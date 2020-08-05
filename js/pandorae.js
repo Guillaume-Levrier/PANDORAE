@@ -905,13 +905,19 @@ const savePNG = () => {
   datasetName = datasetName.replace(/:/ig,"+");
   setTimeout(() => {
     remote.getCurrentWindow().capturePage().then(img=>{
-      fs.writeFile(dialog.showSaveDialog({"defaultPath":datasetName+".png"}),img.toPNG(),()=>{
-
+      dialog.showSaveDialog({defaultPath:datasetName+".png"}).then(filePath=>{
+     
+      fs.writeFile(
+        filePath.filePath,
+        img.toPNG(),()=>{
+          
         document.getElementById('icons').style.display = "block";
           document.getElementById('tooltip').style.overflow = "auto";
 
       })
     })
+  })
+
   }, 250);
 
 
