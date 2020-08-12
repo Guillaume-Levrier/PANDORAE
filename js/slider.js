@@ -292,6 +292,28 @@ const slideControl = event => {
     }
 };
 
+const exportSlides = () => {
+    pandodb.slider.get(currentMainPresStep.id).then(slides => {
+
+        dialog.showSaveDialog({"defaultPath":slides.name+".json"}).then(fp=>{
+        fs.writeFile(
+            fp.filePath,        
+            JSON.stringify(slides),
+            "utf8",
+            err => {
+              if (err) {
+                ipcRenderer.send("console-logs", JSON.stringify(err));
+              } else {
+                ipcRenderer.send("console-logs", "Exporting current slides deck");
+              }
+            }
+          )
+        })
+    })
+
+}
+
+
 const populateSlides = id => {
     let mainSliSect = document.getElementById("mainSlideSections");
 
@@ -427,8 +449,9 @@ const populateSlides = id => {
                 if (slides[i].text) {
                     //stop for last slide (empty)
                     section.id = slides[i].title;
-                    if (
-                        slides[i].text[slides[i].text.indexOf(">") + 1] === "<"
+                    
+                    if ( false
+                        // slides[i].text[slides[i].text.indexOf(">") + 1] === "<"
                     ) {
                         //hide box if text area now empty
                         section.innerHTML =
@@ -436,6 +459,7 @@ const populateSlides = id => {
                             parseInt(window.innerWidth * 0.9) +
                             "px;'></div></div>";
                     } else {
+                        
                         section.innerHTML =
                             "<div style='display:inline-flex;align-items:center;'><div style='background-color:rgba(0, 10, 10, .8);border-radius:4px;padding:10px;margin-right:5%;color:white;display:inline-block;width:" +
                             parseInt(window.innerWidth * 0.9) +
@@ -481,7 +505,10 @@ const populateSlides = id => {
                             remote.getCurrentWindow().reload();
                         }, 100);
                     });
+
+                    iconCreator("export-icon", exportSlides);
             }, 1000);
         }
     });
+    
 };
