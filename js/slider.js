@@ -322,6 +322,21 @@ const populateSlides = id => {
         let slides = presentation.content;
         let obsCellBuffer = {};
 
+        // slide id consistency checker
+        // sometimes, two slides might have the same title, which will mess up display
+        // as the two divs will have the same id. This is solved using a set.
+
+        let slideIdCheck = {};
+
+        slides.forEach(sl => {
+            if (slideIdCheck.hasOwnProperty(sl.title)){
+                sl.title=sl.title+"prime"
+                slideIdCheck[sl.title]=true; 
+            } else {
+                slideIdCheck[sl.title]=true;
+            }
+        });
+
         if (mainPresEdit) {
             slideCreator();
             priorDate = presentation.date;
@@ -449,7 +464,7 @@ const populateSlides = id => {
                 if (slides[i].text) {
                     //stop for last slide (empty)
                     section.id = slides[i].title;
-                    
+                   /* 
                     if ( false
                         // slides[i].text[slides[i].text.indexOf(">") + 1] === "<"
                     ) {
@@ -459,7 +474,7 @@ const populateSlides = id => {
                             parseInt(window.innerWidth * 0.9) +
                             "px;'></div></div>";
                     } else {
-                        
+                     */   
                         section.innerHTML =
                             "<div style='display:inline-flex;align-items:center;'><div style='background-color:rgba(0, 10, 10, .8);border-radius:4px;padding:10px;margin-right:5%;color:white;display:inline-block;width:" +
                             parseInt(window.innerWidth * 0.9) +
@@ -467,7 +482,7 @@ const populateSlides = id => {
                             slides[i].text +
                             "</div></div>";
                     }
-                }
+                
                 mainSliSect.appendChild(section);
             }
 
