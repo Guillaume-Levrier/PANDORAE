@@ -9,24 +9,36 @@ Download **PANDORÆ version 1.0.01** for [Windows](https://anthropos-ecosystems.
 
 Please put your extracted PANDORÆ folder/app where you usually put apps on your computer (i.e. Program Files on Windows, Applications on macOS). It might work if you don't, but this will solve starting issues.
 
-#### Roadmap
+### Roadmap
+Current version : "1.0.01"
+Next version : "1.0.02" 
+Future version : "1.0.03"
 
-#### Current issues
-- continuous integration
-- transform as many setTimeouts as possible into promises
+Future versions will be developed on a "Future" branch and merged with the "Stable" branch at each version.
 
-#### FLUX/CHAEROS
+#### Goals for 1.0.02
+- validate the stability of existing processes and compile
+
+#### Goals for 1.0.03
+*Main*
+- continuous integration on "Future" branches
+
+*FLUX/CHAEROS*
 - calculate flux based on available services
 - direct Twitter and WoS API requests
-- HAL requests 
+- direct HAL requests 
 
-#### Main/PANDORAE.JS
+*Main/PANDORAE.JS*
 - Localize main field/console commands
 - drag&drop PÆ dataset
 
-#### Tutorial 
+*Tutorial*
 - update/localize tutorial
 
-#### Wiki
+#### Goals for the Future
+
+*Wiki*
 - API documentation (WIP)
 
+*certificate*
+- Get PANDORÆ on app stores
