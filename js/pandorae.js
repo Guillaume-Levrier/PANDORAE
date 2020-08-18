@@ -950,8 +950,10 @@ const serialize = (svg) => {
 
 
     ipcRenderer.send("console-logs", "Exporting snapshot of current type to SVG in the user's 'Pictures' folder.");
+    dialog.showSaveDialog({defaultPath:datasetName+".svg"}).then(filePath=>{
+
     fs.writeFile(
-      dialog.showSaveDialog({"defaultPath":datasetName+".svg"}),
+     filePath.filePath,
       string,
       "utf8",
       err => {
@@ -961,6 +963,7 @@ const serialize = (svg) => {
 
       }
     );
+    })
 
 }
 
