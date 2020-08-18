@@ -2941,6 +2941,12 @@ const chronotype = (id) => {
                 function extentUp() {
                     // there is an update pattern issue. To be continued.
 
+                    // tooltip clearup
+                    while (tooltip.firstChild) {
+                        tooltip.removeChild(tooltip.lastChild);
+                      }
+                   
+
                     _brushData = _newBrushData;
                     d3_window
                         .on("mousemove.brush", null)
