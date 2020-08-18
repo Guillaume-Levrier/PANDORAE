@@ -3011,48 +3011,39 @@ const chronotype = (id) => {
                         }
                     });
 
-                    var currentDocList = "<ol>";
+                    var currentDocList = document.createElement("OL")
 
                     currentList.forEach((d) => {
-                        currentDocList =
-                            currentDocList +
-                            "<li style='color:" +
-                            color(d.zone) +
-                            "' id=" +
-                            d.id +
-                            ">" +
-                            d.title +
-                            "</li>";
-                    });
+                        let docTitle = document.createElement("LI")
+                        docTitle.style.color=color(d.zone)
+                        docTitle.id = "list-"+d.id
+                        docTitle.innerText= d.title
+                        docTitle.addEventListener("click", e=>{
+                            shell.openExternal(
+                                "https://dx.doi.org/" + d.DOI
+                            );
+                        });
+                        docTitle.addEventListener("mouseover", e=>{
+                            node.style("opacity", ".2");
+                            document.getElementById(
+                                "node" + d.id
+                            ).style.opacity = 1;
+                            d3.selectAll("line").style("opacity",.1);
+                            links.forEach(link=>{
+                                if (link.source.id===d.id){
+                                    document.getElementById("link"+link.source.id+"-"+link.target.id).style.opacity =1;
+                                }
+                            })
+                        })
+                        docTitle.addEventListener("mouseout", e=>{
+                            node.style("opacity", 1);
+                            d3.selectAll("line").style("opacity",1);
+                        })
 
-                    currentDocList = currentDocList + "<ol>";
-
-                    tooltip.innerHTML = currentDocList;
-
-                    currentList.forEach((d) => {
-                        document
-                            .getElementById(d.id)
-                            .addEventListener("click", (e) => {
-                                shell.openExternal(
-                                    "https://dx.doi.org/" + d.DOI
-                                );
-                            });
-
-                        document
-                            .getElementById(d.id)
-                            .addEventListener("mouseover", (e) => {
-                                node.style("opacity", ".2");
-                                document.getElementById(
-                                    "node" + e.target.id
-                                ).style.opacity = 1;
-                            });
-
-                        document
-                            .getElementById(d.id)
-                            .addEventListener("mouseout", (e) => {
-                                node.style("opacity", 1);
-                            });
-                    });
+                            currentDocList.appendChild(docTitle)
+                    });         
+            
+                    tooltip.appendChild(currentDocList);
 
                     node = node
                         .data(currentNodes, (item) => item) // Select all relevant nodes
@@ -3073,7 +3064,7 @@ const chronotype = (id) => {
                         .data(links, (item) => item) // Select all relevant nodes
                         .join("line") // Append the nodes
                         .attr("fill", "red") // Node color
-                        .attr("id", (d) => "link" + d.source) // Node ID (based on code)
+                        .attr("id", (d) => "link" + d.source +"-"+d.target) // Node ID (based on code)
                         .style("stroke", "red") // Node stroke color
                         .style("stroke-width", 0.5) // Node stroke width
                         .raise() // Nodes are displayed above the rest
