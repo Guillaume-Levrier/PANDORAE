@@ -144,6 +144,8 @@ function scroller() {
             dispatch.call("active", this, sectionIndex);
             currentIndex = sectionIndex;
             activeIndex = currentIndex;
+            try {
+           
             if (activeIndex > 1) {
                 document.getElementById("prevSlideArr").innerHTML =
                     "arrow_upward";
@@ -156,6 +158,10 @@ function scroller() {
             } else {
                 document.getElementById("nextSlideArr").innerHTML =
                     "arrow_downward";
+            }
+             } catch (error) {
+                // it will create an error on type load
+                // console.log(error)    
             }
         }
 
@@ -184,12 +190,13 @@ function scroller() {
 
 var previous = "";
 
-const smoothScrollTo = target =>
-    document.getElementById(target)
-        ? document
+const smoothScrollTo = target => {
+    if (document.getElementById(target)){
+         document
               .getElementById(target)
               .scrollIntoView({ block: "start", behavior: "smooth" })
-        : false; // Scroll smoothly to target
+    }
+}
 
 const display = () => {
     var scroll = scroller().container(d3.select("#mainSlideSections"));

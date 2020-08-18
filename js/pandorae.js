@@ -514,10 +514,11 @@ var quillEdit;
 ipcRenderer.on("backToPres", (event, message) => {
   setTimeout(() => {
     populateSlides(message.id);
-    setTimeout(() => {
+    setTimeout(() => { // the DOM needs to be there
       smoothScrollTo(message.step);
-    }, 1000);
-  }, 500);
+      document.body.style.overflow="auto"
+    }, 1500);
+  }, 200);
 });
 
 const selectOption = (type, id) => {
