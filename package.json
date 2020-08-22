@@ -5,7 +5,9 @@
 	"license": "MIT",
 	"author": "Guillaume Levrier",
 	"main": "main.js",
-	"repository": {},
+	"repository": {
+		"type":"git",
+		"url":"https://github.com/Guillaume-Levrier/PANDORAE/"},
 	"scripts": {
 		"start": "electron ."
 	},
