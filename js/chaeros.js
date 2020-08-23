@@ -733,12 +733,12 @@ let zoteroApiKey =getPassword("Zotero", zoteroUser);
         Promise.all(itemRequests).then(response => {
           for (var i = 0; i < response.length; i++) {
             response[i].items.forEach(d => {
-              if (d.hasOwnProperty("shortTitle")&& typeof d.shortTitle != "string") {
-                var enrichment = JSON.parse(d.shortTitle);
-                d.enrichment = enrichment;
-                if (d.enrichment.hasOwnProperty("altmetric")) {
-                  d.enrichment.altmetric = JSON.parse(d.enrichment.altmetric);
-                }
+              if (d.hasOwnProperty("shortTitle")&& typeof JSON.parse(d.shortTitle) != "string") {
+                //var enrichment = ;
+                d.enrichment = JSON.parse(d.shortTitle);
+                //if (d.enrichment.hasOwnProperty("altmetric")) {
+                //  d.enrichment.altmetric = JSON.parse(d.enrichment.altmetric);
+                //}
               }
               f.items.push(d);
               ResponseAmount = ResponseAmount + 1;

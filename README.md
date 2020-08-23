@@ -10,14 +10,7 @@ Download **PANDORÆ version 1.0.01** for [Windows](https://anthropos-ecosystems.
 Please put your extracted PANDORÆ folder/app where you usually put apps on your computer (i.e. Program Files on Windows, Applications on macOS). It might work if you don't, but this will solve starting issues.
 
 ### Roadmap
-Current version : "1.0.01"
-Next version : "1.0.02" 
 Future version : "1.0.03"
-
-Future versions will be developed on a "Future" branch and merged with the "Stable" branch at each version.
-
-#### Goals for 1.0.02
-- validate the stability of existing processes and compile
 
 #### Goals for 1.0.03
 *Main*
