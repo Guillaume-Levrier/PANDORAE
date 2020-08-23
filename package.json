@@ -1,7 +1,7 @@
 {
 	"name": "pandorae",
-	"version": "1.0.01",
-	"description": "A document-based public policy research protocol",
+	"version": "1.0.02",
+	"description": "A document-centered research protocol",
 	"license": "MIT",
 	"author": "Guillaume Levrier",
 	"main": "main.js",
