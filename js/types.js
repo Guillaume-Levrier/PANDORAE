@@ -2205,14 +2205,13 @@ const chronotype = (id) => {
     //========= LINES & INFO ============
     var maxDocs = 0;
 
-    var arcBars = d3
-        .arc()
-        .innerRadius((d) => y(d.zone))
-        .outerRadius((d) => y(parseFloat(d.zone + d.value / (maxDocs + 1))))
-        .startAngle((d) => x(d.date))
-        .endAngle((d) =>{x(d.date.setMonth(d.date.getMonth() + 1))})
-        .padAngle(0)
-        .padRadius(innerRadius);
+    var arcBars = d3.arc()
+                    .innerRadius((d) => y(d.zone))
+                    .outerRadius((d) => y(parseFloat(d.zone + d.value / (maxDocs + 1))))
+                    .startAngle((d) => x(d.date))
+                    .endAngle((d) =>x(d.date.setMonth(d.date.getMonth() + 1)))
+                    .padAngle(0)
+                    .padRadius(innerRadius);
 
     var color = d3
         .scaleOrdinal() // Line colors
@@ -2381,8 +2380,7 @@ const chronotype = (id) => {
             const areaRad=[];
             let zoneCount=0
 
-            y.domain([0, clustersNest.length + 1]);
-
+            y.domain([0, clustersNest.size + 1]);
 
             clustersNest.forEach(cluster=>{
                 let radAreaData={};
@@ -2415,7 +2413,7 @@ const chronotype = (id) => {
                             );
                         }
 
-                        if (val.values.length > maxDocs) {
+                        if (val.length > maxDocs) {
                             maxDocs = val.length;
                         }
                    
@@ -2426,7 +2424,7 @@ const chronotype = (id) => {
                 zoneCount++
             })
 
-           
+           // errors here, must be foreach
             nodeDocs.forEach((d) => {
                 for (let i = 0; i < clustersNest.length; i++) {
                     if (clustersNest[i].key === d.category) {
