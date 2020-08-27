@@ -614,8 +614,8 @@ const anthropotype = (id) => {
             [-Infinity, -Infinity],
             [Infinity, Infinity],
         ])
-        .on("zoom", (e) => {
-            zoomed(d3.event.transform);
+        .on("zoom", ({transform},d) => {
+            zoomed(transform);
         });
 
     var criteriaList = [];
@@ -843,7 +843,7 @@ const anthropotype = (id) => {
                     .attr("stroke-width", 4);
 
                 // The data selection below is very suboptimal, this is a quick hack that needs to be refactored
-                node.on("click", (d) => {
+                node.on("click", (event,d) => {
                     if (d.hasOwnProperty("title")) {
                         // If it's a document
                         d3.select(document.getElementById(d.id))
@@ -924,19 +924,19 @@ const anthropotype = (id) => {
                 simulation.alpha(1).restart();
             };
 
-            function forcedragstarted(d) {
-                if (!d3.event.active) simulation.alpha(1).restart();
+            function forcedragstarted(event,d) {
+                if (!event.active) simulation.alpha(1).restart();
                 d.fx = d.x;
                 d.fy = d.y;
             }
 
-            function forcedragged(d) {
-                d.fx = d3.event.x;
-                d.fy = d3.event.y;
+            function forcedragged(event,d) {
+                d.fx = event.x;
+                d.fy = event.y;
             }
 
-            function forcedragended(d) {
-                if (!d3.event.active) simulation.alpha(1).restart();
+            function forcedragended(event,d) {
+                if (!event.active) simulation.alpha(1).restart();
                 d.fx = null;
                 d.fy = null;
             }
@@ -992,8 +992,8 @@ const filotype = (id) => {
             [-Infinity, -Infinity],
             [Infinity, Infinity],
         ])
-        .on("zoom", (e) => {
-            zoomed(d3.event.transform);
+        .on("zoom", ({transform},e) => {
+            zoomed(transform);
         });
 
     var color = d3.scaleOrdinal(d3.schemeAccent);
@@ -1097,14 +1097,11 @@ const filotype = (id) => {
                 .attr("clip-path", function (d, i) {
                     return "url(#node_clip" + i + ")";
                 })
-                .on("click", (d) => {
+                .on("click", (event,d) => {
                     var id = d.data.id_str;
                     var targets = d.descendants();
                     let polyPoints = [];
-                    let targetsY = d3
-                        .nest()
-                        .key((d) => d.y)
-                        .entries(targets);
+                    let targetsY = d3.group(targets,d => d.y);
 
                     for (let i = 0; i < targetsY.length; i++) {
                         let x = d3.min(targetsY[i].values, (d) => d.x);
@@ -1153,7 +1150,7 @@ const filotype = (id) => {
                 .style("font-size", lineFontSize / 2)
                 .text((d) => d.data.id_str)
                 .style("cursor", "pointer")
-                .on("click", (d) => {
+                .on("click", (event,d) => {
                     d3.select("#tooltip").html(
                         '<p class="legend"><strong><a target="_blank" href="https://mobile.twitter.com/' +
                             d.data.user.name +
@@ -1439,8 +1436,8 @@ const hyphotype = (id) => {
             [-width * 2, -height * 2],
             [width * 3, height * 3],
         ])
-        .on("zoom", (e) => {
-            zoomed(d3.event.transform);
+        .on("zoom", ({transform},d) => {
+            zoomed(transform);
         }); // Trigger the "zoomed" function on "zoom" behaviour
 
     var color = d3
@@ -1677,10 +1674,10 @@ const hyphotype = (id) => {
                                         scores = possibilities.map(
                                             (d) => -((p.length - 1) % d)
                                         ),
-                                        n = possibilities[d3.scan(scores)],
+                                        n = possibilities[d3.leastIndex(scores)],
                                         start =
                                             1 +
-                                            (d3.scan(
+                                            (d3.leastIndex(
                                                 p.map(
                                                     (xy) =>
                                                         (j === 0 ? -1 : 1) *
@@ -1734,7 +1731,7 @@ const hyphotype = (id) => {
                         .attr("stroke-width", 0.2)
                         .attr("r", (d) => 1 + Math.log(d.indegree + 1))
                         .attr("id", (d) => d.id)
-                        .on("click", (d) => {
+                        .on("click", (event,d) => {
                             var weDetail = "<h3>WE Detail</h3>";
 
                             for (var prop in d) {
@@ -2176,8 +2173,8 @@ const chronotype = (id) => {
             [-Infinity, -Infinity],
             [Infinity, Infinity],
         ]) // Extent to which one can go up/down/left/right
-        .on("zoom", (e) => {
-            zoomed(d3.event.transform);
+        .on("zoom", ({transform},e) => {
+            zoomed(transform);
         });
 
     var innerRadius = height / 3.5;
@@ -2213,7 +2210,7 @@ const chronotype = (id) => {
         .innerRadius((d) => y(d.zone))
         .outerRadius((d) => y(parseFloat(d.zone + d.value / (maxDocs + 1))))
         .startAngle((d) => x(d.date))
-        .endAngle((d) => x(d.date.setMonth(d.date.getMonth() + 1)))
+        .endAngle((d) =>{x(d.date.setMonth(d.date.getMonth() + 1))})
         .padAngle(0)
         .padRadius(innerRadius);
 
@@ -2380,23 +2377,17 @@ const chronotype = (id) => {
                 currentDate.setMonth(currentDate.getMonth() + 1);
             }
 
-            const clustersNest = d3
-                .nest() // Sorting clusters
-                .key((d) => d.category) // Sorting them by category
-                .entries(nodeDocs); // Selecting relevant data
+            const clustersNest = d3.group(nodeDocs,d=>d.category,d=>d.clusterDate)
+            const areaRad=[];
+            let zoneCount=0
 
             y.domain([0, clustersNest.length + 1]);
 
-            clustersNest.forEach((cluster) => {
-                let nestedCluster = d3
-                    .nest()
-                    .key((d) => d.clusterDate)
-                    .entries(cluster.values);
-                cluster.values = nestedCluster;
-            });
 
-            for (let i = 0; i < clustersNest.length; i++) {
-                clustersNest[i].zone = i;
+            clustersNest.forEach(cluster=>{
+                let radAreaData={};
+                radAreaData.zone = zoneCount;
+                
                 let radialVal = {};
 
                 dateAmount.forEach(
@@ -2405,28 +2396,37 @@ const chronotype = (id) => {
                             key: d,
                             date: parseTime(d),
                             value: 0,
-                            zone: i,
+                            zone: zoneCount,
                         })
                 );
 
-                clustersNest[i].values.forEach((val) => {
-                    if (radialVal[val.key] && val.values) {
-                        radialVal[val.key].value = val.values.length;
-                    } else {
-                        ipcRenderer.send(
-                            "console-logs",
-                            "error generating bar at" + JSON.stringify(val)
-                        );
-                    }
+                        console.log(cluster)
 
-                    if (val.values.length > maxDocs) {
-                        maxDocs = val.values.length;
-                    }
+                cluster.forEach((val,key) => {
+                    
+                    val.forEach(d => d.zone=zoneCount)
+
+                        if (radialVal[key] && val.length>0) {
+                            radialVal[key].value = val.length;
+                        } else {
+                            ipcRenderer.send(
+                                "console-logs",
+                                "error generating bar at" + JSON.stringify(val)
+                            );
+                        }
+
+                        if (val.values.length > maxDocs) {
+                            maxDocs = val.length;
+                        }
+                   
                 });
 
-                clustersNest[i].radialVal = Object.values(radialVal);
-            }
+                radAreaData.radialVal = Object.values(radialVal);
+                areaRad.push(radAreaData)
+                zoneCount++
+            })
 
+           
             nodeDocs.forEach((d) => {
                 for (let i = 0; i < clustersNest.length; i++) {
                     if (clustersNest[i].key === d.category) {
@@ -2438,9 +2438,10 @@ const chronotype = (id) => {
             //========= CHART DISPLAY ===========
             var radialBars = view.append("g").attr("id", "radialBars");
 
-            clustersNest.forEach((corpus) => {
+            areaRad.forEach(corpus => {
                 radialBars
                     .append("g")
+                    .attr("id","radArea"+corpus.zone)
                     .selectAll("path")
                     .data(corpus.radialVal)
                     .enter()
@@ -2715,7 +2716,7 @@ const chronotype = (id) => {
                 return _circularbrush;
 
                 function resizeDown(d) {
-                    var _mouse = d3.mouse(_brushG.node());
+                    var _mouse = d3.pointer(_brushG.node());
                     brushing = true;
 
                     if (_brushData[0] === undefined) {
@@ -2750,7 +2751,7 @@ const chronotype = (id) => {
                 }
 
                 function resizeMove(_resize) {
-                    var _mouse = d3.mouse(_brushG.node());
+                    var _mouse = d3.pointer(_brushG.node());
                     var _current = Math.atan2(_mouse[1], _mouse[0]);
                     var _start = Math.atan2(_origin[1], _origin[0]);
 
@@ -3375,8 +3376,8 @@ const geotype = (id) => {
             [0, 0],
             [1200, 900],
         ])
-        .on("zoom", (e) => {
-            zoomed(d3.event.transform);
+        .on("zoom", ({transform},e) => {
+            zoomed(transform);
         });
 
     //globe outline and background
@@ -3553,10 +3554,8 @@ const geotype = (id) => {
                     data[i].index = i;
                 } // id = item index
 
-                var cities = d3
-                    .nest()
-                    .key((d) => d.affilId)
-                    .entries(dataArray);
+                var cities = d3.group(dataArray,d=>d.affilId)
+                 
 
                 cities.forEach((d) => {
                     d.lon = d.values[0].lon;
@@ -3970,10 +3969,7 @@ const geotype = (id) => {
                         accessorFunc = accessor;
                     }
 
-                    const grouped = d3
-                        .nest()
-                        .key((d) => d.date)
-                        .entries(initialData);
+                    const grouped = d3.group(initialData,d=>d.date)
 
                     for (let i = 0; i < grouped.length; i++) {
                         grouped[i].date = new Date(grouped[i].key);
@@ -4239,13 +4235,13 @@ const geotype = (id) => {
                     handle.attr("display", "none");
 
                     function brushStarted() {
-                        if (d3.event.selection) {
-                            startSelection = d3.event.selection[0];
+                        if (event.selection) {
+                            startSelection = event.selection[0];
                         }
                     }
 
                     function brushEnded() {
-                        if (!d3.event.selection) {
+                        if (!event.selection) {
                             handle.attr("display", "none");
 
                             output({
@@ -4253,9 +4249,9 @@ const geotype = (id) => {
                             });
                             return;
                         }
-                        if (d3.event.sourceEvent.type === "brush") return;
+                        if (event.sourceEvent.type === "brush") return;
 
-                        var d0 = d3.event.selection.map(scaleX.invert),
+                        var d0 = event.selection.map(scaleX.invert),
                             d1 = d0.map(d3.timeDay.round);
 
                         if (d1[0] >= d1[1]) {
@@ -4303,32 +4299,32 @@ const geotype = (id) => {
                     }
 
                     function brushed(d) {
-                        if (d3.event.sourceEvent.type === "brush") return;
+                        if (event.sourceEvent.type === "brush") return;
 
                         if (params.freezeMin) {
-                            if (d3.event.selection[0] < startSelection) {
-                                d3.event.selection[1] = Math.min(
-                                    d3.event.selection[0],
-                                    d3.event.selection[1]
+                            if (event.selection[0] < startSelection) {
+                                event.selection[1] = Math.min(
+                                    event.selection[0],
+                                    event.selection[1]
                                 );
                             }
-                            if (d3.event.selection[0] >= startSelection) {
-                                d3.event.selection[1] = Math.max(
-                                    d3.event.selection[0],
-                                    d3.event.selection[1]
+                            if (event.selection[0] >= startSelection) {
+                                event.selection[1] = Math.max(
+                                    event.selection[0],
+                                    event.selection[1]
                                 );
                             }
 
-                            d3.event.selection[0] = 0;
+                            event.selection[0] = 0;
 
                             d3.select(this).call(
-                                d3.event.target.move,
-                                d3.event.selection
+                                event.target.move,
+                                event.selection
                             );
                         }
 
-                        var d0 = d3.event.selection.map(scaleX.invert);
-                        const s = d3.event.selection;
+                        var d0 = event.selection.map(scaleX.invert);
+                        const s = event.selection;
 
                         handle
                             .attr("display", null)
@@ -4442,8 +4438,8 @@ const geotype = (id) => {
         }
     };
 
-    function dragstarted() {
-        v0 = versor.cartesian(projection.invert(d3.mouse(this)));
+    function dragstarted(event) {
+        v0 = versor.cartesian(projection.invert(d3.pointer(event)));
         q0 = versor((r0 = projection.rotate()));
     }
 
@@ -4510,7 +4506,7 @@ const geotype = (id) => {
                 });
         } else {
             const v1 = versor.cartesian(
-                projection.rotate(r0).invert(d3.mouse(this))
+                projection.rotate(r0).invert(d3.pointer(event))
             );
             const q1 = versor.multiply(q0, versor.delta(v0, v1));
             projection.rotate(versor.rotation(q1));
@@ -4616,8 +4612,8 @@ const gazouillotype = (id) => {
         .style("stroke-width", "0"); // Invisible borders
 
     svg.call(
-        zoom.on("zoom", (e) => {
-            zoomed(d3.event.transform);
+        zoom.on("zoom", ({transform},e) => {
+            zoomed(transform);
         })
     );
 
@@ -4829,7 +4825,7 @@ const gazouillotype = (id) => {
                                 .attr("r", radius)
                                 .attr("cx", (d) => x(d.timespan))
                                 .attr("cy", (d) => y(d.indexPosition))
-                                .on("click", (d) => {
+                                .on("click", (event,d) => {
                                     d3.select("#linktosource").remove();
                                     lineData = [];
                                     lineData.push(d);
@@ -5304,13 +5300,13 @@ const gazouillotype = (id) => {
                                 handle.attr("display", "none");
 
                                 function brushStarted() {
-                                    if (d3.event.selection) {
-                                        startSelection = d3.event.selection[0];
+                                    if (event.selection) {
+                                        startSelection = event.selection[0];
                                     }
                                 }
 
                                 function brushEnded() {
-                                    if (!d3.event.selection) {
+                                    if (!event.selection) {
                                         handle.attr("display", "none");
 
                                         output({
@@ -5318,10 +5314,10 @@ const gazouillotype = (id) => {
                                         });
                                         return;
                                     }
-                                    if (d3.event.sourceEvent.type === "brush")
+                                    if (event.sourceEvent.type === "brush")
                                         return;
 
-                                    var d0 = d3.event.selection.map(
+                                    var d0 = event.selection.map(
                                             scaleX.invert
                                         ),
                                         d1 = d0.map(d3.timeDay.round);
@@ -5373,41 +5369,41 @@ const gazouillotype = (id) => {
                                 }
 
                                 function brushed(d) {
-                                    if (d3.event.sourceEvent.type === "brush")
+                                    if (event.sourceEvent.type === "brush")
                                         return;
 
                                     if (params.freezeMin) {
                                         if (
-                                            d3.event.selection[0] <
+                                            event.selection[0] <
                                             startSelection
                                         ) {
-                                            d3.event.selection[1] = Math.min(
-                                                d3.event.selection[0],
-                                                d3.event.selection[1]
+                                            event.selection[1] = Math.min(
+                                                event.selection[0],
+                                                event.selection[1]
                                             );
                                         }
                                         if (
-                                            d3.event.selection[0] >=
+                                            event.selection[0] >=
                                             startSelection
                                         ) {
-                                            d3.event.selection[1] = Math.max(
-                                                d3.event.selection[0],
-                                                d3.event.selection[1]
+                                            event.selection[1] = Math.max(
+                                                event.selection[0],
+                                                event.selection[1]
                                             );
                                         }
 
-                                        d3.event.selection[0] = 0;
+                                        event.selection[0] = 0;
 
                                         d3.select(this).call(
-                                            d3.event.target.move,
-                                            d3.event.selection
+                                            event.target.move,
+                                            event.selection
                                         );
                                     }
 
-                                    var d0 = d3.event.selection.map(
+                                    var d0 = event.selection.map(
                                         scaleX.invert
                                     );
-                                    const s = d3.event.selection;
+                                    const s = event.selection;
 
                                     handle
                                         .attr("display", null)
@@ -5552,7 +5548,7 @@ const gazouillotype = (id) => {
     var currentZoom;
 
     zoomed = (thatZoom, transTime) => {
-        // if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+        // if (event.sourceEvent && event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
 
         var t = thatZoom;
         currentZoom = t;
@@ -5723,8 +5719,8 @@ const pharmacotype = (id) => {
             [-Infinity, -Infinity],
             [Infinity, Infinity],
         ])
-        .on("zoom", (e) => {
-            zoomed(d3.event.transform);
+        .on("zoom", ({transform},e) => {
+            zoomed(transform);
         });
 
     var x = d3.scaleTime(); // Y axis scale
@@ -5872,7 +5868,7 @@ const pharmacotype = (id) => {
                 .attr("dy", 3)
                 .style("cursor", "pointer")
                 .text((d) => d.id)
-                .on("click", (d) => {
+                .on("click", (event,d) => {
                     let idMod = d.Study.ProtocolSection.IdentificationModule;
                     let statMod = d.Study.ProtocolSection.StatusModule;
                     let descMod = d.Study.ProtocolSection.DescriptionModule;
