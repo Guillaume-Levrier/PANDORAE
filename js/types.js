@@ -1371,7 +1371,6 @@ const doxatype = (id) => {
                 }
                 purgeList();
                 displayTweets(visTweets);
-                console.log(visTweets);
             };
 
             var toggleList = document.createElement("FORM");
@@ -2398,8 +2397,6 @@ const chronotype = (id) => {
                         })
                 );
 
-                        console.log(cluster)
-
                 cluster.forEach((val,key) => {
                     
                     val.forEach(d => d.zone=zoneCount)
@@ -2424,14 +2421,20 @@ const chronotype = (id) => {
                 zoneCount++
             })
 
+            
            // errors here, must be foreach
+           /*
             nodeDocs.forEach((d) => {
-                for (let i = 0; i < clustersNest.length; i++) {
-                    if (clustersNest[i].key === d.category) {
-                        d.zone = clustersNest[i].zone;
+                let mapcount=0
+                clustersNest.forEach((clust,key)=>{
+                    if (key === d.category) { 
+                        d.zone = mapcount;
                     }
-                }
+                    mapcount++
+                })
             });
+*/
+            
 
             //========= CHART DISPLAY ===========
             var radialBars = view.append("g").attr("id", "radialBars");
@@ -2481,7 +2484,7 @@ const chronotype = (id) => {
                             (d) =>
                                 d3.pointRadial(
                                     x(d.date),
-                                    y(d.zone - clustersNest.length)
+                                    y(d.zone - clustersNest.size)
                                 )[0]
                         )
                 )
@@ -2494,7 +2497,7 @@ const chronotype = (id) => {
                             (d) =>
                                 d3.pointRadial(
                                     x(d.date),
-                                    y(d.zone - clustersNest.length)
+                                    y(d.zone - clustersNest.size)
                                 )[1]
                         )
                 );
@@ -2522,7 +2525,7 @@ const chronotype = (id) => {
                 node.attr("cx", (d) => d.x) // Node coordinates
                     .attr("cy", (d) => d.y);
 
-                nodetext // Nodetext (material icons) coordinates
+                nodetext // Nodetext (doc number) coordinates
                     .attr("x", (d) => d.x)
                     .attr("y", (d) => d.y);
             }
@@ -2581,11 +2584,11 @@ const chronotype = (id) => {
 
                     _brushG
                         .select("path.extent")
-                        .on("mousedown.brush", resizeDown);
+                        .on("mousedown.brush", event=>{resizeDown(event)});
 
                     _brushG
                         .selectAll("path.resize")
-                        .on("mousedown.brush", resizeDown);
+                        .on("mousedown.brush", event =>{resizeDown(event)});
 
                     return _circularbrush;
                 }
@@ -2713,13 +2716,17 @@ const chronotype = (id) => {
 
                 return _circularbrush;
 
-                function resizeDown(d) {
-                    var _mouse = d3.pointer(_brushG.node());
+                function resizeDown(event) {
+
+                    let d=event.currentTarget;
+                    var _mouse = d3.pointer(event);
+
                     brushing = true;
 
                     if (_brushData[0] === undefined) {
                         _brushData[0] = d;
                     }
+
                     _originalBrushData = {
                         startAngle: _brushData[0].startAngle,
                         endAngle: _brushData[0].endAngle,
@@ -2727,65 +2734,54 @@ const chronotype = (id) => {
 
                     _origin = _mouse;
 
-                    if (d.class == "resize e") {
-                        d3_window
-                            .on("mousemove.brush", function () {
-                                resizeMove("e");
-                            })
-                            .on("mouseup.brush", extentUp);
-                    } else if (d.class == "resize w") {
-                        d3_window
-                            .on("mousemove.brush", function () {
-                                resizeMove("w");
-                            })
-                            .on("mouseup.brush", extentUp);
-                    } else {
-                        d3_window
-                            .on("mousemove.brush", function () {
-                                resizeMove("extent");
-                            })
-                            .on("mouseup.brush", extentUp);
+                    switch (d.className.baseVal) {
+                        case "resize e circularbrush":
+                            d3_window.on("mousemove.brush", event => { resizeMove(event,"e") })
+                                     .on("mouseup.brush", event => { extentUp(event) });
+                            break;
+
+                        case "resize w circularbrush":
+                            d3_window.on("mousemove.brush", event => { resizeMove(event,"w") })
+                                     .on("mouseup.brush", event => { extentUp(event) });
+                           break;
+                                            
+                       default: 
+                            d3_window.on("mousemove.brush", event => { resizeMove(event,"extent") })
+                                     .on("mouseup.brush", event => { extentUp(event) });
+                            break;
                     }
                 }
 
-                function resizeMove(_resize) {
-                    var _mouse = d3.pointer(_brushG.node());
+                function resizeMove(event,_resize) {
+                    var _mouse = d3.pointer(event,_brushG.node());   
+                  
                     var _current = Math.atan2(_mouse[1], _mouse[0]);
                     var _start = Math.atan2(_origin[1], _origin[0]);
 
-                    if (_resize == "e") {
-                        var clampedAngle = Math.max(
-                            Math.min(
-                                _originalBrushData.startAngle +
-                                    (_current - _start),
-                                _originalBrushData.endAngle
-                            ),
-                            _originalBrushData.endAngle - 2 * Math.PI
-                        );
+                    switch (_resize) {
 
-                        if (
-                            _originalBrushData.startAngle +
-                                (_current - _start) >
-                            _originalBrushData.endAngle
-                        ) {
-                            clampedAngle =
-                                _originalBrushData.startAngle +
-                                (_current - _start) -
-                                Math.PI * 2;
-                        } else if (
-                            _originalBrushData.startAngle +
-                                (_current - _start) <
-                            _originalBrushData.endAngle - Math.PI * 2
-                        ) {
-                            clampedAngle =
-                                _originalBrushData.startAngle +
-                                (_current - _start) +
-                                Math.PI * 2;
+                        case "e":
+
+                        var clampedAngle = Math.max(
+                            Math.min(_originalBrushData.startAngle +(_current - _start),_originalBrushData.endAngle),
+                            _originalBrushData.endAngle - 2 * Math.PI
+                            );
+
+                        if (_originalBrushData.startAngle + (_current - _start) >_originalBrushData.endAngle) {
+
+                            clampedAngle = _originalBrushData.startAngle + (_current - _start) - Math.PI * 2;
+
+                        } else if (_originalBrushData.startAngle + (_current - _start) < _originalBrushData.endAngle - Math.PI * 2) {
+                            clampedAngle = _originalBrushData.startAngle +(_current - _start) + Math.PI * 2;
                         }
 
                         var _newStartAngle = clampedAngle;
                         var _newEndAngle = _originalBrushData.endAngle;
-                    } else if (_resize == "w") {
+                            
+                            break;
+
+                        case "w":
+
                         var clampedAngle = Math.min(
                             Math.max(
                                 _originalBrushData.endAngle +
@@ -2815,14 +2811,19 @@ const chronotype = (id) => {
 
                         var _newStartAngle = _originalBrushData.startAngle;
                         var _newEndAngle = clampedAngle;
-                    } else {
-                        var _newStartAngle =
+                            
+                            break;
+                    
+                        default:
+                            var _newStartAngle =
                             _originalBrushData.startAngle +
                             (_current - _start * 1);
                         var _newEndAngle =
                             _originalBrushData.endAngle +
                             (_current - _start * 1);
+                            break;
                     }
+
 
                     _newBrushData = [
                         {
@@ -2860,6 +2861,7 @@ const chronotype = (id) => {
                 }
 
                 function brushRefresh() {
+
                     _brushG
                         .selectAll("path.circularbrush")
                         .data(_newBrushData)
@@ -2897,8 +2899,7 @@ const chronotype = (id) => {
                         .text(
                             currentBrush[0].getDate() +
                                 "/" +
-                                currentBrush[0].getMonth() +
-                                1 +
+                                parseInt(currentBrush[0].getMonth()+1) +
                                 "/" +
                                 currentBrush[0].getFullYear()
                         );
@@ -2930,14 +2931,13 @@ const chronotype = (id) => {
                         .text(
                             currentBrush[1].getDate() +
                                 "/" +
-                                currentBrush[1].getMonth() +
-                                1 +
+                                parseInt(currentBrush[1].getMonth()+1) +
                                 "/" +
                                 currentBrush[1].getFullYear()
                         );
                 }
 
-                function extentUp() {
+                function extentUp(event) {
                     // there is an update pattern issue. To be continued.
 
                     // tooltip clearup
@@ -2947,6 +2947,7 @@ const chronotype = (id) => {
                    
 
                     _brushData = _newBrushData;
+
                     d3_window
                         .on("mousemove.brush", null)
                         .on("mouseup.brush", null);
