@@ -4115,10 +4115,6 @@ const geotype = (id) => {
                         .ticks(max == 1 ? 1 : params.yTicks)
                         .tickFormat(d3.format(".2s"));
 
-                    console.log(eachBarWidth)
-                    console.log(chartHeight)
-                    console.log(values)
-
                     const bars = chart
                         .selectAll(".bar")
                         .data(values)
@@ -4157,9 +4153,9 @@ const geotype = (id) => {
                                     [0, 0],
                                     [chartWidth, chartHeight],
                                 ])
-                                .on("start", brushStarted)
-                                .on("end", brushEnded)
-                                .on("brush", brushed)
+                                .on("start",e=>{ brushStarted(e)})
+                                .on("end", e=>{brushEnded(e)})
+                                .on("brush", e=>{brushed(e)})
                         );
 
                     chart.selectAll(".selection").attr("fill-opacity", 0.1);
@@ -4241,14 +4237,15 @@ const geotype = (id) => {
 
                     handle.attr("display", "none");
 
-                    function brushStarted() {
-                        if (event.selection) {
-                            startSelection = event.selection[0];
+                    function brushStarted({selection}) {
+                        if (selection) {
+                            startSelection = selection[0];
                         }
                     }
 
-                    function brushEnded() {
-                        if (!event.selection) {
+                    function brushEnded(event) {
+                        const selection=event.selection;
+                        if (!selection) {
                             handle.attr("display", "none");
 
                             output({
@@ -4258,7 +4255,7 @@ const geotype = (id) => {
                         }
                         if (event.sourceEvent.type === "brush") return;
 
-                        var d0 = event.selection.map(scaleX.invert),
+                        var d0 = selection.map(scaleX.invert),
                             d1 = d0.map(d3.timeDay.round);
 
                         if (d1[0] >= d1[1]) {
@@ -4305,33 +4302,34 @@ const geotype = (id) => {
                         d3.select("#tooltip").html("");
                     }
 
-                    function brushed(d) {
+                    function brushed(event,d) {
+                        const selection = event.selection;
                         if (event.sourceEvent.type === "brush") return;
 
                         if (params.freezeMin) {
-                            if (event.selection[0] < startSelection) {
-                                event.selection[1] = Math.min(
-                                    event.selection[0],
-                                    event.selection[1]
+                            if (selection[0] < startSelection) {
+                                selection[1] = Math.min(
+                                selection[0],
+                                selection[1]
                                 );
                             }
-                            if (event.selection[0] >= startSelection) {
-                                event.selection[1] = Math.max(
-                                    event.selection[0],
-                                    event.selection[1]
+                            if (selection[0] >= startSelection) {
+                                selection[1] = Math.max(
+                                selection[0],
+                                selection[1]
                                 );
                             }
 
-                            event.selection[0] = 0;
+                            selection[0] = 0;
 
                             d3.select(this).call(
                                 event.target.move,
-                                event.selection
+                                selection
                             );
                         }
 
-                        var d0 = event.selection.map(scaleX.invert);
-                        const s = event.selection;
+                        var d0 = selection.map(scaleX.invert);
+                        const s = selection;
 
                         handle
                             .attr("display", null)
