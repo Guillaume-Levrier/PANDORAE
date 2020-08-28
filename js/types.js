@@ -3891,7 +3891,8 @@ const geotype = (id) => {
                         )
                         .attr("d", path);
 
-                    locations.on("mouseover", (d) => {
+                    locations.on("mouseover", (event,d) => {
+                        
                         d3.selectAll(".arc").style("opacity", ".15");
                         d3.selectAll(".locations").style("opacity", ".4");
 
