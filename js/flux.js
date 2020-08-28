@@ -212,7 +212,7 @@ const drawFlux = (svg, traces, horizontal, showTexts) => {
     .style("cursor", "pointer")
     .attr("font-size", 10)
     .text(d => d.hops[0].info.name)
-    .on("mouseenter", d => {
+    .on("mouseenter", (event,d) => {
       //NODEGROUP STYLE
       nodeGroup
         .transition()
@@ -258,7 +258,7 @@ const drawFlux = (svg, traces, horizontal, showTexts) => {
         }
       });
     })
-    .on("mouseout", d => {
+    .on("mouseout", (event,d) => {
       nodeGroup
         .transition()
         .duration(200)
@@ -268,7 +268,7 @@ const drawFlux = (svg, traces, horizontal, showTexts) => {
         .duration(200)
         .style("stroke-opacity", 1);
     })
-    .on("click", d => {
+    .on("click", (event,d) => {
       fluxDisplay(d.hops[0].name.toLowerCase());
     });
 

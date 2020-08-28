@@ -116,7 +116,7 @@ const moveTo = (step) => {
     }
 
     if (step.hasOwnProperty("drag")) {
-        dragged(step.drag, 2000);
+        dragged({},step.drag, 2000);
     }
 };
 
@@ -614,8 +614,8 @@ const anthropotype = (id) => {
             [-Infinity, -Infinity],
             [Infinity, Infinity],
         ])
-        .on("zoom", (e) => {
-            zoomed(d3.event.transform);
+        .on("zoom", ({transform},d) => {
+            zoomed(transform);
         });
 
     var criteriaList = [];
@@ -843,7 +843,7 @@ const anthropotype = (id) => {
                     .attr("stroke-width", 4);
 
                 // The data selection below is very suboptimal, this is a quick hack that needs to be refactored
-                node.on("click", (d) => {
+                node.on("click", (event,d) => {
                     if (d.hasOwnProperty("title")) {
                         // If it's a document
                         d3.select(document.getElementById(d.id))
@@ -924,19 +924,19 @@ const anthropotype = (id) => {
                 simulation.alpha(1).restart();
             };
 
-            function forcedragstarted(d) {
-                if (!d3.event.active) simulation.alpha(1).restart();
+            function forcedragstarted(event,d) {
+                if (!event.active) simulation.alpha(1).restart();
                 d.fx = d.x;
                 d.fy = d.y;
             }
 
-            function forcedragged(d) {
-                d.fx = d3.event.x;
-                d.fy = d3.event.y;
+            function forcedragged(event,d) {
+                d.fx = event.x;
+                d.fy = event.y;
             }
 
-            function forcedragended(d) {
-                if (!d3.event.active) simulation.alpha(1).restart();
+            function forcedragended(event,d) {
+                if (!event.active) simulation.alpha(1).restart();
                 d.fx = null;
                 d.fy = null;
             }
@@ -992,8 +992,8 @@ const filotype = (id) => {
             [-Infinity, -Infinity],
             [Infinity, Infinity],
         ])
-        .on("zoom", (e) => {
-            zoomed(d3.event.transform);
+        .on("zoom", ({transform},e) => {
+            zoomed(transform);
         });
 
     var color = d3.scaleOrdinal(d3.schemeAccent);
@@ -1097,14 +1097,11 @@ const filotype = (id) => {
                 .attr("clip-path", function (d, i) {
                     return "url(#node_clip" + i + ")";
                 })
-                .on("click", (d) => {
+                .on("click", (event,d) => {
                     var id = d.data.id_str;
                     var targets = d.descendants();
                     let polyPoints = [];
-                    let targetsY = d3
-                        .nest()
-                        .key((d) => d.y)
-                        .entries(targets);
+                    let targetsY = d3.group(targets,d => d.y);
 
                     for (let i = 0; i < targetsY.length; i++) {
                         let x = d3.min(targetsY[i].values, (d) => d.x);
@@ -1153,7 +1150,7 @@ const filotype = (id) => {
                 .style("font-size", lineFontSize / 2)
                 .text((d) => d.data.id_str)
                 .style("cursor", "pointer")
-                .on("click", (d) => {
+                .on("click", (event,d) => {
                     d3.select("#tooltip").html(
                         '<p class="legend"><strong><a target="_blank" href="https://mobile.twitter.com/' +
                             d.data.user.name +
@@ -1374,7 +1371,6 @@ const doxatype = (id) => {
                 }
                 purgeList();
                 displayTweets(visTweets);
-                console.log(visTweets);
             };
 
             var toggleList = document.createElement("FORM");
@@ -1439,8 +1435,8 @@ const hyphotype = (id) => {
             [-width * 2, -height * 2],
             [width * 3, height * 3],
         ])
-        .on("zoom", (e) => {
-            zoomed(d3.event.transform);
+        .on("zoom", ({transform},d) => {
+            zoomed(transform);
         }); // Trigger the "zoomed" function on "zoom" behaviour
 
     var color = d3
@@ -1677,10 +1673,10 @@ const hyphotype = (id) => {
                                         scores = possibilities.map(
                                             (d) => -((p.length - 1) % d)
                                         ),
-                                        n = possibilities[d3.scan(scores)],
+                                        n = possibilities[d3.leastIndex(scores)],
                                         start =
                                             1 +
-                                            (d3.scan(
+                                            (d3.leastIndex(
                                                 p.map(
                                                     (xy) =>
                                                         (j === 0 ? -1 : 1) *
@@ -1734,7 +1730,7 @@ const hyphotype = (id) => {
                         .attr("stroke-width", 0.2)
                         .attr("r", (d) => 1 + Math.log(d.indegree + 1))
                         .attr("id", (d) => d.id)
-                        .on("click", (d) => {
+                        .on("click", (event,d) => {
                             var weDetail = "<h3>WE Detail</h3>";
 
                             for (var prop in d) {
@@ -2176,8 +2172,8 @@ const chronotype = (id) => {
             [-Infinity, -Infinity],
             [Infinity, Infinity],
         ]) // Extent to which one can go up/down/left/right
-        .on("zoom", (e) => {
-            zoomed(d3.event.transform);
+        .on("zoom", ({transform},e) => {
+            zoomed(transform);
         });
 
     var innerRadius = height / 3.5;
@@ -2208,14 +2204,13 @@ const chronotype = (id) => {
     //========= LINES & INFO ============
     var maxDocs = 0;
 
-    var arcBars = d3
-        .arc()
-        .innerRadius((d) => y(d.zone))
-        .outerRadius((d) => y(parseFloat(d.zone + d.value / (maxDocs + 1))))
-        .startAngle((d) => x(d.date))
-        .endAngle((d) => x(d.date.setMonth(d.date.getMonth() + 1)))
-        .padAngle(0)
-        .padRadius(innerRadius);
+    var arcBars = d3.arc()
+                    .innerRadius((d) => y(d.zone))
+                    .outerRadius((d) => y(parseFloat(d.zone + d.value / (maxDocs + 1))))
+                    .startAngle((d) => x(d.date))
+                    .endAngle((d) =>x(d.date.setMonth(d.date.getMonth() + 1)))
+                    .padAngle(0)
+                    .padRadius(innerRadius);
 
     var color = d3
         .scaleOrdinal() // Line colors
@@ -2380,23 +2375,16 @@ const chronotype = (id) => {
                 currentDate.setMonth(currentDate.getMonth() + 1);
             }
 
-            const clustersNest = d3
-                .nest() // Sorting clusters
-                .key((d) => d.category) // Sorting them by category
-                .entries(nodeDocs); // Selecting relevant data
+            const clustersNest = d3.group(nodeDocs,d=>d.category,d=>d.clusterDate)
+            const areaRad=[];
+            let zoneCount=0
 
-            y.domain([0, clustersNest.length + 1]);
+            y.domain([0, clustersNest.size + 1]);
 
-            clustersNest.forEach((cluster) => {
-                let nestedCluster = d3
-                    .nest()
-                    .key((d) => d.clusterDate)
-                    .entries(cluster.values);
-                cluster.values = nestedCluster;
-            });
-
-            for (let i = 0; i < clustersNest.length; i++) {
-                clustersNest[i].zone = i;
+            clustersNest.forEach(cluster=>{
+                let radAreaData={};
+                radAreaData.zone = zoneCount;
+                
                 let radialVal = {};
 
                 dateAmount.forEach(
@@ -2405,42 +2393,56 @@ const chronotype = (id) => {
                             key: d,
                             date: parseTime(d),
                             value: 0,
-                            zone: i,
+                            zone: zoneCount,
                         })
                 );
 
-                clustersNest[i].values.forEach((val) => {
-                    if (radialVal[val.key] && val.values) {
-                        radialVal[val.key].value = val.values.length;
-                    } else {
-                        ipcRenderer.send(
-                            "console-logs",
-                            "error generating bar at" + JSON.stringify(val)
-                        );
-                    }
+                cluster.forEach((val,key) => {
+                    
+                    val.forEach(d => d.zone=zoneCount)
 
-                    if (val.values.length > maxDocs) {
-                        maxDocs = val.values.length;
-                    }
+                        if (radialVal[key] && val.length>0) {
+                            radialVal[key].value = val.length;
+                        } else {
+                            ipcRenderer.send(
+                                "console-logs",
+                                "error generating bar at" + JSON.stringify(val)
+                            );
+                        }
+
+                        if (val.length > maxDocs) {
+                            maxDocs = val.length;
+                        }
+                   
                 });
 
-                clustersNest[i].radialVal = Object.values(radialVal);
-            }
+                radAreaData.radialVal = Object.values(radialVal);
+                areaRad.push(radAreaData)
+                zoneCount++
+            })
 
+            
+           // errors here, must be foreach
+           /*
             nodeDocs.forEach((d) => {
-                for (let i = 0; i < clustersNest.length; i++) {
-                    if (clustersNest[i].key === d.category) {
-                        d.zone = clustersNest[i].zone;
+                let mapcount=0
+                clustersNest.forEach((clust,key)=>{
+                    if (key === d.category) { 
+                        d.zone = mapcount;
                     }
-                }
+                    mapcount++
+                })
             });
+*/
+            
 
             //========= CHART DISPLAY ===========
             var radialBars = view.append("g").attr("id", "radialBars");
 
-            clustersNest.forEach((corpus) => {
+            areaRad.forEach(corpus => {
                 radialBars
                     .append("g")
+                    .attr("id","radArea"+corpus.zone)
                     .selectAll("path")
                     .data(corpus.radialVal)
                     .enter()
@@ -2482,7 +2484,7 @@ const chronotype = (id) => {
                             (d) =>
                                 d3.pointRadial(
                                     x(d.date),
-                                    y(d.zone - clustersNest.length)
+                                    y(d.zone - clustersNest.size)
                                 )[0]
                         )
                 )
@@ -2495,7 +2497,7 @@ const chronotype = (id) => {
                             (d) =>
                                 d3.pointRadial(
                                     x(d.date),
-                                    y(d.zone - clustersNest.length)
+                                    y(d.zone - clustersNest.size)
                                 )[1]
                         )
                 );
@@ -2523,7 +2525,7 @@ const chronotype = (id) => {
                 node.attr("cx", (d) => d.x) // Node coordinates
                     .attr("cy", (d) => d.y);
 
-                nodetext // Nodetext (material icons) coordinates
+                nodetext // Nodetext (doc number) coordinates
                     .attr("x", (d) => d.x)
                     .attr("y", (d) => d.y);
             }
@@ -2582,11 +2584,11 @@ const chronotype = (id) => {
 
                     _brushG
                         .select("path.extent")
-                        .on("mousedown.brush", resizeDown);
+                        .on("mousedown.brush", event=>{resizeDown(event)});
 
                     _brushG
                         .selectAll("path.resize")
-                        .on("mousedown.brush", resizeDown);
+                        .on("mousedown.brush", event =>{resizeDown(event)});
 
                     return _circularbrush;
                 }
@@ -2714,13 +2716,17 @@ const chronotype = (id) => {
 
                 return _circularbrush;
 
-                function resizeDown(d) {
-                    var _mouse = d3.mouse(_brushG.node());
+                function resizeDown(event) {
+
+                    let d=event.currentTarget;
+                    var _mouse = d3.pointer(event);
+
                     brushing = true;
 
                     if (_brushData[0] === undefined) {
                         _brushData[0] = d;
                     }
+
                     _originalBrushData = {
                         startAngle: _brushData[0].startAngle,
                         endAngle: _brushData[0].endAngle,
@@ -2728,65 +2734,54 @@ const chronotype = (id) => {
 
                     _origin = _mouse;
 
-                    if (d.class == "resize e") {
-                        d3_window
-                            .on("mousemove.brush", function () {
-                                resizeMove("e");
-                            })
-                            .on("mouseup.brush", extentUp);
-                    } else if (d.class == "resize w") {
-                        d3_window
-                            .on("mousemove.brush", function () {
-                                resizeMove("w");
-                            })
-                            .on("mouseup.brush", extentUp);
-                    } else {
-                        d3_window
-                            .on("mousemove.brush", function () {
-                                resizeMove("extent");
-                            })
-                            .on("mouseup.brush", extentUp);
+                    switch (d.className.baseVal) {
+                        case "resize e circularbrush":
+                            d3_window.on("mousemove.brush", event => { resizeMove(event,"e") })
+                                     .on("mouseup.brush", event => { extentUp(event) });
+                            break;
+
+                        case "resize w circularbrush":
+                            d3_window.on("mousemove.brush", event => { resizeMove(event,"w") })
+                                     .on("mouseup.brush", event => { extentUp(event) });
+                           break;
+                                            
+                       default: 
+                            d3_window.on("mousemove.brush", event => { resizeMove(event,"extent") })
+                                     .on("mouseup.brush", event => { extentUp(event) });
+                            break;
                     }
                 }
 
-                function resizeMove(_resize) {
-                    var _mouse = d3.mouse(_brushG.node());
+                function resizeMove(event,_resize) {
+                    var _mouse = d3.pointer(event,_brushG.node());   
+                  
                     var _current = Math.atan2(_mouse[1], _mouse[0]);
                     var _start = Math.atan2(_origin[1], _origin[0]);
 
-                    if (_resize == "e") {
-                        var clampedAngle = Math.max(
-                            Math.min(
-                                _originalBrushData.startAngle +
-                                    (_current - _start),
-                                _originalBrushData.endAngle
-                            ),
-                            _originalBrushData.endAngle - 2 * Math.PI
-                        );
+                    switch (_resize) {
 
-                        if (
-                            _originalBrushData.startAngle +
-                                (_current - _start) >
-                            _originalBrushData.endAngle
-                        ) {
-                            clampedAngle =
-                                _originalBrushData.startAngle +
-                                (_current - _start) -
-                                Math.PI * 2;
-                        } else if (
-                            _originalBrushData.startAngle +
-                                (_current - _start) <
-                            _originalBrushData.endAngle - Math.PI * 2
-                        ) {
-                            clampedAngle =
-                                _originalBrushData.startAngle +
-                                (_current - _start) +
-                                Math.PI * 2;
+                        case "e":
+
+                        var clampedAngle = Math.max(
+                            Math.min(_originalBrushData.startAngle +(_current - _start),_originalBrushData.endAngle),
+                            _originalBrushData.endAngle - 2 * Math.PI
+                            );
+
+                        if (_originalBrushData.startAngle + (_current - _start) >_originalBrushData.endAngle) {
+
+                            clampedAngle = _originalBrushData.startAngle + (_current - _start) - Math.PI * 2;
+
+                        } else if (_originalBrushData.startAngle + (_current - _start) < _originalBrushData.endAngle - Math.PI * 2) {
+                            clampedAngle = _originalBrushData.startAngle +(_current - _start) + Math.PI * 2;
                         }
 
                         var _newStartAngle = clampedAngle;
                         var _newEndAngle = _originalBrushData.endAngle;
-                    } else if (_resize == "w") {
+                            
+                            break;
+
+                        case "w":
+
                         var clampedAngle = Math.min(
                             Math.max(
                                 _originalBrushData.endAngle +
@@ -2816,14 +2811,19 @@ const chronotype = (id) => {
 
                         var _newStartAngle = _originalBrushData.startAngle;
                         var _newEndAngle = clampedAngle;
-                    } else {
-                        var _newStartAngle =
+                            
+                            break;
+                    
+                        default:
+                            var _newStartAngle =
                             _originalBrushData.startAngle +
                             (_current - _start * 1);
                         var _newEndAngle =
                             _originalBrushData.endAngle +
                             (_current - _start * 1);
+                            break;
                     }
+
 
                     _newBrushData = [
                         {
@@ -2861,6 +2861,7 @@ const chronotype = (id) => {
                 }
 
                 function brushRefresh() {
+
                     _brushG
                         .selectAll("path.circularbrush")
                         .data(_newBrushData)
@@ -2898,8 +2899,7 @@ const chronotype = (id) => {
                         .text(
                             currentBrush[0].getDate() +
                                 "/" +
-                                currentBrush[0].getMonth() +
-                                1 +
+                                parseInt(currentBrush[0].getMonth()+1) +
                                 "/" +
                                 currentBrush[0].getFullYear()
                         );
@@ -2931,14 +2931,13 @@ const chronotype = (id) => {
                         .text(
                             currentBrush[1].getDate() +
                                 "/" +
-                                currentBrush[1].getMonth() +
-                                1 +
+                                parseInt(currentBrush[1].getMonth()+1) +
                                 "/" +
                                 currentBrush[1].getFullYear()
                         );
                 }
 
-                function extentUp() {
+                function extentUp(event) {
                     // there is an update pattern issue. To be continued.
 
                     // tooltip clearup
@@ -2948,6 +2947,7 @@ const chronotype = (id) => {
                    
 
                     _brushData = _newBrushData;
+
                     d3_window
                         .on("mousemove.brush", null)
                         .on("mouseup.brush", null);
@@ -3375,8 +3375,8 @@ const geotype = (id) => {
             [0, 0],
             [1200, 900],
         ])
-        .on("zoom", (e) => {
-            zoomed(d3.event.transform);
+        .on("zoom", ({transform},e) => {
+            zoomed(transform);
         });
 
     //globe outline and background
@@ -3461,10 +3461,20 @@ const geotype = (id) => {
                         d.enrichment.hasOwnProperty("affiliations")
                     ) {
                         if (d.hasOwnProperty("issued")) {
-                            d.date =
-                                JSON.stringify(d.issued["date-parts"][0][0]) +
-                                "," +
-                                d.issued["date-parts"][0][1];
+                            d.rebuildDate =
+                            d.issued["date-parts"][0][0] +
+                            "-" +
+                            d.issued["date-parts"][0][1] +
+                            "-" +
+                            d.issued["date-parts"][0][2];
+
+                        d.parsedDate = parseTime(d.rebuildDate);
+
+                        d.date =
+                        JSON.stringify(d.issued["date-parts"][0][0]) +
+                        "," +
+                        d.issued["date-parts"][0][1];
+                           
                         }
 
                         d.authors = [];
@@ -3553,42 +3563,36 @@ const geotype = (id) => {
                     data[i].index = i;
                 } // id = item index
 
-                var cities = d3
-                    .nest()
-                    .key((d) => d.affilId)
-                    .entries(dataArray);
+                var citiesGroup = d3.group(dataArray,d=>d.affilId)
+                 
+                var cities=[]
 
-                cities.forEach((d) => {
-                    d.lon = d.values[0].lon;
-                    d.lat = d.values[0].lat;
-                    d.country = d.values[0]["affiliation-country"];
-                    d.city = d.values[0]["affiliation-city"];
-                    d.affiliations = [];
-                    d.values = [];
+
+                citiesGroup.forEach((d) => {
+                 
+                   let valuesBuffer=[];
+
+                   let affiliationsBuffer=[]
 
                     for (var j = 0; j < data.length; j++) {
-                        if (
-                            data[j].hasOwnProperty("enrichment") &&
-                            data[j].enrichment.hasOwnProperty("affiliations")
-                        ) {
-                            for (
-                                var k = 0;
-                                k < data[j].enrichment.affiliations.length;
-                                k++
-                            ) {
-                                if (
-                                    data[j].enrichment.affiliations[k]
-                                        .affilId === d.key
-                                ) {
-                                    d.affiliations.push(
-                                        data[j].enrichment.affiliations[k]
-                                            .affilname
-                                    );
-                                    d.values.push(data[j]);
+                        if (data[j].hasOwnProperty("enrichment") && data[j].enrichment.hasOwnProperty("affiliations")) {
+                            for (var k = 0;k < data[j].enrichment.affiliations.length;k++) {
+                                if (data[j].enrichment.affiliations[k].affilId === d.key) {
+                                    affiliationsBuffer.push(data[j].enrichment.affiliations[k].affilname);
+                                    valuesBuffer.push(data[j]);
                                 }
                             }
                         }
                     }
+
+                    cities.push({
+                        "lon" : d[0].lon,
+                        "lat" : d[0].lat,
+                        "country" : d[0]["affiliation-country"],
+                        "city" : d[0]["affiliation-city"],
+                        "affiliations" : [],
+                        "values" : valuesBuffer
+                    })
                 });
 
                 for (var i = 0; i < cities.length; i++) {
@@ -3887,7 +3891,8 @@ const geotype = (id) => {
                         )
                         .attr("d", path);
 
-                    locations.on("mouseover", (d) => {
+                    locations.on("mouseover", (event,d) => {
+                        
                         d3.selectAll(".arc").style("opacity", ".15");
                         d3.selectAll(".locations").style("opacity", ".4");
 
@@ -3970,20 +3975,7 @@ const geotype = (id) => {
                         accessorFunc = accessor;
                     }
 
-                    const grouped = d3
-                        .nest()
-                        .key((d) => d.date)
-                        .entries(initialData);
-
-                    for (let i = 0; i < grouped.length; i++) {
-                        grouped[i].date = new Date(grouped[i].key);
-                    }
-
-                    for (let i = 0; i < grouped.length; i++) {
-                        if (grouped[i].key === "undefined") {
-                            grouped.splice(i, 1);
-                        }
-                    }
+                    const grouped = d3.group(data,d=>+d.parsedDate)
 
                     const isDate = true;
                     var dateExtent,
@@ -3993,14 +3985,8 @@ const geotype = (id) => {
                         dateRanges,
                         scaleTime;
                     if (isDate) {
-                        dateExtent = d3.extent(grouped.map((d) => d.date));
-
-                        dateExtent[0].setFullYear(
-                            dateExtent[0].getFullYear() - 1
-                        );
-                        dateExtent[1].setFullYear(
-                            dateExtent[1].getFullYear() + 1
-                        );
+                      
+                        dateExtent = d3.extent(data.map(d=>d.date));
 
                         dateRangesCount = Math.round(width / 5);
                         dateScale = d3
@@ -4062,35 +4048,49 @@ const geotype = (id) => {
                             "translate(30," + sliderOffsetHeight + ")"
                         );
 
-                    grouped.forEach((d) => {
-                        d.key = d.date;
-                        d.value = d.values.length;
+                        const values =[]
+
+                    grouped.forEach((val,key) => {
+                        
+                        if (isNaN(key)){
+                            
+                            //log amount of missing elements
+                        }else {
+                            values.push({date:key,value:val.length})
+                        }
                     });
 
-                    const values = grouped.map((d) => d.value);
-                    const min = d3.min(values);
-                    const max = d3.max(values);
-                    const maxX = grouped[grouped.length - 1].key;
-                    const minX = grouped[0].key;
+                  
 
-                    var minDiff = d3.min(grouped, (d, i, arr) => {
+                    const min = d3.min(values,d=>d.value);
+                    const max = d3.max(values,d=>d.value);
+                    const maxX = values[values.length - 1].date;
+                    const minX = values[0].date;
+
+                    
+                    var minDiff = d3.min(values, (d, i, arr) => {
                         if (!i) return Infinity;
-                        return d.key - arr[i - 1].key;
+                        return d.date - arr[i - 1].date;
                     });
-
-                    let eachBarWidth = chartWidth / minDiff / (maxX - minX);
+                                        
+                    let eachBarWidth = 1
+                    /*
+                     chartWidth / values.length;
 
                     if (eachBarWidth > 20) {
                         eachBarWidth = 20;
                     }
 
+
                     if (minDiff < 1) {
                         eachBarWidth = eachBarWidth * minDiff;
                     }
 
+
                     if (eachBarWidth < 1) {
                         eachBarWidth = 1;
                     }
+                    */
 
                     const scale = params.yScale
                         .domain([params.minY, max])
@@ -4118,7 +4118,7 @@ const geotype = (id) => {
 
                     const bars = chart
                         .selectAll(".bar")
-                        .data(grouped)
+                        .data(values)
                         .enter()
                         .append("rect")
                         .attr("class", "bar")
@@ -4126,7 +4126,7 @@ const geotype = (id) => {
                         .attr("height", (d) => scale(d.value))
                         .attr("fill", "steelblue")
                         .attr("y", (d) => -scale(d.value) + (chartHeight - 25))
-                        .attr("x", (d, i) => scaleX(d.key) - eachBarWidth / 2)
+                        .attr("x", (d, i) => scaleX(d.date) - eachBarWidth / 2)
                         .attr("opacity", 0.9);
 
                     const xAxisWrapper = chart
@@ -4154,9 +4154,9 @@ const geotype = (id) => {
                                     [0, 0],
                                     [chartWidth, chartHeight],
                                 ])
-                                .on("start", brushStarted)
-                                .on("end", brushEnded)
-                                .on("brush", brushed)
+                                .on("start",e=>{ brushStarted(e)})
+                                .on("end", e=>{brushEnded(e)})
+                                .on("brush", e=>{brushed(e)})
                         );
 
                     chart.selectAll(".selection").attr("fill-opacity", 0.1);
@@ -4238,14 +4238,15 @@ const geotype = (id) => {
 
                     handle.attr("display", "none");
 
-                    function brushStarted() {
-                        if (d3.event.selection) {
-                            startSelection = d3.event.selection[0];
+                    function brushStarted({selection}) {
+                        if (selection) {
+                            startSelection = selection[0];
                         }
                     }
 
-                    function brushEnded() {
-                        if (!d3.event.selection) {
+                    function brushEnded(event) {
+                        const selection=event.selection;
+                        if (!selection) {
                             handle.attr("display", "none");
 
                             output({
@@ -4253,9 +4254,9 @@ const geotype = (id) => {
                             });
                             return;
                         }
-                        if (d3.event.sourceEvent.type === "brush") return;
+                        if (event.sourceEvent.type === "brush") return;
 
-                        var d0 = d3.event.selection.map(scaleX.invert),
+                        var d0 = selection.map(scaleX.invert),
                             d1 = d0.map(d3.timeDay.round);
 
                         if (d1[0] >= d1[1]) {
@@ -4302,33 +4303,34 @@ const geotype = (id) => {
                         d3.select("#tooltip").html("");
                     }
 
-                    function brushed(d) {
-                        if (d3.event.sourceEvent.type === "brush") return;
+                    function brushed(event,d) {
+                        const selection = event.selection;
+                        if (event.sourceEvent.type === "brush") return;
 
                         if (params.freezeMin) {
-                            if (d3.event.selection[0] < startSelection) {
-                                d3.event.selection[1] = Math.min(
-                                    d3.event.selection[0],
-                                    d3.event.selection[1]
+                            if (selection[0] < startSelection) {
+                                selection[1] = Math.min(
+                                selection[0],
+                                selection[1]
                                 );
                             }
-                            if (d3.event.selection[0] >= startSelection) {
-                                d3.event.selection[1] = Math.max(
-                                    d3.event.selection[0],
-                                    d3.event.selection[1]
+                            if (selection[0] >= startSelection) {
+                                selection[1] = Math.max(
+                                selection[0],
+                                selection[1]
                                 );
                             }
 
-                            d3.event.selection[0] = 0;
+                            selection[0] = 0;
 
                             d3.select(this).call(
-                                d3.event.target.move,
-                                d3.event.selection
+                                event.target.move,
+                                selection
                             );
                         }
 
-                        var d0 = d3.event.selection.map(scaleX.invert);
-                        const s = d3.event.selection;
+                        var d0 = selection.map(scaleX.invert);
+                        const s = selection;
 
                         handle
                             .attr("display", null)
@@ -4442,12 +4444,12 @@ const geotype = (id) => {
         }
     };
 
-    function dragstarted() {
-        v0 = versor.cartesian(projection.invert(d3.mouse(this)));
+    function dragstarted(event) {
+        v0 = versor.cartesian(projection.invert(d3.pointer(event)));
         q0 = versor((r0 = projection.rotate()));
     }
 
-    dragged = function (targetDrag, transTime) {
+    dragged = function (event, targetDrag, transTime) {
         if (targetDrag) {
             d3.transition()
                 .duration(2000)
@@ -4510,7 +4512,7 @@ const geotype = (id) => {
                 });
         } else {
             const v1 = versor.cartesian(
-                projection.rotate(r0).invert(d3.mouse(this))
+                projection.rotate(r0).invert(d3.pointer(event))
             );
             const q1 = versor.multiply(q0, versor.delta(v0, v1));
             projection.rotate(versor.rotation(q1));
@@ -4574,7 +4576,7 @@ const geotype = (id) => {
         }
     };
 
-    view.call(d3.drag().on("start", dragstarted).on("drag", dragged));
+    view.call(d3.drag().on("start", dragstarted).on("drag", event=>(dragged(event))));
 
     view.style("transform-origin", "50% 50% 0");
     view.call(zoom);
@@ -4616,8 +4618,8 @@ const gazouillotype = (id) => {
         .style("stroke-width", "0"); // Invisible borders
 
     svg.call(
-        zoom.on("zoom", (e) => {
-            zoomed(d3.event.transform);
+        zoom.on("zoom", ({transform},e) => {
+            zoomed(transform);
         })
     );
 
@@ -4829,7 +4831,7 @@ const gazouillotype = (id) => {
                                 .attr("r", radius)
                                 .attr("cx", (d) => x(d.timespan))
                                 .attr("cy", (d) => y(d.indexPosition))
-                                .on("click", (d) => {
+                                .on("click", (event,d) => {
                                     d3.select("#linktosource").remove();
                                     lineData = [];
                                     lineData.push(d);
@@ -5304,13 +5306,13 @@ const gazouillotype = (id) => {
                                 handle.attr("display", "none");
 
                                 function brushStarted() {
-                                    if (d3.event.selection) {
-                                        startSelection = d3.event.selection[0];
+                                    if (event.selection) {
+                                        startSelection = event.selection[0];
                                     }
                                 }
 
                                 function brushEnded() {
-                                    if (!d3.event.selection) {
+                                    if (!event.selection) {
                                         handle.attr("display", "none");
 
                                         output({
@@ -5318,10 +5320,10 @@ const gazouillotype = (id) => {
                                         });
                                         return;
                                     }
-                                    if (d3.event.sourceEvent.type === "brush")
+                                    if (event.sourceEvent.type === "brush")
                                         return;
 
-                                    var d0 = d3.event.selection.map(
+                                    var d0 = event.selection.map(
                                             scaleX.invert
                                         ),
                                         d1 = d0.map(d3.timeDay.round);
@@ -5373,41 +5375,41 @@ const gazouillotype = (id) => {
                                 }
 
                                 function brushed(d) {
-                                    if (d3.event.sourceEvent.type === "brush")
+                                    if (event.sourceEvent.type === "brush")
                                         return;
 
                                     if (params.freezeMin) {
                                         if (
-                                            d3.event.selection[0] <
+                                            event.selection[0] <
                                             startSelection
                                         ) {
-                                            d3.event.selection[1] = Math.min(
-                                                d3.event.selection[0],
-                                                d3.event.selection[1]
+                                            event.selection[1] = Math.min(
+                                                event.selection[0],
+                                                event.selection[1]
                                             );
                                         }
                                         if (
-                                            d3.event.selection[0] >=
+                                            event.selection[0] >=
                                             startSelection
                                         ) {
-                                            d3.event.selection[1] = Math.max(
-                                                d3.event.selection[0],
-                                                d3.event.selection[1]
+                                            event.selection[1] = Math.max(
+                                                event.selection[0],
+                                                event.selection[1]
                                             );
                                         }
 
-                                        d3.event.selection[0] = 0;
+                                        event.selection[0] = 0;
 
                                         d3.select(this).call(
-                                            d3.event.target.move,
-                                            d3.event.selection
+                                            event.target.move,
+                                            event.selection
                                         );
                                     }
 
-                                    var d0 = d3.event.selection.map(
+                                    var d0 = event.selection.map(
                                         scaleX.invert
                                     );
-                                    const s = d3.event.selection;
+                                    const s = event.selection;
 
                                     handle
                                         .attr("display", null)
@@ -5552,7 +5554,7 @@ const gazouillotype = (id) => {
     var currentZoom;
 
     zoomed = (thatZoom, transTime) => {
-        // if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+        // if (event.sourceEvent && event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
 
         var t = thatZoom;
         currentZoom = t;
@@ -5723,8 +5725,8 @@ const pharmacotype = (id) => {
             [-Infinity, -Infinity],
             [Infinity, Infinity],
         ])
-        .on("zoom", (e) => {
-            zoomed(d3.event.transform);
+        .on("zoom", ({transform},e) => {
+            zoomed(transform);
         });
 
     var x = d3.scaleTime(); // Y axis scale
@@ -5872,7 +5874,7 @@ const pharmacotype = (id) => {
                 .attr("dy", 3)
                 .style("cursor", "pointer")
                 .text((d) => d.id)
-                .on("click", (d) => {
+                .on("click", (event,d) => {
                     let idMod = d.Study.ProtocolSection.IdentificationModule;
                     let statMod = d.Study.ProtocolSection.StatusModule;
                     let descMod = d.Study.ProtocolSection.DescriptionModule;
