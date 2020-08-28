@@ -116,7 +116,7 @@ const moveTo = (step) => {
     }
 
     if (step.hasOwnProperty("drag")) {
-        dragged(step.drag, 2000);
+        dragged({},step.drag, 2000);
     }
 };
 
@@ -4448,7 +4448,7 @@ const geotype = (id) => {
         q0 = versor((r0 = projection.rotate()));
     }
 
-    dragged = function (targetDrag, transTime) {
+    dragged = function (event, targetDrag, transTime) {
         if (targetDrag) {
             d3.transition()
                 .duration(2000)
@@ -4575,7 +4575,7 @@ const geotype = (id) => {
         }
     };
 
-    view.call(d3.drag().on("start", dragstarted).on("drag", dragged));
+    view.call(d3.drag().on("start", dragstarted).on("drag", event=>(dragged(event))));
 
     view.style("transform-origin", "50% 50% 0");
     view.call(zoom);
