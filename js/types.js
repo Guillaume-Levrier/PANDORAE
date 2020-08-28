@@ -3461,10 +3461,20 @@ const geotype = (id) => {
                         d.enrichment.hasOwnProperty("affiliations")
                     ) {
                         if (d.hasOwnProperty("issued")) {
-                            d.date =
-                                JSON.stringify(d.issued["date-parts"][0][0]) +
-                                "," +
-                                d.issued["date-parts"][0][1];
+                            d.rebuildDate =
+                            d.issued["date-parts"][0][0] +
+                            "-" +
+                            d.issued["date-parts"][0][1] +
+                            "-" +
+                            d.issued["date-parts"][0][2];
+
+                        d.parsedDate = parseTime(d.rebuildDate);
+
+                        d.date =
+                        JSON.stringify(d.issued["date-parts"][0][0]) +
+                        "," +
+                        d.issued["date-parts"][0][1];
+                           
                         }
 
                         d.authors = [];
@@ -3553,40 +3563,36 @@ const geotype = (id) => {
                     data[i].index = i;
                 } // id = item index
 
-                var cities = d3.group(dataArray,d=>d.affilId)
+                var citiesGroup = d3.group(dataArray,d=>d.affilId)
                  
+                var cities=[]
 
-                cities.forEach((d) => {
-                    d.lon = d.values[0].lon;
-                    d.lat = d.values[0].lat;
-                    d.country = d.values[0]["affiliation-country"];
-                    d.city = d.values[0]["affiliation-city"];
-                    d.affiliations = [];
-                    d.values = [];
+
+                citiesGroup.forEach((d) => {
+                 
+                   let valuesBuffer=[];
+
+                   let affiliationsBuffer=[]
 
                     for (var j = 0; j < data.length; j++) {
-                        if (
-                            data[j].hasOwnProperty("enrichment") &&
-                            data[j].enrichment.hasOwnProperty("affiliations")
-                        ) {
-                            for (
-                                var k = 0;
-                                k < data[j].enrichment.affiliations.length;
-                                k++
-                            ) {
-                                if (
-                                    data[j].enrichment.affiliations[k]
-                                        .affilId === d.key
-                                ) {
-                                    d.affiliations.push(
-                                        data[j].enrichment.affiliations[k]
-                                            .affilname
-                                    );
-                                    d.values.push(data[j]);
+                        if (data[j].hasOwnProperty("enrichment") && data[j].enrichment.hasOwnProperty("affiliations")) {
+                            for (var k = 0;k < data[j].enrichment.affiliations.length;k++) {
+                                if (data[j].enrichment.affiliations[k].affilId === d.key) {
+                                    affiliationsBuffer.push(data[j].enrichment.affiliations[k].affilname);
+                                    valuesBuffer.push(data[j]);
                                 }
                             }
                         }
                     }
+
+                    cities.push({
+                        "lon" : d[0].lon,
+                        "lat" : d[0].lat,
+                        "country" : d[0]["affiliation-country"],
+                        "city" : d[0]["affiliation-city"],
+                        "affiliations" : [],
+                        "values" : valuesBuffer
+                    })
                 });
 
                 for (var i = 0; i < cities.length; i++) {
@@ -3968,17 +3974,7 @@ const geotype = (id) => {
                         accessorFunc = accessor;
                     }
 
-                    const grouped = d3.group(initialData,d=>d.date)
-
-                    for (let i = 0; i < grouped.length; i++) {
-                        grouped[i].date = new Date(grouped[i].key);
-                    }
-
-                    for (let i = 0; i < grouped.length; i++) {
-                        if (grouped[i].key === "undefined") {
-                            grouped.splice(i, 1);
-                        }
-                    }
+                    const grouped = d3.group(data,d=>+d.parsedDate)
 
                     const isDate = true;
                     var dateExtent,
@@ -3988,14 +3984,8 @@ const geotype = (id) => {
                         dateRanges,
                         scaleTime;
                     if (isDate) {
-                        dateExtent = d3.extent(grouped.map((d) => d.date));
-
-                        dateExtent[0].setFullYear(
-                            dateExtent[0].getFullYear() - 1
-                        );
-                        dateExtent[1].setFullYear(
-                            dateExtent[1].getFullYear() + 1
-                        );
+                      
+                        dateExtent = d3.extent(data.map(d=>d.date));
 
                         dateRangesCount = Math.round(width / 5);
                         dateScale = d3
@@ -4057,35 +4047,49 @@ const geotype = (id) => {
                             "translate(30," + sliderOffsetHeight + ")"
                         );
 
-                    grouped.forEach((d) => {
-                        d.key = d.date;
-                        d.value = d.values.length;
+                        const values =[]
+
+                    grouped.forEach((val,key) => {
+                        
+                        if (isNaN(key)){
+                            
+                            //log amount of missing elements
+                        }else {
+                            values.push({date:key,value:val.length})
+                        }
                     });
 
-                    const values = grouped.map((d) => d.value);
-                    const min = d3.min(values);
-                    const max = d3.max(values);
-                    const maxX = grouped[grouped.length - 1].key;
-                    const minX = grouped[0].key;
+                  
 
-                    var minDiff = d3.min(grouped, (d, i, arr) => {
+                    const min = d3.min(values,d=>d.value);
+                    const max = d3.max(values,d=>d.value);
+                    const maxX = values[values.length - 1].date;
+                    const minX = values[0].date;
+
+                    
+                    var minDiff = d3.min(values, (d, i, arr) => {
                         if (!i) return Infinity;
-                        return d.key - arr[i - 1].key;
+                        return d.date - arr[i - 1].date;
                     });
-
-                    let eachBarWidth = chartWidth / minDiff / (maxX - minX);
+                                        
+                    let eachBarWidth = 1
+                    /*
+                     chartWidth / values.length;
 
                     if (eachBarWidth > 20) {
                         eachBarWidth = 20;
                     }
 
+
                     if (minDiff < 1) {
                         eachBarWidth = eachBarWidth * minDiff;
                     }
 
+
                     if (eachBarWidth < 1) {
                         eachBarWidth = 1;
                     }
+                    */
 
                     const scale = params.yScale
                         .domain([params.minY, max])
@@ -4111,9 +4115,13 @@ const geotype = (id) => {
                         .ticks(max == 1 ? 1 : params.yTicks)
                         .tickFormat(d3.format(".2s"));
 
+                    console.log(eachBarWidth)
+                    console.log(chartHeight)
+                    console.log(values)
+
                     const bars = chart
                         .selectAll(".bar")
-                        .data(grouped)
+                        .data(values)
                         .enter()
                         .append("rect")
                         .attr("class", "bar")
@@ -4121,7 +4129,7 @@ const geotype = (id) => {
                         .attr("height", (d) => scale(d.value))
                         .attr("fill", "steelblue")
                         .attr("y", (d) => -scale(d.value) + (chartHeight - 25))
-                        .attr("x", (d, i) => scaleX(d.key) - eachBarWidth / 2)
+                        .attr("x", (d, i) => scaleX(d.date) - eachBarWidth / 2)
                         .attr("opacity", 0.9);
 
                     const xAxisWrapper = chart
