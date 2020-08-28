@@ -161,7 +161,7 @@ const drawFlux = (svg, traces, horizontal, showTexts) => {
     .style("cursor", "pointer")
     .attr("font-size", 10)
     .text(d => d.hops[0].info.name)
-    .on("mouseenter", d => {
+    .on("mouseenter", (event,d) => {
       //NODEGROUP STYLE
       nodeGroup
         .transition()
@@ -207,7 +207,7 @@ const drawFlux = (svg, traces, horizontal, showTexts) => {
         }
       });
     })
-    .on("mouseout", d => {
+    .on("mouseout", (event,d) => {
       nodeGroup
         .transition()
         .duration(200)
