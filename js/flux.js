@@ -14,7 +14,6 @@
 
 //========== REQUIRED MODULES ==========
 const tg = require("@hownetworks/tracegraph");
-const rpn = require("request-promise-native"); // RPN enables to generate requests to various APIs
 const fs = require("fs"); // FileSystem reads/writes files and directories
 const userDataPath = remote.app.getPath("userData");
 const { ipcRenderer } = require("electron"); // ipcRenderer manages messages with Main Process
@@ -704,23 +703,9 @@ const scopusBasicRetriever = checker => {
       let urlStart = "&start=";
       let docAmount = 0;
 
-      let optionsRequest = {
-        // Prepare options for the Request-Promise-Native Package
-        uri:
-          rootUrl +
-          scopusQuery +
-          apiProm +
-          scopusApiKey +
-          urlCount +
-          1 +
-          urlStart +
-          0, // URI to be accessed
-        headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-        json: true // Automatically parses the JSON string in the response
-      };
-
-      rpn(optionsRequest) // RPN stands for Request-promise-native (Request + Promise)
-        .then(function(firstResponse) {
+    fetch(rootUrl + scopusQuery + apiProm + scopusApiKey + urlCount + 1 + urlStart + 0)
+      .then(res => res.json())
+      .then(firstResponse=>{
           // Then, once the response is retrieved
           if (checker) {
             if (firstResponse["search-results"]) {
@@ -846,68 +831,8 @@ ipcRenderer.on("artoo",(event,message)=>{
   }
 })
 
-/*
-const biorxivBasicRetriever = checker => {
 
-
-  let query = document.getElementById("biorxivlocalqueryinput").value; // Request Content
-
-
-
-  ipcRenderer.send(
-    "console-logs",
-    "Sending biorxiv the following query : " + query
-  ); // Log query
-
-      // URL Building blocks
-      let rootUrl ="https://api.rxivist.org/v1/papers?q=";
-
-      let optionsRequest = {
-        // Prepare options for the Request-Promise-Native Package
-        uri:
-          rootUrl +
-          query+"&page_size=1",
-        headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-        json: true // Automatically parses the JSON string in the response
-      };
-  
-      rpn(optionsRequest) // RPN stands for Request-promise-native (Request + Promise)
-        .then(response => {
-          console.log(response)
-
-          let dataBasicPreview =
-          "<strong>" +
-          response.query.text_search +
-          "</strong>" +
-          "<br>Expected results at request time : " +
-          response.query.total_results +
-          "<br>Amount of requests needed to retrieve full response : " +
-          parseInt(response.query.final_page+1) +
-          "<br>[Reload this window to submit a different query.]<br>";
-          
-
-        document.getElementById(
-          "biorxiv-basic-previewer"
-        ).innerHTML = dataBasicPreview;
-
-        // Display success in request button
-        fluxButtonAction(
-          "scopus-basic-query",
-          true,
-          "Query Basic Info Retrieved",
-          "errorPhrase"
-        );
-
-        // Display next step option: send full request to Chæros
-        document.getElementById("biorxiv-query").style.display = "block"; 
-
-        })
-        
-};
-*/
 //========== clinicalBasicRetriever ==========
-
-
 const clinicTrialBasicRetriever = checker => {
   
 
@@ -917,23 +842,12 @@ const clinicTrialBasicRetriever = checker => {
     "console-logs",
     "Sending Clinical Trial APIs the following query : " + ctQuery
   ); // Log query
-
   
       let rootUrl = "https://clinicaltrials.gov/api/query/full_studies?";
-    
-      let optionsRequest = {
-        // Prepare options for the Request-Promise-Native Package
-        uri:
-          rootUrl + "expr=" +
-          ctQuery +
-          "&fmt=json", // URI to be accessed
-        headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-        json: true // Automatically parses the JSON string in the response
-      };
-
-      rpn(optionsRequest) // RPN stands for Request-promise-native (Request + Promise)
-        .then(firstResponse => {
-          // Then, once the response is retrieved
+              
+      fetch(rootUrl + "expr=" + ctQuery + "&fmt=json")
+        .then(res => res.json())
+        .then(firstResponse=>{
           
         let totalResults = firstResponse.FullStudiesResponse.NStudiesFound;
 
@@ -1010,15 +924,9 @@ let zoteroApiKey = getPassword("Zotero", zoteroUser);
       zoteroVersion +
       zoteroApiKey;
 
-    // Prepare options for the Request-Promise-Native Package
-    var optionsGlobalRequest = {
-      uri: zoteroCollectionRequest, // URI to be accessed
-      headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-      json: true // Automatically parses the JSON string in the response
-    };
-
-    rpn(optionsGlobalRequest) // RPN stands for Request-promise-native (ES6)
-      .then(function(zoteroColResponse) {
+  fetch(zoteroCollectionRequest)
+    .then(res => res.json())
+    .then(zoteroColResponse=>{
         // With the response
 
         let collections = []; // Create empty 'collections' array
@@ -1104,16 +1012,10 @@ const zoteroLocalRetriever = () => {
   //build the url
   let zoteroCollectionRequest = rootUrl;
 
-  // Prepare options for the Request-Promise-Native Package
-  var optionsGlobalRequest = {
-    uri: zoteroCollectionRequest, // URI to be accessed
-    method: "GET",
-    headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-    json: true // Automatically parses the JSON string in the response
-  };
-
-  rpn(optionsGlobalRequest) // RPN stands for Request-promise-native (ES6)
-    .then(zoteroColResponse => {
+  fetch(zoteroCollectionRequest)
+  .then(res => res.json())
+  .then(zoteroColResponse=>{
+   
       // With the response
 
       console.log(zoteroColResponse);
@@ -1261,21 +1163,16 @@ const endpointConnector = (service, target) => {
 //======== Hyphe Endpoint Chercker ======
 
 const hypheCheck = target => {
+  console.log(target)
   let chk = document.getElementById("hyphe-checker");
 
-  var hypheCheckOptions = {
-    method: "POST",
-    uri: target + "/api/", // URI to be accessed
-    headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-    body: { method: "get_status", params: [null] },
-    json: true // Automatically parses the JSON string in the response
-  };
-
-  rpn(hypheCheckOptions) // RPN stands for Request-promise-native (ES6)
-    .then(hypheResponse => {
-      // With the response
-
-      if (hypheResponse[0].code === "success") {
+  fetch(target + "/api/", {
+    method: 'POST',
+    body:    { method: "get_status", params: [null] },
+    headers: { 'Content-Type': 'application/json' },
+})
+  .then(res =>{
+      if (res.ok) {
         chk.style.color = "DarkOliveGreen";
         chk.innerText = "Hyphe enpoint reached";
         document.getElementById("hyphe-exporter").style.display = "block";
@@ -1285,6 +1182,7 @@ const hypheCheck = target => {
       }
     })
     .catch(e => {
+      console.log(e)
       chk.style.color = "DarkRed";
       chk.innerText = "Failure";
     });
@@ -1293,16 +1191,14 @@ const hypheCheck = target => {
 //======== Hyphe Endpoint Chercker ======
 
 const hypheCorpusList = (target, prevId) => {
-  var hypheCheckOptions = {
-    method: "POST",
-    uri: target + "/api/", // URI to be accessed
-    headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-    body: { method: "list_corpus" /* ,"params":[null] */ },
-    json: true // Automatically parses the JSON string in the response
-  };
 
-  rpn(hypheCheckOptions) // RPN stands for Request-promise-native (ES6)
+  fetch(target + "/api/", {
+    method: 'POST',
+    body:   JSON.stringify({ method: "list_corpus"}),
+})
+  .then(res =>res.json())
     .then(hypheResponse => {
+      console.log(hypheResponse)
       // With the response
       if (hypheResponse[0].code === "success") {
         let corpusList = "<ul>";
@@ -1357,88 +1253,78 @@ const loadHyphe = (corpus, endpoint, pass) => {
 
   document.getElementById(corpus).innerHTML ="Loading corpus, please wait ...";
 
-
   var corpusRequests = [];
 
-var startCorpus = {
-  method: "POST",
-  uri: endpoint + "/api/", // URI to be accessed
-  headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-  body: {
-    method: "start_corpus",
-    params: [corpus, password]
-  },
-  json: true // Automatically parses the JSON string in the response
-};
+fetch(endpoint + "/api/",{
+    method:"POST",
+    body:JSON.stringify({
+      method: "start_corpus",
+      params: [corpus, password]
+})
 
-Promise.all([rpn(startCorpus)]).then(startingCorpus => {
+})
+.then(res=>res.json())
+.then(startingCorpus => {
 
-let corpusStatus = startingCorpus[0][0].result;
+console.log(startingCorpus)
 
+let corpusStatus = startingCorpus[0].result;
 
-var getCorpusStats = {
-  method: "POST",
-  uri: endpoint + "/api/", // URI to be accessed
-  headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-  body: {
-    method: "store.get_webentities_stats",
-    params: [corpus]
-  },
-  json: true
-};
+//get WE stats
+corpusRequests.push({
+    method: "POST",
+    body: JSON.stringify({
+      method: "store.get_webentities_stats",
+      params: [corpus]
+    })
+  });
 
-corpusRequests.push(rpn(getCorpusStats));
+console.log(corpusRequests)
 
-var getWebEntities = {
-  method: "POST",
-  uri: endpoint + "/api/", // URI to be accessed
-  headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-  body: {
-    method: "store.get_webentities_by_status",
-    params: {corpus:corpus,status:"in", count:-1}
-  },
-  json: true
-};
+//get WE
+corpusRequests.push(
+  {
+    method: "POST",
+    body: JSON.stringify({
+      method: "store.get_webentities_by_status",
+      params: {corpus:corpus,status:"in", count:-1}
+    })
+  }
+ );
 
-corpusRequests.push(rpn(getWebEntities));
+//get the network
+  corpusRequests.push(
+  {
+      method: "POST",
+      body: JSON.stringify({
+        method: "store.get_webentities_network",
+        params: {corpus:corpus}
+      })
+    }
+  );  
 
-var getNetwork = {
-  method: "POST",
-  uri: endpoint + "/api/", // URI to be accessed
-  headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-  body: {
-    method: "store.get_webentities_network",
-    params: {corpus:corpus}
-  },
-  json: true
-};
-
-corpusRequests.push(rpn(getNetwork));
-
-var getTags = {
-  method: "POST",
-  uri: endpoint + "/api/", // URI to be accessed
-  headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-  body: {
-    method: "store.get_tags",
-    params: {namespace:null,corpus:corpus}
-  },
-  json: true
-};
-
-corpusRequests.push(rpn(getTags));
+//get the tags
+corpusRequests.push(
+{method: "POST",
+   body: JSON.stringify({
+      method: "store.get_tags",
+      params: {namespace:null,corpus:corpus}
+    })
+  }
+);  
 
 const retrieveCorpus = () =>{
 
-Promise.all(corpusRequests).then(status => {
-
+Promise.all(corpusRequests.map(d=>fetch(endpoint + "/api/",d)))
+  .then(responses=>Promise.all(responses.map(res => res.json())))
+  .then(status => {
+    console.log(status)
+  
   let success = true;
 
   status.forEach(answer=>{
     if(answer[0].code != "success") {success=false}
   })
-
-   
 
   let weStatus = status[0][0].result;
 
@@ -1449,7 +1335,8 @@ Promise.all(corpusRequests).then(status => {
   let tags = status[3][0].result.USER;
 
 
-  
+    corpusRequests = []; // purge the request array
+
       // With the response
       if (success) {
         pandodb.hyphotype.add({
@@ -1468,10 +1355,10 @@ Promise.all(corpusRequests).then(status => {
       
 
     })
-    .catch(e => {});
+    .catch(e => {console.log(e)});
   }
     setTimeout(retrieveCorpus,2000)
-  }).catch(e => {});
+  }).catch(e => {console.log(e)});
 };
 
 const twitterCat = () => {
