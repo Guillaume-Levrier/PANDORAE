@@ -801,7 +801,6 @@ if (document.getElementById("biorxiv-author").value.length>0) {
   ).innerHTML = "Retrieving amount of results...";
 
   ipcRenderer.send("artoo",{type:"request",model:"biorxiv-amount-injector",address:reqURL})
-  console.log(reqURL)
 }
 
 ipcRenderer.on("artoo",(event,message)=>{
@@ -1018,8 +1017,6 @@ const zoteroLocalRetriever = () => {
    
       // With the response
 
-      console.log(zoteroColResponse);
-
       let collections = []; // Create empty 'collections' array
 
       for (let i = 0; i < zoteroColResponse.length; i++) {
@@ -1163,7 +1160,7 @@ const endpointConnector = (service, target) => {
 //======== Hyphe Endpoint Chercker ======
 
 const hypheCheck = target => {
-  console.log(target)
+  
   let chk = document.getElementById("hyphe-checker");
 
   fetch(target + "/api/", {
@@ -1198,7 +1195,7 @@ const hypheCorpusList = (target, prevId) => {
 })
   .then(res =>res.json())
     .then(hypheResponse => {
-      console.log(hypheResponse)
+    
       // With the response
       if (hypheResponse[0].code === "success") {
         let corpusList = "<ul>";
@@ -1266,8 +1263,6 @@ fetch(endpoint + "/api/",{
 .then(res=>res.json())
 .then(startingCorpus => {
 
-console.log(startingCorpus)
-
 let corpusStatus = startingCorpus[0].result;
 
 //get WE stats
@@ -1279,7 +1274,6 @@ corpusRequests.push({
     })
   });
 
-console.log(corpusRequests)
 
 //get WE
 corpusRequests.push(
@@ -1318,7 +1312,6 @@ const retrieveCorpus = () =>{
 Promise.all(corpusRequests.map(d=>fetch(endpoint + "/api/",d)))
   .then(responses=>Promise.all(responses.map(res => res.json())))
   .then(status => {
-    console.log(status)
   
   let success = true;
 

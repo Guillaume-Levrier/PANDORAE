@@ -285,23 +285,16 @@ const scopusRetriever = (user, query, bottleRate) => {
     let urlStart = "&start=";
     let docAmount = 0;
 
-    let optionsRequest = {
-      // Prepare options for the Request-Promise-Native Package
-      uri:
-        rootUrl +
-        scopusQuery +
-        apiProm +
-        scopusApiKey +
-        urlCount +
-        1 +
-        urlStart +
-        0,
-      headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-      json: true // Automatically parses the JSON string in the response
-    };
-
-    rpn(optionsRequest) // RPN stands for Request-promise-native (Request + Promise)
-      .then(function(firstResponse) {
+    fetch(rootUrl +
+      scopusQuery +
+      apiProm +
+      scopusApiKey +
+      urlCount +
+      1 +
+      urlStart +
+      0)
+      .then(res=>res.json())
+      .then(firstResponse => {
         // Once you get the response
 
         let docAmount =
@@ -591,13 +584,9 @@ const clinTriRetriever = query => {
     // URL Building blocks
     let rootUrl = "https://clinicaltrials.gov/api/query/full_studies?";
 
-    let optionsRequest = {      // Prepare options for the Request-Promise-Native Package
-      uri: rootUrl + "expr=" + query + "&fmt=json", // URI to be accessed
-      headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-      json: true // Automatically parses the JSON string in the response
-    };
-
-    rpn(optionsRequest) // RPN stands for Request-promise-native (Request + Promise)
+    
+    fetch(rootUrl + "expr=" + query + "&fmt=json")
+      .then(res=>res.json())
       .then(firstResponse => {
         // Once you get the response
 
@@ -827,19 +816,15 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
         var collectionItem = [{ name: "", parentCollection: "" }]; // Create the Collection item to be sent
         collectionItem[0].name = collectionName;
 
-        var optionsCollectionCreation = {
-          // Prepare options for the Request-Promise-Native Package
-          method: "POST", // Use POST method
-          uri: collectionCreationUrl, // URI to be accessed
-          headers: { "User-Agent": "Request-Promise" }, // Headers (some options can be added here)
-          body: collectionItem, // Bundle the Collection Item with the request
-          json: true // Automatically parses the JSON string in the response
-        };
-
         let collectionCode = { code: "" };
 
-        rpn(optionsCollectionCreation).then(collectionName => {
-          // Send the request through RPN
+        
+        fetch(collectionCreationUrl,{
+          method:"POST",
+          body:JSON.stringify(collectionItem)
+        })
+        .then(res=>res.json())
+        .then(collectionName => {
 
           collectionCode.code = collectionName.success["0"]; // Retrieve name from the response
 
