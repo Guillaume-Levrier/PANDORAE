@@ -17,7 +17,6 @@ Future version : "1.0.03"
 - continuous integration at each release using GitHub actions
 
 *FLUX/CHAEROS*
-- move from RPN to native fetching
 - calculate flux based on available services
 - direct Twitter and WoS API requests
 - direct HAL requests 
