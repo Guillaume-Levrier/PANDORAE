@@ -138,16 +138,26 @@ var FBO = function(exports){
         geometry.addAttribute( 'position',  new THREE.BufferAttribute( vertices, 3 ) );
 
         //the rendermaterial is used to render the particles
-        exports.particles = new THREE.Points( geometry, renderMaterial );
+        particles = new THREE.Points( geometry, renderMaterial );
+
+        exports.particles = particles;
         exports.renderer = renderer;
 
     };
 
     //7 update loop
-    exports.update = function(){
+    exports.update = function(dispose){
+
+        if (dispose){
+
+           renderer.dispose()
+           particles=null;
+
+        } else {
 
         //1 update the simulation and render the result in a target texture
-      
+    
+
         exports.renderer.setRenderTarget( rtt );
        
         renderer.clear();
@@ -158,6 +168,7 @@ var FBO = function(exports){
 
         //2 use the result of the swap as the new position for the particles' renderer
         exports.particles.material.uniforms.positions.value = rtt.texture;
+        }
     };
     return exports;
 }
@@ -263,7 +274,7 @@ window.onload = reloadCore();
            composer.addPass(new RenderPass(scene, camera));
            composer.addPass(effectPass);
 
-           window.addEventListener( "resize", onResize );
+         //  window.addEventListener( "resize", onResize );
           // onResize();
            update();
        }
@@ -290,6 +301,7 @@ window.onload = reloadCore();
            }
            return data;
        }
+       /*
        function onResize()
        { 
            
@@ -305,7 +317,7 @@ window.onload = reloadCore();
                location.reload()
             },400)
            
-       }
+       }*/
 
        function update()
        {
@@ -313,8 +325,13 @@ window.onload = reloadCore();
         if (dispose) {
 
             console.log("stopped")
-            //FBO.dispose()
+
+           
+
+            FBO.update(true);
+            
             simulationShader.dispose()
+            
             
           
         } else {
