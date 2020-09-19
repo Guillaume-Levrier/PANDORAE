@@ -275,7 +275,7 @@ window.onload = reloadCore();
            composer.addPass(new RenderPass(scene, camera));
            composer.addPass(effectPass);
 
-         //  window.addEventListener( "resize", onResize );
+           window.addEventListener( "resize", onResize );
           // onResize();
            update();
        }
@@ -302,7 +302,7 @@ window.onload = reloadCore();
            }
            return data;
        }
-       /*
+       
        function onResize()
        { 
            
@@ -318,24 +318,18 @@ window.onload = reloadCore();
                location.reload()
             },400)
            
-       }*/
+       }
 
        function update()
        {
 
         if (dispose) {
 
-            console.log("stopped")
-
-           
+            window.removeEventListener("resize",onResize, false)
           
             simulationShader.dispose()
             FBO.update(true);
-            
-           
-            
-            
-          
+                      
         } else {
         requestAnimationFrame(update);
 
