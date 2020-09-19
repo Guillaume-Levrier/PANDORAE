@@ -319,11 +319,13 @@ const backToPres = () => {
 const loadType = (type, id) => {
     type = type;
     id = id;
-
+    
+    dispose=true;
     xtypeDisplay();
     purgeCore();
     xtypeExists = true;
     coreExists = false;
+
     ipcRenderer.send("audio-channel", "button1");
     field.value = "";
     const exporter = () => categoryLoader("export");
@@ -6250,7 +6252,7 @@ const typeSwitch = (type, id) => {
     }
 
     document.getElementById("source").innerText = "Source: " + id;
-    dispose=true;
+   
 };
 
 // MODULE EXPORT - don't remove useful for iframe export
