@@ -307,11 +307,18 @@ window.onload = reloadCore();
            
        }
 
-
-
        function update()
        {
-           requestAnimationFrame(update);
+
+        if (dispose) {
+
+            console.log("stopped")
+            //FBO.dispose()
+            simulationShader.dispose()
+            
+          
+        } else {
+        requestAnimationFrame(update);
 
            //update params
            simulationShader.uniforms.timer.value = parseFloat( pandoratio );
@@ -324,6 +331,8 @@ window.onload = reloadCore();
            //render the particles at the new location
            //renderer.render( scene, camera );
             composer.render(clock.getDelta());
+        }
+          
        }
 
 

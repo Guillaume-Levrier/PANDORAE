@@ -25,6 +25,7 @@ const types = require("./js/types");
 const { dialog } = require('electron').remote;
 const Quill = require("quill");
 const { zoomIdentity } = require("d3");
+var dispose = false;
 
 // ============ VERSION ===========
 const msg =
