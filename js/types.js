@@ -6250,6 +6250,7 @@ const typeSwitch = (type, id) => {
     }
 
     document.getElementById("source").innerText = "Source: " + id;
+    dispose=true;
 };
 
 // MODULE EXPORT - don't remove useful for iframe export
