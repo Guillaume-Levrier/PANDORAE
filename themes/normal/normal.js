@@ -150,6 +150,7 @@ var FBO = function(exports){
 
         if (dispose){
 
+          
            renderer.dispose()
            particles=null;
 
@@ -327,10 +328,11 @@ window.onload = reloadCore();
             console.log("stopped")
 
            
-
+          
+            simulationShader.dispose()
             FBO.update(true);
             
-            simulationShader.dispose()
+           
             
             
           
