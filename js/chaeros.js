@@ -825,11 +825,12 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
                         for (var i = 0; i < response.length; i++) {
                             response[i].items.forEach((d) => {
                                 if (
-                                    d.hasOwnProperty("shortTitle") &&
-                                    typeof JSON.parse(d.shortTitle) != "string"
+                                    d.hasOwnProperty("shortTitle") 
                                 ) {
                                     //var enrichment = ;
-                                    d.enrichment = JSON.parse(d.shortTitle);
+                                    if (d.shortTitle[0]==="{"){
+                                        d.enrichment = JSON.parse(d.shortTitle);
+                                    }
                                     //if (d.enrichment.hasOwnProperty("altmetric")) {
                                     //  d.enrichment.altmetric = JSON.parse(d.enrichment.altmetric);
                                     //}
