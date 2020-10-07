@@ -28,11 +28,6 @@ const date =
 
 //========== STARTING FLUX ==========
 ipcRenderer.send("console-logs", "Opening Flux"); // Sending notification to console
-ipcRenderer.on("window-close", (event, message) => {
-  closeWindow();
-});
-
-
 
 //========== Tracegraph ==========
 

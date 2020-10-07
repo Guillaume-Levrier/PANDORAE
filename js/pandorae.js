@@ -590,7 +590,8 @@ if (notLoadingMenu) {
             typeContainer.addEventListener("click",e=>{mainDisplay(block);})
             document.getElementById("secMenContent").appendChild(typeContainer);
             loadingCount+=1;
-            if (loadingCount===blocks.length){notLoadingMenu=true;}
+            if (loadingCount===blocks.length){notLoadingMenu=false;}
+            else {notLoadingMenu=true}
           }
         });
       });
@@ -611,6 +612,7 @@ if (notLoadingMenu) {
   notLoadingMenu=true;
       break;
          case "export":
+           console.log("export1")
          blocks = [
            'interactive',
            'svg',
