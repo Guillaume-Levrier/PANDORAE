@@ -15,14 +15,13 @@
 
 // =========== NODE - NPM ===========
 // Loading all relevant modules
-const { remote, ipcRenderer, shell, clipboard, webFrame } = require("electron");
+const { ipcRenderer, shell } = require("electron");
+const userDataPath = ipcRenderer.sendSync('remote', 'userDataPath'); // Find userData folder Path
+const appPath = ipcRenderer.sendSync('remote', 'appPath');
+const types = require("./js/types");
 const fs = require("fs");
 const d3 = require("d3");
 const THREE = require("three");
-const userDataPath = remote.app.getPath("userData");
-const appPath = remote.app.getAppPath();
-const types = require("./js/types");
-const { dialog } = require('electron').remote;
 const Quill = require("quill");
 const { zoomIdentity } = require("d3");
 var dispose = false;
@@ -412,7 +411,6 @@ const addToLog = (message) => {
 ipcRenderer.on("console-messages", (event, message) => addToLog(message));
 
 ipcRenderer.on("mainWindowReload", (event, message) => {
-  remote.getCurrentWindow().reload();
   location.reload();
 });
 
@@ -749,7 +747,7 @@ const slideCreator = () => {
     document.body.style.animation = "fadeout 0.1s";
     setTimeout(() => {
       document.body.remove();
-      remote.getCurrentWindow().reload();
+      location.reload();
     }, 100);
   })
 
@@ -880,6 +878,8 @@ setTimeout(() => {
 }, 500);
 }
 
+
+/*
 const saveToolTip = () => {
 
   let tooltip = document.getElementById("tooltip");
@@ -888,14 +888,17 @@ const saveToolTip = () => {
   datasetName = datasetName.replace(/\//ig,"_");
   datasetName = datasetName.replace(/:/ig,"+");
 
-
   remote.getCurrentWindow().capturePage({x:parseInt(tooltip.offsetLeft),y:parseInt(tooltip.offsetTop),width:parseInt(tooltip.offsetWidth),height:parseInt(tooltip.offsetHeight)}).then(img=>{
-    fs.writeFile(dialog.showSaveDialog({"defaultPath":datasetName+".png"}),img.toPNG(),()=>{
+    fs.writeFile(
+      ipcRenderer.sendSync('dialogue',{"defaultPath":datasetName+".png"})      
+      ,img.toPNG(),()=>{
       tooltip.style.overflow = "auto";
     })
   })
 
 }
+*/
+
 
 const savePNG = () => {
   document.getElementById('icons').style.display = "none";
@@ -905,24 +908,11 @@ const savePNG = () => {
   var datasetName =document.getElementById('source').innerText.slice(8);
   datasetName = datasetName.replace(/\//ig,"_");
   datasetName = datasetName.replace(/:/ig,"+");
-  setTimeout(() => {
-    remote.getCurrentWindow().capturePage().then(img=>{
-      dialog.showSaveDialog({defaultPath:datasetName+".png"}).then(filePath=>{
-     
-      fs.writeFile(
-        filePath.filePath,
-        img.toPNG(),()=>{
-          
-        document.getElementById('icons').style.display = "block";
-          document.getElementById('tooltip').style.overflow = "auto";
 
-      })
-    })
+  ipcRenderer.invoke("savePNG",{defaultPath:datasetName+".png"}).then(res=>{
+    document.getElementById('icons').style.display = "block";
+    document.getElementById('tooltip').style.overflow = "auto";
   })
-
-  }, 250);
-
-
 }
 
 
@@ -952,20 +942,10 @@ const serialize = (svg) => {
 
 
     ipcRenderer.send("console-logs", "Exporting snapshot of current type to SVG in the user's 'Pictures' folder.");
-    dialog.showSaveDialog({defaultPath:datasetName+".svg"}).then(filePath=>{
+    ipcRenderer.invoke("savePNG",{defaultPath:datasetName+".svg"}).then(res=>{
 
-    fs.writeFile(
-     filePath.filePath,
-      string,
-      "utf8",
-      err => {
-        if (err) {
-          ipcRenderer.send("console-logs", JSON.stringify(err));
-        }
-
-      }
-    );
     })
+    
 
 }
 
@@ -1169,7 +1149,7 @@ const cmdinput = input => {
         setTimeout(() => {
           document.body.remove();
           selectTheme(input.substring(13, input.length));
-          remote.getCurrentWindow().reload();
+          location.reload();
         }, 450);
 
         break;
@@ -1200,7 +1180,7 @@ const cmdinput = input => {
         setTimeout(() => {
           document.body.remove();
           ipcRenderer.send("change-theme", "blood-dragon");
-          remote.getCurrentWindow().reload();
+          location.reload();
         }, 450);
         break;
 
@@ -1240,23 +1220,14 @@ const cmdinput = input => {
         document.body.style.animation = "fadeout 0.5s";
         setTimeout(() => {
           document.body.remove();
-          remote.getCurrentWindow().reload();
+          location.reload();
         }, 450);
         break;
-
-        case CM.mainField.fullscreen:
-          if(remote.getCurrentWindow().isFullScreen()){
-            remote.getCurrentWindow().setFullScreen(false);
-          } else {
-            remote.getCurrentWindow().setFullScreen(true);
-          }
-            break;
 
         case CM.mainField.restart:
           document.body.style.animation = "fadeout 0.5s";
           setTimeout(() => {
-            remote.app.relaunch();
-            remote.app.exit(0);
+            ipcRenderer.invoke("restart",true)
           }, 450);
           break;
 
@@ -1274,7 +1245,7 @@ const cmdinput = input => {
 
       case CM.mainField.openDevtools:
         commandReturn = "opening devtools";
-        remote.getCurrentWindow().openDevTools();
+        ipcRenderer.invoke("mainDevTools",true)
         ipcRenderer.send("console-logs", "opening devtools");
         break;
 
@@ -1360,15 +1331,15 @@ const detransfect = () => {
 //// ========== WINDOW MANAGEMENT ========
 
 const closeWindow = () => {
-  remote.getCurrentWindow().close();
+  ipcRenderer.send("window-manager","closeWindow","index")
 };
 
 const refreshWindow = () => {
-  remote.getCurrentWindow().reload();
+  location.reload();
 };
 
 const reframeMainWindow = () => {
-  remote.mainWindow({ frame: true });
+ // remote.mainWindow({ frame: true });
 };
 
 //// ========== TUTORIAL ========

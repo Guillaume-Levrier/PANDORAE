@@ -512,7 +512,7 @@ const populateSlides = id => {
                         document.body.style.animation = "fadeout 0.1s";
                         setTimeout(() => {
                             document.body.remove();
-                            remote.getCurrentWindow().reload();
+                            location.reload();
                         }, 100);
                     });
 

@@ -267,19 +267,17 @@ const {shell}=require("electron");
 <link rel="stylesheet" type="text/css" href="css/pandorae.css">
 <link rel="icon" type="image/png" href="img/AE-favicon.png"/>
 <script>
-const remote = require('electron').remote;
 
 const closeWindow = () => {
-        ipcRenderer.send("window-ids","flux",remote.getCurrentWindow().id,false);
-       remote.getCurrentWindow().close();
+        ipcRenderer.send("window-manager","closeWindow","flux")     
 }
 
 const refreshWindow = () => {
-       remote.getCurrentWindow().reload();
+       location.reload();
 }
 
 const reframeMainWindow = () => {
-        remote.mainWindow({frame: true})
+      //  remote.mainWindow({frame: true})
 }
 
 

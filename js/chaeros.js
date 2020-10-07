@@ -7,9 +7,9 @@
 //redispatched to the index's "coreCanvas" and "field" (the main field), which subsequently impacts the core animation
 //and the field's value.
 
-const { remote, ipcRenderer } = require("electron"); // Load ipc to communicate with main process
-const userDataPath = remote.app.getPath("userData"); // Find userData folder Path
-const appPath = remote.app.getAppPath();
+const { ipcRenderer } = require("electron"); // Load ipc to communicate with main process
+const userDataPath = ipcRenderer.sendSync('remote', 'userDataPath'); // Find userData folder Path
+const appPath = ipcRenderer.sendSync('remote', 'appPath');
 const bottleneck = require("bottleneck"); // Load bottleneck to manage API request limits
 const fs = require("fs"); // Load filesystem to manage flatfiles
 const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
@@ -422,12 +422,6 @@ const scopusRetriever = (user, query, bottleRate) => {
 
 //========== biorxivRetriever ==========
 const biorxivRetriever = (query) => {
-    ipcRenderer.send(
-        "window-ids",
-        "chaeros",
-        remote.getCurrentWindow().id,
-        false
-    );
 
     let amount = query.amount;
     let totalrequests = Math.ceil(query.amount / 75);

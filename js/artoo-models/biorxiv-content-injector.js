@@ -8,8 +8,8 @@
      * artoo's extension is activated.
      */
 
-    const { remote, ipcRenderer } = require("electron");
-    const appPath = remote.app.getAppPath();
+    const { ipcRenderer } = require("electron");
+    const appPath = ipcRenderer.sendSync('remote', 'appPath');
   
     var body;
     if ('document' in this) {
@@ -45,7 +45,7 @@
         let content = artoo.scrape('.highwire-cite-metadata-doi');
         ipcRenderer.send('artoo',{type:"biorxiv-content",content:content});
         setTimeout(() => {
-          remote.getCurrentWindow().close();
+          location.close()
         }, 200);
       }
 

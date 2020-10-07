@@ -13,10 +13,10 @@
 // but it could technically be reopened once Chæros is done processing the powerValve request. As it can be frustrating for // advanced user, this feature isn't currently enforced.
 
 //========== REQUIRED MODULES ==========
+const { ipcRenderer } = require("electron"); // ipcRenderer manages messages with Main Process
+const userDataPath = ipcRenderer.sendSync('remote', 'userDataPath'); // Find userData folder Path
 const tg = require("@hownetworks/tracegraph");
 const fs = require("fs"); // FileSystem reads/writes files and directories
-const userDataPath = remote.app.getPath("userData");
-const { ipcRenderer } = require("electron"); // ipcRenderer manages messages with Main Process
 const d3 = require("d3");
 
 var CM = CMT["EN"];
@@ -28,9 +28,7 @@ const date =
 
 //========== STARTING FLUX ==========
 ipcRenderer.send("console-logs", "Opening Flux"); // Sending notification to console
-ipcRenderer.send("window-ids", "flux", remote.getCurrentWindow().id, true);
 ipcRenderer.on("window-close", (event, message) => {
-  ipcRenderer.send("window-ids", "flux", remote.getCurrentWindow().id, false);
   closeWindow();
 });
 
@@ -454,8 +452,7 @@ case "biorxivRetriever":
   ipcRenderer.send("console-logs","Sending to CHÆROS action " + fluxAction + " with arguments " +JSON.stringify(fluxArgs) + " " + message );
   ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
   ipcRenderer.send("pulsar", false);
-  ipcRenderer.send("window-ids", "flux", remote.getCurrentWindow().id, false);
-  remote.getCurrentWindow().close(); // Close flux modal window
+  ipcRenderer.send("window-manager","closeWindow","flux");
 };
 
 //========== fluxButtonAction ==========

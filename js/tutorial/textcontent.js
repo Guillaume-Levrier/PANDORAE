@@ -1,5 +1,5 @@
 
-const userDataPath = remote.app.getPath("userData"); // Find userData folder Path
+const userDataPath = ipcRenderer.sendSync('remote', 'userDataPath'); // Find userData folder Path
 
 
 var CM = CMT["EN"];
