@@ -1,5 +1,5 @@
 const electron = require("electron");
-const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog } = electron;
+const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } = electron;
 const fs = require("fs");
 const userDataPath = app.getPath("userData");
 const keytar = require("keytar"); // Load keytar to manage user API keys
@@ -91,7 +91,7 @@ function createWindow() {
   );
 
   mainWindow.setMenu(null);
-  //mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
   mainWindow.on("closed", () => {
     mainWindow = null;
   
@@ -219,9 +219,9 @@ ipcMain.on("window-manager", (event, type, file, scrollTo, section) => {
         for (var i = 0; i < windowIds.length; i++) {
           if (windowIds[i].name === file) {
             win = BrowserWindow.fromId(windowIds[i].id);
+            win.close()
           }
         }
-        win.webContents.send("window-close", "close");
       } catch (e) {
         console.log(e);
       }
@@ -449,3 +449,69 @@ ipcMain.on("artoo", (event, message) => {
   }
 
 });
+
+// Remote -> sendSync
+
+ipcMain.on('remote', async (event, req) => {
+  let res;
+  switch (req) {
+    case "userDataPath": res = app.getPath("userData");
+        break;
+  
+    case "appPath": res = app.getAppPath();
+        break;
+  
+  }  
+    event.returnValue = res
+})
+
+ipcMain.on('read-file', async (event, filepath) => {
+
+  event.returnValue = dialog.showSaveDialog(filepath)
+
+})
+
+ipcMain.handle('restart', async (event, mess) => {
+
+  app.relaunch();
+  app.exit(0);
+
+})
+
+ipcMain.handle('savePNG', async (event, target) => {
+  setTimeout(() => {
+    mainWindow.capturePage().then(img=>{
+      dialog.showSaveDialog(target).then(filePath=>{
+      fs.writeFile(
+        filePath.filePath,
+        img.toPNG(),()=>{})
+    })
+  })
+  
+  }, 250);
+})
+
+
+ipcMain.handle('saveSVG', async (event, target) => {
+  
+  dialog.showSaveDialog(target).then(filePath=>{
+
+    fs.writeFile(
+     filePath.filePath,
+      string,
+      "utf8",
+      err => {
+        if (err) {
+          ipcRenderer.send("console-logs", JSON.stringify(err));
+        }
+
+      }
+    );
+    })
+  
+  
+})
+
+ipcMain.handle('mainDevTools', async (event, target) => {
+  mainWindow.webContents.openDevTools()
+})

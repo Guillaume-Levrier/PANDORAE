@@ -109,7 +109,6 @@ const d3 = require('d3');
 
 <script>
   const closeAndDisplay = () => { 
-    ipcRenderer.send('window-ids','tutorial',remote.getCurrentWindow().id,false);
     ipcRenderer.send('chaeros-notification','return to tutorial',sectionList[activeIndex].id);
     closeWindow();
   };
@@ -134,9 +133,7 @@ setTimeout(() => {
         setInterval(secMinus, 1000)
         
         setTimeout(() => {
-          const { remote } = require('electron');
-          remote.app.relaunch();
-          remote.app.exit(0);
+          ipcRenderer.invoke("restart",true)
         }, 10000); 
             
     }, 7000);
