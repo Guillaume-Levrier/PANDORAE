@@ -10,15 +10,13 @@ a{text-decoration: underline;}
 
 <div id="content"></div>
 <script>
-const {remote, ipcRenderer} = require('electron');
-
-ipcRenderer.send("window-ids","tutorialHelper",remote.getCurrentWindow().id);
+const {ipcRenderer} = require('electron');
 
 const goBack = (slide) => {
     ipcRenderer.send("window-manager","closeWindow","flux");
     ipcRenderer.send("mainWindowReload","reload");
     ipcRenderer.send("window-manager","openModal","tutorial",slide);
-    remote.getCurrentWindow().close();
+    ipcRenderer.send("window-manager","closeWindow","tutorialHelper");
 };
 
 let fluxSlide = "flux";

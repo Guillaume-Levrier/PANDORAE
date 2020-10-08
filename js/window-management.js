@@ -1,13 +1,13 @@
-const remote = require('electron').remote;
+const { ipcRenderer } = require("electron");
 
 const closeWindow = () => {
-       remote.getCurrentWindow().close();
+//       location.close()
 }
 
 const refreshWindow = () => {
-       remote.getCurrentWindow().reload();
+       location.reload();
 }
 
 const reframeMainWindow = () => {
-        remote.mainWindow({frame: true})
+      //  remote.mainWindow({frame: true})
 }
