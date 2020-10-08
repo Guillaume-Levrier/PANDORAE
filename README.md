@@ -9,7 +9,9 @@ Download **PANDORÆ version 1.0.01** for [Windows](https://anthropos-ecosystems.
 
 Please put your extracted PANDORÆ folder/app where you usually put apps on your computer (i.e. Program Files on Windows, Applications on macOS). It might work if you don't, but this will solve starting issues.
 
-*The future branch is currently upgrading to Electron 10. Many processes are untested.*
+*This version is incomplete. Some processes are untested, others are unstable. But due to the security alerts sent by Electron, this seems to be the safe thing to do.*
+
+*If you want to use PANDORÆ for an academic purpose in the very short term, get in touch and I'll check the validity of the process you're using.*
 
 ### Roadmap
 Future version : "1.0.03"
