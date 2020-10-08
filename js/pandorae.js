@@ -612,7 +612,7 @@ if (notLoadingMenu) {
   notLoadingMenu=true;
       break;
          case "export":
-           console.log("export1")
+        
          blocks = [
            'interactive',
            'svg',
@@ -943,8 +943,8 @@ const serialize = (svg) => {
     datasetName = datasetName.replace(/:/ig,"+");
 
 
-    ipcRenderer.send("console-logs", "Exporting snapshot of current type to SVG in the user's 'Pictures' folder.");
-    ipcRenderer.invoke("savePNG",{defaultPath:datasetName+".svg"}).then(res=>{
+    ipcRenderer.send("console-logs", "Exporting snapshot of current type to SVG.");
+    ipcRenderer.invoke("saveSVG",{defaultPath:datasetName+".svg"},string).then(res=>{
 
     })
     
@@ -956,9 +956,9 @@ const exportToHTML=()=>{
 
  var datasetName =document.getElementById('source').innerText.slice(8);
 
-var thisPath = dialog.showSaveDialog({"defaultPath":"PANDORAE-"+currentType.type+".html"})
+ ipcRenderer.invoke("saveHTML",{"defaultPath":"PANDORAE-"+currentType.type+".html"}).then(res=>{
 
- let HTMLFILE = fs.createWriteStream(thisPath)
+ let HTMLFILE = fs.createWriteStream(res.filePath)
 
  HTMLFILE.write('<!DOCTYPE html><html><meta charset="UTF-8">')
  HTMLFILE.write('<title>PANDORÆ - '+datasetName+'</title>')
@@ -1105,6 +1105,9 @@ while (typesJS.indexOf("multiThreader.port.postMessage")>(-1)) {
      })
    })
   })
+
+})
+
 }
 
 

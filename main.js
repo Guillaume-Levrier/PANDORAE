@@ -503,7 +503,7 @@ ipcMain.handle('savePNG', async (event, target) => {
 })
 
 
-ipcMain.handle('saveSVG', async (event, target) => {
+ipcMain.handle('saveSVG', async (event, target,string) => {
   
   dialog.showSaveDialog(target).then(filePath=>{
 
@@ -521,6 +521,16 @@ ipcMain.handle('saveSVG', async (event, target) => {
     })
   
   
+})
+
+ipcMain.handle('saveHTML', async (event, target) => {
+  let res;
+  await dialog.showSaveDialog(target).then(filePath=>{
+    res = filePath
+    })
+
+return res
+
 })
 
 ipcMain.handle('mainDevTools', async (event, target) => {
