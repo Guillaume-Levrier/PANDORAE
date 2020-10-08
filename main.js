@@ -1,8 +1,16 @@
 const electron = require("electron");
-const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog } = electron;
+const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } = electron;
 const fs = require("fs");
 const userDataPath = app.getPath("userData");
 const keytar = require("keytar"); // Load keytar to manage user API keys
+
+var windowIds = {
+      flux:{id: 0, open: false },
+      tutorialHelper:{ id: 0, open: false },
+      tutorial:{ id: 0, open: false },
+      chaeros:[],
+      index:{ id: 0, open: false }
+  };
 
 let mainWindow;
 
@@ -67,6 +75,9 @@ function createWindow() {
     }
   });
 
+  windowIds.index.id = mainWindow.id;
+  windowIds.index.open = true;
+
   mainWindow.loadFile("index.html");
 
   mainWindow.webContents.on(
@@ -91,7 +102,7 @@ function createWindow() {
   );
 
   mainWindow.setMenu(null);
-  //mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
   mainWindow.on("closed", () => {
     mainWindow = null;
   
@@ -117,13 +128,8 @@ app.on("ready", () => {
 
 
 
-var windowIds = [
-  { name: "flux", id: 0, open: false },
-  { name: "tutorialHelper", id: 0, open: false },
-  { name: "tutorial", id: 0, open: false },
-  { name: "chaeros", id: 0, open: false }
-];
 
+/*
 ipcMain.on("window-ids", (event, window, id, open) => {
   windowIds.forEach(d => {
     if (d.name === window) {
@@ -132,6 +138,7 @@ ipcMain.on("window-ids", (event, window, id, open) => {
     }
   });
 });
+*/
 
 const openHelper = helperFile => {
   let screenWidth = electron.screen.getPrimaryDisplay().workAreaSize.width;
@@ -160,9 +167,8 @@ const openHelper = helperFile => {
 };
 
 const openModal = (modalFile, scrollTo) => {
-  for (let i = 0; i < windowIds.length; i++) {
-    if (windowIds[i].name === modalFile) {
-      if (windowIds[i].open === false) {
+    
+      if (windowIds[modalFile].open === false) {
         let win = new BrowserWindow({
          // backgroundColor: "white",
           parent: mainWindow,
@@ -183,26 +189,29 @@ const openModal = (modalFile, scrollTo) => {
         win.loadURL(path);
         win.once("ready-to-show", () => {
           win.show();
+          windowIds[modalFile].id=win.id;
+          windowIds[modalFile].open=true;
           if (scrollTo) {
             setTimeout(() => win.webContents.send("scroll-to", scrollTo), 1000);
           }
         });
       }
-    }
-  }
+    
+  
 };
 
 ipcMain.on("window-manager", (event, type, file, scrollTo, section) => {
   let win = {};
 
   switch (type) {
+
     case "openHelper":
       openHelper(file);
 
       setTimeout(() => {
         for (var i = 0; i < windowIds.length; i++) {
           if (windowIds[i].name === file) {
-            BrowserWindow.fromId(windowIds[i].id).webContents.send(
+            BrowserWindow.fromId(windowIds[type].id).webContents.send(
               "tutorial-types",
               section
             );
@@ -211,23 +220,25 @@ ipcMain.on("window-manager", (event, type, file, scrollTo, section) => {
       }, 800);
 
       break;
+
     case "openModal":
       openModal(file, scrollTo);
       break;
+
     case "closeWindow":
+     
       try {
-        for (var i = 0; i < windowIds.length; i++) {
-          if (windowIds[i].name === file) {
-            win = BrowserWindow.fromId(windowIds[i].id);
-          }
-        }
-        win.webContents.send("window-close", "close");
+        
+          BrowserWindow.fromId(windowIds[file].id).close()
+                
       } catch (e) {
         console.log(e);
       }
       break;
   }
 });
+
+
 
 //CONSOLE
 
@@ -449,3 +460,79 @@ ipcMain.on("artoo", (event, message) => {
   }
 
 });
+
+// Remote -> sendSync
+
+ipcMain.on('remote', async (event, req) => {
+  let res;
+  switch (req) {
+    case "userDataPath": res = app.getPath("userData");
+        break;
+  
+    case "appPath": res = app.getAppPath();
+        break;
+  
+  }  
+    event.returnValue = res
+})
+
+ipcMain.on('read-file', async (event, filepath) => {
+
+  event.returnValue = dialog.showSaveDialog(filepath)
+
+})
+
+ipcMain.handle('restart', async (event, mess) => {
+
+  app.relaunch();
+  app.exit(0);
+
+})
+
+ipcMain.handle('savePNG', async (event, target) => {
+  setTimeout(() => {
+    mainWindow.capturePage().then(img=>{
+      dialog.showSaveDialog(target).then(filePath=>{
+      fs.writeFile(
+        filePath.filePath,
+        img.toPNG(),()=>{})
+    })
+  })
+  
+  }, 250);
+})
+
+
+ipcMain.handle('saveSVG', async (event, target,string) => {
+  
+  dialog.showSaveDialog(target).then(filePath=>{
+
+    fs.writeFile(
+     filePath.filePath,
+      string,
+      "utf8",
+      err => {
+        if (err) {
+          ipcRenderer.send("console-logs", JSON.stringify(err));
+        }
+
+      }
+    );
+    })
+  
+  
+})
+
+ipcMain.handle('saveHTML', async (event, target) => {
+  let res;
+  await dialog.showSaveDialog(target).then(filePath=>{
+    res = filePath
+    })
+
+return res
+
+})
+
+ipcMain.handle('mainDevTools', async (event, target) => {
+  mainWindow.webContents.openDevTools()
+})

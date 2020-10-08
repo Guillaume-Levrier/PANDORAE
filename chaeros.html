@@ -5,8 +5,7 @@
 
 <script>
   const chaeros = require('./js/chaeros');
-  const {remote, ipcRenderer} = require('electron');
-  let win = remote.getCurrentWindow();
+  const {ipcRenderer} = require('electron');
 
 ipcRenderer.on('chaeros-compute', (event, fluxAction,fluxArgs,message) => {
   try{

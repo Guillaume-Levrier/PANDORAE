@@ -1,5 +1,4 @@
 const { Runtime, Inspector } = require("@observablehq/runtime");
-const rpn = require("request-promise-native"); // RPN enables to generate requests to various APIs
 
 const createObsCell = (
     slide,
@@ -49,19 +48,8 @@ const createObsCell = (
         adjustSize();
         // If not, download it from the Observable API
     } else {
-        let optionsRequest = {
-            // Prepare options for the Request-Promise-Native Package
-            uri:
-                "https://api.observablehq.com/" +
-                userName +
-                "/" +
-                notebookName +
-                ".js?v=3", // URI to be accessed
-            headers: { "User-Agent": "Request-Promise" }, // User agent to access is Request-promise
-            json: false, // don't automatically parse as JSON
-        };
 
-        rpn(optionsRequest) // RPN stands for Request-promise-native (Request + Promise)
+        fetch("https://api.observablehq.com/" + userName + "/" + notebookName + ".js?v=3")
             .then(mod => {
                 // Write the file in the app's user directory
                 fs.writeFile(modStorePath, mod, "utf8", err => {
@@ -524,7 +512,7 @@ const populateSlides = id => {
                         document.body.style.animation = "fadeout 0.1s";
                         setTimeout(() => {
                             document.body.remove();
-                            remote.getCurrentWindow().reload();
+                            location.reload();
                         }, 100);
                     });
 

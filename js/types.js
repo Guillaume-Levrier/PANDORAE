@@ -8,7 +8,7 @@
 // =========== NODE MODULES ===========
 
 //BEGIN NODE MODULES
-const { remote, ipcRenderer, shell } = require("electron");
+const { ipcRenderer, shell } = require("electron");
 const fs = require("fs");
 const d3 = require("d3");
 const csv = require("csv-parser");
@@ -319,11 +319,13 @@ const backToPres = () => {
 const loadType = (type, id) => {
     type = type;
     id = id;
-
+    
+    dispose=true;
     xtypeDisplay();
     purgeCore();
     xtypeExists = true;
     coreExists = false;
+
     ipcRenderer.send("audio-channel", "button1");
     field.value = "";
     const exporter = () => categoryLoader("export");
@@ -343,7 +345,7 @@ const loadType = (type, id) => {
         document.body.style.animation = "fadeout 0.1s";
         setTimeout(() => {
             document.body.remove();
-            remote.getCurrentWindow().reload();
+            location.reload();
         }, 100);
     });
 
@@ -6250,6 +6252,7 @@ const typeSwitch = (type, id) => {
     }
 
     document.getElementById("source").innerText = "Source: " + id;
+   
 };
 
 // MODULE EXPORT - don't remove useful for iframe export

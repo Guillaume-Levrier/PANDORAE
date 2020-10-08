@@ -9,12 +9,14 @@ Download **PANDORÆ version 1.0.01** for [Windows](https://anthropos-ecosystems.
 
 Please put your extracted PANDORÆ folder/app where you usually put apps on your computer (i.e. Program Files on Windows, Applications on macOS). It might work if you don't, but this will solve starting issues.
 
+*The future branch is currently upgrading to Electron 10. Many processes are untested.*
+
 ### Roadmap
 Future version : "1.0.03"
 
 #### Goals for 1.0.03
 *Main*
-- continuous integration on "Future" branches
+- continuous integration at each release using GitHub actions
 
 *FLUX/CHAEROS*
 - calculate flux based on available services
