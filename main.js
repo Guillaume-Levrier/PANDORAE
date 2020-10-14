@@ -102,7 +102,7 @@ function createWindow() {
   );
 
   mainWindow.setMenu(null);
-  mainWindow.webContents.openDevTools();
+ // mainWindow.webContents.openDevTools();
   mainWindow.on("closed", () => {
     mainWindow = null;
   
@@ -168,7 +168,10 @@ const openHelper = helperFile => {
 
 const openModal = (modalFile, scrollTo) => {
     
+console.log("opening "+modalFile)
+
       if (windowIds[modalFile].open === false) {
+
         let win = new BrowserWindow({
          // backgroundColor: "white",
           parent: mainWindow,
@@ -230,6 +233,7 @@ ipcMain.on("window-manager", (event, type, file, scrollTo, section) => {
       try {
         
           BrowserWindow.fromId(windowIds[file].id).close()
+          windowIds[file].open=false;
                 
       } catch (e) {
         console.log(e);
