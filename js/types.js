@@ -4794,11 +4794,12 @@ const gazouillotype = (id) => {
                         width - toolWidth,
                     ]);
                     xAxis.ticks(x.range()[1] / 100);
+                    /*
                     zoom.translateExtent([
-                        [-width / 3, 0],
-                        [Infinity, height],
+                        [-Infinity, -Infinity],
+                        [Infinity, Infinity],
                     ]);
-
+*/
                     let areaData = [];
 
                     data.forEach((d) => {
@@ -4823,6 +4824,9 @@ const gazouillotype = (id) => {
                         if (gzWorkerAnswer.data.type === "gz") {
                             circleData = gzWorkerAnswer.data.msg;
 
+                            console.log(circleData)
+
+                            
                             view.selectAll("circle")
                                 .data(circleData)
                                 .enter()
@@ -5240,7 +5244,7 @@ const gazouillotype = (id) => {
                                         ],
                                     })
                                     .attr("cursor", "ew-resize")
-                                    .attr("pointer-events", "all");
+                                    .attr("pointer-events", "none");
 
                                 handle
                                     .patternify({
@@ -5314,6 +5318,7 @@ const gazouillotype = (id) => {
                                 }
 
                                 function brushEnded() {
+                                    
                                     if (!event.selection) {
                                         handle.attr("display", "none");
 
