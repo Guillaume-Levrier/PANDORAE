@@ -167,8 +167,6 @@ const openHelper = helperFile => {
 };
 
 const openModal = (modalFile, scrollTo) => {
-    
-console.log("opening "+modalFile)
 
       if (windowIds[modalFile].open === false) {
 
