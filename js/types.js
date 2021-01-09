@@ -362,15 +362,25 @@ const loadType = (type, id) => {
 };
 
 // =========== XTYPE ===========
-const xtype = document.getElementById("xtype"); // xtype is a div containing each (-type) visualisation
-var width = xtype.clientWidth; // Fetching client width
-var height = xtype.clientHeight; // Fetching client height
-var toolWidth = 0.3 * width + 20; // The tooltip is around a third of total available screen width
 
-// =========== PRESENTATION BOX ===========
+var xtype,width,height,toolWidth;
+
 var presentationBox = document.createElement("div");
 presentationBox.id = "presentationBox";
+
+window.onload = function(){
+     xtype = document.getElementById("xtype"); // xtype is a div containing each (-type) visualisation
+     width = xtype.clientWidth; // Fetching client width
+     height = xtype.clientHeight; // Fetching client height
+     toolWidth = 0.3 * width + 20; // The tooltip is around a third of total available screen width
+    
+     // =========== PRESENTATION BOX ===========
+
 document.body.appendChild(presentationBox);
+}
+
+
+
 
 // ========== TIME ===========
 const currentTime = new Date(); // Precise time when the page has loaded

@@ -10,10 +10,7 @@
 		"url": "https://github.com/Guillaume-Levrier/PANDORAE/"
 	},
 	"scripts": {
-		"start": "electron .",
-		"postinstall": "electron-builder install-app-deps",
-		"build": "electron-builder --mac --windows --linux",
-		"release": "electron-builder --mac --windows --linux --publish always"
+		"start": "electron ."
 	},
 	"dependencies": {
 		"@hownetworks/tracegraph": "^0.3.0",

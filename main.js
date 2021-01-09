@@ -69,7 +69,10 @@ function createWindow() {
     frame: true,
     resizable: true,
     webPreferences: {
-      nodeIntegration: true,
+    preload:basePath+"/js/preload-index.js",
+      worldSafeExecuteJavaScript: true,
+      contextIsolation:true,
+      //nodeIntegration: true,
       nodeIntegrationInWorker: true,
       plugins: true
     }
@@ -91,6 +94,8 @@ function createWindow() {
           parent: mainWindow,
           frame: true,
           webPreferences: {
+            worldSafeExecuteJavaScript: true,
+            contextIsolation: true,
             nodeIntegration: true,
             nodeIntegrationInWorker: true
           }
@@ -102,7 +107,7 @@ function createWindow() {
   );
 
   mainWindow.setMenu(null);
- // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
   mainWindow.on("closed", () => {
     mainWindow = null;
   
@@ -155,6 +160,8 @@ const openHelper = helperFile => {
     x: screenWidth - 350,
     y: 100,
     webPreferences: {
+      worldSafeExecuteJavaScript: true,
+      contextIsolation: true,
       nodeIntegration: true,
       nodeIntegrationInWorker: true
     }
@@ -181,6 +188,8 @@ const openModal = (modalFile, scrollTo) => {
           show: false,
           y: 100,
           webPreferences: {
+            worldSafeExecuteJavaScript: true,
+            contextIsolation: true,
             nodeIntegration: true,
             nodeIntegrationInWorker: true
           }
@@ -322,6 +331,8 @@ const chaerosCalculator = () => {
     transparent: true,
     show: false,
     webPreferences: {
+      worldSafeExecuteJavaScript: true,
+      contextIsolation: true,
       nodeIntegration: true,
       nodeIntegrationInWorker: true
     }
@@ -345,6 +356,8 @@ const createAudioManager = () => {
     transparent: true,
     show: false,
     webPreferences: {
+      worldSafeExecuteJavaScript: true,
+      contextIsolation: true,
       nodeIntegration: true,
       nodeIntegrationInWorker: true
     }
@@ -424,6 +437,8 @@ const artooScraper = (model,address) => {
     transparent: true,
     show: false,
     webPreferences: {
+      worldSafeExecuteJavaScript: true,
+      contextIsolation: true,
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
       preload: basePath+'/js/artoo-models/'+model+'.js',
