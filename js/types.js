@@ -8,17 +8,22 @@
 // =========== NODE MODULES ===========
 
 //BEGIN NODE MODULES
-const { ipcRenderer, shell } = require("electron");
-const fs = require("fs");
-const d3 = require("d3");
+//const { ipcRenderer, shell } = require("electron");
+//const fs = require("fs");
+//const d3 = require("d3");
 const csv = require("csv-parser");
 const versor = require("versor");
-const Quill = require("quill");
+//const Quill = require("quill");
 const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
 
 //END NODE MODULES
 
-var field = document.getElementById("field");
+var field;
+
+window.onload = function() {
+
+field = document.getElementById("field");
+}
 
 const dataDownload = (data) => {
     var source = document.getElementById("source");
@@ -606,6 +611,9 @@ const multiFormat = (date) =>
         : d3.timeYear(date) < date
         ? formatMonth
         : formatYear)(date);
+
+
+
 
 // ========= ANTHROPOTYPE =========
 const anthropotype = (id) => {
@@ -6221,7 +6229,8 @@ const pharmacotype = (id) => {
 // Switch used to which type to draw/generate
 
 const typeSwitch = (type, id) => {
-    field.value = "loading " + type;
+
+   document.getElementById("field").value = "loading " + type;
 
     switch (type) {
         case "pharmacotype":
