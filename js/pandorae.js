@@ -18,7 +18,7 @@
 const { ipcRenderer, shell } = require("electron");
 const userDataPath = ipcRenderer.sendSync('remote', 'userDataPath'); // Find userData folder Path
 const appPath = ipcRenderer.sendSync('remote', 'appPath');
-const types = require("./js/types");
+//const types = require(appPath+"/js/types");
 const fs = require("fs");
 const d3 = require("d3");
 const THREE = require("three");
@@ -44,6 +44,12 @@ var currentType;           // Once a type is started, know which one
 var presentationStep = [];
 
 var tutoSlide;
+var field;
+var pandoratio = 0; // Used in three.js transitions (from one shape to another)
+var xtypeExists = false; // xtype SVG doesn't exist on document load
+var coreExists = true; // core does exist on document load
+
+window.onload = function() {
 
 // =========== LANGUAGE SELECTION ===========
 var CM = CMT["EN"];                                            // Load the EN locale at start
@@ -72,24 +78,31 @@ var divlist = [
   {id:"tutostartmenu",path:"returnToTutorial"}
 ]
 
-populateLocale(divlist)
 
+  populateLocale(divlist)
 
-document.getElementById("lang").childNodes.forEach(lg=>{
-  lg.addEventListener("click",e=>{
-    CM=CMT[lg.innerText];
-    populateLocale(divlist)
-    fs.readFile(userDataPath + "/userID/user-id.json", "utf8",
-      (err, data) => {
-        data = JSON.parse(data);
-        data.locale=lg.innerText;
-        data = JSON.stringify(data);
-        fs.writeFile(userDataPath + "/userID/user-id.json", data, "utf8", err => {
-          if (err) throw err;
-        });
-      })
+  document.getElementById("lang").childNodes.forEach(lg=>{
+    lg.addEventListener("click",e=>{
+      CM=CMT[lg.innerText];
+      populateLocale(divlist)
+      fs.readFile(userDataPath + "/userID/user-id.json", "utf8",
+        (err, data) => {
+          data = JSON.parse(data);
+          data.locale=lg.innerText;
+          data = JSON.stringify(data);
+          fs.writeFile(userDataPath + "/userID/user-id.json", data, "utf8", err => {
+            if (err) throw err;
+          });
+        })
+    })
   })
-})
+
+
+
+
+
+
+
 
 
 
@@ -161,10 +174,9 @@ aelogo.addEventListener("dblclick", () => {
 });
 
 // =========== Global Variables ===========
-var pandoratio = 0; // Used in three.js transitions (from one shape to another)
-var field = document.getElementById("field"); // Field is the main field
-var xtypeExists = false; // xtype SVG doesn't exist on document load
-var coreExists = true; // core does exist on document load
+
+   field = document.getElementById("field"); // Field is the main field
+
 
 
 // =========== Icons ===========
@@ -1650,3 +1662,4 @@ ipcRenderer.on("cmdInputFromRenderer", (event, command) => {
   cmdinput(command)
 })
 
+};
