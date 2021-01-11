@@ -481,50 +481,46 @@ const fluxButtonAction = (buttonID, success, successPhrase, errorPhrase) => {
 // datasetDisplay shows the datasets (usually JSON or CSV files) available in the relevant /datasets/ subdirectory.
 
 const datasetDisplay = (divId, kind) => {
-  // This function displays the available datasets
+ 
 
   try {
     // Try the following block
-    let datasets = []; // Start from an empty array
+    
+    let list = document.createElement("UL")
+
     pandodb[kind].toArray(files => {
-      files.forEach(file => {
-        // For each file in the directory
-        datasets.push(
-          // Push the file in the array
-          "<li id='" +
-            file.id +
-            "' >" +
-            "<span style='cursor:pointer;' onclick=datasetDetail('" +
-            kind +
-            "-dataset-preview','" +
-            kind +
-            "'," +
-            JSON.stringify(file.id) +
-            ",'" +
-            kind +
-            "-dataset-buttons')>" +
-            file.name +
-            "</span>" +
-            "<i class='fluxDelDataset material-icons' onclick=datasetRemove(" +
-            JSON.stringify(kind) +
-            "," +
-            JSON.stringify(file.id) +
-            ")>close</i></li>"
-        );
-      });
+    
+      files.forEach(file=>{
+        
+        console.log(file)
 
-      var datasetList = ""; // Create the list as a string
+      let line = document.createElement("LI")
+          line.id= file.id
 
-      for (var i = 0; i < datasets.length; ++i) {
-        // For each element of the array
-        datasetList = datasetList + datasets[i]; // Add it to the string
-      }
-      if (datasetList.length === 0) {
+      let button = document.createElement("SPAN")
+          button.addEventListener("click",e=>{
+            datasetDetail(kind+"-dataset-preview",kind,file.id,kind+"-dataset-buttons")
+          })
+          button.innerText=file.name
+
+        let rem = document.createElement("i")
+          rem.className = "fluxDelDataset material-icons"
+          rem.addEventListener("click",e=>{
+            datasetRemove(kind,file.id)
+          })
+          rem.innerText="close"
+        
+          line.appendChild(button)
+          line.appendChild(rem)
+          list.appendChild(line)
+          
+        })
+       
+      if (files.length === 0) {
         document.getElementById(divId).innerHTML =
           "No dataset available in the system";
       } else {
-        document.getElementById(divId).innerHTML =
-          "<ul>" + datasetList + "</ul>"; // The string is a <ul> list
+        document.getElementById(divId).appendChild(list)
       }
     });
   } catch (err) {
@@ -556,6 +552,8 @@ const datasetRemove = (kind, id) => {
 
 const datasetDetail = (prevId, kind, id, buttonId) => {
   // This function provides info on a specific dataset
+
+
 
   var datasetDetail = {}; // Create the dataDetail object
   let dataPreview = ""; // Created dataPreview variable
@@ -1184,53 +1182,81 @@ const hypheCheck = target => {
 
 const hypheCorpusList = (target, prevId) => {
 
+console.log(target, prevId)
+
   fetch(target + "/api/", {
     method: 'POST',
     body:   JSON.stringify({ method: "list_corpus"}),
 })
   .then(res =>res.json())
     .then(hypheResponse => {
-    
+      console.log(hypheResponse)
       // With the response
+
+
+     
+
       if (hypheResponse[0].code === "success") {
-        let corpusList = "<ul>";
+        let corpusList = document.createElement("UL")
 
         for (var corpus in hypheResponse[0].result) {
           if (hypheResponse[0].result[corpus].password) {
-            corpusList =
-              corpusList +
-              "<li  id=" +
-              hypheResponse[0].result[corpus].corpus_id +
-              "><strong>" +
+           
+            var line = document.createElement("LI")
+                line.id = hypheResponse[0].result[corpus].corpus_id
+                
+            var linCont = document.createElement("DIV")
+            linCont.innerHTML= 
+                     
+                "<strong>" +
               hypheResponse[0].result[corpus].name +
               "</strong> - IN WE:" +
               hypheResponse[0].result[corpus].webentities_in +
               " - password : <input id=" +
               corpus +
               "pass" +
-              " type='password'> <input type='button' value='Load' onclick='loadHyphe(" +
-              JSON.stringify(hypheResponse[0].result[corpus].corpus_id) +
-              "," +
-              JSON.stringify(target) +
-              ",true)'></li>";
+              " type='password'>";
+              
+              
+            var load = document.createElement("INPUT")
+              load.type="button"
+              load.value="load"
+              load.style.marginLeft="10px"
+              load.addEventListener("click",e=>{
+                loadHyphe(hypheResponse[0].result[corpus].corpus_id,target)
+              })
+
+              line.appendChild(linCont)
+              linCont.appendChild(load)
+              corpusList.appendChild(line)
+            
           } else {
-            corpusList =
-              corpusList +
-              "<li  id=" +
-              hypheResponse[0].result[corpus].corpus_id +
-              "><strong>" +
+         
+            var line = document.createElement("LI")
+            line.id = hypheResponse[0].result[corpus].corpus_id
+            
+        var linCont = document.createElement("DIV")
+        linCont.innerHTML=    
+                  
+            "<strong>" +
               hypheResponse[0].result[corpus].name +
               "</strong> - IN WE:" +
-              hypheResponse[0].result[corpus].webentities_in +
-              " <input type='button' value='Load' onclick='loadHyphe(" +
-              JSON.stringify(hypheResponse[0].result[corpus].corpus_id) +
-              "," +
-              JSON.stringify(target) +
-              ")'></li>";
+              hypheResponse[0].result[corpus].webentities_in;
+              
+              var load = document.createElement("INPUT")
+              load.type="button"
+              load.value="load"
+              load.addEventListener("click",e=>{
+                loadHyphe(hypheResponse[0].result[corpus].corpus_id,target)
+              })
+
+              line.appendChild(linCont)
+              linCont.appendChild(load)
+              corpusList.appendChild(line)
           }
         }
-        corpusList = corpusList + "</ul>";
-        document.getElementById(prevId).innerHTML = corpusList; // Display dataPreview in a div
+        
+        document.getElementById(prevId).appendChild(corpusList); // Display dataPreview in a div
       } else {
       }
     })
@@ -1454,12 +1480,12 @@ window.addEventListener('DOMContentLoaded', (event) => {
     {id:"Zotero",func:"updateUserData",arg:"Zotero"},
     {id:"scopusValidation",func:"checkKey",arg:"scopusValidation"},
     {id:"Scopus",func:"updateUserData",arg:"Scopus"},
-   {id:"fluxDisplayButton",func:"fluxDisplay",arg:"flux-manager"},
+    {id:"fluxDisplayButton",func:"fluxDisplay",arg:"flux-manager"},
     {id:"fluxCloseButton",func:"closeWindow"},
     {id:"fluxRefreshButton",func:"refreshWindow"},
-    {id:"hyphe-checker",func:"hypheCheck"}
-    //{id:"",func:"",arg:[]},
-    //{id:"",func:"",arg:[]},
+    {id:"hyphe-checker",func:"hypheCheck"},
+    {id:"hyphe-exporter",func:"endpointConnector"},
+    {id:"hypheDataset",func:"datasetDisplay",arg:['hyphe-dataset-list','hyphe']},
     //{id:"",func:"",arg:[]},
     //{id:"",func:"",arg:[]},
     //{id:"",func:"",arg:[]},
@@ -1492,10 +1518,18 @@ window.addEventListener('DOMContentLoaded', (event) => {
          case "hypheCheck": hypheCheck(document.getElementById('hypheaddress').value);
          break;
 
-
-     
-       default:
+         case "endpointConnector": endpointConnector('hyphe',document.getElementById('hypheaddress').value);
          break;
+     
+       case "datasetDisplay":datasetDisplay(but.arg[0],but.arg[1])
+         break;
+
+         case "":
+         break;
+
+         case "":
+         break;
+         
      }
 
       
