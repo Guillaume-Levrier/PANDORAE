@@ -278,7 +278,7 @@ var pandoratio = 0; // Used in three.js transitions (from one shape to another)
 var xtypeExists = false; // xtype SVG doesn't exist on document load
 var coreExists = true; // core does exist on document load
 
-window.onload = function() {
+window.addEventListener('DOMContentLoaded', (event) => {
 
 // =========== LANGUAGE SELECTION ===========
 var CM = CMT["EN"];                                            // Load the EN locale at start
@@ -782,7 +782,8 @@ const selectOption = (type, id) => {
   );
   field.value = CM.global.field.starting + type;
   currentType = {type:type,id:id}
-  types.typeSwitch(type, id);
+  //types.typeSwitch(type, id);
+  typeSwitch(type, id);
   ipcRenderer.send("audio-channel", "button2");
   pulse(1, 1, 10);
   ipcRenderer.send(
@@ -1784,7 +1785,7 @@ const loadTheme = () => {
   });
 };
 
-window.onload = loadTheme();
+loadTheme();
 
 let screenZoomToggle = false;
 
@@ -1891,7 +1892,9 @@ ipcRenderer.on("cmdInputFromRenderer", (event, command) => {
   cmdinput(command)
 })
 
-};//========== TYPES ==========
+});
+
+//========== TYPES ==========
 // PANDORAE is a data exploration tool. Once the user's data has been loaded through Flux
 // and potentially curated through Zotero and/or rekindled in Chaeros, it is to be sent
 // to one of the available Types. Types are simple data visualisation frameworks designed to
