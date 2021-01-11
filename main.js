@@ -188,9 +188,10 @@ const openModal = (modalFile, scrollTo) => {
           show: false,
           y: 100,
           webPreferences: {
+            preload:basePath+"/js/preload-"+modalFile+".js",
             worldSafeExecuteJavaScript: true,
             contextIsolation: true,
-            nodeIntegration: true,
+            //nodeIntegration: true,
             nodeIntegrationInWorker: true
           }
         });

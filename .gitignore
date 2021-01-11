@@ -1,5 +1,7 @@
 *.csv
 *.txt
+js/preload-index.js
+js/preload-flux.js
 img/*
 mp4/*
 node_modules/*
