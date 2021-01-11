@@ -13,11 +13,12 @@
 // but it could technically be reopened once Chæros is done processing the powerValve request. As it can be frustrating for // advanced user, this feature isn't currently enforced.
 
 //========== REQUIRED MODULES ==========
-const { ipcRenderer } = require("electron"); // ipcRenderer manages messages with Main Process
+const { ipcRenderer,shell } = require("electron"); // ipcRenderer manages messages with Main Process
 const userDataPath = ipcRenderer.sendSync('remote', 'userDataPath'); // Find userData folder Path
 const tg = require("@hownetworks/tracegraph");
 const fs = require("fs"); // FileSystem reads/writes files and directories
 const d3 = require("d3");
+
 
 var CM = CMT["EN"];
 
@@ -26,8 +27,10 @@ var db = "";
 const date =
   new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
 
-//========== STARTING FLUX ==========
-ipcRenderer.send("console-logs", "Opening Flux"); // Sending notification to console
+
+
+
+
 
 //========== Tracegraph ==========
 
@@ -272,9 +275,9 @@ const drawFlux = (svg, traces, horizontal, showTexts) => {
     .attr("cy", d => d.bounds.cy);
 };
 
-const svg = d3.select("svg");
 
-drawFlux(svg, traces, false, true);
+
+
 
 //========== fluxDisplay ==========
 // Display relevant tab when called according to the tab's id.
@@ -1429,3 +1432,78 @@ const localUpload = () => {
   })
   
 };
+
+
+//========== STARTING FLUX ==========
+ipcRenderer.send("console-logs", "Opening Flux"); // Sending notification to console
+
+const closeWindow = () => {
+  ipcRenderer.send("window-manager","closeWindow","flux")     
+}
+
+const refreshWindow = () => {
+  location.reload()
+}
+
+window.addEventListener('DOMContentLoaded', (event) => {
+
+  
+  var buttonMap=[
+    {id:"user-button",func:"basicUserData"},
+    {id:"zoteroAPIValidation",func:"checkKey",arg:"zoteroAPIValidation"},
+    {id:"Zotero",func:"updateUserData",arg:"Zotero"},
+    {id:"scopusValidation",func:"checkKey",arg:"scopusValidation"},
+    {id:"Scopus",func:"updateUserData",arg:"Scopus"},
+   {id:"fluxDisplayButton",func:"fluxDisplay",arg:"flux-manager"},
+    {id:"fluxCloseButton",func:"closeWindow"},
+    {id:"fluxRefreshButton",func:"refreshWindow"},
+    {id:"hyphe-checker",func:"hypheCheck"}
+    //{id:"",func:"",arg:[]},
+    //{id:"",func:"",arg:[]},
+    //{id:"",func:"",arg:[]},
+    //{id:"",func:"",arg:[]},
+    //{id:"",func:"",arg:[]},
+  ]
+
+  const svg = d3.select("svg");
+  drawFlux(svg, traces, false, true);
+
+  buttonMap.forEach(but=>{
+
+    document.getElementById(but.id).addEventListener("click",e=>{
+     switch (but.func) {
+       case "basicUserData": basicUserData();
+         break;
+         case "checkKey": checkKey(bot.arg);
+         break;
+
+         case "updateUserData": updateUserData(bot.arg);
+         break;
+
+         case "fluxDisplay": fluxDisplay(but.arg);
+         break;
+
+         case "closeWindow": closeWindow();
+         break;
+
+         case "refreshWindow": refreshWindow();
+         break;
+
+         case "hypheCheck": hypheCheck(document.getElementById('hypheaddress').value);
+         break;
+
+
+     
+       default:
+         break;
+     }
+
+      
+    })
+
+  })
+
+
+
+})
+

@@ -1,3 +1,4 @@
+
 const normalCore = () => {
 
  const { DepthOfFieldEffect, EffectComposer, EffectPass, RenderPass } = require("postprocessing");
@@ -354,4 +355,4 @@ window.onload = reloadCore();
 
 
 
-module.exports = () => {normalCore();};
+//module.exports = () => {normalCore();};

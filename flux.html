@@ -1,5 +1,7 @@
 <!DOCTYPE html><html><meta charset="UTF-8">
 <title>PANDORÆ-FLUX</title>
+<!-- <meta http-equiv="Content-Security-Policy" content="script-src 'self';object-src 'none';base-uri 'none';">
+ -->
 <style>
   body{
     background-color:white;
@@ -10,11 +12,9 @@
   }
 </style>
 
-<script src="js/db.js"></script>
-<script src="js/locales.js"></script>
-<script>
-const {shell}=require("electron");
-</script>
+<!-- <script src="js/db.js"></script>
+<script src="js/locales.js"></script> -->
+
 
 <!-- OPEN TAB -->
 <div id="open" style="display:none;" class="fluxTabs">
@@ -39,10 +39,10 @@ const {shell}=require("electron");
       <div class="credential"> Name:<br> <input class="fluxInput" spellcheck="false" id="userNameInput" type="text" value="Enter your name"><br><br></div>
       <div class="credential"> Email:<br> <input class="fluxInput" spellcheck="false" id="userMailInput" type="text" value="Enter your email"><br><br></div>
       <div class="credential"> Zotero group id:<br> <input class="fluxInput" spellcheck="false" id="zoterouserinput" type="text" value="Enter your zotero group code"><br><br></div>
-      <button type="submit" id="user-button" class="flux-button" onclick="basicUserData();return false">Update User Credentials</button><br>
+      <button type="submit" id="user-button" class="flux-button">Update User Credentials</button><br>
  
-      <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="zoteroAPIValidation">help_outline</i> Zotero API key:<br> <input class="fluxInput" spellcheck="false" id="zoterokeyinput" type="password" value="Enter your Zotero API key"><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Zotero">cached</i> <br><br></div>
-      <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="scopusValidation">help_outline</i> Scopus API key:<br> <input class="fluxInput" spellcheck="false" id="scopuskeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Scopus">cached</i><br><br></div>
+      <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" id="zoteroAPIValidation">help_outline</i> Zotero API key:<br> <input class="fluxInput" spellcheck="false" id="zoterokeyinput" type="password" value="Enter your Zotero API key"><i title="Click this button to update your credentials" class="material-icons updateCredentials" id="Zotero">cached</i> <br><br></div>
+      <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" id="scopusValidation">help_outline</i> Scopus API key:<br> <input class="fluxInput" spellcheck="false" id="scopuskeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" id="Scopus">cached</i><br><br></div>
      <!-- <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="altmetricValidation">help_outline</i> Altmetric API key:<br> <input class="fluxInput" spellcheck="false" id="altmetrickeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Altmetric">cached</i><br><br></div>
       <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="twitterValidation">help_outline</i> Twitter API key:<br> <input class="fluxInput" spellcheck="false" id="twitterkeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Twitter">cached</i><br><br></div>
       <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="openAccessValidation">help_outline</i> OAbutton API key:<br> <input class="fluxInput" spellcheck="false" id="OAbutton" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="OAbutton">cached</i><br><br></div> -->
@@ -55,7 +55,7 @@ const {shell}=require("electron");
   <span class="flux-title">Hyphe</span><br><br>
   <p id="hyphendpoint"></p>
   <input class="fluxInput" spellcheck="false" id="hypheaddress" type="text" value="https://hyphe.medialab.sciences-po.fr/demo"><br><br>
-  <button type="submit" class="flux-button" id="hyphe-checker" onclick="hypheCheck(document.getElementById('hypheaddress').value);return false">Check Hyphe endpoint</button><br><br>
+  <button type="submit" class="flux-button" id="hyphe-checker">Check Hyphe endpoint</button><br><br>
   <button type="submit" style="display:none;" class="flux-button" id="hyphe-exporter" onclick="endpointConnector('hyphe',document.getElementById('hypheaddress').value);return false">Add to Hyphe endpoints</button><br><br>
   <button type="submit" class="flux-button" id="cslcolret" onclick="datasetDisplay('hyphe-dataset-list','hyphe');return false">Display available Hyphe endpoints</button><br>
   <div id="hyphe-dataset-preview"  style="position:relative;max-height: 200px;overflow-y: scroll;"></div>
@@ -258,29 +258,17 @@ const {shell}=require("electron");
     </div>
 
 <div style="position:fixed;z-index:20;padding: 5px;right:0px;top:0px;">
-<i class="material-icons  dialog-buttons" onclick="fluxDisplay('flux-manager');">arrow_back</i>
-<i class="material-icons dialog-buttons" onclick="refreshWindow();">refresh</i>
-<i class="material-icons dialog-buttons" onclick="closeWindow();">close</i>
+<i class="material-icons  dialog-buttons" id="fluxDisplayButton" >arrow_back</i>
+<i class="material-icons dialog-buttons" id="fluxRefreshButton"  >refresh</i>
+<i class="material-icons dialog-buttons" id="fluxCloseButton" >close</i>
 </div>
 </div>
 
 <link rel="stylesheet" type="text/css" href="css/pandorae.css">
 <link rel="icon" type="image/png" href="img/AE-favicon.png"/>
-<script>
-
-const closeWindow = () => {
-        ipcRenderer.send("window-manager","closeWindow","flux")     
-}
-
-const refreshWindow = () => {
-       location.reload();
-}
-
-const reframeMainWindow = () => {
-      //  remote.mainWindow({frame: true})
-}
 
 
-</script>
-<script src="js/flux.js"></script>
-<script src="js/userdata.js"></script>
+
+
+<!-- <script src="js/flux.js"></script>
+<script src="js/userdata.js"></script> -->

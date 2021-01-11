@@ -49,6 +49,15 @@ var pandoratio = 0; // Used in three.js transitions (from one shape to another)
 var xtypeExists = false; // xtype SVG doesn't exist on document load
 var coreExists = true; // core does exist on document load
 
+var activeTheme;
+var fullscreenable;
+
+var coreCanvasW = window.innerWidth;
+var coreCanvasH = window.innerHeight;
+
+var coreDefW = 512;
+var coreDefH = 512;
+
 window.addEventListener('DOMContentLoaded', (event) => {
 
 // =========== LANGUAGE SELECTION ===========
@@ -1474,14 +1483,7 @@ ipcRenderer.on("tutorial", (event, message) => {
 
 // ========= THEMES =======
 
-var activeTheme;
-var fullscreenable;
 
-var coreCanvasW = window.innerWidth;
-var coreCanvasH = window.innerHeight;
-
-var coreDefW = 512;
-var coreDefH = 512;
 
 const selectTheme = themeName => {
   fs.readFile(userDataPath + "/themes/themes.json", "utf8", (err, data) => {
@@ -1514,11 +1516,25 @@ const loadTheme = () => {
         activeTheme = theme;
 
         if (theme.hasOwnProperty("script")) {
+
+          switch (theme.script) {
+            case "normal": normalCore();
+            break;
+            case "vega": vega();
+        
+              break;
+          
+            default:
+              break;
+          }
+
+          /*
           var themeScripts = require(appPath +
             "/themes/" +
             theme["theme-name"] +
             "/" +
             theme.script)();          
+            */
         }
 
         setTimeout(() => {

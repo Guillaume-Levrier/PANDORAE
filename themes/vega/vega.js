@@ -40,4 +40,4 @@ const vega = () => {
     for (let i = .1; i < .9; i=i+.1) {circleDrawer(etalon*(i))};
 }
 
-module.exports = () => {vega();};
+// module.exports = () => {vega();};
