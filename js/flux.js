@@ -784,28 +784,28 @@ if (document.getElementById("biorxiv-author").value.length>0) {
 }  
   
   
- reqURL=reqURL+'%20jcode%3A'+document.getElementById("biorxiv-list").value+
+ reqURL=reqURL+jcode+
   '%20limit_from%3A'+document.getElementById("biorxiv-date-from").value+
-  '%20limit_to%3A'+document.getElementById("biorxiv-date-to").value+
-  '%20numresults%3A1%20sort%3Apublication-date%20direction%3Adescending%20format_result%3Acondensed';
+  '%20limit_to%3A'+document.getElementById("biorxiv-date-to").value+endUrl;
 
   document.getElementById(
     "biorxiv-basic-previewer"
-  ).innerHTML = "Retrieving amount of results...";
+  ).innerHTML = "Retrieving result amount...";
 
-  ipcRenderer.send("artoo",{type:"request",model:"biorxiv-amount-injector",address:reqURL})
+let req = {type:"request",model:"biorxiv-amount-injector",address:reqURL}
+
+  ipcRenderer.send("artoo",req)
+
 }
 
 ipcRenderer.on("artoo",(event,message)=>{
+  console.log("got answer",message)
   switch (message.type) {
     case "biorxiv-amount":
-      
-      
+            
       let dataBasicPreview =
-      "Expected amount of results: " +
+      "Expected amount: " +
       message.content;
-
-      
 
     document.getElementById(
       "biorxiv-basic-previewer"
@@ -818,15 +818,14 @@ ipcRenderer.on("artoo",(event,message)=>{
     ).style.display = "block"; 
       break;
   
-    default:
-      break;
   }
 })
 
 
 //========== clinicalBasicRetriever ==========
-const clinicTrialBasicRetriever = checker => {
+const clinicTrialBasicRetriever = () => {
   
+  console.log("clintri retrieve")
 
   let ctQuery =  document.getElementById("clinical_trialslocalqueryinput").value; // Request Content
 
@@ -1220,7 +1219,7 @@ console.log(target, prevId)
               load.value="load"
               load.style.marginLeft="10px"
               load.addEventListener("click",e=>{
-                console.log(hypheResponse[0].result[corpus].corpus_id)
+              
                 loadHyphe(hypheResponse[0].result[corpus].corpus_id,target)
               })
 
@@ -1471,7 +1470,7 @@ const refreshWindow = () => {
   location.reload()
 }
 
-window.addEventListener('DOMContentLoaded', (event) => {
+window.addEventListener('load', (event) => {
 
   
   var buttonMap=[
@@ -1489,10 +1488,24 @@ window.addEventListener('DOMContentLoaded', (event) => {
     {id:"systemList",func:"datasetDisplay",arg:['systemDatasetsList','system']},
     {id:"load-local",func:"localUpload"},
     {id:"systitret",func:"powerValve",arg:"sysExport"},
-    //{id:"",func:"",arg:[]},
-    //{id:"",func:"",arg:[]},
-    //{id:"",func:"",arg:[]},
-    //{id:"",func:"",arg:[]},
+    {id:"clinical_trials-basic-query",func:"clinicTrialBasicRetriever"},
+    {id:"clinical_trials-query",func:"powerValve",arg:"clinTriRetriever"},
+    {id:"scopus-basic-query",func:"scopusBasicRetriever",arg:[]},
+    {id:"scopus-query",func:"powerValve",arg:"scopusRetriever"},
+    {id:"biorxiv-basic-query",func:"biorxivBasicRetriever"},
+    {id:"biorxiv-query",func:"powerValve",arg:'biorxivRetriever'},
+    {id:"twitterImporter",func:"powerValve",arg:"tweetImporter"},
+    {id:"twitterCatImporter",func:"twitterCat"},
+    {id:"twitterThreadImporter",func:"twitterThread"},
+    {id:"scopusGeolocate",func:"powerValve",arg:"scopusGeolocate"},
+    {id:"csljson-display",func:"datasetDisplay",arg:['scopus-dataset-list','scopus']},
+    {id:"convert-csl",func:"powerValve",arg:"scopusConverter"},
+    {id:"scopus-display",func:"datasetDisplay",arg:['enriched-dataset-list','enriched']},
+    {id:"cslcolret",func:"datasetDisplay",arg:['userCsljsonCollections','csljson']},
+    {id:"zoteroCollecBuild",func:"powerValve",arg:"zoteroCollectionBuilder"},
+    {id:"zotcolret",func:"zoteroCollectionRetriever"},
+    {id:"zotitret",func:"powerValve",arg:'zoteroItemsRetriever'},
+      //{id:"",func:"",arg:[]},
     //{id:"",func:"",arg:[]},
     //{id:"",func:"",arg:[]},
     //{id:"",func:"",arg:[]},
@@ -1501,45 +1514,79 @@ window.addEventListener('DOMContentLoaded', (event) => {
   const svg = d3.select("svg");
   drawFlux(svg, traces, false, true);
 
+function funcSwitch(but) {
+
+  switch (but.func) {
+
+    case "biorxivBasicRetriever": biorxivBasicRetriever();
+    
+    break;
+    
+
+    case "basicUserData": basicUserData();
+      break;
+      case "checkKey": checkKey(but.arg);
+      break;
+
+      case "updateUserData": updateUserData(but.arg);
+      break;
+
+      case "fluxDisplay": fluxDisplay(but.arg);
+      break;
+
+      case "closeWindow": closeWindow();
+      break;
+
+      case "refreshWindow": refreshWindow();
+      break;
+
+      case "hypheCheck": hypheCheck(document.getElementById('hypheaddress').value);
+      break;
+
+      case "endpointConnector": endpointConnector('hyphe',document.getElementById('hypheaddress').value);
+      break;
+  
+    case "datasetDisplay":datasetDisplay(but.arg[0],but.arg[1])
+      break;
+
+      case "localUpload":localUpload()
+      break;
+
+      case "powerValve": powerValve(but.arg,e.target)
+      break;
+
+      case "clinicTrialBasicRetriever":   
+      clinicTrialBasicRetriever()
+      break;
+
+      case "scopusBasicRetriever": scopusBasicRetriever()
+      break;
+
+    
+
+      case "twitterCat": twitterCat()
+      break;
+
+      case "twitterThread": twitterThread()
+      break;
+
+      case "zoteroCollectionRetriever": zoteroCollectionRetriever()
+      break;
+               
+
+     
+  }
+
+}
+
   buttonMap.forEach(but=>{
 
     document.getElementById(but.id).addEventListener("click",e=>{
-     switch (but.func) {
-       case "basicUserData": basicUserData();
-         break;
-         case "checkKey": checkKey(bot.arg);
-         break;
-
-         case "updateUserData": updateUserData(bot.arg);
-         break;
-
-         case "fluxDisplay": fluxDisplay(but.arg);
-         break;
-
-         case "closeWindow": closeWindow();
-         break;
-
-         case "refreshWindow": refreshWindow();
-         break;
-
-         case "hypheCheck": hypheCheck(document.getElementById('hypheaddress').value);
-         break;
-
-         case "endpointConnector": endpointConnector('hyphe',document.getElementById('hypheaddress').value);
-         break;
+     funcSwitch(but)
      
-       case "datasetDisplay":datasetDisplay(but.arg[0],but.arg[1])
-         break;
-
-         case "localUpload":localUpload()
-         break;
-
-         case "powerValve": powerValve(bot.arg,e.target)
-         break;
-         
-     }
-
-      
+      e.preventDefault();
+    
+    return false
     })
 
   })

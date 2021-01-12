@@ -2,6 +2,7 @@
 *.txt
 js/preload-index.js
 js/preload-flux.js
+js/preload-chaeros.js
 img/*
 mp4/*
 node_modules/*

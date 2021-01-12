@@ -560,6 +560,7 @@ li:active {
 /* ============ CORE =========== */
 
 #coreCanvas {
+    outline:none;
     top: 0;
     position: fixed;
     display: none;

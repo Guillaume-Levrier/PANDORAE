@@ -14,7 +14,7 @@ const bottleneck = require("bottleneck"); // Load bottleneck to manage API reque
 const fs = require("fs"); // Load filesystem to manage flatfiles
 const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
 const date = new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
-
+var winId = 0
 var currentDoc = {};
 
 var geolocationActive = false;
@@ -123,7 +123,7 @@ const scopusConverter = (dataset) => {
         "scopusConverter successfully converted " + dataset
     ); // Log success
     setTimeout(() => {
-        win.close();
+           ipcRenderer.send("win-destroy",winId);;
     }, 500);
 };
 
@@ -266,7 +266,7 @@ const scopusGeolocate = (dataset) => {
                 );
 
                 setTimeout(() => {
-                    win.close();
+                       ipcRenderer.send("win-destroy",winId);;
                 }, 2000);
             }
         );
@@ -408,7 +408,7 @@ const scopusRetriever = (user, query, bottleRate) => {
                                             " have been successfully retrieved."
                                     );
                                     setTimeout(() => {
-                                        win.close();
+                                           ipcRenderer.send("win-destroy",winId);;
                                     }, 500); // Close Chaeros
                                 });
                         });
@@ -622,7 +622,7 @@ const biorxivRetriever = (query) => {
                     "bioRxiv results successfully poured in CSL-JSON database"
                 ); // Log success
                 setTimeout(() => {
-                    win.close();
+                       ipcRenderer.send("win-destroy",winId);;
                 }, 500);
             })
             .catch((error) => {
@@ -719,7 +719,7 @@ const clinTriRetriever = (query) => {
                                         " retrieved"
                                 );
                                 ipcRenderer.send("pulsar", true);
-                                win.close();
+                                   ipcRenderer.send("win-destroy",winId);;
                             }, 500); // Close Chaeros
                         });
                 })
@@ -847,6 +847,7 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
 
 //========== sysExport ==========
 const sysExport = (destination, importName, id) => {
+
     pandodb.open();
 
     pandodb.system.get(id).then((dataset) => {
@@ -872,7 +873,7 @@ const dataWriter = (destination, importName, content) => {
     );
     ipcRenderer.send("pulsar", true);
     setTimeout(() => {
-        win.close();
+           ipcRenderer.send("win-destroy",winId);
     }, 1000);
 };
 
@@ -985,7 +986,7 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
                                         "Collection created"
                                     ); // Send success message to main Display
                                     ipcRenderer.send("pulsar", true);
-                                    win.close();
+                                       ipcRenderer.send("win-destroy",winId);;
                                 }, 2000);
                             } // If all responses have been recieved, delay then close chaeros
                         });
@@ -1104,4 +1105,28 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
     }
 };
 
-module.exports = { chaerosSwitch: chaerosSwitch }; // Export the switch as a module
+//module.exports = { chaerosSwitch: chaerosSwitch }; // Export the switch as a module
+
+
+// POST MAIN WORLD CREATION
+window.addEventListener('DOMContentLoaded', (event) => {
+
+    ipcRenderer.on('id', (event, id) => {
+        winId=id.id;
+    })
+
+    ipcRenderer.on('chaeros-compute', (event, fluxAction,fluxArgs,message) => {
+        //console.log(event, fluxAction,fluxArgs,message)
+        try{
+            
+            chaerosSwitch(fluxAction,fluxArgs);
+          } catch (err){
+            ipcRenderer.send('console-logs',err);
+            ipcRenderer.send('chaeros-failure', JSON.stringify(err));
+          } finally{
+      
+        }
+      })
+      
+      ipcRenderer.send('chaeros-is-ready', 'ready')
+    })
