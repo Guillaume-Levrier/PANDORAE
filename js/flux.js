@@ -1190,20 +1190,17 @@ console.log(target, prevId)
 })
   .then(res =>res.json())
     .then(hypheResponse => {
-      console.log(hypheResponse)
-      // With the response
-
-
      
-
-      if (hypheResponse[0].code === "success") {
+       if (hypheResponse[0].code === "success") {
         let corpusList = document.createElement("UL")
 
         for (var corpus in hypheResponse[0].result) {
+          let corpusID=hypheResponse[0].result[corpus].corpus_id
+
           if (hypheResponse[0].result[corpus].password) {
            
             var line = document.createElement("LI")
-                line.id = hypheResponse[0].result[corpus].corpus_id
+                line.id = corpusID
                 
             var linCont = document.createElement("DIV")
             linCont.innerHTML= 
@@ -1223,6 +1220,7 @@ console.log(target, prevId)
               load.value="load"
               load.style.marginLeft="10px"
               load.addEventListener("click",e=>{
+                console.log(hypheResponse[0].result[corpus].corpus_id)
                 loadHyphe(hypheResponse[0].result[corpus].corpus_id,target)
               })
 
@@ -1233,11 +1231,10 @@ console.log(target, prevId)
           } else {
          
             var line = document.createElement("LI")
-            line.id = hypheResponse[0].result[corpus].corpus_id
+            line.id = corpusID
             
         var linCont = document.createElement("DIV")
-        linCont.innerHTML=    
-                  
+        linCont.innerHTML=  
             "<strong>" +
               hypheResponse[0].result[corpus].name +
               "</strong> - IN WE:" +
@@ -1247,7 +1244,7 @@ console.log(target, prevId)
               load.type="button"
               load.value="load"
               load.addEventListener("click",e=>{
-                loadHyphe(hypheResponse[0].result[corpus].corpus_id,target)
+                   loadHyphe(corpusID,target)
               })
 
               line.appendChild(linCont)
@@ -1264,6 +1261,9 @@ console.log(target, prevId)
 };
 
 const loadHyphe = (corpus, endpoint, pass) => {
+
+  console.log(corpus, endpoint, pass)
+
   let password = false;
   if (pass) {
     password = document.getElementById(corpus + "pass").value;
@@ -1486,6 +1486,13 @@ window.addEventListener('DOMContentLoaded', (event) => {
     {id:"hyphe-checker",func:"hypheCheck"},
     {id:"hyphe-exporter",func:"endpointConnector"},
     {id:"hypheDataset",func:"datasetDisplay",arg:['hyphe-dataset-list','hyphe']},
+    {id:"systemList",func:"datasetDisplay",arg:['systemDatasetsList','system']},
+    {id:"load-local",func:"localUpload"},
+    {id:"systitret",func:"powerValve",arg:"sysExport"},
+    //{id:"",func:"",arg:[]},
+    //{id:"",func:"",arg:[]},
+    //{id:"",func:"",arg:[]},
+    //{id:"",func:"",arg:[]},
     //{id:"",func:"",arg:[]},
     //{id:"",func:"",arg:[]},
     //{id:"",func:"",arg:[]},
@@ -1524,10 +1531,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
        case "datasetDisplay":datasetDisplay(but.arg[0],but.arg[1])
          break;
 
-         case "":
+         case "localUpload":localUpload()
          break;
 
-         case "":
+         case "powerValve": powerValve(bot.arg,e.target)
          break;
          
      }
