@@ -1,24 +1,4 @@
 <!DOCTYPE html><html><meta charset="UTF-8">
-<title>CHÆROS-COMPUTE</title>
-
-<script src="js/db.js"></script>
-
-<script>
-  const chaeros = require('./js/chaeros');
-  const {ipcRenderer} = require('electron');
-
-ipcRenderer.on('chaeros-compute', (event, fluxAction,fluxArgs,message) => {
-  try{
-      
-      chaeros.chaerosSwitch(fluxAction,fluxArgs);
-    } catch (err){
-      ipcRenderer.send('console-logs',err);
-      ipcRenderer.send('chaeros-failure', JSON.stringify(err));
-    } finally{
-
-  }
-})
-
-ipcRenderer.send('chaeros-is-ready', 'ready')
-
-</script>
+<title>CHÆROS</title>
+ 
+<meta http-equiv="Content-Security-Policy" content="script-src 'self';object-src 'none';base-uri 'none';">

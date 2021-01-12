@@ -211,6 +211,16 @@ const openModal = (modalFile, scrollTo) => {
   
 };
 
+ipcMain.on("win-destroy", (event, winId) => {
+
+  BrowserWindow.fromId(winId).destroy()
+
+})
+
+
+
+
+
 ipcMain.on("window-manager", (event, type, file, scrollTo, section) => {
   let win = {};
 
@@ -240,9 +250,11 @@ ipcMain.on("window-manager", (event, type, file, scrollTo, section) => {
      
       try {
         
+
+        
           BrowserWindow.fromId(windowIds[file].id).close()
           windowIds[file].open=false;
-                
+          
       } catch (e) {
         console.log(e);
       }
@@ -332,17 +344,22 @@ const chaerosCalculator = () => {
     transparent: true,
     show: false,
     webPreferences: {
+      preload:basePath+"/js/preload-chaeros.js",
       worldSafeExecuteJavaScript: true,
       contextIsolation: true,
-      nodeIntegration: true,
-      nodeIntegrationInWorker: true
+      //nodeIntegration: true,
+      //nodeIntegrationInWorker: true
     }
   });
 
   chaerosWindow.loadFile("chaeros.html");
 
+  // add to id
+  windowIds.chaeros.push({id:chaerosWindow.id});
+ 
   chaerosWindow.webContents.on("did-finish-load", function() {
-    //chaerosWindow.webContents.openDevTools();
+    chaerosWindow.webContents.send("id",{id:chaerosWindow.id})
+    chaerosWindow.webContents.openDevTools();
   });
 };
 
@@ -440,39 +457,42 @@ const artooScraper = (model,address) => {
     webPreferences: {
       worldSafeExecuteJavaScript: true,
       contextIsolation: true,
-      nodeIntegration: true,
-      nodeIntegrationInWorker: true,
-      preload: basePath+'/js/artoo-models/'+model+'.js',
-      webSecurity:false
+      preload: basePath+'/js/artoo-models/'+model+'.js'
     }
   });
 
   artooWindow.loadURL(address);
 
   artooWindow.webContents.on("did-finish-load", function() {
-    //artooWindow.webContents.openDevTools();
+  
+    artooWindow.webContents.send("id",artooWindow.id)
+    artooWindow.webContents.openDevTools();
   });
 };
 
 ipcMain.on("artoo", (event, message) => {
+ 
+  console.log(message)
   switch (message.type) {
     case "request":
       artooScraper(message.model,message.address) 
       break;
   
     case 'biorxiv-amount':
-      for (var i = 0; i < windowIds.length; i++) {
-        if (windowIds[i].name === "flux") {
-          BrowserWindow.fromId(windowIds[i].id).webContents.send('artoo',message)
-        }
-      }
+  
+             
+          BrowserWindow.fromId(windowIds.flux.id).webContents.send('artoo',message)
+        
+      
      
       case 'biorxiv-content':
-      for (var i = 0; i < windowIds.length; i++) {
-        if (windowIds[i].name === "chaeros" && windowIds[i].id>0) {
-          BrowserWindow.fromId(windowIds[i].id).webContents.send('artoo',message)
+        // there has to be an issue here
+        /*
+      for (var i = 0; i < windowIds.chaeros.length; i++) {
+        if (windowIds.chaeros[i].id>0) {
+          BrowserWindow.fromId(windowIds.chaeros[i].id).webContents.send('artoo',message)
         }
-      }
+      }*/
 
       break;
   }

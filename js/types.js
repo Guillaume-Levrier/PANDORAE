@@ -4844,9 +4844,7 @@ const gazouillotype = (id) => {
                         if (gzWorkerAnswer.data.type === "gz") {
                             circleData = gzWorkerAnswer.data.msg;
 
-                            console.log(circleData)
-
-                            
+                                                      
                             view.selectAll("circle")
                                 .data(circleData)
                                 .enter()
