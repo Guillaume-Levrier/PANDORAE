@@ -792,13 +792,13 @@ if (document.getElementById("biorxiv-author").value.length>0) {
     "biorxiv-basic-previewer"
   ).innerHTML = "Retrieving result amount...";
 
-let req = {type:"request",model:"biorxiv-amount-injector",address:reqURL}
+let req = {type:"request",model:"biorxiv-amount-retriever",address:reqURL}
 
-  ipcRenderer.send("artoo",req)
+  ipcRenderer.send("biorxiv-retrieve",req)
 
 }
 
-ipcRenderer.on("artoo",(event,message)=>{
+ipcRenderer.on("biorxiv-retrieve",(event,message)=>{
   console.log("got answer",message)
   switch (message.type) {
     case "biorxiv-amount":
@@ -1504,17 +1504,13 @@ window.addEventListener('load', (event) => {
     {id:"cslcolret",func:"datasetDisplay",arg:['userCsljsonCollections','csljson']},
     {id:"zoteroCollecBuild",func:"powerValve",arg:"zoteroCollectionBuilder"},
     {id:"zotcolret",func:"zoteroCollectionRetriever"},
-    {id:"zotitret",func:"powerValve",arg:'zoteroItemsRetriever'},
-      //{id:"",func:"",arg:[]},
-    //{id:"",func:"",arg:[]},
-    //{id:"",func:"",arg:[]},
-    //{id:"",func:"",arg:[]},
+    {id:"zotitret",func:"powerValve",arg:'zoteroItemsRetriever'}   
   ]
 
   const svg = d3.select("svg");
   drawFlux(svg, traces, false, true);
 
-function funcSwitch(but) {
+function funcSwitch(e,but) {
 
   switch (but.func) {
 
@@ -1582,7 +1578,7 @@ function funcSwitch(but) {
   buttonMap.forEach(but=>{
 
     document.getElementById(but.id).addEventListener("click",e=>{
-     funcSwitch(but)
+     funcSwitch(e,but)
      
       e.preventDefault();
     

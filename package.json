@@ -15,7 +15,6 @@
 	"dependencies": {
 		"@hownetworks/tracegraph": "^0.3.0",
 		"@observablehq/runtime": "^4.6.4",
-		"artoo-js": "^0.4.0",
 		"bottleneck": "^2.19.5",
 		"csv-parser": "^2.3.3",
 		"d3": "^6.0.0",
