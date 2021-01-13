@@ -1,16 +1,24 @@
 const electron = require("electron");
-const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } = electron;
+const {
+  app,
+  BrowserView,
+  BrowserWindow,
+  ipcMain,
+  shell,
+  dialog,
+  WebContents,
+} = electron;
 const fs = require("fs");
 const userDataPath = app.getPath("userData");
 const keytar = require("keytar"); // Load keytar to manage user API keys
 
 var windowIds = {
-      flux:{id: 0, open: false },
-      tutorialHelper:{ id: 0, open: false },
-      tutorial:{ id: 0, open: false },
-      chaeros:[],
-      index:{ id: 0, open: false }
-  };
+  flux: { id: 0, open: false },
+  tutorialHelper: { id: 0, open: false },
+  tutorial: { id: 0, open: false },
+  chaeros: [],
+  index: { id: 0, open: false },
+};
 
 let mainWindow;
 
@@ -18,9 +26,9 @@ const basePath = app.getAppPath();
 
 //FileSystem
 const userDataDirTree = (path, dirTree) => {
-  dirTree.forEach(d => {
+  dirTree.forEach((d) => {
     if (!fs.existsSync(path + d)) {
-      fs.mkdirSync(path + d, { recursive: true }, err => {
+      fs.mkdirSync(path + d, { recursive: true }, (err) => {
         if (err) throw err;
       });
     }
@@ -35,7 +43,7 @@ const createUserId = () => {
     UserMail: "Enter your e-mail (not required)",
     ZoteroID: "Enter your Zotero ID (required to use Flux features)",
     theme: "normal",
-    locale:"EN"
+    locale: "EN",
   };
 
   if (!fs.existsSync(userDataPath + "/userID/user-id.json")) {
@@ -43,7 +51,7 @@ const createUserId = () => {
       userDataPath + "/userID/user-id.json",
       JSON.stringify(userID),
       "utf8",
-      err => {
+      (err) => {
         if (err) throw err;
       }
     );
@@ -69,13 +77,13 @@ function createWindow() {
     frame: true,
     resizable: true,
     webPreferences: {
-    preload:basePath+"/js/preload-index.js",
+      preload: basePath + "/js/preload-index.js",
       worldSafeExecuteJavaScript: true,
-      contextIsolation:true,
+      contextIsolation: true,
       //nodeIntegration: true,
       nodeIntegrationInWorker: true,
-      plugins: true
-    }
+      plugins: true,
+    },
   });
 
   windowIds.index.id = mainWindow.id;
@@ -97,8 +105,8 @@ function createWindow() {
             worldSafeExecuteJavaScript: true,
             contextIsolation: true,
             nodeIntegration: true,
-            nodeIntegrationInWorker: true
-          }
+            nodeIntegrationInWorker: true,
+          },
         });
 
         event.newGuest = new BrowserWindow(options);
@@ -107,10 +115,9 @@ function createWindow() {
   );
 
   mainWindow.setMenu(null);
-  mainWindow.webContents.openDevTools();
+  //mainWindow.webContents.openDevTools();
   mainWindow.on("closed", () => {
     mainWindow = null;
-  
   });
 }
 
@@ -119,20 +126,17 @@ app.on("ready", () => {
     "/logs",
     "/userID",
     "/themes",
-    "/flatDatasets"
+    "/flatDatasets",
   ]);
   createUserId();
   createThemes();
   createWindow();
   createAudioManager();
 
-  mainWindow.onbeforeunload = e => {
-    BrowserView.getAllViews().forEach(view => view.destroy());
+  mainWindow.onbeforeunload = (e) => {
+    BrowserView.getAllViews().forEach((view) => view.destroy());
   };
 });
-
-
-
 
 /*
 ipcMain.on("window-ids", (event, window, id, open) => {
@@ -145,7 +149,7 @@ ipcMain.on("window-ids", (event, window, id, open) => {
 });
 */
 
-const openHelper = helperFile => {
+const openHelper = (helperFile) => {
   let screenWidth = electron.screen.getPrimaryDisplay().workAreaSize.width;
   let screenHeight = electron.screen.getPrimaryDisplay().workAreaSize.height;
 
@@ -163,8 +167,8 @@ const openHelper = helperFile => {
       worldSafeExecuteJavaScript: true,
       contextIsolation: true,
       nodeIntegration: true,
-      nodeIntegrationInWorker: true
-    }
+      nodeIntegrationInWorker: true,
+    },
   });
   win.once("ready-to-show", () => {
     win.show();
@@ -174,58 +178,47 @@ const openHelper = helperFile => {
 };
 
 const openModal = (modalFile, scrollTo) => {
+  if (windowIds[modalFile].open === false) {
+    let win = new BrowserWindow({
+      // backgroundColor: "white",
+      parent: mainWindow,
+      modal: true,
+      transparent: true,
+      alwaysOnTop: false,
+      frame: false,
+      resizable: false,
+      show: false,
+      y: 100,
+      webPreferences: {
+        preload: basePath + "/js/preload-" + modalFile + ".js",
+        worldSafeExecuteJavaScript: true,
+        contextIsolation: true,
+        //nodeIntegration: true,
+        nodeIntegrationInWorker: true,
+      },
+    });
 
-      if (windowIds[modalFile].open === false) {
-
-        let win = new BrowserWindow({
-         // backgroundColor: "white",
-          parent: mainWindow,
-          modal: true,
-          transparent:true,
-          alwaysOnTop: false,
-          frame: false,
-          resizable: false,
-          show: false,
-          y: 100,
-          webPreferences: {
-            preload:basePath+"/js/preload-"+modalFile+".js",
-            worldSafeExecuteJavaScript: true,
-            contextIsolation: true,
-            //nodeIntegration: true,
-            nodeIntegrationInWorker: true
-          }
-        });
-
-        var path = "file://" + __dirname + "/" + modalFile + ".html";
-        win.loadURL(path);
-        win.once("ready-to-show", () => {
-          win.show();
-          windowIds[modalFile].id=win.id;
-          windowIds[modalFile].open=true;
-          if (scrollTo) {
-            setTimeout(() => win.webContents.send("scroll-to", scrollTo), 1000);
-          }
-        });
+    var path = "file://" + __dirname + "/" + modalFile + ".html";
+    win.loadURL(path);
+    win.once("ready-to-show", () => {
+      win.show();
+      windowIds[modalFile].id = win.id;
+      windowIds[modalFile].open = true;
+      if (scrollTo) {
+        setTimeout(() => win.webContents.send("scroll-to", scrollTo), 1000);
       }
-    
-  
+    });
+  }
 };
 
 ipcMain.on("win-destroy", (event, winId) => {
-
-  BrowserWindow.fromId(winId).destroy()
-
-})
-
-
-
-
+  BrowserWindow.fromId(winId).destroy();
+});
 
 ipcMain.on("window-manager", (event, type, file, scrollTo, section) => {
   let win = {};
 
   switch (type) {
-
     case "openHelper":
       openHelper(file);
 
@@ -247,22 +240,15 @@ ipcMain.on("window-manager", (event, type, file, scrollTo, section) => {
       break;
 
     case "closeWindow":
-     
       try {
-        
-
-        
-          BrowserWindow.fromId(windowIds[file].id).close()
-          windowIds[file].open=false;
-          
+        BrowserWindow.fromId(windowIds[file].id).close();
+        windowIds[file].open = false;
       } catch (e) {
         console.log(e);
       }
       break;
   }
 });
-
-
 
 //CONSOLE
 
@@ -306,24 +292,20 @@ ipcMain.on("pulsar", (event, message) => {
 });
 
 ipcMain.on("keytar", (event, request) => {
+  switch (request.type) {
+    case "setPassword":
+      keytar
+        .setPassword(request.service, request.user, request.value)
+        .then((password) => (event.returnValue = password));
+      break;
 
-switch (request.type) {
-  case "setPassword":
-    keytar
-    .setPassword(request.service, request.user,request.value)
-    .then(password => event.returnValue = password);
-    break;
-
-  case "getPassword":
-    keytar
-    .getPassword(request.service, request.user)
-    .then(password => event.returnValue = password);
-    break;
-}
-
- 
-
-}); 
+    case "getPassword":
+      keytar
+        .getPassword(request.service, request.user)
+        .then((password) => (event.returnValue = password));
+      break;
+  }
+});
 
 ipcMain.on("chaeros-is-ready", (event, arg) => {
   let action = powerValveArgsArray[powerValveArgsArray.length - 1];
@@ -335,7 +317,6 @@ ipcMain.on("chaeros-is-ready", (event, arg) => {
   );
 });
 
-
 const chaerosCalculator = () => {
   let chaerosWindow = new BrowserWindow({
     width: 10,
@@ -344,27 +325,19 @@ const chaerosCalculator = () => {
     transparent: true,
     show: false,
     webPreferences: {
-      preload:basePath+"/js/preload-chaeros.js",
+      preload: basePath + "/js/preload-chaeros.js",
       worldSafeExecuteJavaScript: true,
       contextIsolation: true,
-      //nodeIntegration: true,
-      //nodeIntegrationInWorker: true
-    }
+    },
   });
 
   chaerosWindow.loadFile("chaeros.html");
 
-  // add to id
-  windowIds.chaeros.push({id:chaerosWindow.id});
- 
-  chaerosWindow.webContents.on("did-finish-load", function() {
-    chaerosWindow.webContents.send("id",{id:chaerosWindow.id})
+  chaerosWindow.webContents.on("did-finish-load", function () {
+    chaerosWindow.webContents.send("id", chaerosWindow.id);
     chaerosWindow.webContents.openDevTools();
   });
 };
-
-
-
 
 const createAudioManager = () => {
   let audioManager = new BrowserWindow({
@@ -374,43 +347,42 @@ const createAudioManager = () => {
     transparent: true,
     show: false,
     webPreferences: {
+      preload: basePath + "/js/preload-audio.js",
       worldSafeExecuteJavaScript: true,
       contextIsolation: true,
-      nodeIntegration: true,
-      nodeIntegrationInWorker: true
-    }
+    },
   });
 
-audioManager.loadFile("audioManager.html")
-audioManager.webContents.on("did-finish-load", function() {
- // audioManager.webContents.openDevTools();
-});
-ipcMain.on("audio-channel", (event, audio) => {
-  audioManager.webContents.send("audio-channel", audio);
-});
+  audioManager.loadFile("audioManager.html");
+  audioManager.webContents.on("did-finish-load", function () {
+    // audioManager.webContents.openDevTools();
+  });
+  ipcMain.on("audio-channel", (event, audio) => {
+    audioManager.webContents.send("audio-channel", audio);
+  });
 
-mainWindow.on("closed", () => {
-            setTimeout(() => {
-                app.quit();
-            }, 1000);
-        });
-    };
+  mainWindow.on("closed", () => {
+    setTimeout(() => {
+      app.quit();
+    }, 1000);
+  });
+};
 
 app.on("activate", () => {
   if (mainWindow === null) {
-    createWindow();    
+    createWindow();
   }
 });
 
 // Quit when all windows are closed.
-app.on("window-all-closed", function() {
+app.on("window-all-closed", function () {
   // Write log
   fs.writeFile(
     // Write data
     userDataPath + "/logs/log-" + date + ".txt",
     dataLog,
     "utf8", // Path/name, data, format
-    err => {
+    (err) => {
       if (err) throw err;
       setTimeout(() => {
         app.quit();
@@ -434,21 +406,19 @@ ipcMain.on("progress", (event, message) => {
   mainWindow.webContents.send("progressBar", ratio);
 });
 
-
 ipcMain.on("cmdInputFromRenderer", (event, theme) => {
   mainWindow.webContents.send("cmdInputFromRenderer", theme);
 });
 
 ipcMain.on("backToPres", (event, message) => {
-  mainWindow.reload()
+  mainWindow.reload();
   setTimeout(() => {
     mainWindow.webContents.send("backToPres", message);
   }, 500);
-})
+});
 
-
-const artooScraper = (model,address) => {
-  let artooWindow = new BrowserWindow({
+const biorXivScraper = (model, address, chaerosWinId) => {
+  let biorXivWindow = new BrowserWindow({
     width: 10,
     height: 10,
     frame: false,
@@ -457,120 +427,100 @@ const artooScraper = (model,address) => {
     webPreferences: {
       worldSafeExecuteJavaScript: true,
       contextIsolation: true,
-      preload: basePath+'/js/artoo-models/'+model+'.js'
-    }
+      preload: basePath + "/js/retrieve-models/" + model + ".js",
+    },
   });
 
-  artooWindow.loadURL(address);
+  biorXivWindow.loadURL(address);
 
-  artooWindow.webContents.on("did-finish-load", function() {
-  
-    artooWindow.webContents.send("id",artooWindow.id)
-    artooWindow.webContents.openDevTools();
+  biorXivWindow.webContents.on("did-finish-load", function () {
+    biorXivWindow.webContents.send("id", biorXivWindow.id);
+
+    if (chaerosWinId) {
+      biorXivWindow.webContents.send("chaeros-id", chaerosWinId);
+    }
+
+    //  biorXivWindow.webContents.openDevTools();
   });
 };
 
-ipcMain.on("artoo", (event, message) => {
- 
-  console.log(message)
+ipcMain.on("biorxiv-retrieve", (event, message) => {
   switch (message.type) {
     case "request":
-      artooScraper(message.model,message.address) 
+      biorXivScraper(message.model, message.address, message.winId);
       break;
-  
-    case 'biorxiv-amount':
-  
-             
-          BrowserWindow.fromId(windowIds.flux.id).webContents.send('artoo',message)
-        
-      
-     
-      case 'biorxiv-content':
-        // there has to be an issue here
-        /*
-      for (var i = 0; i < windowIds.chaeros.length; i++) {
-        if (windowIds.chaeros[i].id>0) {
-          BrowserWindow.fromId(windowIds.chaeros[i].id).webContents.send('artoo',message)
-        }
-      }*/
+
+    case "biorxiv-amount":
+      BrowserWindow.fromId(windowIds.flux.id).webContents.send(
+        "biorxiv-retrieve",
+        message
+      );
+      break;
+
+    case "biorxiv-content":
+      BrowserWindow.fromId(message.charWindId).webContents.send(
+        "biorxiv-retrieve",
+        message
+      );
 
       break;
   }
-
 });
 
 // Remote -> sendSync
 
-ipcMain.on('remote', async (event, req) => {
+ipcMain.on("remote", async (event, req) => {
   let res;
   switch (req) {
-    case "userDataPath": res = app.getPath("userData");
-        break;
-  
-    case "appPath": res = app.getAppPath();
-        break;
-  
-  }  
-    event.returnValue = res
-})
+    case "userDataPath":
+      res = app.getPath("userData");
+      break;
 
-ipcMain.on('read-file', async (event, filepath) => {
+    case "appPath":
+      res = app.getAppPath();
+      break;
+  }
+  event.returnValue = res;
+});
 
-  event.returnValue = dialog.showSaveDialog(filepath)
+ipcMain.on("read-file", async (event, filepath) => {
+  event.returnValue = dialog.showSaveDialog(filepath);
+});
 
-})
-
-ipcMain.handle('restart', async (event, mess) => {
-
+ipcMain.handle("restart", async (event, mess) => {
   app.relaunch();
   app.exit(0);
+});
 
-})
-
-ipcMain.handle('savePNG', async (event, target) => {
+ipcMain.handle("savePNG", async (event, target) => {
   setTimeout(() => {
-    mainWindow.capturePage().then(img=>{
-      dialog.showSaveDialog(target).then(filePath=>{
-      fs.writeFile(
-        filePath.filePath,
-        img.toPNG(),()=>{})
-    })
-  })
-  
+    mainWindow.capturePage().then((img) => {
+      dialog.showSaveDialog(target).then((filePath) => {
+        fs.writeFile(filePath.filePath, img.toPNG(), () => {});
+      });
+    });
   }, 250);
-})
+});
 
-
-ipcMain.handle('saveSVG', async (event, target,string) => {
-  
-  dialog.showSaveDialog(target).then(filePath=>{
-
-    fs.writeFile(
-     filePath.filePath,
-      string,
-      "utf8",
-      err => {
-        if (err) {
-          ipcRenderer.send("console-logs", JSON.stringify(err));
-        }
-
+ipcMain.handle("saveSVG", async (event, target, string) => {
+  dialog.showSaveDialog(target).then((filePath) => {
+    fs.writeFile(filePath.filePath, string, "utf8", (err) => {
+      if (err) {
+        ipcRenderer.send("console-logs", JSON.stringify(err));
       }
-    );
-    })
-  
-  
-})
+    });
+  });
+});
 
-ipcMain.handle('saveHTML', async (event, target) => {
+ipcMain.handle("saveHTML", async (event, target) => {
   let res;
-  await dialog.showSaveDialog(target).then(filePath=>{
-    res = filePath
-    })
+  await dialog.showSaveDialog(target).then((filePath) => {
+    res = filePath;
+  });
 
-return res
+  return res;
+});
 
-})
-
-ipcMain.handle('mainDevTools', async (event, target) => {
-  mainWindow.webContents.openDevTools()
-})
+ipcMain.handle("mainDevTools", async (event, target) => {
+  mainWindow.webContents.openDevTools();
+});
