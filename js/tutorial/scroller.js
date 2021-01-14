@@ -1,13 +1,14 @@
+// scroller
 let activeIndex = 0;
 
 var sectionList = document.querySelectorAll("section");
 
 const addPadding = () => {
   for (let sect of sectionList) {
-    sect.style.paddingTop=parseInt((document.body.offsetHeight-sect.clientHeight)/2)+"px";
-  }       
-}
-  
+    sect.style.paddingTop =
+      parseInt((document.body.offsetHeight - sect.clientHeight) / 2) + "px";
+  }
+};
 
 function scroller() {
   let container = d3.select("body"),
@@ -25,7 +26,7 @@ function scroller() {
 
     resize();
 
-    var timer = d3.timer(function() {
+    var timer = d3.timer(function () {
       position();
       timer.stop();
     });
@@ -34,21 +35,25 @@ function scroller() {
   function resize() {
     sectionPositions = [];
     var startPos;
-    sections.each(function(d, i) {
+    sections.each(function (d, i) {
       var top = this.getBoundingClientRect().top;
       if (i === 0) {
         startPos = top;
       }
-      sectionPositions.push(top - startPos-(window.innerHeight-this.getBoundingClientRect().height)/2);
+      sectionPositions.push(
+        top -
+          startPos -
+          (window.innerHeight - this.getBoundingClientRect().height) / 2
+      );
     });
     containerStart =
       container.node().getBoundingClientRect().top + window.pageYOffset;
   }
 
   function position() {
-    var pos = window.pageYOffset - containerStart; 
-    var sectionIndex = d3.bisect(sectionPositions, pos);    
-    sectionIndex = Math.min(sections.size() - 1, sectionIndex)-1;
+    var pos = window.pageYOffset - containerStart;
+    var sectionIndex = d3.bisect(sectionPositions, pos);
+    sectionIndex = Math.min(sections.size() - 1, sectionIndex) - 1;
 
     if (currentIndex !== sectionIndex) {
       dispatch.call("active", this, sectionIndex);
@@ -63,7 +68,7 @@ function scroller() {
     dispatch.call("progress", this, currentIndex, progress);
   }
 
-  scroll.container = function(value) {
+  scroll.container = function (value) {
     if (arguments.length === 0) {
       return container;
     }
@@ -71,7 +76,7 @@ function scroller() {
     return scroll;
   };
 
-  scroll.on = function(action, callback) {
+  scroll.on = function (action, callback) {
     dispatch.on(action, callback);
   };
 
@@ -96,17 +101,15 @@ const display = () => {
 
   scroll(d3.selectAll(".step"));
 
-  scroll.on("active", function(index) {
-    d3.selectAll(".step").style("opacity", function(d, i) {
+  scroll.on("active", function (index) {
+    d3.selectAll(".step").style("opacity", function (d, i) {
       return i === index ? 1 : 0.1;
     });
     progress(index);
   });
 };
 
-
-
-const progress = index => {
+const progress = (index) => {
   var sectionList = document.querySelectorAll("section");
   let progBasis = parseInt(
     (activeIndex / sectionList.length) * window.innerHeight
@@ -127,4 +130,3 @@ const progress = index => {
     }
   }
 };
-

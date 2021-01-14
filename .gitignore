@@ -3,6 +3,7 @@
 js/preload-index.js
 js/preload-flux.js
 js/preload-chaeros.js
+js/preload-tutorial.js
 img/*
 mp4/*
 node_modules/*
