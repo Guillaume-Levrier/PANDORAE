@@ -59,12 +59,12 @@ const createUserId = () => {
 };
 
 const createThemes = () => {
-  if (!fs.existsSync(userDataPath + "/themes/themes.json")) {
-    fs.copyFileSync(
-      basePath + "/json/themes.json",
-      userDataPath + "/themes/themes.json"
-    );
-  }
+  // if (!fs.existsSync(userDataPath + "/themes/themes.json")) {
+  fs.copyFileSync(
+    basePath + "/json/themes.json",
+    userDataPath + "/themes/themes.json"
+  );
+  //}
 };
 
 function createWindow() {
@@ -91,31 +91,8 @@ function createWindow() {
 
   mainWindow.loadFile("index.html");
 
-  mainWindow.webContents.on(
-    "new-window",
-    (event, url, frameName, disposition, options, additionalFeatures) => {
-      if (frameName === "modal") {
-        event.preventDefault();
-
-        Object.assign(options, {
-          modal: true,
-          parent: mainWindow,
-          frame: true,
-          webPreferences: {
-            worldSafeExecuteJavaScript: true,
-            contextIsolation: true,
-            nodeIntegration: true,
-            nodeIntegrationInWorker: true,
-          },
-        });
-
-        event.newGuest = new BrowserWindow(options);
-      }
-    }
-  );
-
   mainWindow.setMenu(null);
-  //mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
@@ -210,6 +187,30 @@ const openModal = (modalFile, scrollTo) => {
     });
   }
 };
+
+var currentTheme = "normal";
+
+const readTheme = () => {
+  fs.readFile(userDataPath + "/themes/themes.json", "utf8", (err, data) => {
+    var themeData = JSON.parse(data);
+    console.log("current theme is");
+    console.log(themeData);
+    mainWindow.webContents.send("themeContent", themeData[currentTheme]);
+  });
+};
+
+ipcMain.on("theme", (event, req) => {
+  switch (req.type) {
+    case "read":
+      readTheme();
+      break;
+
+    case "set":
+      console.log("new theme set " + req.theme);
+      currentTheme = req.theme;
+      break;
+  }
+});
 
 ipcMain.on("win-destroy", (event, winId) => {
   BrowserWindow.fromId(winId).destroy();
@@ -335,7 +336,7 @@ const chaerosCalculator = () => {
 
   chaerosWindow.webContents.on("did-finish-load", function () {
     chaerosWindow.webContents.send("id", chaerosWindow.id);
-    chaerosWindow.webContents.openDevTools();
+    //chaerosWindow.webContents.openDevTools();
   });
 };
 
