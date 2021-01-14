@@ -13,6 +13,7 @@ const appPath = ipcRenderer.sendSync("remote", "appPath");
 const bottleneck = require("bottleneck"); // Load bottleneck to manage API request limits
 const fs = require("fs"); // Load filesystem to manage flatfiles
 const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
+const { promises } = require("dns");
 const date =
   new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
 var winId = 0;
@@ -384,8 +385,6 @@ const scopusRetriever = (user, query, bottleRate) => {
 
 //========== biorxivRetriever ==========
 const biorxivRetriever = (query) => {
-  console.log(query);
-
   let amount = query.amount;
   let totalrequests = Math.ceil(amount / 75);
   let doiBuffer = [];
@@ -839,11 +838,6 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
 
     try {
       // If the file is valid, do the following:
-      const limiter = new bottleneck({
-        // Create a bottleneck to prevent API rate limit
-        maxConcurrent: 1, // Only one request at once
-        minTime: 400, // Every 400 milliseconds
-      });
 
       let zoteroApiKey = getPassword("Zotero", zoteroUser);
 
@@ -900,36 +894,43 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
             });
           });
 
-          limiter.schedule(() => {
-            Promise.all(
-              fetchTargets.map((d) => {
-                console.log(d);
-                fetch(d.uri, {
-                  method: "POST",
-                  body: JSON.stringify(d.body),
-                });
-              })
-            )
-
-              .then((res) => Promise.all(res.map((d) => d.json())))
-              .then((res) => {
-                console.log(res);
-                if (res.length === fileArrays.length) {
-                  setTimeout(() => {
-                    ipcRenderer.send(
-                      "chaeros-notification",
-                      "Collection created"
-                    ); // Send success message to main Display
-                    ipcRenderer.send("pulsar", true);
-                    // ipcRenderer.send("win-destroy",winId);;
-                  }, 2000);
-                } // If all responses have been recieved, delay then close chaeros
-              });
-            ipcRenderer.send(
-              "console-logs",
-              "Collection " + JSON.stringify(collectionName) + " built."
-            ); // Send success message to console
+          const limiter = new bottleneck({
+            // Create a bottleneck to prevent hitting API rate limits
+            maxConcurrent: 1, // Only one request at once
+            minTime: 200, // Every 200 milliseconds
           });
+
+          limiter
+            .schedule(() =>
+              Promise.all(
+                fetchTargets.map((d) =>
+                  fetch(d.uri, {
+                    method: "POST",
+                    body: JSON.stringify(d.body),
+                  })
+                )
+              )
+            )
+            .then((responses) =>
+              Promise.all(responses.map((res) => res.json()))
+            )
+            .then((res) => {
+              console.log(res);
+              if (res.length === fileArrays.length) {
+                setTimeout(() => {
+                  ipcRenderer.send(
+                    "chaeros-notification",
+                    "Collection created"
+                  ); // Send success message to main Display
+                  ipcRenderer.send("pulsar", true);
+                  //ipcRenderer.send("win-destroy", winId);
+                }, 2000);
+              } // If all responses have been recieved, delay then close chaeros
+            });
+          ipcRenderer.send(
+            "console-logs",
+            "Collection " + JSON.stringify(collectionName) + " built."
+          ); // Send success message to console
         });
     } catch (e) {
       ipcRenderer.send("console-logs", e);
