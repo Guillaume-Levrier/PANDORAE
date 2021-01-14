@@ -20,6 +20,16 @@ const preloadMap = [
     files: ["js/db.js", "js/locales.js", "js/flux.js", "js/userdata.js"],
   },
   { name: "js/preload-chaeros.js", files: ["js/db.js", "js/chaeros.js"] },
+  {
+    name: "js/preload-tutorial.js",
+    files: [
+      "js/locales.js",
+      "js/tutorial/cascade.js",
+      "js/tutorial/textcontent.js",
+      "js/tutorial/scroller.js",
+      "js/tutorial/tutorial.js",
+    ],
+  },
 ];
 
 preloadMap.forEach((plmap) => {

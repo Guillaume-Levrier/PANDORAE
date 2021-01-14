@@ -49,7 +49,7 @@ var field;
 var pandoratio = 0; // Used in three.js transitions (from one shape to another)
 var xtypeExists = false; // xtype SVG doesn't exist on document load
 var coreExists = true; // core does exist on document load
-
+var xtype;
 var activeTheme;
 var fullscreenable;
 
@@ -1298,6 +1298,7 @@ const cmdinput = (input) => {
 
 window.addEventListener("DOMContentLoaded", (event) => {
   iconDiv = document.getElementById("icons");
+  xtype = document.getElementById("xtype"); // xtype is a div containing each (-type) visualisation
 
   // =========== LANGUAGE SELECTION ===========
   var CM = CMT["EN"]; // Load the EN locale at start
@@ -1657,38 +1658,27 @@ const saveToolTip = () => {
 
   //// ========== TUTORIAL ========
 
-  fs.readFile(
-    userDataPath + "/userID/user-id.json", // Read the designated datafile
-    "utf8",
-    (err, data) => {
-      // Additional options for readFile
-      if (err) throw err;
-      let user = JSON.parse(data);
+  ipcRenderer.send("userStatus", true);
 
-      if (user.UserName === "Enter your name") {
-        menuIcon.style.cursor = "not-allowed";
-        consoleIcon.style.cursor = "not-allowed";
-        document.getElementById("tutostartmenu").style.display = "block";
-        field.style.pointerEvents = "all";
-        field.style.cursor = "pointer";
-        field.value = "start tutorial";
-      } else {
-        document.getElementById("menu-icon").onclick = toggleMenu;
-        document.getElementById("option-icon").onclick = toggleConsole;
-        document.getElementById("menu-icon").style.cursor = "pointer";
-        document.getElementById("option-icon").style.cursor = "pointer";
+  ipcRenderer.on("userStatus", (event, user) => kickStart(user));
 
-        fs.readFile(appPath + "/package.json", "utf8", (err, data) => {
-          if (err) throw err;
-          let package = JSON.parse(data);
-          let version = package.version;
-          document.getElementById("version").innerHTML =
-            user.UserName.toUpperCase() + " | " + version;
-        });
-      }
+  const kickStart = (user) => {
+    if (user.UserName === "Enter your name") {
+      menuIcon.style.cursor = "not-allowed";
+      consoleIcon.style.cursor = "not-allowed";
+      document.getElementById("tutostartmenu").style.display = "block";
+      field.style.pointerEvents = "all";
+      field.style.cursor = "pointer";
+      field.value = "start tutorial";
+    } else {
+      document.getElementById("menu-icon").onclick = toggleMenu;
+      document.getElementById("option-icon").onclick = toggleConsole;
+      document.getElementById("menu-icon").style.cursor = "pointer";
+      document.getElementById("option-icon").style.cursor = "pointer";
+      document.getElementById("version").innerHTML =
+        user.UserName.toUpperCase() + " | " + version;
     }
-  );
-
+  };
   ipcRenderer.on("tutorial", (event, message) => {
     menuIcon.onclick = toggleMenu;
     menuIcon.style.cursor = "pointer";

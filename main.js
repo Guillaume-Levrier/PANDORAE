@@ -69,8 +69,10 @@ const createThemes = () => {
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    //  width: 1200,
+    //  height: 800,
+    width: 1280,
+    height: 720,
     fullscreenable: true,
     backgroundColor: "white",
     titleBarStyle: "hidden",
@@ -114,17 +116,6 @@ app.on("ready", () => {
     BrowserView.getAllViews().forEach((view) => view.destroy());
   };
 });
-
-/*
-ipcMain.on("window-ids", (event, window, id, open) => {
-  windowIds.forEach(d => {
-    if (d.name === window) {
-      d.id = id;
-      d.open = open;
-    }
-  });
-});
-*/
 
 const openHelper = (helperFile) => {
   let screenWidth = electron.screen.getPrimaryDisplay().workAreaSize.width;
@@ -188,13 +179,26 @@ const openModal = (modalFile, scrollTo) => {
   }
 };
 
+ipcMain.on("userStatus", (event, req) => {
+  if (req) {
+    fs.readFile(
+      userDataPath + "/userID/user-id.json", // Read the user data file
+      "utf8",
+      (err, data) => {
+        // Additional options for readFile
+        if (err) throw err;
+        let user = JSON.parse(data);
+        mainWindow.webContents.send("userStatus", user);
+      }
+    );
+  }
+});
+
 var currentTheme = "normal";
 
 const readTheme = () => {
   fs.readFile(userDataPath + "/themes/themes.json", "utf8", (err, data) => {
     var themeData = JSON.parse(data);
-    console.log("current theme is");
-    console.log(themeData);
     mainWindow.webContents.send("themeContent", themeData[currentTheme]);
   });
 };
@@ -206,7 +210,6 @@ ipcMain.on("theme", (event, req) => {
       break;
 
     case "set":
-      console.log("new theme set " + req.theme);
       currentTheme = req.theme;
       break;
   }
