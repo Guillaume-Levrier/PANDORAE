@@ -301,6 +301,10 @@ const scopusRetriever = (user, query, bottleRate) => {
 
       var dataPromises = []; // Create empty array for the promises to come
 
+      if (docAmount>4800){
+        docAmount=4800
+      }
+
       for (let countStart = 0; countStart <= docAmount; countStart += 200) {
         // For each page of 200 documents
 
@@ -315,13 +319,33 @@ const scopusRetriever = (user, query, bottleRate) => {
           urlStart +
           countStart;
 
-        dataPromises.push(scopusTotalRequest); // Push promise in the relevant array
+      
+            dataPromises.push(scopusTotalRequest); // Push promise in the relevant array    
+      
       }
+  
+      
+      let scopusResponse=[]
 
-      limiter
+      dataPromises.forEach(d=>{ limiter
+        .schedule(()=>fetch(d)).then(res=>res.json())
+          .then(result=>{
+          scopusResponse.push(result) 
+          if(scopusResponse.length===dataPromises.length){
+          
+     
+console.log(scopusResponse)
+      
+
+/*
+       limiter
         .schedule(() => Promise.all(dataPromises.map((d) => fetch(d))))
-        .then((res) => Promise.all(res.map((d) => d.json())))
+        .then((res) =>{Promise.all(res.map((d) => d.json()))})
         .then((scopusResponse) => {
+
+          console.log(scopusResponse)
+        */
+        
           for (let i = 0; i < scopusResponse.length; i++) {
             // For each page of (max 200) results
             let retrievedDocuments =
@@ -334,9 +358,9 @@ const scopusRetriever = (user, query, bottleRate) => {
               }
             }
           }
-          return;
-        })
-        .then(() => {
+          //return;
+        //})
+        //.then(() => {
           // Once all entries/documents have been written
 
           pandodb.open();
@@ -375,8 +399,12 @@ const scopusRetriever = (user, query, bottleRate) => {
                   }, 500); // Close Chaeros
                 });
             });
-        });
-    })
+        //});
+          }
+        })
+      })
+        })
+        
     .catch((e) => {
       ipcRenderer.send("chaeros-failure", e); // Send error to main process
       ipcRenderer.send("pulsar", true);
@@ -883,7 +911,7 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
             fileArrays.push(subArray); // Push subArray in fileArrays
           }
 
-          console.log(fileArrays);
+         // console.log(fileArrays);
 
           let fetchTargets = [];
 
@@ -900,30 +928,24 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
             minTime: 200, // Every 200 milliseconds
           });
 
-          limiter
-            .schedule(() =>
-              Promise.all(
-                fetchTargets.map((d) =>
-                  fetch(d.uri, {
-                    method: "POST",
-                    body: JSON.stringify(d.body),
-                  })
-                )
-              )
-            )
-            .then((responses) =>
-              Promise.all(responses.map((res) => res.json()))
-            )
-            .then((res) => {
-              console.log(res);
-              if (res.length === fileArrays.length) {
+let resultList=[]
+
+fetchTargets.forEach(d=>{ limiter
+        .schedule(()=>fetch(d.uri, {
+          method: "POST",
+          body: JSON.stringify(d.body),
+        }))
+        .then(res=>res.json())
+          .then(result=>{
+            resultList.push(result) 
+              if (resultList.length === fileArrays.length) {
                 setTimeout(() => {
                   ipcRenderer.send(
                     "chaeros-notification",
                     "Collection created"
                   ); // Send success message to main Display
                   ipcRenderer.send("pulsar", true);
-                  //ipcRenderer.send("win-destroy", winId);
+                  ipcRenderer.send("win-destroy", winId);
                 }, 2000);
               } // If all responses have been recieved, delay then close chaeros
             });
@@ -931,6 +953,7 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
             "console-logs",
             "Collection " + JSON.stringify(collectionName) + " built."
           ); // Send success message to console
+        })
         });
     } catch (e) {
       ipcRenderer.send("console-logs", e);
