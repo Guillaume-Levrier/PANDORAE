@@ -372,15 +372,13 @@ var width, height, toolWidth;
 var presentationBox = document.createElement("div");
 presentationBox.id = "presentationBox";
 
-window.onload = function () {
+window.addEventListener("load", (event) => {
+  xtype = document.getElementById("xtype");
   width = xtype.clientWidth; // Fetching client width
   height = xtype.clientHeight; // Fetching client height
   toolWidth = 0.3 * width + 20; // The tooltip is around a third of total available screen width
-
-  // =========== PRESENTATION BOX ===========
-
   document.body.appendChild(presentationBox);
-};
+});
 
 // ========== TIME ===========
 const currentTime = new Date(); // Precise time when the page has loaded
@@ -4485,21 +4483,26 @@ const gazouillotype = (id) => {
           data.date = new Date(data.created_at); // get the date
           data.stamp = Math.round(data.date.getTime() / 600000) * 600000; // make it part of a 10-min pile in milliseconds
           data.timespan = new Date(data.stamp); // turn that into a proper JS date
-
+          twtAmount++;
+          //console.log(twtAmount);
+          field.value = twtAmount + " tweets loaded";
           if (data.stamp === twDate) {
             // If a pile already exists
             tranche.tweets.push(data); // add this tweet to the current pile
           } else {
             // else
-            twtAmount += tranche.tweets.length; // add the amount of the previous pile to the previous total
+            // twtAmount += tranche.tweets.length; // add the amount of the previous pile to the previous total
             datajson.content.tweets.push(tranche); // push the pile to the main array
             twDate = data.stamp; // change pile date
             tranche = { date: data.timespan, tweets: [] }; // create new pile object
             tranche.tweets.push(data); // add tweet to this new pile
+
+            /*
             ipcRenderer.send(
               "chaeros-notification",
               twtAmount + " tweets loaded"
             ); // send new total to main display
+            */
           }
         })
         .on("end", () => {
