@@ -104,24 +104,27 @@ const scopusConverter = (dataset) => {
     } finally {
       pandodb.open();
       let id = dataset;
+      
       pandodb.csljson.add({
         id: id,
         date: date,
         name: dataset,
         content: convertedDataset,
-      }); // Save array in local database
+      }).then(()=>{
+        ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
+        ipcRenderer.send("pulsar", true);
+        ipcRenderer.send(
+          "console-logs",
+          "scopusConverter successfully converted " + dataset
+        ); // Log success
+        setTimeout(() => {
+          ipcRenderer.send("win-destroy", winId);
+        }, 500);
+      })
     }
   });
 
-  ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
-  ipcRenderer.send("pulsar", true);
-  ipcRenderer.send(
-    "console-logs",
-    "scopusConverter successfully converted " + dataset
-  ); // Log success
-  setTimeout(() => {
-    ipcRenderer.send("win-destroy", winId);
-  }, 500);
+  
 };
 
 //========== scopusGeolocate ==========
