@@ -38,16 +38,13 @@ const dataDownload = (data) => {
   source.style.cursor = "pointer";
 
   source.addEventListener("click", (e) => {
-    fs.writeFile(
-      dialog.showSaveDialog({ defaultPath: datasetName + ".json" }),
-      JSON.stringify(data),
-      () => {
-        ipcRenderer.send(
-          "console-logs",
-          "Downloading dataset " + data.id + ".json"
-        );
-      }
-    );
+    ipcRenderer
+      .invoke(
+        "saveDataset",
+        { defaultPath: datasetName + ".json" },
+        JSON.stringify(data)
+      )
+      .then((res) => {});
   });
 };
 
@@ -2237,9 +2234,25 @@ const chronotype = (id) => {
           doc.forEach((d) => {
             if (d.issued) {
               if (
-                d.issued.hasOwnProperty("date-parts") &&
-                d.issued["date-parts"][0].length === 3
+                d.issued.hasOwnProperty("date-parts") //&&
+                //  d.issued["date-parts"][0].length === 3
               ) {
+                let year = d.issued["date-parts"][0][0];
+                let month = d.issued["date-parts"][0][1];
+                let day = d.issued["date-parts"][0][2];
+
+                if (month === undefined) {
+                  // if month isn't registered
+                  month = 1;
+                }
+
+                if (day === undefined) {
+                  // if day isn't registered
+                  day = 1;
+                }
+
+                d.rebuildDate = year + "-" + month + "-" + day;
+                /* 
                 d.date =
                   d.issued["date-parts"][0][0] +
                   "-" +
@@ -2248,14 +2261,11 @@ const chronotype = (id) => {
                   d.issued["date-parts"][0][2];
 
                 d.date = parseTime(d.date);
+*/
+                d.date = parseTime(d.rebuildDate);
 
                 d.category = docs[i].name;
-                d.clusterDate =
-                  d.issued["date-parts"][0][0] +
-                  "-" +
-                  d.issued["date-parts"][0][1] +
-                  "-" +
-                  "15";
+                d.clusterDate = year + "-" + month + "-" + "15";
                 d.code = d.category + "-" + d.clusterDate;
                 d.type = csl_material[d.type];
                 d.authors = [];
@@ -2409,9 +2419,9 @@ const chronotype = (id) => {
           "collision",
           d3
             .forceCollide() // nodes can collide
-            .radius(4) // if expanded is true, they collide with a force superior to 0
-            .iterations(3)
-            .strength(0.15)
+            .radius(1.5) // if expanded is true, they collide with a force superior to 0
+            .iterations(2)
+            .strength(0.1)
         )
         .force(
           "x",
@@ -2964,7 +2974,7 @@ const chronotype = (id) => {
           node = node
             .data(currentNodes, (item) => item) // Select all relevant nodes
             .join("circle") // Append the nodes
-            .attr("r", 2) // Node radius
+            .attr("r", 1) // Node radius
             .attr("fill", (d) => color(d.zone)) // Node color
             .attr("id", (d) => "node" + d.id) // Node ID (based on code)
             .attr("stroke", (d) => color(d.zone)) // Node stroke color
@@ -2982,7 +2992,7 @@ const chronotype = (id) => {
             .attr("fill", "red") // Node color
             .attr("id", (d) => "link" + d.source + "-" + d.target) // Node ID (based on code)
             .style("stroke", "red") // Node stroke color
-            .style("stroke-width", 0.5) // Node stroke width
+            .style("stroke-width", 0.1) // Node stroke width
             .raise() // Nodes are displayed above the rest
             .merge(link)
             .lower();
@@ -2997,6 +3007,7 @@ const chronotype = (id) => {
             .style("font-size", "2.5px") // Icon size
             .style("font-weight", "bolder") // Icon size
             .attr("text-anchor", "middle")
+            .style("display", "none")
             .text((d) => {
               for (let i = 0; i < currentNodes.length; i++) {
                 if (d.id === currentNodes[i].id) {
@@ -3332,6 +3343,8 @@ const geotype = (id) => {
         datajson.content[i].items.forEach((d) => data.push(d));
       }
 
+      console.log(data.length);
+
       Promise.all([d3.json("json/world-countries.json")]).then((geo) => {
         var geoData = geo[0];
 
@@ -3349,19 +3362,27 @@ const geotype = (id) => {
             d.enrichment.hasOwnProperty("affiliations")
           ) {
             if (d.hasOwnProperty("issued")) {
-              d.rebuildDate =
-                d.issued["date-parts"][0][0] +
-                "-" +
-                d.issued["date-parts"][0][1] +
-                "-" +
-                d.issued["date-parts"][0][2];
+              // there is clearly an issue here
+
+              let year = d.issued["date-parts"][0][0];
+              let month = d.issued["date-parts"][0][1];
+              let day = d.issued["date-parts"][0][2];
+
+              if (month === undefined) {
+                // if month isn't registered
+                month = 1;
+              }
+
+              if (day === undefined) {
+                // if day isn't registered
+                day = 1;
+              }
+
+              d.rebuildDate = year + "-" + month + "-" + day;
 
               d.parsedDate = parseTime(d.rebuildDate);
 
-              d.date =
-                JSON.stringify(d.issued["date-parts"][0][0]) +
-                "," +
-                d.issued["date-parts"][0][1];
+              d.date = year + "," + month;
             }
 
             d.authors = [];
@@ -3666,7 +3687,7 @@ const geotype = (id) => {
             .append("path")
             .attr("class", "arc fly_arcs")
             .style("fill", "none")
-            .style("stroke-width", ".5")
+            .style("stroke-width", ".1")
             .style("stroke-linecap", "round")
             .style("stroke", (d) => {
               if (d.visibility) {
@@ -3684,7 +3705,7 @@ const geotype = (id) => {
             .append("path")
             .style("fill", "none")
             .attr("class", "arc")
-            .style("stroke-width", "1")
+            .style("stroke-width", ".15")
             .style("stroke-linecap", "round")
             .style("stroke", (d) => {
               if (d.visibility) {
@@ -3702,8 +3723,9 @@ const geotype = (id) => {
             .data(cities)
             .enter()
             .append("text")
+
             .style("fill", "black")
-            .style("fond-style", "Noto Sans")
+            .style("font-family", "sans-serif")
             .style("user-select", "none")
             .style("display", (d) => {
               if (
@@ -3886,7 +3908,7 @@ const geotype = (id) => {
             .append("g")
             .attr("transform", "translate(30," + sliderOffsetHeight + ")");
 
-          const values = [];
+          var values = [];
 
           grouped.forEach((val, key) => {
             if (isNaN(key)) {
@@ -3896,10 +3918,16 @@ const geotype = (id) => {
             }
           });
 
+          values = values.slice().sort((a, b) => d3.ascending(a.date, b.date));
+
+          //  console.log(values);
+
           const min = d3.min(values, (d) => d.value);
           const max = d3.max(values, (d) => d.value);
           const maxX = values[values.length - 1].date;
           const minX = values[0].date;
+
+          //  console.log(minX, maxX);
 
           var minDiff = d3.min(values, (d, i, arr) => {
             if (!i) return Infinity;
@@ -4079,6 +4107,9 @@ const geotype = (id) => {
 
           function brushEnded(event) {
             const selection = event.selection;
+
+            // console.log(selection);
+
             if (!selection) {
               handle.attr("display", "none");
 
@@ -4087,7 +4118,7 @@ const geotype = (id) => {
               });
               return;
             }
-            if (event.sourceEvent.type === "brush") return;
+            // if (event.sourceEvent.type === "brush") return;
 
             var d0 = selection.map(scaleX.invert),
               d1 = d0.map(d3.timeDay.round);
@@ -4098,37 +4129,40 @@ const geotype = (id) => {
             }
 
             brushContent = d1;
-            let visArticleAmnt = 0;
 
-            links.forEach((link) => (link.visibility = false)); // Make all links invisible
+            let paperMap = new Map();
+
+            data.forEach((d) => {
+              if (
+                d.parsedDate >= brushContent[0] &&
+                d.parsedDate <= brushContent[1]
+              ) {
+                paperMap.set(d.DOI, true);
+              }
+            });
+
+            // Manage link visibility
+            links.forEach((link) => {
+              if (paperMap.get(link.DOI)) {
+                link.visibility = true;
+              } else {
+                link.visibility = false;
+              }
+            });
 
             cities.forEach((city) => {
               city.values.forEach((paper) => {
-                paper.date = new Date(paper.date);
-                var linkIndex = links.findIndex(
-                  (link) => link.DOI === paper.DOI
-                );
-
-                if (
-                  paper.date >= brushContent[0] &&
-                  paper.date <= brushContent[1]
-                ) {
+                if (paperMap.get(paper.DOI)) {
                   paper.visibility = true;
-                  visArticleAmnt = visArticleAmnt + 1;
-                  if (linkIndex > -1 && links[linkIndex].DOI != undefined) {
-                    links[linkIndex].visibility = true;
-                  }
                 } else {
                   paper.visibility = false;
-                  //  if (linkIndex > -1) {
-                  //    links[linkIndex].visibility = false;
-                  //  }
                 }
               });
             });
 
-            document.getElementById("docCountDiv").innerHTML =
-              visArticleAmnt + " articles";
+            document.getElementById(
+              "docCountDiv"
+            ).innerHTML = `${paperMap.size} articles`;
             linkLoc();
             d3.select("#tooltip").html("");
           }

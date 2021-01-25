@@ -1063,6 +1063,33 @@ const categoryLoader = (cat) => {
   }
 };
 
+const saveAs = (format) => {
+  toggleMenu();
+
+  setTimeout(() => {
+    switch (format) {
+      case "svg":
+        serialize(document.getElementById("xtypeSVG"));
+        break;
+
+      case "png":
+        savePNG();
+        break;
+
+      case "interactive":
+        exportToHTML();
+        break;
+
+      case "description":
+        saveToolTip();
+        break;
+
+      default:
+        break;
+    }
+  }, 500);
+};
+
 const listTableDatasets = (table) => {
   let targetType = pandodb[table];
 
@@ -1577,33 +1604,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
         toggleMenu();
         break;
     }
-  };
-
-  const saveAs = (format) => {
-    toggleMenu();
-
-    setTimeout(() => {
-      switch (format) {
-        case "svg":
-          serialize(document.getElementById("xtypeSVG"));
-          break;
-
-        case "png":
-          savePNG();
-          break;
-
-        case "interactive":
-          exportToHTML();
-          break;
-
-        case "description":
-          saveToolTip();
-          break;
-
-        default:
-          break;
-      }
-    }, 500);
   };
 
   /*

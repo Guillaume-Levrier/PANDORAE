@@ -496,6 +496,12 @@ ipcMain.handle("restart", async (event, mess) => {
   app.exit(0);
 });
 
+ipcMain.handle("saveDataset", async (event, target, data) => {
+  dialog.showSaveDialog(target).then((filePath) => {
+    fs.writeFile(filePath.filePath, data, () => {});
+  });
+});
+
 ipcMain.handle("savePNG", async (event, target) => {
   setTimeout(() => {
     mainWindow.capturePage().then((img) => {
