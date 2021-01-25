@@ -104,27 +104,27 @@ const scopusConverter = (dataset) => {
     } finally {
       pandodb.open();
       let id = dataset;
-      
-      pandodb.csljson.add({
-        id: id,
-        date: date,
-        name: dataset,
-        content: convertedDataset,
-      }).then(()=>{
-        ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
-        ipcRenderer.send("pulsar", true);
-        ipcRenderer.send(
-          "console-logs",
-          "scopusConverter successfully converted " + dataset
-        ); // Log success
-        setTimeout(() => {
-          ipcRenderer.send("win-destroy", winId);
-        }, 500);
-      })
+
+      pandodb.csljson
+        .add({
+          id: id,
+          date: date,
+          name: dataset,
+          content: convertedDataset,
+        })
+        .then(() => {
+          ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
+          ipcRenderer.send("pulsar", true);
+          ipcRenderer.send(
+            "console-logs",
+            "scopusConverter successfully converted " + dataset
+          ); // Log success
+          setTimeout(() => {
+            ipcRenderer.send("win-destroy", winId);
+          }, 500);
+        });
     }
   });
-
-  
 };
 
 //========== scopusGeolocate ==========
@@ -304,8 +304,8 @@ const scopusRetriever = (user, query, bottleRate) => {
 
       var dataPromises = []; // Create empty array for the promises to come
 
-      if (docAmount>4800){
-        docAmount=4800
+      if (docAmount > 4800) {
+        docAmount = 4800;
       }
 
       for (let countStart = 0; countStart <= docAmount; countStart += 200) {
@@ -322,25 +322,21 @@ const scopusRetriever = (user, query, bottleRate) => {
           urlStart +
           countStart;
 
-      
-            dataPromises.push(scopusTotalRequest); // Push promise in the relevant array    
-      
+        dataPromises.push(scopusTotalRequest); // Push promise in the relevant array
       }
-  
-      
-      let scopusResponse=[]
 
-      dataPromises.forEach(d=>{ limiter
-        .schedule(()=>fetch(d)).then(res=>res.json())
-          .then(result=>{
-          scopusResponse.push(result) 
-          if(scopusResponse.length===dataPromises.length){
-          
-     
-console.log(scopusResponse)
-      
+      let scopusResponse = [];
 
-/*
+      dataPromises.forEach((d) => {
+        limiter
+          .schedule(() => fetch(d))
+          .then((res) => res.json())
+          .then((result) => {
+            scopusResponse.push(result);
+            if (scopusResponse.length === dataPromises.length) {
+              //console.log(scopusResponse)
+
+              /*
        limiter
         .schedule(() => Promise.all(dataPromises.map((d) => fetch(d))))
         .then((res) =>{Promise.all(res.map((d) => d.json()))})
@@ -348,66 +344,66 @@ console.log(scopusResponse)
 
           console.log(scopusResponse)
         */
-        
-          for (let i = 0; i < scopusResponse.length; i++) {
-            // For each page of (max 200) results
-            let retrievedDocuments =
-              scopusResponse[i]["search-results"]["entry"]; // Select the docs it contains
 
-            if (retrievedDocuments != undefined) {
-              for (let j = 0; j < retrievedDocuments.length; j++) {
-                // For each document
-                content.entries.push(retrievedDocuments[j]); // Write it in the "entries" array
+              for (let i = 0; i < scopusResponse.length; i++) {
+                // For each page of (max 200) results
+                let retrievedDocuments =
+                  scopusResponse[i]["search-results"]["entry"]; // Select the docs it contains
+
+                if (retrievedDocuments != undefined) {
+                  for (let j = 0; j < retrievedDocuments.length; j++) {
+                    // For each document
+                    content.entries.push(retrievedDocuments[j]); // Write it in the "entries" array
+                  }
+                }
               }
-            }
-          }
-          //return;
-        //})
-        //.then(() => {
-          // Once all entries/documents have been written
+              //return;
+              //})
+              //.then(() => {
+              // Once all entries/documents have been written
 
-          pandodb.open();
-          let id = query + date;
-          pandodb.scopus
-            .add({
-              id: id,
-              date: date,
-              name: query,
-              content: content,
-            })
-            .then((res1) => {
-              pandodb.enriched
+              pandodb.open();
+              let id = query + date;
+              pandodb.scopus
                 .add({
                   id: id,
                   date: date,
                   name: query,
                   content: content,
                 })
-                .then((res2) => {
-                  ipcRenderer.send(
-                    "chaeros-notification",
-                    "Scopus API data retrieved"
-                  ); // signal success to main process
-                  ipcRenderer.send("pulsar", true);
-                  ipcRenderer.send(
-                    "console-logs",
-                    "Scopus dataset on " +
-                      query +
-                      " for user " +
-                      user +
-                      " have been successfully retrieved."
-                  );
-                  setTimeout(() => {
-                    ipcRenderer.send("win-destroy", winId);
-                  }, 500); // Close Chaeros
+                .then((res1) => {
+                  pandodb.enriched
+                    .add({
+                      id: id,
+                      date: date,
+                      name: query,
+                      content: content,
+                    })
+                    .then((res2) => {
+                      ipcRenderer.send(
+                        "chaeros-notification",
+                        "Scopus API data retrieved"
+                      ); // signal success to main process
+                      ipcRenderer.send("pulsar", true);
+                      ipcRenderer.send(
+                        "console-logs",
+                        "Scopus dataset on " +
+                          query +
+                          " for user " +
+                          user +
+                          " have been successfully retrieved."
+                      );
+                      setTimeout(() => {
+                        ipcRenderer.send("win-destroy", winId);
+                      }, 500); // Close Chaeros
+                    });
                 });
-            });
-        //});
-          }
-        })
-      })
-        })
-        
+              //});
+            }
+          });
+      });
+    })
+
     .catch((e) => {
       ipcRenderer.send("chaeros-failure", e); // Send error to main process
       ipcRenderer.send("pulsar", true);
@@ -744,9 +740,7 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
   });
 
   let zoteroPromises = [];
-
-  let zoteroItemsResponse;
-
+  var zoteroResponse = [];
   let zoteroApiKey = getPassword("Zotero", zoteroUser);
 
   for (let j = 0; j < collections.length; j++) {
@@ -763,55 +757,93 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
     zoteroPromises.push(zoteroCollectionRequest); // Push promise in the relevant array
   }
 
-  Promise.all(zoteroPromises.map((d) => fetch(d)))
-    .then((responses) => Promise.all(responses.map((res) => res.json())))
-    .then((zoteroItemsResponse) => {
-      ResponseAmount = 0;
-      ResponseTarget = 0;
+  var zoteroCollectionResponse = [];
 
-      zoteroItemsResponse.forEach((f) => {
-        ResponseTarget = ResponseTarget + parseInt(f.meta.numItems);
-        f.name = f.data.name;
-        f.items = [];
+  let responseTarget = 0;
+  let responseAmount = 0;
 
-        let itemRequests = [];
+  zoteroPromises.forEach((d) => {
+    limiter
+      .schedule(() => fetch(d))
+      .then((res) => res.json())
+      .then((result) => {
+        zoteroCollectionResponse.push(result);
 
-        for (var i = 0; i < f.meta.numItems; i += 100) {
-          let rootUrl = "https://api.zotero.org/groups/";
-          let urlBase = "/collections/" + f.data.key;
-          var zoteroVersion =
-            "/items/top?&v=3&format=csljson&start=" + i + "&limit=100&key=";
-          let zoteroItemsRequest =
-            rootUrl + zoteroUser + urlBase + zoteroVersion + zoteroApiKey;
+        if (zoteroCollectionResponse.length === zoteroPromises.length) {
+          console.log(zoteroCollectionResponse);
 
-          itemRequests.push(zoteroItemsRequest);
-        }
+          zoteroCollectionResponse.forEach((f) => {
+            //  console.log(f);
 
-        limiter
-          .schedule(() => Promise.all(itemRequests.map((d) => fetch(d))))
-          .then((responses) => Promise.all(responses.map((res) => res.json())))
-          .then((response) => {
-            for (var i = 0; i < response.length; i++) {
-              response[i].items.forEach((d) => {
-                if (d.hasOwnProperty("shortTitle")) {
-                  //var enrichment = ;
-                  if (d.shortTitle[0] === "{") {
-                    d.enrichment = JSON.parse(d.shortTitle);
-                  }
-                  //if (d.enrichment.hasOwnProperty("altmetric")) {
-                  //  d.enrichment.altmetric = JSON.parse(d.enrichment.altmetric);
-                  //}
-                }
-                f.items.push(d);
-                ResponseAmount = ResponseAmount + 1;
-                if (ResponseAmount === ResponseTarget) {
-                  dataWriter(["system"], importName, zoteroItemsResponse);
-                }
-              });
+            thisCollectionAmount = parseInt(f.meta.numItems);
+            responseTarget = responseTarget + thisCollectionAmount;
+
+            f.name = f.data.name;
+            f.items = [];
+
+            console.log(
+              "la collection " + f.name + " comporte " + thisCollectionAmount
+            );
+
+            let itemRequests = [];
+
+            for (var i = 0; i < f.meta.numItems; i += 100) {
+              let rootUrl = "https://api.zotero.org/groups/";
+              let urlBase = "/collections/" + f.data.key;
+              var zoteroVersion =
+                "/items/top?&v=3&format=csljson&start=" + i + "&limit=100&key=";
+              let zoteroItemsRequest =
+                rootUrl + zoteroUser + urlBase + zoteroVersion + zoteroApiKey;
+
+              itemRequests.push(zoteroItemsRequest);
             }
+
+            itemRequests.forEach((d) => {
+              limiter
+                .schedule(() => fetch(d))
+                .then((res) => res.json())
+                .then((response) => {
+                  response.items.forEach((d) => {
+                    if (d.hasOwnProperty("shortTitle")) {
+                      //var enrichment = ;
+                      if (d.shortTitle[0] === "{") {
+                        d.enrichment = JSON.parse(d.shortTitle);
+                      }
+                      //if (d.enrichment.hasOwnProperty("altmetric")) {
+                      //  d.enrichment.altmetric = JSON.parse(d.enrichment.altmetric);
+                      //}
+                    }
+                    f.items.push(d);
+
+                    responseAmount++;
+                    ipcRenderer.send(
+                      "chaeros-notification",
+                      "Loading " +
+                        responseAmount +
+                        " of " +
+                        responseTarget +
+                        " documents."
+                    );
+
+                    //if (items.length === thisCollectionAmount) {
+                    //  f.items.push(f);
+                    // }
+
+                    if (responseAmount === responseTarget) {
+                      //console.log(zoteroCollectionResponse);
+                      dataWriter(
+                        ["system"],
+                        importName,
+                        zoteroCollectionResponse
+                      );
+                    }
+                  });
+                });
+            });
           });
+        }
       });
-    });
+  });
 };
 
 //========== sysExport ==========
@@ -825,6 +857,8 @@ const sysExport = (destination, importName, id) => {
 
 //========== dataWriter ==========
 const dataWriter = (destination, importName, content) => {
+  console.log("datawriter");
+  console.log(destination, importName, content);
   pandodb.open();
   destination.forEach((d) => {
     let table = pandodb[d];
@@ -914,7 +948,7 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
             fileArrays.push(subArray); // Push subArray in fileArrays
           }
 
-         // console.log(fileArrays);
+          // console.log(fileArrays);
 
           let fetchTargets = [];
 
@@ -931,32 +965,35 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
             minTime: 200, // Every 200 milliseconds
           });
 
-let resultList=[]
+          let resultList = [];
 
-fetchTargets.forEach(d=>{ limiter
-        .schedule(()=>fetch(d.uri, {
-          method: "POST",
-          body: JSON.stringify(d.body),
-        }))
-        .then(res=>res.json())
-          .then(result=>{
-            resultList.push(result) 
-              if (resultList.length === fileArrays.length) {
-                setTimeout(() => {
-                  ipcRenderer.send(
-                    "chaeros-notification",
-                    "Collection created"
-                  ); // Send success message to main Display
-                  ipcRenderer.send("pulsar", true);
-                  ipcRenderer.send("win-destroy", winId);
-                }, 2000);
-              } // If all responses have been recieved, delay then close chaeros
-            });
-          ipcRenderer.send(
-            "console-logs",
-            "Collection " + JSON.stringify(collectionName) + " built."
-          ); // Send success message to console
-        })
+          fetchTargets.forEach((d) => {
+            limiter
+              .schedule(() =>
+                fetch(d.uri, {
+                  method: "POST",
+                  body: JSON.stringify(d.body),
+                })
+              )
+              .then((res) => res.json())
+              .then((result) => {
+                resultList.push(result);
+                if (resultList.length === fileArrays.length) {
+                  setTimeout(() => {
+                    ipcRenderer.send(
+                      "chaeros-notification",
+                      "Collection created"
+                    ); // Send success message to main Display
+                    ipcRenderer.send("pulsar", true);
+                    ipcRenderer.send("win-destroy", winId);
+                  }, 2000);
+                } // If all responses have been recieved, delay then close chaeros
+              });
+            ipcRenderer.send(
+              "console-logs",
+              "Collection " + JSON.stringify(collectionName) + " built."
+            ); // Send success message to console
+          });
         });
     } catch (e) {
       ipcRenderer.send("console-logs", e);
