@@ -3343,8 +3343,6 @@ const geotype = (id) => {
         datajson.content[i].items.forEach((d) => data.push(d));
       }
 
-      console.log(data.length);
-
       Promise.all([d3.json("json/world-countries.json")]).then((geo) => {
         var geoData = geo[0];
 
@@ -3847,29 +3845,29 @@ const geotype = (id) => {
 
           const grouped = d3.group(data, (d) => +d.parsedDate);
 
-          const isDate = true;
+          //const isDate = true;
           var dateExtent,
             dateScale,
             scaleTime,
             dateRangesCount,
             dateRanges,
             scaleTime;
-          if (isDate) {
-            dateExtent = d3.extent(data.map((d) => d.date));
+          //        if (isDate) {
 
-            dateRangesCount = Math.round(width / 5);
-            dateScale = d3
-              .scaleTime()
-              .domain(dateExtent)
-              .range([0, dateRangesCount]);
-            scaleTime = d3
-              .scaleTime()
-              .domain(dateExtent)
-              .range([0, chartWidth]);
-            dateRanges = d3
-              .range(dateRangesCount)
-              .map((d) => [dateScale.invert(d), dateScale.invert(d + 1)]);
-          }
+          dateExtent = d3.extent(data.map((d) => d.parsedDate));
+
+          console.log(dateExtent);
+
+          dateRangesCount = Math.round(width / 5);
+          dateScale = d3
+            .scaleTime()
+            .domain(dateExtent)
+            .range([0, dateRangesCount]);
+          scaleTime = d3.scaleTime().domain(dateExtent).range([0, chartWidth]);
+          dateRanges = d3
+            .range(dateRangesCount)
+            .map((d) => [dateScale.invert(d), dateScale.invert(d + 1)]);
+          //      }
 
           d3.selection.prototype.patternify = function (params) {
             var container = this;
@@ -3967,10 +3965,10 @@ const geotype = (id) => {
             .domain([minX, maxX])
             .range([0, chartWidth]);
 
-          var axis = d3.axisBottom(scaleX);
-          if (isDate) {
-            axis = d3.axisBottom(scaleTime);
-          }
+          // var axis = d3.axisBottom(scaleX);
+          //if (isDate) {
+          var axis = d3.axisBottom(scaleTime);
+          //}
           const axisY = d3
             .axisLeft(scaleY)
             .tickSize(-chartWidth - 20)
@@ -4208,9 +4206,9 @@ const geotype = (id) => {
             const node = svg.node();
             node.value = value;
             node.value.data = getData(node.value.range);
-            if (isDate) {
-              node.value.range = value.range.map((d) => dateScale.invert(d));
-            }
+            // if (isDate) {
+            node.value.range = value.range.map((d) => dateScale.invert(d));
+            //}
             node.dispatchEvent(new CustomEvent("input"));
           }
 
@@ -4236,11 +4234,11 @@ const geotype = (id) => {
             },
           });
 
-          if (isDate) {
-            returnValue.value.range = returnValue.value.range.map((d) =>
-              dateScale.invert(d)
-            );
-          }
+          //  if (isDate) {
+          returnValue.value.range = returnValue.value.range.map((d) =>
+            dateScale.invert(d)
+          );
+          //  }
 
           return returnValue;
         };
