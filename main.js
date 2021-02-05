@@ -115,7 +115,7 @@ app.on("ready", () => {
   };
 });
 
-const openHelper = (helperFile) => {
+const openHelper = (helperFile, message) => {
   let screenWidth = electron.screen.getPrimaryDisplay().workAreaSize.width;
   let screenHeight = electron.screen.getPrimaryDisplay().workAreaSize.height;
 
@@ -132,11 +132,15 @@ const openHelper = (helperFile) => {
     webPreferences: {
       worldSafeExecuteJavaScript: true,
       contextIsolation: true,
-      nodeIntegration: true,
-      nodeIntegrationInWorker: true,
+      preload: basePath + "/js/tuto-help.js",
     },
   });
+
+  windowIds.tutorialHelper.id = win.id;
+  windowIds.tutorialHelper.open = true;
+
   win.once("ready-to-show", () => {
+    win.webContents.send("tutorial-types", message);
     win.show();
   });
   var path = "file://" + __dirname + "/" + helperFile + ".html";
@@ -146,7 +150,6 @@ const openHelper = (helperFile) => {
 const openModal = (modalFile, scrollTo) => {
   if (windowIds[modalFile].open === false) {
     let win = new BrowserWindow({
-      // backgroundColor: "white",
       parent: mainWindow,
       modal: true,
       transparent: true,
@@ -222,19 +225,7 @@ ipcMain.on("window-manager", (event, type, file, scrollTo, section) => {
 
   switch (type) {
     case "openHelper":
-      openHelper(file);
-
-      setTimeout(() => {
-        for (var i = 0; i < windowIds.length; i++) {
-          if (windowIds[i].name === file) {
-            BrowserWindow.fromId(windowIds[type].id).webContents.send(
-              "tutorial-types",
-              section
-            );
-          }
-        }
-      }, 800);
-
+      openHelper(file, section);
       break;
 
     case "openModal":
