@@ -8,6 +8,7 @@ ipcRenderer.on("scroll-to", (event, message) => {
 
 const tuto = (step) => {
   ipcRenderer.send("tutorial", step);
+  closeWindow();
 };
 
 const closeWindow = () => {
@@ -27,29 +28,41 @@ const refreshWindow = () => {
   location.reload();
 };
 
-window.addEventListener("load", (e) => {
-  const lastScroll = () => {
-    smoothScrollTo("final8");
-    document.body.style.animation = "invert 2s";
-    document.body.style.animationFillMode = "forwards";
-    document.body.style.overflow = "hidden";
-    document.getElementById("backarrow").style.display = "none";
+const lastScroll = () => {
+  smoothScrollTo("final8");
+  document.body.style.animation = "invert 2s";
+  document.body.style.animationFillMode = "forwards";
+  document.body.style.overflow = "hidden";
+  document.getElementById("backarrow").style.display = "none";
+
+  setTimeout(() => {
+    let seconds = 10;
+    const secMinus = () => {
+      seconds = seconds - 1;
+      document.getElementById("restartCount").innerHTML =
+        "Restarting in:<br>" + seconds;
+    };
+
+    setInterval(secMinus, 1000);
 
     setTimeout(() => {
-      let seconds = 10;
-      const secMinus = () => {
-        seconds = seconds - 1;
-        document.getElementById("restartCount").innerHTML =
-          "Restarting in:<br>" + seconds;
-      };
+      ipcRenderer.invoke("restart", true);
+    }, 10000);
+  }, 7000);
+};
 
-      setInterval(secMinus, 1000);
+window.addEventListener("load", (e) => {
+  sectionList = document.querySelectorAll("section");
 
-      setTimeout(() => {
-        ipcRenderer.invoke("restart", true);
-      }, 10000);
-    }, 7000);
-  };
+  document.getElementById("backarrow").addEventListener("click", (e) => {
+    smoothScrollTo(previous, true);
+  });
+
+  document.getElementById("refresher").addEventListener("click", refreshWindow);
+
+  document
+    .getElementById("closeDisplay")
+    .addEventListener("click", closeAndDisplay);
 
   setTimeout(() => {
     //This is important because otherwise the padding is messed up and no event listener will do

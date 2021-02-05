@@ -1,7 +1,7 @@
 // scroller
 let activeIndex = 0;
 
-var sectionList = document.querySelectorAll("section");
+var sectionList;
 
 const addPadding = () => {
   for (let sect of sectionList) {
