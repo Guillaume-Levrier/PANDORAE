@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
   <meta charset="UTF-8" />
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="script-src 'self';object-src 'none';base-uri 'none';"
+  />
   <title>PANDORÆ-FLUX</title>
   <link rel="stylesheet" type="text/css" href="css/pandorae.css" />
 
@@ -89,15 +93,10 @@
         class="material-icons dialog-buttons"
         id="backarrow"
         style="display: none"
-        onclick="smoothScrollTo(previous,true);"
         >arrow_back</i
       >
-      <i class="material-icons dialog-buttons" onclick="refreshWindow();"
-        >refresh</i
-      >
-      <i class="material-icons dialog-buttons" onclick="closeAndDisplay();"
-        >close</i
-      >
+      <i class="material-icons dialog-buttons" id="refresher">refresh</i>
+      <i class="material-icons dialog-buttons" id="closeDisplay">close</i>
       <div
         id="lang"
         style="margin-top: 0px; margin-left: 30px; width: 30px; display: block"
@@ -109,15 +108,5 @@
     </div>
 
     <link rel="icon" type="image/png" href="img/AE-favicon.png" />
-    <script></script>
-    <!-- 
-    <script src="js/locales.js"></script>
-    <script src="js/window-management.js"></script>
-    <script src="js/tutorial/cascade.js"></script>
-    <script src="js/tutorial/textcontent.js"></script>
-    <script src="js/tutorial/scroller.js"></script>
-    <script src="js/tutorial/tutorial.js"></script> -->
-
-    <script></script>
   </body>
 </html>

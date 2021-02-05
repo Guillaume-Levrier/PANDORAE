@@ -1,21 +1,23 @@
-//const keytar = require("keytar");
-
-//const { ipcRenderer } = require("electron");
-
-const getPassword = (service,user) =>ipcRenderer.sendSync("keytar",{user:user,service:service,type:"getPassword"});
-const setPassword = (service,user,value) => ipcRenderer.sendSync("keytar",{user:user,service:service,value:value,type:"setPassword"}); 
-
-
+const getPassword = (service, user) =>
+  ipcRenderer.sendSync("keytar", {
+    user: user,
+    service: service,
+    type: "getPassword",
+  });
+const setPassword = (service, user, value) =>
+  ipcRenderer.sendSync("keytar", {
+    user: user,
+    service: service,
+    value: value,
+    type: "setPassword",
+  });
 
 const getUserData = () => {
   fs.readFile(
     userDataPath + "/userID/user-id.json", // Read the designated datafile
     "utf8",
     (err, data) => {
-
       if (err) throw err;
-
-
 
       let user = JSON.parse(data);
 
@@ -26,36 +28,53 @@ const getUserData = () => {
       document.getElementById("userNameInput").value = userName;
       document.getElementById("userMailInput").value = userMail;
       document.getElementById("zoterouserinput").value = zoteroUser;
-      document.getElementById("zoterokeyinput").value = getPassword("Zotero",zoteroUser);
-      document.getElementById("scopuskeyinput").value = getPassword("Scopus",userName);
-      
+      document.getElementById("zoterokeyinput").value = getPassword(
+        "Zotero",
+        zoteroUser
+      );
+      document.getElementById("scopuskeyinput").value = getPassword(
+        "Scopus",
+        userName
+      );
     }
   );
 };
 
-
 const basicUserData = () => {
+  let userButton = document.getElementById("user-button");
+
   let userName = document.getElementById("userNameInput").value;
   let userMail = document.getElementById("userMailInput").value;
   let zoteroUser = document.getElementById("zoterouserinput").value;
 
-  var user = { UserName: userName, UserMail: userMail, ZoteroID: zoteroUser, locale: "EN" };
-  var data = JSON.stringify(user);
-  
-  fs.writeFile(userDataPath + "/userID/user-id.json", data, "utf8", err => {
-    if (err) throw err;
-  });
+  if (userName.length > 0) {
+    var user = {
+      UserName: userName,
+      UserMail: userMail,
+      ZoteroID: zoteroUser,
+      locale: "EN",
+    };
+    var data = JSON.stringify(user);
 
-  document.getElementById("user-button").style.transition = "all 1s ease-out";
-  document.getElementById("user-button").style.backgroundPosition =
-    "right bottom";
-  document.getElementById("user-button").style.color = "black";
-  document.getElementById("user-button").innerText = "User credentials updated";
+    fs.writeFile(userDataPath + "/userID/user-id.json", data, "utf8", (err) => {
+      if (err) throw err;
+    });
 
-  getUserData();
+    userButton.style.transition = "all 1s ease-out";
+    userButton.style.backgroundPosition = "right bottom";
+    userButton.style.color = "black";
+    userButton.innerText = "User credentials updated";
+
+    getUserData();
+  } else {
+    userButton.style.transition = "all 1s ease-out";
+    userButton.style.backgroundPosition = "right bottom";
+    userButton.style.color = "red";
+    userButton.innerText = "Failure: username cannot be empty";
+  }
 };
 
-const updateUserData = service => {
+const updateUserData = (service) => {
   let userName = document.getElementById("userNameInput").value;
   let zoteroUser = document.getElementById("zoterouserinput").value;
 
@@ -77,7 +96,7 @@ const updateUserData = service => {
       );
       checkKey("scopusValidation");
       break;
-/*
+    /*
     case "Altmetric":
       keytar.setPassword(
         "Altmetric",
@@ -126,7 +145,7 @@ const checkKey = (service, status) => {
       }
 
       break;
-      /*
+    /*
     case "altmetricValidation":
       break;
 
@@ -148,9 +167,6 @@ const checkKey = (service, status) => {
   }
 };
 
-window.addEventListener('DOMContentLoaded', (event) => {
-
-  getUserData()
-
-})
-
+window.addEventListener("DOMContentLoaded", (event) => {
+  getUserData();
+});
