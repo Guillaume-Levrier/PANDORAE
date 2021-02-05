@@ -12,6 +12,32 @@ const populateTutorial = () => {
 
     document.getElementById("slideSections").appendChild(section);
   }
+
+  let links = document.getElementById("slideSections").querySelectorAll("A");
+
+  for (let link of links) {
+    // console.log(link.dataset.action, link.dataset.target);
+
+    link.addEventListener("click", (e) => {
+      switch (link.dataset.action) {
+        case "scroll":
+          smoothScrollTo(link.dataset.target);
+          break;
+
+        case "tuto":
+          tuto(link.dataset.target);
+          break;
+
+        case "openEx":
+          console.log("open external " + link.dataset.target);
+          break;
+
+        case "lastScroll()":
+          lastScroll();
+          break;
+      }
+    });
+  }
 };
 
 window.addEventListener("load", (e) => {
