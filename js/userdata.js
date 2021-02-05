@@ -32,7 +32,7 @@ const getUserData = () => {
     }
   );
 };
-getUserData();
+
 
 const basicUserData = () => {
   let userName = document.getElementById("userNameInput").value;
@@ -147,3 +147,10 @@ const checkKey = (service, status) => {
     document.getElementById(service).innerHTML = "highlight_off";
   }
 };
+
+window.addEventListener('DOMContentLoaded', (event) => {
+
+  getUserData()
+
+})
+

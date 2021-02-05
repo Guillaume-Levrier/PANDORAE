@@ -13,11 +13,12 @@
 // but it could technically be reopened once Chæros is done processing the powerValve request. As it can be frustrating for // advanced user, this feature isn't currently enforced.
 
 //========== REQUIRED MODULES ==========
-const { ipcRenderer } = require("electron"); // ipcRenderer manages messages with Main Process
+const { ipcRenderer,shell } = require("electron"); // ipcRenderer manages messages with Main Process
 const userDataPath = ipcRenderer.sendSync('remote', 'userDataPath'); // Find userData folder Path
 const tg = require("@hownetworks/tracegraph");
 const fs = require("fs"); // FileSystem reads/writes files and directories
 const d3 = require("d3");
+
 
 var CM = CMT["EN"];
 
@@ -26,8 +27,10 @@ var db = "";
 const date =
   new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
 
-//========== STARTING FLUX ==========
-ipcRenderer.send("console-logs", "Opening Flux"); // Sending notification to console
+
+
+
+
 
 //========== Tracegraph ==========
 
@@ -272,9 +275,9 @@ const drawFlux = (svg, traces, horizontal, showTexts) => {
     .attr("cy", d => d.bounds.cy);
 };
 
-const svg = d3.select("svg");
 
-drawFlux(svg, traces, false, true);
+
+
 
 //========== fluxDisplay ==========
 // Display relevant tab when called according to the tab's id.
@@ -478,50 +481,46 @@ const fluxButtonAction = (buttonID, success, successPhrase, errorPhrase) => {
 // datasetDisplay shows the datasets (usually JSON or CSV files) available in the relevant /datasets/ subdirectory.
 
 const datasetDisplay = (divId, kind) => {
-  // This function displays the available datasets
+ 
 
   try {
     // Try the following block
-    let datasets = []; // Start from an empty array
+    
+    let list = document.createElement("UL")
+
     pandodb[kind].toArray(files => {
-      files.forEach(file => {
-        // For each file in the directory
-        datasets.push(
-          // Push the file in the array
-          "<li id='" +
-            file.id +
-            "' >" +
-            "<span style='cursor:pointer;' onclick=datasetDetail('" +
-            kind +
-            "-dataset-preview','" +
-            kind +
-            "'," +
-            JSON.stringify(file.id) +
-            ",'" +
-            kind +
-            "-dataset-buttons')>" +
-            file.name +
-            "</span>" +
-            "<i class='fluxDelDataset material-icons' onclick=datasetRemove(" +
-            JSON.stringify(kind) +
-            "," +
-            JSON.stringify(file.id) +
-            ")>close</i></li>"
-        );
-      });
+    
+      files.forEach(file=>{
+        
+        console.log(file)
 
-      var datasetList = ""; // Create the list as a string
+      let line = document.createElement("LI")
+          line.id= file.id
 
-      for (var i = 0; i < datasets.length; ++i) {
-        // For each element of the array
-        datasetList = datasetList + datasets[i]; // Add it to the string
-      }
-      if (datasetList.length === 0) {
+      let button = document.createElement("SPAN")
+          button.addEventListener("click",e=>{
+            datasetDetail(kind+"-dataset-preview",kind,file.id,kind+"-dataset-buttons")
+          })
+          button.innerText=file.name
+
+        let rem = document.createElement("i")
+          rem.className = "fluxDelDataset material-icons"
+          rem.addEventListener("click",e=>{
+            datasetRemove(kind,file.id)
+          })
+          rem.innerText="close"
+        
+          line.appendChild(button)
+          line.appendChild(rem)
+          list.appendChild(line)
+          
+        })
+       
+      if (files.length === 0) {
         document.getElementById(divId).innerHTML =
           "No dataset available in the system";
       } else {
-        document.getElementById(divId).innerHTML =
-          "<ul>" + datasetList + "</ul>"; // The string is a <ul> list
+        document.getElementById(divId).appendChild(list)
       }
     });
   } catch (err) {
@@ -553,6 +552,8 @@ const datasetRemove = (kind, id) => {
 
 const datasetDetail = (prevId, kind, id, buttonId) => {
   // This function provides info on a specific dataset
+
+
 
   var datasetDetail = {}; // Create the dataDetail object
   let dataPreview = ""; // Created dataPreview variable
@@ -783,28 +784,28 @@ if (document.getElementById("biorxiv-author").value.length>0) {
 }  
   
   
- reqURL=reqURL+'%20jcode%3A'+document.getElementById("biorxiv-list").value+
+ reqURL=reqURL+jcode+
   '%20limit_from%3A'+document.getElementById("biorxiv-date-from").value+
-  '%20limit_to%3A'+document.getElementById("biorxiv-date-to").value+
-  '%20numresults%3A1%20sort%3Apublication-date%20direction%3Adescending%20format_result%3Acondensed';
+  '%20limit_to%3A'+document.getElementById("biorxiv-date-to").value+endUrl;
 
   document.getElementById(
     "biorxiv-basic-previewer"
-  ).innerHTML = "Retrieving amount of results...";
+  ).innerHTML = "Retrieving result amount...";
 
-  ipcRenderer.send("artoo",{type:"request",model:"biorxiv-amount-injector",address:reqURL})
+let req = {type:"request",model:"biorxiv-amount-retriever",address:reqURL}
+
+  ipcRenderer.send("biorxiv-retrieve",req)
+
 }
 
-ipcRenderer.on("artoo",(event,message)=>{
+ipcRenderer.on("biorxiv-retrieve",(event,message)=>{
+  console.log("got answer",message)
   switch (message.type) {
     case "biorxiv-amount":
-      
-      
+            
       let dataBasicPreview =
-      "Expected amount of results: " +
+      "Expected amount: " +
       message.content;
-
-      
 
     document.getElementById(
       "biorxiv-basic-previewer"
@@ -817,15 +818,14 @@ ipcRenderer.on("artoo",(event,message)=>{
     ).style.display = "block"; 
       break;
   
-    default:
-      break;
   }
 })
 
 
 //========== clinicalBasicRetriever ==========
-const clinicTrialBasicRetriever = checker => {
+const clinicTrialBasicRetriever = () => {
   
+  console.log("clintri retrieve")
 
   let ctQuery =  document.getElementById("clinical_trialslocalqueryinput").value; // Request Content
 
@@ -1181,53 +1181,78 @@ const hypheCheck = target => {
 
 const hypheCorpusList = (target, prevId) => {
 
+console.log(target, prevId)
+
   fetch(target + "/api/", {
     method: 'POST',
     body:   JSON.stringify({ method: "list_corpus"}),
 })
   .then(res =>res.json())
     .then(hypheResponse => {
-    
-      // With the response
-      if (hypheResponse[0].code === "success") {
-        let corpusList = "<ul>";
+     
+       if (hypheResponse[0].code === "success") {
+        let corpusList = document.createElement("UL")
 
         for (var corpus in hypheResponse[0].result) {
+          let corpusID=hypheResponse[0].result[corpus].corpus_id
+
           if (hypheResponse[0].result[corpus].password) {
-            corpusList =
-              corpusList +
-              "<li  id=" +
-              hypheResponse[0].result[corpus].corpus_id +
-              "><strong>" +
+           
+            var line = document.createElement("LI")
+                line.id = corpusID
+                
+            var linCont = document.createElement("DIV")
+            linCont.innerHTML= 
+                     
+                "<strong>" +
               hypheResponse[0].result[corpus].name +
               "</strong> - IN WE:" +
               hypheResponse[0].result[corpus].webentities_in +
               " - password : <input id=" +
               corpus +
               "pass" +
-              " type='password'> <input type='button' value='Load' onclick='loadHyphe(" +
-              JSON.stringify(hypheResponse[0].result[corpus].corpus_id) +
-              "," +
-              JSON.stringify(target) +
-              ",true)'></li>";
+              " type='password'>";
+              
+              
+            var load = document.createElement("INPUT")
+              load.type="button"
+              load.value="load"
+              load.style.marginLeft="10px"
+              load.addEventListener("click",e=>{
+              
+                loadHyphe(hypheResponse[0].result[corpus].corpus_id,target)
+              })
+
+              line.appendChild(linCont)
+              linCont.appendChild(load)
+              corpusList.appendChild(line)
+            
           } else {
-            corpusList =
-              corpusList +
-              "<li  id=" +
-              hypheResponse[0].result[corpus].corpus_id +
-              "><strong>" +
+         
+            var line = document.createElement("LI")
+            line.id = corpusID
+            
+        var linCont = document.createElement("DIV")
+        linCont.innerHTML=  
+            "<strong>" +
               hypheResponse[0].result[corpus].name +
               "</strong> - IN WE:" +
-              hypheResponse[0].result[corpus].webentities_in +
-              " <input type='button' value='Load' onclick='loadHyphe(" +
-              JSON.stringify(hypheResponse[0].result[corpus].corpus_id) +
-              "," +
-              JSON.stringify(target) +
-              ")'></li>";
+              hypheResponse[0].result[corpus].webentities_in;
+              
+              var load = document.createElement("INPUT")
+              load.type="button"
+              load.value="load"
+              load.addEventListener("click",e=>{
+                   loadHyphe(corpusID,target)
+              })
+
+              line.appendChild(linCont)
+              linCont.appendChild(load)
+              corpusList.appendChild(line)
           }
         }
-        corpusList = corpusList + "</ul>";
-        document.getElementById(prevId).innerHTML = corpusList; // Display dataPreview in a div
+        
+        document.getElementById(prevId).appendChild(corpusList); // Display dataPreview in a div
       } else {
       }
     })
@@ -1235,6 +1260,9 @@ const hypheCorpusList = (target, prevId) => {
 };
 
 const loadHyphe = (corpus, endpoint, pass) => {
+
+  console.log(corpus, endpoint, pass)
+
   let password = false;
   if (pass) {
     password = document.getElementById(corpus + "pass").value;
@@ -1429,3 +1457,137 @@ const localUpload = () => {
   })
   
 };
+
+
+//========== STARTING FLUX ==========
+ipcRenderer.send("console-logs", "Opening Flux"); // Sending notification to console
+
+const closeWindow = () => {
+  ipcRenderer.send("window-manager","closeWindow","flux")     
+}
+
+const refreshWindow = () => {
+  location.reload()
+}
+
+window.addEventListener('load', (event) => {
+
+  
+  var buttonMap=[
+    {id:"user-button",func:"basicUserData"},
+    {id:"zoteroAPIValidation",func:"checkKey",arg:"zoteroAPIValidation"},
+    {id:"Zotero",func:"updateUserData",arg:"Zotero"},
+    {id:"scopusValidation",func:"checkKey",arg:"scopusValidation"},
+    {id:"Scopus",func:"updateUserData",arg:"Scopus"},
+    {id:"fluxDisplayButton",func:"fluxDisplay",arg:"flux-manager"},
+    {id:"fluxCloseButton",func:"closeWindow"},
+    {id:"fluxRefreshButton",func:"refreshWindow"},
+    {id:"hyphe-checker",func:"hypheCheck"},
+    {id:"hyphe-exporter",func:"endpointConnector"},
+    {id:"hypheDataset",func:"datasetDisplay",arg:['hyphe-dataset-list','hyphe']},
+    {id:"systemList",func:"datasetDisplay",arg:['systemDatasetsList','system']},
+    {id:"load-local",func:"localUpload"},
+    {id:"systitret",func:"powerValve",arg:"sysExport"},
+    {id:"clinical_trials-basic-query",func:"clinicTrialBasicRetriever"},
+    {id:"clinical_trials-query",func:"powerValve",arg:"clinTriRetriever"},
+    {id:"scopus-basic-query",func:"scopusBasicRetriever",arg:[]},
+    {id:"scopus-query",func:"powerValve",arg:"scopusRetriever"},
+    {id:"biorxiv-basic-query",func:"biorxivBasicRetriever"},
+    {id:"biorxiv-query",func:"powerValve",arg:'biorxivRetriever'},
+    {id:"twitterImporter",func:"powerValve",arg:"tweetImporter"},
+    {id:"twitterCatImporter",func:"twitterCat"},
+    {id:"twitterThreadImporter",func:"twitterThread"},
+    {id:"scopusGeolocate",func:"powerValve",arg:"scopusGeolocate"},
+    {id:"csljson-display",func:"datasetDisplay",arg:['scopus-dataset-list','scopus']},
+    {id:"convert-csl",func:"powerValve",arg:"scopusConverter"},
+    {id:"scopus-display",func:"datasetDisplay",arg:['enriched-dataset-list','enriched']},
+    {id:"cslcolret",func:"datasetDisplay",arg:['userCsljsonCollections','csljson']},
+    {id:"zoteroCollecBuild",func:"powerValve",arg:"zoteroCollectionBuilder"},
+    {id:"zotcolret",func:"zoteroCollectionRetriever"},
+    {id:"zotitret",func:"powerValve",arg:'zoteroItemsRetriever'}   
+  ]
+
+  const svg = d3.select("svg");
+  drawFlux(svg, traces, false, true);
+
+function funcSwitch(e,but) {
+
+  switch (but.func) {
+
+    case "biorxivBasicRetriever": biorxivBasicRetriever();
+    
+    break;
+    
+
+    case "basicUserData": basicUserData();
+      break;
+      case "checkKey": checkKey(but.arg);
+      break;
+
+      case "updateUserData": updateUserData(but.arg);
+      break;
+
+      case "fluxDisplay": fluxDisplay(but.arg);
+      break;
+
+      case "closeWindow": closeWindow();
+      break;
+
+      case "refreshWindow": refreshWindow();
+      break;
+
+      case "hypheCheck": hypheCheck(document.getElementById('hypheaddress').value);
+      break;
+
+      case "endpointConnector": endpointConnector('hyphe',document.getElementById('hypheaddress').value);
+      break;
+  
+    case "datasetDisplay":datasetDisplay(but.arg[0],but.arg[1])
+      break;
+
+      case "localUpload":localUpload()
+      break;
+
+      case "powerValve": powerValve(but.arg,e.target)
+      break;
+
+      case "clinicTrialBasicRetriever":   
+      clinicTrialBasicRetriever()
+      break;
+
+      case "scopusBasicRetriever": scopusBasicRetriever()
+      break;
+
+    
+
+      case "twitterCat": twitterCat()
+      break;
+
+      case "twitterThread": twitterThread()
+      break;
+
+      case "zoteroCollectionRetriever": zoteroCollectionRetriever()
+      break;
+               
+
+     
+  }
+
+}
+
+  buttonMap.forEach(but=>{
+
+    document.getElementById(but.id).addEventListener("click",e=>{
+     funcSwitch(e,but)
+     
+      e.preventDefault();
+    
+    return false
+    })
+
+  })
+
+
+
+})
+
