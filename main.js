@@ -92,7 +92,7 @@ function createWindow() {
   mainWindow.loadFile("index.html");
 
   mainWindow.setMenu(null);
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
@@ -328,7 +328,7 @@ const chaerosCalculator = () => {
 
   chaerosWindow.webContents.on("did-finish-load", function () {
     chaerosWindow.webContents.send("id", chaerosWindow.id);
-    chaerosWindow.webContents.openDevTools();
+    //   chaerosWindow.webContents.openDevTools();
   });
 };
 
