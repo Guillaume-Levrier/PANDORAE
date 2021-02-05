@@ -1,152 +1,123 @@
-<!DOCTYPE html><html><meta charset='UTF-8'>
-<title>PANDORÆ-FLUX</title>
-<link rel='stylesheet' type='text/css' href='css/pandorae.css'>
+<!DOCTYPE html>
+<html>
+  <meta charset="UTF-8" />
+  <title>PANDORÆ-FLUX</title>
+  <link rel="stylesheet" type="text/css" href="css/pandorae.css" />
 
-<style>
-body{
-  overflow: scroll;
-  text-align: justify;
-  color: black;
-  opacity: 0;
-  background-color:white;
-}
+  <style>
+    body {
+      overflow: scroll;
+      text-align: justify;
+      color: black;
+      opacity: 0;
+      background-color: white;
+    }
 
-::-webkit-scrollbar {
-    display: none;
-}
-#slideSections {
-  padding-left: 40px;
-  padding-right: 40px;
-}
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    #slideSections {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
 
-.step {
-  font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
-  font-size: 16px;
-  line-height: 26px;
-}
+    .step {
+      font-family: "Noto Sans", "Noto Sans SC", sans-serif;
+      font-size: 16px;
+      line-height: 26px;
+    }
 
-.centerStep{
-  text-align:center;
-}
+    .centerStep {
+      text-align: center;
+    }
 
-a {
-text-decoration: underline;
-cursor:pointer;
-}
+    a {
+      text-decoration: underline;
+      cursor: pointer;
+    }
 
-sections .title {
-font-family: 'Noto Sans', 'Noto Sans SC', sans-serif;
-  font-size: 18px;
-  font-weight: 900;
-  margin-bottom: 2px;
-  color: #262626;
-  line-height: 1.2em;
-}
+    sections .title {
+      font-family: "Noto Sans", "Noto Sans SC", sans-serif;
+      font-size: 18px;
+      font-weight: 900;
+      margin-bottom: 2px;
+      color: #262626;
+      line-height: 1.2em;
+    }
 
-.commands{
-  font-size:16px;
-  font-family: monospace;
-}
+    .commands {
+      font-size: 16px;
+      font-family: monospace;
+    }
 
+    #dialogDiv {
+      position: fixed;
+      z-index: 20;
+      padding: 5px;
+      right: 0px;
+      top: 0px;
+      width: 60px;
+    }
 
-#dialogDiv{
-        position:fixed;
-        z-index:20;
-        padding: 5px;
-        right:0px;
-        top:0px;
-        width:60px;
+    @keyframes invert {
+      from {
+        background-color: white;
+        color: black;
       }
-      
+      to {
+        background-color: black;
+        color: white;
+      }
+    }
 
+    #progressBar {
+      position: fixed;
+      z-index: 19;
+      top: 0px;
+      left: calc(100%-4px);
+      width: 4px;
+      height: 0px;
+      background-color: #141414;
+    }
+  </style>
+  <body>
+    <div id="slideSections"></div>
+    <div id="progressBar"></div>
 
-@keyframes
-  invert {
-    from {background-color: white; color:black}
-    to {background-color: black; color:white}
-  }
+    <div id="dialogDiv">
+      <i
+        class="material-icons dialog-buttons"
+        id="backarrow"
+        style="display: none"
+        onclick="smoothScrollTo(previous,true);"
+        >arrow_back</i
+      >
+      <i class="material-icons dialog-buttons" onclick="refreshWindow();"
+        >refresh</i
+      >
+      <i class="material-icons dialog-buttons" onclick="closeAndDisplay();"
+        >close</i
+      >
+      <div
+        id="lang"
+        style="margin-top: 0px; margin-left: 30px; width: 30px; display: block"
+      >
+        <div class="locale">FR</div>
+        <div class="locale">EN</div>
+        <div class="locale">中文</div>
+      </div>
+    </div>
 
-#progressBar{
-  position:fixed;
-        z-index:19;
-  top: 0px;
-  left:calc(100%-4px);
-  width:4px;
-  height: 0px;
-  background-color: #141414;
-}
+    <link rel="icon" type="image/png" href="img/AE-favicon.png" />
+    <script></script>
+    <!-- 
+    <script src="js/locales.js"></script>
+    <script src="js/window-management.js"></script>
+    <script src="js/tutorial/cascade.js"></script>
+    <script src="js/tutorial/textcontent.js"></script>
+    <script src="js/tutorial/scroller.js"></script>
+    <script src="js/tutorial/tutorial.js"></script> -->
 
-</style>
-<body>
-
-<div id='slideSections'></div>
-<div id='progressBar'></div>
-
-<div id='dialogDiv'>
-  <i class='material-icons  dialog-buttons' id='backarrow' style='display:none;' onclick='smoothScrollTo(previous,true);'>arrow_back</i>
-  <i class='material-icons dialog-buttons' onclick='refreshWindow();'>refresh</i>
-  <i class='material-icons dialog-buttons' onclick='closeAndDisplay();'>close</i>
-  <div id='lang' style='margin-top:0px;margin-left:30px;width:30px;display: block;'>
-    <div class='locale'>FR</div>
-    <div class='locale'>EN</div>
-    <div class='locale'>中文</div>
-  </div>
-</div>
-
-
-<link rel='icon' type='image/png' href='img/AE-favicon.png'/>
-<script>
-const fs = require('fs');
-const d3 = require('d3');
-</script>
-<script src='js/locales.js'></script>
-<script src='js/window-management.js'></script>
-<script src='js/tutorial/cascade.js'></script>
-<script src='js/tutorial/textcontent.js'></script>
-<script src='js/tutorial/scroller.js'></script>
-<script src='js/tutorial/tutorial.js'></script>
-
-
-<script>
-  const closeAndDisplay = () => { 
-    ipcRenderer.send('chaeros-notification','return to tutorial',sectionList[activeIndex].id);
-    closeWindow();
-  };
-</script>
-
-<script>
-
-const lastScroll = () =>{
-        smoothScrollTo('final8');       
-        document.body.style.animation = 'invert 2s';
-        document.body.style.animationFillMode= 'forwards';
-        document.body.style.overflow = 'hidden';
-        document.getElementById('backarrow').style.display = 'none';
-        
-setTimeout(() => {  
-        let seconds = 10;
-        const secMinus = () => {
-          seconds = seconds-1;
-          document.getElementById('restartCount').innerHTML = 'Restarting in:<br>'+ seconds;
-        };
-
-        setInterval(secMinus, 1000)
-        
-        setTimeout(() => {
-          ipcRenderer.invoke("restart",true)
-        }, 10000); 
-            
-    }, 7000);
-  }
-
-setTimeout(() => { //This is important because otherwise the padding is messed up and no event listener will do
-  addPadding();
-  display();  
-  document.body.style.animation='fadein 1s';
-  setTimeout(() => {
-    document.body.style.opacity = 1;
-  }, 950);
-}, 200);
-
-  </script>
-</body>
+    <script></script>
+  </body>
+</html>

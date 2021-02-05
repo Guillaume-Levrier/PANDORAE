@@ -1,3 +1,5 @@
+
+// Slider script
 const { Runtime, Inspector } = require("@observablehq/runtime");
 
 const createObsCell = (
