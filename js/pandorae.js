@@ -31,14 +31,7 @@ var typeSelector = false;
 const msg =
   "      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ";
 
-var version = "";
-
-fs.readFile(appPath + "/package.json", "utf8", (err, data) => {
-  if (err) throw err;
-  let package = JSON.parse(data);
-  let version = package.version;
-  console.log(msg + " - " + version + "\n\n");
-});
+var version = "1.0.03";
 
 // for export purposes
 var currentType; // Once a type is started, know which one
@@ -893,8 +886,13 @@ const loadTheme = (theme) => {
     case "normal":
       normalCore();
       break;
+
     case "vega":
       vega();
+      break;
+
+    case "blood-dragon":
+      bloodDragon();
 
       break;
 
