@@ -2947,7 +2947,7 @@ const chronotype = (id) => {
             docTitle.id = "list-" + d.id;
             docTitle.innerText = d.title;
             docTitle.addEventListener("click", (e) => {
-              shell.openExternal("https://dx.doi.org/" + d.DOI);
+              ipcRenderer.invoke("openEx", "https://dx.doi.org/" + d.DOI);
             });
             docTitle.addEventListener("mouseover", (e) => {
               node.style("opacity", ".2");
@@ -3575,7 +3575,7 @@ const geotype = (id) => {
               }
 
               docDOM.addEventListener("click", (e) => {
-                shell.openExternal(url);
+                ipcRenderer.invoke("openEx", url);
               });
             }
             document.getElementById("tooltip").appendChild(inst);
