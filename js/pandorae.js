@@ -687,6 +687,7 @@ const exportToHTML = () => {
                         );
                       }
 
+                      // issue here, openEx has been moved to the main process
                       while (typesJS.indexOf("shell.openExternal") > -1) {
                         typesJS = typesJS.replace(
                           "shell.openExternal",

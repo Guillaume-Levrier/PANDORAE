@@ -27,7 +27,7 @@ const populateTutorial = () => {
           break;
 
         case "openEx":
-          console.log("open external " + link.dataset.target);
+          ipcRenderer.invoke("openEx", link.dataset.target);
           break;
 
         case "lastScroll()":

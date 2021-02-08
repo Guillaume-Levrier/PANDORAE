@@ -523,3 +523,7 @@ ipcMain.handle("saveHTML", async (event, target) => {
 ipcMain.handle("mainDevTools", async (event, target) => {
   mainWindow.webContents.openDevTools();
 });
+
+ipcMain.handle("openEx", async (event, target) => {
+  shell.openExternal(target);
+});
