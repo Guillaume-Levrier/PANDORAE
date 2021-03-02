@@ -2947,7 +2947,7 @@ const chronotype = (id) => {
             docTitle.id = "list-" + d.id;
             docTitle.innerText = d.title;
             docTitle.addEventListener("click", (e) => {
-              shell.openExternal("https://dx.doi.org/" + d.DOI);
+              ipcRenderer.invoke("openEx", "https://dx.doi.org/" + d.DOI);
             });
             docTitle.addEventListener("mouseover", (e) => {
               node.style("opacity", ".2");
@@ -3575,7 +3575,7 @@ const geotype = (id) => {
               }
 
               docDOM.addEventListener("click", (e) => {
-                shell.openExternal(url);
+                ipcRenderer.invoke("openEx", url);
               });
             }
             document.getElementById("tooltip").appendChild(inst);
@@ -4643,610 +4643,580 @@ const gazouillotype = (id) => {
             areaData.push(point);
           });
 
-          ipcRenderer.send("chaeros-notification", "generating network"); // send new total to main display
+          view
+            .selectAll("circle")
+            .data(circleData)
+            .enter()
+            .append("circle")
+            .style("cursor", "pointer")
+            .attr("id", (d) => d.id)
+            .style("fill", (d) => color(d.retweet_count))
+            .attr("r", radius)
+            .attr("cx", (d) => x(d.timespan))
+            .attr("cy", (d) => y(d.indexPosition))
+            .on("click", (event, d) => {
+              d3.select("#linktosource").remove();
+              lineData = [];
+              lineData.push(d);
+              circleData.forEach((tweet) => {
+                document.getElementById(tweet.id).style.fill = color(
+                  tweet.retweet_count
+                );
 
-          multiThreader.postMessage({
-            type: "gz",
-            dataset: circleData,
-          });
+                if (tweet.id === d.retweeted_id) {
+                  lineData.push(tweet);
+                }
 
-          multiThreader.onmessage = (gzWorkerAnswer) => {
-            if (gzWorkerAnswer.data.type === "gz") {
-              circleData = gzWorkerAnswer.data.msg;
+                if (
+                  d.retweeted_id.length > 1 &&
+                  tweet.retweeted_id === d.retweeted_id
+                ) {
+                  document.getElementById(tweet.id).style.fill = "salmon";
+                }
+                if (tweet.from_user_id === d.from_user_id) {
+                  document.getElementById(tweet.id).style.fill = altColor(
+                    tweet.retweet_count
+                  );
+                }
+              });
 
-              view
-                .selectAll("circle")
-                .data(circleData)
-                .enter()
-                .append("circle")
-                .style("cursor", "pointer")
-                .attr("id", (d) => d.id)
-                .style("fill", (d) => color(d.retweet_count))
-                .attr("r", radius)
-                .attr("cx", (d) => x(d.timespan))
-                .attr("cy", (d) => y(d.indexPosition))
-                .on("click", (event, d) => {
-                  d3.select("#linktosource").remove();
-                  lineData = [];
-                  lineData.push(d);
-                  circleData.forEach((tweet) => {
-                    document.getElementById(tweet.id).style.fill = color(
-                      tweet.retweet_count
-                    );
+              if (parseInt(d.retweeted_id)) {
+                // if it is a NaN, returns false
+                if (document.getElementById(d.retweeted_id)) {
+                  document.getElementById(d.retweeted_id).style.fill = "red";
+                }
 
-                    if (tweet.id === d.retweeted_id) {
-                      lineData.push(tweet);
-                    }
+                var line = (line = d3
+                  .line()
+                  .x((line) => x(line.timespan))
+                  .y((line) => y(line.indexPosition)));
 
-                    if (
-                      d.retweeted_id.length > 1 &&
-                      tweet.retweeted_id === d.retweeted_id
-                    ) {
-                      document.getElementById(tweet.id).style.fill = "salmon";
-                    }
-                    if (tweet.from_user_id === d.from_user_id) {
-                      document.getElementById(tweet.id).style.fill = altColor(
-                        tweet.retweet_count
-                      );
-                    }
-                  });
+                view
+                  .append("path")
+                  .datum(lineData)
+                  .attr("id", "linktosource")
+                  .style("stroke", "red")
+                  .style("stroke-linecap", "round")
+                  .style("stroke-width", radius / 3)
+                  .attr("d", line);
+              }
 
-                  if (parseInt(d.retweeted_id)) {
-                    // if it is a NaN, returns false
-                    if (document.getElementById(d.retweeted_id)) {
-                      document.getElementById(d.retweeted_id).style.fill =
-                        "red";
-                    }
-
-                    var line = (line = d3
-                      .line()
-                      .x((line) => x(line.timespan))
-                      .y((line) => y(line.indexPosition)));
-
-                    view
-                      .append("path")
-                      .datum(lineData)
-                      .attr("id", "linktosource")
-                      .style("stroke", "red")
-                      .style("stroke-linecap", "round")
-                      .style("stroke-width", radius / 3)
-                      .attr("d", line);
+              keywords
+                .reduce((res, val) => res.concat(val.split(/ AND /)), [])
+                .forEach((e) => {
+                  let target = new RegExp("\\b" + e + "\\b", "gi");
+                  if (target.test(d.text)) {
+                    d.text = d.text.replace(target, "<mark>" + e + "</mark>");
                   }
-
-                  keywords
-                    .reduce((res, val) => res.concat(val.split(/ AND /)), [])
-                    .forEach((e) => {
-                      let target = new RegExp("\\b" + e + "\\b", "gi");
-                      if (target.test(d.text)) {
-                        d.text = d.text.replace(
-                          target,
-                          "<mark>" + e + "</mark>"
-                        );
-                      }
-                      if (target.test(d.from_user_name)) {
-                        d.from_user_name = d.from_user_name.replace(
-                          target,
-                          "<mark>" + e + "</mark>"
-                        );
-                      }
-                      if (target.test(d.links)) {
-                        d.links = d.links.replace(
-                          target,
-                          "<mark>" + e + "</mark>"
-                        );
-                      }
-                    });
-                  d3.select("#tooltip").html(
-                    '<p class="legend"><strong><a target="_blank" href="https://mobile.twitter.com/' +
-                      d.from_user_name +
-                      '">' +
-                      d.from_user_name +
-                      '</a></strong> <br/><div style="border:1px solid black;"><p>' +
-                      d.text +
-                      "</p></div><br><br> Language: " +
-                      d.lang +
-                      "<br>Date: " +
-                      d.date +
-                      "<br> Favorite count: " +
-                      d.favorite_count +
-                      "<br>Reply count: " +
-                      d.reply_count +
-                      "<br>Retweet count: " +
-                      d.retweet_count +
-                      "<br>Links: <a target='_blank' href='" +
-                      d.links +
-                      "'>" +
-                      d.links +
-                      "</a><br> Hashtags: " +
-                      d.hashtags +
-                      "<br> Mentionned user names: " +
-                      d.mentionned_user_names +
-                      "<br> Source: " +
-                      d.source_name +
-                      "<br>Tweet id: <a target='_blank' href='https://mobile.twitter.com/" +
-                      d.from_user_name +
-                      "/status/" +
-                      d.id +
-                      "'>" +
-                      d.id +
-                      "</a><br> Possibly sensitive: " +
-                      d.possibly_sensitive +
-                      "<br><br> Embeded media<br><img src='" +
-                      d.medias_urls +
-                      "' width='300' ><br><br><strong>Location</strong><br/>City: " +
-                      d.location +
-                      "<br> Latitude:" +
-                      d.lat +
-                      "<br>Longitude: " +
-                      d.lng +
-                      "<br><br><strong>User info</strong><br><img src='" +
-                      d.from_user_profile_image_url +
-                      "' max-width='300'><br><br>Account creation date: " +
-                      d.from_user_created_at +
-                      "<br> Account name: " +
-                      d.from_user_name +
-                      "<br> User id: " +
-                      d.from_user_id +
-                      "<br> User description: " +
-                      d.from_user_description +
-                      "<br> User follower count: " +
-                      d.from_user_followercount +
-                      "<br> User friend count: " +
-                      d.from_user_friendcount +
-                      "<br> User tweet count: " +
-                      d.from_user_tweetcount +
-                      "" +
-                      "<br><br>" +
-                      requestContent +
-                      "<br><br><br><br><br><br><br><br></p>"
-                  );
+                  if (target.test(d.from_user_name)) {
+                    d.from_user_name = d.from_user_name.replace(
+                      target,
+                      "<mark>" + e + "</mark>"
+                    );
+                  }
+                  if (target.test(d.links)) {
+                    d.links = d.links.replace(target, "<mark>" + e + "</mark>");
+                  }
                 });
+              d3.select("#tooltip").html(
+                '<p class="legend"><strong><a target="_blank" href="https://mobile.twitter.com/' +
+                  d.from_user_name +
+                  '">' +
+                  d.from_user_name +
+                  '</a></strong> <br/><div style="border:1px solid black;"><p>' +
+                  d.text +
+                  "</p></div><br><br> Language: " +
+                  d.lang +
+                  "<br>Date: " +
+                  d.date +
+                  "<br> Favorite count: " +
+                  d.favorite_count +
+                  "<br>Reply count: " +
+                  d.reply_count +
+                  "<br>Retweet count: " +
+                  d.retweet_count +
+                  "<br>Links: <a target='_blank' href='" +
+                  d.links +
+                  "'>" +
+                  d.links +
+                  "</a><br> Hashtags: " +
+                  d.hashtags +
+                  "<br> Mentionned user names: " +
+                  d.mentionned_user_names +
+                  "<br> Source: " +
+                  d.source_name +
+                  "<br>Tweet id: <a target='_blank' href='https://mobile.twitter.com/" +
+                  d.from_user_name +
+                  "/status/" +
+                  d.id +
+                  "'>" +
+                  d.id +
+                  "</a><br> Possibly sensitive: " +
+                  d.possibly_sensitive +
+                  "<br><br> Embeded media<br><img src='" +
+                  d.medias_urls +
+                  "' width='300' ><br><br><strong>Location</strong><br/>City: " +
+                  d.location +
+                  "<br> Latitude:" +
+                  d.lat +
+                  "<br>Longitude: " +
+                  d.lng +
+                  "<br><br><strong>User info</strong><br><img src='" +
+                  d.from_user_profile_image_url +
+                  "' max-width='300'><br><br>Account creation date: " +
+                  d.from_user_created_at +
+                  "<br> Account name: " +
+                  d.from_user_name +
+                  "<br> User id: " +
+                  d.from_user_id +
+                  "<br> User description: " +
+                  d.from_user_description +
+                  "<br> User follower count: " +
+                  d.from_user_followercount +
+                  "<br> User friend count: " +
+                  d.from_user_friendcount +
+                  "<br> User tweet count: " +
+                  d.from_user_tweetcount +
+                  "" +
+                  "<br><br>" +
+                  requestContent +
+                  "<br><br><br><br><br><br><br><br></p>"
+              );
+            });
 
-              // === Bar Range Slider ===
-              // adapted from https://observablehq.com/@bumbeishvili/data-driven-range-sliders
+          // === Bar Range Slider ===
+          // adapted from https://observablehq.com/@bumbeishvili/data-driven-range-sliders
 
-              const barRangeSlider = (
-                initialDataArray,
-                accessorFunction,
-                aggregatorFunction,
-                paramsObject
-              ) => {
-                const chartWidth = width - toolWidth - 40;
-                let chartHeight = 100;
-                let startSelection = 100;
+          const barRangeSlider = (
+            initialDataArray,
+            accessorFunction,
+            aggregatorFunction,
+            paramsObject
+          ) => {
+            const chartWidth = width - toolWidth - 40;
+            let chartHeight = 100;
+            let startSelection = 100;
 
-                const argumentsArr = [...arguments];
+            const argumentsArr = [...arguments];
 
-                const initialData = initialDataArray;
-                const accessor = accessorFunction;
-                const aggregator = aggregatorFunction;
-                let params = argumentsArr.filter(isPlainObj)[0];
-                if (!params) {
-                  params = {};
-                }
-                params.minY = params.yScale ? 0.0001 : 0;
-                params.yScale = params.yScale || d3.scaleLinear();
-                chartHeight = params.height || chartHeight;
-                params.yTicks = params.yTicks || 4;
-                params.freezeMin = params.freezeMin || false;
+            const initialData = initialDataArray;
+            const accessor = accessorFunction;
+            const aggregator = aggregatorFunction;
+            let params = argumentsArr.filter(isPlainObj)[0];
+            if (!params) {
+              params = {};
+            }
+            params.minY = params.yScale ? 0.0001 : 0;
+            params.yScale = params.yScale || d3.scaleLinear();
+            chartHeight = params.height || chartHeight;
+            params.yTicks = params.yTicks || 4;
+            params.freezeMin = params.freezeMin || false;
 
-                var accessorFunc = (d) => d;
-                if (initialData[0].value != null) {
-                  accessorFunc = (d) => d.value;
-                }
-                if (typeof accessor == "function") {
-                  accessorFunc = accessor;
-                }
+            var accessorFunc = (d) => d;
+            if (initialData[0].value != null) {
+              accessorFunc = (d) => d.value;
+            }
+            if (typeof accessor == "function") {
+              accessorFunc = accessor;
+            }
 
-                const grouped = initialData;
+            const grouped = initialData;
 
-                const isDate = true;
-                var dateExtent,
-                  dateScale,
-                  scaleTime,
-                  dateRangesCount,
-                  dateRanges,
-                  scaleTime;
+            const isDate = true;
+            var dateExtent,
+              dateScale,
+              scaleTime,
+              dateRangesCount,
+              dateRanges,
+              scaleTime;
 
-                dateExtent = d3.extent(grouped.map((d) => d.timespan));
+            dateExtent = d3.extent(grouped.map((d) => d.timespan));
 
-                dateRangesCount = Math.round(width / 5);
-                dateScale = d3
-                  .scaleTime()
-                  .domain(dateExtent)
-                  .range([0, dateRangesCount]);
-                scaleTime = d3
-                  .scaleTime()
-                  .domain(dateExtent)
-                  .range([0, chartWidth]);
+            dateRangesCount = Math.round(width / 5);
+            dateScale = d3
+              .scaleTime()
+              .domain(dateExtent)
+              .range([0, dateRangesCount]);
+            scaleTime = d3
+              .scaleTime()
+              .domain(dateExtent)
+              .range([0, chartWidth]);
 
-                dateRanges = d3
-                  .range(dateRangesCount)
-                  .map((d) => [dateScale.invert(d), dateScale.invert(d + 1)]);
+            dateRanges = d3
+              .range(dateRangesCount)
+              .map((d) => [dateScale.invert(d), dateScale.invert(d + 1)]);
 
-                d3.selection.prototype.patternify = function (params) {
-                  var container = this;
-                  var selector = params.selector;
-                  var elementTag = params.tag;
-                  var data = params.data || [selector];
+            d3.selection.prototype.patternify = function (params) {
+              var container = this;
+              var selector = params.selector;
+              var elementTag = params.tag;
+              var data = params.data || [selector];
 
-                  // Pattern in action
-                  var selection = container
-                    .selectAll("." + selector)
-                    .data(data, (d, i) => {
-                      if (typeof d === "object") {
-                        if (d.id) {
-                          return d.id;
-                        }
-                      }
-                      return i;
-                    });
-                  selection.exit().remove();
-                  selection = selection
-                    .enter()
-                    .append(elementTag)
-                    .merge(selection);
-                  selection.attr("class", selector);
-                  return selection;
-                };
-
-                const handlerWidth = 2,
-                  handlerFill = "#E1E1E3",
-                  middleHandlerWidth = 10,
-                  middleHandlerStroke = "#8E8E8E",
-                  middleHandlerFill = "#EFF4F7";
-
-                const svg = d3.select(xtypeSVG);
-
-                let sliderOffsetHeight = document.body.offsetHeight - 120;
-
-                const chart = svg
-                  .append("g")
-                  .attr("transform", "translate(30," + sliderOffsetHeight + ")")
-                  .attr("id", "chart");
-
-                grouped.forEach((d) => {
-                  d.key = d.timespan;
-                  d.value = d.indexPosition;
+              // Pattern in action
+              var selection = container
+                .selectAll("." + selector)
+                .data(data, (d, i) => {
+                  if (typeof d === "object") {
+                    if (d.id) {
+                      return d.id;
+                    }
+                  }
+                  return i;
                 });
+              selection.exit().remove();
+              selection = selection.enter().append(elementTag).merge(selection);
+              selection.attr("class", selector);
+              return selection;
+            };
 
-                const values = grouped.map((d) => d.value);
-                const min = d3.min(values);
-                const max = d3.max(values);
-                const maxX = grouped[grouped.length - 1].key;
-                const minX = grouped[0].key;
+            const handlerWidth = 2,
+              handlerFill = "#E1E1E3",
+              middleHandlerWidth = 10,
+              middleHandlerStroke = "#8E8E8E",
+              middleHandlerFill = "#EFF4F7";
 
-                var minDiff = d3.min(grouped, (d, i, arr) => {
-                  if (!i) return Infinity;
-                  return d.key - arr[i - 1].key;
-                });
+            const svg = d3.select(xtypeSVG);
 
-                let eachBarWidth = chartWidth / minDiff / (maxX - minX);
+            let sliderOffsetHeight = document.body.offsetHeight - 120;
 
-                if (eachBarWidth > 20) {
-                  eachBarWidth = 20;
-                }
+            const chart = svg
+              .append("g")
+              .attr("transform", "translate(30," + sliderOffsetHeight + ")")
+              .attr("id", "chart");
 
-                if (minDiff < 1) {
-                  eachBarWidth = eachBarWidth * minDiff;
-                }
+            grouped.forEach((d) => {
+              d.key = d.timespan;
+              d.value = d.indexPosition;
+            });
 
-                if (eachBarWidth < 1) {
-                  eachBarWidth = 1;
-                }
+            const values = grouped.map((d) => d.value);
+            const min = d3.min(values);
+            const max = d3.max(values);
+            const maxX = grouped[grouped.length - 1].key;
+            const minX = grouped[0].key;
 
-                const scale = params.yScale
-                  .domain([params.minY, max])
-                  .range([0, chartHeight - 25]);
+            var minDiff = d3.min(grouped, (d, i, arr) => {
+              if (!i) return Infinity;
+              return d.key - arr[i - 1].key;
+            });
 
-                const scaleY = scale
-                  .copy()
-                  .domain([max, params.minY])
-                  .range([0, chartHeight - 25]);
+            let eachBarWidth = chartWidth / minDiff / (maxX - minX);
 
-                const scaleX = d3
-                  .scaleLinear()
-                  .domain([minX, maxX])
-                  .range([0, chartWidth]);
+            if (eachBarWidth > 20) {
+              eachBarWidth = 20;
+            }
 
-                var axis = d3.axisBottom(scaleX);
+            if (minDiff < 1) {
+              eachBarWidth = eachBarWidth * minDiff;
+            }
 
-                if (isDate) {
-                  axis = d3
-                    .axisBottom(scaleTime)
-                    .tickFormat(d3.timeFormat("%d/%m/%y"));
-                }
+            if (eachBarWidth < 1) {
+              eachBarWidth = 1;
+            }
 
-                const axisY = d3
-                  .axisLeft(scaleY)
-                  .tickSize(-chartWidth - 20)
-                  .ticks(max == 1 ? 1 : params.yTicks)
-                  .tickFormat(d3.format(".2s"));
+            const scale = params.yScale
+              .domain([params.minY, max])
+              .range([0, chartHeight - 25]);
 
-                brushXscale = scaleX;
+            const scaleY = scale
+              .copy()
+              .domain([max, params.minY])
+              .range([0, chartHeight - 25]);
 
-                const bars = chart
-                  .selectAll(".bar")
-                  .data(grouped)
-                  .enter()
-                  .append("rect")
-                  .attr("class", "bar")
-                  .attr("width", eachBarWidth)
-                  .attr("height", (d) => scale(d.value))
-                  .attr("fill", "steelblue")
-                  .attr("y", (d) => -scale(d.value) + (chartHeight - 25))
-                  .attr("x", (d, i) => scaleX(d.key) - eachBarWidth / 2)
-                  .attr("opacity", 0.9);
+            const scaleX = d3
+              .scaleLinear()
+              .domain([minX, maxX])
+              .range([0, chartWidth]);
 
-                const xAxisWrapper = chart
-                  .append("g")
-                  .attr("id", "brushXAxis")
-                  .attr("transform", `translate(${0},${chartHeight - 25})`)
-                  .call(axis);
+            var axis = d3.axisBottom(scaleX);
 
-                const yAxisWrapper = chart
-                  .append("g")
-                  .attr("transform", `translate(${-10},${0})`)
-                  .call(axisY);
+            if (isDate) {
+              axis = d3
+                .axisBottom(scaleTime)
+                .tickFormat(d3.timeFormat("%d/%m/%y"));
+            }
 
-                const brush = chart
-                  .append("g")
-                  .attr("id", "selectionBrush")
-                  .attr("class", "brush")
-                  .call(
-                    d3
-                      .brushX()
-                      .extent([
-                        [0, 0],
-                        [chartWidth, chartHeight],
-                      ])
-                      .on("start", brushStarted)
-                      .on("end", brushEnded)
-                      .on("brush", brushed)
-                  );
+            const axisY = d3
+              .axisLeft(scaleY)
+              .tickSize(-chartWidth - 20)
+              .ticks(max == 1 ? 1 : params.yTicks)
+              .tickFormat(d3.format(".2s"));
 
-                chart.selectAll(".selection").attr("fill-opacity", 0.1);
+            brushXscale = scaleX;
 
-                var handle = brush
-                  .patternify({
-                    tag: "g",
-                    selector: "custom-handle",
-                    data: [
-                      {
-                        left: true,
-                      },
-                      {
-                        left: false,
-                      },
-                    ],
-                  })
-                  .attr("cursor", "ew-resize")
-                  .attr("pointer-events", "none");
+            const bars = chart
+              .selectAll(".bar")
+              .data(grouped)
+              .enter()
+              .append("rect")
+              .attr("class", "bar")
+              .attr("width", eachBarWidth)
+              .attr("height", (d) => scale(d.value))
+              .attr("fill", "steelblue")
+              .attr("y", (d) => -scale(d.value) + (chartHeight - 25))
+              .attr("x", (d, i) => scaleX(d.key) - eachBarWidth / 2)
+              .attr("opacity", 0.9);
 
-                handle
-                  .patternify({
-                    tag: "rect",
-                    selector: "custom-handle-rect",
-                    data: (d) => [d],
-                  })
-                  .attr("width", handlerWidth)
-                  .attr("height", 100)
-                  .attr("fill", handlerFill)
-                  .attr("stroke", handlerFill)
-                  .attr("y", -50)
-                  .attr("pointer-events", "none");
+            const xAxisWrapper = chart
+              .append("g")
+              .attr("id", "brushXAxis")
+              .attr("transform", `translate(${0},${chartHeight - 25})`)
+              .call(axis);
 
-                handle
-                  .patternify({
-                    tag: "rect",
-                    selector: "custom-handle-rect-middle",
-                    data: (d) => [d],
-                  })
-                  .attr("width", middleHandlerWidth)
-                  .attr("height", 30)
-                  .attr("fill", middleHandlerFill)
-                  .attr("stroke", middleHandlerStroke)
-                  .attr("y", -16)
-                  .attr("x", -middleHandlerWidth / 4)
-                  .attr("pointer-events", "none")
-                  .attr("rx", 3);
+            const yAxisWrapper = chart
+              .append("g")
+              .attr("transform", `translate(${-10},${0})`)
+              .call(axisY);
 
-                handle
-                  .patternify({
-                    tag: "rect",
-                    selector: "custom-handle-rect-line-left",
-                    data: (d) => [d],
-                  })
-                  .attr("width", 0.7)
-                  .attr("height", 20)
-                  .attr("fill", middleHandlerStroke)
-                  .attr("stroke", middleHandlerStroke)
-                  .attr("y", -100 / 6 + 5)
-                  .attr("x", -middleHandlerWidth / 4 + 3)
-                  .attr("pointer-events", "none");
+            const brush = chart
+              .append("g")
+              .attr("id", "selectionBrush")
+              .attr("class", "brush")
+              .call(
+                d3
+                  .brushX()
+                  .extent([
+                    [0, 0],
+                    [chartWidth, chartHeight],
+                  ])
+                  .on("start", brushStarted)
+                  .on("end", brushEnded)
+                  .on("brush", brushed)
+              );
 
-                handle
-                  .patternify({
-                    tag: "rect",
-                    selector: "custom-handle-rect-line-right",
-                    data: (d) => [d],
-                  })
-                  .attr("width", 0.7)
-                  .attr("height", 20)
-                  .attr("fill", middleHandlerStroke)
-                  .attr("stroke", middleHandlerStroke)
-                  .attr("y", -100 / 6 + 5)
-                  .attr("x", -middleHandlerWidth / 4 + middleHandlerWidth - 3)
-                  .attr("pointer-events", "none");
+            chart.selectAll(".selection").attr("fill-opacity", 0.1);
 
+            var handle = brush
+              .patternify({
+                tag: "g",
+                selector: "custom-handle",
+                data: [
+                  {
+                    left: true,
+                  },
+                  {
+                    left: false,
+                  },
+                ],
+              })
+              .attr("cursor", "ew-resize")
+              .attr("pointer-events", "none");
+
+            handle
+              .patternify({
+                tag: "rect",
+                selector: "custom-handle-rect",
+                data: (d) => [d],
+              })
+              .attr("width", handlerWidth)
+              .attr("height", 100)
+              .attr("fill", handlerFill)
+              .attr("stroke", handlerFill)
+              .attr("y", -50)
+              .attr("pointer-events", "none");
+
+            handle
+              .patternify({
+                tag: "rect",
+                selector: "custom-handle-rect-middle",
+                data: (d) => [d],
+              })
+              .attr("width", middleHandlerWidth)
+              .attr("height", 30)
+              .attr("fill", middleHandlerFill)
+              .attr("stroke", middleHandlerStroke)
+              .attr("y", -16)
+              .attr("x", -middleHandlerWidth / 4)
+              .attr("pointer-events", "none")
+              .attr("rx", 3);
+
+            handle
+              .patternify({
+                tag: "rect",
+                selector: "custom-handle-rect-line-left",
+                data: (d) => [d],
+              })
+              .attr("width", 0.7)
+              .attr("height", 20)
+              .attr("fill", middleHandlerStroke)
+              .attr("stroke", middleHandlerStroke)
+              .attr("y", -100 / 6 + 5)
+              .attr("x", -middleHandlerWidth / 4 + 3)
+              .attr("pointer-events", "none");
+
+            handle
+              .patternify({
+                tag: "rect",
+                selector: "custom-handle-rect-line-right",
+                data: (d) => [d],
+              })
+              .attr("width", 0.7)
+              .attr("height", 20)
+              .attr("fill", middleHandlerStroke)
+              .attr("stroke", middleHandlerStroke)
+              .attr("y", -100 / 6 + 5)
+              .attr("x", -middleHandlerWidth / 4 + middleHandlerWidth - 3)
+              .attr("pointer-events", "none");
+
+            handle.attr("display", "none");
+
+            function brushStarted() {
+              if (event.selection) {
+                startSelection = event.selection[0];
+              }
+            }
+
+            function brushEnded() {
+              if (!event.selection) {
                 handle.attr("display", "none");
 
-                function brushStarted() {
-                  if (event.selection) {
-                    startSelection = event.selection[0];
-                  }
-                }
-
-                function brushEnded() {
-                  if (!event.selection) {
-                    handle.attr("display", "none");
-
-                    output({
-                      range: [minX, maxX],
-                    });
-                    return;
-                  }
-                  if (event.sourceEvent.type === "brush") return;
-
-                  var d0 = event.selection.map(scaleX.invert),
-                    d1 = d0.map(d3.timeDay.round);
-
-                  if (d1[0] >= d1[1]) {
-                    d1[0] = d3.timeDay.floor(d0[0]);
-                    d1[1] = d3.timeDay.offset(d1[0]);
-                  }
-
-                  brushContent = d1;
-
-                  let midDate;
-
-                  midDate = new Date(
-                    brushContent[0].getTime() +
-                      (brushContent[1].getTime() - brushContent[0].getTime()) /
-                        2
-                  );
-
-                  // TO DO
-                  // COMPUTE ZOOM SCALE ACCORDING TO d1
-
-                  d3.select("#xtypeSVG")
-                    .transition()
-                    .duration(750)
-                    .call(
-                      zoom.transform,
-                      d3.zoomIdentity.translate(-x(d1[0]), -y(200))
-                    );
-
-                  let visibleTweets = 0;
-
-                  grouped.forEach((pile) => {
-                    if (
-                      pile.key >= brushContent[0] &&
-                      pile.key <= brushContent[1]
-                    ) {
-                      visibleTweets =
-                        parseInt(visibleTweets) + parseInt(pile.value);
-                    }
-                  });
-
-                  //   document.getElementById("docCountDiv").innerHTML = visibleTweets + " tweets";
-                }
-
-                function brushed(d) {
-                  if (event.sourceEvent.type === "brush") return;
-
-                  if (params.freezeMin) {
-                    if (event.selection[0] < startSelection) {
-                      event.selection[1] = Math.min(
-                        event.selection[0],
-                        event.selection[1]
-                      );
-                    }
-                    if (event.selection[0] >= startSelection) {
-                      event.selection[1] = Math.max(
-                        event.selection[0],
-                        event.selection[1]
-                      );
-                    }
-
-                    event.selection[0] = 0;
-
-                    d3.select(this).call(event.target.move, event.selection);
-                  }
-
-                  var d0 = event.selection.map(scaleX.invert);
-                  const s = event.selection;
-
-                  handle
-                    .attr("display", null)
-                    .attr("transform", function (d, i) {
-                      return (
-                        "translate(" + (s[i] - 2) + "," + chartHeight / 2 + ")"
-                      );
-                    });
-                  output({
-                    range: d0,
-                  });
-                }
-
-                yAxisWrapper.selectAll(".domain").remove();
-                xAxisWrapper.selectAll(".domain").attr("opacity", 0.1);
-
-                chart.selectAll(".tick line").attr("opacity", 0.1);
-
-                function isPlainObj(o) {
-                  return typeof o == "object" && o.constructor == Object;
-                }
-
-                function output(value) {
-                  const node = svg.node();
-                  node.value = value;
-                  node.value.data = getData(node.value.range);
-                  if (isDate) {
-                    node.value.range = value.range.map((d) =>
-                      dateScale.invert(d)
-                    );
-                  }
-                  node.dispatchEvent(new CustomEvent("input"));
-                }
-
-                function getData(range) {
-                  const dataBars = bars
-                    .attr("fill", "steelblue")
-                    .filter((d) => {
-                      return d.key >= range[0] && d.key <= range[1];
-                    })
-                    //  .attr("fill", "red")
-                    .nodes()
-                    .map((d) => d.__data__)
-                    .map((d) => d.values)
-                    .reduce((a, b) => a.concat(b), []);
-
-                  return dataBars;
-                }
-
-                const returnValue = Object.assign(svg.node(), {
-                  value: {
-                    range: [minX, maxX],
-                    data: initialData,
-                  },
+                output({
+                  range: [minX, maxX],
                 });
+                return;
+              }
+              if (event.sourceEvent.type === "brush") return;
 
-                if (isDate) {
-                  returnValue.value.range = returnValue.value.range.map((d) =>
-                    dateScale.invert(d)
+              var d0 = event.selection.map(scaleX.invert),
+                d1 = d0.map(d3.timeDay.round);
+
+              if (d1[0] >= d1[1]) {
+                d1[0] = d3.timeDay.floor(d0[0]);
+                d1[1] = d3.timeDay.offset(d1[0]);
+              }
+
+              brushContent = d1;
+
+              let midDate;
+
+              midDate = new Date(
+                brushContent[0].getTime() +
+                  (brushContent[1].getTime() - brushContent[0].getTime()) / 2
+              );
+
+              // TO DO
+              // COMPUTE ZOOM SCALE ACCORDING TO d1
+
+              d3.select("#xtypeSVG")
+                .transition()
+                .duration(750)
+                .call(
+                  zoom.transform,
+                  d3.zoomIdentity.translate(-x(d1[0]), -y(200))
+                );
+
+              let visibleTweets = 0;
+
+              grouped.forEach((pile) => {
+                if (
+                  pile.key >= brushContent[0] &&
+                  pile.key <= brushContent[1]
+                ) {
+                  visibleTweets =
+                    parseInt(visibleTweets) + parseInt(pile.value);
+                }
+              });
+
+              //   document.getElementById("docCountDiv").innerHTML = visibleTweets + " tweets";
+            }
+
+            function brushed(d) {
+              if (event.sourceEvent.type === "brush") return;
+
+              if (params.freezeMin) {
+                if (event.selection[0] < startSelection) {
+                  event.selection[1] = Math.min(
+                    event.selection[0],
+                    event.selection[1]
+                  );
+                }
+                if (event.selection[0] >= startSelection) {
+                  event.selection[1] = Math.max(
+                    event.selection[0],
+                    event.selection[1]
                   );
                 }
 
-                return returnValue;
-              };
+                event.selection[0] = 0;
 
-              var docCountDiv = document.createElement("div");
-              docCountDiv.id = "docCountDiv";
-              docCountDiv.style.position = "absolute";
-              docCountDiv.style.fontSize = "10px";
-              docCountDiv.style.top = document.body.offsetHeight - 15 + "px";
-              docCountDiv.style.left = parseInt(width - toolWidth) / 2 + "px";
-              docCountDiv.innerHTML = circleData.length + " tweets";
-              xtype.appendChild(docCountDiv);
+                d3.select(this).call(event.target.move, event.selection);
+              }
 
-              barRangeSlider(areaData);
+              var d0 = event.selection.map(scaleX.invert);
+              const s = event.selection;
 
-              loadType();
-
-              keywordsDisplay();
+              handle.attr("display", null).attr("transform", function (d, i) {
+                return "translate(" + (s[i] - 2) + "," + chartHeight / 2 + ")";
+              });
+              output({
+                range: d0,
+              });
             }
-          }; //======== END OF GZ WORKER ANWSER ===========
+
+            yAxisWrapper.selectAll(".domain").remove();
+            xAxisWrapper.selectAll(".domain").attr("opacity", 0.1);
+
+            chart.selectAll(".tick line").attr("opacity", 0.1);
+
+            function isPlainObj(o) {
+              return typeof o == "object" && o.constructor == Object;
+            }
+
+            function output(value) {
+              const node = svg.node();
+              node.value = value;
+              node.value.data = getData(node.value.range);
+              if (isDate) {
+                node.value.range = value.range.map((d) => dateScale.invert(d));
+              }
+              node.dispatchEvent(new CustomEvent("input"));
+            }
+
+            function getData(range) {
+              const dataBars = bars
+                .attr("fill", "steelblue")
+                .filter((d) => {
+                  return d.key >= range[0] && d.key <= range[1];
+                })
+                //  .attr("fill", "red")
+                .nodes()
+                .map((d) => d.__data__)
+                .map((d) => d.values)
+                .reduce((a, b) => a.concat(b), []);
+
+              return dataBars;
+            }
+
+            const returnValue = Object.assign(svg.node(), {
+              value: {
+                range: [minX, maxX],
+                data: initialData,
+              },
+            });
+
+            if (isDate) {
+              returnValue.value.range = returnValue.value.range.map((d) =>
+                dateScale.invert(d)
+              );
+            }
+
+            return returnValue;
+          };
+
+          var docCountDiv = document.createElement("div");
+          docCountDiv.id = "docCountDiv";
+          docCountDiv.style.position = "absolute";
+          docCountDiv.style.fontSize = "10px";
+          docCountDiv.style.top = document.body.offsetHeight - 15 + "px";
+          docCountDiv.style.left = parseInt(width - toolWidth) / 2 + "px";
+          docCountDiv.innerHTML = circleData.length + " tweets";
+          xtype.appendChild(docCountDiv);
+
+          barRangeSlider(areaData);
+
+          loadType();
+
+          keywordsDisplay();
         });
     })
     .catch((error) => {
