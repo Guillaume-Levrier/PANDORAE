@@ -11,6 +11,13 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
+        include:
+          - os: window-latest
+            ext: ".exe"
+          - os: macos-latest
+            ext: ".zip"
+          - os: ubuntu-latest
+            ext: ".AppImage"
 
     steps:
       - name: Check out Git repository
@@ -30,3 +37,11 @@ jobs:
       - name: Check dist dir
         run: |
           ls dist
+          
+      - name: Uploading release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: "./dist/PANDORAE${{ matrix.ext }}"
+          asset_name: PANDORAE${{ matrix.ext }}
+          tag: ${{ github.ref }}
