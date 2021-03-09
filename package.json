@@ -34,7 +34,7 @@
     "electron-builder": "^22.9.1",
     "electron-rebuild": "^2.3.4",
     "node-abi": "^2.19.3"
-  }
+  },
   "build":{
     "artifactName" : "PANDORAE.${ext}"
 }
