@@ -10,9 +10,8 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
         include:
-          - os: window-latest
+          - os: windows-latest
             ext: ".exe"
           - os: macos-latest
             ext: ".zip"
