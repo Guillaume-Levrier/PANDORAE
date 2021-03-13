@@ -23,6 +23,8 @@ var CM = CMT["EN"];
 
 var db = "";
 
+var ISSNarr=[]
+
 const date =
   new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
 
@@ -302,6 +304,12 @@ const powerValve = (fluxAction, item) => {
         "userNameInput"
       ).value;
       break;
+
+    case "reqISSN":
+        prepareISSN()
+        fluxArgs.reqISSN=ISSNarr
+        message = "Preparing ISSN requests";  
+    break;
 
     case "scopusConverter":
       fluxArgs.scopusConverter = { dataset: "" };
@@ -888,6 +896,34 @@ const clinicTrialBasicRetriever = () => {
     });
 };
 
+
+const prepareISSN = () => {
+
+  var cols=[];
+
+  var collecs = document.getElementsByClassName("scopColCheck");
+
+  for (let i = 0; i < collecs.length; i++) {
+    if (collecs[i].checked) {
+      cols.push(collecs[i].value);
+    }
+  }
+
+
+
+  pandodb.scopus
+    .toArray((files) => {
+      files.forEach(d=>{
+        cols.forEach(e=>{
+          if (d.id===e){
+            ISSNarr.push(e)
+          }
+        })
+      })
+    })
+
+}
+
 //========== Scopus ISSN List ==========
 
 const ScopusISSNList = () => {
@@ -896,27 +932,25 @@ const ScopusISSNList = () => {
   pandodb.scopus
     .toArray((files) => {
       // With the response
-      console.log(files);
       let collections = []; // Create empty 'collections' array
-      /*
       for (let i = 0; i < files.length; i++) {
         // Loop on the response
         let coll = {}; // Create an empty object
-        coll.key = zoteroColResponse[i].data.key; // Fill it with this collection's key
-        coll.name = zoteroColResponse[i].data.name; // Fill it with this collection's name
+        coll.key = files[i].id; // Fill it with this collection's key
+        coll.name = files[i].name; // Fill it with this collection's name
         collections.push(
           // Push a string (HTML input list) in the collections array
-          "<input class='zotColCheck' value='" +
+          "<input class='scopColCheck' value='" +
             coll.key +
             "' name='" +
             coll.name +
             "' type='checkbox'/><label> " +
             coll.key +
-            " - " +
-            coll.name +
             "</label><br> "
         );
       }
+
+      
 
       var collectionList = ""; // Create the list as a string
       for (var k = 0; k < collections.length; ++k) {
@@ -924,49 +958,47 @@ const ScopusISSNList = () => {
         collectionList = collectionList + collections[k]; // Add it to the string
       }
 
+      
+
       // Display full list in div
-      document.getElementById("userZoteroCollections").innerHTML =
+      document.getElementById("scopus-dataset-ISSN-list").innerHTML =
         "<form style='line-height:1.5'>" + collectionList + "</form>";
 
       // Show success on button
+      
       fluxButtonAction(
-        "zotcolret",
+        "scopus-ISSN-display",
         true,
-        "Zotero Collections Successfully Retrieved",
+        "Displaying available Scopus Datasets",
         "errorPhrase"
       );
 
       // Preparing and showing additional options
-      document.getElementById("zotitret").style.display = "inline-flex";
-      document.getElementById("zoteroResults").style.display = "flex";
-      document.getElementById("zoteroImportName").style.display = "inline-flex";
-      document.getElementById("zoteroImportInstruction").style.display =
-        "inline-flex";
+      
+      document.getElementById("issn-prepare").style.display = "inline-flex";
 
      
 
-      */
+      
     })
     .catch(function (err) {
-      /*
+      
       fluxButtonAction(
-        "zotcolret",
+        "scopus-dataset-ISSN-list",
         false,
-        "Zotero Collections Successfully Retrieved",
+        "Failure",
         err
       );
       ipcRenderer.send(
         "console-logs",
-        "Error in retrieving collections for Zotero id " +
-          zoteroUser +
-          " : " +
+        "Error in fetching Scopus data : " +
           err
       ); // Log error
-      */
+      
     });
 };
 
-ScopusISSNList();
+
 //========== zoteroCollectionRetriever ==========
 // Retrieve collections from a Zotero user code. To be noted that a user code can be something else than a user: it can
 // also be a group library ID, allowing for group or even public work on a same Zotero/PANDORÆ corpus.
@@ -1537,6 +1569,7 @@ const refreshWindow = () => {
 
 window.addEventListener("load", (event) => {
   var buttonMap = [
+    {id:"scopus-ISSN-display",func:"ScopusISSNList"},
     { id: "user-button", func: "basicUserData" },
     { id: "zoteroAPIValidation", func: "checkKey", arg: "zoteroAPIValidation" },
     { id: "Zotero", func: "updateUserData", arg: "Zotero" },
@@ -1596,6 +1629,11 @@ window.addEventListener("load", (event) => {
     },
     { id: "zotcolret", func: "zoteroCollectionRetriever" },
     { id: "zotitret", func: "powerValve", arg: "zoteroItemsRetriever" },
+    {
+      id: "issn-prepare",
+      func: "powerValve",
+      arg: "reqISSN",
+    }
   ];
 
   const svg = d3.select("svg");
@@ -1673,6 +1711,8 @@ window.addEventListener("load", (event) => {
       case "zoteroCollectionRetriever":
         zoteroCollectionRetriever();
         break;
+
+      case "ScopusISSNList": ScopusISSNList();
     }
   }
 
