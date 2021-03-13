@@ -1020,6 +1020,64 @@ const tweetImporter = (dataset, query, name) => {
   });
 };
 
+// ===== reqISSN
+
+const reqISSN = (user,scopid) =>{
+
+  const limiter = new bottleneck({
+    // Create a bottleneck to prevent API rate limit
+    maxConcurrent: 1, // Only one request at once
+    minTime: 500,
+  });
+
+const issnList= new Set();
+
+  pandodb.scopus.toArray((files) => {
+    files.forEach(d=>{
+      scopid.forEach(e=>{
+        if (d.id===e){
+          d.content.entries.forEach(art=>{
+            if (art.hasOwnProperty("prism:issn")){
+              issnList.add(art["prism:issn"])
+          }
+        })
+        }
+      })
+    })
+
+
+   let ISSNPromises=[]
+
+   let scopusApiKey = getPassword("Scopus", user);
+
+    // URL Building blocks
+    let rootUrl = "https://api.elsevier.com/content/serial/title/issn/";
+    let apiProm = "?apiKey=";
+    
+    function pushPromise(val){
+      ISSNPromises.push(rootUrl+val+apiProm+scopusApiKey)
+    }
+    
+    issnList.forEach(pushPromise)
+
+      let scopusISSNResponse = [];
+
+      console.log("temps estimé: "+ISSNPromises.length/2)
+
+
+      ISSNPromises.forEach((d) => {
+        limiter
+          .schedule(() => fetch(d))
+          .then((res) => res.json())
+          .then((result) => {
+            console.log(result) 
+        })
+    })
+
+
+})
+}
+
 //========== chaerosSwitch ==========
 // Switch used to choose the function to execute in CHÆROS.
 
@@ -1100,8 +1158,16 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
     case "clinTriRetriever":
       clinTriRetriever(fluxArgs.clinTriRetriever.query);
       break;
+
+      case "reqISSN":
+        reqISSN(fluxArgs.user,fluxArgs.reqISSN)
+        break;
   }
 };
+
+
+
+
 
 //module.exports = { chaerosSwitch: chaerosSwitch }; // Export the switch as a module
 
