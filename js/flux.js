@@ -307,7 +307,8 @@ const powerValve = (fluxAction, item) => {
 
     case "reqISSN":
         prepareISSN()
-        fluxArgs.reqISSN=ISSNarr
+        fluxArgs.user = document.getElementById("userNameInput").value;
+        fluxArgs.reqISSN=ISSNarr;
         message = "Preparing ISSN requests";  
     break;
 
@@ -896,6 +897,7 @@ const clinicTrialBasicRetriever = () => {
     });
 };
 
+var availScopus=[];
 
 const prepareISSN = () => {
 
@@ -909,18 +911,13 @@ const prepareISSN = () => {
     }
   }
 
-
-
-  pandodb.scopus
-    .toArray((files) => {
-      files.forEach(d=>{
+  availScopus.forEach(d=>{
         cols.forEach(e=>{
-          if (d.id===e){
+          if (d===e){
             ISSNarr.push(e)
           }
         })
       })
-    })
 
 }
 
@@ -934,6 +931,7 @@ const ScopusISSNList = () => {
       // With the response
       let collections = []; // Create empty 'collections' array
       for (let i = 0; i < files.length; i++) {
+        availScopus.push(files[i].id)
         // Loop on the response
         let coll = {}; // Create an empty object
         coll.key = files[i].id; // Fill it with this collection's key
