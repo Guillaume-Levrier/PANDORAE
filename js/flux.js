@@ -921,14 +921,54 @@ const prepareISSN = () => {
 
 }
 
-//========== Scopus ISSN List ==========
+const exportCitedBy = () => {
 
-const ScopusISSNList = () => {
+  var cols=[];
+  var citedby=[];
+
+  var collecs = document.getElementsByClassName("scopColCheck");
+
+  for (let i = 0; i < collecs.length; i++) {
+    if (collecs[i].checked) {
+      cols.push(collecs[i].value);
+    }
+  }
+  pandodb.scopus
+    .toArray((files) => {
+  files.forEach(d=>{
+        cols.forEach(e=>{
+          if (d.id===e){
+            d.content.entries.forEach(art=>{
+              citedby.push({doi:art["prism:doi"],citedby:parseInt(art["citedby-count"])})
+            })
+          }
+        })
+      })
+      var data={
+        date:date,
+        id:"scopus-citedby_"+date,
+        name:"scopus-citedby",
+        content:citedby
+      }
+      pandodb.system.add(data).then(() => {
+        ipcRenderer.send("coreSignal", "poured citedby in SYSTEM"); // Sending notification to console
+        ipcRenderer.send("console-logs", "Poured citedby in SYSTEM " + data.id); // Sending notification to console
+        setTimeout(() => {
+          closeWindow();
+        }, 500);
+    })
+})
+}
+
+//========== Scopus List ==========
+
+const ScopusList = () => {
   ipcRenderer.send("console-logs", "Listing available scopus datasets."); // Log collection request
 
   pandodb.scopus
     .toArray((files) => {
       // With the response
+      console.log(files)
       let collections = []; // Create empty 'collections' array
       for (let i = 0; i < files.length; i++) {
         availScopus.push(files[i].id)
@@ -965,7 +1005,7 @@ const ScopusISSNList = () => {
       // Show success on button
       
       fluxButtonAction(
-        "scopus-ISSN-display",
+        "scopus-list-display",
         true,
         "Displaying available Scopus Datasets",
         "errorPhrase"
@@ -974,7 +1014,7 @@ const ScopusISSNList = () => {
       // Preparing and showing additional options
       
       document.getElementById("issn-prepare").style.display = "inline-flex";
-
+      document.getElementById("export-cited-by").style.display = "inline-flex";
      
 
       
@@ -1567,7 +1607,7 @@ const refreshWindow = () => {
 
 window.addEventListener("load", (event) => {
   var buttonMap = [
-    {id:"scopus-ISSN-display",func:"ScopusISSNList"},
+    {id:"scopus-list-display",func:"ScopusList"},
     { id: "user-button", func: "basicUserData" },
     { id: "zoteroAPIValidation", func: "checkKey", arg: "zoteroAPIValidation" },
     { id: "Zotero", func: "updateUserData", arg: "Zotero" },
@@ -1631,7 +1671,11 @@ window.addEventListener("load", (event) => {
       id: "issn-prepare",
       func: "powerValve",
       arg: "reqISSN",
-    }
+    },{
+      id: "export-cited-by",
+      func: "exportCitedBy"}
+
+    
   ];
 
   const svg = d3.select("svg");
@@ -1710,7 +1754,11 @@ window.addEventListener("load", (event) => {
         zoteroCollectionRetriever();
         break;
 
-      case "ScopusISSNList": ScopusISSNList();
+      case "ScopusList": ScopusList();
+      break;
+      
+      case "exportCitedBy":exportCitedBy();
+      break;
     }
   }
 
