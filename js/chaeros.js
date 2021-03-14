@@ -1070,7 +1070,32 @@ const issnList= new Set();
           .schedule(() => fetch(d))
           .then((res) => res.json())
           .then((result) => {
-            console.log(result) 
+            scopusISSNResponse.push(result)
+
+            ipcRenderer.send("coreSignal", scopusISSNResponse.length+"/"+ISSNPromises.length+" journal profiles retrieved."); // Sending notification to console
+
+            if (scopusISSNResponse.length===ISSNPromises.length){ // if all responses have been recieved
+              var data= {
+                id:"ISSN-Retrieval_"+date,
+                date:date,
+                name:"ISSN-Retrieval"+date,
+                content:scopusISSNResponse
+              }
+
+              pandodb.open();
+              pandodb.system.add(data).then(() => {
+                ipcRenderer.send("coreSignal", "ISSN poured in SYSTEM"); // Sending notification to console
+                ipcRenderer.send("pulsar", true);
+                ipcRenderer.send("console-logs", "ISSN poured in SYSTEM"); // Sending notification to console
+                setTimeout(() => {
+                  ipcRenderer.send("win-destroy", winId);
+                }, 500);
+              });
+
+
+            }
+
+            
         })
     })
 
