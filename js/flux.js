@@ -490,7 +490,7 @@ const datasetDisplay = (divId, kind) => {
 
     pandodb[kind].toArray((files) => {
       files.forEach((file) => {
-        console.log(file);
+        
 
         let line = document.createElement("LI");
         line.id = file.id;
@@ -664,7 +664,7 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
             document.getElementById(buttonId).style.display = "unset";
             document.getElementById(buttonId).style.flex = "auto";
             document.getElementById("systemToType").value = doc.id;
-
+            
             break;
         }
       });
@@ -939,7 +939,9 @@ const exportCitedBy = () => {
         cols.forEach(e=>{
           if (d.id===e){
             d.content.entries.forEach(art=>{
-              citedby.push({doi:art["prism:doi"],citedby:parseInt(art["citedby-count"])})
+              let val = {};
+              val[art["prism:doi"]]=parseInt(art["citedby-count"]);
+              citedby.push(val)
             })
           }
         })
@@ -1605,6 +1607,32 @@ const refreshWindow = () => {
   location.reload();
 };
 
+const downloadData = () =>{
+
+var id = document.getElementById(
+  "system-dataset-preview"
+).name;
+
+pandodb.system.toArray((files)=>{
+
+
+  files.forEach(d=>{
+    if (d.id===id){
+  ipcRenderer
+  .invoke(
+    "saveDataset",
+    { defaultPath: id + ".json" },
+    JSON.stringify(d)
+  )
+  .then((res) => {});
+    }
+  })
+})
+
+}
+
+
+
 window.addEventListener("load", (event) => {
   var buttonMap = [
     {id:"scopus-list-display",func:"ScopusList"},
@@ -1673,7 +1701,10 @@ window.addEventListener("load", (event) => {
       arg: "reqISSN",
     },{
       id: "export-cited-by",
-      func: "exportCitedBy"}
+      func: "exportCitedBy"},
+      ,{
+        id: "downloadData",
+        func: "downloadData"}
 
     
   ];
@@ -1756,8 +1787,11 @@ window.addEventListener("load", (event) => {
 
       case "ScopusList": ScopusList();
       break;
-      
+
       case "exportCitedBy":exportCitedBy();
+      break;
+
+      case "downloadData":downloadData();
       break;
     }
   }
