@@ -16,6 +16,7 @@ const versor = require("versor");
 //const Quill = require("quill");
 const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
 const sankey = require("d3-sankey");
+const { min } = require("d3-array");
 //END NODE MODULES
 
 var field;
@@ -5872,7 +5873,7 @@ const fieldotype = (id) => {
   //========== SVG VIEW =============
   var svg = d3.select(xtype).append("svg").attr("id", "xtypeSVG"); // Creating the SVG DOM node
   d3.select(xtype).style("overflow", "scroll");
-  svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
+  svg.attr("width", width).attr("height", height); // Attributing width and height to svg
 
   var view = svg
     .append("g") // Appending a group to SVG
@@ -5902,10 +5903,15 @@ const fieldotype = (id) => {
 
       const keywordMap = {};
 
+      var minYear = 9999;
+      var maxYear = 0;
+
       for (const cat in data) {
         data[cat].forEach((doc) => {
           let year = doc.Issued["date-parts"][0][0];
-
+          let y = parseInt(year);
+          if (y < minYear) minYear = y;
+          if (y > maxYear) maxYear = y;
           if (doc.JournalKeywords != null) {
             doc.JournalKeywords.forEach((kw) => {
               if (keywordMap.hasOwnProperty(kw["@abbrev"])) {
@@ -5926,142 +5932,181 @@ const fieldotype = (id) => {
                 keywordMap[kw["@abbrev"]][kw["$"]][year].hasOwnProperty(cat)
               ) {
               } else {
-                keywordMap[kw["@abbrev"]][kw["$"]][year][cat] = [];
+                keywordMap[kw["@abbrev"]][kw["$"]][year][cat] = {
+                  num: 0,
+                  count: 0,
+                };
               }
 
+              keywordMap[kw["@abbrev"]][kw["$"]][year][cat].num++;
               // Adding 1 to all to prevent 0 counts from disappearing
-              keywordMap[kw["@abbrev"]][kw["$"]][year][cat].push(doc.Count + 1);
+              keywordMap[kw["@abbrev"]][kw["$"]][year][cat].count +=
+                doc.Count + 1;
             });
           }
         });
       }
 
+      var dateDomain = [Date.parse(minYear), Date.parse(maxYear)];
+
       console.log(keywordMap);
 
-      graphHeight = (width - toolWidth) / 3;
+      let dataArea = {};
 
-      const graphAmount = Object.getOwnPropertyNames(keywordMap).length;
-      const sankeys = {};
+      const fillEmpty = (cat, i, area, subj) => {
+        let itemVal = {
+          date: i,
+          key: cat + " published",
+          value: 0,
+        };
 
-      svg.attr("height", (graphHeight + 50) * graphAmount);
+        let itemCount = {
+          date: i,
+          key: cat + " cited",
+          value: 0,
+        };
+
+        dataArea[area + "-" + subj].push(itemVal);
+        dataArea[area + "-" + subj].push(itemCount);
+      };
 
       for (const area in keywordMap) {
-        sankeys[area] = {};
-        var nodes = [];
-        var links = [];
         for (const subj in keywordMap[area]) {
-          let yearMark = true;
-          let prevYear = 0;
-          for (const year in keywordMap[area][subj]) {
-            let y = parseInt(year);
+          dataArea[area + "-" + subj] = [];
+          //for (const year in keywordMap[area][subj]) {
+          for (let i = minYear; i <= maxYear; i++) {
+            if (keywordMap[area][subj].hasOwnProperty(i)) {
+              for (const cat in data) {
+                if (keywordMap[area][subj][i].hasOwnProperty(cat)) {
+                  let itemVal = {
+                    date: i,
+                    key: cat + " published",
+                    value: keywordMap[area][subj][i][cat].num,
+                  };
 
-            if (yearMark) {
-              prevYear = y - 1;
-              let basenode = {
-                id: subj + prevYear,
-                area: area,
-                subj: subj,
-                year: y - 1,
-              };
-              nodes.push(basenode);
+                  let itemCount = {
+                    date: i,
+                    key: cat + " cited",
+                    value: keywordMap[area][subj][i][cat].count,
+                  };
 
-              yearMark = false;
+                  dataArea[area + "-" + subj].push(itemVal);
+                  dataArea[area + "-" + subj].push(itemCount);
+                } else {
+                  fillEmpty(cat, i, area, subj);
+                }
+              }
+            } else {
+              for (const cat in data) {
+                fillEmpty(cat, i, area, subj);
+              }
             }
-
-            let node = {
-              id: subj + year,
-              area: area,
-              subj: subj,
-              year: y,
-            };
-            nodes.push(node);
-
-            for (const cat in keywordMap[area][subj][year]) {
-              let link = {
-                source: subj + prevYear,
-                target: subj + year,
-                cat: cat,
-                area: area,
-                value: keywordMap[area][subj][year][cat].length,
-                nominal: true,
-              };
-
-              let linkCount = {
-                source: subj + prevYear,
-                target: subj + year,
-                cat: cat,
-                area: area,
-                value: 0,
-                nominal: false,
-              };
-
-              //compute node value so that one can compare with length too.
-              keywordMap[area][subj][year][cat].forEach((d) => {
-                linkCount.value += d;
-              });
-              links.push(linkCount);
-
-              links.push(link);
-            }
-            prevYear = year;
           }
         }
-
-        sankey
-          .sankey()
-          .nodeId((d) => d.id)
-          .nodeAlign(sankey.sankeyCenter)
-          .nodeSort(null)
-          .nodeWidth(5)
-          .nodePadding(5)
-          .extent([
-            [0, 5],
-            [width - toolWidth, graphHeight - 5],
-          ])({
-          nodes,
-          links,
-        });
-        sankeys[area].nodes = nodes;
-        sankeys[area].links = links;
       }
 
-      console.log(sankeys);
+      console.log(dataArea);
 
-      var skount = 0;
+      const graphAmount = Object.getOwnPropertyNames(dataArea).length;
+      const graphHeight = 200;
+      svg.attr("height", (graphHeight + 100) * graphAmount + 200);
 
-      for (const sk in sankeys) {
-        var nodes = sankeys[sk].nodes;
-        var links = sankeys[sk].links;
+      var graphWidth = 400;
 
-        var skg = view.append("g").attr("id", sk);
+      var x = d3.scaleUtc().domain(dateDomain).range([0, graphWidth]);
 
-        skg
-          .append("text")
-          .attr("x", 10)
-          .attr("y", skount * (graphHeight + 50) - 10)
-          .text(sk);
+      var area = d3
+        .area()
+        .x((d) => x(d.data[0]))
+        .y0((d) => y(d[0]))
+        .y1((d) => y(d[1]));
 
-        skg
+      var order = d3.stackOrderNone;
+
+      var graphCount = 0;
+
+      for (const field in dataArea) {
+        var keys = Array.from(d3.group(dataArea[field], (d) => d.key).keys());
+
+        var values = Array.from(
+          d3.rollup(
+            dataArea[field],
+            ([d]) => d.value,
+            (d) => Date.parse(d.date),
+            (d) => d.key
+          )
+        );
+
+        var series = d3
+          .stack()
+          .keys(keys)
+          .value(([, values], key) => values.get(key))
+          .order(order)(values);
+
+        if (graphCount === 0) {
+          console.log(series);
+        }
+
+        var topScale = d3.max(series, (d) => d3.max(d, (d) => d[1]));
+
+        yMax = 0;
+        if (topScale > 20000) {
+          yMax = 40000;
+        } else if (topScale > 5000) {
+          yMax = 20000;
+        } else if (topScale > 1000) {
+          yMax = 5000;
+        } else {
+          yMax = 1000;
+        }
+
+        var y = d3
+          .scaleLinear()
+          .domain([0, yMax])
+          .nice()
+          .range([graphHeight, 0]);
+
+        var xAxis = (g) =>
+          g.attr("transform", `translate(0,${graphHeight})`).call(
+            d3
+              .axisBottom(x)
+              .ticks(width / 80)
+              .tickSizeOuter(0)
+          );
+
+        var yAxis = (g) =>
+          g
+            // .attr("transform", `translate(${width - 50},0)`)
+            .call(d3.axisRight(y).tickSize(graphWidth + 20))
+            .call((g) => g.select(".domain").remove())
+            .call((g) =>
+              g
+                .selectAll(".tick:not(:first-of-type) line")
+                .attr("stroke-opacity", 0.5)
+                .attr("stroke-dasharray", "2,2")
+            )
+            .call((g) =>
+              g
+                .select(".tick:last-of-type text")
+                .clone()
+                .attr("x", 3)
+                .attr("text-anchor", "start")
+                .attr("font-weight", "bold")
+                .text(data.y)
+            );
+
+        var graph = view.append("g").attr("id", field);
+
+        graph.append("text").attr("x", 10).attr("y", -20).text(field);
+
+        graph
           .append("g")
-          .attr("id", "nodeRects")
-          .selectAll("rect")
-          .data(nodes)
-          .join("rect")
-          .attr("x", (d) => d.x0 + 1)
-          .attr("y", (d) => d.y0)
-          .attr("width", (d) => d.x1 - d.x0 - 2)
-          .attr("height", (d) => d.y1 - d.y0)
-          .attr("fill", "gray");
-
-        var nodeLinks = skg
-          .append("g")
-          .attr("id", "nodeLinks")
-          .attr("fill", "none")
-          .selectAll("g")
-          .data(links.sort((a, b) => b.width - a.width))
-          .join("g")
-          .attr("stroke", (d) => {
-            switch (d.cat) {
+          .selectAll("path")
+          .data(series)
+          .join("path")
+          //.attr("fill", ({ key }) => color(key))
+          .attr("fill", ({ key }) => {
+            switch (key.substring(0, 2)) {
               case "EU":
                 return "#00379d";
                 break;
@@ -6079,24 +6124,29 @@ const fieldotype = (id) => {
                 break;
             }
           })
-          .attr("opacity", (d) => (d.nominal ? 1 : 0.5));
-        //.style("mix-blend-mode", "multiply");
+          .attr("opacity", ({ key }) =>
+            key.substring(3, 8) === "cited" ? 0.5 : 1
+          )
+          .attr("d", area)
+          .append("title")
+          .text(({ key }) => key);
 
-        nodeLinks
-          .append("path")
-          .attr("d", sankey.sankeyLinkHorizontal())
-          .attr("stroke-width", (d) => Math.max(1, d.width));
+        graph.append("g").call(xAxis);
 
-        skg.attr(
+        graph.append("g").call(yAxis);
+
+        graph.attr(
           "transform",
-          "translate(0," + skount * (graphHeight + 50) + ")"
+          "translate(0," + graphCount * (graphHeight + 100) + ")"
         );
-        skount++;
+
+        graphCount++;
       }
 
-      view.attr("transform", "translate(0," + 50 + ")");
+      view.attr("transform", "translate(100,100)");
 
       loadType();
+      document.getElementById("tooltip").style.display = "none";
     })
     .catch((error) => {
       console.log(error);
