@@ -23,7 +23,7 @@ var CM = CMT["EN"];
 
 var db = "";
 
-var ISSNarr=[]
+var ISSNarr = [];
 
 const date =
   new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
@@ -306,11 +306,11 @@ const powerValve = (fluxAction, item) => {
       break;
 
     case "reqISSN":
-        prepareISSN()
-        fluxArgs.user = document.getElementById("userNameInput").value;
-        fluxArgs.reqISSN=ISSNarr;
-        message = "Preparing ISSN requests";  
-    break;
+      prepareISSN();
+      fluxArgs.user = document.getElementById("userNameInput").value;
+      fluxArgs.reqISSN = ISSNarr;
+      message = "Preparing ISSN requests";
+      break;
 
     case "scopusConverter":
       fluxArgs.scopusConverter = { dataset: "" };
@@ -490,8 +490,6 @@ const datasetDisplay = (divId, kind) => {
 
     pandodb[kind].toArray((files) => {
       files.forEach((file) => {
-        
-
         let line = document.createElement("LI");
         line.id = file.id;
 
@@ -664,7 +662,7 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
             document.getElementById(buttonId).style.display = "unset";
             document.getElementById(buttonId).style.flex = "auto";
             document.getElementById("systemToType").value = doc.id;
-            
+
             break;
         }
       });
@@ -897,11 +895,10 @@ const clinicTrialBasicRetriever = () => {
     });
 };
 
-var availScopus=[];
+var availScopus = [];
 
 const prepareISSN = () => {
-
-  var cols=[];
+  var cols = [];
 
   var collecs = document.getElementsByClassName("scopColCheck");
 
@@ -911,20 +908,18 @@ const prepareISSN = () => {
     }
   }
 
-  availScopus.forEach(d=>{
-        cols.forEach(e=>{
-          if (d===e){
-            ISSNarr.push(e)
-          }
-        })
-      })
-
-}
+  availScopus.forEach((d) => {
+    cols.forEach((e) => {
+      if (d === e) {
+        ISSNarr.push(e);
+      }
+    });
+  });
+};
 
 const exportCitedBy = () => {
-
-  var cols=[];
-  var citedby=[];
+  var cols = [];
+  var citedby = [];
 
   var collecs = document.getElementsByClassName("scopColCheck");
 
@@ -933,34 +928,33 @@ const exportCitedBy = () => {
       cols.push(collecs[i].value);
     }
   }
-  pandodb.scopus
-    .toArray((files) => {
-  files.forEach(d=>{
-        cols.forEach(e=>{
-          if (d.id===e){
-            d.content.entries.forEach(art=>{
-              let val = {};
-              val[art["prism:doi"]]=parseInt(art["citedby-count"]);
-              citedby.push(val)
-            })
-          }
-        })
-      })
-      var data={
-        date:date,
-        id:"scopus-citedby_"+date,
-        name:"scopus-citedby",
-        content:citedby
-      }
-      pandodb.system.add(data).then(() => {
-        ipcRenderer.send("coreSignal", "poured citedby in SYSTEM"); // Sending notification to console
-        ipcRenderer.send("console-logs", "Poured citedby in SYSTEM " + data.id); // Sending notification to console
-        setTimeout(() => {
-          closeWindow();
-        }, 500);
-    })
-})
-}
+  pandodb.scopus.toArray((files) => {
+    files.forEach((d) => {
+      cols.forEach((e) => {
+        if (d.id === e) {
+          d.content.entries.forEach((art) => {
+            let val = {};
+            val[art["prism:doi"]] = parseInt(art["citedby-count"]);
+            citedby.push(val);
+          });
+        }
+      });
+    });
+    var data = {
+      date: date,
+      id: "scopus-citedby_" + date,
+      name: "scopus-citedby",
+      content: citedby,
+    };
+    pandodb.system.add(data).then(() => {
+      ipcRenderer.send("coreSignal", "poured citedby in SYSTEM"); // Sending notification to console
+      ipcRenderer.send("console-logs", "Poured citedby in SYSTEM " + data.id); // Sending notification to console
+      setTimeout(() => {
+        closeWindow();
+      }, 500);
+    });
+  });
+};
 
 //========== Scopus List ==========
 
@@ -970,10 +964,10 @@ const ScopusList = () => {
   pandodb.scopus
     .toArray((files) => {
       // With the response
-      console.log(files)
+      console.log(files);
       let collections = []; // Create empty 'collections' array
       for (let i = 0; i < files.length; i++) {
-        availScopus.push(files[i].id)
+        availScopus.push(files[i].id);
         // Loop on the response
         let coll = {}; // Create an empty object
         coll.key = files[i].id; // Fill it with this collection's key
@@ -990,22 +984,18 @@ const ScopusList = () => {
         );
       }
 
-      
-
       var collectionList = ""; // Create the list as a string
       for (var k = 0; k < collections.length; ++k) {
         // For each element of the array
         collectionList = collectionList + collections[k]; // Add it to the string
       }
 
-      
-
       // Display full list in div
       document.getElementById("scopus-dataset-ISSN-list").innerHTML =
         "<form style='line-height:1.5'>" + collectionList + "</form>";
 
       // Show success on button
-      
+
       fluxButtonAction(
         "scopus-list-display",
         true,
@@ -1014,30 +1004,18 @@ const ScopusList = () => {
       );
 
       // Preparing and showing additional options
-      
+
       document.getElementById("issn-prepare").style.display = "inline-flex";
       document.getElementById("export-cited-by").style.display = "inline-flex";
-     
-
-      
     })
     .catch(function (err) {
-      
-      fluxButtonAction(
-        "scopus-dataset-ISSN-list",
-        false,
-        "Failure",
-        err
-      );
+      fluxButtonAction("scopus-dataset-ISSN-list", false, "Failure", err);
       ipcRenderer.send(
         "console-logs",
-        "Error in fetching Scopus data : " +
-          err
+        "Error in fetching Scopus data : " + err
       ); // Log error
-      
     });
 };
-
 
 //========== zoteroCollectionRetriever ==========
 // Retrieve collections from a Zotero user code. To be noted that a user code can be something else than a user: it can
@@ -1579,20 +1557,36 @@ const twitterThread = () => {
 const localUpload = () => {
   ipcRenderer.send("coreSignal", "importing local dataset"); // Sending notification to console
   ipcRenderer.send("pulsar", false);
+
   var datasetPath = document.getElementById("localUploadPath").files[0].path;
 
   fs.readFile(datasetPath, "utf8", (err, data) => {
     var data = JSON.parse(data);
 
-    pandodb.open();
-    pandodb.system.add(data).then(() => {
-      ipcRenderer.send("coreSignal", "imported local dataset"); // Sending notification to console
-      ipcRenderer.send("pulsar", true);
-      ipcRenderer.send("console-logs", "Imported local dataset " + data.id); // Sending notification to console
-      setTimeout(() => {
-        closeWindow();
-      }, 500);
+    var capList = ["Content", "Id", "Date", "Name"];
+
+    capList.forEach((d) => {
+      if (data.hasOwnProperty(d)) {
+        let prop = d.toLocaleLowerCase();
+        data[prop] = data[d];
+        delete data[d];
+      }
     });
+
+    pandodb.open();
+    pandodb.system
+      .add(data)
+      .then(() => {
+        ipcRenderer.send("coreSignal", "imported local dataset"); // Sending notification to console
+        ipcRenderer.send("pulsar", true);
+        ipcRenderer.send("console-logs", "Imported local dataset " + data.id); // Sending notification to console
+        setTimeout(() => {
+          closeWindow();
+        }, 500);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   });
 };
 
@@ -1607,35 +1601,27 @@ const refreshWindow = () => {
   location.reload();
 };
 
-const downloadData = () =>{
+const downloadData = () => {
+  var id = document.getElementById("system-dataset-preview").name;
 
-var id = document.getElementById(
-  "system-dataset-preview"
-).name;
-
-pandodb.system.toArray((files)=>{
-
-
-  files.forEach(d=>{
-    if (d.id===id){
-  ipcRenderer
-  .invoke(
-    "saveDataset",
-    { defaultPath: id + ".json" },
-    JSON.stringify(d)
-  )
-  .then((res) => {});
-    }
-  })
-})
-
-}
-
-
+  pandodb.system.toArray((files) => {
+    files.forEach((d) => {
+      if (d.id === id) {
+        ipcRenderer
+          .invoke(
+            "saveDataset",
+            { defaultPath: id + ".json" },
+            JSON.stringify(d)
+          )
+          .then((res) => {});
+      }
+    });
+  });
+};
 
 window.addEventListener("load", (event) => {
   var buttonMap = [
-    {id:"scopus-list-display",func:"ScopusList"},
+    { id: "scopus-list-display", func: "ScopusList" },
     { id: "user-button", func: "basicUserData" },
     { id: "zoteroAPIValidation", func: "checkKey", arg: "zoteroAPIValidation" },
     { id: "Zotero", func: "updateUserData", arg: "Zotero" },
@@ -1699,14 +1685,16 @@ window.addEventListener("load", (event) => {
       id: "issn-prepare",
       func: "powerValve",
       arg: "reqISSN",
-    },{
+    },
+    {
       id: "export-cited-by",
-      func: "exportCitedBy"},
-      ,{
-        id: "downloadData",
-        func: "downloadData"}
-
-    
+      func: "exportCitedBy",
+    },
+    ,
+    {
+      id: "downloadData",
+      func: "downloadData",
+    },
   ];
 
   const svg = d3.select("svg");
@@ -1785,14 +1773,17 @@ window.addEventListener("load", (event) => {
         zoteroCollectionRetriever();
         break;
 
-      case "ScopusList": ScopusList();
-      break;
+      case "ScopusList":
+        ScopusList();
+        break;
 
-      case "exportCitedBy":exportCitedBy();
-      break;
+      case "exportCitedBy":
+        exportCitedBy();
+        break;
 
-      case "downloadData":downloadData();
-      break;
+      case "downloadData":
+        downloadData();
+        break;
     }
   }
 

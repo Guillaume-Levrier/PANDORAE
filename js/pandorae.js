@@ -808,6 +808,7 @@ const exportToHTML = () => {
                         "doxatype",
                         "filotype",
                         "pharmacotype",
+                        "fieldotype",
                       ];
 
                       blocks.forEach((block) => {
@@ -1145,6 +1146,7 @@ const categoryLoader = (cat) => {
           "doxatype",
           "filotype",
           "pharmacotype",
+          "fieldotype",
         ];
         let loadingCount = 0;
         ipcRenderer.send("console-logs", "Displaying available types");
