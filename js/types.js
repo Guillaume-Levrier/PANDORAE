@@ -5868,6 +5868,12 @@ const pharmacotype = (id) => {
   ipcRenderer.send("console-logs", "Starting Pharmacotype");
 };
 
+const fieldotype = (id) => {
+  pandodb.fieldotype.get(id).then((datajson) => {
+    console.log(datajson);
+  });
+};
+
 //========== typesSwitch ==========
 // Switch used to which type to draw/generate
 
@@ -5875,6 +5881,10 @@ const typeSwitch = (type, id) => {
   document.getElementById("field").value = "loading " + type;
 
   switch (type) {
+    case "fieldotype":
+      fieldotype(id);
+      break;
+
     case "pharmacotype":
       pharmacotype(id);
       break;
