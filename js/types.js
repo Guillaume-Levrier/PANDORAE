@@ -15,7 +15,7 @@ const csv = require("csv-parser");
 const versor = require("versor");
 //const Quill = require("quill");
 const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
-
+const sankey = require("d3-sankey");
 //END NODE MODULES
 
 var field;
@@ -5869,9 +5869,250 @@ const pharmacotype = (id) => {
 };
 
 const fieldotype = (id) => {
-  pandodb.fieldotype.get(id).then((datajson) => {
-    console.log(datajson);
-  });
+  //========== SVG VIEW =============
+  var svg = d3.select(xtype).append("svg").attr("id", "xtypeSVG"); // Creating the SVG DOM node
+  d3.select(xtype).style("overflow", "scroll");
+  svg.attr("width", width - toolWidth).attr("height", height); // Attributing width and height to svg
+
+  var view = svg
+    .append("g") // Appending a group to SVG
+    .attr("id", "view"); // CSS viewfinder properties
+
+  //zoom extent
+  zoom
+    .scaleExtent([0.2, 15]) // To which extent do we allow to zoom forward or zoom back
+    .translateExtent([
+      [-Infinity, -Infinity],
+      [Infinity, Infinity],
+    ])
+    .on("zoom", ({ transform }, d) => {
+      zoomed(transform);
+    });
+
+  let palette = ["#820206", "#3c5e00", "#00379d"];
+
+  var color = d3.scaleOrdinal(palette);
+
+  pandodb.fieldotype
+    .get(id)
+    .then((datajson) => {
+      dataDownload(datajson);
+
+      const data = datajson.content;
+
+      const keywordMap = {};
+
+      for (const cat in data) {
+        data[cat].forEach((doc) => {
+          let year = doc.Issued["date-parts"][0][0];
+
+          if (doc.JournalKeywords != null) {
+            doc.JournalKeywords.forEach((kw) => {
+              if (keywordMap.hasOwnProperty(kw["@abbrev"])) {
+                if (keywordMap[kw["@abbrev"]].hasOwnProperty(kw["$"])) {
+                } else {
+                  keywordMap[kw["@abbrev"]][kw["$"]] = {};
+                }
+              } else {
+                keywordMap[kw["@abbrev"]] = {};
+                keywordMap[kw["@abbrev"]][kw["$"]] = {};
+              }
+              if (keywordMap[kw["@abbrev"]][kw["$"]][year]) {
+              } else {
+                keywordMap[kw["@abbrev"]][kw["$"]][year] = {};
+              }
+
+              if (
+                keywordMap[kw["@abbrev"]][kw["$"]][year].hasOwnProperty(cat)
+              ) {
+              } else {
+                keywordMap[kw["@abbrev"]][kw["$"]][year][cat] = [];
+              }
+
+              // Adding 1 to all to prevent 0 counts from disappearing
+              keywordMap[kw["@abbrev"]][kw["$"]][year][cat].push(doc.Count + 1);
+            });
+          }
+        });
+      }
+
+      console.log(keywordMap);
+
+      graphHeight = (width - toolWidth) / 3;
+
+      const graphAmount = Object.getOwnPropertyNames(keywordMap).length;
+      const sankeys = {};
+
+      svg.attr("height", (graphHeight + 50) * graphAmount);
+
+      for (const area in keywordMap) {
+        sankeys[area] = {};
+        var nodes = [];
+        var links = [];
+        for (const subj in keywordMap[area]) {
+          let yearMark = true;
+          let prevYear = 0;
+          for (const year in keywordMap[area][subj]) {
+            let y = parseInt(year);
+
+            if (yearMark) {
+              prevYear = y - 1;
+              let basenode = {
+                id: subj + prevYear,
+                area: area,
+                subj: subj,
+                year: y - 1,
+              };
+              nodes.push(basenode);
+
+              yearMark = false;
+            }
+
+            let node = {
+              id: subj + year,
+              area: area,
+              subj: subj,
+              year: y,
+            };
+            nodes.push(node);
+
+            for (const cat in keywordMap[area][subj][year]) {
+              let link = {
+                source: subj + prevYear,
+                target: subj + year,
+                cat: cat,
+                area: area,
+                value: keywordMap[area][subj][year][cat].length,
+                nominal: true,
+              };
+
+              let linkCount = {
+                source: subj + prevYear,
+                target: subj + year,
+                cat: cat,
+                area: area,
+                value: 0,
+                nominal: false,
+              };
+
+              //compute node value so that one can compare with length too.
+              keywordMap[area][subj][year][cat].forEach((d) => {
+                linkCount.value += d;
+              });
+              links.push(linkCount);
+
+              links.push(link);
+            }
+            prevYear = year;
+          }
+        }
+
+        sankey
+          .sankey()
+          .nodeId((d) => d.id)
+          .nodeAlign(sankey.sankeyCenter)
+          .nodeSort(null)
+          .nodeWidth(5)
+          .nodePadding(5)
+          .extent([
+            [0, 5],
+            [width - toolWidth, graphHeight - 5],
+          ])({
+          nodes,
+          links,
+        });
+        sankeys[area].nodes = nodes;
+        sankeys[area].links = links;
+      }
+
+      console.log(sankeys);
+
+      var skount = 0;
+
+      for (const sk in sankeys) {
+        var nodes = sankeys[sk].nodes;
+        var links = sankeys[sk].links;
+
+        var skg = view.append("g").attr("id", sk);
+
+        skg
+          .append("text")
+          .attr("x", 10)
+          .attr("y", skount * (graphHeight + 50) - 10)
+          .text(sk);
+
+        skg
+          .append("g")
+          .attr("id", "nodeRects")
+          .selectAll("rect")
+          .data(nodes)
+          .join("rect")
+          .attr("x", (d) => d.x0 + 1)
+          .attr("y", (d) => d.y0)
+          .attr("width", (d) => d.x1 - d.x0 - 2)
+          .attr("height", (d) => d.y1 - d.y0)
+          .attr("fill", "gray");
+
+        var nodeLinks = skg
+          .append("g")
+          .attr("id", "nodeLinks")
+          .attr("fill", "none")
+          .selectAll("g")
+          .data(links.sort((a, b) => b.width - a.width))
+          .join("g")
+          .attr("stroke", (d) => {
+            switch (d.cat) {
+              case "EU":
+                return "#00379d";
+                break;
+
+              case "US":
+                return "#3c5e00";
+                break;
+
+              case "CN":
+                return "#820206";
+                break;
+
+              default:
+                return color(d.cat);
+                break;
+            }
+          })
+          .attr("opacity", (d) => (d.nominal ? 1 : 0.5));
+        //.style("mix-blend-mode", "multiply");
+
+        nodeLinks
+          .append("path")
+          .attr("d", sankey.sankeyLinkHorizontal())
+          .attr("stroke-width", (d) => Math.max(1, d.width));
+
+        skg.attr(
+          "transform",
+          "translate(0," + skount * (graphHeight + 50) + ")"
+        );
+        skount++;
+      }
+
+      view.attr("transform", "translate(0," + 50 + ")");
+
+      loadType();
+    })
+    .catch((error) => {
+      console.log(error);
+      field.value = "error - invalid dataset";
+      ipcRenderer.send(
+        "console-logs",
+        "Fieldotype error: dataset " + id + " is invalid."
+      );
+    });
+
+  zoomed = (thatZoom, transTime) => {
+    console.log("zooming");
+    view.attr("transform", thatZoom);
+  };
+
+  ipcRenderer.send("console-logs", "Starting fieldotype");
 };
 
 //========== typesSwitch ==========
