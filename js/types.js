@@ -6097,7 +6097,14 @@ const fieldotype = (id) => {
 
         var graph = view.append("g").attr("id", field);
 
-        graph.append("text").attr("x", 10).attr("y", -20).text(field);
+        graph
+          .append("text")
+          .attr("x", 0)
+          .attr("y", -14)
+          .style("font-family", "sans-serif")
+          .style("font-size", "12px")
+          .style("font-weight", "bold")
+          .text(field.toLocaleUpperCase());
 
         graph
           .append("g")
