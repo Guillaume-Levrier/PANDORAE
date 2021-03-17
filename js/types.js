@@ -3343,8 +3343,6 @@ const geotype = (id) => {
         datajson.content[i].items.forEach((d) => data.push(d));
       }
 
-      console.log(data);
-
       var collabDir = {};
       // Affiliation collaboration compute
       data.forEach((art) => {
