@@ -18,7 +18,6 @@
     "bottleneck": "^2.19.5",
     "csv-parser": "^2.3.5",
     "d3": "^6.5.0",
-    "d3-sankey": "^0.12.3",
     "dexie": "^3.0.3",
     "keytar": "^6.0.1",
     "merge-files": "^0.1.2",
