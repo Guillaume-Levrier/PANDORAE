@@ -378,7 +378,10 @@ const powerValve = (fluxAction, item) => {
           "Please select a destination"
         );
       } else {
-        fluxArgs.zoteroItemsRetriever = { collections: [], destination: [] };
+        fluxArgs.zoteroItemsRetriever = {
+          collections: [],
+          destination: [],
+        };
         var collecs = document.getElementsByClassName("zotColCheck");
         for (let i = 0; i < collecs.length; i++) {
           if (collecs[i].checked) {
@@ -956,6 +959,90 @@ const exportCitedBy = () => {
   });
 };
 
+const affilRank = () => {
+  var cols = [];
+  var affils = {};
+
+  var collecs = document.getElementsByClassName("scopColCheck");
+
+  for (let i = 0; i < collecs.length; i++) {
+    if (collecs[i].checked) {
+      cols.push(collecs[i].value);
+    }
+  }
+  pandodb.scopus.toArray((files) => {
+    files.forEach((d) => {
+      cols.forEach((e) => {
+        if (d.id === e) {
+          d.content.entries.forEach((art) => {
+            if (art.hasOwnProperty("affiliation")) {
+              if (art.affiliation.length > 0) {
+                art.affiliation.forEach((aff) => {
+                  let affName = aff.affilname;
+                  console.log(aff);
+                  if (affils.hasOwnProperty(affName)) {
+                  } else {
+                    let area = "";
+
+                    switch (aff["affiliation-country"]) {
+                      case "China":
+                        area = "CN";
+                        break;
+
+                      case "United States":
+                        area = "US";
+                        break;
+
+                      default:
+                        if (
+                          "Austria Italy Belgium Latvia Bulgaria Lithuania Croatia Luxembourg Cyprus Malta Czech Republic Netherlands Denmark Poland Estonia Portugal Finland Romania France Slovakia Germany Slovenia Greece Spain Hungary Sweden Ireland United Kingdom".includes(
+                            aff["affiliation-country"]
+                          )
+                        ) {
+                          area = "EU";
+                        } else {
+                          area = "Other";
+                        }
+                        break;
+                    }
+
+                    affils[affName] = {
+                      name: affName,
+                      numCount: 0,
+                      citedBy: 0,
+                      city: aff["affiliation-city"],
+                      area: area,
+                    };
+                  }
+
+                  affils[affName].numCount++;
+                  console.log(affils[affName].citedBy);
+                  affils[affName].citedBy += parseInt(art["citedby-count"]);
+                  console.log(affils[affName].citedBy);
+                });
+              }
+            }
+          });
+        }
+      });
+    });
+    var data = {
+      date: date,
+      id: "scopus-affilRank_" + date,
+      name: "scopus-affilRank",
+      content: affils,
+    };
+
+    pandodb.system.add(data).then(() => {
+      ipcRenderer.send("coreSignal", "poured citedby in SYSTEM"); // Sending notification to console
+      ipcRenderer.send("console-logs", "Poured citedby in SYSTEM " + data.id); // Sending notification to console
+      setTimeout(() => {
+        closeWindow();
+      }, 500);
+    });
+  });
+};
+
 //========== Scopus List ==========
 
 const ScopusList = () => {
@@ -964,7 +1051,6 @@ const ScopusList = () => {
   pandodb.scopus
     .toArray((files) => {
       // With the response
-      console.log(files);
       let collections = []; // Create empty 'collections' array
       for (let i = 0; i < files.length; i++) {
         availScopus.push(files[i].id);
@@ -1007,6 +1093,8 @@ const ScopusList = () => {
 
       document.getElementById("issn-prepare").style.display = "inline-flex";
       document.getElementById("export-cited-by").style.display = "inline-flex";
+      document.getElementById("export-affil-rank").style.display =
+        "inline-flex";
     })
     .catch(function (err) {
       fluxButtonAction("scopus-dataset-ISSN-list", false, "Failure", err);
@@ -1623,7 +1711,11 @@ window.addEventListener("load", (event) => {
   var buttonMap = [
     { id: "scopus-list-display", func: "ScopusList" },
     { id: "user-button", func: "basicUserData" },
-    { id: "zoteroAPIValidation", func: "checkKey", arg: "zoteroAPIValidation" },
+    {
+      id: "zoteroAPIValidation",
+      func: "checkKey",
+      arg: "zoteroAPIValidation",
+    },
     { id: "Zotero", func: "updateUserData", arg: "Zotero" },
     { id: "scopusValidation", func: "checkKey", arg: "scopusValidation" },
     { id: "Scopus", func: "updateUserData", arg: "Scopus" },
@@ -1644,7 +1736,10 @@ window.addEventListener("load", (event) => {
     },
     { id: "load-local", func: "localUpload" },
     { id: "systitret", func: "powerValve", arg: "sysExport" },
-    { id: "clinical_trials-basic-query", func: "clinicTrialBasicRetriever" },
+    {
+      id: "clinical_trials-basic-query",
+      func: "clinicTrialBasicRetriever",
+    },
     {
       id: "clinical_trials-query",
       func: "powerValve",
@@ -1690,7 +1785,11 @@ window.addEventListener("load", (event) => {
       id: "export-cited-by",
       func: "exportCitedBy",
     },
-    ,
+    {
+      id: "export-affil-rank",
+      func: "affilRank",
+    },
+
     {
       id: "downloadData",
       func: "downloadData",
@@ -1779,6 +1878,10 @@ window.addEventListener("load", (event) => {
 
       case "exportCitedBy":
         exportCitedBy();
+        break;
+
+      case "affilRank":
+        affilRank();
         break;
 
       case "downloadData":
