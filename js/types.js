@@ -3343,6 +3343,48 @@ const geotype = (id) => {
         datajson.content[i].items.forEach((d) => data.push(d));
       }
 
+      console.log(data);
+
+      var collabDir = {};
+      // Affiliation collaboration compute
+      data.forEach((art) => {
+        if (art.hasOwnProperty("enrichment")) {
+          d = art.enrichment;
+          if (d.hasOwnProperty("affiliations")) {
+            if (d.affiliations.length > 1) {
+              d.affiliations.forEach((aff) => {
+                affname = aff.affilname;
+                if (collabDir.hasOwnProperty(aff)) {
+                } else {
+                  collabDir[affname] = {
+                    name: affname,
+                    city: aff["affiliation-city"],
+                    country: aff["affiliation-country"],
+                    collab: {},
+                  };
+                }
+                d.affiliations.forEach((oaff) => {
+                  oaffname = oaff.affilname;
+                  if (oaffname === affname) {
+                  } else {
+                    if (collabDir[affname].hasOwnProperty(oaffname)) {
+                    } else {
+                      collabDir[affname]["collab"][oaffname] = 0;
+                    }
+                    collabDir[affname]["collab"][oaffname]++;
+                  }
+                });
+              });
+            }
+          }
+        }
+      });
+
+      //console.log(collabDir);
+
+      //dataDownload(collabDir);
+      // end of Affiliation collaboration compute
+
       Promise.all([d3.json("json/world-countries.json")]).then((geo) => {
         var geoData = geo[0];
 
@@ -4258,6 +4300,7 @@ const geotype = (id) => {
       }); // end of world-country call
     })
     .catch((error) => {
+      console.log(error);
       field.value = "error - invalid dataset";
       ipcRenderer.send(
         "console-logs",
