@@ -15,7 +15,6 @@ const csv = require("csv-parser");
 const versor = require("versor");
 //const Quill = require("quill");
 const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
-const sankey = require("d3-sankey");
 const { min } = require("d3-array");
 //END NODE MODULES
 
@@ -5901,18 +5900,41 @@ const fieldotype = (id) => {
 
       const data = datajson.content;
 
-      const keywordMap = {};
+      console.log(data);
 
+      const keywordMap = {};
       var minYear = 9999;
       var maxYear = 0;
 
+      var keyCountMap = { 0: 0 };
+      var areaKeyCountMap = { EU: { 0: 0 }, CN: { 0: 0 }, US: { 0: 0 } };
+
       for (const cat in data) {
+        console.log(cat);
         data[cat].forEach((doc) => {
           let year = doc.Issued["date-parts"][0][0];
           let y = parseInt(year);
           if (y < minYear) minYear = y;
           if (y > maxYear) maxYear = y;
-          if (doc.JournalKeywords != null) {
+
+          if (doc.JournalKeywords === null) {
+            keyCountMap[0]++;
+            areaKeyCountMap[cat][0]++;
+          } else {
+            let jnum = JSON.stringify(doc.JournalKeywords.length);
+
+            if (keyCountMap.hasOwnProperty(jnum)) {
+              keyCountMap[jnum]++;
+            } else {
+              keyCountMap[jnum] = 1;
+            }
+
+            if (areaKeyCountMap[cat].hasOwnProperty(jnum)) {
+              areaKeyCountMap[cat][jnum]++;
+            } else {
+              areaKeyCountMap[cat][jnum] = 1;
+            }
+
             doc.JournalKeywords.forEach((kw) => {
               if (keywordMap.hasOwnProperty(kw["@abbrev"])) {
                 if (keywordMap[kw["@abbrev"]].hasOwnProperty(kw["$"])) {
@@ -5947,9 +5969,11 @@ const fieldotype = (id) => {
         });
       }
 
-      var dateDomain = [Date.parse(minYear), Date.parse(maxYear)];
-
+      console.log(JSON.stringify(keyCountMap));
+      console.log(JSON.stringify(areaKeyCountMap));
       console.log(keywordMap);
+
+      var dateDomain = [Date.parse(minYear), Date.parse(maxYear)];
 
       let dataArea = {};
 
@@ -6005,8 +6029,6 @@ const fieldotype = (id) => {
         }
       }
 
-      console.log(dataArea);
-
       const graphAmount = Object.getOwnPropertyNames(dataArea).length;
       const graphHeight = 200;
       svg.attr("height", (graphHeight + 100) * graphAmount + 200);
@@ -6042,10 +6064,6 @@ const fieldotype = (id) => {
           .keys(keys)
           .value(([, values], key) => values.get(key))
           .order(order)(values);
-
-        if (graphCount === 0) {
-          console.log(series);
-        }
 
         var topScale = d3.max(series, (d) => d3.max(d, (d) => d[1]));
 
