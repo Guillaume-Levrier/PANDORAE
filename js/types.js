@@ -3349,11 +3349,16 @@ const geotype = (id) => {
         if (art.hasOwnProperty("enrichment")) {
           d = art.enrichment;
           if (d.hasOwnProperty("affiliations")) {
+            // check if doc has affiliations
             if (d.affiliations.length > 1) {
+              // check for more than 1 aff
               d.affiliations.forEach((aff) => {
+                // iterate over affils
                 affname = aff.affilname;
-                if (collabDir.hasOwnProperty(aff)) {
+                if (collabDir.hasOwnProperty(affname)) {
                 } else {
+                  // if this aff doesn't exist in dir
+                  // create this entry in dir
                   collabDir[affname] = {
                     name: affname,
                     city: aff["affiliation-city"],
@@ -3361,15 +3366,21 @@ const geotype = (id) => {
                     collab: {},
                   };
                 }
+
                 d.affiliations.forEach((oaff) => {
+                  // then iterate on art aff
                   oaffname = oaff.affilname;
                   if (oaffname === affname) {
                   } else {
-                    if (collabDir[affname].hasOwnProperty(oaffname)) {
+                    // if aff isn't the current aff
+                    let thisCollab = collabDir[affname]["collab"];
+                    if (thisCollab.hasOwnProperty(oaffname)) {
+                      // check current aff's existing links
                     } else {
-                      collabDir[affname]["collab"][oaffname] = 0;
+                      thisCollab[oaffname] = 0; // create new link if doesn't exist
                     }
-                    collabDir[affname]["collab"][oaffname]++;
+
+                    thisCollab[oaffname]++; // increment link by 1
                   }
                 });
               });
@@ -3378,7 +3389,7 @@ const geotype = (id) => {
         }
       });
 
-      //console.log(collabDir);
+    //  console.log(collabDir);
 
       //dataDownload(collabDir);
       // end of Affiliation collaboration compute
