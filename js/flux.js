@@ -70,6 +70,13 @@ let traces = [
   {
     hops: [
       { info: { name: "OPEN" }, name: "OPEN" },
+      { info: { name: "REGARDSCITOYENS" }, name: "REGARDSCITOYENS" },
+      { info: { name: "CSL-JSON" }, name: "CSL-JSON" },
+    ],
+  },
+  {
+    hops: [
+      { info: { name: "OPEN" }, name: "OPEN" },
       { info: { name: "HYPHE" }, name: "HYPHE" },
     ],
   },
@@ -310,6 +317,11 @@ const powerValve = (fluxAction, item) => {
       fluxArgs.user = document.getElementById("userNameInput").value;
       fluxArgs.reqISSN = ISSNarr;
       message = "Preparing ISSN requests";
+      break;
+
+    case "regards":
+      fluxArgs.regquery = document.getElementById("regardsrecherche").value;
+      message = "Connecting to Regards Citoyens";
       break;
 
     case "scopusConverter":
@@ -1678,6 +1690,35 @@ const localUpload = () => {
   });
 };
 
+//===== Regards Citoyens ======
+
+const regardsBasic = () => {
+  var queryContent = document.getElementById("regardsrecherche").value;
+  var query =
+    "https://www.nosdeputes.fr/recherche/" + queryContent + "?format=json";
+
+  console.log(query);
+
+  d3.json(query).then((res) => {
+    console.log(res);
+    let totalreq = parseInt(res.last_result / 500) + parseInt(res.last_result);
+    var previewer = document.getElementById("regards-basic-previewer");
+    previewer.innerHTML =
+      "<br><p>Total document number:" +
+      res.last_result +
+      "</p>" +
+      "<p>Necessary requests to obtain all document contents:" +
+      totalreq +
+      "</p>";
+
+    document.getElementById("regards-query").style.display = "flex";
+
+    if (totalreq === 0) {
+      document.getElementById("regards-query").disabled = true;
+    }
+  });
+};
+
 //========== STARTING FLUX ==========
 ipcRenderer.send("console-logs", "Opening Flux"); // Sending notification to console
 
@@ -1753,6 +1794,8 @@ window.addEventListener("load", (event) => {
     { id: "twitterCatImporter", func: "twitterCat" },
     { id: "twitterThreadImporter", func: "twitterThread" },
     { id: "scopusGeolocate", func: "powerValve", arg: "scopusGeolocate" },
+    { id: "regards-basic-query", func: "regardsBasic" },
+    { id: "regards-query", func: "powerValve", arg: "regards" },
     {
       id: "csljson-display",
       func: "datasetDisplay",
@@ -1827,6 +1870,10 @@ window.addEventListener("load", (event) => {
 
       case "refreshWindow":
         refreshWindow();
+        break;
+
+      case "regardsBasic":
+        regardsBasic();
         break;
 
       case "hypheCheck":
