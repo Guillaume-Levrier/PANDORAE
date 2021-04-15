@@ -1697,10 +1697,7 @@ const regardsBasic = () => {
   var query =
     "https://www.nosdeputes.fr/recherche/" + queryContent + "?format=json";
 
-  console.log(query);
-
   d3.json(query).then((res) => {
-    console.log(res);
     let totalreq = parseInt(res.last_result / 500) + parseInt(res.last_result);
     var previewer = document.getElementById("regards-basic-previewer");
     previewer.innerHTML =

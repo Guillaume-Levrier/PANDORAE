@@ -1022,86 +1022,106 @@ const tweetImporter = (dataset, query, name) => {
 
 // ===== reqISSN
 
-const reqISSN = (user,scopid) =>{
-
+const reqISSN = (user, scopid) => {
   const limiter = new bottleneck({
     // Create a bottleneck to prevent API rate limit
     maxConcurrent: 1, // Only one request at once
     minTime: 500,
   });
 
-const issnList= new Set();
+  const issnList = new Set();
 
   pandodb.scopus.toArray((files) => {
-    files.forEach(d=>{
-      scopid.forEach(e=>{
-        if (d.id===e){
-          d.content.entries.forEach(art=>{
-            if (art.hasOwnProperty("prism:issn")){
-              issnList.add(art["prism:issn"])
-          }
-        })
+    files.forEach((d) => {
+      scopid.forEach((e) => {
+        if (d.id === e) {
+          d.content.entries.forEach((art) => {
+            if (art.hasOwnProperty("prism:issn")) {
+              issnList.add(art["prism:issn"]);
+            }
+          });
         }
-      })
-    })
+      });
+    });
 
+    let ISSNPromises = [];
 
-   let ISSNPromises=[]
-
-   let scopusApiKey = getPassword("Scopus", user);
+    let scopusApiKey = getPassword("Scopus", user);
 
     // URL Building blocks
     let rootUrl = "https://api.elsevier.com/content/serial/title/issn/";
     let apiProm = "?apiKey=";
-    
-    function pushPromise(val){
-      ISSNPromises.push(rootUrl+val+apiProm+scopusApiKey)
+
+    function pushPromise(val) {
+      ISSNPromises.push(rootUrl + val + apiProm + scopusApiKey);
     }
-    
-    issnList.forEach(pushPromise)
 
-      let scopusISSNResponse = [];
+    issnList.forEach(pushPromise);
 
-      console.log("temps estimé: "+ISSNPromises.length/2)
+    let scopusISSNResponse = [];
 
+    console.log("temps estimé: " + ISSNPromises.length / 2);
 
-      ISSNPromises.forEach((d) => {
-        limiter
-          .schedule(() => fetch(d))
-          .then((res) => res.json())
-          .then((result) => {
-            scopusISSNResponse.push(result)
+    ISSNPromises.forEach((d) => {
+      limiter
+        .schedule(() => fetch(d))
+        .then((res) => res.json())
+        .then((result) => {
+          scopusISSNResponse.push(result);
 
-            ipcRenderer.send("coreSignal", scopusISSNResponse.length+"/"+ISSNPromises.length+" journal profiles retrieved."); // Sending notification to console
+          ipcRenderer.send(
+            "coreSignal",
+            scopusISSNResponse.length +
+              "/" +
+              ISSNPromises.length +
+              " journal profiles retrieved."
+          ); // Sending notification to console
 
-            if (scopusISSNResponse.length===ISSNPromises.length){ // if all responses have been recieved
-              var data= {
-                id:"ISSN-Retrieval_"+date,
-                date:date,
-                name:"ISSN-Retrieval"+date,
-                content:scopusISSNResponse
-              }
+          if (scopusISSNResponse.length === ISSNPromises.length) {
+            // if all responses have been recieved
+            var data = {
+              id: "ISSN-Retrieval_" + date,
+              date: date,
+              name: "ISSN-Retrieval" + date,
+              content: scopusISSNResponse,
+            };
 
-              pandodb.open();
-              pandodb.system.add(data).then(() => {
-                ipcRenderer.send("coreSignal", "ISSN poured in SYSTEM"); // Sending notification to console
-                ipcRenderer.send("pulsar", true);
-                ipcRenderer.send("console-logs", "ISSN poured in SYSTEM"); // Sending notification to console
-                setTimeout(() => {
-                  ipcRenderer.send("win-destroy", winId);
-                }, 500);
-              });
+            pandodb.open();
+            pandodb.system.add(data).then(() => {
+              ipcRenderer.send("coreSignal", "ISSN poured in SYSTEM"); // Sending notification to console
+              ipcRenderer.send("pulsar", true);
+              ipcRenderer.send("console-logs", "ISSN poured in SYSTEM"); // Sending notification to console
+              setTimeout(() => {
+                ipcRenderer.send("win-destroy", winId);
+              }, 500);
+            });
+          }
+        });
+    });
+  });
+};
 
+// Regards
 
-            }
+const regardsRetriever = (queryContent) => {
+  var query =
+    "https://www.nosdeputes.fr/recherche/" + queryContent + "?format=json";
 
-            
-        })
-    })
+  d3.json(query).then((res) => {
+    let totalReq = parseInt(res.last_result / 500) + 1;
 
+    var pagesReq = [];
 
-})
-}
+    for (let i = 1; i <= totalReq; i++) {
+      pagesReq.push(
+        "https://www.nosdeputes.fr/recherche/" +
+          queryContent +
+          "?format=json&page=" +
+          i
+      );
+    }
+  });
+};
 
 //========== chaerosSwitch ==========
 // Switch used to choose the function to execute in CHÆROS.
@@ -1116,6 +1136,10 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
   );
 
   switch (fluxAction) {
+    case "regards":
+      regardsRetriever(fluxArgs.regquery);
+      break;
+
     case "scopusConverter":
       scopusConverter(fluxArgs.scopusConverter.dataset);
       break;
@@ -1184,15 +1208,11 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
       clinTriRetriever(fluxArgs.clinTriRetriever.query);
       break;
 
-      case "reqISSN":
-        reqISSN(fluxArgs.user,fluxArgs.reqISSN)
-        break;
+    case "reqISSN":
+      reqISSN(fluxArgs.user, fluxArgs.reqISSN);
+      break;
   }
 };
-
-
-
-
 
 //module.exports = { chaerosSwitch: chaerosSwitch }; // Export the switch as a module
 
