@@ -13,6 +13,7 @@ const appPath = ipcRenderer.sendSync("remote", "appPath");
 const bottleneck = require("bottleneck"); // Load bottleneck to manage API request limits
 const fs = require("fs"); // Load filesystem to manage flatfiles
 const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
+const d3 = require("d3");
 const { promises } = require("dns");
 const date =
   new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
@@ -1060,8 +1061,6 @@ const reqISSN = (user, scopid) => {
 
     let scopusISSNResponse = [];
 
-    console.log("temps estimé: " + ISSNPromises.length / 2);
-
     ISSNPromises.forEach((d) => {
       limiter
         .schedule(() => fetch(d))
@@ -1107,7 +1106,17 @@ const regardsRetriever = (queryContent) => {
   var query =
     "https://www.nosdeputes.fr/recherche/" + queryContent + "?format=json";
 
+  const regContent = {};
+
+  const limiter = new bottleneck({
+    // Create a bottleneck to prevent API rate limit
+    maxConcurrent: 1, // Only one request at once
+    minTime: 200,
+  });
+
   d3.json(query).then((res) => {
+    console.log(res);
+
     let totalReq = parseInt(res.last_result / 500) + 1;
 
     var pagesReq = [];
@@ -1116,10 +1125,62 @@ const regardsRetriever = (queryContent) => {
       pagesReq.push(
         "https://www.nosdeputes.fr/recherche/" +
           queryContent +
-          "?format=json&page=" +
+          "?format=json&count=500&page=" +
           i
       );
     }
+
+    console.log(pagesReq);
+
+    const docReq = [];
+
+    limiter
+      .schedule(() => Promise.all(pagesReq.map((d) => fetch(d))))
+      .then((res) => Promise.all(res.map((d) => d.json())))
+      .then((resPages) => {
+        resPages.forEach((page) => {
+          page.results.forEach((doc) => {
+            let doctype = doc.document_type.toLowerCase();
+            if (regContent.hasOwnProperty(doctype)) {
+            } else {
+              regContent[doctype] = new Map();
+            }
+            regContent[doctype].set(doc.document_id, doc);
+            docReq.push(doc.document_url);
+          });
+        });
+      })
+      .then((res) => {
+        limiter
+          .schedule(() => Promise.all(docReq.map((d) => fetch(d))))
+          .then((res) => Promise.all(res.map((d) => d.json())))
+          .then((resDocs) => {
+            resDocs.forEach((doc) => {
+              for (const doctype in doc) {
+                let docInMap = regContent[doctype].get(doc[doctype].id);
+                docInMap.content = doc[doctype];
+                regContent[doctype].set(doc[doctype].id, docInMap);
+              }
+            });
+
+            var data = {
+              id: "regards-citoyens_" + date,
+              date: date,
+              name: "regards-citoyens_" + date,
+              content: regContent,
+            };
+
+            pandodb.open();
+            pandodb.regards.add(data).then(() => {
+              ipcRenderer.send("coreSignal", "Regards data poured in SYSTEM"); // Sending notification to console
+              ipcRenderer.send("pulsar", true);
+              ipcRenderer.send("console-logs", "Regards data poured in SYSTEM"); // Sending notification to console
+              setTimeout(() => {
+                ipcRenderer.send("win-destroy", winId);
+              }, 500);
+            });
+          });
+      });
   });
 };
 
