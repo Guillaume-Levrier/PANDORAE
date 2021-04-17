@@ -1730,23 +1730,18 @@ const refreshWindow = () => {
 const downloadData = () => {
   var id = document.getElementById("system-dataset-preview").name;
 
-  pandodb.system.toArray((files) => {
-    files.forEach((d) => {
-      if (d.id === id) {
-        ipcRenderer
-          .invoke(
-            "saveDataset",
-            { defaultPath: id + ".json" },
-            JSON.stringify(d)
-          )
-          .then((res) => {});
-      }
-    });
+  pandodb.system.get(id).then((data) => {
+    ipcRenderer.invoke(
+      "saveDataset",
+      { defaultPath: id + ".json" },
+      JSON.stringify(data)
+    );
   });
 };
 
 window.addEventListener("load", (event) => {
   var buttonMap = [
+    { id: "showConsole", func: "fluxConsole" },
     { id: "scopus-list-display", func: "ScopusList" },
     { id: "user-button", func: "basicUserData" },
     {
@@ -1841,9 +1836,17 @@ window.addEventListener("load", (event) => {
 
   function funcSwitch(e, but) {
     switch (but.func) {
+      case "fluxConsole":
+        ipcRenderer.invoke("fluxDevTools", true);
+
+        var id = document.getElementById("system-dataset-preview").name;
+
+        pandodb.system.get(id).then((data) => console.log(data));
+
+        break;
+
       case "biorxivBasicRetriever":
         biorxivBasicRetriever();
-
         break;
 
       case "basicUserData":
