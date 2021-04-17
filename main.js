@@ -328,7 +328,7 @@ const chaerosCalculator = () => {
 
   chaerosWindow.webContents.on("did-finish-load", function () {
     chaerosWindow.webContents.send("id", chaerosWindow.id);
-       chaerosWindow.webContents.openDevTools();
+    chaerosWindow.webContents.openDevTools();
   });
 };
 
@@ -522,6 +522,10 @@ ipcMain.handle("saveHTML", async (event, target) => {
 
 ipcMain.handle("mainDevTools", async (event, target) => {
   mainWindow.webContents.openDevTools();
+});
+
+ipcMain.handle("fluxDevTools", async (event, target) => {
+  BrowserWindow.fromId(windowIds.flux.id).openDevTools();
 });
 
 ipcMain.handle("openEx", async (event, target) => {

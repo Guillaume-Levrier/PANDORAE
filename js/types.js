@@ -2085,6 +2085,17 @@ const hyphotype = (id) => {
   ipcRenderer.send("console-logs", "Starting Hyphotype");
 };
 
+// ========== regardotype ==========
+const regards = (id) => {
+  // When called, draw the chronotype
+
+  console.log(id);
+
+  pandodb.regards.get(id).then((datajson) => {
+    console.log(datajson);
+  });
+};
+
 // ========== CHRONOTYPE ==========
 const chronotype = (id) => {
   // When called, draw the chronotype
@@ -3389,7 +3400,7 @@ const geotype = (id) => {
         }
       });
 
-    //  console.log(collabDir);
+      //  console.log(collabDir);
 
       //dataDownload(collabDir);
       // end of Affiliation collaboration compute
@@ -6249,6 +6260,9 @@ const typeSwitch = (type, id) => {
   document.getElementById("field").value = "loading " + type;
 
   switch (type) {
+    case "regards":
+      regards(id);
+      break;
     case "fieldotype":
       fieldotype(id);
       break;

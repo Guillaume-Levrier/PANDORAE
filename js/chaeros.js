@@ -1069,7 +1069,7 @@ const reqISSN = (user, scopid) => {
           scopusISSNResponse.push(result);
 
           ipcRenderer.send(
-            "coreSignal",
+            "chaeros-notification",
             scopusISSNResponse.length +
               "/" +
               ISSNPromises.length +
@@ -1087,7 +1087,7 @@ const reqISSN = (user, scopid) => {
 
             pandodb.open();
             pandodb.system.add(data).then(() => {
-              ipcRenderer.send("coreSignal", "ISSN poured in SYSTEM"); // Sending notification to console
+              ipcRenderer.send("chaeros-notification", "ISSN poured in SYSTEM"); // Sending notification to console
               ipcRenderer.send("pulsar", true);
               ipcRenderer.send("console-logs", "ISSN poured in SYSTEM"); // Sending notification to console
               setTimeout(() => {
@@ -1101,23 +1101,33 @@ const reqISSN = (user, scopid) => {
 };
 
 // Regards
+// Cette fonction a pour but d'interroger l'API de nosdeputes.fr, un service maintenu
+// par l'association Regards Citoyens. A partir d'une requête textuelle (un mot ou une)
+// expression, chaeros va interroger cette API afin de reconstruire un jeu de données
+// ordonné qui récupère tous les usages de cette expression.
+// Cette fonction est encore en cours de construction
 
 const regardsRetriever = (queryContent) => {
+  // La première étape consiste à relancer la requête telle qu'obtenue dans le FLUX
+  // Afin de disposer du nombre de pages de 500 éléments à demander à  l'API
+
   var query =
     "https://www.nosdeputes.fr/recherche/" + queryContent + "?format=json";
 
+  // Déclaration d'un objet constant dont les propriétés renvoient à des
+  // Maps par type de texte (ex. "amendements":Map(XX),"questionsecrites":Map(YY),etc)
   const regContent = {};
 
   const limiter = new bottleneck({
     // Create a bottleneck to prevent API rate limit
     maxConcurrent: 1, // Only one request at once
-    minTime: 200,
+    minTime: 600,
   });
 
   d3.json(query).then((res) => {
-    console.log(res);
-
     let totalReq = parseInt(res.last_result / 500) + 1;
+
+    let totalNum = parseInt(res.last_result);
 
     var pagesReq = [];
 
@@ -1130,55 +1140,181 @@ const regardsRetriever = (queryContent) => {
       );
     }
 
-    console.log(pagesReq);
-
     const docReq = [];
+
+    // Une fois ces pages récupérées, il faut ensuite soumettre ces requêtes tout
+    // en respectant l'API rate limiting
 
     limiter
       .schedule(() => Promise.all(pagesReq.map((d) => fetch(d))))
       .then((res) => Promise.all(res.map((d) => d.json())))
       .then((resPages) => {
+        // Une fois toutes les réponses reçues
+        // itérer sur toutes les pages
         resPages.forEach((page) => {
+          // puis itérer sur chaque résultat de chaque page
           page.results.forEach((doc) => {
+            // normaliser le type de document, cf https://github.com/regardscitoyens/nosdeputes.fr/issues/176
             let doctype = doc.document_type.toLowerCase();
+
+            // Si ce type de document existe déjà, ne rien faire
             if (regContent.hasOwnProperty(doctype)) {
             } else {
+              // sinon, créer une nouvelle Map correspondant à ce type de document
               regContent[doctype] = new Map();
             }
+            // ajouter un ensemble clé,valeur dans la map
+            // clé : ID du document tel que déclaré par l'API
+            // valeur : contenu du document
             regContent[doctype].set(doc.document_id, doc);
+            // puis ajouter le lien du résultat dans un tableau afin d'aller chercher
+            // par la suite les ressources auxquelles il renvoie
             docReq.push(doc.document_url);
           });
         });
       })
+      // Puis
       .then((res) => {
+        // envoyer des requêtes sur la base de tous les liens de résultats
+        // récupérés précédemment
         limiter
           .schedule(() => Promise.all(docReq.map((d) => fetch(d))))
           .then((res) => Promise.all(res.map((d) => d.json())))
           .then((resDocs) => {
+            // pour chaque document
             resDocs.forEach((doc) => {
+              // récupérer le type de document (formatage étrange) cf https://github.com/regardscitoyens/nosdeputes.fr/issues/178
               for (const doctype in doc) {
+                // mettre à jour le document dans la map avec le contenu des ressources obtenu
                 let docInMap = regContent[doctype].get(doc[doctype].id);
                 docInMap.content = doc[doctype];
                 regContent[doctype].set(doc[doctype].id, docInMap);
               }
             });
 
-            var data = {
-              id: "regards-citoyens_" + date,
-              date: date,
-              name: "regards-citoyens_" + date,
-              content: regContent,
-            };
+            // Ré-enrichissement des interventions par séances
 
-            pandodb.open();
-            pandodb.regards.add(data).then(() => {
-              ipcRenderer.send("coreSignal", "Regards data poured in SYSTEM"); // Sending notification to console
-              ipcRenderer.send("pulsar", true);
-              ipcRenderer.send("console-logs", "Regards data poured in SYSTEM"); // Sending notification to console
-              setTimeout(() => {
-                ipcRenderer.send("win-destroy", winId);
-              }, 500);
+            // création d'une Map avec les séances hébergeant les interventions
+            const seances = new Map();
+            regContent.intervention.forEach((inter) => {
+              // both the seance id and legislature are needed
+              // the legislature currently has to be rebuilt, cf https://github.com/regardscitoyens/nosdeputes.fr/issues/179
+
+              let url = inter.content.url_nosdeputes;
+              let legislature = url.slice(
+                url.indexOf("nosdeputes.fr/") + 14,
+                url.indexOf("/seance/")
+              );
+              seances.set(inter.content.seance_id, legislature);
             });
+
+            let seanceReqs = [];
+
+            seances.forEach((seance, leg) => {
+              seanceReqs.push(
+                "https://www.nosdeputes.fr/" +
+                  seance +
+                  "/seance/" +
+                  leg +
+                  "/json"
+              );
+            });
+
+            limiter
+              .schedule(() => Promise.all(seanceReqs.map((d) => fetch(d))))
+              .then((res) => Promise.all(res.map((d) => d.json())))
+              .then((resSeances) => {
+                // verser les résultats dans la Map seances
+                resSeances.forEach((sc) => {
+                  for (const typedoc in sc.seance[0]) {
+                    seances.set(sc.seance[0][typedoc].seance_id, sc.seance);
+                  }
+                });
+
+                // ajouter les séances à la constante de résultats
+                regContent.seances = seances;
+
+                // enrichir les interventions précédemment obtenues avec les
+                // métadonnées contenues dans les séances
+
+                // pour chaque intervention contenant l'expression recherchée
+                regContent.intervention.forEach((inter) => {
+                  // ouvrir la séance correspondance et itérer sur son contenu
+                  seances.get(inter.content.seance_id).forEach((d) => {
+                    // si l'ID de l'item de la séance est le même que l'id de l'intervention
+                    if ((d.intervention.id = inter.document_id)) {
+                      // pour chaque propriété disponible dans l'objet trouvé
+                      for (const key in d.intervention) {
+                        // si elle est déjà disponible
+                        if (inter.content.hasOwnProperty(key)) {
+                          // ne rien faire
+                        } else {
+                          // sinon l'ajouter à l'intervention
+                          inter.content[key] = d.intervention[key];
+                        }
+                      }
+                    }
+                  });
+                });
+
+                // vérification que les requêtes ont bien abouti à des retours
+                var totalMap = 0;
+
+                for (var itemType in regContent) {
+                  totalMap += regContent[itemType].size;
+                }
+
+                console.log(regContent)
+                console.log(totalMap)
+                console.log(totalNum)
+
+                // Si c'est bien le cas, formatage puis sauvegarde
+                if (totalMap >= totalNum) {
+                  /*
+                  var data = {
+                    id: "regards-citoyens_" + queryContent + date,
+                    date: date,
+                    name: "regards-citoyens_" + queryContent,
+                    content: regContent,
+                  };
+*/
+
+                  dataWriter(["system"], queryContent, regContent);
+
+                  /*
+              pandodb.open();
+              pandodb.regards.add(data).then(() => {
+                ipcRenderer.send(
+                  "chaeros-notification",
+                  "Regards data poured in SYSTEM"
+                ); // Sending notification to console
+                ipcRenderer.send("pulsar", true);
+                ipcRenderer.send(
+                  "console-logs",
+                  "Regards data poured in SYSTEM"
+                ); // Sending notification to console
+                setTimeout(() => {
+                  ipcRenderer.send("win-destroy", winId);
+                }, 500);
+              });
+*/
+                } else {
+                  ipcRenderer.send(
+                    "chaeros-notification",
+                    "Failure to retrieve data from Regards API"
+                  ); // Sending notification to console
+                  ipcRenderer.send("pulsar", true);
+                  ipcRenderer.send(
+                    "console-logs",
+                    "Failure to retrieve data from Regards API"
+                  ); // Sending notification to console
+                  /*
+                  setTimeout(() => {
+                    ipcRenderer.send("win-destroy", winId);
+                  }, 500);
+                  */
+                }
+              });
           });
       });
   });

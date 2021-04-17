@@ -800,6 +800,7 @@ const exportToHTML = () => {
                       );
 
                       var blocks = [
+                        "regards",
                         "chronotype",
                         "geotype",
                         "anthropotype",
@@ -1138,6 +1139,7 @@ const categoryLoader = (cat) => {
     switch (cat) {
       case "type":
         blocks = [
+          "regards",
           "chronotype",
           "geotype",
           "anthropotype",
@@ -1377,6 +1379,12 @@ const cmdinput = (input) => {
         toggleMenu();
         categoryLoader("type");
         mainDisplay("chronotype");
+        break;
+
+      case "regards":
+        toggleMenu();
+        categoryLoader("type");
+        mainDisplay("regards");
         break;
 
       case "geotype":
