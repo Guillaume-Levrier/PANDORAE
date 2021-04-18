@@ -1242,7 +1242,7 @@ const regardsRetriever = (queryContent) => {
                   // ouvrir la séance correspondance et itérer sur son contenu
                   seances.get(inter.content.seance_id).forEach((d) => {
                     // si l'ID de l'item de la séance est le même que l'id de l'intervention
-                    if ((d.intervention.id = inter.document_id)) {
+                    if (d.intervention.id === inter.document_id) {
                       // pour chaque propriété disponible dans l'objet trouvé
                       for (const key in d.intervention) {
                         // si elle est déjà disponible
@@ -1264,40 +1264,13 @@ const regardsRetriever = (queryContent) => {
                   totalMap += regContent[itemType].size;
                 }
 
-                console.log(regContent)
-                console.log(totalMap)
-                console.log(totalNum)
+                console.log(regContent);
+                console.log(totalMap);
+                console.log(totalNum);
 
                 // Si c'est bien le cas, formatage puis sauvegarde
                 if (totalMap >= totalNum) {
-                  /*
-                  var data = {
-                    id: "regards-citoyens_" + queryContent + date,
-                    date: date,
-                    name: "regards-citoyens_" + queryContent,
-                    content: regContent,
-                  };
-*/
-
                   dataWriter(["system"], queryContent, regContent);
-
-                  /*
-              pandodb.open();
-              pandodb.regards.add(data).then(() => {
-                ipcRenderer.send(
-                  "chaeros-notification",
-                  "Regards data poured in SYSTEM"
-                ); // Sending notification to console
-                ipcRenderer.send("pulsar", true);
-                ipcRenderer.send(
-                  "console-logs",
-                  "Regards data poured in SYSTEM"
-                ); // Sending notification to console
-                setTimeout(() => {
-                  ipcRenderer.send("win-destroy", winId);
-                }, 500);
-              });
-*/
                 } else {
                   ipcRenderer.send(
                     "chaeros-notification",
@@ -1308,11 +1281,10 @@ const regardsRetriever = (queryContent) => {
                     "console-logs",
                     "Failure to retrieve data from Regards API"
                   ); // Sending notification to console
-                  /*
+
                   setTimeout(() => {
                     ipcRenderer.send("win-destroy", winId);
                   }, 500);
-                  */
                 }
               });
           });

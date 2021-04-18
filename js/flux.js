@@ -1661,7 +1661,7 @@ const localUpload = () => {
   var datasetPath = document.getElementById("localUploadPath").files[0].path;
 
   fs.readFile(datasetPath, "utf8", (err, data) => {
-    var data = JSON.parse(data);
+    var data = JSON.parse(data, reviver);
 
     var capList = ["Content", "Id", "Date", "Name"];
 
@@ -1727,6 +1727,26 @@ const refreshWindow = () => {
   location.reload();
 };
 
+function replacer(key, value) {
+  if (value instanceof Map) {
+    return {
+      dataType: "Map",
+      value: Array.from(value.entries()), // or with spread: value: [...value]
+    };
+  } else {
+    return value;
+  }
+}
+
+function reviver(key, value) {
+  if (typeof value === "object" && value !== null) {
+    if (value.dataType === "Map") {
+      return new Map(value.value);
+    }
+  }
+  return value;
+}
+
 const downloadData = () => {
   var id = document.getElementById("system-dataset-preview").name;
 
@@ -1734,7 +1754,7 @@ const downloadData = () => {
     ipcRenderer.invoke(
       "saveDataset",
       { defaultPath: id + ".json" },
-      JSON.stringify(data)
+      JSON.stringify(data, replacer)
     );
   });
 };
