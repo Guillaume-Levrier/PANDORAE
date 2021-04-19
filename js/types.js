@@ -2293,6 +2293,7 @@ const regards = (id) => {
         .append("text")
         .attr("dy", "0.31em")
         .style("font-size", "12px")
+        .style("font-family", "sans-serif")
         .style("cursor", (d) => (d.depth === 3 ? "pointer" : "auto"))
         .attr("x", (d) => (d.children ? -6 : 6))
         .text((d) => d.data.name)
