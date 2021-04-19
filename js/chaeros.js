@@ -1181,7 +1181,6 @@ const regardsRetriever = (queryContent) => {
             // envoyer des requêtes sur la base de tous les liens de résultats
             // récupérés précédemment
 
-            console.log(docReq);
             let docN = 0;
 
             docReq.forEach((documentRequest) => {
@@ -1194,10 +1193,9 @@ const regardsRetriever = (queryContent) => {
                     "chaeros-notification",
                     "Retrieving document " + docN + " of " + docReq.length
                   );
-                  console.log(documentResponse);
+
                   resDocs.push(documentResponse);
                   if (resDocs.length === docReq.length) {
-                    console.log(resDocs);
                     // pour chaque document
                     resDocs.forEach((doc) => {
                       // récupérer le type de document (formatage étrange) cf https://github.com/regardscitoyens/nosdeputes.fr/issues/178
@@ -1238,12 +1236,20 @@ const regardsRetriever = (queryContent) => {
                     });
 
                     const resSeances = [];
-
+                    let seanceN = 0;
                     seanceReqs.forEach((seanceReq) => {
                       limiter
                         .schedule(() => fetch(seanceReq))
                         .then((res) => res.json())
                         .then((resSeance) => {
+                          seanceN++;
+                          ipcRenderer.send(
+                            "chaeros-notification",
+                            "Retrieving séance " +
+                              seanceN +
+                              " of " +
+                              seanceReqs.length
+                          );
                           resSeances.push(resSeance);
                           if (resSeances.length === seanceReqs.length) {
                             // verser les résultats dans la Map seances
@@ -1318,13 +1324,11 @@ const regardsRetriever = (queryContent) => {
 
                                 // Si c'est bien le cas, formatage puis sauvegarde
                                 if (totalMap >= totalNum) {
-                                  console.log(regContent);
-                                  /*
                                   dataWriter(
                                     ["system"],
                                     queryContent,
                                     regContent
-                                  );*/
+                                  );
                                 } else {
                                   ipcRenderer.send(
                                     "chaeros-notification",
