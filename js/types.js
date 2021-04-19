@@ -2149,13 +2149,20 @@ const regards = (id) => {
           chronoData[key][prop].forEach((d) => {
             if (d.content.hasOwnProperty("sujet")) {
               d.name =
+                d.content["auteur_groupe_acronyme"] +
+                " " +
                 d.content.signataires +
                 " | " +
                 d.content.sujet +
                 " | " +
                 d.content.id;
             } else if (d.content.hasOwnProperty("intervenant_nom")) {
-              d.name = d.content["intervenant_nom"] + " | " + d.content.id;
+              d.name =
+                d.content["intervenant_groupe"] +
+                " " +
+                d.content["intervenant_nom"] +
+                " | " +
+                d.content.id;
             }
           });
 
@@ -2216,6 +2223,49 @@ const regards = (id) => {
         .attr("fill", (d) => (d.children ? "#555" : "#999"))
         .attr("r", 2.5);
 
+      function toolBuidlder(d) {
+        console.log(d);
+        if (d.depth === 3) {
+          var dt = d.data.content;
+
+          if (dt.hasOwnProperty("contenu")) {
+            // intervention
+            tooltip.innerHTML =
+              "<h3>" +
+              dt.intervenant_nom +
+              "</h3><h4>" +
+              dt.intervenant_fonction +
+              "</h4>" +
+              dt.intervenant_groupe +
+              "<br><span style='text-decoration: underline;'>" +
+              dt.seance_lieu +
+              "</span><br>" +
+              dt.seance_titre +
+              "<br>" +
+              dt.type +
+              "<br>" +
+              dt.contenu;
+          } else if (dt.hasOwnProperty("expose")) {
+            // amendement
+            tooltip.innerHTML =
+              "<h3>" +
+              dt.signataires +
+              "</h3><h4>" +
+              dt.sujet +
+              "</h4>" +
+              dt.auteur_groupe_acronyme +
+              "<br><span style='text-decoration: underline;'>Statut: " +
+              dt.sort +
+              "</span><br>Texte de loi: " +
+              dt.texteloi_id +
+              "<br><br> <strong>Exposé des motifs:</strong>" +
+              dt.expose +
+              "<br><br> <strong>Contenu de l'amendement:</strong><br>" +
+              dt.texte;
+          }
+        }
+      }
+
       node
         .append("text")
         .attr("dy", "0.31em")
@@ -2224,14 +2274,7 @@ const regards = (id) => {
         .attr("x", (d) => (d.children ? -6 : 6))
         .text((d) => d.data.name)
         .on("click", (event, d) => {
-          if (d.depth === 3) {
-            dt = d.data.content;
-            if (dt.hasOwnProperty("contenu")) {
-              tooltip.innerHTML = dt.contenu;
-            } else if (dt.hasOwnProperty("expose")) {
-              tooltip.innerHTML = dt.expose + "<br><br>" + dt.texte;
-            }
-          }
+          toolBuidlder(d);
         })
         .style("display", (d) => (d.depth === 0 ? "none" : "block"))
         .filter((d) => d.children)

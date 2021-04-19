@@ -1174,6 +1174,7 @@ const regardsRetriever = (queryContent) => {
         });
       })
       // Puis
+
       .then((res) => {
         // envoyer des requêtes sur la base de tous les liens de résultats
         // récupérés précédemment
@@ -1192,7 +1193,7 @@ const regardsRetriever = (queryContent) => {
               }
             });
 
-            // Ré-enrichissement des interventions par séances
+            // Ré-enrichissement des interventions
 
             // création d'une Map avec les séances hébergeant les interventions
             const seances = new Map();
@@ -1257,6 +1258,16 @@ const regardsRetriever = (queryContent) => {
                   });
                 });
 
+                fetch("https://www.nosdeputes.fr/deputes/json")
+                  .then((dep) => dep.json())
+                  .then((deps) => {
+                    depMap = new Map();
+                    deps.deputes.forEach((d) => depMap.set(d.id, d));
+                    regContent.questionecrite.forEach((d) => {
+                      //d.content.aut = depMap.get(d.content.parlementaire_id);
+                    });
+                  });
+
                 // vérification que les requêtes ont bien abouti à des retours
                 var totalMap = 0;
 
@@ -1270,7 +1281,7 @@ const regardsRetriever = (queryContent) => {
 
                 // Si c'est bien le cas, formatage puis sauvegarde
                 if (totalMap >= totalNum) {
-                  dataWriter(["system"], queryContent, regContent);
+                  //   dataWriter(["system"], queryContent, regContent);
                 } else {
                   ipcRenderer.send(
                     "chaeros-notification",
