@@ -449,7 +449,7 @@ h1 {
   margin: 0px;
   padding: 10px;
   width: 30%;
-  height: 100%;
+  height: calc(100% - 20px);
   font-size: 12px;
   background-color: white;
   display: block;

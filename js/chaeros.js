@@ -1178,10 +1178,14 @@ const regardsRetriever = (queryContent) => {
       .then((res) => {
         // envoyer des requêtes sur la base de tous les liens de résultats
         // récupérés précédemment
+
+        console.log(docReq);
+
         limiter
           .schedule(() => Promise.all(docReq.map((d) => fetch(d))))
           .then((res) => Promise.all(res.map((d) => d.json())))
           .then((resDocs) => {
+            console.log(resDocs);
             // pour chaque document
             resDocs.forEach((doc) => {
               // récupérer le type de document (formatage étrange) cf https://github.com/regardscitoyens/nosdeputes.fr/issues/178
@@ -1262,41 +1266,46 @@ const regardsRetriever = (queryContent) => {
                   .then((dep) => dep.json())
                   .then((deps) => {
                     depMap = new Map();
-                    deps.deputes.forEach((d) => depMap.set(d.id, d));
-                    regContent.questionecrite.forEach((d) => {
-                      //d.content.aut = depMap.get(d.content.parlementaire_id);
-                    });
+                    deps.deputes.forEach((d) => depMap.set(d.depute.id, d));
+                    console.log(depMap);
+                    for (const key in regContent) {
+                      regContent[key].forEach((d) => {
+                        if (d.hasOwnProperty("content")) {
+                          if (d.content.hasOwnProperty("parlementaire_id")) {
+                            d.content.aut = depMap.get(
+                              parseInt(d.content.parlementaire_id)
+                            );
+                          }
+                        }
+                      });
+                    }
+
+                    // vérification que les requêtes ont bien abouti à des retours
+                    var totalMap = 0;
+
+                    for (var itemType in regContent) {
+                      totalMap += regContent[itemType].size;
+                    }
+
+                    // Si c'est bien le cas, formatage puis sauvegarde
+                    if (totalMap >= totalNum) {
+                      dataWriter(["system"], queryContent, regContent);
+                    } else {
+                      ipcRenderer.send(
+                        "chaeros-notification",
+                        "Failure to retrieve data from Regards API"
+                      ); // Sending notification to console
+                      ipcRenderer.send("pulsar", true);
+                      ipcRenderer.send(
+                        "console-logs",
+                        "Failure to retrieve data from Regards API"
+                      ); // Sending notification to console
+
+                      setTimeout(() => {
+                        ipcRenderer.send("win-destroy", winId);
+                      }, 500);
+                    }
                   });
-
-                // vérification que les requêtes ont bien abouti à des retours
-                var totalMap = 0;
-
-                for (var itemType in regContent) {
-                  totalMap += regContent[itemType].size;
-                }
-
-                console.log(regContent);
-                console.log(totalMap);
-                console.log(totalNum);
-
-                // Si c'est bien le cas, formatage puis sauvegarde
-                if (totalMap >= totalNum) {
-                  //   dataWriter(["system"], queryContent, regContent);
-                } else {
-                  ipcRenderer.send(
-                    "chaeros-notification",
-                    "Failure to retrieve data from Regards API"
-                  ); // Sending notification to console
-                  ipcRenderer.send("pulsar", true);
-                  ipcRenderer.send(
-                    "console-logs",
-                    "Failure to retrieve data from Regards API"
-                  ); // Sending notification to console
-
-                  setTimeout(() => {
-                    ipcRenderer.send("win-destroy", winId);
-                  }, 500);
-                }
               });
           });
       });

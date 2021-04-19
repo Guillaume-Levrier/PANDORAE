@@ -2122,6 +2122,8 @@ const regards = (id) => {
     .then((datajson) => {
       dataDownload(datajson);
 
+      console.log(datajson);
+
       let chronoData = {};
 
       for (const key in datajson.content) {
@@ -2161,6 +2163,13 @@ const regards = (id) => {
                 d.content["intervenant_groupe"] +
                 " " +
                 d.content["intervenant_nom"] +
+                " | " +
+                d.content.id;
+            } else if (d.content.hasOwnProperty("question")) {
+              d.name =
+                d.content["parlementaire_groupe_acronyme"] +
+                " " +
+                d.content.aut.depute.nom +
                 " | " +
                 d.content.id;
             }
@@ -2262,6 +2271,20 @@ const regards = (id) => {
               dt.expose +
               "<br><br> <strong>Contenu de l'amendement:</strong><br>" +
               dt.texte;
+          } else if (dt.hasOwnProperty("question")) {
+            tooltip.innerHTML =
+              "<h3>" +
+              dt.aut.depute.nom +
+              "</h3><h4>" +
+              dt.themes +
+              "</h4>" +
+              dt.parlementaire_groupe_acronyme +
+              "<br><span style='text-decoration: underline;'>Destinataire: " +
+              dt.ministere +
+              "</span><br><br><strong>Question:</strong> " +
+              dt.question +
+              "<br><br> <strong>Réponse:</strong> " +
+              dt.reponse;
           }
         }
       }
