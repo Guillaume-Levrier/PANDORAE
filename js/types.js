@@ -2233,7 +2233,6 @@ const regards = (id) => {
         .attr("r", 2.5);
 
       function toolBuidlder(d) {
-        console.log(d);
         if (d.depth === 3) {
           var dt = d.data.content;
 
@@ -2289,15 +2288,21 @@ const regards = (id) => {
         }
       }
 
+      view.style("user-select", "none");
+
       node
         .append("text")
         .attr("dy", "0.31em")
         .style("font-size", "12px")
         .style("font-family", "sans-serif")
         .style("cursor", (d) => (d.depth === 3 ? "pointer" : "auto"))
+
         .attr("x", (d) => (d.children ? -6 : 6))
         .text((d) => d.data.name)
         .on("click", (event, d) => {
+          d3.selectAll("text").style("font-weight", "normal");
+          let el = event.currentTarget;
+          el.style.fontWeight = "bolder";
           toolBuidlder(d);
         })
         .style("display", (d) => (d.depth === 0 ? "none" : "block"))
