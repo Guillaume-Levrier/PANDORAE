@@ -12,3 +12,4 @@ package-lock.json
 !json/world-countries.json
 .vscode/*
 yarn.lock
+dist/
