@@ -10,6 +10,7 @@
     "url": "https://github.com/Guillaume-Levrier/PANDORAE/"
   },
   "scripts": {
+    "postinstall": "electron-builder install-app-deps",
     "start": "electron ."
   },
   "dependencies": {
@@ -36,6 +37,13 @@
     "node-abi": "^2.19.3"
   },
   "build": {
-    "artifactName": "PANDORAE.${ext}"
+    "artifactName": "PANDORAE.${ext}",
+    "productName": "PANDORÆ",
+    "win": {
+      "icon": "PANDORAE.ico"
+    },
+    "mac": {
+      "icon": "PANDORAE.icns"
+    }
   }
 }
