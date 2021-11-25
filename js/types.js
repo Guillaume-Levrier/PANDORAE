@@ -256,9 +256,8 @@ const addPresentationStep = () => {
   };
 
   if (document.getElementById("slideText")) {
-    stepData.slideContent = document.getElementsByClassName(
-      "ql-editor"
-    )[0].innerHTML;
+    stepData.slideContent =
+      document.getElementsByClassName("ql-editor")[0].innerHTML;
   }
 
   let buttons = document.querySelectorAll("div.presentationStep");
@@ -719,24 +718,26 @@ const anthropotype = (id) => {
           docData.forEach((doc) => {
             if (doc.title === criteria) {
               doc.id = doc.title;
-              doc.author.forEach((auth) => {
-                let checkCode = auth.family + auth.given;
-                if (dataCheck.indexOf(checkCode) < 0) {
-                  dataCheck.push(checkCode);
-                  auth.crit = [];
-                  auth.crit.push(doc.title);
-                  data.push(auth);
-                } else {
-                  for (let j = 0; j < data.length; j++) {
-                    if (
-                      data[j].family === auth.family &&
-                      data[j].given === auth.given
-                    ) {
-                      data[j].crit.push(doc.title);
+              if (doc.hasOwnProperty("author")) {
+                doc.author.forEach((auth) => {
+                  let checkCode = auth.family + auth.given;
+                  if (dataCheck.indexOf(checkCode) < 0) {
+                    dataCheck.push(checkCode);
+                    auth.crit = [];
+                    auth.crit.push(doc.title);
+                    data.push(auth);
+                  } else {
+                    for (let j = 0; j < data.length; j++) {
+                      if (
+                        data[j].family === auth.family &&
+                        data[j].given === auth.given
+                      ) {
+                        data[j].crit.push(doc.title);
+                      }
                     }
                   }
-                }
-              });
+                });
+              }
             }
           });
         });
