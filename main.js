@@ -1,13 +1,6 @@
 const electron = require("electron");
-const {
-  app,
-  BrowserView,
-  BrowserWindow,
-  ipcMain,
-  shell,
-  dialog,
-  WebContents,
-} = electron;
+const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } =
+  electron;
 const fs = require("fs");
 const userDataPath = app.getPath("userData");
 const keytar = require("keytar"); // Load keytar to manage user API keys
@@ -521,7 +514,7 @@ ipcMain.handle("saveHTML", async (event, target) => {
 });
 
 ipcMain.handle("mainDevTools", async (event, target) => {
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 });
 
 ipcMain.handle("fluxDevTools", async (event, target) => {
