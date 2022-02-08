@@ -995,10 +995,15 @@ const tweetImporter = (dataset, query, name) => {
 
   let id = name + date;
 
+  //console.log(dataset, query, name);
+
   fs.readFile(query, "utf8", (err, queryKeywords) => {
     if (err) throw err;
-    queryKeywords = JSON.parse(queryKeywords);
-    queryKeywords.keywords.forEach((d) => content.keywords.push(d));
+    console.log(queryKeywords);
+    content.keywords = JSON.parse(queryKeywords);
+    //console.log(queryKeywords);
+    //queryKeywords.keywords.forEach((d) => content.keywords.push(d));
+    console.log(content.keywords);
     let path = userDataPath + "/flatDatasets/" + name + ".csv";
     content.path = path;
     fs.copyFileSync(dataset, path);
@@ -1368,6 +1373,8 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
       " process with the following arguments : " +
       JSON.stringify(fluxArgs)
   );
+
+  console.log(fluxAction, fluxArgs);
 
   switch (fluxAction) {
     case "regards":
