@@ -6230,7 +6230,7 @@ const fieldotype = (id) => {
 
       const data = datajson.content;
 
-      console.log(data);
+      //console.log(data);
 
       const keywordMap = {};
       var minYear = 9999;
@@ -6240,7 +6240,7 @@ const fieldotype = (id) => {
       var areaKeyCountMap = { EU: { 0: 0 }, CN: { 0: 0 }, US: { 0: 0 } };
 
       for (const cat in data) {
-        console.log(cat);
+        // console.log(cat);
         data[cat].forEach((doc) => {
           let year = doc.Issued["date-parts"][0][0];
           let y = parseInt(year);
@@ -6298,11 +6298,11 @@ const fieldotype = (id) => {
           }
         });
       }
-
+      /*
       console.log(JSON.stringify(keyCountMap));
       console.log(JSON.stringify(areaKeyCountMap));
       console.log(keywordMap);
-
+*/
       var dateDomain = [Date.parse(minYear), Date.parse(maxYear)];
 
       let dataArea = {};
