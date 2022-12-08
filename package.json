@@ -17,12 +17,12 @@
     "@hownetworks/tracegraph": "^0.3.0",
     "@observablehq/runtime": "^4.8.2",
     "bottleneck": "^2.19.5",
-    "csv-parser": "^2.3.5",
+    "csv-parser": "^3.0.0",
     "d3": "^6.5.0",
-    "dexie": "^3.0.3",
-    "keytar": "^6.0.1",
+    "dexie": "^3.2.2",
+    "keytar": "^7.9.0",
     "merge-files": "^0.1.2",
-    "mnemonist": "^0.38.1",
+    "mnemonist": "^0.39.5",
     "npm": "^6.14.11",
     "postprocessing": "^6.20.3",
     "quill": "^1.3.7",
@@ -31,7 +31,7 @@
     "whois-json": "^2.0.4"
   },
   "devDependencies": {
-    "electron": "10.2.0",
+    "electron": "21.2.0",
     "electron-builder": "^22.9.1",
     "electron-rebuild": "^2.3.4",
     "node-abi": "^2.19.3"
