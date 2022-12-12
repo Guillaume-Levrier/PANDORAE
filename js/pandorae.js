@@ -462,9 +462,8 @@ const typeSelect = () => {
 
 const saveSlides = () => {
   let name = document.getElementById("presNamer").value;
-  mainPresContent[activeIndex].text = document.getElementsByClassName(
-    "ql-editor"
-  )[0].innerHTML;
+  mainPresContent[activeIndex].text =
+    document.getElementsByClassName("ql-editor")[0].innerHTML;
   let date =
     new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
   if (priorDate) {
