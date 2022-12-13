@@ -16,10 +16,10 @@ const devModules = Object.keys(pkg.devDependencies).map(
 );
 const packOptions = {
   dir: "./",
-  name: "HypheBrowser",
+  name: "PANDORAE",
   asar: true,
   ignore: ignored.concat(devModules), // include runtime deps
-  icon: "app/icon/icon",
+  icon: "PANDORAE",
   version: electronPkg.version,
 };
 
