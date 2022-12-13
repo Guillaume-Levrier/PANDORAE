@@ -71,9 +71,6 @@ function createWindow() {
     resizable: true,
     webPreferences: {
       preload: basePath + "/js/preload-index.js",
-      worldSafeExecuteJavaScript: true,
-      contextIsolation: true,
-      //nodeIntegration: true,
       nodeIntegrationInWorker: true,
       plugins: true,
     },
@@ -123,8 +120,6 @@ const openHelper = (helperFile, message) => {
     x: screenWidth - 350,
     y: 100,
     webPreferences: {
-      worldSafeExecuteJavaScript: true,
-      contextIsolation: true,
       preload: basePath + "/js/tuto-help.js",
     },
   });
@@ -153,9 +148,6 @@ const openModal = (modalFile, scrollTo) => {
       y: 100,
       webPreferences: {
         preload: basePath + "/js/preload-" + modalFile + ".js",
-        worldSafeExecuteJavaScript: true,
-        contextIsolation: true,
-        //nodeIntegration: true,
         nodeIntegrationInWorker: true,
       },
     });
@@ -312,8 +304,8 @@ const chaerosCalculator = () => {
     show: false,
     webPreferences: {
       preload: basePath + "/js/preload-chaeros.js",
-      worldSafeExecuteJavaScript: true,
-      contextIsolation: true,
+      nodeIntegrationInWorker: true,
+      plugins: true,
     },
   });
 
@@ -321,7 +313,7 @@ const chaerosCalculator = () => {
 
   chaerosWindow.webContents.on("did-finish-load", function () {
     chaerosWindow.webContents.send("id", chaerosWindow.id);
-    chaerosWindow.webContents.openDevTools();
+    //chaerosWindow.webContents.openDevTools();
   });
 };
 
@@ -334,8 +326,6 @@ const createAudioManager = () => {
     show: false,
     webPreferences: {
       preload: basePath + "/js/preload-audio.js",
-      worldSafeExecuteJavaScript: true,
-      contextIsolation: true,
     },
   });
 
@@ -411,8 +401,6 @@ const biorXivScraper = (model, address, chaerosWinId) => {
     transparent: true,
     show: false,
     webPreferences: {
-      worldSafeExecuteJavaScript: true,
-      contextIsolation: true,
       preload: basePath + "/js/retrieve-models/" + model + ".js",
     },
   });
