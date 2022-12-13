@@ -30,9 +30,6 @@ jobs:
       - name: Package electron app in different versions and architectures 🔧
         run: npm run package
 
-      - name: Check builds dir
-        run: ls release dist
-
       - name: Upload release for Linux
         uses: svenstaro/upload-release-action@v2
         with:
