@@ -41,7 +41,7 @@
     "tiny-promisify": "^1.0.0",
     "cross-env": "^5.2.1",
     "del": "^4.1.1",
-    "webpack": "^5.75.0"
+    "webpack": "^4.44.0"
   },
   "build": {
     "artifactName": "PANDORAE.${ext}",
