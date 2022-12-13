@@ -11,7 +11,8 @@
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
-    "start": "electron ."
+    "start": "electron .",
+    "build:all": "cross-env NODE_ENV=production node bin/package.js"
   },
   "dependencies": {
     "@hownetworks/tracegraph": "^0.3.0",
@@ -34,7 +35,8 @@
     "electron": "22.0.0",
     "electron-builder": "^23.6.0",
     "electron-rebuild": "^2.3.4",
-    "node-abi": "^2.19.3"
+    "node-abi": "^2.19.3",
+    "tiny-promisify": "^1.0.0"
   },
   "build": {
     "artifactName": "PANDORAE.${ext}",
