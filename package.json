@@ -12,7 +12,8 @@
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
     "start": "electron .",
-    "build:all": "cross-env NODE_ENV=production node bin/package.js"
+    "build:all": "cross-env NODE_ENV=production node bin/package.js",
+    "package": "cd release/ && ls | while read d; do cd $d; rm -f *.zip; zip -r HyBro-$d.zip *; cd ..; done && mv */*.zip ."
   },
   "dependencies": {
     "@hownetworks/tracegraph": "^0.3.0",
@@ -35,9 +36,12 @@
     "electron": "22.0.0",
     "electron-builder": "^23.6.0",
     "electron-rebuild": "^2.3.4",
+    "electron-packager": "^17.1.1",
     "node-abi": "^2.19.3",
     "tiny-promisify": "^1.0.0",
-    "cross-env": "^5.2.1"
+    "cross-env": "^5.2.1",
+    "del": "^7.0.0",
+    "webpack": "^5.75.0"
   },
   "build": {
     "artifactName": "PANDORAE.${ext}",
