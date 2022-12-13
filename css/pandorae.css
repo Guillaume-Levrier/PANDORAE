@@ -930,6 +930,7 @@ label {
   font-size: 12px;
   font-weight: bold;
   cursor: pointer;
+  padding-right: 10px;
 }
 
 .credential {

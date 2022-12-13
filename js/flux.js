@@ -304,12 +304,10 @@ const powerValve = (fluxAction, item) => {
   ) {
     case "altmetricRetriever":
       fluxArgs.altmetricRetriever = {};
-      fluxArgs.altmetricRetriever.id = document.getElementById(
-        "altmetricRetriever"
-      ).name;
-      fluxArgs.altmetricRetriever.user = document.getElementById(
-        "userNameInput"
-      ).value;
+      fluxArgs.altmetricRetriever.id =
+        document.getElementById("altmetricRetriever").name;
+      fluxArgs.altmetricRetriever.user =
+        document.getElementById("userNameInput").value;
       break;
 
     case "reqISSN":
@@ -338,15 +336,13 @@ const powerValve = (fluxAction, item) => {
 
     case "scopusRetriever":
       fluxArgs.scopusRetriever = { user: "", query: "" };
-      fluxArgs.scopusRetriever.user = document.getElementById(
-        "userNameInput"
-      ).value;
+      fluxArgs.scopusRetriever.user =
+        document.getElementById("userNameInput").value;
       fluxArgs.scopusRetriever.query = document.getElementById(
         "scopuslocalqueryinput"
       ).value;
-      fluxArgs.scopusRetriever.bottleneck = document.getElementById(
-        "scopusRange"
-      ).value;
+      fluxArgs.scopusRetriever.bottleneck =
+        document.getElementById("scopusRange").value;
       message = "Retrieving data from Scopus";
       break;
 
@@ -404,9 +400,8 @@ const powerValve = (fluxAction, item) => {
           }
         }
 
-        fluxArgs.zoteroItemsRetriever.zoteroUser = document.getElementById(
-          "zoterouserinput"
-        ).value;
+        fluxArgs.zoteroItemsRetriever.zoteroUser =
+          document.getElementById("zoterouserinput").value;
         fluxArgs.zoteroItemsRetriever.importName = document
           .getElementById("zoteroImportName")
           .value.replace(/\s/g, "");
@@ -419,12 +414,10 @@ const powerValve = (fluxAction, item) => {
       fluxArgs.zoteroCollectionBuilder.id = document.getElementById(
         "csljson-dataset-preview"
       ).name;
-      fluxArgs.zoteroCollectionBuilder.collectionName = document.getElementById(
-        "zoteroCollecName"
-      ).value;
-      fluxArgs.zoteroCollectionBuilder.zoteroUser = document.getElementById(
-        "zoterouserinput"
-      ).value;
+      fluxArgs.zoteroCollectionBuilder.collectionName =
+        document.getElementById("zoteroCollecName").value;
+      fluxArgs.zoteroCollectionBuilder.zoteroUser =
+        document.getElementById("zoterouserinput").value;
       break;
 
     case "biorxivRetriever":
@@ -443,15 +436,12 @@ const powerValve = (fluxAction, item) => {
 
     case "tweetImporter":
       fluxArgs.tweetImporter = {};
-      fluxArgs.tweetImporter.dataset = document.getElementById(
-        "twitterDataset"
-      ).files[0].path;
-      fluxArgs.tweetImporter.query = document.getElementById(
-        "twitterQuery"
-      ).files[0].path;
-      fluxArgs.tweetImporter.datasetName = document.getElementById(
-        "twitterDatasetName"
-      ).value;
+      fluxArgs.tweetImporter.dataset =
+        document.getElementById("twitterDataset").files[0].path;
+      fluxArgs.tweetImporter.query =
+        document.getElementById("twitterQuery").files[0].path;
+      fluxArgs.tweetImporter.datasetName =
+        document.getElementById("twitterDatasetName").value;
       message = "loading twitter dataset";
       break;
   }
@@ -519,15 +509,30 @@ const datasetDisplay = (divId, kind) => {
         });
         button.innerText = file.name;
 
-        let rem = document.createElement("i");
-        rem.className = "fluxDelDataset material-icons";
-        rem.addEventListener("click", (e) => {
+        let download = document.createElement("i");
+        download.className = "fluxDelDataset material-icons";
+        download.addEventListener("click", (e) => {
+          let name = file.name + ".json";
+          ipcRenderer.invoke(
+            "saveDataset",
+            { defaultPath: name },
+            JSON.stringify(file, replacer)
+          );
+        });
+
+        download.innerText = "download";
+
+        let remove = document.createElement("i");
+        remove.className = "fluxDelDataset material-icons";
+        remove.addEventListener("click", (e) => {
           datasetRemove(kind, file.id);
         });
-        rem.innerText = "close";
+        remove.innerText = "close";
 
         line.appendChild(button);
-        line.appendChild(rem);
+        line.appendChild(remove);
+        line.appendChild(download);
+
         list.appendChild(line);
       });
 
@@ -535,6 +540,7 @@ const datasetDisplay = (divId, kind) => {
         document.getElementById(divId).innerHTML =
           "No dataset available in the system";
       } else {
+        document.getElementById(divId).innerHTML = "";
         document.getElementById(divId).appendChild(list);
       }
     });
@@ -755,9 +761,8 @@ const scopusBasicRetriever = (checker) => {
           "<br>[Reload this window to submit a different query.]<br>" +
           "<br>Amount of requests per second: <span id='scopusRangeValue'>1</span><input style='margin-left:30px' type='range' oninput='this.previousSibling.innerText=parseInt(this.value)' id='scopusRange' min='1' step='any' max='20' value='1'><br><br>";
 
-        document.getElementById(
-          "scopus-basic-previewer"
-        ).innerHTML = dataBasicPreview;
+        document.getElementById("scopus-basic-previewer").innerHTML =
+          dataBasicPreview;
 
         // Display success in request button
         fluxButtonAction(
@@ -831,9 +836,8 @@ ipcRenderer.on("biorxiv-retrieve", (event, message) => {
     case "biorxiv-amount":
       let dataBasicPreview = "Expected amount: " + message.content;
 
-      document.getElementById(
-        "biorxiv-basic-previewer"
-      ).innerHTML = dataBasicPreview;
+      document.getElementById("biorxiv-basic-previewer").innerHTML =
+        dataBasicPreview;
 
       bioRxivAmount = message.content.match(/\d+/g).join("");
 
@@ -884,9 +888,8 @@ const clinicTrialBasicRetriever = () => {
         "<br>[Reload this window to submit a different query.]<br>" +
         "<br>Amount of requests per second: <span id='scopusRangeValue'>1</span><input style='margin-left:30px' type='range' oninput='this.previousSibling.innerText=parseInt(this.value)' id='scopusRange' min='1' step='any' max='20' value='1'><br><br>";
 
-      document.getElementById(
-        "clinical_trials-basic-previewer"
-      ).innerHTML = dataBasicPreview;
+      document.getElementById("clinical_trials-basic-previewer").innerHTML =
+        dataBasicPreview;
 
       // Display success in request button
       fluxButtonAction(
