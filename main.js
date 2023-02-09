@@ -4,6 +4,9 @@ const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } =
 const fs = require("fs");
 const userDataPath = app.getPath("userData");
 const keytar = require("keytar"); // Load keytar to manage user API keys
+const dns = require('dns');
+
+
 
 var windowIds = {
   flux: { id: 0, open: false },
@@ -180,7 +183,7 @@ ipcMain.on("userStatus", (event, req) => {
   }
 });
 
-var currentTheme = "normal";
+var currentTheme = "vega";
 
 const readTheme = () => {
   fs.readFile(userDataPath + "/themes/themes.json", "utf8", (err, data) => {
@@ -468,7 +471,7 @@ ipcMain.handle("restart", async (event, mess) => {
 
 ipcMain.handle("saveDataset", async (event, target, data) => {
   dialog.showSaveDialog(target).then((filePath) => {
-    fs.writeFile(filePath.filePath, data, () => {});
+    fs.writeFile(filePath.filePath, data, () => { });
   });
 });
 
@@ -476,7 +479,7 @@ ipcMain.handle("savePNG", async (event, target) => {
   setTimeout(() => {
     mainWindow.capturePage().then((img) => {
       dialog.showSaveDialog(target).then((filePath) => {
-        fs.writeFile(filePath.filePath, img.toPNG(), () => {});
+        fs.writeFile(filePath.filePath, img.toPNG(), () => { });
       });
     });
   }, 250);
@@ -502,7 +505,7 @@ ipcMain.handle("saveHTML", async (event, target) => {
 });
 
 ipcMain.handle("mainDevTools", async (event, target) => {
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 });
 
 ipcMain.handle("fluxDevTools", async (event, target) => {
@@ -512,3 +515,29 @@ ipcMain.handle("fluxDevTools", async (event, target) => {
 ipcMain.handle("openEx", async (event, target) => {
   shell.openExternal(target);
 });
+
+// Check if PANDORAE has a access to a domain
+
+const dnslist = [
+  //{ name: "BNF", url: "example.org" },
+  //{ name: "BnF", url: "www.bnf.fr" },
+  // { name: "BNF", url: "nemo10.bnf.fr:8983" },
+]
+dnslist.forEach(d => {
+  //console.log(d.url)
+  dns.lookup(d.url, (err, address, family) => {
+    console.log(err, address, family)
+    console.log('address: %j family: IPv%s', address, family)
+  });
+})
+
+const dnsLocalServiceList = [
+  { name: "BnF Solr Nemo 10", url: "172.20.64.112", port: 8983 },
+];
+
+dnsLocalServiceList.forEach(d => {
+  dns.lookupService(d.url, d.port, (err, hostname, service) => {
+    console.log(hostname, service);
+    // Prints: localhost ssh
+  });
+})
