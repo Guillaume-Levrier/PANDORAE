@@ -1424,7 +1424,8 @@ const hypheCorpusList = (target, prevId) => {
               "<strong>" +
               hypheResponse[0].result[corpus].name +
               "</strong> - IN WE:" +
-              hypheResponse[0].result[corpus].webentities_in;
+              hypheResponse[0].result[corpus].webentities_in +
+              " - ";
 
             var load = document.createElement("INPUT");
             load.type = "button";
