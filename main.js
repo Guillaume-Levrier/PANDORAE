@@ -181,23 +181,62 @@ ipcMain.on("userStatus", (event, req) => {
   }
 });
 
-var currentTheme = "vega";
+var themeData = fs.readFileSync(
+  userDataPath + "/themes/themes.json",
+  "utf8",
+  (err, data) => JSON.parse(data)
+);
 
-const readTheme = () => {
-  fs.readFile(userDataPath + "/themes/themes.json", "utf8", (err, data) => {
-    var themeData = JSON.parse(data);
-    mainWindow.webContents.send("themeContent", themeData[currentTheme]);
-  });
+themeData = JSON.parse(themeData);
+
+const getTheme = () => {
+  var t;
+
+  for (const theme in themeData) {
+    if (themeData[theme].selected) {
+      t = themeData[theme];
+    }
+  }
+
+  mainWindow.webContents.send("themeContent", t);
 };
+
+const setTheme = (newTheme) => {
+  //console.log(newTheme);
+  //console.log(themeData);
+  for (const theme in themeData) {
+    themeData[theme].selected = false;
+    if (theme === newTheme) {
+      themeData[theme].selected = true;
+    }
+  }
+
+  fs.writeFileSync(
+    userDataPath + "/themes/themes.json",
+    JSON.stringify(themeData),
+    "utf8",
+    (err) => {
+      if (err) throw err;
+    }
+  );
+
+  mainWindow.webContents.send("themeContent", themeData[newTheme]);
+};
+
+//const readTheme = (themeName) => {
+//var themeData =
+
+//
+//});
 
 ipcMain.on("theme", (event, req) => {
   switch (req.type) {
     case "read":
-      readTheme();
+      getTheme();
       break;
 
     case "set":
-      currentTheme = req.theme;
+      setTheme(req.theme);
       break;
   }
 });
