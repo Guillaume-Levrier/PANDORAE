@@ -379,7 +379,7 @@ const scopusGeolocate = (dataset) => {
         ipcRenderer.send(
           "console-logs",
           "Unable to locale the following cities " +
-            JSON.stringify(unlocatedCities)
+          JSON.stringify(unlocatedCities)
         );
         doc.content.articleGeoloc = true; // Mark file as geolocated
         pandodb.enriched.put(doc);
@@ -518,10 +518,10 @@ const scopusRetriever = (user, query, bottleRate) => {
                       ipcRenderer.send(
                         "console-logs",
                         "Scopus dataset on " +
-                          query +
-                          " for user " +
-                          user +
-                          " have been successfully retrieved."
+                        query +
+                        " for user " +
+                        user +
+                        " have been successfully retrieved."
                       );
                       setTimeout(() => {
                         ipcRenderer.send("win-destroy", winId);
@@ -855,12 +855,12 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
   ipcRenderer.send(
     "console-logs",
     "Started retrieving collections " +
-      collections +
-      "for user " +
-      zoteroUser +
-      " under the import name " +
-      importName +
-      " into SYSTEM."
+    collections +
+    "for user " +
+    zoteroUser +
+    " under the import name " +
+    importName +
+    " into SYSTEM."
   );
 
   const limiter = new bottleneck({
@@ -949,10 +949,10 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
                     ipcRenderer.send(
                       "chaeros-notification",
                       "Loading " +
-                        responseAmount +
-                        " of " +
-                        responseTarget +
-                        " documents."
+                      responseAmount +
+                      " of " +
+                      responseTarget +
+                      " documents."
                     );
 
                     //if (items.length === thisCollectionAmount) {
@@ -1016,11 +1016,11 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
   ipcRenderer.send(
     "console-logs",
     "Building collection" +
-      collectionName +
-      " for user " +
-      zoteroUser +
-      " in path " +
-      id
+    collectionName +
+    " for user " +
+    zoteroUser +
+    " in path " +
+    id
   );
 
   ipcRenderer.send(
@@ -1205,9 +1205,9 @@ const reqISSN = (user, scopid) => {
           ipcRenderer.send(
             "chaeros-notification",
             scopusISSNResponse.length +
-              "/" +
-              ISSNPromises.length +
-              " journal profiles retrieved."
+            "/" +
+            ISSNPromises.length +
+            " journal profiles retrieved."
           ); // Sending notification to console
 
           if (scopusISSNResponse.length === ISSNPromises.length) {
@@ -1268,9 +1268,9 @@ const regardsRetriever = (queryContent) => {
     for (let i = 1; i <= totalReq; i++) {
       pagesReq.push(
         "https://www.nosdeputes.fr/recherche/" +
-          queryContent +
-          "?format=json&count=500&page=" +
-          i
+        queryContent +
+        "?format=json&count=500&page=" +
+        i
       );
     }
 
@@ -1377,10 +1377,10 @@ const regardsRetriever = (queryContent) => {
                     seances.forEach((seance, leg) => {
                       seanceReqs.push(
                         "https://www.nosdeputes.fr/" +
-                          seance +
-                          "/seance/" +
-                          leg +
-                          "/json"
+                        seance +
+                        "/seance/" +
+                        leg +
+                        "/json"
                       );
                     });
 
@@ -1395,9 +1395,9 @@ const regardsRetriever = (queryContent) => {
                           ipcRenderer.send(
                             "chaeros-notification",
                             "Retrieving séance " +
-                              seanceN +
-                              " of " +
-                              seanceReqs.length
+                            seanceN +
+                            " of " +
+                            seanceReqs.length
                           );
                           resSeances.push(resSeance);
                           if (resSeances.length === seanceReqs.length) {
@@ -1447,7 +1447,7 @@ const regardsRetriever = (queryContent) => {
                                 deps.deputes.forEach((d) =>
                                   depMap.set(d.depute.id, d)
                                 );
-                                console.log(depMap);
+                                // console.log(depMap);
                                 for (const key in regContent) {
                                   regContent[key].forEach((d) => {
                                     if (d.hasOwnProperty("content")) {
@@ -1506,6 +1506,25 @@ const regardsRetriever = (queryContent) => {
   });
 };
 
+
+const solrMetaExplorer = (req, count) => {
+
+  const url = (req, start, end) => `http://IP:PORT/solr/netarchivebuilder/select?q=${req}&start=${start}&rows=${end - start}`
+
+  const urlArray = []
+
+  if (count > 200) {
+    for (let i = 0; i < count / 200 + 1; i++) {
+      urlArray.push(url(req, i * 200, (i + 1) * 200))
+    }
+  }
+
+  console.log(urlArray)
+
+  // activate bottleneck here.
+
+}
+
 //========== chaerosSwitch ==========
 // Switch used to choose the function to execute in CHÆROS.
 
@@ -1513,14 +1532,19 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
   ipcRenderer.send(
     "console-logs",
     "CHÆROS started a " +
-      fluxAction +
-      " process with the following arguments : " +
-      JSON.stringify(fluxArgs)
+    fluxAction +
+    " process with the following arguments : " +
+    JSON.stringify(fluxArgs)
   );
 
   console.log(fluxAction, fluxArgs);
 
   switch (fluxAction) {
+
+    case "bnf-solr":
+      solrMetaExplorer(fluxArgs.bnfsolrquery, fluxArgs.solrbnfcount);
+      break;
+
     case "regards":
       regardsRetriever(fluxArgs.regquery);
       break;
