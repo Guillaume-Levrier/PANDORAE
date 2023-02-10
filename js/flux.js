@@ -33,47 +33,12 @@ const date =
 let traces = [
   {
     hops: [
-      { info: { name: "OPEN" }, name: "OPEN" },
-      { info: { name: "CLINICAL⠀TRIALS" }, name: "CLINICAL⠀TRIALS" },
-      { info: { name: "SYSTEM" }, name: "SYSTEM" },
-    ],
-  },
-  {
-    hops: [
       { info: { name: "USER" }, name: "USER" },
       { info: { name: "TWITTER" }, name: "TWITTER" },
       { info: { name: "SYSTEM" }, name: "SYSTEM" },
     ],
   },
-  {
-    hops: [
-      { info: { name: "ENRICHMENT" }, name: "ENRICHMENT" },
-      { info: { name: "CSL-JSON" }, name: "CSL-JSON" },
-      { info: { name: "ZOTERO" }, name: "ZOTERO" },
-      { info: { name: "SYSTEM" }, name: "SYSTEM" },
-    ],
-  },
-  {
-    hops: [
-      { info: { name: "USER" }, name: "USER" },
-      { info: { name: "SCOPUS/WoS" }, name: "SCOPUS/WoS" },
-      { info: { name: "ENRICHMENT" }, name: "ENRICHMENT" },
-    ],
-  },
-  {
-    hops: [
-      { info: { name: "OPEN" }, name: "OPEN" },
-      { info: { name: "BIORXIV" }, name: "BIORXIV" },
-      { info: { name: "ENRICHMENT" }, name: "ENRICHMENT" },
-    ],
-  },
-  {
-    hops: [
-      { info: { name: "OPEN" }, name: "OPEN" },
-      { info: { name: "REGARDSCITOYENS" }, name: "REGARDSCITOYENS" },
-      { info: { name: "CSL-JSON" }, name: "CSL-JSON" },
-    ],
-  },
+
   {
     hops: [
       { info: { name: "OPEN" }, name: "OPEN" },
@@ -81,6 +46,14 @@ let traces = [
     ],
   },
 ];
+
+const addHop = (steparr) => {
+  const hops = {
+    hops: [],
+  };
+  steparr.forEach((d) => hops.hops.push({ info: { name: d }, name: d }));
+  traces.push(hops);
+};
 
 const drawFlux = (svg, traces, horizontal, showTexts) => {
   function makeText(selection) {
@@ -1855,7 +1828,54 @@ window.addEventListener("load", (event) => {
   ];
 
   const svg = d3.select("svg");
-  drawFlux(svg, traces, false, true);
+
+  ipcRenderer.invoke("checkflux", true).then((result) => {
+    const res = JSON.parse(result);
+
+    res.dnslist.forEach((d) => {
+      if (d.valid) {
+        switch (d.name) {
+          case "Scopus":
+            addHop(["USER", "SCOPUS", "ENRICHMENT"]);
+            break;
+
+          case "BIORXIV":
+            addHop(["OPEN", "BIORXIV", "ENRICHMENT"]);
+            break;
+
+          case "Zotero":
+            addHop(["ENRICHMENT", "CSL-JSON", "ZOTERO", "SYSTEM"]);
+            break;
+
+          case "Clinical Trials":
+            addHop(["OPEN", "CLINICALㅤTRIALS", "SYSTEM"]);
+            break;
+
+          case "Regards Citoyens":
+            addHop(["OPEN", "REGARDSCITOYENS", "CSL-JSON"]);
+            break;
+
+          default:
+            break;
+        }
+      }
+    });
+
+    res.dnsLocalServiceList.forEach((d) => {
+      if (d.valid) {
+        switch (d.name) {
+          case "BnF Solr Nemo 10":
+            addHop(["BNF", "SYSTEM"]);
+            break;
+
+          default:
+            break;
+        }
+      }
+    });
+
+    drawFlux(svg, traces, false, true);
+  });
 
   function funcSwitch(e, but) {
     switch (but.func) {
