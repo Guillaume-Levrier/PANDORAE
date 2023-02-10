@@ -4,9 +4,7 @@ const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } =
 const fs = require("fs");
 const userDataPath = app.getPath("userData");
 const keytar = require("keytar"); // Load keytar to manage user API keys
-const dns = require('dns');
-
-
+const dns = require("dns");
 
 var windowIds = {
   flux: { id: 0, open: false },
@@ -471,7 +469,7 @@ ipcMain.handle("restart", async (event, mess) => {
 
 ipcMain.handle("saveDataset", async (event, target, data) => {
   dialog.showSaveDialog(target).then((filePath) => {
-    fs.writeFile(filePath.filePath, data, () => { });
+    fs.writeFile(filePath.filePath, data, () => {});
   });
 });
 
@@ -479,7 +477,7 @@ ipcMain.handle("savePNG", async (event, target) => {
   setTimeout(() => {
     mainWindow.capturePage().then((img) => {
       dialog.showSaveDialog(target).then((filePath) => {
-        fs.writeFile(filePath.filePath, img.toPNG(), () => { });
+        fs.writeFile(filePath.filePath, img.toPNG(), () => {});
       });
     });
   }, 250);
@@ -516,28 +514,40 @@ ipcMain.handle("openEx", async (event, target) => {
   shell.openExternal(target);
 });
 
-// Check if PANDORAE has a access to a domain
+// Check if PANDORAE-FLUX has a access to pregistered domains
 
 const dnslist = [
-  //{ name: "BNF", url: "example.org" },
-  //{ name: "BnF", url: "www.bnf.fr" },
-  // { name: "BNF", url: "nemo10.bnf.fr:8983" },
-]
-dnslist.forEach(d => {
-  //console.log(d.url)
+  { name: "Scopus", url: "api.elsevier.com" },
+  { name: "BIORXIV", url: "www.biorxiv.org" },
+  { name: "Zotero", url: "api.zotero.org" },
+  { name: "Clinical Trials", url: "clinicaltrials.gov" },
+  { name: "Regards Citoyens", url: "nosdeputes.fr" },
+];
+dnslist.forEach((d) => {
   dns.lookup(d.url, (err, address, family) => {
-    console.log(err, address, family)
-    console.log('address: %j family: IPv%s', address, family)
+    if (address) {
+      d.valid = true;
+    } else {
+      d.valid = false;
+    }
   });
-})
+});
 
 const dnsLocalServiceList = [
   { name: "BnF Solr Nemo 10", url: "172.20.64.112", port: 8983 },
 ];
 
-dnsLocalServiceList.forEach(d => {
+dnsLocalServiceList.forEach((d) => {
   dns.lookupService(d.url, d.port, (err, hostname, service) => {
-    console.log(hostname, service);
-    // Prints: localhost ssh
+    if (hostname || service) {
+      d.valid = true;
+    } else {
+      d.valid = false;
+    }
   });
-})
+});
+
+ipcMain.handle("checkflux", async (event, mess) => {
+  const result = JSON.stringify({ dnslist, dnsLocalServiceList });
+  return result;
+});

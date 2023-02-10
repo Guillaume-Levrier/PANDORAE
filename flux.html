@@ -1,14 +1,18 @@
-<!DOCTYPE html><html><meta charset="UTF-8">
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
 <title>PANDORÆ-FLUX</title>
-<meta http-equiv="Content-Security-Policy" content="script-src 'self';object-src 'none';base-uri 'none';">
+<meta http-equiv="Content-Security-Policy"
+  content="script-src 'self';object-src 'none';base-uri 'none';">
 
 <style>
-  body{
-    background-color:white;
+  body {
+    background-color: white;
     overflow: scroll;
   }
+
   ::-webkit-scrollbar {
-      display: none;
+    display: none;
   }
 </style>
 
@@ -17,49 +21,76 @@
 
 <!-- OPEN TAB -->
 <div id="open" style="display:none;" class="fluxTabs">
-  
+
   <span class="flux-title">Open</span><br><br>
   <p>The open databases you can request are:
-    <ul>
-      <li>datasets from currently running hyphe servers</li>
-      <li>bioRxiv requests (scraped then rehydrated through the API)</li>
-      <li>clinical trials requests (obtained through clinical trials gov API)</li>
-    </ul>
+  <ul>
+    <li>datasets from currently running hyphe servers</li>
+    <li>bioRxiv requests (scraped then rehydrated through the API)</li>
+    <li>clinical trials requests (obtained through clinical trials gov API)</li>
+  </ul>
   </p>
 
-  </div>
+</div>
 
 <div id="flux-manager" class="fluxTabs"><svg></svg></div>
 
 <!-- USER TAB -->
 <div id="user" style="display:none;" class="fluxTabs">
   <span class="flux-title">USER</span><br><br>
-    <form id="user-data-form" autocomplete="off">
-      <div class="credential"> Name:<br> <input class="fluxInput" spellcheck="false" id="userNameInput" type="text" value="Enter your name"><br><br></div>
-      <div class="credential"> Email:<br> <input class="fluxInput" spellcheck="false" id="userMailInput" type="text" value="Enter your email"><br><br></div>
-      <div class="credential"> Zotero group id:<br> <input class="fluxInput" spellcheck="false" id="zoterouserinput" type="text" value="Enter your zotero group code"><br><br></div>
-      <button type="submit" id="user-button" class="flux-button">Update User Credentials</button><br>
- 
-      <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" id="zoteroAPIValidation">help_outline</i> Zotero API key:<br> <input class="fluxInput" spellcheck="false" id="zoterokeyinput" type="password" value="Enter your Zotero API key"><i title="Click this button to update your credentials" class="material-icons updateCredentials" id="Zotero">cached</i> <br><br></div>
-      <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" id="scopusValidation">help_outline</i> Scopus API key:<br> <input class="fluxInput" spellcheck="false" id="scopuskeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" id="Scopus">cached</i><br><br></div>
-     <!-- <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="altmetricValidation">help_outline</i> Altmetric API key:<br> <input class="fluxInput" spellcheck="false" id="altmetrickeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Altmetric">cached</i><br><br></div>
+  <form id="user-data-form" autocomplete="off">
+    <div class="credential"> Name:<br> <input class="fluxInput"
+        spellcheck="false" id="userNameInput" type="text"
+        value="Enter your name"><br><br></div>
+    <div class="credential"> Email:<br> <input class="fluxInput"
+        spellcheck="false" id="userMailInput" type="text"
+        value="Enter your email"><br><br></div>
+    <div class="credential"> Zotero group id:<br> <input class="fluxInput"
+        spellcheck="false" id="zoterouserinput" type="text"
+        value="Enter your zotero group code"><br><br></div>
+    <button type="submit" id="user-button" class="flux-button">Update User
+      Credentials</button><br>
+
+    <div class="credential"><i
+        title="Click this button to check your API credentials status"
+        class="material-icons validation"
+        id="zoteroAPIValidation">help_outline</i> Zotero API key:<br> <input
+        class="fluxInput" spellcheck="false" id="zoterokeyinput" type="password"
+        value="Enter your Zotero API key"><i
+        title="Click this button to update your credentials"
+        class="material-icons updateCredentials" id="Zotero">cached</i> <br><br>
+    </div>
+    <div class="credential"><i
+        title="Click this button to check your API credentials status"
+        class="material-icons validation" id="scopusValidation">help_outline</i>
+      Scopus API key:<br> <input class="fluxInput" spellcheck="false"
+        id="scopuskeyinput" type="password" value=""><i
+        title="Click this button to update your credentials"
+        class="material-icons updateCredentials" id="Scopus">cached</i><br><br>
+    </div>
+    <!-- <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="altmetricValidation">help_outline</i> Altmetric API key:<br> <input class="fluxInput" spellcheck="false" id="altmetrickeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Altmetric">cached</i><br><br></div>
       <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="twitterValidation">help_outline</i> Twitter API key:<br> <input class="fluxInput" spellcheck="false" id="twitterkeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Twitter">cached</i><br><br></div>
       <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="openAccessValidation">help_outline</i> OAbutton API key:<br> <input class="fluxInput" spellcheck="false" id="OAbutton" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="OAbutton">cached</i><br><br></div> -->
-    </form>
+  </form>
 </div>
 
 <!-- HYPHE TAB -->
 <div id="hyphe" style="display:none;" class="fluxTabs">
-  
+
   <span class="flux-title">Hyphe</span><br><br>
   <p id="hyphendpoint"></p>
-  <input class="fluxInput" spellcheck="false" id="hypheaddress" type="text" value="https://hyphe.medialab.sciences-po.fr/demo"><br><br>
-  <button type="submit" class="flux-button" id="hyphe-checker">Check Hyphe endpoint</button><br><br>
-  <button type="submit" style="display:none;" class="flux-button" id="hyphe-exporter">Add to Hyphe endpoints</button><br><br>
-  <button type="submit" class="flux-button" id="hypheDataset">Display available Hyphe endpoints</button><br>
-  <div id="hyphe-dataset-preview"  style="position:relative;max-height: 200px;overflow-y: scroll;"></div>
+  <input class="fluxInput" spellcheck="false" id="hypheaddress" type="text"
+    value="https://hyphe.medialab.sciences-po.fr/demo"><br><br>
+  <button type="submit" class="flux-button" id="hyphe-checker">Check Hyphe
+    endpoint</button><br><br>
+  <button type="submit" style="display:none;" class="flux-button"
+    id="hyphe-exporter">Add to Hyphe endpoints</button><br><br>
+  <button type="submit" class="flux-button" id="hypheDataset">Display available
+    Hyphe endpoints</button><br>
+  <div id="hyphe-dataset-preview"
+    style="position:relative;max-height: 200px;overflow-y: scroll;"></div>
 
-  <div id="hyphe-dataset-list"  style="position:relative;"></div>
+  <div id="hyphe-dataset-list" style="position:relative;"></div>
 
   <!-- send to SYSTEM instead -->
 
@@ -69,162 +100,215 @@
 <div id="clinical⠀trials" style="display:none;" class="fluxTabs">
   <span class="flux-title">Clinical Trials</span>
   <br><br>
-     <form id="clinical_trials-form" autocomplete="off">Clinical Trials Query:<br> 
-        <input class="fluxInput" spellcheck="false" id="clinical_trialslocalqueryinput" type="text" value="Enter your query"><br><br>
-        <button type="submit" class="flux-button" id="clinical_trials-basic-query">Retrieve basic info</button>&nbsp;&nbsp;
-        <div id="clinical_trials-basic-previewer" style="position:relative;"></div>
-        <button style="display:none;" type="submit" class="flux-button" id="clinical_trials-query">Submit full query to the Clinical Trials API services</button>
-        <br><br>
-     </form>
+  <form id="clinical_trials-form" autocomplete="off">Clinical Trials Query:<br>
+    <input class="fluxInput" spellcheck="false"
+      id="clinical_trialslocalqueryinput" type="text"
+      value="Enter your query"><br><br>
+    <button type="submit" class="flux-button"
+      id="clinical_trials-basic-query">Retrieve basic info</button>&nbsp;&nbsp;
+    <div id="clinical_trials-basic-previewer" style="position:relative;"></div>
+    <button style="display:none;" type="submit" class="flux-button"
+      id="clinical_trials-query">Submit full query to the Clinical Trials API
+      services</button>
+    <br><br>
+  </form>
 </div>
 
 <!-- SCOPUS TAB -->
-<div id="scopus/wos" style="display:none;" class="fluxTabs">
-    <span class="flux-title">SCOPUS</span>
+<div id="scopus" style="display:none;" class="fluxTabs">
+  <span class="flux-title">SCOPUS</span>
+  <br><br>
+  <form id="scopus-form" autocomplete="off">Scopus Query:<br>
+    <input class="fluxInput" spellcheck="false" id="scopuslocalqueryinput"
+      type="text" value="Enter your Scopus Query"><br><br><br>
+    <button type="submit" class="flux-button" id="scopus-basic-query">Retrieve
+      basic info</button>&nbsp;&nbsp;
+    <div id="scopus-basic-previewer" style="position:relative;"></div>
+    <button style="display:none;" type="submit" class="flux-button"
+      id="scopus-query">Submit Scopus Query</button>
     <br><br>
-       <form id="scopus-form" autocomplete="off">Scopus Query:<br> 
-          <input class="fluxInput" spellcheck="false" id="scopuslocalqueryinput" type="text" value="Enter your Scopus Query"><br><br><br>
-          <button type="submit" class="flux-button" id="scopus-basic-query">Retrieve basic info</button>&nbsp;&nbsp;
-          <div id="scopus-basic-previewer" style="position:relative;"></div>
-          <button style="display:none;" type="submit" class="flux-button" id="scopus-query">Submit Scopus Query</button>
-          <br><br><hr><br><br>
-          Scopus ISSN retrieval: retrieve journal profiles of articles contained in previous Scopus requests.<br><br>
-          <button type="submit" class="flux-button" id="scopus-list-display">Update available dataset list</button>  &nbsp; &nbsp; &nbsp;<button type="submit" class="flux-button" style="display: none;" id="issn-prepare">Request Journal Profiles</button> &nbsp; &nbsp; &nbsp;<button type="submit" class="flux-button" style="display: none;" id="export-cited-by">Export [cited by] data</button>&nbsp; &nbsp; &nbsp;<button type="submit" class="flux-button" style="display: none;" id="export-affil-rank">Export Affiliation ranking</button><br><br>
-       </form>
-       <div id="scopus-dataset-ISSN-list"  style="position:relative;">No dataset loaded yet.</div>
+    <hr><br><br>
+    Scopus ISSN retrieval: retrieve journal profiles of articles contained in
+    previous Scopus requests.<br><br>
+    <button type="submit" class="flux-button" id="scopus-list-display">Update
+      available dataset list</button> &nbsp; &nbsp; &nbsp;<button type="submit"
+      class="flux-button" style="display: none;" id="issn-prepare">Request
+      Journal Profiles</button> &nbsp; &nbsp; &nbsp;<button type="submit"
+      class="flux-button" style="display: none;" id="export-cited-by">Export
+      [cited by] data</button>&nbsp; &nbsp; &nbsp;<button type="submit"
+      class="flux-button" style="display: none;" id="export-affil-rank">Export
+      Affiliation ranking</button><br><br>
+  </form>
+  <div id="scopus-dataset-ISSN-list" style="position:relative;">No dataset
+    loaded yet.</div>
 </div>
 
 <!-- BIORXIV TAB -->
 <div id="biorxiv" style="display:none;" class="fluxTabs">
   <span class="flux-title">bioRxiv</span>
   <br><br>
-     <form id="biorxiv-form" autocomplete="off">Query:<br> 
-        <input class="fluxInput" spellcheck="false" id="biorxivlocalqueryinput" type="text" value=""><br><br>
-          From: <input type="date" id="biorxiv-date-from"> - To: <input type="date" id="biorxiv-date-to"><br>
-          <br> Database: <input list="biorxiv-medrxiv" id="biorxiv-list" value="biorxiv"/><br><br>
-            <datalist id="biorxiv-medrxiv">
-                <option value="biorxiv">
-            </datalist>
-            Author: <input class="fluxInput" spellcheck="false" id="biorxiv-author" type="text" value=""><br><br>
-            DOI : <input class="fluxInput" spellcheck="false" id="biorxiv-doi" type="text" value=""><br><br>
-            <button type="submit" class="flux-button" id="biorxiv-basic-query" >Retrieve basic info</button>&nbsp;&nbsp;
-        <div id="biorxiv-basic-previewer" style="position:relative;"></div><br><br>
-        <button style="display: none;" type="submit" class="flux-button" id="biorxiv-query">Submit bioRxiv Query</button>
-        <br><br>
-     </form>
+  <form id="biorxiv-form" autocomplete="off">Query:<br>
+    <input class="fluxInput" spellcheck="false" id="biorxivlocalqueryinput"
+      type="text" value=""><br><br>
+    From: <input type="date" id="biorxiv-date-from"> - To: <input type="date"
+      id="biorxiv-date-to"><br>
+    <br> Database: <input list="biorxiv-medrxiv" id="biorxiv-list"
+      value="biorxiv" /><br><br>
+    <datalist id="biorxiv-medrxiv">
+      <option value="biorxiv">
+    </datalist>
+    Author: <input class="fluxInput" spellcheck="false" id="biorxiv-author"
+      type="text" value=""><br><br>
+    DOI : <input class="fluxInput" spellcheck="false" id="biorxiv-doi"
+      type="text" value=""><br><br>
+    <button type="submit" class="flux-button" id="biorxiv-basic-query">Retrieve
+      basic info</button>&nbsp;&nbsp;
+    <div id="biorxiv-basic-previewer" style="position:relative;"></div><br><br>
+    <button style="display: none;" type="submit" class="flux-button"
+      id="biorxiv-query">Submit bioRxiv Query</button>
+    <br><br>
+  </form>
 </div>
 
 <!-- REGARDSCITOYENS TAB -->
 <div id="regardscitoyens" style="display:none;" class="fluxTabs">
   <span class="flux-title">Regards Citoyens</span>
   <br><br>
-     <form id="regards-form" autocomplete="off">Query:<br> 
-        <input class="fluxInput" spellcheck="false" id="regardsrecherche" type="text" value=""><br><br>
-            <button type="submit" class="flux-button" id="regards-basic-query" >Retrieve basic info</button>&nbsp;&nbsp;
-        <div id="regards-basic-previewer" style="position:relative;"></div><br><br>
-        <button style="display: none;" type="submit" class="flux-button" id="regards-query">Submit Full Query</button>
-        <br><br>
-     </form>
+  <form id="regards-form" autocomplete="off">Query:<br>
+    <input class="fluxInput" spellcheck="false" id="regardsrecherche"
+      type="text" value=""><br><br>
+    <button type="submit" class="flux-button" id="regards-basic-query">Retrieve
+      basic info</button>&nbsp;&nbsp;
+    <div id="regards-basic-previewer" style="position:relative;"></div><br><br>
+    <button style="display: none;" type="submit" class="flux-button"
+      id="regards-query">Submit Full Query</button>
+    <br><br>
+  </form>
 </div>
 
 
 <!-- TWITTER TAB -->
 <div id="twitter" style="display:none;" class="fluxTabs">
   <span class="flux-title">TWITTER</span><br><br>
-    <form id="twitter-form" autocomplete="off">
-      <br>
-      <h4>Datasets retrieved through Gazouilloire</h4>   <br>
-      Upload tweets to the system. Only properties consistent with the twitter API will be imported. Tweet datasets must be uploaded as CSV, queries as JSON objects (<a>read more here</a>).
-      <br>   <br>
-        Twitter Dataset (CSV)<br>
-         <input type="file" id="twitterDataset" accept="csv"><br><br>
-        Twitter Query (JSON)<br>
-        <input type="file" id="twitterQuery" accept="json"><br><br>
-        Dataset Name (if a dataset with the same name already exists, it will be overwritten)<br>
-        <input class="fluxInput" spellcheck="false" id="twitterDatasetName" type="text" value="Enter a dataset name"><br><br>
-        <br> <button type="submit" class="flux-button" id="twitterImporter">Import to SYSTEM</button>
-    </form>
-    <form id="twitter-form-cat" autocomplete="off">
-      <br>
-      <h4>Datasets for categories</h4>   <br>
-      Upload categorized tweets to the system. 
-      <br>   <br>
-        JSON Dataset<br>
-         <input type="file" id="twitterCatPathInput" accept="json"><br><br>
-        <input class="fluxInput" spellcheck="false" id="twitterCatName" type="text" value="Enter a dataset name"><br><br>
-        <br> <button type="submit" class="flux-button" id="twitterCatImporter">Import to SYSTEM</button>
-    </form>
-    <h4>Twarc threads</h4>   <br>
-    Upload threads retrieved through twarc. 
-    <br>   <br>
-      JSON Dataset<br>
-       <input type="file" id="twitterThread" accept="json"><br><br>
-      <input class="fluxInput" spellcheck="false" id="twitterThreadName" type="text" value="Enter a dataset name"><br><br>
-      <br> <button type="submit" class="flux-button" id="twitterThreadImporter">Import to SYSTEM</button>
+  <form id="twitter-form" autocomplete="off">
+    <br>
+    <h4>Datasets retrieved through Gazouilloire</h4> <br>
+    Upload tweets to the system. Only properties consistent with the twitter API
+    will be imported. Tweet datasets must be uploaded as CSV, queries as JSON
+    objects (<a>read more here</a>).
+    <br> <br>
+    Twitter Dataset (CSV)<br>
+    <input type="file" id="twitterDataset" accept="csv"><br><br>
+    Twitter Query (JSON)<br>
+    <input type="file" id="twitterQuery" accept="json"><br><br>
+    Dataset Name (if a dataset with the same name already exists, it will be
+    overwritten)<br>
+    <input class="fluxInput" spellcheck="false" id="twitterDatasetName"
+      type="text" value="Enter a dataset name"><br><br>
+    <br> <button type="submit" class="flux-button" id="twitterImporter">Import
+      to SYSTEM</button>
+  </form>
+  <form id="twitter-form-cat" autocomplete="off">
+    <br>
+    <h4>Datasets for categories</h4> <br>
+    Upload categorized tweets to the system.
+    <br> <br>
+    JSON Dataset<br>
+    <input type="file" id="twitterCatPathInput" accept="json"><br><br>
+    <input class="fluxInput" spellcheck="false" id="twitterCatName" type="text"
+      value="Enter a dataset name"><br><br>
+    <br> <button type="submit" class="flux-button"
+      id="twitterCatImporter">Import to SYSTEM</button>
+  </form>
+  <h4>Twarc threads</h4> <br>
+  Upload threads retrieved through twarc.
+  <br> <br>
+  JSON Dataset<br>
+  <input type="file" id="twitterThread" accept="json"><br><br>
+  <input class="fluxInput" spellcheck="false" id="twitterThreadName" type="text"
+    value="Enter a dataset name"><br><br>
+  <br> <button type="submit" class="flux-button"
+    id="twitterThreadImporter">Import to SYSTEM</button>
   </form>
 </div>
 
 <!-- ENRICHMENT TAB -->
 <div id="enrichment" style="display:none;" class="fluxTabs">
-    <span class="flux-title">DATA ENRICHMENT</span><br><br>
-    This tab will allow you to geolocate your documents' affiliations and find their Altmetric metadata.<br><br>  
-      <form autocomplete="off">
-        <div id="scopus-dataset-preview" style="position:relative;">Click on a dataset to display its features. </div>
-        <div id="scopus-dataset-buttons" style="display:none;">
-            <button type="submit" class="flux-button" id="scopusGeolocate">Geolocate Affiliations</button>
-            <!-- <button type="submit" class="flux-button" id="altmetricRetriever" onclick='powerValve("altmetricRetriever",this);return false'>Enrich with Altmetric Data</button> -->
-        </div>
-        <br><br>
-        <button type="submit" class="flux-button" id="csljson-display">Update available dataset list</button>
-      </form>
-    <div id="scopus-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
-  </div> 
+  <span class="flux-title">DATA ENRICHMENT</span><br><br>
+  This tab will allow you to geolocate your documents' affiliations and find
+  their Altmetric metadata.<br><br>
+  <form autocomplete="off">
+    <div id="scopus-dataset-preview" style="position:relative;">Click on a
+      dataset to display its features. </div>
+    <div id="scopus-dataset-buttons" style="display:none;">
+      <button type="submit" class="flux-button" id="scopusGeolocate">Geolocate
+        Affiliations</button>
+      <!-- <button type="submit" class="flux-button" id="altmetricRetriever" onclick='powerValve("altmetricRetriever",this);return false'>Enrich with Altmetric Data</button> -->
+    </div>
+    <br><br>
+    <button type="submit" class="flux-button" id="csljson-display">Update
+      available dataset list</button>
+  </form>
+  <div id="scopus-dataset-list" style="position:relative;">No dataset loaded
+    yet.</div>
+</div>
 
 <!-- CSL JSON TAB -->
 <div id="csl-json" style="display:none;" class="fluxTabs">
   <span class="flux-title">CSL-JSON</span><br><br>
-    <form autocomplete="off">
-      <div id="enriched-dataset-preview" style="position:relative;">Click on a dataset to display its features. </div>
-      <div id="enriched-dataset-buttons" style="display:none;">
-        <button type="submit" class="flux-button" id="convert-csl">Convert to CSL</button>
-      </div><br><br>
-      <button type="submit" class="flux-button" id="scopus-display">Update available dataset list</button>
-    </form>
-  <div id="enriched-dataset-list"  style="position:relative;">No dataset loaded yet.</div>
-</div> 
+  <form autocomplete="off">
+    <div id="enriched-dataset-preview" style="position:relative;">Click on a
+      dataset to display its features. </div>
+    <div id="enriched-dataset-buttons" style="display:none;">
+      <button type="submit" class="flux-button" id="convert-csl">Convert to
+        CSL</button>
+    </div><br><br>
+    <button type="submit" class="flux-button" id="scopus-display">Update
+      available dataset list</button>
+  </form>
+  <div id="enriched-dataset-list" style="position:relative;">No dataset loaded
+    yet.</div>
+</div>
 
 <!-- ZOTERO TAB -->
 <div id="zotero" style="display:none;" class="fluxTabs">
-    <span class="flux-title">ZOTERO</span><br><br>
+  <span class="flux-title">ZOTERO</span><br><br>
 
-<form id="zotero-export-form" autocomplete="off">
-<div id="selectedCollection">
-</div>
+  <form id="zotero-export-form" autocomplete="off">
+    <div id="selectedCollection">
+    </div>
 
-<br><br>
-<button type="submit" class="flux-button" id="cslcolret">Display available csljson files</button><br>
-<div id="csljson-dataset-preview"></div>
-<div id="csljson-dataset-buttons"style="display:none;">
-  <input class="fluxInput" spellcheck="false" class="sendToZotero" id="zoteroCollecName"  type="text" value="Enter collection name">
+    <br><br>
+    <button type="submit" class="flux-button" id="cslcolret">Display available
+      csljson files</button><br>
+    <div id="csljson-dataset-preview"></div>
+    <div id="csljson-dataset-buttons" style="display:none;">
+      <input class="fluxInput" spellcheck="false" class="sendToZotero"
+        id="zoteroCollecName" type="text" value="Enter collection name">
 
-  <button type="submit" class="flux-button sendToZotero" id="zoteroCollecBuild">Create a new Zotero Collection</button>
-</div>
-<div id="userCsljsonCollections"></div>
-</form>
-<br><br>
-<form id="zotero-import-form" autocomplete="off"></form>
-<button type="submit" class="flux-button" id="zotcolret" >Display online library collections</button><br><br>
-<!-- <button type="submit" class="flux-button" id="zotcolret" onclick="zoteroLocalRetriever();return false">Display local zotero instance collections</button><br><br> -->
-<span id="zoteroImportInstruction" style="display:none;">Select the Zotero collections you want to import to PANDORÆ </span><br><br>
+      <button type="submit" class="flux-button sendToZotero"
+        id="zoteroCollecBuild">Create a new Zotero Collection</button>
+    </div>
+    <div id="userCsljsonCollections"></div>
+  </form>
+  <br><br>
+  <form id="zotero-import-form" autocomplete="off"></form>
+  <button type="submit" class="flux-button" id="zotcolret">Display online
+    library collections</button><br><br>
+  <!-- <button type="submit" class="flux-button" id="zotcolret" onclick="zoteroLocalRetriever();return false">Display local zotero instance collections</button><br><br> -->
+  <span id="zoteroImportInstruction" style="display:none;">Select the Zotero
+    collections you want to import to PANDORÆ </span><br><br>
 
-<div id="zoteroResults" style="display:none;">
-<div id="userZoteroCollections" style="flex:auto"></div>
+  <div id="zoteroResults" style="display:none;">
+    <div id="userZoteroCollections" style="flex:auto"></div>
 
-</div>
-<br><br><br>
-<input class="fluxInput" spellcheck="false" id="zoteroImportName" style="display:none;" type="text" value="Enter import name">
-<button type="submit" class="flux-button" style="display:none;" id="zotitret">Import selected collections into system</button><br>
-</form>
+  </div>
+  <br><br><br>
+  <input class="fluxInput" spellcheck="false" id="zoteroImportName"
+    style="display:none;" type="text" value="Enter import name">
+  <button type="submit" class="flux-button" style="display:none;"
+    id="zotitret">Import selected collections into system</button><br>
+  </form>
 </div>
 
 <!-- LOCAL TAB -->
@@ -245,47 +329,64 @@
 
 <!-- SYSTEM TAB -->
 <div id="system" style="display:none;" class="fluxTabs">
-    <span class="flux-title">SYSTEM</span><br><br>
-    Datasets listed in SYSTEM are available locally and ready to be exported to one of PANDORÆ's visualisation tools.
-    <button type="submit" class="flux-button" id="systemList">Display available datasets</button><br>
-  <div  style="display:flex">
-<div id="system-dataset-preview" style="flex:auto"></div>
-  <div id="system-dataset-buttons" style="display:none">
-    <button type="submit" class="flux-button" id="downloadData">Download dataset</button>
-    <button type="submit" class="flux-button" id="showConsole">Display in Console</button>
-    <br>
-    <br><br>Export dataset to :<br>
-  <input class='sysDestCheck' value='chronotype' name='chronotype' type='checkbox'/><label>chronotype</label><br>
-  <input class='sysDestCheck' value='geotype' name='geotype' type='checkbox'/><label>geotype</label><br>
-  <input class='sysDestCheck' value='anthropotype' name='anthropotype' type='checkbox'/><label>anthropotype</label><br>
-   <input class='sysDestCheck' value='hyphotype' name='hyphotype' type='checkbox'/><label>hyphotype</label><br>
-   <input class='sysDestCheck' value='fieldotype' name='fieldotype' type='checkbox'/><label>fieldotype</label><br>
-   <input class='sysDestCheck' value='regards' name='regards' type='checkbox'/><label>regards</label><br>
- <input class='sysDestCheck' value='gazouillotype' name='gazouillotype' type='checkbox'/><label>gazouillotype</label><br>
- <input class='sysDestCheck' value='slider' name='slider' type='checkbox'/><label>slider</label><br>
-  <input class="fluxInput" spellcheck="false" id="systemToType" type="text" value="Enter a dataset name">
-  <button type="submit" class="flux-button" id="systitret">Export</button><br>
-</div>
-</div>
-<div id="systemDatasetsList"></div>
-<br>
-<hr>
-<br>Import local dataset :<br>
-<input class="fluxInput" id="localUploadPath" type="file" accept=".json"/><br><br>
-
-<button type="submit" class="flux-button" id="load-local">Upload local dataset to SYSTEM</button>
-
+  <span class="flux-title">SYSTEM</span><br><br>
+  Datasets listed in SYSTEM are available locally and ready to be exported to
+  one of PANDORÆ's visualisation tools.
+  <button type="submit" class="flux-button" id="systemList">Display available
+    datasets</button><br>
+  <div style="display:flex">
+    <div id="system-dataset-preview" style="flex:auto"></div>
+    <div id="system-dataset-buttons" style="display:none">
+      <button type="submit" class="flux-button" id="downloadData">Download
+        dataset</button>
+      <button type="submit" class="flux-button" id="showConsole">Display in
+        Console</button>
+      <br>
+      <br><br>Export dataset to :<br>
+      <input class='sysDestCheck' value='chronotype' name='chronotype'
+        type='checkbox' /><label>chronotype</label><br>
+      <input class='sysDestCheck' value='geotype' name='geotype'
+        type='checkbox' /><label>geotype</label><br>
+      <input class='sysDestCheck' value='anthropotype' name='anthropotype'
+        type='checkbox' /><label>anthropotype</label><br>
+      <input class='sysDestCheck' value='hyphotype' name='hyphotype'
+        type='checkbox' /><label>hyphotype</label><br>
+      <input class='sysDestCheck' value='fieldotype' name='fieldotype'
+        type='checkbox' /><label>fieldotype</label><br>
+      <input class='sysDestCheck' value='regards' name='regards'
+        type='checkbox' /><label>regards</label><br>
+      <input class='sysDestCheck' value='gazouillotype' name='gazouillotype'
+        type='checkbox' /><label>gazouillotype</label><br>
+      <input class='sysDestCheck' value='slider' name='slider'
+        type='checkbox' /><label>slider</label><br>
+      <input class="fluxInput" spellcheck="false" id="systemToType" type="text"
+        value="Enter a dataset name">
+      <button type="submit" class="flux-button"
+        id="systitret">Export</button><br>
     </div>
+  </div>
+  <div id="systemDatasetsList"></div>
+  <br>
+  <hr>
+  <br>Import local dataset :<br>
+  <input class="fluxInput" id="localUploadPath" type="file"
+    accept=".json" /><br><br>
+
+  <button type="submit" class="flux-button" id="load-local">Upload local dataset
+    to SYSTEM</button>
+
+</div>
 
 <div style="position:fixed;z-index:20;padding: 5px;right:0px;top:0px;">
-<i class="material-icons  dialog-buttons" id="fluxDisplayButton" >arrow_back</i>
-<i class="material-icons dialog-buttons" id="fluxRefreshButton"  >refresh</i>
-<i class="material-icons dialog-buttons" id="fluxCloseButton" >close</i>
+  <i class="material-icons  dialog-buttons"
+    id="fluxDisplayButton">arrow_back</i>
+  <i class="material-icons dialog-buttons" id="fluxRefreshButton">refresh</i>
+  <i class="material-icons dialog-buttons" id="fluxCloseButton">close</i>
 </div>
 </div>
 
 <link rel="stylesheet" type="text/css" href="css/pandorae.css">
-<link rel="icon" type="image/png" href="img/AE-favicon.png"/>
+<link rel="icon" type="image/png" href="img/AE-favicon.png" />
 
 
 
