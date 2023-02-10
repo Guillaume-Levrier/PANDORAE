@@ -583,6 +583,12 @@ const powerValve = (fluxAction, item) => {
   switch (
   fluxAction // According to function name ...
   ) {
+
+    case "bnf-solr":
+      fluxArgs.bnfsolrquery = document.getElementById("bnf-solr-query").value;
+      message = "Connecting to BNF-SOLR";
+      break;
+
     case "altmetricRetriever":
       fluxArgs.altmetricRetriever = {};
       fluxArgs.altmetricRetriever.id =
@@ -725,6 +731,8 @@ const powerValve = (fluxAction, item) => {
         document.getElementById("twitterDatasetName").value;
       message = "loading twitter dataset";
       break;
+
+
   }
 
   ipcRenderer.send(
@@ -2025,18 +2033,16 @@ const regardsBasic = () => {
 const queryBnFSolr = () => {
   const queryContent = document.getElementById("bnf-solr-query").value;
 
-
   const query =
     "http://172.20.64.112:8983/solr/netarchivebuilder/select?q=" + queryContent
 
-  console.log(query)
   d3.json(query).then((res) => {
-    console.log(res)
+
     var previewer = document.getElementById("bnf-solr-basic-previewer");
     previewer.innerHTML = `<br><p>  ${res.response.numFound} documents found`
 
 
-    document.getElementById("bnf-solr-query").style.display = "flex";
+    document.getElementById("bnf-solr-fullquery").style.display = "flex";
 
     if (res.response.numFound === 0) {
       document.getElementById("bnf-solr-query").disabled = true;
@@ -2091,6 +2097,7 @@ const downloadData = () => {
 window.addEventListener("load", (event) => {
   var buttonMap = [
     { id: "bnf-solr-basic-query", func: "queryBnFSolr" },
+    { id: "bnf-solr-fullquery", func: "powerValve", arg: " bnf-solr" },
     { id: "showConsole", func: "fluxConsole" },
     { id: "scopus-list-display", func: "ScopusList" },
     { id: "user-button", func: "basicUserData" },
