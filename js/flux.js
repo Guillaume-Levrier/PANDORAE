@@ -278,6 +278,7 @@ const powerValve = (fluxAction, item) => {
 
     case "bnf-solr":
       fluxArgs.bnfsolrquery = document.getElementById("bnf-solr-query").value;
+      fluxArgs.fluxArgs.bnfsolrquery = solrbnfcount;
       message = "Connecting to BNF-SOLR";
       break;
 
@@ -1721,7 +1722,7 @@ const regardsBasic = () => {
 };
 
 //===== Solr BNF ======
-
+var solrbnfcount;
 const queryBnFSolr = () => {
   const queryContent = document.getElementById("bnf-solr-query").value;
 
@@ -1733,6 +1734,7 @@ const queryBnFSolr = () => {
     var previewer = document.getElementById("bnf-solr-basic-previewer");
     previewer.innerHTML = `<br><p>  ${res.response.numFound} documents found`
 
+    solrbnfcount = res.response.numFound;
 
     document.getElementById("bnf-solr-fullquery").style.display = "flex";
 
