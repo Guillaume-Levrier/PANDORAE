@@ -262,10 +262,10 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Actioning powerValve on " +
-      JSON.stringify(item.name) +
-      " through the " +
-      fluxAction +
-      " procedure."
+    JSON.stringify(item.name) +
+    " through the " +
+    fluxAction +
+    " procedure."
   );
 
   let fluxArgs = {}; // Arguments are stored in an object
@@ -273,7 +273,7 @@ const powerValve = (fluxAction, item) => {
   let itemname = item.name; // item argument is usually stored in "this"
 
   switch (
-    fluxAction // According to function name ...
+  fluxAction // According to function name ...
   ) {
     case "altmetricRetriever":
       fluxArgs.altmetricRetriever = {};
@@ -422,11 +422,11 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Sending to CHÆROS action " +
-      fluxAction +
-      " with arguments " +
-      JSON.stringify(fluxArgs) +
-      " " +
-      message
+    fluxAction +
+    " with arguments " +
+    JSON.stringify(fluxArgs) +
+    " " +
+    message
   );
   ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
   ipcRenderer.send("pulsar", false);
@@ -1049,12 +1049,12 @@ const ScopusList = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='scopColCheck' value='" +
-            coll.key +
-            "' name='" +
-            coll.name +
-            "' type='checkbox'/><label> " +
-            coll.key +
-            "</label><br> "
+          coll.key +
+          "' name='" +
+          coll.name +
+          "' type='checkbox'/><label> " +
+          coll.key +
+          "</label><br> "
         );
       }
 
@@ -1130,14 +1130,14 @@ const zoteroCollectionRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-            coll.key +
-            "' name='" +
-            coll.name +
-            "' type='checkbox'/><label> " +
-            coll.key +
-            " - " +
-            coll.name +
-            "</label><br> "
+          coll.key +
+          "' name='" +
+          coll.name +
+          "' type='checkbox'/><label> " +
+          coll.key +
+          " - " +
+          coll.name +
+          "</label><br> "
         );
       }
 
@@ -1178,9 +1178,9 @@ const zoteroCollectionRetriever = () => {
       ipcRenderer.send(
         "console-logs",
         "Error in retrieving collections for Zotero id " +
-          zoteroUser +
-          " : " +
-          err
+        zoteroUser +
+        " : " +
+        err
       ); // Log error
     });
 };
@@ -1216,14 +1216,14 @@ const zoteroLocalRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-            coll.key +
-            "' name='" +
-            coll.name +
-            "' type='checkbox'/><label> " +
-            coll.key +
-            " - " +
-            coll.name +
-            "</label><br> "
+          coll.key +
+          "' name='" +
+          coll.name +
+          "' type='checkbox'/><label> " +
+          coll.key +
+          " - " +
+          coll.name +
+          "</label><br> "
         );
       }
 
@@ -1284,10 +1284,10 @@ const datasetLoader = () => {
         ipcRenderer.send(
           "console-logs",
           "Dataset " +
-            dataset.name +
-            " loaded into " +
-            JSON.stringify(target) +
-            "."
+          dataset.name +
+          " loaded into " +
+          JSON.stringify(target) +
+          "."
         ); // Log action
       });
     });
@@ -1346,9 +1346,14 @@ const endpointConnector = (service, target) => {
 };
 
 //======== Hyphe Endpoint Chercker ======
-
+var hyphetarget;
 const hypheCheck = (target) => {
   let chk = document.getElementById("hyphe-checker");
+
+
+  if (target.indexOf("/#/login") > -1) {
+    target = target.replace("/#/login", "")
+  }
 
   fetch(target + "/api/", {
     method: "POST",
@@ -1357,12 +1362,26 @@ const hypheCheck = (target) => {
   })
     .then((res) => {
       if (res.ok) {
+        hyphetarget = target + "/api/"
         chk.style.color = "DarkOliveGreen";
         chk.innerText = "Hyphe enpoint reached";
         document.getElementById("hyphe-exporter").style.display = "block";
       } else {
-        chk.style.color = "DarkRed";
-        chk.innerText = "Failure";
+        fetch(target + "-api/", {
+          method: "POST",
+          body: { method: "get_status", params: [null] },
+          headers: { "Content-Type": "application/json" },
+        }).then((res2) => {
+          if (res2.ok) {
+            hyphetarget = target + "-api/"
+            chk.style.color = "DarkOliveGreen";
+            chk.innerText = "Hyphe enpoint reached";
+            document.getElementById("hyphe-exporter").style.display = "block";
+          } else {
+            chk.style.color = "DarkRed";
+            chk.innerText = "Failure";
+          }
+        })
       }
     })
     .catch((e) => {
@@ -1375,9 +1394,9 @@ const hypheCheck = (target) => {
 //======== Hyphe Endpoint Chercker ======
 
 const hypheCorpusList = (target, prevId) => {
-  console.log(target, prevId);
 
-  fetch(target + "/api/", {
+
+  fetch(target, {
     method: "POST",
     body: JSON.stringify({ method: "list_corpus" }),
   })
@@ -1444,7 +1463,7 @@ const hypheCorpusList = (target, prevId) => {
       } else {
       }
     })
-    .catch((e) => {});
+    .catch((e) => { });
 };
 
 const loadHyphe = (corpus, endpoint, pass) => {
@@ -1693,6 +1712,31 @@ const regardsBasic = () => {
   });
 };
 
+//===== Solr BNF ======
+
+const queryBnFSolr = () => {
+  const queryContent = document.getElementById("bnf-solr-query").value;
+
+
+  const query =
+    "http://172.20.64.112:8983/solr/netarchivebuilder/select?q=" + queryContent
+
+  console.log(query)
+  d3.json(query).then((res) => {
+    console.log(res)
+    var previewer = document.getElementById("bnf-solr-basic-previewer");
+    previewer.innerHTML = `<br><p>  ${res.response.numFound} documents found`
+
+
+    document.getElementById("bnf-solr-query").style.display = "flex";
+
+    if (res.response.numFound === 0) {
+      document.getElementById("bnf-solr-query").disabled = true;
+    }
+  });
+};
+
+
 //========== STARTING FLUX ==========
 ipcRenderer.send("console-logs", "Opening Flux"); // Sending notification to console
 
@@ -1738,6 +1782,7 @@ const downloadData = () => {
 
 window.addEventListener("load", (event) => {
   var buttonMap = [
+    { id: "bnf-solr-basic-query", func: "queryBnFSolr" },
     { id: "showConsole", func: "fluxConsole" },
     { id: "scopus-list-display", func: "ScopusList" },
     { id: "user-button", func: "basicUserData" },
@@ -1866,7 +1911,7 @@ window.addEventListener("load", (event) => {
       if (d.valid) {
         switch (d.name) {
           case "BnF Solr Nemo 10":
-            addHop(["BNF", "SYSTEM"]);
+            addHop(["BNF-SOLR", "SYSTEM"]);
             break;
 
           default:
@@ -1876,10 +1921,16 @@ window.addEventListener("load", (event) => {
     });
 
     drawFlux(svg, traces, false, true);
+
+    ipcRenderer.invoke("fluxDevTools", true);
+
   });
 
   function funcSwitch(e, but) {
     switch (but.func) {
+      case "queryBnFSolr":
+        queryBnFSolr();
+        break;
       case "fluxConsole":
         ipcRenderer.invoke("fluxDevTools", true);
 
@@ -1927,7 +1978,7 @@ window.addEventListener("load", (event) => {
       case "endpointConnector":
         endpointConnector(
           "hyphe",
-          document.getElementById("hypheaddress").value
+          hyphetarget
         );
         break;
 
