@@ -583,9 +583,10 @@ const powerValve = (fluxAction, item) => {
   switch (
   fluxAction // According to function name ...
   ) {
-    case "bnf-solr":
-      fluxArgs.bnfsolrquery = document.getElementById("bnf-solr-query").value;
-      fluxArgs.fluxArgs.bnfsolrquery = solrbnfcount;
+    case "BNF-SOLR":
+      const fieldId = item.id.replace("full", "")
+      fluxArgs.bnfsolrquery = document.getElementById(fieldId).value;
+      fluxArgs.solrbnfcount = solrbnfcount[fluxArgs.bnfsolrquery];
       message = "Connecting to BNF-SOLR";
       break;
 
@@ -742,9 +743,9 @@ const powerValve = (fluxAction, item) => {
     " " +
     message
   );
-  ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
+  // ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
   ipcRenderer.send("pulsar", false);
-  ipcRenderer.send("window-manager", "closeWindow", "flux");
+  //ipcRenderer.send("window-manager", "closeWindow", "flux");
 };
 
 //========== fluxButtonAction ==========
@@ -2024,11 +2025,9 @@ const regardsBasic = () => {
 };
 
 //===== Solr BNF ======
-var solrbnfcount;
+var solrbnfcount = {};
+
 const queryBnFSolr = (but) => {
-
-  console.log(but);
-
 
   const queryContent = document.getElementById(`bnf-solr-query-${but.serv}`).value;
 
@@ -2041,7 +2040,7 @@ const queryBnFSolr = (but) => {
     var previewer = document.getElementById("bnf-solr-basic-previewer-" + but.serv);
     previewer.innerHTML = `<br><p>  ${res.response.numFound} documents found`;
 
-    solrbnfcount = res.response.numFound;
+    solrbnfcount[queryContent] = res.response.numFound;
 
     document.getElementById("bnf-solr-fullquery-" + but.serv).style.display = "flex";
 
@@ -2273,7 +2272,7 @@ window.addEventListener("load", (event) => {
 
           document.body.append(solrCont);
           buttonList.push({ id: "bnf-solr-basic-query-" + serv, serv, func: "queryBnFSolr", args: res.dnsLocalServiceList[service] });
-          buttonList.push({ id: "bnf-solr-fullquery-" + serv, serv, func: "powerValve", args: res.dnsLocalServiceList[service] });
+          buttonList.push({ id: "bnf-solr-fullquery-" + serv, serv, func: "powerValve", arg: "BNF-SOLR" });
 
           break;
 
@@ -2399,8 +2398,6 @@ window.addEventListener("load", (event) => {
         break;
     }
   }
-
-
 });
 const getPassword = (service, user) =>
   ipcRenderer.sendSync("keytar", {

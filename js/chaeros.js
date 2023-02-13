@@ -1398,7 +1398,8 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
   switch (fluxAction) {
 
     case "bnf-solr":
-      solrMetaExplorer(fluxArgs.bnfsolrquery, fluxArgs.solrbnfcount);
+      console.log(fluxArgs)
+      // solrMetaExplorer(fluxArgs.bnfsolrquery, fluxArgs.solrbnfcount);
       break;
 
     case "regards":
