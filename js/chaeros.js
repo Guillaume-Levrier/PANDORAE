@@ -456,7 +456,7 @@ const biorxivRetriever = (query) => {
   let count = 0;
 
   ipcRenderer.on("biorxiv-retrieve", (event, message) => {
-    console.log(message);
+
 
     message.content.forEach((d) =>
       doiBuffer.push(d.replace("doi: https://doi.org/", "").replace(" ", ""))
@@ -578,12 +578,7 @@ const biorxivRetriever = (query) => {
 
         let id = query.terms + date;
 
-        console.log({
-          id: id,
-          date: date,
-          name: query.terms,
-          content: cslArticles,
-        });
+
 
         pandodb.csljson.add({
           id: id,
@@ -756,10 +751,10 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
         zoteroCollectionResponse.push(result);
 
         if (zoteroCollectionResponse.length === zoteroPromises.length) {
-          console.log(zoteroCollectionResponse);
+
 
           zoteroCollectionResponse.forEach((f) => {
-            //  console.log(f);
+
 
             thisCollectionAmount = parseInt(f.meta.numItems);
             responseTarget = responseTarget + thisCollectionAmount;
@@ -811,12 +806,10 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
                       " documents."
                     );
 
-                    //if (items.length === thisCollectionAmount) {
-                    //  f.items.push(f);
-                    // }
+
 
                     if (responseAmount === responseTarget) {
-                      //console.log(zoteroCollectionResponse);
+
                       dataWriter(
                         ["system"],
                         importName,
@@ -892,7 +885,7 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
 
       let zoteroApiKey = getPassword("Zotero", zoteroUser);
 
-      console.log(zoteroApiKey);
+
 
       // URL Building blocks
       var rootUrl = "https://api.zotero.org/groups/";
@@ -912,7 +905,7 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
         .then((collectionName) => {
           collectionCode.code = collectionName.success["0"]; // Retrieve name from the response
 
-          console.log(collectionCode);
+
 
           let fileArrays = []; // Create empty array
 
@@ -934,7 +927,7 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
             fileArrays.push(subArray); // Push subArray in fileArrays
           }
 
-          // console.log(fileArrays);
+
 
           let fetchTargets = [];
 
@@ -995,15 +988,13 @@ const tweetImporter = (dataset, query, name) => {
 
   let id = name + date;
 
-  //console.log(dataset, query, name);
+
 
   fs.readFile(query, "utf8", (err, queryKeywords) => {
     if (err) throw err;
-    console.log(queryKeywords);
+
     content.keywords = JSON.parse(queryKeywords);
-    //console.log(queryKeywords);
-    //queryKeywords.keywords.forEach((d) => content.keywords.push(d));
-    console.log(content.keywords);
+
     let path = userDataPath + "/flatDatasets/" + name + ".csv";
     content.path = path;
     fs.copyFileSync(dataset, path);
@@ -1303,7 +1294,8 @@ const regardsRetriever = (queryContent) => {
                                 deps.deputes.forEach((d) =>
                                   depMap.set(d.depute.id, d)
                                 );
-                                // console.log(depMap);
+
+
                                 for (const key in regContent) {
                                   regContent[key].forEach((d) => {
                                     if (d.hasOwnProperty("content")) {
@@ -1365,7 +1357,6 @@ const regardsRetriever = (queryContent) => {
 
 const solrMetaExplorer = (req, meta) => {
 
-  console.log(meta)
 
   const url = (req, start, end) => `http://${meta.but.args.url}:${meta.but.args.port}/solr/netarchivebuilder/select?q=${req}&start=${start}&rows=${end - start}`
 
@@ -1387,10 +1378,24 @@ const solrMetaExplorer = (req, meta) => {
 
     res.forEach(d => totalResponse = [...totalResponse, ...d.response.docs])
 
-    const content = [[]];
+
+    const dataset = {
+      data: {},
+      items: [],
+      key: req,
+      name: req
+    }
 
     totalResponse.forEach(d => {
-      content[0].push({
+
+      const date = new Date(d.crawl_date);
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+
+      const issued = { "date-parts": [[year, month, day]] }
+
+      dataset.items.push({
         itemType: "webpage",
         title: d.title,
         creators: [],
@@ -1399,6 +1404,7 @@ const solrMetaExplorer = (req, meta) => {
         volume: "",
         issue: "",
         pages: "",
+        issued,
         date: d.crawl_date,
         series: "",
         seriesTitle: "",
@@ -1432,7 +1438,7 @@ const solrMetaExplorer = (req, meta) => {
     dataWriter(
       ["system"],
       importName,
-      content
+      [dataset]
     );
   })
 
@@ -1451,7 +1457,6 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
     JSON.stringify(fluxArgs)
   );
 
-  console.log(fluxAction, fluxArgs);
 
   switch (fluxAction) {
 
