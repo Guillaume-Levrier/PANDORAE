@@ -262,10 +262,10 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Actioning powerValve on " +
-    JSON.stringify(item.name) +
-    " through the " +
-    fluxAction +
-    " procedure."
+      JSON.stringify(item.name) +
+      " through the " +
+      fluxAction +
+      " procedure."
   );
 
   let fluxArgs = {}; // Arguments are stored in an object
@@ -273,7 +273,7 @@ const powerValve = (fluxAction, item) => {
   let itemname = item.name; // item argument is usually stored in "this"
 
   switch (
-  fluxAction // According to function name ...
+    fluxAction // According to function name ...
   ) {
     case "bnf-solr":
       fluxArgs.bnfsolrquery = document.getElementById("bnf-solr-query").value;
@@ -428,11 +428,11 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Sending to CHÆROS action " +
-    fluxAction +
-    " with arguments " +
-    JSON.stringify(fluxArgs) +
-    " " +
-    message
+      fluxAction +
+      " with arguments " +
+      JSON.stringify(fluxArgs) +
+      " " +
+      message
   );
   ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
   ipcRenderer.send("pulsar", false);
@@ -1055,12 +1055,12 @@ const ScopusList = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='scopColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            "</label><br> "
         );
       }
 
@@ -1136,14 +1136,14 @@ const zoteroCollectionRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          " - " +
-          coll.name +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            " - " +
+            coll.name +
+            "</label><br> "
         );
       }
 
@@ -1184,9 +1184,9 @@ const zoteroCollectionRetriever = () => {
       ipcRenderer.send(
         "console-logs",
         "Error in retrieving collections for Zotero id " +
-        zoteroUser +
-        " : " +
-        err
+          zoteroUser +
+          " : " +
+          err
       ); // Log error
     });
 };
@@ -1222,14 +1222,14 @@ const zoteroLocalRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          " - " +
-          coll.name +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            " - " +
+            coll.name +
+            "</label><br> "
         );
       }
 
@@ -1290,10 +1290,10 @@ const datasetLoader = () => {
         ipcRenderer.send(
           "console-logs",
           "Dataset " +
-          dataset.name +
-          " loaded into " +
-          JSON.stringify(target) +
-          "."
+            dataset.name +
+            " loaded into " +
+            JSON.stringify(target) +
+            "."
         ); // Log action
       });
     });
@@ -1466,7 +1466,7 @@ const hypheCorpusList = (target, prevId) => {
       } else {
       }
     })
-    .catch((e) => { });
+    .catch((e) => {});
 };
 
 const loadHyphe = (corpus, endpoint, pass) => {
@@ -1740,21 +1740,16 @@ const queryBnFSolr = () => {
 //===== Adding a new local service ======
 
 const addLocalService = () => {
-
   const serviceName = document.getElementById("newServiceName").value;
   const serviceLocation = document.getElementById("newServiceLocation").value;
   const serviceType = document.getElementById("newServiceType").value;
 
-  console.log(serviceName, serviceLocation, serviceType)
-
-  /*
-    ipcRenderer.send("addLocalService", JSON.stringify({
-      serviceName, serviceLocation, serviceType
-    }));
-    */
-  ipcRenderer.send("addLocalService", "test")
-}
-
+  ipcRenderer.invoke("addLocalService", {
+    serviceName,
+    serviceLocation,
+    serviceType,
+  });
+};
 
 //========== STARTING FLUX ==========
 ipcRenderer.send("console-logs", "Opening Flux"); // Sending notification to console

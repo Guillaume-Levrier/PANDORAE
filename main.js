@@ -166,7 +166,7 @@ const openModal = (modalFile, scrollTo) => {
   }
 };
 
-ipcMain.on("userStatus", (event, req) => {
+var currentUser = ipcMain.on("userStatus", (event, req) => {
   if (req) {
     fs.readFile(
       userDataPath + "/userID/user-id.json", // Read the user data file
@@ -174,8 +174,8 @@ ipcMain.on("userStatus", (event, req) => {
       (err, data) => {
         // Additional options for readFile
         if (err) throw err;
-        let user = JSON.parse(data);
-        mainWindow.webContents.send("userStatus", user);
+        currentUser = JSON.parse(data);
+        mainWindow.webContents.send("userStatus", currentUser);
       }
     );
   }
@@ -508,7 +508,7 @@ ipcMain.handle("restart", async (event, mess) => {
 
 ipcMain.handle("saveDataset", async (event, target, data) => {
   dialog.showSaveDialog(target).then((filePath) => {
-    fs.writeFile(filePath.filePath, data, () => { });
+    fs.writeFile(filePath.filePath, data, () => {});
   });
 });
 
@@ -516,7 +516,7 @@ ipcMain.handle("savePNG", async (event, target) => {
   setTimeout(() => {
     mainWindow.capturePage().then((img) => {
       dialog.showSaveDialog(target).then((filePath) => {
-        fs.writeFile(filePath.filePath, img.toPNG(), () => { });
+        fs.writeFile(filePath.filePath, img.toPNG(), () => {});
       });
     });
   }, 250);
@@ -574,10 +574,29 @@ dnslist.forEach((d) => {
 
 const dnsLocalServiceList = [];
 
-ipcMain.handle("addLocalService", async (event, mess) => {
-  console.log("coucou")
-  console.log(mess)
+ipcMain.handle("addLocalService", async (event, m) => {
+  const loc = m.serviceLocation.split(":");
+  dns.lookupService(loc[0], loc[1], (err, hostname, service) => {
+    if (hostname || service) {
+      if (!currentUser.hasOwnProperty("localServices")) {
+        currentUser.localServices = {};
+      }
 
+      currentUser.localServices[m.serviceName] = {
+        url: loc[0],
+        port: loc[1],
+      };
+
+      fs.writeFileSync(
+        userDataPath + "/userID/user-id.json",
+        JSON.stringify(currentUser),
+        "utf8",
+        (err) => {
+          if (err) throw err;
+        }
+      );
+    }
+  });
 });
 
 dnsLocalServiceList.forEach((d) => {
