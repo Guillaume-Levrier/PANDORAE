@@ -583,7 +583,6 @@ const powerValve = (fluxAction, item) => {
   switch (
   fluxAction // According to function name ...
   ) {
-
     case "bnf-solr":
       fluxArgs.bnfsolrquery = document.getElementById("bnf-solr-query").value;
       fluxArgs.fluxArgs.bnfsolrquery = solrbnfcount;
@@ -732,8 +731,6 @@ const powerValve = (fluxAction, item) => {
         document.getElementById("twitterDatasetName").value;
       message = "loading twitter dataset";
       break;
-
-
   }
 
   ipcRenderer.send(
@@ -1667,9 +1664,8 @@ var hyphetarget;
 const hypheCheck = (target) => {
   let chk = document.getElementById("hyphe-checker");
 
-
   if (target.indexOf("/#/login") > -1) {
-    target = target.replace("/#/login", "")
+    target = target.replace("/#/login", "");
   }
 
   fetch(target + "/api/", {
@@ -1679,7 +1675,7 @@ const hypheCheck = (target) => {
   })
     .then((res) => {
       if (res.ok) {
-        hyphetarget = target + "/api/"
+        hyphetarget = target + "/api/";
         chk.style.color = "DarkOliveGreen";
         chk.innerText = "Hyphe enpoint reached";
         document.getElementById("hyphe-exporter").style.display = "block";
@@ -1690,7 +1686,7 @@ const hypheCheck = (target) => {
           headers: { "Content-Type": "application/json" },
         }).then((res2) => {
           if (res2.ok) {
-            hyphetarget = target + "-api/"
+            hyphetarget = target + "-api/";
             chk.style.color = "DarkOliveGreen";
             chk.innerText = "Hyphe enpoint reached";
             document.getElementById("hyphe-exporter").style.display = "block";
@@ -1698,7 +1694,7 @@ const hypheCheck = (target) => {
             chk.style.color = "DarkRed";
             chk.innerText = "Failure";
           }
-        })
+        });
       }
     })
     .catch((e) => {
@@ -1711,8 +1707,6 @@ const hypheCheck = (target) => {
 //======== Hyphe Endpoint Chercker ======
 
 const hypheCorpusList = (target, prevId) => {
-
-
   fetch(target, {
     method: "POST",
     body: JSON.stringify({ method: "list_corpus" }),
@@ -2035,12 +2029,11 @@ const queryBnFSolr = () => {
   const queryContent = document.getElementById("bnf-solr-query").value;
 
   const query =
-    "http://172.20.64.112:8983/solr/netarchivebuilder/select?q=" + queryContent
+    "http://172.20.64.112:8983/solr/netarchivebuilder/select?q=" + queryContent;
 
   d3.json(query).then((res) => {
-
     var previewer = document.getElementById("bnf-solr-basic-previewer");
-    previewer.innerHTML = `<br><p>  ${res.response.numFound} documents found`
+    previewer.innerHTML = `<br><p>  ${res.response.numFound} documents found`;
 
     solrbnfcount = res.response.numFound;
 
@@ -2051,6 +2044,22 @@ const queryBnFSolr = () => {
     }
   });
 };
+
+//===== Adding a new local service ======
+
+const addLocalService = () => {
+
+  const serviceName = document.getElementById("newServiceName").value;
+  const serviceLocation = document.getElementById("newServiceLocation").value;
+  const serviceType = document.getElementById("newServiceType").value;
+
+  console.log(serviceName, serviceLocation, serviceType)
+
+
+  ipcRenderer.send("addLocalService", JSON.stringify({
+    serviceName, serviceLocation, serviceType
+  }));
+}
 
 
 //========== STARTING FLUX ==========
@@ -2098,6 +2107,7 @@ const downloadData = () => {
 
 window.addEventListener("load", (event) => {
   var buttonMap = [
+    { id: "new-service-button", func: "addLocalService" },
     { id: "bnf-solr-basic-query", func: "queryBnFSolr" },
     { id: "bnf-solr-fullquery", func: "powerValve", arg: " bnf-solr" },
     { id: "showConsole", func: "fluxConsole" },
@@ -2227,7 +2237,7 @@ window.addEventListener("load", (event) => {
     res.dnsLocalServiceList.forEach((d) => {
       if (d.valid) {
         switch (d.name) {
-          case "BnF Solr Nemo 10":
+          case "BnF-SOLR":
             addHop(["BNF-SOLR", "SYSTEM"]);
             break;
 
@@ -2239,14 +2249,16 @@ window.addEventListener("load", (event) => {
 
     drawFlux(svg, traces, false, true);
 
-    //ipcRenderer.invoke("fluxDevTools", true);
-
+    ipcRenderer.invoke("fluxDevTools", true);
   });
 
   function funcSwitch(e, but) {
     switch (but.func) {
       case "queryBnFSolr":
         queryBnFSolr();
+        break;
+      case "addLocalService":
+        addLocalService();
         break;
       case "fluxConsole":
         ipcRenderer.invoke("fluxDevTools", true);
@@ -2293,10 +2305,7 @@ window.addEventListener("load", (event) => {
         break;
 
       case "endpointConnector":
-        endpointConnector(
-          "hyphe",
-          hyphetarget
-        );
+        endpointConnector("hyphe", hyphetarget);
         break;
 
       case "datasetDisplay":

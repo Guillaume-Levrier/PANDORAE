@@ -37,6 +37,8 @@
 <!-- USER TAB -->
 <div id="user" style="display:none;" class="fluxTabs">
   <span class="flux-title">USER</span><br><br>
+
+  <span class="credential"><b>User information</b></span><br><br>
   <form id="user-data-form" autocomplete="off">
     <div class="credential"> Name:<br> <input class="fluxInput" spellcheck="false" id="userNameInput" type="text"
         value="Enter your name"><br><br></div>
@@ -47,6 +49,20 @@
     <button type="submit" id="user-button" class="flux-button">Update User
       Credentials</button><br>
 
+    <span class="credential"><b>Local services</b></span><br><br>
+    <span class="credential">Use the fields to add new local services.</span><br><br>
+
+    <div class="credential"> <input style="width:20%;" class="fluxInput" spellcheck="false" id="newServiceName"
+        type="text" value="Service name"> &nbsp;<input style="width:20%;" class="fluxInput" spellcheck="false"
+        id="newServiceLocation" type="text" value="IP:PORT"> &nbsp;<select style="width:20%;" class="fluxInput"
+        spellcheck="false" id="newServiceType">
+        <option valeur="BNF-SOLR">BNF-SOLR</option>
+      </select> &nbsp;
+      <button type="submit" id="new-service-button" class="flux-button">Add Service</button>
+      <br><br>
+    </div>
+
+    <span class="credential"><b>API Keys</b></span><br><br>
     <div class="credential"><i title="Click this button to check your API credentials status"
         class="material-icons validation" id="zoteroAPIValidation">help_outline</i> Zotero API key:<br> <input
         class="fluxInput" spellcheck="false" id="zoterokeyinput" type="password" value="Enter your Zotero API key"><i
