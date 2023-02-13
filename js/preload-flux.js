@@ -570,10 +570,10 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Actioning powerValve on " +
-      JSON.stringify(item.name) +
-      " through the " +
-      fluxAction +
-      " procedure."
+    JSON.stringify(item.name) +
+    " through the " +
+    fluxAction +
+    " procedure."
   );
 
   let fluxArgs = {}; // Arguments are stored in an object
@@ -581,7 +581,7 @@ const powerValve = (fluxAction, item) => {
   let itemname = item.name; // item argument is usually stored in "this"
 
   switch (
-    fluxAction // According to function name ...
+  fluxAction // According to function name ...
   ) {
     case "bnf-solr":
       fluxArgs.bnfsolrquery = document.getElementById("bnf-solr-query").value;
@@ -736,11 +736,11 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Sending to CHÆROS action " +
-      fluxAction +
-      " with arguments " +
-      JSON.stringify(fluxArgs) +
-      " " +
-      message
+    fluxAction +
+    " with arguments " +
+    JSON.stringify(fluxArgs) +
+    " " +
+    message
   );
   ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
   ipcRenderer.send("pulsar", false);
@@ -1363,12 +1363,12 @@ const ScopusList = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='scopColCheck' value='" +
-            coll.key +
-            "' name='" +
-            coll.name +
-            "' type='checkbox'/><label> " +
-            coll.key +
-            "</label><br> "
+          coll.key +
+          "' name='" +
+          coll.name +
+          "' type='checkbox'/><label> " +
+          coll.key +
+          "</label><br> "
         );
       }
 
@@ -1444,14 +1444,14 @@ const zoteroCollectionRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-            coll.key +
-            "' name='" +
-            coll.name +
-            "' type='checkbox'/><label> " +
-            coll.key +
-            " - " +
-            coll.name +
-            "</label><br> "
+          coll.key +
+          "' name='" +
+          coll.name +
+          "' type='checkbox'/><label> " +
+          coll.key +
+          " - " +
+          coll.name +
+          "</label><br> "
         );
       }
 
@@ -1492,9 +1492,9 @@ const zoteroCollectionRetriever = () => {
       ipcRenderer.send(
         "console-logs",
         "Error in retrieving collections for Zotero id " +
-          zoteroUser +
-          " : " +
-          err
+        zoteroUser +
+        " : " +
+        err
       ); // Log error
     });
 };
@@ -1530,14 +1530,14 @@ const zoteroLocalRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-            coll.key +
-            "' name='" +
-            coll.name +
-            "' type='checkbox'/><label> " +
-            coll.key +
-            " - " +
-            coll.name +
-            "</label><br> "
+          coll.key +
+          "' name='" +
+          coll.name +
+          "' type='checkbox'/><label> " +
+          coll.key +
+          " - " +
+          coll.name +
+          "</label><br> "
         );
       }
 
@@ -1598,10 +1598,10 @@ const datasetLoader = () => {
         ipcRenderer.send(
           "console-logs",
           "Dataset " +
-            dataset.name +
-            " loaded into " +
-            JSON.stringify(target) +
-            "."
+          dataset.name +
+          " loaded into " +
+          JSON.stringify(target) +
+          "."
         ); // Log action
       });
     });
@@ -1774,7 +1774,7 @@ const hypheCorpusList = (target, prevId) => {
       } else {
       }
     })
-    .catch((e) => {});
+    .catch((e) => { });
 };
 
 const loadHyphe = (corpus, endpoint, pass) => {
@@ -2028,8 +2028,7 @@ var solrbnfcount;
 const queryBnFSolr = () => {
   const queryContent = document.getElementById("bnf-solr-query").value;
 
-  // const query =
-  //  "http://172.20.64.112:8983/solr/netarchivebuilder/select?q=" + queryContent;
+  const query = "solr/netarchivebuilder/select?q=" + queryContent;
 
   d3.json(query).then((res) => {
     var previewer = document.getElementById("bnf-solr-basic-previewer");
@@ -2105,8 +2104,8 @@ const downloadData = () => {
 window.addEventListener("load", (event) => {
   var buttonMap = [
     { id: "new-service-button", func: "addLocalService" },
-    { id: "bnf-solr-basic-query", func: "queryBnFSolr" },
-    { id: "bnf-solr-fullquery", func: "powerValve", arg: " bnf-solr" },
+    //{ id: "bnf-solr-basic-query", func: "queryBnFSolr" },
+    //{ id: "bnf-solr-fullquery", func: "powerValve", arg: " bnf-solr" },
     { id: "showConsole", func: "fluxConsole" },
     { id: "scopus-list-display", func: "ScopusList" },
     { id: "user-button", func: "basicUserData" },
@@ -2200,6 +2199,7 @@ window.addEventListener("load", (event) => {
   const svg = d3.select("svg");
 
   ipcRenderer.invoke("checkflux", true).then((result) => {
+    ipcRenderer.invoke("fluxDevTools", true);
     const res = JSON.parse(result);
 
     res.dnslist.forEach((d) => {
@@ -2231,22 +2231,49 @@ window.addEventListener("load", (event) => {
       }
     });
 
-    res.dnsLocalServiceList.forEach((d) => {
-      if (d.valid) {
-        switch (d.name) {
-          case "BnF-SOLR":
-            addHop(["BNF-SOLR", "SYSTEM"]);
-            break;
+    const localServicePreviewer = document.getElementById("localservices-basic-previewer")
 
-          default:
-            break;
-        }
+    const table = document.createElement("UL")
+
+    localServicePreviewer.append(table)
+
+    for (const service in res.dnsLocalServiceList) {
+
+      switch (res.dnsLocalServiceList[service].type) {
+        case "BNF-SOLR":
+          const serv = service.toUpperCase().replace(" ", "-")
+          addHop([serv, "SYSTEM"]);
+          table.innerHTML += `- ${res.dnsLocalServiceList[service].type} - ${service}`
+
+          const solrCont = document.createElement("div");
+
+          solrCont.id = serv.toLowerCase();
+          solrCont.style.display = "none";
+          solrCont.className = "fluxTabs";
+
+          solrCont.innerHTML = `<!-- BNF SOLR TAB -->     
+                      <span class="flux-title">${service.toUpperCase()}</span>
+                      <br><br>
+                      <form id="bnf-solr-form" autocomplete="off">Query:<br>
+                        <input class="fluxInput" spellcheck="false" id="bnf-solr-query" type="text" value=""><br><br>
+                        <button type="submit" class="flux-button" id="bnf-solr-basic-query">Retrieve
+                          basic info</button>&nbsp;&nbsp;
+                        <div id="bnf-solr-basic-previewer" style="position:relative;"></div><br><br>
+                        <button style="display: none;" type="submit" class="flux-button" id="bnf-solr-fullquery">Submit Full Query</button>
+                        <br><br>
+                      </form>`
+          document.body.append(solrCont)
+          break;
+
+        default:
+          break;
       }
-    });
+    }
+
 
     drawFlux(svg, traces, false, true);
 
-    ipcRenderer.invoke("fluxDevTools", true);
+
   });
 
   function funcSwitch(e, but) {
@@ -2358,11 +2385,10 @@ window.addEventListener("load", (event) => {
   buttonMap.forEach((but) => {
     document.getElementById(but.id).addEventListener("click", (e) => {
       funcSwitch(e, but);
-
       e.preventDefault();
-
       return false;
     });
+
   });
 });
 const getPassword = (service, user) =>

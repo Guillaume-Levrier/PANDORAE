@@ -50,7 +50,11 @@
       Credentials</button><br>
 
     <span class="credential"><b>Local services</b></span><br><br>
-    <span class="credential">Use the fields to add new local services.</span><br><br>
+    <div class="credential">
+      <div id="localservices-basic-previewer" style="position:relative;"></div>
+    </div>
+
+    <span class="credential">Use the fields below to add new local services.</span><br><br>
 
     <div class="credential"> <input style="width:20%;" class="fluxInput" spellcheck="false" id="newServiceName"
         type="text" value="Service name"> &nbsp;<input style="width:20%;" class="fluxInput" spellcheck="false"
@@ -181,19 +185,7 @@
   </form>
 </div>
 
-<!-- BNF SOLR TAB -->
-<div id="bnf-solr" style="display:none;" class="fluxTabs">
-  <span class="flux-title">Solr BnF</span>
-  <br><br>
-  <form id="bnf-solr-form" autocomplete="off">Query:<br>
-    <input class="fluxInput" spellcheck="false" id="bnf-solr-query" type="text" value=""><br><br>
-    <button type="submit" class="flux-button" id="bnf-solr-basic-query">Retrieve
-      basic info</button>&nbsp;&nbsp;
-    <div id="bnf-solr-basic-previewer" style="position:relative;"></div><br><br>
-    <button style="display: none;" type="submit" class="flux-button" id="bnf-solr-fullquery">Submit Full Query</button>
-    <br><br>
-  </form>
-</div>
+
 
 
 <!-- TWITTER TAB -->

@@ -166,7 +166,9 @@ const openModal = (modalFile, scrollTo) => {
   }
 };
 
-var currentUser = ipcMain.on("userStatus", (event, req) => {
+var currentUser;
+
+ipcMain.on("userStatus", (event, req) => {
   if (req) {
     fs.readFile(
       userDataPath + "/userID/user-id.json", // Read the user data file
@@ -175,6 +177,23 @@ var currentUser = ipcMain.on("userStatus", (event, req) => {
         // Additional options for readFile
         if (err) throw err;
         currentUser = JSON.parse(data);
+        if (currentUser.hasOwnProperty("localServices")) {
+
+          for (const service in currentUser.localServices) {
+
+            const d = currentUser.localServices[service];
+
+            dns.lookupService(d.url, d.port, (err, hostname, service) => {
+              if (hostname || service) {
+                d.valid = true;
+              } else {
+                d.valid = false;
+              }
+            });
+          }
+
+        }
+
         mainWindow.webContents.send("userStatus", currentUser);
       }
     );
@@ -508,7 +527,7 @@ ipcMain.handle("restart", async (event, mess) => {
 
 ipcMain.handle("saveDataset", async (event, target, data) => {
   dialog.showSaveDialog(target).then((filePath) => {
-    fs.writeFile(filePath.filePath, data, () => {});
+    fs.writeFile(filePath.filePath, data, () => { });
   });
 });
 
@@ -516,7 +535,7 @@ ipcMain.handle("savePNG", async (event, target) => {
   setTimeout(() => {
     mainWindow.capturePage().then((img) => {
       dialog.showSaveDialog(target).then((filePath) => {
-        fs.writeFile(filePath.filePath, img.toPNG(), () => {});
+        fs.writeFile(filePath.filePath, img.toPNG(), () => { });
       });
     });
   }, 250);
@@ -572,7 +591,7 @@ dnslist.forEach((d) => {
   });
 });
 
-const dnsLocalServiceList = [];
+
 
 ipcMain.handle("addLocalService", async (event, m) => {
   const loc = m.serviceLocation.split(":");
@@ -585,6 +604,7 @@ ipcMain.handle("addLocalService", async (event, m) => {
       currentUser.localServices[m.serviceName] = {
         url: loc[0],
         port: loc[1],
+        type: m.serviceType
       };
 
       fs.writeFileSync(
@@ -599,17 +619,12 @@ ipcMain.handle("addLocalService", async (event, m) => {
   });
 });
 
-dnsLocalServiceList.forEach((d) => {
-  dns.lookupService(d.url, d.port, (err, hostname, service) => {
-    if (hostname || service) {
-      d.valid = true;
-    } else {
-      d.valid = false;
-    }
-  });
-});
+
 
 ipcMain.handle("checkflux", async (event, mess) => {
+  const dnsLocalServiceList = currentUser.localServices;
   const result = JSON.stringify({ dnslist, dnsLocalServiceList });
+
+
   return result;
 });
