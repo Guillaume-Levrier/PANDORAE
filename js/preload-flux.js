@@ -586,7 +586,7 @@ const powerValve = (fluxAction, item) => {
     case "BNF-SOLR":
       const fieldId = item.id.replace("full", "")
       fluxArgs.bnfsolrquery = document.getElementById(fieldId).value;
-      fluxArgs.solrbnfcount = solrbnfcount[fluxArgs.bnfsolrquery];
+      fluxArgs.meta = solrbnfcount[fluxArgs.bnfsolrquery];
       message = "Connecting to BNF-SOLR";
       break;
 
@@ -743,9 +743,9 @@ const powerValve = (fluxAction, item) => {
     " " +
     message
   );
-  // ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
+  ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
   ipcRenderer.send("pulsar", false);
-  //ipcRenderer.send("window-manager", "closeWindow", "flux");
+  ipcRenderer.send("window-manager", "closeWindow", "flux");
 };
 
 //========== fluxButtonAction ==========
@@ -2033,20 +2033,17 @@ const queryBnFSolr = (but) => {
 
   const query = "http://" + but.args.url + ":" + but.args.port + "/solr/netarchivebuilder/select?q=" + queryContent;
 
-  console.log(query)
 
   d3.json(query).then((res) => {
-    console.log(res)
+
     var previewer = document.getElementById("bnf-solr-basic-previewer-" + but.serv);
     previewer.innerHTML = `<br><p>  ${res.response.numFound} documents found`;
 
-    solrbnfcount[queryContent] = res.response.numFound;
+    solrbnfcount[queryContent] = { count: res.response.numFound, but };
 
-    document.getElementById("bnf-solr-fullquery-" + but.serv).style.display = "flex";
-
-    //if (res.response.numFound === 0) {
-    // document.getElementById("bnf-solr-query-" + but.serv).disabled = true;
-    //}
+    if (res.response.numFound > 0) {
+      document.getElementById("bnf-solr-fullquery-" + but.serv).style.display = "flex";
+    }
   });
 
 };
@@ -2205,7 +2202,9 @@ window.addEventListener("load", (event) => {
   const svg = d3.select("svg");
 
   ipcRenderer.invoke("checkflux", true).then((result) => {
-    ipcRenderer.invoke("fluxDevTools", true);
+
+    // ipcRenderer.invoke("fluxDevTools", true);
+
     const res = JSON.parse(result);
 
     res.dnslist.forEach((d) => {

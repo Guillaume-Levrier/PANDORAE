@@ -1363,21 +1363,79 @@ const regardsRetriever = (queryContent) => {
 };
 
 
-const solrMetaExplorer = (req, count) => {
+const solrMetaExplorer = (req, meta) => {
 
-  const url = (req, start, end) => `http://IP:PORT/solr/netarchivebuilder/select?q=${req}&start=${start}&rows=${end - start}`
+  console.log(meta)
+
+  const url = (req, start, end) => `http://${meta.but.args.url}:${meta.but.args.port}/solr/netarchivebuilder/select?q=${req}&start=${start}&rows=${end - start}`
 
   const urlArray = []
 
-  if (count > 200) {
-    for (let i = 0; i < count / 200 + 1; i++) {
-      urlArray.push(url(req, i * 200, (i + 1) * 200))
+  // make smaller packages (not necessary since supposed to be local)
+  // but a good practice
+  if (meta.count > 200) {
+    for (let i = 0; i < meta.count / 200 + 1; i++) {
+      urlArray.push(fetch(url(req, i * 200, (i + 1) * 200)).then(r => r.json()))
     }
   }
 
-  console.log(urlArray)
+  // send request
+  Promise.all(urlArray).then(res => {
 
-  // activate bottleneck here.
+    // rebuild an array with all the responses 
+    var totalResponse = [];
+
+    res.forEach(d => totalResponse = [...totalResponse, ...d.response.docs])
+
+    const content = [[]];
+
+    totalResponse.forEach(d => {
+      content[0].push({
+        itemType: "webpage",
+        title: d.title,
+        creators: [],
+        abstractNote: "",
+        publicationTitle: "",
+        volume: "",
+        issue: "",
+        pages: "",
+        date: d.crawl_date,
+        series: "",
+        seriesTitle: "",
+        seriesText: "",
+        journalAbbreviation: "",
+        language: "",
+        DOI: "",
+        ISSN: "",
+        shortTitle: "",
+        url: d.url_norm,
+        accessDate: "",
+        archive: "",
+        archiveLocation: "",
+        libraryCatalog: "",
+        callNumber: "",
+        rights: "",
+        extra: d,
+        tags: [],
+        collections: [],
+        relations: {},
+      });
+
+    })
+
+
+
+    const importName = req + "-" + new Date();
+
+    // dataWriter(destination, importName, content);
+
+    dataWriter(
+      ["system"],
+      importName,
+      content
+    );
+  })
+
 
 }
 
@@ -1397,9 +1455,9 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
 
   switch (fluxAction) {
 
-    case "bnf-solr":
-      console.log(fluxArgs)
-      // solrMetaExplorer(fluxArgs.bnfsolrquery, fluxArgs.solrbnfcount);
+    case "BNF-SOLR":
+
+      solrMetaExplorer(fluxArgs.bnfsolrquery, fluxArgs.meta);
       break;
 
     case "regards":
