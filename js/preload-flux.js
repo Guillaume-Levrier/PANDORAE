@@ -2025,23 +2025,31 @@ const regardsBasic = () => {
 
 //===== Solr BNF ======
 var solrbnfcount;
-const queryBnFSolr = () => {
-  const queryContent = document.getElementById("bnf-solr-query").value;
+const queryBnFSolr = (but) => {
 
-  const query = "solr/netarchivebuilder/select?q=" + queryContent;
+  console.log(but);
+
+
+  const queryContent = document.getElementById(`bnf-solr-query-${but.serv}`).value;
+
+  const query = "http://" + but.args.url + ":" + but.args.port + "/solr/netarchivebuilder/select?q=" + queryContent;
+
+  console.log(query)
 
   d3.json(query).then((res) => {
-    var previewer = document.getElementById("bnf-solr-basic-previewer");
+    console.log(res)
+    var previewer = document.getElementById("bnf-solr-basic-previewer-" + but.serv);
     previewer.innerHTML = `<br><p>  ${res.response.numFound} documents found`;
 
     solrbnfcount = res.response.numFound;
 
-    document.getElementById("bnf-solr-fullquery").style.display = "flex";
+    document.getElementById("bnf-solr-fullquery-" + but.serv).style.display = "flex";
 
-    if (res.response.numFound === 0) {
-      document.getElementById("bnf-solr-query").disabled = true;
-    }
+    //if (res.response.numFound === 0) {
+    // document.getElementById("bnf-solr-query-" + but.serv).disabled = true;
+    //}
   });
+
 };
 
 //===== Adding a new local service ======
@@ -2102,10 +2110,9 @@ const downloadData = () => {
 };
 
 window.addEventListener("load", (event) => {
-  var buttonMap = [
+  var buttonList = [
     { id: "new-service-button", func: "addLocalService" },
-    //{ id: "bnf-solr-basic-query", func: "queryBnFSolr" },
-    //{ id: "bnf-solr-fullquery", func: "powerValve", arg: " bnf-solr" },
+
     { id: "showConsole", func: "fluxConsole" },
     { id: "scopus-list-display", func: "ScopusList" },
     { id: "user-button", func: "basicUserData" },
@@ -2241,7 +2248,8 @@ window.addEventListener("load", (event) => {
 
       switch (res.dnsLocalServiceList[service].type) {
         case "BNF-SOLR":
-          const serv = service.toUpperCase().replace(" ", "-")
+          const serv = service.toUpperCase().replace(" ", "-");
+
           addHop([serv, "SYSTEM"]);
           table.innerHTML += `- ${res.dnsLocalServiceList[service].type} - ${service}`
 
@@ -2255,14 +2263,18 @@ window.addEventListener("load", (event) => {
                       <span class="flux-title">${service.toUpperCase()}</span>
                       <br><br>
                       <form id="bnf-solr-form" autocomplete="off">Query:<br>
-                        <input class="fluxInput" spellcheck="false" id="bnf-solr-query" type="text" value=""><br><br>
-                        <button type="submit" class="flux-button" id="bnf-solr-basic-query">Retrieve
+                        <input class="fluxInput" spellcheck="false" id="bnf-solr-query-${serv}" type="text" value=""><br><br>
+                        <button type="submit" class="flux-button" id="bnf-solr-basic-query-${serv}">Retrieve
                           basic info</button>&nbsp;&nbsp;
-                        <div id="bnf-solr-basic-previewer" style="position:relative;"></div><br><br>
-                        <button style="display: none;" type="submit" class="flux-button" id="bnf-solr-fullquery">Submit Full Query</button>
+                        <div id="bnf-solr-basic-previewer-${serv}" style="position:relative;"></div><br><br>
+                        <button style="display: none;" type="submit" class="flux-button" id="bnf-solr-fullquery-${serv}">Submit Full Query</button>
                         <br><br>
                       </form>`
-          document.body.append(solrCont)
+
+          document.body.append(solrCont);
+          buttonList.push({ id: "bnf-solr-basic-query-" + serv, serv, func: "queryBnFSolr", args: res.dnsLocalServiceList[service] });
+          buttonList.push({ id: "bnf-solr-fullquery-" + serv, serv, func: "powerValve", args: res.dnsLocalServiceList[service] });
+
           break;
 
         default:
@@ -2270,16 +2282,22 @@ window.addEventListener("load", (event) => {
       }
     }
 
-
     drawFlux(svg, traces, false, true);
 
+    buttonList.forEach((but) => {
+      document.getElementById(but.id).addEventListener("click", (e) => {
+        funcSwitch(e, but);
+        e.preventDefault();
+        return false;
+      });
+    });
 
   });
 
   function funcSwitch(e, but) {
     switch (but.func) {
       case "queryBnFSolr":
-        queryBnFSolr();
+        queryBnFSolr(but);
         break;
       case "addLocalService":
         addLocalService();
@@ -2382,14 +2400,7 @@ window.addEventListener("load", (event) => {
     }
   }
 
-  buttonMap.forEach((but) => {
-    document.getElementById(but.id).addEventListener("click", (e) => {
-      funcSwitch(e, but);
-      e.preventDefault();
-      return false;
-    });
 
-  });
 });
 const getPassword = (service, user) =>
   ipcRenderer.sendSync("keytar", {
