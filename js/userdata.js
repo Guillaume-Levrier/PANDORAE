@@ -36,6 +36,11 @@ const getUserData = () => {
         "Scopus",
         userName
       );
+
+      document.getElementById("woskeyinput").value = getPassword(
+        "WebOfScience",
+        userName
+      );
     }
   );
 };
@@ -96,34 +101,15 @@ const updateUserData = (service) => {
       );
       checkKey("scopusValidation");
       break;
-    /*
-    case "Altmetric":
-      keytar.setPassword(
-        "Altmetric",
-        userName,
-        document.getElementById("altmetrickeyinput").value
-      );
-      checkKey("altmetricValidation");
-      break;
 
-    case "Twitter":
-      keytar.setPassword(
-        "Twitter",
+    case "WebOfScience":
+      setPassword(
+        "WebOfScience",
         userName,
-        document.getElementById("twitterkeyinput").value
+        document.getElementById("woskeyinput").value
       );
-      checkKey("twitterValidation");
+      checkKey("wosValidation");
       break;
-
-    case "OAbutton":
-      keytar.setPassword(
-        "OAbutton",
-        userName,
-        document.getElementById("OAbutton").value
-      );
-      checkKey("openAccessValidation");
-      break;
-      */
   }
 
   getUserData();
@@ -143,7 +129,6 @@ const checkKey = (service, status) => {
       if (status === undefined) {
         scopusBasicRetriever(true);
       }
-
       break;
     /*
     case "altmetricValidation":

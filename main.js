@@ -178,9 +178,7 @@ ipcMain.on("userStatus", (event, req) => {
         if (err) throw err;
         currentUser = JSON.parse(data);
         if (currentUser.hasOwnProperty("localServices")) {
-
           for (const service in currentUser.localServices) {
-
             const d = currentUser.localServices[service];
 
             dns.lookupService(d.url, d.port, (err, hostname, service) => {
@@ -191,7 +189,6 @@ ipcMain.on("userStatus", (event, req) => {
               }
             });
           }
-
         }
 
         mainWindow.webContents.send("userStatus", currentUser);
@@ -527,7 +524,7 @@ ipcMain.handle("restart", async (event, mess) => {
 
 ipcMain.handle("saveDataset", async (event, target, data) => {
   dialog.showSaveDialog(target).then((filePath) => {
-    fs.writeFile(filePath.filePath, data, () => { });
+    fs.writeFile(filePath.filePath, data, () => {});
   });
 });
 
@@ -535,7 +532,7 @@ ipcMain.handle("savePNG", async (event, target) => {
   setTimeout(() => {
     mainWindow.capturePage().then((img) => {
       dialog.showSaveDialog(target).then((filePath) => {
-        fs.writeFile(filePath.filePath, img.toPNG(), () => { });
+        fs.writeFile(filePath.filePath, img.toPNG(), () => {});
       });
     });
   }, 250);
@@ -580,7 +577,9 @@ const dnslist = [
   { name: "Zotero", url: "api.zotero.org" },
   { name: "Clinical Trials", url: "clinicaltrials.gov" },
   { name: "Regards Citoyens", url: "nosdeputes.fr" },
+  { name: "Web Of Science", url: "clarivate.com" },
 ];
+
 dnslist.forEach((d) => {
   dns.lookup(d.url, (err, address, family) => {
     if (address) {
@@ -590,8 +589,6 @@ dnslist.forEach((d) => {
     }
   });
 });
-
-
 
 ipcMain.handle("addLocalService", async (event, m) => {
   const loc = m.serviceLocation.split(":");
@@ -604,7 +601,7 @@ ipcMain.handle("addLocalService", async (event, m) => {
       currentUser.localServices[m.serviceName] = {
         url: loc[0],
         port: loc[1],
-        type: m.serviceType
+        type: m.serviceType,
       };
 
       fs.writeFileSync(
@@ -619,12 +616,9 @@ ipcMain.handle("addLocalService", async (event, m) => {
   });
 });
 
-
-
 ipcMain.handle("checkflux", async (event, mess) => {
   const dnsLocalServiceList = currentUser.localServices;
   const result = JSON.stringify({ dnslist, dnsLocalServiceList });
-
 
   return result;
 });

@@ -570,10 +570,10 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Actioning powerValve on " +
-    JSON.stringify(item.name) +
-    " through the " +
-    fluxAction +
-    " procedure."
+      JSON.stringify(item.name) +
+      " through the " +
+      fluxAction +
+      " procedure."
   );
 
   let fluxArgs = {}; // Arguments are stored in an object
@@ -581,10 +581,10 @@ const powerValve = (fluxAction, item) => {
   let itemname = item.name; // item argument is usually stored in "this"
 
   switch (
-  fluxAction // According to function name ...
+    fluxAction // According to function name ...
   ) {
     case "BNF-SOLR":
-      const fieldId = item.id.replace("full", "")
+      const fieldId = item.id.replace("full", "");
       fluxArgs.bnfsolrquery = document.getElementById(fieldId).value;
       fluxArgs.meta = solrbnfcount[fluxArgs.bnfsolrquery];
       message = "Connecting to BNF-SOLR";
@@ -737,11 +737,11 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Sending to CHÆROS action " +
-    fluxAction +
-    " with arguments " +
-    JSON.stringify(fluxArgs) +
-    " " +
-    message
+      fluxAction +
+      " with arguments " +
+      JSON.stringify(fluxArgs) +
+      " " +
+      message
   );
   ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
   ipcRenderer.send("pulsar", false);
@@ -1364,12 +1364,12 @@ const ScopusList = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='scopColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            "</label><br> "
         );
       }
 
@@ -1445,14 +1445,14 @@ const zoteroCollectionRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          " - " +
-          coll.name +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            " - " +
+            coll.name +
+            "</label><br> "
         );
       }
 
@@ -1493,9 +1493,9 @@ const zoteroCollectionRetriever = () => {
       ipcRenderer.send(
         "console-logs",
         "Error in retrieving collections for Zotero id " +
-        zoteroUser +
-        " : " +
-        err
+          zoteroUser +
+          " : " +
+          err
       ); // Log error
     });
 };
@@ -1531,14 +1531,14 @@ const zoteroLocalRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          " - " +
-          coll.name +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            " - " +
+            coll.name +
+            "</label><br> "
         );
       }
 
@@ -1599,10 +1599,10 @@ const datasetLoader = () => {
         ipcRenderer.send(
           "console-logs",
           "Dataset " +
-          dataset.name +
-          " loaded into " +
-          JSON.stringify(target) +
-          "."
+            dataset.name +
+            " loaded into " +
+            JSON.stringify(target) +
+            "."
         ); // Log action
       });
     });
@@ -1775,7 +1775,7 @@ const hypheCorpusList = (target, prevId) => {
       } else {
       }
     })
-    .catch((e) => { });
+    .catch((e) => {});
 };
 
 const loadHyphe = (corpus, endpoint, pass) => {
@@ -2028,24 +2028,79 @@ const regardsBasic = () => {
 var solrbnfcount = {};
 
 const queryBnFSolr = (but) => {
+  const queryContent = document.getElementById(
+    `bnf-solr-query-${but.serv}`
+  ).value;
 
-  const queryContent = document.getElementById(`bnf-solr-query-${but.serv}`).value;
-
-  const query = "http://" + but.args.url + ":" + but.args.port + "/solr/netarchivebuilder/select?q=" + queryContent;
-
+  const query =
+    "http://" +
+    but.args.url +
+    ":" +
+    but.args.port +
+    "/solr/netarchivebuilder/select?q=" +
+    queryContent;
 
   d3.json(query).then((res) => {
-
-    var previewer = document.getElementById("bnf-solr-basic-previewer-" + but.serv);
+    var previewer = document.getElementById(
+      "bnf-solr-basic-previewer-" + but.serv
+    );
     previewer.innerHTML = `<br><p>  ${res.response.numFound} documents found`;
 
     solrbnfcount[queryContent] = { count: res.response.numFound, but };
 
     if (res.response.numFound > 0) {
-      document.getElementById("bnf-solr-fullquery-" + but.serv).style.display = "flex";
+      document.getElementById("bnf-solr-fullquery-" + but.serv).style.display =
+        "flex";
     }
   });
+};
 
+//===== Clarivate Web of Science ======
+
+const wosBasicRetriever = (query) => {
+  const wosKey = getPassword("WebOfScience", user);
+
+  const getpublishTimeSpan = () => {
+    const from = document.getElementById("wos-from-date").value;
+    const to = document.getElementById("wos-to-date").value;
+
+    if (from && to) {
+      return `${from}+${to}`;
+    } else {
+      return null;
+    }
+  };
+
+  const publishTimeSpan = getpublishTimeSpan();
+
+  const queryOptions = {
+    databaseId: "wos",
+    lang: "en",
+    usrQuery: query,
+    edition: null,
+    publishTimeSpan,
+    //loadTimeSpan: "string",
+    //createdTimeSpan: "string",
+    //modifiedTimeSpan: "string",
+    count: 1,
+    firstRecord: 1,
+    sortField: "A",
+    //viewField: "string",
+    optionView: "FR",
+    //optionOther: "string",
+  };
+
+  const apiTarget = `https://wos-api.clarivate.com/api/wos/`;
+
+  fetch(apiTarget, {
+    method: "POST",
+    body: queryOptions,
+    headers: { "Content-Type": "application/json", "X-ApiKey": wosKey },
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      console.log(res);
+    });
 };
 
 //===== Adding a new local service ======
@@ -2107,8 +2162,8 @@ const downloadData = () => {
 
 window.addEventListener("load", (event) => {
   var buttonList = [
+    { id: "wos-basic-query", func: "wosBasicRetriever" },
     { id: "new-service-button", func: "addLocalService" },
-
     { id: "showConsole", func: "fluxConsole" },
     { id: "scopus-list-display", func: "ScopusList" },
     { id: "user-button", func: "basicUserData" },
@@ -2120,6 +2175,7 @@ window.addEventListener("load", (event) => {
     { id: "Zotero", func: "updateUserData", arg: "Zotero" },
     { id: "scopusValidation", func: "checkKey", arg: "scopusValidation" },
     { id: "Scopus", func: "updateUserData", arg: "Scopus" },
+    { id: "WebOfScience", func: "updateUserData", arg: "WebOfScience" },
     { id: "fluxDisplayButton", func: "fluxDisplay", arg: "flux-manager" },
     { id: "fluxCloseButton", func: "closeWindow" },
     { id: "fluxRefreshButton", func: "refreshWindow" },
@@ -2202,7 +2258,6 @@ window.addEventListener("load", (event) => {
   const svg = d3.select("svg");
 
   ipcRenderer.invoke("checkflux", true).then((result) => {
-
     // ipcRenderer.invoke("fluxDevTools", true);
 
     const res = JSON.parse(result);
@@ -2212,6 +2267,10 @@ window.addEventListener("load", (event) => {
         switch (d.name) {
           case "Scopus":
             addHop(["USER", "SCOPUS", "ENRICHMENT"]);
+            break;
+
+          case "Web Of Science":
+            addHop(["USER", "WEBㅤOFㅤSCIENCE", "ENRICHMENT"]);
             break;
 
           case "BIORXIV":
@@ -2236,20 +2295,21 @@ window.addEventListener("load", (event) => {
       }
     });
 
-    const localServicePreviewer = document.getElementById("localservices-basic-previewer")
+    const localServicePreviewer = document.getElementById(
+      "localservices-basic-previewer"
+    );
 
-    const table = document.createElement("UL")
+    const table = document.createElement("UL");
 
-    localServicePreviewer.append(table)
+    localServicePreviewer.append(table);
 
     for (const service in res.dnsLocalServiceList) {
-
       switch (res.dnsLocalServiceList[service].type) {
         case "BNF-SOLR":
           const serv = service.toUpperCase().replace(" ", "-");
 
           addHop([serv, "SYSTEM"]);
-          table.innerHTML += `- ${res.dnsLocalServiceList[service].type} - ${service}`
+          table.innerHTML += `- ${res.dnsLocalServiceList[service].type} - ${service}`;
 
           const solrCont = document.createElement("div");
 
@@ -2267,11 +2327,21 @@ window.addEventListener("load", (event) => {
                         <div id="bnf-solr-basic-previewer-${serv}" style="position:relative;"></div><br><br>
                         <button style="display: none;" type="submit" class="flux-button" id="bnf-solr-fullquery-${serv}">Submit Full Query</button>
                         <br><br>
-                      </form>`
+                      </form>`;
 
           document.body.append(solrCont);
-          buttonList.push({ id: "bnf-solr-basic-query-" + serv, serv, func: "queryBnFSolr", args: res.dnsLocalServiceList[service] });
-          buttonList.push({ id: "bnf-solr-fullquery-" + serv, serv, func: "powerValve", arg: "BNF-SOLR" });
+          buttonList.push({
+            id: "bnf-solr-basic-query-" + serv,
+            serv,
+            func: "queryBnFSolr",
+            args: res.dnsLocalServiceList[service],
+          });
+          buttonList.push({
+            id: "bnf-solr-fullquery-" + serv,
+            serv,
+            func: "powerValve",
+            arg: "BNF-SOLR",
+          });
 
           break;
 
@@ -2289,7 +2359,6 @@ window.addEventListener("load", (event) => {
         return false;
       });
     });
-
   });
 
   function funcSwitch(e, but) {
@@ -2307,6 +2376,10 @@ window.addEventListener("load", (event) => {
 
         pandodb.system.get(id).then((data) => console.log(data));
 
+        break;
+
+      case "wosBasicRetriever":
+        wosBasicRetriever();
         break;
 
       case "biorxivBasicRetriever":
@@ -2436,6 +2509,11 @@ const getUserData = () => {
         "Scopus",
         userName
       );
+
+      document.getElementById("woskeyinput").value = getPassword(
+        "WebOfScience",
+        userName
+      );
     }
   );
 };
@@ -2496,34 +2574,15 @@ const updateUserData = (service) => {
       );
       checkKey("scopusValidation");
       break;
-    /*
-    case "Altmetric":
-      keytar.setPassword(
-        "Altmetric",
-        userName,
-        document.getElementById("altmetrickeyinput").value
-      );
-      checkKey("altmetricValidation");
-      break;
 
-    case "Twitter":
-      keytar.setPassword(
-        "Twitter",
+    case "WebOfScience":
+      setPassword(
+        "WebOfScience",
         userName,
-        document.getElementById("twitterkeyinput").value
+        document.getElementById("woskeyinput").value
       );
-      checkKey("twitterValidation");
+      checkKey("wosValidation");
       break;
-
-    case "OAbutton":
-      keytar.setPassword(
-        "OAbutton",
-        userName,
-        document.getElementById("OAbutton").value
-      );
-      checkKey("openAccessValidation");
-      break;
-      */
   }
 
   getUserData();
@@ -2543,7 +2602,6 @@ const checkKey = (service, status) => {
       if (status === undefined) {
         scopusBasicRetriever(true);
       }
-
       break;
     /*
     case "altmetricValidation":

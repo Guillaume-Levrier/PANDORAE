@@ -4583,8 +4583,6 @@ const chronotype = (id) => {
         bill: "account_balance",
       };
 
-
-
       const dataSorter = () => {
         for (let i = 0; i < docs.length; i++) {
           let doc = docs[i].items;
