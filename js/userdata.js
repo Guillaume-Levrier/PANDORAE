@@ -130,15 +130,6 @@ const checkKey = (service, status) => {
         scopusBasicRetriever(true);
       }
       break;
-    /*
-    case "altmetricValidation":
-      break;
-
-    case "twitterValidation":
-      break;
-
-    case "openAccessValidation":
-      break;*/
   }
 
   success = status;

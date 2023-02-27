@@ -583,6 +583,10 @@ const powerValve = (fluxAction, item) => {
   switch (
     fluxAction // According to function name ...
   ) {
+    case "wosBuild":
+      fluxArgs.wosquery = wosReq;
+      message = "Connecting to WoS";
+      break;
     case "BNF-SOLR":
       const fieldId = item.id.replace("full", "");
       fluxArgs.bnfsolrquery = document.getElementById(fieldId).value;
@@ -743,6 +747,7 @@ const powerValve = (fluxAction, item) => {
       " " +
       message
   );
+
   ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
   ipcRenderer.send("pulsar", false);
   ipcRenderer.send("window-manager", "closeWindow", "flux");
@@ -2057,8 +2062,15 @@ const queryBnFSolr = (but) => {
 
 //===== Clarivate Web of Science ======
 
-const wosBasicRetriever = (query) => {
-  const wosKey = getPassword("WebOfScience", user);
+var wosReq;
+
+const wosBasicRetriever = () => {
+  const query = document.getElementById("wosbasicqueryinput").value;
+
+  const wosKey = getPassword(
+    "WebOfScience",
+    document.getElementById("userNameInput").value
+  );
 
   const getpublishTimeSpan = () => {
     const from = document.getElementById("wos-from-date").value;
@@ -2073,8 +2085,8 @@ const wosBasicRetriever = (query) => {
 
   const publishTimeSpan = getpublishTimeSpan();
 
-  const queryOptions = {
-    databaseId: "wos",
+  wosReq = {
+    databaseId: "WOK",
     lang: "en",
     usrQuery: query,
     edition: null,
@@ -2084,7 +2096,7 @@ const wosBasicRetriever = (query) => {
     //modifiedTimeSpan: "string",
     count: 1,
     firstRecord: 1,
-    sortField: "A",
+    //sortField: "ASC",
     //viewField: "string",
     optionView: "FR",
     //optionOther: "string",
@@ -2094,12 +2106,19 @@ const wosBasicRetriever = (query) => {
 
   fetch(apiTarget, {
     method: "POST",
-    body: queryOptions,
+    body: JSON.stringify(wosReq),
     headers: { "Content-Type": "application/json", "X-ApiKey": wosKey },
   })
     .then((res) => res.json())
     .then((res) => {
-      console.log(res);
+      const numFound = res.QueryResult.RecordsFound;
+      document.getElementById(
+        "wos-basic-previewer"
+      ).innerHTML = `Number of records found: ${numFound}.`;
+      if (numFound > 0) {
+        document.getElementById("wos-query").style.display = "block";
+        //powerValve
+      }
     });
 };
 
@@ -2163,6 +2182,11 @@ const downloadData = () => {
 window.addEventListener("load", (event) => {
   var buttonList = [
     { id: "wos-basic-query", func: "wosBasicRetriever" },
+    {
+      id: "wos-query",
+      func: "powerValve",
+      arg: "wosBuild",
+    },
     { id: "new-service-button", func: "addLocalService" },
     { id: "showConsole", func: "fluxConsole" },
     { id: "scopus-list-display", func: "ScopusList" },
@@ -2603,15 +2627,6 @@ const checkKey = (service, status) => {
         scopusBasicRetriever(true);
       }
       break;
-    /*
-    case "altmetricValidation":
-      break;
-
-    case "twitterValidation":
-      break;
-
-    case "openAccessValidation":
-      break;*/
   }
 
   success = status;

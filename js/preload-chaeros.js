@@ -379,7 +379,7 @@ const scopusGeolocate = (dataset) => {
         ipcRenderer.send(
           "console-logs",
           "Unable to locale the following cities " +
-          JSON.stringify(unlocatedCities)
+            JSON.stringify(unlocatedCities)
         );
         doc.content.articleGeoloc = true; // Mark file as geolocated
         pandodb.enriched.put(doc);
@@ -518,10 +518,10 @@ const scopusRetriever = (user, query, bottleRate) => {
                       ipcRenderer.send(
                         "console-logs",
                         "Scopus dataset on " +
-                        query +
-                        " for user " +
-                        user +
-                        " have been successfully retrieved."
+                          query +
+                          " for user " +
+                          user +
+                          " have been successfully retrieved."
                       );
                       setTimeout(() => {
                         ipcRenderer.send("win-destroy", winId);
@@ -600,8 +600,6 @@ const biorxivRetriever = (query) => {
   let count = 0;
 
   ipcRenderer.on("biorxiv-retrieve", (event, message) => {
-
-
     message.content.forEach((d) =>
       doiBuffer.push(d.replace("doi: https://doi.org/", "").replace(" ", ""))
     );
@@ -721,8 +719,6 @@ const biorxivRetriever = (query) => {
         pandodb.open();
 
         let id = query.terms + date;
-
-
 
         pandodb.csljson.add({
           id: id,
@@ -850,12 +846,12 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
   ipcRenderer.send(
     "console-logs",
     "Started retrieving collections " +
-    collections +
-    "for user " +
-    zoteroUser +
-    " under the import name " +
-    importName +
-    " into SYSTEM."
+      collections +
+      "for user " +
+      zoteroUser +
+      " under the import name " +
+      importName +
+      " into SYSTEM."
   );
 
   const limiter = new bottleneck({
@@ -895,11 +891,7 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
         zoteroCollectionResponse.push(result);
 
         if (zoteroCollectionResponse.length === zoteroPromises.length) {
-
-
           zoteroCollectionResponse.forEach((f) => {
-
-
             thisCollectionAmount = parseInt(f.meta.numItems);
             responseTarget = responseTarget + thisCollectionAmount;
 
@@ -944,16 +936,13 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
                     ipcRenderer.send(
                       "chaeros-notification",
                       "Loading " +
-                      responseAmount +
-                      " of " +
-                      responseTarget +
-                      " documents."
+                        responseAmount +
+                        " of " +
+                        responseTarget +
+                        " documents."
                     );
 
-
-
                     if (responseAmount === responseTarget) {
-
                       dataWriter(
                         ["system"],
                         importName,
@@ -1009,11 +998,11 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
   ipcRenderer.send(
     "console-logs",
     "Building collection" +
-    collectionName +
-    " for user " +
-    zoteroUser +
-    " in path " +
-    id
+      collectionName +
+      " for user " +
+      zoteroUser +
+      " in path " +
+      id
   );
 
   ipcRenderer.send(
@@ -1028,8 +1017,6 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
       // If the file is valid, do the following:
 
       let zoteroApiKey = getPassword("Zotero", zoteroUser);
-
-
 
       // URL Building blocks
       var rootUrl = "https://api.zotero.org/groups/";
@@ -1048,8 +1035,6 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
         .then((res) => res.json())
         .then((collectionName) => {
           collectionCode.code = collectionName.success["0"]; // Retrieve name from the response
-
-
 
           let fileArrays = []; // Create empty array
 
@@ -1070,8 +1055,6 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
             }
             fileArrays.push(subArray); // Push subArray in fileArrays
           }
-
-
 
           let fetchTargets = [];
 
@@ -1131,8 +1114,6 @@ const tweetImporter = (dataset, query, name) => {
   let content = { keywords: [], path: "" };
 
   let id = name + date;
-
-
 
   fs.readFile(query, "utf8", (err, queryKeywords) => {
     if (err) throw err;
@@ -1196,9 +1177,9 @@ const reqISSN = (user, scopid) => {
           ipcRenderer.send(
             "chaeros-notification",
             scopusISSNResponse.length +
-            "/" +
-            ISSNPromises.length +
-            " journal profiles retrieved."
+              "/" +
+              ISSNPromises.length +
+              " journal profiles retrieved."
           ); // Sending notification to console
 
           if (scopusISSNResponse.length === ISSNPromises.length) {
@@ -1259,9 +1240,9 @@ const regardsRetriever = (queryContent) => {
     for (let i = 1; i <= totalReq; i++) {
       pagesReq.push(
         "https://www.nosdeputes.fr/recherche/" +
-        queryContent +
-        "?format=json&count=500&page=" +
-        i
+          queryContent +
+          "?format=json&count=500&page=" +
+          i
       );
     }
 
@@ -1368,10 +1349,10 @@ const regardsRetriever = (queryContent) => {
                     seances.forEach((seance, leg) => {
                       seanceReqs.push(
                         "https://www.nosdeputes.fr/" +
-                        seance +
-                        "/seance/" +
-                        leg +
-                        "/json"
+                          seance +
+                          "/seance/" +
+                          leg +
+                          "/json"
                       );
                     });
 
@@ -1386,9 +1367,9 @@ const regardsRetriever = (queryContent) => {
                           ipcRenderer.send(
                             "chaeros-notification",
                             "Retrieving séance " +
-                            seanceN +
-                            " of " +
-                            seanceReqs.length
+                              seanceN +
+                              " of " +
+                              seanceReqs.length
                           );
                           resSeances.push(resSeance);
                           if (resSeances.length === seanceReqs.length) {
@@ -1438,7 +1419,6 @@ const regardsRetriever = (queryContent) => {
                                 deps.deputes.forEach((d) =>
                                   depMap.set(d.depute.id, d)
                                 );
-
 
                                 for (const key in regContent) {
                                   regContent[key].forEach((d) => {
@@ -1498,46 +1478,49 @@ const regardsRetriever = (queryContent) => {
   });
 };
 
-
 const solrMetaExplorer = (req, meta) => {
+  const url = (req, start, end) =>
+    `http://${meta.but.args.url}:${
+      meta.but.args.port
+    }/solr/netarchivebuilder/select?q=${req}&start=${start}&rows=${
+      end - start
+    }`;
 
-
-  const url = (req, start, end) => `http://${meta.but.args.url}:${meta.but.args.port}/solr/netarchivebuilder/select?q=${req}&start=${start}&rows=${end - start}`
-
-  const urlArray = []
+  const urlArray = [];
 
   // make smaller packages (not necessary since supposed to be local)
   // but a good practice
   if (meta.count > 200) {
     for (let i = 0; i < meta.count / 200 + 1; i++) {
-      urlArray.push(fetch(url(req, i * 200, (i + 1) * 200)).then(r => r.json()))
+      urlArray.push(
+        fetch(url(req, i * 200, (i + 1) * 200)).then((r) => r.json())
+      );
     }
   }
 
   // send request
-  Promise.all(urlArray).then(res => {
-
-    // rebuild an array with all the responses 
+  Promise.all(urlArray).then((res) => {
+    // rebuild an array with all the responses
     var totalResponse = [];
 
-    res.forEach(d => totalResponse = [...totalResponse, ...d.response.docs])
-
+    res.forEach(
+      (d) => (totalResponse = [...totalResponse, ...d.response.docs])
+    );
 
     const dataset = {
       data: {},
       items: [],
       key: req,
-      name: req
-    }
+      name: req,
+    };
 
-    totalResponse.forEach(d => {
-
+    totalResponse.forEach((d) => {
       const date = new Date(d.crawl_date);
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
       const day = date.getDate();
 
-      const issued = { "date-parts": [[year, month, day]] }
+      const issued = { "date-parts": [[year, month, day]] };
 
       dataset.items.push({
         itemType: "webpage",
@@ -1570,24 +1553,15 @@ const solrMetaExplorer = (req, meta) => {
         collections: [],
         relations: {},
       });
-
-    })
-
-
+    });
 
     const importName = req + "-" + new Date();
 
     // dataWriter(destination, importName, content);
 
-    dataWriter(
-      ["system"],
-      importName,
-      [dataset]
-    );
-  })
-
-
-}
+    dataWriter(["system"], importName, [dataset]);
+  });
+};
 
 //========== chaerosSwitch ==========
 // Switch used to choose the function to execute in CHÆROS.
@@ -1596,16 +1570,17 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
   ipcRenderer.send(
     "console-logs",
     "CHÆROS started a " +
-    fluxAction +
-    " process with the following arguments : " +
-    JSON.stringify(fluxArgs)
+      fluxAction +
+      " process with the following arguments : " +
+      JSON.stringify(fluxArgs)
   );
 
-
   switch (fluxAction) {
+    case "wosBuild":
+      console.log(fluxArgs);
+      break;
 
     case "BNF-SOLR":
-
       solrMetaExplorer(fluxArgs.bnfsolrquery, fluxArgs.meta);
       break;
 
