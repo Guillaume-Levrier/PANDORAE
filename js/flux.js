@@ -277,6 +277,7 @@ const powerValve = (fluxAction, item) => {
   ) {
     case "wosBuild":
       fluxArgs.wosquery = wosReq;
+      fluxArgs.user = document.getElementById("userNameInput").value;
       message = "Connecting to WoS";
       break;
     case "BNF-SOLR":

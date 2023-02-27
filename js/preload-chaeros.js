@@ -1563,6 +1563,32 @@ const solrMetaExplorer = (req, meta) => {
   });
 };
 
+// ===== Web of Science =====
+
+const wosFullRetriever = (user, wosReq) => {
+  console.log(user, wosReq);
+
+  const wosKey = getPassword("WebOfScience", user);
+
+  console.log(wosKey);
+
+  const apiTarget = `https://wos-api.clarivate.com/api/wos/`;
+
+  wosReq.count = 100;
+
+  fetch(apiTarget, {
+    method: "POST",
+    body: JSON.stringify(wosReq),
+    headers: { "Content-Type": "application/json", "X-ApiKey": wosKey },
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      console.log(res);
+      const documents = res.Data.Records.records.REC;
+      console.log(JSON.stringify(documents[0]));
+    });
+};
+
 //========== chaerosSwitch ==========
 // Switch used to choose the function to execute in CHÆROS.
 
@@ -1577,7 +1603,8 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
 
   switch (fluxAction) {
     case "wosBuild":
-      console.log(fluxArgs);
+      wosFullRetriever(fluxArgs.user, fluxArgs.wosquery);
+
       break;
 
     case "BNF-SOLR":
