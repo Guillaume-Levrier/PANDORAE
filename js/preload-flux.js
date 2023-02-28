@@ -893,7 +893,7 @@ const datasetRemove = (kind, id) => {
 const datasetDetail = (prevId, kind, id, buttonId) => {
   // This function provides info on a specific dataset
 
-  var datasetDetail = {}; // Create the dataDetail object
+  //var datasetDetail = {}; // Create the dataDetail object
   let dataPreview = ""; // Created dataPreview variable
 
   if (prevId === null) {
@@ -906,6 +906,27 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
     try {
       pandodb[kind].get(id).then((doc) => {
         switch (kind) {
+          case "webofscience":
+            dataPreview =
+              "<strong>" +
+              doc.name +
+              "</strong>" + // dataPreview is the displayed information in the div
+              "<br>Origin: Web of Science" +
+              "<br>Query: " +
+              doc.content.query +
+              "<br>Total results: " +
+              doc.content.entries.length +
+              "<br>Query date: " +
+              doc.date;
+
+            document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
+            // document.getElementById(buttonId).style.display = "block";
+            document.getElementById("webofscienceGeolocate").style.display =
+              "block";
+            document.getElementById("webofscienceGeolocate").name = doc.id;
+            //document.getElementById("altmetricRetriever").name = doc.id;
+
+            break;
           case "scopus":
             dataPreview =
               "<strong>" +
@@ -920,9 +941,10 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
               doc.date;
 
             document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
-            document.getElementById(buttonId).style.display = "block";
+            //document.getElementById(buttonId).style.display = "block";
+            document.getElementById("scopusGeolocate").style.display = "block";
             document.getElementById("scopusGeolocate").name = doc.id;
-            document.getElementById("altmetricRetriever").name = doc.id;
+            //document.getElementById("altmetricRetriever").name = doc.id;
 
             break;
 
@@ -2261,9 +2283,14 @@ window.addEventListener("load", (event) => {
     { id: "regards-basic-query", func: "regardsBasic" },
     { id: "regards-query", func: "powerValve", arg: "regards" },
     {
-      id: "csljson-display",
+      id: "sci-api-retrieve-display",
       func: "datasetDisplay",
       arg: ["scopus-dataset-list", "scopus"],
+    },
+    {
+      id: "sci-api-retrieve-display",
+      func: "datasetDisplay",
+      arg: ["webofscience-dataset-list", "webofscience"],
     },
     { id: "convert-csl", func: "powerValve", arg: "scopusConverter" },
     {

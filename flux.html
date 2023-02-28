@@ -298,18 +298,29 @@
   This tab will allow you to geolocate your documents' affiliations and find
   their Altmetric metadata.<br><br>
   <form autocomplete="off">
-    <div id="scopus-dataset-preview" style="position:relative;">Click on a
-      dataset to display its features. </div>
-    <div id="scopus-dataset-buttons" style="display:none;">
-      <button type="submit" class="flux-button" id="scopusGeolocate">Geolocate
-        Affiliations</button>
-      <!-- <button type="submit" class="flux-button" id="altmetricRetriever" onclick='powerValve("altmetricRetriever",this);return false'>Enrich with Altmetric Data</button> -->
-    </div>
+    <div id="scopus-dataset-preview" style="position:relative;"></div>
+    <button type="submit" style="display: none;" class="flux-button"
+      id="scopusGeolocate">Geolocate
+      Affiliations</button> <br>
+    <div id="webofscience-dataset-preview" style="position:relative;"></div>
+    <button type="submit" style="display: none;" class="flux-button"
+      id="webofscienceGeolocate">Geolocate
+      Affiliations</button>
+
     <br><br>
-    <button type="submit" class="flux-button" id="csljson-display">Update
+    <button type="submit" class="flux-button"
+      id="sci-api-retrieve-display">Update
       available dataset list</button>
   </form>
-  <div id="scopus-dataset-list" style="position:relative;">No dataset loaded
+  <br><br>
+  <h4>Scopus</h4>
+  <div id="scopus-dataset-list" style="position:relative;">No Scopus dataset
+    loaded
+    yet.</div>
+  <h4>Web of Science</h4>
+  <div id="webofscience-dataset-list" style="position:relative;">No Web of
+    Science dataset
+    loaded
     yet.</div>
 </div>
 
