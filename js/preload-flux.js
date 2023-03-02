@@ -638,15 +638,21 @@ const powerValve = (fluxAction, item) => {
       message = "Connecting to Regards Citoyens";
       break;
 
-    case "scopusConverter":
-      fluxArgs.scopusConverter = { dataset: "" };
-      fluxArgs.scopusConverter.dataset = itemname;
+    case "cslConverter":
+      fluxArgs.dataset = itemname;
+      fluxArgs.corpusType = item.dataset.corpusType;
       message = "Converting to CSL-JSON";
       break;
 
     case "scopusGeolocate":
-      fluxArgs.scopusGeolocate = {};
-      fluxArgs.scopusGeolocate.dataset = itemname;
+      fluxArgs.scopusGeolocate = { dataset: itemname };
+
+      message = "Geolocating Affiliations";
+      break;
+
+    case "webofscienceGeolocate":
+      fluxArgs.webofscienceGeolocate = { dataset: itemname };
+      //fluxArgs.webofscienceGeolocate.
       message = "Geolocating Affiliations";
       break;
 
@@ -905,19 +911,14 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
   } else {
     try {
       pandodb[kind].get(id).then((doc) => {
+        console.log(doc);
         switch (kind) {
           case "webofscience":
-            dataPreview =
-              "<strong>" +
-              doc.name +
-              "</strong>" + // dataPreview is the displayed information in the div
-              "<br>Origin: Web of Science" +
-              "<br>Query: " +
-              doc.content.query +
-              "<br>Total results: " +
-              doc.content.entries.length +
-              "<br>Query date: " +
-              doc.date;
+            dataPreview = `<strong> ${doc.name} </strong>
+              <br>Origin: ${doc.content.type}
+              <br>Query: ${doc.content.query} 
+              <br>Total results: ${doc.content.entries.length} 
+              <br>Query date: ${doc.date}`;
 
             document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
             // document.getElementById(buttonId).style.display = "block";
@@ -949,26 +950,20 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
             break;
 
           case "enriched":
-            dataPreview =
-              "<strong>" +
-              doc.name +
-              "</strong>" + // dataPreview is the displayed information in the div
-              "<br>Origin: Scopus" +
-              "<br>Query: " +
-              doc.content.query +
-              "<br>Total results: " +
-              doc.content.entries.length +
-              "<br>Query date: " +
-              doc.date +
-              "<br>Affiliations geolocated: " +
-              doc.content.articleGeoloc +
-              "<br>Altmetric metadata retrieved: " +
-              doc.content.altmetricEnriched;
+            dataPreview = `<strong>${doc.name} </strong>
+              <br>Origin: ${doc.content.type}
+              <br>Query: ${doc.content.query}
+              <br>Total results: ${doc.content.entries.length}
+              <br>Query date: ${doc.date}
+              <br>Affiliations geolocated:${doc.content.articleGeoloc}
+              <br>Altmetric metadata retrieved: ${doc.content.altmetricEnriched}`;
+
             document.getElementById(prevId).innerHTML = dataPreview;
             document.getElementById(buttonId).style.display = "block";
-            document.getElementById("convert-csl").style.display =
-              "inline-flex";
-            document.getElementById("convert-csl").name = doc.id;
+            const convertButton = document.getElementById("convert-csl");
+            convertButton.style.display = "inline-flex";
+            convertButton.name = doc.id;
+            convertButton.dataset.corpusType = doc.content.type;
             break;
 
           case "csljson":
@@ -2280,6 +2275,11 @@ window.addEventListener("load", (event) => {
     { id: "twitterCatImporter", func: "twitterCat" },
     { id: "twitterThreadImporter", func: "twitterThread" },
     { id: "scopusGeolocate", func: "powerValve", arg: "scopusGeolocate" },
+    {
+      id: "webofscienceGeolocate",
+      func: "powerValve",
+      arg: "webofscienceGeolocate",
+    },
     { id: "regards-basic-query", func: "regardsBasic" },
     { id: "regards-query", func: "powerValve", arg: "regards" },
     {
@@ -2292,7 +2292,7 @@ window.addEventListener("load", (event) => {
       func: "datasetDisplay",
       arg: ["webofscience-dataset-list", "webofscience"],
     },
-    { id: "convert-csl", func: "powerValve", arg: "scopusConverter" },
+    { id: "convert-csl", func: "powerValve", arg: "cslConverter" },
     {
       id: "scopus-display",
       func: "datasetDisplay",

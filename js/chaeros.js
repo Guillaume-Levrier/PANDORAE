@@ -128,6 +128,153 @@ const scopusConverter = (dataset) => {
   });
 };
 
+//========== webofscienceConverter ==========
+//webofscienceConverter converts a scopus JSON dataset into a Zotero CSL-JSON dataset.
+
+const webofscienceConverter = (dataset) => {
+  // [dataset] is the file to be converted
+  ipcRenderer.send(
+    "console-logs",
+    "Starting webofscienceConverter on " + dataset
+  ); // Notify console conversion started
+  let convertedDataset = []; // Create an array
+
+  pandodb.enriched.get(dataset).then((doc) => {
+    // Open the database in which the scopus dataset is stored
+
+    try {
+      // If the file is valid, do the following:
+      let articles = doc.content.entries; // Select the array filled with the targeted articles
+
+      for (var i = 0; i < articles.length; ++i) {
+        // For each article of the array, change the name of the properties
+        let pushedArticle = {
+          itemType: "journalArticle",
+          title: "",
+          creators: [],
+          abstractNote: "",
+          publicationTitle: "",
+          volume: "",
+          issue: "",
+          pages: "",
+          date: "",
+          series: "",
+          seriesTitle: "",
+          seriesText: "",
+          journalAbbreviation: "",
+          language: "",
+          DOI: "",
+          ISSN: "",
+          shortTitle: "",
+          url: "",
+          accessDate: "",
+          archive: "",
+          archiveLocation: "",
+          libraryCatalog: "",
+          callNumber: "",
+          rights: "",
+          extra: "",
+          tags: [],
+          collections: [],
+          relations: {},
+        };
+
+        // Then fill the article with the relevant properties
+
+        const art = articles[i];
+
+        const item = art.static_data.item;
+
+        art.static_data.summary.names.name.forEach((individual) => {
+          // the field "role" gives other things than author in wos datasets
+          // but we would need to build a compatibility table with CSL-JSON
+
+          pushedArticle.creators.push({
+            creatorType: "author",
+            firstName: individual.first_name,
+            lastName: individual.last_name,
+          });
+        });
+
+        art.static_data.summary.titles.title.forEach((title) => {
+          if (title.type === "item") {
+            pushedArticle.title = title.content;
+          }
+        });
+
+        pushedArticle.publicationTitle =
+          art.static_data.summary.publishers.publisher.names.name.unified_name;
+
+        if (
+          art.static_data.fullrecord_metadata.abstracts.hasOwnProperty(
+            "abstract"
+          )
+        ) {
+          var abstract = "";
+
+          const abssource =
+            art.static_data.fullrecord_metadata.abstracts.abstract.abstract_text
+              .p;
+
+          if (typeof abssource === "string") {
+            abstract = abssource;
+          } else {
+            abssource.forEach((p) => (abstract += p + "\n"));
+          }
+
+          pushedArticle.abstract = abstract;
+        }
+
+        pushedArticle.date = art.static_data.summary.pub_info.sortdate;
+
+        //pushedArticle.url = articles[i]["url"];
+        //pushedArticle.creators[0].lastName = articles[i]["dc:creator"];
+        //
+        //pushedArticle.DOI = articles[i]["prism:doi"];
+        /*
+        let enrichment = {
+          affiliations: articles[i].affiliation,
+          OA: articles[i].openaccessFlag,
+        };
+
+        if (articles[i].hasOwnProperty("altmetricData")) {
+          enrichment.altmetric = JSON.stringify(articles[i].altmetricData);
+        }
+*/
+        //      pushedArticle.shortTitle = JSON.stringify(enrichment);
+        convertedDataset.push(pushedArticle); // Then push the article in the array of converted articles
+      }
+    } catch (err) {
+      console.log(err);
+      ipcRenderer.send("chaeros-failure", JSON.stringify(err)); // On failure, send error notification to main process
+      ipcRenderer.send("pulsar", true);
+      ipcRenderer.send("console-logs", JSON.stringify(err)); // On failure, send error to console
+    } finally {
+      pandodb.open();
+      let id = dataset;
+
+      pandodb.csljson
+        .add({
+          id: id,
+          date: date,
+          name: dataset,
+          content: convertedDataset,
+        })
+        .then(() => {
+          ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
+          ipcRenderer.send("pulsar", true);
+          ipcRenderer.send(
+            "console-logs",
+            "webofscienceConverter successfully converted " + dataset
+          ); // Log success
+          setTimeout(() => {
+            ipcRenderer.send("win-destroy", winId);
+          }, 500);
+        });
+    }
+  });
+};
+
 //========== scopusGeolocate ==========
 // scopusGeolocate gets cities/countries geographical coordinates from affiliations.
 
@@ -250,6 +397,145 @@ const scopusGeolocate = (dataset) => {
         setTimeout(() => {
           ipcRenderer.send("win-destroy", winId);
         }, 2000);
+      }
+    );
+  });
+};
+
+//========== webofscienceGeolocate ==========
+// webofscienceGeolocate gets cities/countries geographical coordinates from affiliations.
+
+const webofscienceGeolocate = (dataset) => {
+  geolocationActive = true;
+  ipcRenderer.send("chaeros-notification", "Geolocating affiliations");
+  ipcRenderer.send(
+    "console-logs",
+    "Started webofscienceGeolocate on " + dataset
+  );
+
+  pandodb.enriched.get(dataset).then((doc) => {
+    fs.readFile(
+      appPath + "/json/cities.json", // Read the dataset passed as option
+      "utf8",
+      (err, locatedCities) => {
+        // It should be encoded as UTF-8
+
+        var coordinates = JSON.parse(locatedCities);
+
+        let article = doc.content.entries; // Find relevant objects in the parsed dataset
+        let totalCityArray = []; // Prepare an empty array
+
+        console.log(coordinates);
+        console.log(article);
+
+        /*
+        for (var i = 0; i < article.length - 1; i++) {
+          // For loop to generate list of cities to be requested
+          if (
+            article[i].hasOwnProperty("affiliation") &&
+            article[i].affiliation.length > 0
+          ) {
+            // If item has at least an affiliation
+            for (let j = 0; j < article[i].affiliation.length; j++) {
+              // Iterate on item's available affiliation
+              if (
+                article[i].affiliation[j].hasOwnProperty("affiliation-country")
+              ) {
+                // If affiliation has a city
+                let location = {};
+                location.country =
+                  article[i].affiliation[j]["affiliation-country"];
+                location.city = article[i].affiliation[j]["affiliation-city"]; // Extract city name
+                totalCityArray.push(JSON.stringify(location));
+              }
+            }
+          }
+        }
+        let cityRequests = MultiSet.from(totalCityArray); // Create a multiset from city Array to prevent duplicate requests
+
+        let cityIndex = [];
+
+        cityRequests.forEachMultiplicity((count, key) => {
+          cityIndex.push(JSON.parse(key));
+        });
+
+        cityIndex.forEach((d) => {
+          for (let l = 0; l < coordinates.length; l++) {
+            if (d.country === coordinates[l].country) {
+              if (d.city === coordinates[l].name) {
+                d.lon = coordinates[l].lon;
+                d.lat = coordinates[l].lat;
+              }
+            }
+          }
+        });
+
+        article.forEach((d) => {
+          for (let l = 0; l < cityIndex.length; l++) {
+            if (d.hasOwnProperty("affiliation")) {
+              for (var k = 0; k < d.affiliation.length; k++) {
+                // Loop on available item's affiliations
+
+                let city = d.affiliation[k]["affiliation-city"]; // Extract affiliation city
+                let country = d.affiliation[k]["affiliation-country"]; // Extract affiliation city
+
+                if (typeof city === "object") {
+                  city = JSON.stringify(city);
+                } // Stringify to allow for comparison
+                if (typeof country === "object") {
+                  country = JSON.stringify(country);
+                } // Stringify to allow for comparison
+
+                if (country === cityIndex[l].country) {
+                  if (city === cityIndex[l].city) {
+                    ipcRenderer.send(
+                      "chaeros-notification",
+                      "Located " + d.affiliation[k]["affilname"] + " in " + city
+                    );
+                    d.affiliation[k].lon = cityIndex[l].lon;
+                    d.affiliation[k].lat = cityIndex[l].lat;
+                  }
+                }
+              }
+            }
+          }
+        });
+
+        let unlocatedCities = [];
+
+        article.forEach((d) => {
+          if (d.hasOwnProperty("affiliation")) {
+            for (let i = 0; i < d.affiliation.length; i++) {
+              if (d.affiliation[i].lon === undefined) {
+                unlocatedCities.push(d.affiliation[i]);
+              }
+            }
+          }
+        });
+
+        console.log(doc);
+
+        /*
+
+        ipcRenderer.send(
+          "console-logs",
+          "Unable to locale the following cities " +
+            JSON.stringify(unlocatedCities)
+        );
+        doc.content.articleGeoloc = true; // Mark file as geolocated
+        pandodb.enriched.put(doc);
+
+        ipcRenderer.send("chaeros-notification", "Affiliations geolocated"); //Send success message to main process
+        ipcRenderer.send("pulsar", true);
+        ipcRenderer.send(
+          "console-logs",
+          "scopusGeolocate successfully added geolocations on " + dataset
+        );
+
+        setTimeout(() => {
+          ipcRenderer.send("win-destroy", winId);
+        }, 2000);
+        */
       }
     );
   });
@@ -1497,8 +1783,6 @@ const wosFullRetriever = (user, wosReq) => {
                 articleGeoloc: false,
                 entries: resultCorpus,
               };
-              console.log(id);
-              console.log(content);
 
               pandodb.open();
 
@@ -1547,6 +1831,8 @@ const wosFullRetriever = (user, wosReq) => {
 // Switch used to choose the function to execute in CHÆROS.
 
 const chaerosSwitch = (fluxAction, fluxArgs) => {
+  console.log(fluxAction, fluxArgs);
+
   ipcRenderer.send(
     "console-logs",
     "CHÆROS started a " +
@@ -1569,12 +1855,30 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
       regardsRetriever(fluxArgs.regquery);
       break;
 
-    case "scopusConverter":
-      scopusConverter(fluxArgs.scopusConverter.dataset);
+    case "cslConverter":
+      // switch in a switch
+      console.log(fluxArgs);
+      switch (fluxArgs.corpusType) {
+        case "Scopus-dataset":
+          scopusConverter(fluxArgs.dataset);
+          break;
+
+        case "WoS-dataset":
+          webofscienceConverter(fluxArgs.dataset);
+          break;
+
+        default:
+          break;
+      }
+      // end of switch in a switch
       break;
 
     case "scopusGeolocate":
       scopusGeolocate(fluxArgs.scopusGeolocate.dataset);
+      break;
+
+    case "webofscienceGeolocate":
+      webofscienceGeolocate(fluxArgs.webofscienceGeolocate.dataset);
       break;
 
     case "altmetricRetriever":
