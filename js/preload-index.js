@@ -10356,24 +10356,7 @@ const normalCore = () => {
         "position",
         new THREE.BufferAttribute(
           new Float32Array([
-            -1,
-            -1,
-            0,
-            1,
-            -1,
-            0,
-            1,
-            1,
-            0,
-            -1,
-            -1,
-            0,
-            1,
-            1,
-            0,
-            -1,
-            1,
-            0,
+            -1, -1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0,
           ]),
           3
         )
@@ -10389,7 +10372,7 @@ const normalCore = () => {
 
       var cell = new THREE.Group();
 
-      var cellGeometry = new THREE.SphereBufferGeometry(300, 512, 512);
+      var cellGeometry = new THREE.SphereGeometry(300, 512, 512);
       var cellMaterial = new THREE.MeshPhongMaterial({
         color: 0x156289,
         transparent: true,
@@ -10505,11 +10488,12 @@ const normalCore = () => {
 
     //first model
     var dataA = getSphere(width * height, 128);
+
     var textureA = new THREE.DataTexture(
       dataA,
       width,
       height,
-      THREE.RGBFormat,
+      THREE.RGBAFormat,
       THREE.FloatType,
       THREE.DEFAULT_MAPPING,
       THREE.RepeatWrapping,
@@ -10519,11 +10503,12 @@ const normalCore = () => {
 
     //second model
     var dataB = getSphere(width * height, 128);
+
     var textureB = new THREE.DataTexture(
       dataB,
       width,
       height,
-      THREE.RGBFormat,
+      THREE.RGBAFormat,
       THREE.FloatType,
       THREE.DEFAULT_MAPPING,
       THREE.RepeatWrapping,
@@ -10588,14 +10573,15 @@ const normalCore = () => {
     return v.normalize().multiplyScalar(size);
   }
   function getSphere(count, size) {
-    var len = count * 3;
+    var len = count * 4;
     var data = new Float32Array(len);
     var p = new THREE.Vector3();
-    for (var i = 0; i < len; i += 3) {
+    for (var i = 0; i < len; i += 4) {
       getPoint(p, size);
       data[i] = p.x;
       data[i + 1] = p.y;
       data[i + 2] = p.z;
+      data[i + 3] = 255;
     }
     return data;
   }
