@@ -1827,6 +1827,59 @@ const wosFullRetriever = (user, wosReq) => {
     });
 };
 
+// ========= BnF Solr Remap ==========
+// function to remap documents from BnF solr to Zotero compatible
+// CSL - JSON format.
+
+const bnfRemap = (doc) => {
+  const remappedDocument = { itemType: "webpage" };
+
+  const originalBnfFields = {
+    title: "title",
+    content_type_norm: "genre",
+    content_language: "language",
+    host: "container-title",
+  };
+
+  for (const key in doc) {
+    if (doc.hasOwnProperty(key)) {
+      remappedDocument[originalBnfFields[key]] = doc[key];
+    }
+  }
+
+  remappedDocument.URL =
+    "http://archivesinternet.bnf.fr/" + doc.wayback_date + "/" + doc.url;
+
+  if (doc.hasOwnProperty("author")) {
+    if (typeof doc.author === "string") {
+      remappedDocument.author = [{ family: doc.author }];
+    } else {
+      remappedDocument.author = [];
+      doc.author.forEach((auth) => {
+        remappedDocument.author.push({ family: auth });
+      });
+    }
+  }
+
+  const date = new Date(doc.crawl_date);
+
+  remappedDocument.issued = {
+    "date-parts": [[doc.crawl_year, date.getMonth() + 1, date.getDate()]],
+  };
+
+  remappedDocument.note = { id: doc.id, collections: doc.collections };
+
+  if (doc.hasOwnProperty("description")) {
+    remappedDocument.note.description = doc.description;
+  }
+
+  delete remappedDocument.undefined;
+
+  remappedDocument.note = JSON.stringify(remappedDocument.note);
+
+  return remappedDocument;
+};
+
 //========== chaerosSwitch ==========
 // Switch used to choose the function to execute in CHÆROS.
 
