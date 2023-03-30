@@ -1651,57 +1651,41 @@ const solrMetaExplorer = (req, meta) => {
 
     const dataset = {
       data: {},
-      items: [],
+      items: totalResponse,
       key: req,
       name: req,
     };
 
-    totalResponse.forEach((d) => {
-      const date = new Date(d.crawl_date);
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
+    // ICI, SAUVER LE CONTENU COMPLET
 
-      const issued = { "date-parts": [[year, month, day]] };
-
-      dataset.items.push({
-        itemType: "webpage",
-        title: d.title,
-        creators: [],
-        abstractNote: "",
-        publicationTitle: "",
-        volume: "",
-        issue: "",
-        pages: "",
-        issued,
-        date: d.crawl_date,
-        series: "",
-        seriesTitle: "",
-        seriesText: "",
-        journalAbbreviation: "",
-        language: "",
-        DOI: "",
-        ISSN: "",
-        shortTitle: "",
-        url: d.url_norm,
-        accessDate: "",
-        archive: "",
-        archiveLocation: "",
-        libraryCatalog: "",
-        callNumber: "",
-        rights: "",
-        extra: d,
-        tags: [],
-        collections: [],
-        relations: {},
-      });
-    });
-
-    const importName = req + "-" + new Date();
-
+    //     const importName = req + "-" + new Date();
     // dataWriter(destination, importName, content);
 
-    dataWriter(["system"], importName, [dataset]);
+    // FAIRE UNE AUTRE FONCTION POUR BNF
+
+    ///totalResponse.forEach((d) => dataset.items.push(bnfRemap(d)));
+
+    //dataWriter(["system"], importName, [dataset]);
+    /*
+    pandodb.csljson
+      .add({
+        id,
+        date,
+        name: importName,
+        content: dataset,
+      })
+      .then(() => {
+        ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
+        ipcRenderer.send("pulsar", true);
+        ipcRenderer.send(
+          "console-logs",
+          "Bnf data successfully converted " + dataset
+        ); // Log success
+        setTimeout(() => {
+          ipcRenderer.send("win-destroy", winId);
+        }, 500);
+      });
+      */
   });
 };
 
