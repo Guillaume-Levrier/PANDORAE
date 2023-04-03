@@ -6957,8 +6957,15 @@ const gazouillotype = (id) => {
 
           // RE-SORT PILES TO MAKE SURE THEY ARE PAST->FUTURE
 
-          var data = datajson.content.tweets; // Reassign data
+          const data = datajson.content.tweets; // Reassign data
           var keywords = datajson.content.keywords;
+
+          if (typeof keywords === "object") {
+            keywords = keywords.keywords;
+          }
+
+          console.log(data);
+          console.log(keywords);
 
           var requestContent = "Request content :<br><ul>";
 
