@@ -2697,11 +2697,19 @@ const anthropotype = (id) => {
   // When called, draw the anthropotype
 
   //========== SVG VIEW =============
-  var svg = d3.select(xtype).append("svg").attr("id", "xtypeSVG"); // Creating the SVG DOM node
+  const svg = d3.select(xtype).append("svg").attr("id", "xtypeSVG"); // Creating the SVG DOM node
 
   svg.attr("width", width).attr("height", height); // Attributing width and height to svg
 
-  var view = svg
+  const bgrect = svg
+    .append("rect")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", width)
+    .attr("height", height)
+    .attr("fill", "white");
+
+  const view = svg
     .append("g") // Appending a group to SVG
     .attr("id", "view"); // CSS viewfinder properties
 
@@ -2791,6 +2799,9 @@ const anthropotype = (id) => {
       };
 
       const cartoSorter = (criteria) => {
+        document.getElementById("tooltip").innerHTML = "";
+
+        menuBuilder();
         node.remove();
         link.remove();
         simulation.alpha(1).restart();
@@ -2885,33 +2896,6 @@ const anthropotype = (id) => {
               .on("end", forcedragended)
           );
 
-        var color = d3
-          .scaleOrdinal() // Line colors
-          .domain([0, 1])
-          .range([
-            "#08154a",
-            "#490027",
-            "#5c7a38",
-            "#4f4280",
-            "#6f611b",
-            "#5b7abd",
-            "#003f13",
-            "#b479a9",
-            "#3a2e00",
-            "#017099",
-            "#845421",
-            "#008b97",
-            "#460d00",
-            "#62949e",
-            "#211434",
-            "#af8450",
-            "#30273c",
-            "#bd7b70",
-            "#005b5c",
-            "#c56883",
-            "#a68199",
-          ]);
-
         node
           .append("circle")
           .attr("r", (d) => {
@@ -2921,8 +2905,7 @@ const anthropotype = (id) => {
             }
             return r;
           })
-          // .attr("fill", "rgba(63, 191, 191, 0.20)")
-          .attr("fill", (d) => (d.color ? color(d.color) : "gray"))
+          .attr("fill", (d) => (d.hasOwnProperty("color") ? d.color : "gray"))
           .attr("opacity", 0.3)
           .attr("stroke", "white")
           .attr("stroke-width", 2);
@@ -2933,7 +2916,6 @@ const anthropotype = (id) => {
           .attr("dx", "10")
           .attr("dy", "4")
           .style("fill", "black")
-          .style("cursor", "pointer")
           .style("font-size", "15px")
           .style("font-family", "sans-serif")
           .text((d) => d.id)
@@ -2944,71 +2926,69 @@ const anthropotype = (id) => {
           .attr("stroke-width", 4);
 
         // The data selection below is very suboptimal, this is a quick hack that needs to be refactored
-        node
-          .on("click", (event, d) => {
-            if (d.hasOwnProperty("title")) {
-              // If it's a document
+
+        bgrect.on("click", () => {
+          document.getElementById("tooltip").innerHTML = "";
+          menuBuilder();
+        });
+
+        const displaySelectionTooltip = (e, d) => {
+          document.getElementById("tooltip").innerHTML = "";
+
+          const tooltitle = document.createElement("div");
+
+          const colorChoice = document.createElement("input");
+          colorChoice.type = "color";
+
+          // if document
+          if (d.hasOwnProperty("title")) {
+            tooltitle.innerHTML = `<h2>Labelling for document "${d.id}"</h2>`;
+
+            colorChoice.addEventListener("change", () => {
               d3.select(document.getElementById(d.id))
                 .select("circle")
-                .attr("fill", "rgba(220,20,60,.5)");
+                .attr("fill", colorChoice.value);
               d.author.forEach((auth) => {
                 let nodeGroup = document.getElementById(auth.id);
                 d3.select(nodeGroup)
                   .select("circle")
-                  .attr("fill", "rgba(220,20,60,.5)");
+                  .attr("fill", colorChoice.value);
               });
-            } else {
-              // Else it's an author
+              d.color = colorChoice.value;
+            });
+
+            // else if author
+          } else {
+            tooltitle.innerHTML = `<h4>Labelling for author "${d.id}"</h4>`;
+
+            colorChoice.addEventListener("change", () => {
+              d.color = colorChoice.value;
               d.crit.forEach((e) => {
                 d3.select(document.getElementById(e))
                   .select("circle")
-                  .attr("fill", "rgba(220,20,60,.5)");
+                  .attr("fill", colorChoice.value);
                 data.forEach((f) => {
                   if (f.title === e) {
                     f.author.forEach((auth) => {
                       let nodeGroup = document.getElementById(auth.id);
                       d3.select(nodeGroup)
                         .select("circle")
-                        .attr("fill", "rgba(220,20,60,.5)");
+                        .attr("fill", colorChoice.value);
                     });
                   }
                 });
               });
-            }
-          })
-          .on("dblclick", (d) => {
-            if (d.hasOwnProperty("title")) {
-              // If it's a document
-              d3.select(document.getElementById(d.id))
-                .select("circle")
-                .attr("fill", (d) => (d.color ? color(d.color) : "gray"));
-              d.author.forEach((auth) => {
-                let nodeGroup = document.getElementById(auth.id);
-                d3.select(nodeGroup)
-                  .select("circle")
-                  .attr("fill", (d) => (d.color ? color(d.color) : "gray"));
-              });
-            } else {
-              // Else it's an author
-              d.crit.forEach((e) => {
-                d3.select(document.getElementById(e))
-                  .select("circle")
-                  .attr("fill", (d) => (d.color ? color(d.color) : "gray"));
-                data.forEach((f) => {
-                  if (f.title === e) {
-                    f.author.forEach((auth) => {
-                      let nodeGroup = document.getElementById(auth.id);
-                      d3.select(nodeGroup)
-                        .select("circle")
-                        .attr("fill", (d) =>
-                          d.color ? color(d.color) : "gray"
-                        );
-                    });
-                  }
-                });
-              });
-            }
-          });
+            });
+          }
+
+          document.getElementById("tooltip").append(tooltitle, colorChoice);
+        };
+
+        node.style("cursor", "pointer");
+
+        node.on("click", function (e, d) {
+          displaySelectionTooltip(e, d);
+        });
 
         simulation.nodes(data).on("tick", ticked);
         simulation.force("link").links(links);
