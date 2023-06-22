@@ -628,6 +628,12 @@ const anthropotype = (id) => {
   var criteriaList = [];
   var currentCriteria = [];
 
+  //======== CURRENT WIP =========
+
+  // Create a more elaborate tooltip
+  // that lets users create a tag (text + color)
+  // and then apply that tag to nodes
+
   //======== DATA CALL & SORT =========
   pandodb.anthropotype
     .get(id)
@@ -650,16 +656,56 @@ const anthropotype = (id) => {
       docData.forEach((d) => criteriaList.push(d.title));
 
       const menuBuilder = () => {
-        criteriaList.forEach((d) => {
-          let crit = document.createElement("div");
-          crit.className = "criteriaTab";
-          crit.id = d;
-          crit.innerHTML = d;
-          crit.onclick = function () {
-            cartoSorter(d);
-          };
-          document.getElementById("tooltip").appendChild(crit);
-        });
+        const menu = document.createElement("div");
+        menu.style = "display:flex;flex-direction: column;";
+
+        const buttons = document.createElement("div");
+
+        buttons.style =
+          "padding:5px;border:1px solid black;display: flex;justify-content: space-around;";
+
+        const criteriaButton = document.createElement("div");
+        criteriaButton.innerText = "Document List";
+        criteriaButton.style.cursor = "pointer";
+
+        const tagButton = document.createElement("div");
+        tagButton.innerText = "Tags";
+        tagButton.style.cursor = "pointer";
+
+        buttons.append(criteriaButton, tagButton);
+
+        const menuContent = document.createElement("div");
+
+        menu.append(buttons, menuContent);
+
+        function populateCriteria() {
+          menuContent.innerHTML = "";
+          criteriaList.forEach((d) => {
+            let crit = document.createElement("div");
+            crit.className = "criteriaTab";
+            crit.style.borderBottom = "1px solid #141414";
+            crit.style.marginBottom = "5px";
+            crit.style.cursor = "pointer";
+            crit.id = d;
+            crit.innerHTML = d;
+            crit.onclick = function () {
+              cartoSorter(d);
+            };
+            menuContent.appendChild(crit);
+          });
+        }
+
+        populateCriteria();
+
+        function populateTags() {
+          menuContent.innerHTML = "";
+        }
+
+        criteriaButton.addEventListener("click", populateCriteria);
+
+        tagButton.addEventListener("click", populateTags);
+
+        document.getElementById("tooltip").append(menu);
       };
 
       //========== FORCE GRAPH ============
@@ -827,12 +873,12 @@ const anthropotype = (id) => {
           .attr("stroke-width", 4);
 
         // The data selection below is very suboptimal, this is a quick hack that needs to be refactored
-
+        /*
         bgrect.on("click", () => {
           document.getElementById("tooltip").innerHTML = "";
           menuBuilder();
         });
-
+*/
         const displaySelectionTooltip = (e, d) => {
           document.getElementById("tooltip").innerHTML = "";
 
@@ -4864,9 +4910,6 @@ const gazouillotype = (id) => {
           if (typeof keywords === "object") {
             keywords = keywords.keywords;
           }
-
-          console.log(data);
-          console.log(keywords);
 
           var requestContent = "Request content :<br><ul>";
 

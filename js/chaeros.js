@@ -373,7 +373,7 @@ const scopusGeolocate = (dataset) => {
           if (d.hasOwnProperty("affiliation")) {
             for (let i = 0; i < d.affiliation.length; i++) {
               if (d.affiliation[i].lon === undefined) {
-                unlocatedCities.push(d.affiliation[i]);
+                unlocatedCities.push(d.affiliation[i]["affiliation-city"]);
               }
             }
           }
@@ -381,8 +381,10 @@ const scopusGeolocate = (dataset) => {
 
         ipcRenderer.send(
           "console-logs",
-          "Unable to locale the following cities " +
-          JSON.stringify(unlocatedCities)
+          "Unable to locale the " +
+            unlocatedCities.length +
+            " following cities " +
+            JSON.stringify(unlocatedCities)
         );
         doc.content.articleGeoloc = true; // Mark file as geolocated
         pandodb.enriched.put(doc);
@@ -424,8 +426,6 @@ const webofscienceGeolocate = (dataset) => {
 
         let article = doc.content.entries; // Find relevant objects in the parsed dataset
         let totalCityArray = []; // Prepare an empty array
-
-
 
         /*
         for (var i = 0; i < article.length - 1; i++) {
@@ -553,6 +553,8 @@ const scopusRetriever = (user, query, bottleRate) => {
     minTime: 1000,
   });
 
+  console.log(user, query, bottleRate);
+
   ipcRenderer.send(
     "console-logs",
     "Started scopusRetriever on " + query + " for user " + user
@@ -583,6 +585,7 @@ const scopusRetriever = (user, query, bottleRate) => {
   )
     .then((res) => res.json())
     .then((firstResponse) => {
+      console.log(firstResponse);
       // Once you get the response
 
       let docAmount =
@@ -659,10 +662,10 @@ const scopusRetriever = (user, query, bottleRate) => {
                       ipcRenderer.send(
                         "console-logs",
                         "Scopus dataset on " +
-                        query +
-                        " for user " +
-                        user +
-                        " have been successfully retrieved."
+                          query +
+                          " for user " +
+                          user +
+                          " have been successfully retrieved."
                       );
                       setTimeout(() => {
                         ipcRenderer.send("win-destroy", winId);
@@ -671,11 +674,17 @@ const scopusRetriever = (user, query, bottleRate) => {
                 });
               //});
             }
+          })
+          .catch((e) => {
+            console.log(e);
+            ipcRenderer.send("chaeros-failure", e); // Send error to main process
+            ipcRenderer.send("pulsar", true);
           });
       });
     })
 
     .catch((e) => {
+      console.log(e);
       ipcRenderer.send("chaeros-failure", e); // Send error to main process
       ipcRenderer.send("pulsar", true);
     });
@@ -987,12 +996,12 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
   ipcRenderer.send(
     "console-logs",
     "Started retrieving collections " +
-    collections +
-    "for user " +
-    zoteroUser +
-    " under the import name " +
-    importName +
-    " into SYSTEM."
+      collections +
+      "for user " +
+      zoteroUser +
+      " under the import name " +
+      importName +
+      " into SYSTEM."
   );
 
   const limiter = new bottleneck({
@@ -1077,10 +1086,10 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
                     ipcRenderer.send(
                       "chaeros-notification",
                       "Loading " +
-                      responseAmount +
-                      " of " +
-                      responseTarget +
-                      " documents."
+                        responseAmount +
+                        " of " +
+                        responseTarget +
+                        " documents."
                     );
 
                     if (responseAmount === responseTarget) {
@@ -1110,7 +1119,6 @@ const sysExport = (destination, importName, id) => {
 
 //========== dataWriter ==========
 const dataWriter = (destination, importName, content) => {
-
   pandodb.open();
   destination.forEach((d) => {
     let table = pandodb[d];
@@ -1138,11 +1146,11 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
   ipcRenderer.send(
     "console-logs",
     "Building collection" +
-    collectionName +
-    " for user " +
-    zoteroUser +
-    " in path " +
-    id
+      collectionName +
+      " for user " +
+      zoteroUser +
+      " in path " +
+      id
   );
 
   ipcRenderer.send(
@@ -1224,7 +1232,6 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
               )
               .then((res) => res.json())
               .then((result) => {
-
                 resultList.push(result);
                 if (resultList.length === fileArrays.length) {
                   setTimeout(() => {
@@ -1319,9 +1326,9 @@ const reqISSN = (user, scopid) => {
           ipcRenderer.send(
             "chaeros-notification",
             scopusISSNResponse.length +
-            "/" +
-            ISSNPromises.length +
-            " journal profiles retrieved."
+              "/" +
+              ISSNPromises.length +
+              " journal profiles retrieved."
           ); // Sending notification to console
 
           if (scopusISSNResponse.length === ISSNPromises.length) {
@@ -1355,12 +1362,13 @@ const reqISSN = (user, scopid) => {
 // ordonné qui récupère tous les usages de cette expression.
 // Cette fonction est encore en cours de construction
 
-const regardsRetriever = (queryContent) => {
+const regardsRetriever = (queryContent, legislature) => {
   // La première étape consiste à relancer la requête telle qu'obtenue dans le FLUX
   // Afin de disposer du nombre de pages de 500 éléments à demander à  l'API
 
-  var query =
-    "https://www.nosdeputes.fr/recherche/" + queryContent + "?format=json";
+  const query = `https://${legislature}.nosdeputes.fr/recherche/${encodeURI(
+    queryContent
+  )}?format=json`;
 
   // Déclaration d'un objet constant dont les propriétés renvoient à des
   // Maps par type de texte (ex. "amendements":Map(XX),"questionsecrites":Map(YY),etc)
@@ -1372,258 +1380,267 @@ const regardsRetriever = (queryContent) => {
     minTime: 600,
   });
 
-  d3.json(query).then((res) => {
-    let totalReq = parseInt(res.last_result / 500) + 1;
+  console.log(query);
 
-    let totalNum = parseInt(res.last_result);
+  fetch(query)
+    .then((r) => r.json())
+    .then((res) => {
+      let totalReq = parseInt(res.last_result / 500) + 1;
 
-    var pagesReq = [];
+      let totalNum = parseInt(res.last_result);
 
-    for (let i = 1; i <= totalReq; i++) {
-      pagesReq.push(
-        "https://www.nosdeputes.fr/recherche/" +
-        queryContent +
-        "?format=json&count=500&page=" +
-        i
-      );
-    }
+      var pagesReq = [];
 
-    const docReq = [];
-    const resPages = [];
-    const resDocs = [];
+      for (let i = 1; i <= totalReq; i++) {
+        pagesReq.push(
+          `https://${legislature}.nosdeputes.fr/recherche/${encodeURI(
+            queryContent
+          )}?format=json&count=500&page=${i}`
+        );
+      }
 
-    let pageN = 0;
+      const docReq = [];
+      const resPages = [];
+      const resDocs = [];
 
-    // Une fois ces pages récupérées, il faut ensuite soumettre ces requêtes tout
-    // en respectant l'API rate limiting
+      let pageN = 0;
 
-    pagesReq.forEach((pageReq) => {
-      limiter
-        .schedule(() => fetch(pageReq))
-        .then((res) => res.json())
-        .then((resPage) => {
-          pageN++;
-          ipcRenderer.send(
-            "chaeros-notification",
-            "Retrieving page " + pageN + " of " + pagesReq.length
-          );
-          resPages.push(resPage);
+      // Une fois ces pages récupérées, il faut ensuite soumettre ces requêtes tout
+      // en respectant l'API rate limiting
 
-          if (resPages.length === pagesReq.length) {
-            // Une fois toutes les réponses reçues
-            // itérer sur toutes les pages
-            resPages.forEach((page) => {
-              // puis itérer sur chaque résultat de chaque page
-              page.results.forEach((doc) => {
-                // normaliser le type de document, cf https://github.com/regardscitoyens/nosdeputes.fr/issues/176
-                let doctype = doc.document_type.toLowerCase();
+      pagesReq.forEach((pageReq) => {
+        limiter
+          .schedule(() => fetch(pageReq))
+          .then((res) => res.json())
+          .then((resPage) => {
+            pageN++;
+            ipcRenderer.send(
+              "chaeros-notification",
+              "Retrieving page " + pageN + " of " + pagesReq.length
+            );
+            resPages.push(resPage);
 
-                // Si ce type de document existe déjà, ne rien faire
-                if (regContent.hasOwnProperty(doctype)) {
-                } else {
-                  // sinon, créer une nouvelle Map correspondant à ce type de document
-                  regContent[doctype] = new Map();
-                }
-                // ajouter un ensemble clé,valeur dans la map
-                // clé : ID du document tel que déclaré par l'API
-                // valeur : contenu du document
-                regContent[doctype].set(doc.document_id, doc);
-                // puis ajouter le lien du résultat dans un tableau afin d'aller chercher
-                // par la suite les ressources auxquelles il renvoie
-                docReq.push(
-                  doc.document_url.replace(
-                    "http://www.nosdeputes",
-                    "https://www.nosdeputes"
-                  )
-                );
-              });
-            });
+            if (resPages.length === pagesReq.length) {
+              // Une fois toutes les réponses reçues
+              // itérer sur toutes les pages
+              resPages.forEach((page) => {
+                // puis itérer sur chaque résultat de chaque page
+                page.results.forEach((doc) => {
+                  // normaliser le type de document, cf https://github.com/regardscitoyens/nosdeputes.fr/issues/176
+                  let doctype = doc.document_type.toLowerCase();
 
-            // Puis
-
-            // envoyer des requêtes sur la base de tous les liens de résultats
-            // récupérés précédemment
-
-            let docN = 0;
-
-            docReq.forEach((documentRequest) => {
-              limiter
-                .schedule(() => fetch(documentRequest))
-                .then((res) => res.json())
-                .then((documentResponse) => {
-                  docN++;
-                  ipcRenderer.send(
-                    "chaeros-notification",
-                    "Retrieving document " + docN + " of " + docReq.length
+                  // Si ce type de document existe déjà, ne rien faire
+                  if (regContent.hasOwnProperty(doctype)) {
+                  } else {
+                    // sinon, créer une nouvelle Map correspondant à ce type de document
+                    regContent[doctype] = new Map();
+                  }
+                  // ajouter un ensemble clé,valeur dans la map
+                  // clé : ID du document tel que déclaré par l'API
+                  // valeur : contenu du document
+                  regContent[doctype].set(doc.document_id, doc);
+                  // puis ajouter le lien du résultat dans un tableau afin d'aller chercher
+                  // par la suite les ressources auxquelles il renvoie
+                  docReq.push(
+                    doc.document_url.replace(
+                      "http://www.nosdeputes",
+                      "https://www.nosdeputes"
+                    )
                   );
+                });
+              });
 
-                  resDocs.push(documentResponse);
-                  if (resDocs.length === docReq.length) {
-                    // pour chaque document
-                    resDocs.forEach((doc) => {
-                      // récupérer le type de document (formatage étrange) cf https://github.com/regardscitoyens/nosdeputes.fr/issues/178
-                      for (const doctype in doc) {
-                        // mettre à jour le document dans la map avec le contenu des ressources obtenu
-                        let docInMap = regContent[doctype].get(doc[doctype].id);
-                        docInMap.content = doc[doctype];
-                        regContent[doctype].set(doc[doctype].id, docInMap);
-                      }
-                    });
+              // Puis
 
-                    // Ré-enrichissement des interventions
+              // envoyer des requêtes sur la base de tous les liens de résultats
+              // récupérés précédemment
 
-                    // création d'une Map avec les séances hébergeant les interventions
-                    const seances = new Map();
-                    regContent.intervention.forEach((inter) => {
-                      // both the seance id and legislature are needed
-                      // the legislature currently has to be rebuilt, cf https://github.com/regardscitoyens/nosdeputes.fr/issues/179
+              let docN = 0;
 
-                      let url = inter.content.url_nosdeputes;
-                      let legislature = url.slice(
-                        url.indexOf("nosdeputes.fr/") + 14,
-                        url.indexOf("/seance/")
-                      );
-                      seances.set(inter.content.seance_id, legislature);
-                    });
+              docReq.forEach((documentRequest) => {
+                limiter
+                  .schedule(() => fetch(documentRequest))
+                  .then((res) => res.json())
+                  .then((documentResponse) => {
+                    docN++;
+                    ipcRenderer.send(
+                      "chaeros-notification",
+                      "Retrieving document " + docN + " of " + docReq.length
+                    );
 
-                    let seanceReqs = [];
-
-                    seances.forEach((seance, leg) => {
-                      seanceReqs.push(
-                        "https://www.nosdeputes.fr/" +
-                        seance +
-                        "/seance/" +
-                        leg +
-                        "/json"
-                      );
-                    });
-
-                    const resSeances = [];
-                    let seanceN = 0;
-                    seanceReqs.forEach((seanceReq) => {
-                      limiter
-                        .schedule(() => fetch(seanceReq))
-                        .then((res) => res.json())
-                        .then((resSeance) => {
-                          seanceN++;
-                          ipcRenderer.send(
-                            "chaeros-notification",
-                            "Retrieving séance " +
-                            seanceN +
-                            " of " +
-                            seanceReqs.length
+                    resDocs.push(documentResponse);
+                    if (resDocs.length === docReq.length) {
+                      // pour chaque document
+                      resDocs.forEach((doc) => {
+                        // récupérer le type de document (formatage étrange) cf https://github.com/regardscitoyens/nosdeputes.fr/issues/178
+                        for (const doctype in doc) {
+                          // mettre à jour le document dans la map avec le contenu des ressources obtenu
+                          let docInMap = regContent[doctype].get(
+                            doc[doctype].id
                           );
-                          resSeances.push(resSeance);
-                          if (resSeances.length === seanceReqs.length) {
-                            // verser les résultats dans la Map seances
-                            resSeances.forEach((sc) => {
-                              for (const typedoc in sc.seance[0]) {
-                                seances.set(
-                                  sc.seance[0][typedoc].seance_id,
-                                  sc.seance
-                                );
-                              }
-                            });
+                          docInMap.content = doc[doctype];
+                          regContent[doctype].set(doc[doctype].id, docInMap);
+                        }
+                      });
 
-                            // ajouter les séances à la constante de résultats
-                            regContent.seances = seances;
+                      // Ré-enrichissement des interventions
 
-                            // enrichir les interventions précédemment obtenues avec les
-                            // métadonnées contenues dans les séances
+                      // création d'une Map avec les séances hébergeant les interventions
+                      const seances = new Map();
+                      regContent.intervention.forEach((inter) => {
+                        // both the seance id and legislature are needed
+                        // the legislature currently has to be rebuilt, cf https://github.com/regardscitoyens/nosdeputes.fr/issues/179
 
-                            // pour chaque intervention contenant l'expression recherchée
-                            regContent.intervention.forEach((inter) => {
-                              // ouvrir la séance correspondance et itérer sur son contenu
-                              seances
-                                .get(inter.content.seance_id)
-                                .forEach((d) => {
-                                  // si l'ID de l'item de la séance est le même que l'id de l'intervention
-                                  if (d.intervention.id === inter.document_id) {
-                                    // pour chaque propriété disponible dans l'objet trouvé
-                                    for (const key in d.intervention) {
-                                      // si elle est déjà disponible
-                                      if (inter.content.hasOwnProperty(key)) {
-                                        // ne rien faire
-                                      } else {
-                                        // sinon l'ajouter à l'intervention
-                                        inter.content[key] =
-                                          d.intervention[key];
-                                      }
-                                    }
-                                  }
-                                });
-                            });
+                        let url = inter.content.url_nosdeputes;
+                        let legislature = url.slice(
+                          url.indexOf("nosdeputes.fr/") + 14,
+                          url.indexOf("/seance/")
+                        );
+                        seances.set(inter.content.seance_id, legislature);
+                      });
 
-                            fetch("https://www.nosdeputes.fr/deputes/json")
-                              .then((dep) => dep.json())
-                              .then((deps) => {
-                                depMap = new Map();
-                                deps.deputes.forEach((d) =>
-                                  depMap.set(d.depute.id, d)
-                                );
+                      let seanceReqs = [];
 
-                                for (const key in regContent) {
-                                  regContent[key].forEach((d) => {
-                                    if (d.hasOwnProperty("content")) {
-                                      if (
-                                        d.content.hasOwnProperty(
-                                          "parlementaire_id"
-                                        )
-                                      ) {
-                                        d.content.aut = depMap.get(
-                                          parseInt(d.content.parlementaire_id)
-                                        );
+                      seances.forEach((seance, leg) => {
+                        seanceReqs.push(
+                          "https://www.nosdeputes.fr/" +
+                            seance +
+                            "/seance/" +
+                            leg +
+                            "/json"
+                        );
+                      });
+
+                      const resSeances = [];
+                      let seanceN = 0;
+                      seanceReqs.forEach((seanceReq) => {
+                        limiter
+                          .schedule(() => fetch(seanceReq))
+                          .then((res) => res.json())
+                          .then((resSeance) => {
+                            seanceN++;
+                            ipcRenderer.send(
+                              "chaeros-notification",
+                              "Retrieving séance " +
+                                seanceN +
+                                " of " +
+                                seanceReqs.length
+                            );
+                            resSeances.push(resSeance);
+                            if (resSeances.length === seanceReqs.length) {
+                              // verser les résultats dans la Map seances
+                              resSeances.forEach((sc) => {
+                                for (const typedoc in sc.seance[0]) {
+                                  seances.set(
+                                    sc.seance[0][typedoc].seance_id,
+                                    sc.seance
+                                  );
+                                }
+                              });
+
+                              // ajouter les séances à la constante de résultats
+                              regContent.seances = seances;
+
+                              // enrichir les interventions précédemment obtenues avec les
+                              // métadonnées contenues dans les séances
+
+                              // pour chaque intervention contenant l'expression recherchée
+                              regContent.intervention.forEach((inter) => {
+                                // ouvrir la séance correspondance et itérer sur son contenu
+                                seances
+                                  .get(inter.content.seance_id)
+                                  .forEach((d) => {
+                                    // si l'ID de l'item de la séance est le même que l'id de l'intervention
+                                    if (
+                                      d.intervention.id === inter.document_id
+                                    ) {
+                                      // pour chaque propriété disponible dans l'objet trouvé
+                                      for (const key in d.intervention) {
+                                        // si elle est déjà disponible
+                                        if (inter.content.hasOwnProperty(key)) {
+                                          // ne rien faire
+                                        } else {
+                                          // sinon l'ajouter à l'intervention
+                                          inter.content[key] =
+                                            d.intervention[key];
+                                        }
                                       }
                                     }
                                   });
-                                }
-
-                                // vérification que les requêtes ont bien abouti à des retours
-                                var totalMap = 0;
-
-                                for (var itemType in regContent) {
-                                  totalMap += regContent[itemType].size;
-                                }
-
-                                // Si c'est bien le cas, formatage puis sauvegarde
-                                if (totalMap >= totalNum) {
-                                  dataWriter(
-                                    ["system"],
-                                    queryContent,
-                                    regContent
-                                  );
-                                } else {
-                                  ipcRenderer.send(
-                                    "chaeros-notification",
-                                    "Failure to retrieve data from Regards API"
-                                  ); // Sending notification to console
-                                  ipcRenderer.send("pulsar", true);
-                                  ipcRenderer.send(
-                                    "console-logs",
-                                    "Failure to retrieve data from Regards API"
-                                  ); // Sending notification to console
-
-                                  setTimeout(() => {
-                                    ipcRenderer.send("win-destroy", winId);
-                                  }, 500);
-                                }
                               });
-                          }
-                        });
-                    });
-                  }
-                });
-            });
-          }
-        });
+
+                              fetch("https://www.nosdeputes.fr/deputes/json")
+                                .then((dep) => dep.json())
+                                .then((deps) => {
+                                  depMap = new Map();
+                                  deps.deputes.forEach((d) =>
+                                    depMap.set(d.depute.id, d)
+                                  );
+
+                                  for (const key in regContent) {
+                                    regContent[key].forEach((d) => {
+                                      if (d.hasOwnProperty("content")) {
+                                        if (
+                                          d.content.hasOwnProperty(
+                                            "parlementaire_id"
+                                          )
+                                        ) {
+                                          d.content.aut = depMap.get(
+                                            parseInt(d.content.parlementaire_id)
+                                          );
+                                        }
+                                      }
+                                    });
+                                  }
+
+                                  // vérification que les requêtes ont bien abouti à des retours
+                                  var totalMap = 0;
+
+                                  for (var itemType in regContent) {
+                                    totalMap += regContent[itemType].size;
+                                  }
+
+                                  // Si c'est bien le cas, formatage puis sauvegarde
+                                  if (totalMap >= totalNum) {
+                                    dataWriter(
+                                      ["system"],
+                                      queryContent,
+                                      regContent
+                                    );
+                                  } else {
+                                    ipcRenderer.send(
+                                      "chaeros-notification",
+                                      "Failure to retrieve data from Regards API"
+                                    ); // Sending notification to console
+                                    ipcRenderer.send("pulsar", true);
+                                    ipcRenderer.send(
+                                      "console-logs",
+                                      "Failure to retrieve data from Regards API"
+                                    ); // Sending notification to console
+
+                                    setTimeout(() => {
+                                      ipcRenderer.send("win-destroy", winId);
+                                    }, 500);
+                                  }
+                                });
+                            }
+                          });
+                      });
+                    }
+                  });
+              });
+            }
+          });
+      });
     });
-  });
 };
 
 const solrMetaExplorer = (req, meta) => {
   const url = (req, start, end) =>
-    `http://${meta.but.args.url}:${meta.but.args.port
-    }/solr/netarchivebuilder/select?q=${req}&start=${start}&rows=${end - start
+    `http://${meta.but.args.url}:${
+      meta.but.args.port
+    }/solr/netarchivebuilder/select?q=${req}&start=${start}&rows=${
+      end - start
     }`;
 
   const urlArray = [];
@@ -1637,12 +1654,8 @@ const solrMetaExplorer = (req, meta) => {
       );
     }
   } else {
-    urlArray.push(
-      fetch(url(req, 0, 200)).then((r) => r.json())
-    );
+    urlArray.push(fetch(url(req, 0, 200)).then((r) => r.json()));
   }
-
-
 
   // send request
   Promise.all(urlArray).then((res) => {
@@ -1653,8 +1666,6 @@ const solrMetaExplorer = (req, meta) => {
     res.forEach(
       (d) => (totalResponse = [...totalResponse, ...d.response.docs])
     );
-
-
 
     const dataset = {
       data: {},
@@ -1683,23 +1694,18 @@ const solrMetaExplorer = (req, meta) => {
       content: cslData,
     };
 
+    pandodb.csljson.add(cslConvertedDataset).then(() => {
+      ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
+      ipcRenderer.send("pulsar", true);
+      ipcRenderer.send(
+        "console-logs",
+        "Bnf data successfully converted " + dataset
+      ); // Log success
 
-
-    pandodb.csljson
-      .add(cslConvertedDataset)
-      .then(() => {
-        ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
-        ipcRenderer.send("pulsar", true);
-        ipcRenderer.send(
-          "console-logs",
-          "Bnf data successfully converted " + dataset
-        ); // Log success
-
-        setTimeout(() => {
-          ipcRenderer.send("win-destroy", winId);
-        }, 500);
-      });
-
+      setTimeout(() => {
+        ipcRenderer.send("win-destroy", winId);
+      }, 500);
+    });
   });
 };
 
@@ -1731,8 +1737,6 @@ const wosFullRetriever = (user, wosReq) => {
       const num = res.QueryResult.RecordsFound;
 
       const reqnum = Math.ceil(num / 100);
-
-
 
       let count = 0;
 
@@ -1808,10 +1812,10 @@ const wosFullRetriever = (user, wosReq) => {
                   ipcRenderer.send(
                     "console-logs",
                     "Web of Science dataset on " +
-                    wosReq.usrQuery +
-                    " for user " +
-                    user +
-                    " have been successfully retrieved."
+                      wosReq.usrQuery +
+                      " for user " +
+                      user +
+                      " have been successfully retrieved."
                   );
                   setTimeout(() => {
                     ipcRenderer.send("win-destroy", winId);
@@ -1837,7 +1841,7 @@ const bnfRemap = (doc) => {
     description: "abstractNote",
     content_type_norm: "websiteType",
     content_language: "language",
-    host: "websiteTitle"
+    host: "websiteTitle",
   };
 
   for (const key in doc) {
@@ -1866,7 +1870,10 @@ const bnfRemap = (doc) => {
 
   delete remappedDocument.undefined;
 
-  remappedDocument.shortTitle = JSON.stringify({ id: doc.id, collections: doc.collections });
+  remappedDocument.shortTitle = JSON.stringify({
+    id: doc.id,
+    collections: doc.collections,
+  });
 
   return remappedDocument;
 };
@@ -1875,14 +1882,12 @@ const bnfRemap = (doc) => {
 // Switch used to choose the function to execute in CHÆROS.
 
 const chaerosSwitch = (fluxAction, fluxArgs) => {
-
-
   ipcRenderer.send(
     "console-logs",
     "CHÆROS started a " +
-    fluxAction +
-    " process with the following arguments : " +
-    JSON.stringify(fluxArgs)
+      fluxAction +
+      " process with the following arguments : " +
+      JSON.stringify(fluxArgs)
   );
 
   switch (fluxAction) {
@@ -1896,11 +1901,10 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
       break;
 
     case "regards":
-      regardsRetriever(fluxArgs.regquery);
+      regardsRetriever(fluxArgs.regquery, fluxArgs.legislature);
       break;
 
     case "cslConverter":
-
       switch (fluxArgs.corpusType) {
         case "Scopus-dataset":
           scopusConverter(fluxArgs.dataset);
