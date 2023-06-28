@@ -164,6 +164,30 @@ pandodb.version(8).stores({
   regards: structureV1,
 });
 
+pandodb.version(9).stores({
+  fieldotype: structureV1,
+  filotype: structureV1,
+  doxatype: structureV1,
+  hyphotype: structureV1,
+  enriched: structureV1,
+  scopus: structureV1,
+  webofscience: structureV1,
+  csljson: structureV1,
+  zotero: structureV1,
+  twitter: structureV1,
+  anthropotype: structureV1,
+  chronotype: structureV1,
+  geotype: structureV1,
+  pharmacotype: structureV1,
+  publicdebate: structureV1,
+  gazouillotype: structureV1,
+  hyphe: structureV1,
+  system: structureV1,
+  slider: structureV1,
+  regards: structureV1,
+  istex: structureV1,
+});
+
 pandodb.open();
 //========== CHÆEROS ==========
 //When Flux actions are too heavy to be quasi-instantaneous, powerValve sends a message to the main process. This
@@ -540,7 +564,11 @@ const scopusGeolocate = (dataset) => {
           if (d.hasOwnProperty("affiliation")) {
             for (let i = 0; i < d.affiliation.length; i++) {
               if (d.affiliation[i].lon === undefined) {
-                unlocatedCities.push(d.affiliation[i]["affiliation-city"]);
+                unlocatedCities.push(
+                  d.affiliation[i]["affiliation-city"] +
+                    ", " +
+                    d.affiliation[i]["affiliation-country"]
+                );
               }
             }
           }
@@ -1996,6 +2024,98 @@ const wosFullRetriever = (user, wosReq) => {
     });
 };
 
+// ========= ISTEX RETRIEVER ==========
+
+const istexRetriever = (query) => {
+  console.log(query);
+
+  const target = `https://api.istex.fr/document/?q=${query}&size=5000&output=*`;
+
+  console.log(target);
+
+  var entries = [];
+
+  function saveContent() {
+    const id = query + date;
+    var content = {
+      type: "ISTEX-dataset",
+      fullquery: query,
+      query: query,
+      queryDate: date,
+      altmetricEnriched: false,
+      articleGeoloc: false,
+      entries,
+    };
+
+    pandodb.open();
+
+    pandodb.istex
+      .add({
+        id,
+        date,
+        name: query,
+        content,
+      })
+      .then(() => {
+        pandodb.enriched
+          .add({
+            id,
+            date,
+            name: query,
+            content,
+          })
+          .then(() => {
+            ipcRenderer.send(
+              "chaeros-notification",
+              "ISTEX API data retrieved"
+            ); // signal success to main process
+            ipcRenderer.send("pulsar", true);
+            ipcRenderer.send(
+              "console-logs",
+              "ISTEX dataset on " +
+                query +
+                " for user " +
+                user +
+                " have been successfully retrieved."
+            );
+            setTimeout(() => {
+              ipcRenderer.send("win-destroy", winId);
+            }, 500); // Close Chaeros
+          });
+      });
+  }
+
+  fetch(target)
+    .then((res) => res.json())
+    .then((r) => {
+      entries = [...r.hits];
+
+      if (entries.length < 5000) {
+        saveContent();
+      } else {
+        const total = Math.floor(entries.length / 5000);
+        for (let i = 1; i < total; i++) {
+          // I'm fully aware promise chaining is a thing
+          // This is a quick implementation prior to getting
+          // more info on this endpoint's rate limiting.
+          setTimeout(() => {
+            const target = `https://api.istex.fr/document/?q=${query}&size=5000&output=*&from=${
+              i * 5000
+            }`;
+            fetch(target)
+              .then((res) => res.json())
+              .then((r) => {
+                entries = [...entries, ...r.hits];
+                if (i === total - 1) {
+                  setTimeout(saveContent, 2000);
+                }
+              });
+          }, 2000 * i);
+        }
+      }
+    });
+};
+
 // ========= BnF Solr Remap ==========
 // function to remap documents from BnF solr to Zotero compatible
 // CSL - JSON format.
@@ -2100,6 +2220,10 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
         fluxArgs.altmetricRetriever.id,
         fluxArgs.altmetricRetriever.user
       );
+      break;
+
+    case "istexRetriever":
+      istexRetriever(fluxArgs.istexQuery);
       break;
 
     case "scopusRetriever":

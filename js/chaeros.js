@@ -373,7 +373,11 @@ const scopusGeolocate = (dataset) => {
           if (d.hasOwnProperty("affiliation")) {
             for (let i = 0; i < d.affiliation.length; i++) {
               if (d.affiliation[i].lon === undefined) {
-                unlocatedCities.push(d.affiliation[i]["affiliation-city"]);
+                unlocatedCities.push(
+                  d.affiliation[i]["affiliation-city"] +
+                    ", " +
+                    d.affiliation[i]["affiliation-country"]
+                );
               }
             }
           }
@@ -1829,6 +1833,98 @@ const wosFullRetriever = (user, wosReq) => {
     });
 };
 
+// ========= ISTEX RETRIEVER ==========
+
+const istexRetriever = (query) => {
+  console.log(query);
+
+  const target = `https://api.istex.fr/document/?q=${query}&size=5000&output=*`;
+
+  console.log(target);
+
+  var entries = [];
+
+  function saveContent() {
+    const id = query + date;
+    var content = {
+      type: "ISTEX-dataset",
+      fullquery: query,
+      query: query,
+      queryDate: date,
+      altmetricEnriched: false,
+      articleGeoloc: false,
+      entries,
+    };
+
+    pandodb.open();
+
+    pandodb.istex
+      .add({
+        id,
+        date,
+        name: query,
+        content,
+      })
+      .then(() => {
+        pandodb.enriched
+          .add({
+            id,
+            date,
+            name: query,
+            content,
+          })
+          .then(() => {
+            ipcRenderer.send(
+              "chaeros-notification",
+              "ISTEX API data retrieved"
+            ); // signal success to main process
+            ipcRenderer.send("pulsar", true);
+            ipcRenderer.send(
+              "console-logs",
+              "ISTEX dataset on " +
+                query +
+                " for user " +
+                user +
+                " have been successfully retrieved."
+            );
+            setTimeout(() => {
+              ipcRenderer.send("win-destroy", winId);
+            }, 500); // Close Chaeros
+          });
+      });
+  }
+
+  fetch(target)
+    .then((res) => res.json())
+    .then((r) => {
+      entries = [...r.hits];
+
+      if (entries.length < 5000) {
+        saveContent();
+      } else {
+        const total = Math.floor(entries.length / 5000);
+        for (let i = 1; i < total; i++) {
+          // I'm fully aware promise chaining is a thing
+          // This is a quick implementation prior to getting
+          // more info on this endpoint's rate limiting.
+          setTimeout(() => {
+            const target = `https://api.istex.fr/document/?q=${query}&size=5000&output=*&from=${
+              i * 5000
+            }`;
+            fetch(target)
+              .then((res) => res.json())
+              .then((r) => {
+                entries = [...entries, ...r.hits];
+                if (i === total - 1) {
+                  setTimeout(saveContent, 2000);
+                }
+              });
+          }, 2000 * i);
+        }
+      }
+    });
+};
+
 // ========= BnF Solr Remap ==========
 // function to remap documents from BnF solr to Zotero compatible
 // CSL - JSON format.
@@ -1933,6 +2029,10 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
         fluxArgs.altmetricRetriever.id,
         fluxArgs.altmetricRetriever.user
       );
+      break;
+
+    case "istexRetriever":
+      istexRetriever(fluxArgs.istexQuery);
       break;
 
     case "scopusRetriever":

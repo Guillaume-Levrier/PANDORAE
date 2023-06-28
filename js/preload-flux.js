@@ -164,6 +164,30 @@ pandodb.version(8).stores({
   regards: structureV1,
 });
 
+pandodb.version(9).stores({
+  fieldotype: structureV1,
+  filotype: structureV1,
+  doxatype: structureV1,
+  hyphotype: structureV1,
+  enriched: structureV1,
+  scopus: structureV1,
+  webofscience: structureV1,
+  csljson: structureV1,
+  zotero: structureV1,
+  twitter: structureV1,
+  anthropotype: structureV1,
+  chronotype: structureV1,
+  geotype: structureV1,
+  pharmacotype: structureV1,
+  publicdebate: structureV1,
+  gazouillotype: structureV1,
+  hyphe: structureV1,
+  system: structureV1,
+  slider: structureV1,
+  regards: structureV1,
+  istex: structureV1,
+});
+
 pandodb.open();
 const CMT = {
   EN: {
@@ -657,6 +681,14 @@ const powerValve = (fluxAction, item) => {
       message = "Geolocating Affiliations";
       break;
 
+    case "istexRetriever":
+      fluxArgs.istexQuery = document.getElementById(
+        "istexlocalqueryinput"
+      ).value;
+
+      message = "Retrieving data from ISTEX";
+      break;
+
     case "scopusRetriever":
       fluxArgs.scopusRetriever = { user: "", query: "" };
       fluxArgs.scopusRetriever.user =
@@ -1028,6 +1060,62 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
       ipcRenderer.send("console-logs", error); // Log error
     }
   }
+};
+
+//========== istexBasicRetriever ==========
+// Send a single request for a single document to ISTEX in order to retrieve the request's metadata and give the user a
+// rough idea of how big (and therefore how many requests) the response represents. The user is then offered to proceed
+// with the actual request, which will then be channeled to Chæros.
+
+const istexBasicRetriever = (checker) => {
+  //document.getElementById("scopus-basic-query").innerText = "Loading ...";
+
+  let query = document.getElementById("istexlocalqueryinput").value; // Request Content
+
+  ipcRenderer.send(
+    "console-logs",
+    "Sending ISTEX the following query : " + query
+  ); // Log query
+
+  const target = `https://api.istex.fr/document/?q=${query}&size=1`;
+
+  fetch(target)
+    .then((res) => res.json())
+    .then((r) => {
+      // Then, once the response is retrieved
+
+      console.log(r);
+
+      let date = new Date();
+
+      // Display metadata in a div
+      let dataBasicPreview = `<br><strong>Query: ${query}</strong><br>
+      Expected results at request time: ${r.total}<br>
+      Query date: ${date}`;
+
+      document.getElementById("istex-basic-previewer").innerHTML =
+        dataBasicPreview;
+
+      // Display success in request button
+      fluxButtonAction(
+        "istex-basic-query",
+        true,
+        "Query Basic Info Retrieved",
+        "errorPhrase"
+      );
+
+      // Display next step option: send full request to Chæros
+      document.getElementById("istex-query").style.display = "block";
+    })
+    .catch(function (e) {
+      fluxButtonAction(
+        "istex-basic-query",
+        false,
+        "Query Basic Info Error",
+        e.message
+      );
+      ipcRenderer.send("console-logs", "Query error : " + e); // Log error
+    });
 };
 
 //========== scopusBasicRetriever ==========
@@ -2274,7 +2362,9 @@ window.addEventListener("load", (event) => {
       arg: "clinTriRetriever",
     },
     { id: "scopus-basic-query", func: "scopusBasicRetriever", arg: [] },
+    { id: "istex-basic-query", func: "istexBasicRetriever", arg: [] },
     { id: "scopus-query", func: "powerValve", arg: "scopusRetriever" },
+    { id: "istex-query", func: "powerValve", arg: "istexRetriever" },
     { id: "biorxiv-basic-query", func: "biorxivBasicRetriever" },
     { id: "biorxiv-query", func: "powerValve", arg: "biorxivRetriever" },
     { id: "twitterImporter", func: "powerValve", arg: "tweetImporter" },
@@ -2368,6 +2458,10 @@ window.addEventListener("load", (event) => {
 
           case "Regards Citoyens":
             addHop(["OPEN", "REGARDSCITOYENS", "CSL-JSON"]);
+            break;
+
+          case "ISTEX":
+            addHop(["OPEN", "ISTEX", "ENRICHMENT"]);
             break;
 
           default:
@@ -2520,6 +2614,10 @@ window.addEventListener("load", (event) => {
 
       case "scopusBasicRetriever":
         scopusBasicRetriever();
+        break;
+
+      case "istexBasicRetriever":
+        istexBasicRetriever();
         break;
 
       case "twitterCat":
