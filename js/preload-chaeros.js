@@ -2027,11 +2027,7 @@ const wosFullRetriever = (user, wosReq) => {
 // ========= ISTEX RETRIEVER ==========
 
 const istexRetriever = (query) => {
-  console.log(query);
-
   const target = `https://api.istex.fr/document/?q=${query}&size=5000&output=*`;
-
-  console.log(target);
 
   var entries = [];
 
@@ -2114,6 +2110,103 @@ const istexRetriever = (query) => {
         }
       }
     });
+};
+
+const istexCSLconverter = (dataset) => {
+  const istexToZoteroCSL = (item) => {
+    const article = {
+      itemType: "journalArticle",
+      creators: [],
+      pages: "",
+      series: "",
+      seriesTitle: "",
+      seriesText: "",
+      journalAbbreviation: "",
+      language: "",
+      url: "",
+      accessDate: "",
+      archive: "",
+      archiveLocation: "",
+      libraryCatalog: "",
+      callNumber: "",
+      rights: "",
+      extra: "",
+      tags: [],
+      collections: [],
+      relations: {},
+    };
+
+    article.title = item.title;
+    article.abstractNote = item.abstract;
+    article.publicationTitle = item.host.title;
+    article.volume = item.host.volume;
+    article.issue = item.host.issue;
+    article.date = item.publicationDate;
+
+    try {
+      article.DOI = item.doi[0];
+    } catch (error) {
+      console.log("no doi");
+    }
+
+    article.ISSN = item.host.issn[0];
+
+    item.author.forEach((auth) => {
+      const names = auth.name.split(" ");
+      const firstName = names[0];
+      var lastName = "";
+      for (let i = 1; i < names.length; ++i) {
+        lastName += names[i];
+      }
+      article.creators.push({ creatorType: "author", firstName, lastName });
+    });
+
+    article.shortTitle = JSON.stringify(item);
+
+    return article;
+  };
+
+  ipcRenderer.send("console-logs", "Starting istexConverter on " + dataset); // Notify console conversion started
+  let convertedDataset = []; // Create an array
+
+  pandodb.enriched.get(dataset).then((doc) => {
+    // Open the database in which the scopus dataset is stored
+    try {
+      // If the file is valid, do the following:
+      const articles = doc.content.entries; // Select the array filled with the targeted articles
+
+      for (let i = 0; i < articles.length; i++) {
+        const converted = istexToZoteroCSL(articles[i]);
+        convertedDataset.push(converted);
+      }
+    } catch (err) {
+      ipcRenderer.send("chaeros-failure", JSON.stringify(err)); // On failure, send error notification to main process
+      ipcRenderer.send("pulsar", true);
+      ipcRenderer.send("console-logs", JSON.stringify(err)); // On failure, send error to console
+    } finally {
+      pandodb.open();
+      let id = dataset + "-converted";
+
+      pandodb.csljson
+        .add({
+          id,
+          date,
+          name: dataset,
+          content: convertedDataset,
+        })
+        .then(() => {
+          ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
+          ipcRenderer.send("pulsar", true);
+          ipcRenderer.send(
+            "console-logs",
+            "istexConverter successfully converted " + dataset
+          ); // Log success
+          setTimeout(() => {
+            ipcRenderer.send("win-destroy", winId);
+          }, 500);
+        });
+    }
+  });
 };
 
 // ========= BnF Solr Remap ==========
@@ -2199,6 +2292,9 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
 
         case "WoS-dataset":
           webofscienceConverter(fluxArgs.dataset);
+          break;
+        case "ISTEX-dataset":
+          istexCSLconverter(fluxArgs.dataset);
           break;
 
         default:
