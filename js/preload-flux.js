@@ -666,6 +666,8 @@ const powerValve = (fluxAction, item) => {
     case "cslConverter":
       fluxArgs.dataset = itemname;
       fluxArgs.corpusType = item.dataset.corpusType;
+      fluxArgs.normalize = document.getElementById("crossEnrich").checked;
+      fluxArgs.userMail = document.getElementById("userMailInput").value;
       message = "Converting to CSL-JSON";
       break;
 

@@ -325,9 +325,9 @@
 <!-- ENRICHMENT TAB -->
 <div id="enrichment" style="display:none;" class="fluxTabs">
   <span class="flux-title">DATA ENRICHMENT</span><br><br>
-  This tab will allow you to geolocate your documents' affiliations and find
-  their Altmetric metadata.<br><br>
+  This tab will allow you to geolocate your documents' affiliations.<br><br>
   <form autocomplete="off">
+    <br>
     <div id="scopus-dataset-preview" style="position:relative;"></div>
     <button type="submit" style="display: none;" class="flux-button"
       id="scopusGeolocate">Geolocate
@@ -361,6 +361,10 @@
     <div id="enriched-dataset-preview" style="position:relative;">Click on a
       dataset to display its features. </div>
     <div id="enriched-dataset-buttons" style="display:none;">
+      <input type="checkbox" class="flux-button" name="crossEnrich"
+        id="crossEnrich"> <label for="crossEnrich">Normalize with
+        CrossRef</label><br>
+      <br>
       <button type="submit" class="flux-button" id="convert-csl">Convert to
         CSL</button>
     </div><br><br>

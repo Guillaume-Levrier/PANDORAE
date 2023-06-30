@@ -224,7 +224,7 @@ const getPassword = (service, user) =>
 //========== scopusConverter ==========
 //scopusConverter converts a scopus JSON dataset into a Zotero CSL-JSON dataset.
 
-const scopusConverter = (dataset) => {
+const scopusConverter = (dataset, normalize, email) => {
   // [dataset] is the file to be converted
   ipcRenderer.send("console-logs", "Starting scopusConverter on " + dataset); // Notify console conversion started
   let convertedDataset = []; // Create an array
@@ -294,27 +294,37 @@ const scopusConverter = (dataset) => {
       ipcRenderer.send("pulsar", true);
       ipcRenderer.send("console-logs", JSON.stringify(err)); // On failure, send error to console
     } finally {
-      pandodb.open();
-      let id = dataset;
-
-      pandodb.csljson
-        .add({
+      const id = dataset;
+      if (normalize) {
+        const converted = {
           id: id,
           date: date,
           name: dataset,
           content: convertedDataset,
-        })
-        .then(() => {
-          ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
-          ipcRenderer.send("pulsar", true);
-          ipcRenderer.send(
-            "console-logs",
-            "scopusConverter successfully converted " + dataset
-          ); // Log success
-          setTimeout(() => {
-            ipcRenderer.send("win-destroy", winId);
-          }, 500);
-        });
+        };
+        crossRefEnricher(converted, email);
+      } else {
+        pandodb.open();
+
+        pandodb.csljson
+          .add({
+            id: id,
+            date: date,
+            name: dataset,
+            content: convertedDataset,
+          })
+          .then(() => {
+            ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
+            ipcRenderer.send("pulsar", true);
+            ipcRenderer.send(
+              "console-logs",
+              "scopusConverter successfully converted " + dataset
+            ); // Log success
+            setTimeout(() => {
+              ipcRenderer.send("win-destroy", winId);
+            }, 500);
+          });
+      }
     }
   });
 };
@@ -322,7 +332,7 @@ const scopusConverter = (dataset) => {
 //========== webofscienceConverter ==========
 //webofscienceConverter converts a scopus JSON dataset into a Zotero CSL-JSON dataset.
 
-const webofscienceConverter = (dataset) => {
+const webofscienceConverter = (dataset, normalize, mail) => {
   // [dataset] is the file to be converted
   ipcRenderer.send(
     "console-logs",
@@ -2112,7 +2122,9 @@ const istexRetriever = (query) => {
     });
 };
 
-const istexCSLconverter = (dataset) => {
+// ====== ISTEX CONVERTER ======
+
+const istexCSLconverter = (dataset, normalize, mail) => {
   const istexToZoteroCSL = (item) => {
     const article = {
       itemType: "journalArticle",
@@ -2258,6 +2270,107 @@ const bnfRemap = (doc) => {
   return remappedDocument;
 };
 
+// ======== CrossRef Enricher =====
+
+const crossRefEnricher = (dataset, mail) => {
+  const limiter = new bottleneck({
+    maxConcurrent: 4,
+    minTime: 100,
+  });
+
+  function getAuthors(article) {
+    const authors = [];
+    article.author.forEach((a) =>
+      authors.push({
+        creatorType: "author",
+        firstName: a.given,
+        lastName: a.family,
+      })
+    );
+    return authors;
+  }
+
+  const query = (doi) => `https://api.crossref.org/works/${doi}?mailto=${mail}`;
+
+  const datafinish = [];
+
+  const data = dataset.content;
+
+  /* for testing purposes
+  for (let i = 0; i < 20; i++) {
+    data.push(dataset.content[i]);
+  }*/
+
+  if (1) {
+    for (let i = 0; i < data.length; i++) {
+      const DOI = data[i].DOI;
+
+      limiter
+        .schedule(() => {
+          if (DOI) {
+            return fetch(query(DOI));
+          } else {
+            return "{data:null}";
+          }
+        })
+        .then((res) => res.json())
+        .catch((err) => console.log(err))
+        .then((res) => {
+          ipcRenderer.send(
+            "chaeros-notification",
+            `CrossRef normalization ${i}/${data.length - 1}`
+          );
+          if (res) {
+            if (res.hasOwnProperty("message")) {
+              if (res.message.hasOwnProperty("author")) {
+                datafinish.push({ DOI, creators: getAuthors(res.message) });
+              }
+            }
+          }
+
+          if (i === data.length - 1) {
+            ipcRenderer.send(
+              "chaeros-notification",
+              `CrossReff normalization successful`
+            );
+
+            data.forEach((d) => {
+              datafinish.forEach((f) => {
+                if (d.DOI === f.DOI) {
+                  d.creators = f.creators;
+                }
+              });
+            });
+
+            pandodb.open();
+
+            const normalized = {
+              id: "[n]" + dataset.id + date,
+              date: dataset.date,
+              name: "[n]" + dataset.name,
+              content: data,
+            };
+
+            pandodb.csljson
+              .add(normalized)
+              .then(() => {
+                ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
+                ipcRenderer.send("pulsar", true);
+                ipcRenderer.send(
+                  "console-logs",
+                  "Successfully converted " + dataset
+                ); // Log success
+                setTimeout(() => {
+                  ipcRenderer.send("win-destroy", winId);
+                }, 500);
+              })
+              .catch((err) => console.log(err));
+          }
+        });
+    }
+  }
+};
+
 //========== chaerosSwitch ==========
 // Switch used to choose the function to execute in CHÆROS.
 
@@ -2287,14 +2400,26 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
     case "cslConverter":
       switch (fluxArgs.corpusType) {
         case "Scopus-dataset":
-          scopusConverter(fluxArgs.dataset);
+          scopusConverter(
+            fluxArgs.dataset,
+            fluxArgs.normalize,
+            fluxArgs.userMail
+          );
           break;
 
         case "WoS-dataset":
-          webofscienceConverter(fluxArgs.dataset);
+          webofscienceConverter(
+            fluxArgs.dataset,
+            fluxArgs.normalize,
+            fluxArgs.userMail
+          );
           break;
         case "ISTEX-dataset":
-          istexCSLconverter(fluxArgs.dataset);
+          istexCSLconverter(
+            fluxArgs.dataset,
+            fluxArgs.normalize,
+            fluxArgs.userMail
+          );
           break;
 
         default:
