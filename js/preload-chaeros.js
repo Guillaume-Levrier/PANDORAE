@@ -451,27 +451,37 @@ const webofscienceConverter = (dataset, normalize, mail) => {
       ipcRenderer.send("pulsar", true);
       ipcRenderer.send("console-logs", JSON.stringify(err)); // On failure, send error to console
     } finally {
-      pandodb.open();
-      let id = dataset;
-
-      pandodb.csljson
-        .add({
+      const id = dataset;
+      if (normalize) {
+        const converted = {
           id: id,
           date: date,
           name: dataset,
           content: convertedDataset,
-        })
-        .then(() => {
-          ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
-          ipcRenderer.send("pulsar", true);
-          ipcRenderer.send(
-            "console-logs",
-            "webofscienceConverter successfully converted " + dataset
-          ); // Log success
-          setTimeout(() => {
-            ipcRenderer.send("win-destroy", winId);
-          }, 500);
-        });
+        };
+        crossRefEnricher(converted, email);
+      } else {
+        pandodb.open();
+
+        pandodb.csljson
+          .add({
+            id: id,
+            date: date,
+            name: dataset,
+            content: convertedDataset,
+          })
+          .then(() => {
+            ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
+            ipcRenderer.send("pulsar", true);
+            ipcRenderer.send(
+              "console-logs",
+              "webofscienceConverter successfully converted " + dataset
+            ); // Log success
+            setTimeout(() => {
+              ipcRenderer.send("win-destroy", winId);
+            }, 500);
+          });
+      }
     }
   });
 };
@@ -632,7 +642,6 @@ const webofscienceGeolocate = (dataset) => {
         let article = doc.content.entries; // Find relevant objects in the parsed dataset
         let totalCityArray = []; // Prepare an empty array
 
-        /*
         for (var i = 0; i < article.length - 1; i++) {
           // For loop to generate list of cities to be requested
           if (
@@ -717,9 +726,7 @@ const webofscienceGeolocate = (dataset) => {
           }
         });
 
-        console.log(doc);
-
-        /*
+        //console.log(doc);
 
         ipcRenderer.send(
           "console-logs",
@@ -739,7 +746,6 @@ const webofscienceGeolocate = (dataset) => {
         setTimeout(() => {
           ipcRenderer.send("win-destroy", winId);
         }, 2000);
-        */
       }
     );
   });
@@ -2196,27 +2202,37 @@ const istexCSLconverter = (dataset, normalize, mail) => {
       ipcRenderer.send("pulsar", true);
       ipcRenderer.send("console-logs", JSON.stringify(err)); // On failure, send error to console
     } finally {
-      pandodb.open();
-      let id = dataset + "-converted";
-
-      pandodb.csljson
-        .add({
-          id,
-          date,
+      const id = dataset + "-converted";
+      if (normalize) {
+        const converted = {
+          id: id,
+          date: date,
           name: dataset,
           content: convertedDataset,
-        })
-        .then(() => {
-          ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
-          ipcRenderer.send("pulsar", true);
-          ipcRenderer.send(
-            "console-logs",
-            "istexConverter successfully converted " + dataset
-          ); // Log success
-          setTimeout(() => {
-            ipcRenderer.send("win-destroy", winId);
-          }, 500);
-        });
+        };
+        crossRefEnricher(converted, email);
+      } else {
+        pandodb.open();
+
+        pandodb.csljson
+          .add({
+            id,
+            date,
+            name: dataset,
+            content: convertedDataset,
+          })
+          .then(() => {
+            ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
+            ipcRenderer.send("pulsar", true);
+            ipcRenderer.send(
+              "console-logs",
+              "istexConverter successfully converted " + dataset
+            ); // Log success
+            setTimeout(() => {
+              ipcRenderer.send("win-destroy", winId);
+            }, 500);
+          });
+      }
     }
   });
 };

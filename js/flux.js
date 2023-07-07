@@ -2096,7 +2096,7 @@ window.addEventListener("load", (event) => {
             break;
 
           case "Zotero":
-            addHop(["ENRICHMENT", "CSL-JSON", "ZOTERO", "SYSTEM"]);
+            addHop(["ENRICHMENT", "CSL-JSON", "MANUAL", "ZOTERO", "SYSTEM"]);
             break;
 
           case "Clinical Trials":
