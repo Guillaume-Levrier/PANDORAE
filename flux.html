@@ -33,7 +33,9 @@
 
 </div>
 
-<div id="flux-manager" class="fluxTabs"><svg></svg></div>
+<div id="flux-manager" class="fluxTabs">
+  <svg id="cascade"></svg>
+</div>
 
 <!-- USER TAB -->
 <div id="user" style="display:none;" class="fluxTabs">
@@ -520,6 +522,33 @@
     id="fluxDisplayButton">arrow_back</i>
   <i class="material-icons dialog-buttons" id="fluxRefreshButton">refresh</i>
   <i class="material-icons dialog-buttons" id="fluxCloseButton">close</i>
+</div>
+
+<div style="position:fixed;z-index:20;padding: 5px;left:5px;top:5px;">
+  <fieldset style="border:unset">
+    <div>
+      <input type="checkbox" id="scientometricsSelect" name="scientometrics"
+        checked>
+      <label for="scientometrics">Scientometrics</label>
+    </div>
+    <div>
+      <input type="checkbox" id="clinicalTrialsSelect" name="clinicalTrials">
+      <label for="clinicalTrials">Clinical Trials</label>
+    </div>
+    <div>
+      <input type="checkbox" id="parliamentsSelect" name="parliaments">
+      <label for="parliaments">Parliaments</label>
+    </div>
+    <div>
+      <input type="checkbox" id="twitterSelect" name="twitter">
+      <label for="twitter">Twitter</label>
+    </div>
+    <div>
+      <input type="checkbox" id="hypheSelect" name="hyphe">
+      <label for="hyphe">Hyphe</label>
+    </div>
+
+  </fieldset>
 </div>
 </div>
 

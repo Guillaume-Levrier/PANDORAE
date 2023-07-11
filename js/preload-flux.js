@@ -386,22 +386,7 @@ const date = () =>
 
 //========== Tracegraph ==========
 
-let traces = [
-  {
-    hops: [
-      { info: { name: "USER" }, name: "USER" },
-      { info: { name: "TWITTER" }, name: "TWITTER" },
-      { info: { name: "SYSTEM" }, name: "SYSTEM" },
-    ],
-  },
-
-  {
-    hops: [
-      { info: { name: "OPEN" }, name: "OPEN" },
-      { info: { name: "HYPHE" }, name: "HYPHE" },
-    ],
-  },
-];
+let traces = [];
 
 const addHop = (steparr) => {
   const hops = {
@@ -2860,40 +2845,80 @@ window.addEventListener("load", (event) => {
 
   const svg = d3.select("svg");
 
-  ipcRenderer.invoke("checkflux", true).then((result) => {
-    // ipcRenderer.invoke("fluxDevTools", true);
+  var availability;
 
-    const res = JSON.parse(result);
+  const selections = {
+    scientometricsSelect: true,
+    clinicalTrialsSelect: false,
+    parliamentsSelect: false,
+    twitterSelect: false,
+    hypheSelect: false,
+  };
 
-    res.dnslist.forEach((d) => {
+  function configureCascade() {
+    for (const theme in selections) {
+      const select = document.getElementById(theme);
+      select.addEventListener("change", () => {
+        selections[theme] = select.checked;
+        document.getElementById("cascade").innerHTML = "";
+        updateCascade();
+      });
+    }
+  }
+
+  configureCascade();
+
+  function updateCascade() {
+    traces = [];
+    document.getElementById("cascade").innerHTML = "";
+    availability.dnslist.forEach((d) => {
       if (d.valid) {
         switch (d.name) {
           case "Scopus":
-            addHop(["USER", "SCOPUS", "ENRICHMENT"]);
+            if (selections.scientometricsSelect) {
+              addHop(["USER", "SCOPUS", "ENRICHMENT"]);
+            }
             break;
 
           case "Web Of Science":
-            addHop(["USER", "WEBㅤOFㅤSCIENCE", "ENRICHMENT"]);
+            if (selections.scientometricsSelect) {
+              addHop(["USER", "WEBㅤOFㅤSCIENCE", "ENRICHMENT"]);
+            }
             break;
 
           case "BIORXIV":
-            addHop(["OPEN", "BIORXIV", "ENRICHMENT"]);
+            if (selections.scientometricsSelect) {
+              addHop(["OPEN", "BIORXIV", "ENRICHMENT"]);
+            }
             break;
 
           case "Zotero":
-            addHop(["ENRICHMENT", "CSL-JSON", "MANUAL", "ZOTERO", "SYSTEM"]);
+            addHop([
+              "USER",
+              "ENRICHMENT",
+              "CSL-JSON",
+              "MANUAL",
+              "ZOTERO",
+              "SYSTEM",
+            ]);
             break;
 
           case "Clinical Trials":
-            addHop(["OPEN", "CLINICALㅤTRIALS", "SYSTEM"]);
+            if (selections.clinicalTrialsSelect) {
+              addHop(["OPEN", "CLINICALㅤTRIALS", "SYSTEM"]);
+            }
             break;
 
           case "Regards Citoyens":
-            addHop(["OPEN", "REGARDSCITOYENS", "CSL-JSON"]);
+            if (selections.parliamentsSelect) {
+              addHop(["OPEN", "REGARDSCITOYENS", "CSL-JSON"]);
+            }
             break;
 
           case "ISTEX":
-            addHop(["OPEN", "ISTEX", "ENRICHMENT"]);
+            if (selections.scientometricsSelect) {
+              addHop(["OPEN", "ISTEX", "ENRICHMENT"]);
+            }
             break;
 
           default:
@@ -2901,6 +2926,13 @@ window.addEventListener("load", (event) => {
         }
       }
     });
+
+    if (selections.twitterSelect) {
+      addHop(["USER", "TWITTER", "SYSTEM"]);
+    }
+    if (selections.hypheSelect) {
+      addHop(["OPEN", "HYPHE", "SYSTEM"]);
+    }
 
     const localServicePreviewer = document.getElementById(
       "localservices-basic-previewer"
@@ -2910,13 +2942,13 @@ window.addEventListener("load", (event) => {
 
     localServicePreviewer.append(table);
 
-    for (const service in res.dnsLocalServiceList) {
-      switch (res.dnsLocalServiceList[service].type) {
+    for (const service in availability.dnsLocalServiceList) {
+      switch (availability.dnsLocalServiceList[service].type) {
         case "BNF-SOLR":
           const serv = service.toUpperCase().replace(" ", "-");
 
           addHop([serv, "SYSTEM"]);
-          table.innerHTML += `- ${res.dnsLocalServiceList[service].type} - ${service}`;
+          table.innerHTML += `- ${availability.dnsLocalServiceList[service].type} - ${service}`;
 
           const solrCont = document.createElement("div");
 
@@ -2966,6 +2998,11 @@ window.addEventListener("load", (event) => {
         return false;
       });
     });
+  }
+
+  ipcRenderer.invoke("checkflux", true).then((result) => {
+    availability = JSON.parse(result);
+    updateCascade();
   });
 
   function funcSwitch(e, but) {
