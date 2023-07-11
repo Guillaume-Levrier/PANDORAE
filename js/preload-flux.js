@@ -381,7 +381,7 @@ var db = "";
 
 var ISSNarr = [];
 
-const date =
+const date = () =>
   new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
 
 //========== Tracegraph ==========
@@ -869,6 +869,7 @@ const datasetDisplay = (divId, kind, altkind) => {
         let button = document.createElement("SPAN");
         button.addEventListener("click", (e) => {
           console.log("click");
+          console.log(altkind);
           datasetDetail(
             altkind + "-dataset-preview",
             kind,
@@ -949,6 +950,8 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
   //var datasetDetail = {}; // Create the dataDetail object
   let dataPreview = ""; // Created dataPreview variable
 
+  console.log(prevId, kind, id, buttonId);
+
   if (prevId === null) {
     document.getElementById(kind + "-dataset-preview").innerText =
       "Dataset deleted";
@@ -1013,11 +1016,6 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
             break;
 
           case "manual":
-            console.log(prevId);
-            console.log(document.getElementById(prevId));
-            console.log(buttonId);
-            console.log(document.getElementById(buttonId));
-
           case "csljson":
             dataPreview =
               "<strong>" +
@@ -1105,7 +1103,7 @@ const istexBasicRetriever = (checker) => {
 
       console.log(r);
 
-      let date = new Date();
+      let date = date();
 
       // Display metadata in a div
       let dataBasicPreview = `<br><strong>Query: ${query}</strong><br>
@@ -1187,7 +1185,7 @@ const scopusBasicRetriever = (checker) => {
             return 2;
           }
         };
-        let date = new Date();
+        let date = date();
 
         // Display metadata in a div
         let dataBasicPreview =
@@ -1314,7 +1312,7 @@ const clinicTrialBasicRetriever = () => {
         }
       };
 
-      let date = new Date();
+      let date = date();
 
       // Display metadata in a div
       let dataBasicPreview =
@@ -1401,8 +1399,8 @@ const exportCitedBy = () => {
       });
     });
     var data = {
-      date: date,
-      id: "scopus-citedby_" + date,
+      date: date(),
+      id: "scopus-citedby_" + date(),
       name: "scopus-citedby",
       content: citedby,
     };
@@ -1484,8 +1482,8 @@ const affilRank = () => {
       });
     });
     var data = {
-      date: date,
-      id: "scopus-affilRank_" + date,
+      date: date(),
+      id: "scopus-affilRank_" + date(),
       name: "scopus-affilRank",
       content: affils,
     };
@@ -1805,7 +1803,7 @@ const endpointConnector = (service, target) => {
 
   pandodb[service].add({
     id: target,
-    date: date,
+    date: date(),
     name: target,
     content: target,
   });
@@ -2016,8 +2014,8 @@ const loadHyphe = (corpus, endpoint, pass) => {
             // With the response
             if (success) {
               pandodb.hyphotype.add({
-                id: corpus + date,
-                date: date,
+                id: corpus + date(),
+                date: date(),
                 name: corpus,
                 content: {
                   corpusStatus: corpusStatus,
@@ -2058,11 +2056,11 @@ const twitterCat = () => {
     var classifiedData = JSON.parse(data);
 
     pandodb.open();
-    let id = datasetName + date;
+    let id = datasetName + date();
     pandodb.doxatype
       .add({
         id: id,
-        date: date,
+        date: date(),
         name: datasetName,
         content: classifiedData,
       })
@@ -2096,12 +2094,12 @@ const twitterThread = () => {
   });
 
   lineReader.on("close", () => {
-    let id = datasetName + date;
+    let id = datasetName + date();
 
     pandodb.filotype
       .add({
         id: id,
-        date: date,
+        date: date(),
         name: datasetName,
         content: thread,
       })
@@ -2214,24 +2212,89 @@ const queryBnFSolr = (but) => {
   });
 };
 
-///==== Manual Merging of Authors ====
+//==== Manual Merging of Authors ====
+// This one is a bit trick because it can be quite computationnaly intensive and yet has to stay in FLUX.
+// Maybe some chaeros-led hand curation will have to happen at some point, maybe not.
+// Might be worth it making FLUX bigger for that purpose. (upsize then downsize when over)
 
 const manualMergeAuthors = () => {
-  const dataname = document.getElementById("csljson-dataset-preview").name;
+  const dataname = document.getElementById("manual-dataset-preview").name;
 
-  console.log("starting the manual merging of authors");
+  const mergeCont = document.getElementById("mergeCont");
+  mergeCont.style = "border:1px solid #141414;padding:5px;";
 
   var authors = 0;
 
   // load the existing one if need be
   var authorMergeMap = {};
 
-  const downloadMerged = document.createElement("button");
+  const downloadMerged = document.createElement("div");
+  downloadMerged.id = "dlmerged";
+  downloadMerged.style = "margin:5px";
+  downloadMerged.className = "flux-button";
   downloadMerged.innerText = "Download Merged Authors";
+
+  const saveMerged = document.createElement("div");
+  saveMerged.id = "saveMerged";
+  saveMerged.style = "margin:5px";
+  saveMerged.className = "flux-button";
+  saveMerged.innerText = "Update dataset with merged authors";
+
+  var dataset;
+
+  saveMerged.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    dataset.id = "merged_" + dataset.id;
+    dataset.name = "merged_" + dataset.name;
+
+    dataset.date = date();
+
+    if (!dataset.hasOwnProperty("mergeMap")) {
+      dataset.mergeMap = {};
+    }
+    dataset.mergeMap.authorMergeMap = authorMergeMap;
+
+    pandodb.csljson.add(dataset).then(() => {
+      ipcRenderer.send("coreSignal", "Saved author merging"); // Sending notification to console
+      ipcRenderer.send("console-logs", "Saved author merging " + data.id); // Sending notification to console
+      setTimeout(() => {
+        closeWindow();
+      }, 500);
+    });
+  });
+
+  const uploadMergeMapCont = document.createElement("div");
+  uploadMergeMapCont.style = "margin:5px";
+  const uploadMergeMapLabel = document.createElement("label");
+  const br = document.createElement("br");
+  uploadMergeMapLabel.innerText = "Add an author merge directory";
+  const uploadMergeMapInput = document.createElement("input");
+  uploadMergeMapInput.type = "file";
+  uploadMergeMapInput.id = "authorMergeDirectory";
+  uploadMergeMapInput.name = "authorMergeDirectory";
+  uploadMergeMapInput.accept = "application/json";
+
+  uploadMergeMapInput.addEventListener("change", () => {
+    const curFiles = uploadMergeMapInput.files;
+    const doc = curFiles[0];
+
+    fs.readFile(doc.path, "utf8", (err, data) => {
+      const dataparsed = JSON.parse(data);
+      for (const auth in dataparsed) {
+        authorMergeMap[auth] = dataparsed[auth];
+      }
+      refreshMergeMap();
+    });
+  });
+
+  uploadMergeMapCont.append(uploadMergeMapLabel, br, uploadMergeMapInput);
 
   const mergeMapList = document.createElement("ul");
 
-  document.getElementById("mergeMap").append(downloadMerged, mergeMapList);
+  document
+    .getElementById("mergeMap")
+    .append(uploadMergeMapCont, downloadMerged, saveMerged, mergeMapList);
 
   const dist = (a, b) => {
     if (typeof a === "string" && typeof b === "string") {
@@ -2384,6 +2447,7 @@ const manualMergeAuthors = () => {
           names.append(namecont);
         }
       }
+
       merge.addEventListener("click", (e) => {
         e.preventDefault();
 
@@ -2419,7 +2483,7 @@ const manualMergeAuthors = () => {
     manselect.innerHTML = "";
     const field = document.createElement("fieldset");
     field.style =
-      "display: flex;flex-direction: column;height:180px;overflow-y:scroll;padding:5px;";
+      "display: flex;flex-direction: column;height:180px;overflow-y:scroll;padding:5px;border:1px solid #141414;";
 
     const list = listAuthors(authors);
 
@@ -2490,30 +2554,33 @@ const manualMergeAuthors = () => {
     regenAuthorList();
   };
 
-  console.log("Loading dataset");
-
   pandodb.csljson
     .get(dataname)
     .then((data) => {
-      downloadMerged.addEventListener("click", () =>
+      dataset = data;
+      downloadMerged.addEventListener("click", (e) => {
+        e.preventDefault();
+
         ipcRenderer.invoke(
           "saveDataset",
           { defaultPath: "authors_" + data.name + ".json" },
           JSON.stringify(authorMergeMap)
-        )
-      );
+        );
+      });
 
       authors = sortAuthors(data);
 
-      console.log(authors);
+      if (data.hasOwnProperty("mergeMap")) {
+        if (data.mergeMap.hasOwnProperty("authorMergeMap")) {
+          authorMergeMap = data.mergeMap.authorMergeMap;
+        }
+      }
 
-      document.getElementById("userCsljsonCollections").style.display = "none";
+      document.getElementById("manualCsljsonCollections").style.display =
+        "none";
       document.getElementById("manual-merge-authors").style.display = "none";
 
-      console.log("Starting first refresh merge map");
       refreshMergeMap();
-
-      //;
     })
     .catch((err) => console.log(err));
 };
@@ -2926,7 +2993,7 @@ window.addEventListener("load", (event) => {
         break;
 
       case "datasetDisplay":
-        datasetDisplay(but.arg[0], but.arg[1]);
+        datasetDisplay(but.arg[0], but.arg[1], but.arg[2]);
         break;
 
       case "localUpload":
