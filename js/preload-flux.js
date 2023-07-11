@@ -868,8 +868,6 @@ const datasetDisplay = (divId, kind, altkind) => {
 
         let button = document.createElement("SPAN");
         button.addEventListener("click", (e) => {
-          console.log("click");
-          console.log(altkind);
           datasetDetail(
             altkind + "-dataset-preview",
             kind,
@@ -949,8 +947,6 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
 
   //var datasetDetail = {}; // Create the dataDetail object
   let dataPreview = ""; // Created dataPreview variable
-
-  console.log(prevId, kind, id, buttonId);
 
   if (prevId === null) {
     document.getElementById(kind + "-dataset-preview").innerText =
@@ -1100,8 +1096,6 @@ const istexBasicRetriever = (checker) => {
     .then((res) => res.json())
     .then((r) => {
       // Then, once the response is retrieved
-
-      console.log(r);
 
       let date = date();
 
@@ -1271,7 +1265,6 @@ const biorxivBasicRetriever = () => {
 };
 
 ipcRenderer.on("biorxiv-retrieve", (event, message) => {
-  console.log("got answer", message);
   switch (message.type) {
     case "biorxiv-amount":
       let dataBasicPreview = "Expected amount: " + message.content;
@@ -1288,8 +1281,6 @@ ipcRenderer.on("biorxiv-retrieve", (event, message) => {
 
 //========== clinicalBasicRetriever ==========
 const clinicTrialBasicRetriever = () => {
-  console.log("clintri retrieve");
-
   let ctQuery = document.getElementById("clinical_trialslocalqueryinput").value; // Request Content
 
   ipcRenderer.send(
@@ -1931,8 +1922,6 @@ const hypheCorpusList = (target, prevId) => {
 };
 
 const loadHyphe = (corpus, endpoint, pass) => {
-  console.log(corpus, endpoint, pass);
-
   let password = false;
   if (pass) {
     password = document.getElementById(corpus + "pass").value;
@@ -2218,15 +2207,14 @@ const queryBnFSolr = (but) => {
 // Might be worth it making FLUX bigger for that purpose. (upsize then downsize when over)
 
 const manualMergeAuthors = () => {
+  // find the dataset name
   const dataname = document.getElementById("manual-dataset-preview").name;
 
+  // DOM interface (buttons)
   const mergeCont = document.getElementById("mergeCont");
   mergeCont.style = "border:1px solid #141414;padding:5px;";
 
   var authors = 0;
-
-  // load the existing one if need be
-  var authorMergeMap = {};
 
   const downloadMerged = document.createElement("div");
   downloadMerged.id = "dlmerged";
@@ -2240,12 +2228,54 @@ const manualMergeAuthors = () => {
   saveMerged.className = "flux-button";
   saveMerged.innerText = "Update dataset with merged authors";
 
+  // merging data
+  var authorMergeMap = {};
+
+  // this function is for saving only;
+  //rebuild the author merge map when saving using the longest name
+  //and the attribute this to all articles;
+
+  const updateArticles = (dataset, authorMergeMap) => {
+    const completeMap = {};
+    // step 1 - rebuild merge map;
+    for (const author in authorMergeMap) {
+      // list all possibilities
+      const thisAuthor = authorMergeMap[author];
+      const thisAuthorList = [author];
+      for (const alias in thisAuthor) {
+        thisAuthorList.push(alias);
+      }
+      const sortedList = thisAuthorList.sort((a, b) => b.length - a.length);
+      const mainAlias = sortedList[0];
+      sortedList.forEach((auth) => (completeMap[auth] = mainAlias));
+    }
+    console.log(completeMap);
+    // step 2 - attribute to articles
+    dataset.content.forEach((article) => {
+      article.creators.forEach((author) => {
+        const concat = author.lastName + " | " + author.firstName;
+        if (
+          completeMap.hasOwnProperty(concat) &&
+          authors[completeMap[concat]]
+        ) {
+          author.lastName = authors[completeMap[concat]].lastName;
+
+          author.firstName = authors[completeMap[concat]].firstName;
+        }
+        delete author.concat;
+        delete author.alias;
+        delete author.artlist;
+        delete author.distances;
+      });
+    });
+  };
+
   var dataset;
 
   saveMerged.addEventListener("click", (e) => {
     e.preventDefault();
 
-    dataset.id = "merged_" + dataset.id;
+    dataset.id = "merged_" + dataset.name + date();
     dataset.name = "merged_" + dataset.name;
 
     dataset.date = date();
@@ -2255,13 +2285,19 @@ const manualMergeAuthors = () => {
     }
     dataset.mergeMap.authorMergeMap = authorMergeMap;
 
-    pandodb.csljson.add(dataset).then(() => {
-      ipcRenderer.send("coreSignal", "Saved author merging"); // Sending notification to console
-      ipcRenderer.send("console-logs", "Saved author merging " + data.id); // Sending notification to console
-      setTimeout(() => {
-        closeWindow();
-      }, 500);
-    });
+    updateArticles(dataset, authorMergeMap);
+
+    pandodb.csljson
+      .add(dataset)
+      .then(() => {
+        ipcRenderer.send("coreSignal", "Saved author merging"); // Sending notification to console
+        ipcRenderer.send("console-logs", "Saved author merging " + dataset.id); // Sending notification to console
+        setTimeout(() => {
+          console.log("closing window");
+          closeWindow();
+        }, 500);
+      })
+      .catch((err) => console.log(err));
   });
 
   const uploadMergeMapCont = document.createElement("div");
