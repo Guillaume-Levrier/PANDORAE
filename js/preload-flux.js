@@ -373,6 +373,7 @@ const userDataPath = ipcRenderer.sendSync("remote", "userDataPath"); // Find use
 const tg = require("@hownetworks/tracegraph");
 const fs = require("fs"); // FileSystem reads/writes files and directories
 const d3 = require("d3");
+const { distance, closest } = require("fastest-levenshtein");
 
 var CM = CMT["EN"];
 
@@ -845,9 +846,18 @@ const fluxButtonAction = (buttonID, success, successPhrase, errorPhrase) => {
 //========== datasetDisplay ==========
 // datasetDisplay shows the datasets (usually JSON or CSV files) available in the relevant /datasets/ subdirectory.
 
-const datasetDisplay = (divId, kind) => {
+const datasetDisplay = (divId, kind, altkind) => {
   try {
     // Try the following block
+
+    // The altkind thing is a hack. Normally, 1 flux tab equals to 1 db.
+    // With manual, we find ourselves editing/updating csl-json data.
+    // Might walk this one back in the future, seems the lesser of two
+    // evils right now.
+
+    if (!altkind) {
+      altkind = kind;
+    }
 
     let list = document.createElement("UL");
 
@@ -858,11 +868,12 @@ const datasetDisplay = (divId, kind) => {
 
         let button = document.createElement("SPAN");
         button.addEventListener("click", (e) => {
+          console.log("click");
           datasetDetail(
-            kind + "-dataset-preview",
+            altkind + "-dataset-preview",
             kind,
             file.id,
-            kind + "-dataset-buttons"
+            altkind + "-dataset-buttons"
           );
         });
         button.innerText = file.name;
@@ -903,6 +914,7 @@ const datasetDisplay = (divId, kind) => {
       }
     });
   } catch (err) {
+    console.log(err);
     document.getElementById(divId).innerHTML = err; // Display error in the result div
   }
 };
@@ -946,7 +958,6 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
   } else {
     try {
       pandodb[kind].get(id).then((doc) => {
-        console.log(doc);
         switch (kind) {
           case "webofscience":
             dataPreview = `<strong> ${doc.name} </strong>
@@ -1000,6 +1011,12 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
             convertButton.name = doc.id;
             convertButton.dataset.corpusType = doc.content.type;
             break;
+
+          case "manual":
+            console.log(prevId);
+            console.log(document.getElementById(prevId));
+            console.log(buttonId);
+            console.log(document.getElementById(buttonId));
 
           case "csljson":
             dataPreview =
@@ -2197,6 +2214,310 @@ const queryBnFSolr = (but) => {
   });
 };
 
+///==== Manual Merging of Authors ====
+
+const manualMergeAuthors = () => {
+  const dataname = document.getElementById("csljson-dataset-preview").name;
+
+  console.log("starting the manual merging of authors");
+
+  var authors = 0;
+
+  // load the existing one if need be
+  var authorMergeMap = {};
+
+  const downloadMerged = document.createElement("button");
+  downloadMerged.innerText = "Download Merged Authors";
+
+  const mergeMapList = document.createElement("ul");
+
+  document.getElementById("mergeMap").append(downloadMerged, mergeMapList);
+
+  const dist = (a, b) => {
+    if (typeof a === "string" && typeof b === "string") {
+      return distance(a.toLowerCase(), b.toLowerCase());
+    } else {
+      return 0;
+    }
+  };
+
+  function sortAuthors(data) {
+    var nameMap = {};
+
+    data.content.forEach((article) => {
+      article.creators.forEach((author) => {
+        if (author.lastName) {
+          if (!author.firstName) {
+            author.firstName = "";
+          }
+
+          const concat = author.lastName + " | " + author.firstName;
+          author.concat = concat;
+          author.alias = [
+            { concat, lastName: author.lastName, firstName: author.firstName },
+          ];
+
+          if (!nameMap.hasOwnProperty(concat)) {
+            author.artlist = [];
+            nameMap[concat] = author;
+          }
+          nameMap[concat].artlist.push(article.DOI);
+        }
+      });
+    });
+
+    const nameList = [];
+
+    for (const nm in nameMap) {
+      nameList.push(nameMap[nm]);
+    }
+
+    nameMap = {};
+
+    nameList.forEach((author) => {
+      const distances = [];
+      nameList.forEach((other) => {
+        const score =
+          dist(author.lastName, other.lastName) +
+          Math.ceil(dist(author.firstName, other.firstName) / 3);
+
+        distances.push({ name: other.concat, score });
+      });
+
+      const sorted = distances.sort((a, b) => a.score - b.score);
+
+      const limitedlist = [];
+
+      let len = 10;
+
+      if (nameList.length <= 50) {
+        len = nameList.length;
+      } else {
+        if (author.lastName.length < 6) {
+          len = 250;
+        } else {
+          len = 50;
+        }
+      }
+
+      for (let i = 0; i < len; i++) {
+        if (sorted[i].score < 10) {
+          limitedlist.push(sorted[i]);
+        }
+      }
+
+      author.distances = limitedlist;
+      nameMap[author.concat] = author;
+    });
+
+    return nameMap;
+  }
+
+  const listAuthors = (nameMap) => {
+    const list = [];
+    for (const n in nameMap) {
+      const p = nameMap[n];
+      list.push({ name: p.concat, articles: p.artlist.length });
+    }
+
+    return list.sort((a, b) => b.articles - a.articles);
+  };
+
+  function displayAuthor(auth, distanced) {
+    const cont = document.createElement("div");
+
+    const merge = document.createElement("button");
+    merge.innerText = "Merge";
+
+    if (auth) {
+      const name = auth.name;
+
+      cont.style =
+        "height:500px;overflow-y:scroll;border : 1px solid #141414;padding:5px;font-family:sans-serif";
+      const title = document.createElement("h3");
+      title.innerText = auth.concat;
+      const articles = document.createElement("ul");
+      articles.style = "font-family:monospace;font-size:10px";
+      for (let i = 0; i < 5; ++i) {
+        const art = auth.artlist[i];
+        if (art) {
+          const article = document.createElement("li");
+          article.innerHTML = `<a target="_blank" href="https://doi.org/${art}">${art}</a>`;
+          articles.append(article);
+        }
+      }
+
+      const names = document.createElement("div");
+
+      for (let i = 0; i < auth.distances.length; ++i) {
+        const p = auth.distances[i];
+        if (p.score > 0) {
+          const namecont = document.createElement("div");
+          namecont.style.display = "flex";
+          const namebox = document.createElement("input");
+          namebox.type = "checkbox";
+          namebox.className = "checkbox";
+          namebox.id = p.name;
+          namebox.name = p.name;
+
+          const nameLabel = document.createElement("label");
+          nameLabel.for = p.name;
+          nameLabel.style =
+            "display: flex;width: 300px;justify-content: space-between;padding:3px";
+
+          let refs = "";
+
+          if (distanced[p.name]) {
+            const autharticles = distanced[p.name].artlist;
+
+            for (let j = 0; j < 5; ++j) {
+              if (autharticles[j]) {
+                refs += `[<a target="_blank" href="https://doi.org/${
+                  autharticles[j]
+                }">${j + 1}</a>] `;
+              }
+            }
+          }
+          nameLabel.innerHTML = `<div style="display:flex">${p.name} &nbsp;<div style="font-size:10px"> ${refs}</div></div><div> ${p.score}</div>`;
+
+          namecont.append(namebox, nameLabel);
+          names.append(namecont);
+        }
+      }
+      merge.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        const res = {};
+
+        // do not add this because this will be the main alias, and
+        // it will have to be kept in the main auth directory, the
+        // other ones will be deleted
+        //res[auth.concat] = 1;
+        const boxes = document.getElementsByClassName("checkbox");
+
+        for (let i = 0; i < boxes.length; ++i) {
+          if (boxes[i].checked) {
+            res[boxes[i].id] = 1;
+          }
+        }
+        authorMergeMap[auth.concat] = res;
+
+        cont.innerHTML = "";
+
+        refreshMergeMap();
+      });
+
+      cont.append(title, articles, merge, names);
+    } else {
+      cont.innerText = "Choose an author to start";
+    }
+    return cont;
+  }
+
+  function regenAuthorList() {
+    const manselect = document.getElementById("manualSelector");
+    manselect.innerHTML = "";
+    const field = document.createElement("fieldset");
+    field.style =
+      "display: flex;flex-direction: column;height:180px;overflow-y:scroll;padding:5px;";
+
+    const list = listAuthors(authors);
+
+    list.forEach((auth) => {
+      try {
+        const div = document.createElement("div");
+        div.style.display = "inline-flex";
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = "author";
+
+        const thisAuthor = authors[auth.name];
+
+        input.addEventListener("click", () => {
+          const details = document.getElementById("detailSelector");
+          details.innerHTML = "";
+
+          details.append(displayAuthor(thisAuthor, authors));
+        });
+
+        const color = authorMergeMap.hasOwnProperty(auth.name)
+          ? "blue"
+          : "black";
+
+        const label = document.createElement("label");
+        label.style = `display: inline-flex;justify-content: space-between;width: 100%;flex-direction: row;color:${color}`;
+        label.innerHTML = `<div>${auth.name}</div><div>${auth.articles}</div>`;
+
+        div.append(input, label);
+        field.append(div);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
+    manselect.append(field);
+  }
+
+  const refreshMergeMap = () => {
+    mergeMapList.innerHTML = "";
+
+    for (const name in authorMergeMap) {
+      const point = document.createElement("li");
+      point.innerText = name + " - aliases: ";
+
+      // getting slightly mad over here
+
+      for (const d in authorMergeMap[name]) {
+        point.innerText += " [" + d + "] ";
+
+        if (authors.hasOwnProperty(d)) {
+          authors[name].alias.push({
+            concat: authors[d].concat,
+            firstName: authors[d].firstName,
+            lastName: authors[d].lastName,
+          });
+          authors[name].artlist = [
+            ...authors[name].artlist,
+            ...authors[d].artlist,
+          ];
+          delete authors[d];
+        }
+      }
+
+      mergeMapList.append(point);
+    }
+
+    regenAuthorList();
+  };
+
+  console.log("Loading dataset");
+
+  pandodb.csljson
+    .get(dataname)
+    .then((data) => {
+      downloadMerged.addEventListener("click", () =>
+        ipcRenderer.invoke(
+          "saveDataset",
+          { defaultPath: "authors_" + data.name + ".json" },
+          JSON.stringify(authorMergeMap)
+        )
+      );
+
+      authors = sortAuthors(data);
+
+      console.log(authors);
+
+      document.getElementById("userCsljsonCollections").style.display = "none";
+      document.getElementById("manual-merge-authors").style.display = "none";
+
+      console.log("Starting first refresh merge map");
+      refreshMergeMap();
+
+      //;
+    })
+    .catch((err) => console.log(err));
+};
+
 //===== Clarivate Web of Science ======
 
 var wosReq;
@@ -2318,6 +2639,7 @@ const downloadData = () => {
 
 window.addEventListener("load", (event) => {
   var buttonList = [
+    { id: "manual-merge-authors", func: "manualMergeAuthors" },
     { id: "wos-basic-query", func: "wosBasicRetriever" },
     {
       id: "wos-query",
@@ -2400,6 +2722,11 @@ window.addEventListener("load", (event) => {
       id: "cslcolret",
       func: "datasetDisplay",
       arg: ["userCsljsonCollections", "csljson"],
+    },
+    {
+      id: "mancolret",
+      func: "datasetDisplay",
+      arg: ["manualCsljsonCollections", "csljson", "manual"],
     },
     {
       id: "zoteroCollecBuild",
@@ -2551,7 +2878,7 @@ window.addEventListener("load", (event) => {
 
         var id = document.getElementById("system-dataset-preview").name;
 
-        pandodb.system.get(id).then((data) => console.log(data));
+        //pandodb.system.get(id).then((data) => console.log(data));
 
         break;
 
@@ -2644,6 +2971,10 @@ window.addEventListener("load", (event) => {
 
       case "affilRank":
         affilRank();
+        break;
+
+      case "manualMergeAuthors":
+        manualMergeAuthors();
         break;
 
       case "downloadData":
