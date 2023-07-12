@@ -229,6 +229,12 @@ const fluxDisplay = (tab) => {
 
   let tabs = document.getElementsByClassName("fluxTabs"); // Get all content DIVs by their common class
 
+  if (tab === "flux-manager") {
+    document.getElementById("selectCascade").style.display = "block";
+  } else {
+    document.getElementById("selectCascade").style.display = "none";
+  }
+
   for (let i = 0; i < tabs.length; i++) {
     // Loop on DIVs
     tabs[i].style.display = "none"; // Hide the DIVs
