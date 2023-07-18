@@ -11,6 +11,7 @@
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
+    "update": "git pull && npm i",
     "start": "electron .",
     "build:all": "cross-env NODE_ENV=production node bin/package.js",
     "package": "cd release/ && ls | while read d; do cd $d; rm -f *.zip; zip -r PANDORAE-$d.zip *; cd ..; done && mv */*.zip ."
