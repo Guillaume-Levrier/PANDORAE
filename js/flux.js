@@ -1814,23 +1814,37 @@ const queryBnFSolr = (but) => {
     `bnf-solr-query-${but.serv}`
   ).value;
 
+
+  console.log("ping")
+
+  // Ici, ne prendre que la dernière capture connue
+
   const query =
     "http://" +
     but.args.url +
     ":" +
     but.args.port +
     "/solr/netarchivebuilder/select?q=" +
-    queryContent;
+    queryContent +
+    "&rows=0&sort=crawl_date%20desc&group=true&group.field=url&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0&rows=0&sort=score+desc";
+
+  // 
 
   d3.json(query).then((res) => {
+    console.log(res)
+    console.log("pong")
+
     var previewer = document.getElementById(
       "bnf-solr-basic-previewer-" + but.serv
     );
-    previewer.innerHTML = `<br><p>  ${res.response.numFound} documents found`;
 
-    solrbnfcount[queryContent] = { count: res.response.numFound, but };
+    const numFound = res.grouped.url.matches;
 
-    if (res.response.numFound > 0) {
+    previewer.innerHTML = `<br><p>  ${numFound} documents found`;
+
+    solrbnfcount[queryContent] = { count: numFound, but };
+
+    if (numFound > 0) {
       document.getElementById("bnf-solr-fullquery-" + but.serv).style.display =
         "flex";
     }
@@ -2594,8 +2608,10 @@ window.addEventListener("load", (event) => {
     localServicePreviewer.append(table);
 
     for (const service in availability.dnsLocalServiceList) {
+
       switch (availability.dnsLocalServiceList[service].type) {
         case "BNF-SOLR":
+
           const serv = service.toUpperCase().replace(" ", "-");
 
           if (selections.localSelect) {
@@ -2660,8 +2676,10 @@ window.addEventListener("load", (event) => {
   });
 
   function funcSwitch(e, but) {
+    console.log("bliblboub")
     switch (but.func) {
       case "queryBnFSolr":
+        console.log("pang")
         queryBnFSolr(but);
         break;
       case "addLocalService":
