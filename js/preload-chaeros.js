@@ -1861,25 +1861,33 @@ const solrMetaExplorer = (req, meta) => {
 
   // Great thing that no one ever invented posting arguments as JSON objects
   const url = (req, start, end) =>
-    `http://
-    ${meta.but.args.url}:${meta.but.args.port}/
-    solr/netarchivebuilder/
-    select?q=${req}
-    &start=${start}
-    &rows=${end - start}
-    &sort=crawl_date%20desc
-    &group=true
-    &group.field=url
-    &group.limit=1
-    &group.sort=score+desc%2Ccrawl_date+desc
-    &start=0
-    &rows=0
-    &sort=score+desc`;
+    "http://" +
+    meta.but.args.url + ":" + meta.but.args.port +
+    "/solr/netarchivebuilder/" +
+    "select?q=" + req +
+    "&start=" + start +
+    "&rows=" + (end - start) +
+    "&sort=crawl_date%20desc" +
+    "&group=true" +
+    "&group.field=url" +
+    "&group.limit=1" +
+    "&group.sort=score+desc%2Ccrawl_date+desc" +
+    "&start=0" +
+    "&rows=0" +
+    "&sort=score+desc";
 
   const urlArray = [];
 
+  //console.log(url(req, 0, 200))
+
+  //urlArray.push(fetch(url(req, 0, 200)).then((r) => r.json()))
+
   // make smaller packages (not necessary since supposed to be local)
   // but a good practice
+
+  // sauf qu'en réalité il faudrait savoir combien de groups au total désormais.
+  // A voir des demain.
+
   if (meta.count > 200) {
     for (let i = 0; i < meta.count / 200 + 1; i++) {
       urlArray.push(
@@ -1894,11 +1902,21 @@ const solrMetaExplorer = (req, meta) => {
   Promise.all(urlArray).then((res) => {
     // rebuild an array with all the responses
 
+    console.log(res)
+
     var totalResponse = [];
 
     res.forEach(
-      (d) => (totalResponse = [...totalResponse, ...d.response.docs])
-    );
+      (d) => {
+
+        const docs = []
+
+        d.grouped.url.groups.forEach(g => docs.push(g.doclist.docs[0]))
+
+        totalResponse = [...totalResponse, ...docs]
+
+      })
+
 
     const dataset = {
       data: {},
@@ -1906,6 +1924,8 @@ const solrMetaExplorer = (req, meta) => {
       key: req,
       name: req,
     };
+
+    console.log(dataset)
 
     // dataWriter(["system"], importName, [dataset]);
 
@@ -1920,12 +1940,20 @@ const solrMetaExplorer = (req, meta) => {
 
     totalResponse.forEach((d) => cslData.push(bnfRemap(d)));
 
+
+
+
+
     const cslConvertedDataset = {
       id: importName,
       date: JSON.stringify(new Date()),
       name: importName,
       content: cslData,
     };
+
+    console.log("got there")
+
+    console.log(cslConvertedDataset)
 
     pandodb.csljson.add(cslConvertedDataset).then(() => {
       ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
@@ -1938,7 +1966,9 @@ const solrMetaExplorer = (req, meta) => {
       setTimeout(() => {
         ipcRenderer.send("win-destroy", winId);
       }, 500);
-    });
+    }).catch(e => { console.log(e) });
+
+
   });
 };
 
@@ -2302,6 +2332,7 @@ const bnfRemap = (doc) => {
   remappedDocument.shortTitle = JSON.stringify({
     id: doc.id,
     collections: doc.collections,
+    links: doc.links
   });
 
   return remappedDocument;

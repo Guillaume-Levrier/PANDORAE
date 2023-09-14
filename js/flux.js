@@ -1826,7 +1826,11 @@ const queryBnFSolr = (but) => {
     but.args.port +
     "/solr/netarchivebuilder/select?q=" +
     queryContent +
-    "&rows=0&sort=crawl_date%20desc&group=true&group.field=url&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0&rows=0&sort=score+desc";
+    "&rows=0&sort=crawl_date%20desc&group=true&group.field=url" +
+    "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
+    "&rows=0&sort=score+desc&group.ngroups=true";
+
+  console.log(query)
 
   // 
 
@@ -1838,7 +1842,7 @@ const queryBnFSolr = (but) => {
       "bnf-solr-basic-previewer-" + but.serv
     );
 
-    const numFound = res.grouped.url.matches;
+    const numFound = res.grouped.url.ngroups;
 
     previewer.innerHTML = `<br><p>  ${numFound} documents found`;
 
