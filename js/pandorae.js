@@ -671,9 +671,9 @@ const selectOption = (type, id) => {
     ipcRenderer.send(
       "console-logs",
       CM.console.starting[0] +
-        type +
-        CM.console.starting[1] +
-        JSON.stringify(id)
+      type +
+      CM.console.starting[1] +
+      JSON.stringify(id)
     );
   }
 };
@@ -730,7 +730,7 @@ const serialize = (svg) => {
   );
   ipcRenderer
     .invoke("saveSVG", { defaultPath: datasetName + ".svg" }, string)
-    .then((res) => {});
+    .then((res) => { });
 };
 
 const exportToHTML = () => {
@@ -803,6 +803,7 @@ const exportToHTML = () => {
                         "chronotype",
                         "geotype",
                         "anthropotype",
+                        "archotype",
                         "gazouillotype",
                         "hyphotype",
                         "doxatype",
@@ -938,10 +939,10 @@ const exportToHTML = () => {
                                   HTMLFILE.write(typesJS);
                                   HTMLFILE.write(
                                     "typeSwitch(" +
-                                      JSON.stringify(currentType.type) +
-                                      "," +
-                                      JSON.stringify(currentType.id) +
-                                      ");"
+                                    JSON.stringify(currentType.type) +
+                                    "," +
+                                    JSON.stringify(currentType.id) +
+                                    ");"
                                   );
                                   HTMLFILE.write(
                                     'document.getElementById("field").style.zIndex = "-10";'
@@ -965,10 +966,10 @@ const exportToHTML = () => {
                         HTMLFILE.write(typesJS);
                         HTMLFILE.write(
                           "typeSwitch(" +
-                            JSON.stringify(currentType.type) +
-                            "," +
-                            JSON.stringify(currentType.id) +
-                            ");"
+                          JSON.stringify(currentType.type) +
+                          "," +
+                          JSON.stringify(currentType.id) +
+                          ");"
                         );
                         HTMLFILE.write(
                           'document.getElementById("field").style.zIndex = "-10";'
@@ -1142,6 +1143,7 @@ const categoryLoader = (cat) => {
           "chronotype",
           "geotype",
           "anthropotype",
+          "archotype",
           "gazouillotype",
           "hyphotype",
           "doxatype",
@@ -1396,6 +1398,12 @@ const cmdinput = (input) => {
         toggleMenu();
         categoryLoader("type");
         mainDisplay("anthropotype");
+        break;
+
+      case "archotype":
+        toggleMenu();
+        categoryLoader("type");
+        mainDisplay("archotype");
         break;
 
       case "gazouillotype":
