@@ -188,6 +188,31 @@ pandodb.version(9).stores({
   istex: structureV1,
 });
 
+pandodb.version(10).stores({
+  fieldotype: structureV1,
+  filotype: structureV1,
+  doxatype: structureV1,
+  hyphotype: structureV1,
+  enriched: structureV1,
+  scopus: structureV1,
+  webofscience: structureV1,
+  csljson: structureV1,
+  zotero: structureV1,
+  twitter: structureV1,
+  archotype: structureV1,
+  anthropotype: structureV1,
+  chronotype: structureV1,
+  geotype: structureV1,
+  pharmacotype: structureV1,
+  publicdebate: structureV1,
+  gazouillotype: structureV1,
+  hyphe: structureV1,
+  system: structureV1,
+  slider: structureV1,
+  regards: structureV1,
+  istex: structureV1,
+});
+
 pandodb.open();
 const CMT = {
   EN: {
@@ -2715,6 +2740,243 @@ const multiFormat = (date) =>
     : d3.timeYear(date) < date
     ? formatMonth
     : formatYear)(date);
+
+// ========= ARCHOTYPE =========
+const archotype = (id) => {
+  // When called, draw the archotype
+
+  //========== SVG VIEW =============
+  const svg = d3.select(xtype).append("svg").attr("id", "xtypeSVG"); // Creating the SVG DOM node
+
+  svg.attr("width", width).attr("height", height); // Attributing width and height to svg
+
+  const bgrect = svg
+    .append("rect")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", width)
+    .attr("height", height)
+    .attr("fill", "white");
+
+  const view = svg
+    .append("g") // Appending a group to SVG
+    .attr("id", "view"); // CSS viewfinder properties
+
+  //zoom extent
+  zoom
+    .scaleExtent([-Infinity, Infinity]) // To which extent do we allow to zoom forward or zoom back
+    .translateExtent([
+      [-Infinity, -Infinity],
+      [Infinity, Infinity],
+    ])
+    .on("zoom", ({ transform }, d) => {
+      zoomed(transform);
+    });
+
+  var criteriaList = [];
+  var currentCriteria = [];
+
+  //======== DATA CALL & SORT =========
+  pandodb.archotype
+    .get(id)
+    .then((datajson) => {
+      dataDownload(datajson);
+
+      const getPosition = (string, subString, index) =>
+        string.split(subString, index).join(subString).length;
+
+      const documents = data.content;
+
+      var nodes = [];
+      var links = [];
+
+      const nodemap = {};
+
+      const domainMap = {};
+      // attention ici, divisé par 10
+
+      const divider = 1;
+
+      for (let i = 0; i < documents.length / divider; ++i) {
+        const d = documents[i];
+
+        const elem = {
+          id: d.URL.substring(d.URL.lastIndexOf("http")),
+          title: d.title,
+        };
+
+        if (!domainMap.hasOwnProperty(d["container-title"])) {
+          nodes.push({ id: d["container-title"], name: d["container-title"] });
+        }
+
+        links.push({
+          source: elem.id,
+          target: d["container-title"],
+          color: "blue",
+        });
+
+        nodes.push(elem);
+        nodemap[elem.id] = 1;
+        domainMap[d["container-title"]] = 1;
+      }
+      for (let i = 0; i < documents.length / divider; ++i) {
+        const d = documents[i];
+        const thislinks = JSON.parse(d["title-short"]).links;
+        if (thislinks) {
+          const source = d.URL.substring(d.URL.lastIndexOf("http"));
+
+          const sourceDomain = source.substring(
+            11,
+            getPosition(source, "/", 3)
+          );
+
+          if (nodemap.hasOwnProperty(source)) {
+            thislinks.forEach((target) => {
+              const domain = target.substring(7, getPosition(target, "/", 3));
+
+              if (nodemap.hasOwnProperty(target)) {
+                links.push({ source, target, color: "darkred" });
+              } else if (
+                domainMap.hasOwnProperty(domain) &&
+                domain != sourceDomain &&
+                domain.indexOf(sourceDomain) === -1 &&
+                sourceDomain.indexOf(domain) === -1
+              ) {
+                links.push({ source, target: domain, color: "orange" });
+              }
+            });
+          }
+        }
+      }
+
+      let domainCount = Object.keys(domainMap).length;
+
+      const g = svg.append("g");
+
+      // Some of the code below is directly taken from one of Mike Bostocks'
+      // observable notebooks, comments included.
+
+      // The force simulation mutates links and nodes, so create a copy
+      // so that re-evaluating this cell produces the same result.
+      links = links.map((d) => ({ ...d }));
+      nodes = nodes.map((d) => ({ ...d }));
+
+      console.log(nodes);
+      console.log(links);
+
+      // Create a simulation with several forces.
+      const simulation = d3
+        .forceSimulation(nodes)
+        //.alphaDecay(0.4)
+        .force(
+          "link",
+          d3.forceLink(links).id((d) => d.id)
+        )
+        .force("charge", d3.forceManyBody(-2000))
+        .force("center", d3.forceCenter(0))
+        .on("tick", ticked);
+
+      // Create the SVG container.
+
+      // Add a line for each link, and a circle for each node.
+      const link = g
+        .append("g")
+        .attr("stroke", "#999")
+        .attr("stroke-opacity", 0.6)
+        .selectAll()
+        .data(links)
+        .join("line")
+        .attr("stroke-width", 3)
+        .attr("stroke", (d) => d.color);
+
+      const node = g
+        .append("g")
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 1.5)
+        .selectAll()
+        .data(nodes)
+        .join("circle")
+        .attr("r", 5)
+        .attr("fill", "blue");
+
+      node.append("title").text((d) => d.id);
+
+      // Add a drag behavior.
+
+      // Set the position attributes of links and nodes each time the simulation ticks.
+      function ticked() {
+        link
+          .attr("x1", (d) => d.source.x)
+          .attr("y1", (d) => d.source.y)
+          .attr("x2", (d) => d.target.x)
+          .attr("y2", (d) => d.target.y);
+
+        node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+      }
+
+      node.call(
+        d3
+          .drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended)
+      );
+
+      // Reheat the simulation when drag starts, and fix the subject position.
+      function dragstarted(event) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        event.subject.fx = event.subject.x;
+        event.subject.fy = event.subject.y;
+      }
+
+      // Update the subject (dragged node) position during drag.
+      function dragged(event) {
+        event.subject.fx = event.x;
+        event.subject.fy = event.y;
+      }
+
+      // Restore the target alpha so the simulation cools after dragging ends.
+      // Unfix the subject position now that it’s no longer being dragged.
+      function dragended(event) {
+        if (!event.active) simulation.alphaTarget(0);
+        event.subject.fx = null;
+        event.subject.fy = null;
+      }
+
+      svg.call(
+        d3
+          .zoom()
+          .extent([
+            [0, 0],
+            [width, height],
+          ])
+          .scaleExtent([-999, 10])
+          .on("zoom", zoomed)
+      );
+
+      function zoomed({ transform }) {
+        g.attr("transform", transform);
+      }
+
+      loadType();
+    })
+    .catch((error) => {
+      field.value = "error - invalid dataset";
+      ipcRenderer.send(
+        "console-logs",
+        "archotype error: dataset " + id + " is invalid."
+      );
+    });
+
+  //======== ZOOM & RESCALE ===========
+  svg.call(zoom).on("dblclick.zoom", null);
+
+  zoomed = (thatZoom, transTime) => {
+    view.attr("transform", thatZoom);
+  };
+
+  ipcRenderer.send("console-logs", "Starting anthropotype");
+};
 
 // ========= ANTHROPOTYPE =========
 const anthropotype = (id) => {
