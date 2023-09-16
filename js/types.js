@@ -776,18 +776,22 @@ const archotype = (id) => {
 
       if (resolver) {
         node.style("cursor", d => d.domain ? "move" : "pointer")
+
         node.on("click", (e, d) => (d.domain) ? 0 :
           fetch(
-            `http://${resolver}/solr/netarchivebuilder/select?q=url:"${d.id}"`
+            `http://${resolver}/solr/netarchivebuilder/select?q=url:${JSON.stringify(d.id)}`
           )
             .then((r) => r.json())
             .then((r) => {
+
+              console.log(`http://${resolver}/solr/netarchivebuilder/select?q=url:${JSON.stringify(d.id)}`)
               console.log(r)
+
               if (r.response.numFound > 0) {
 
                 var content = "";
 
-                const doc = r.response.docs[0]
+                const doc = r.response.docs[r.response.docs.length - 1]
 
                 for (const key in doc) {
                   content += `<div style="font-weight:bold">${key}</div><div>${doc[key]}</div><br>`
