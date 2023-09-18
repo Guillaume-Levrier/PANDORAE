@@ -2933,18 +2933,15 @@ const archotype = (id) => {
       if (resolver) {
         node.style("cursor", d => d.domain ? "move" : "pointer")
 
-
-
-
         node.on("click", (e, d) => (d.domain) ? 0 :
           fetch(
-            `http://${resolver}/solr/netarchivebuilder/select?q=url:${JSON.stringify(d.id)}`
+            `http://${resolver}/solr/netarchivebuilder/select?q=url:${JSON.stringify(d.id.replaceAll("&", "%26"))}`
           )
             .then((r) => r.json())
             .then((r) => {
 
-              console.log(`http://${resolver}/solr/netarchivebuilder/select?q=url:${JSON.stringify(d.id)}`)
-              console.log(r)
+              // console.log(`http://${resolver}/solr/netarchivebuilder/select?q=url:${JSON.stringify(d.id.replaceAll("&", "%26"))}`)
+              // console.log(r)
 
               if (r.response.numFound > 0) {
 
