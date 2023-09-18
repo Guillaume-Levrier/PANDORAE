@@ -2,7 +2,11 @@ const electron = require("electron");
 const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } =
   electron;
 const fs = require("fs");
-const userDataPath = app.getPath("userData");
+//const userDataPath = app.getPath("userData");
+
+// hack to make this truly portable
+const userDataPath = app.getPath("documents");
+
 const keytar = require("keytar"); // Load keytar to manage user API keys
 const dns = require("dns");
 
@@ -18,17 +22,6 @@ let mainWindow;
 
 const basePath = app.getAppPath();
 
-//FileSystem
-const userDataDirTree = (path, dirTree) => {
-  dirTree.forEach((d) => {
-    if (!fs.existsSync(path + d)) {
-      fs.mkdirSync(path + d, { recursive: true }, (err) => {
-        if (err) throw err;
-      });
-    }
-  });
-};
-
 let userID;
 
 const createUserId = () => {
@@ -40,9 +33,9 @@ const createUserId = () => {
     locale: "EN",
   };
 
-  if (!fs.existsSync(userDataPath + "/userID/user-id.json")) {
+  if (!fs.existsSync(userDataPath + "/PANDORAE/userID/user-id.json")) {
     fs.writeFileSync(
-      userDataPath + "/userID/user-id.json",
+      userDataPath + "/PANDORAE/userID/user-id.json",
       JSON.stringify(userID),
       "utf8",
       (err) => {
@@ -56,7 +49,7 @@ const createThemes = () => {
   // if (!fs.existsSync(userDataPath + "/themes/themes.json")) {
   fs.copyFileSync(
     basePath + "/json/themes.json",
-    userDataPath + "/themes/themes.json"
+    userDataPath + "/PANDORAE/themes/themes.json"
   );
   //}
 };
@@ -89,17 +82,39 @@ function createWindow() {
   });
 }
 
+//FileSystem
+const userDataDirTree = (path, dirTree) =>
+  dirTree.forEach((d) => {
+    if (!fs.existsSync(path + d)) {
+      fs.mkdirSync(path + d, { recursive: true }, (err) => {
+        if (err) throw err;
+      });
+    }
+  });
+
+var themeData;
+
 app.on("ready", () => {
   userDataDirTree(userDataPath, [
-    "/logs",
-    "/userID",
-    "/themes",
-    "/flatDatasets",
+    "/PANDORAE/logs",
+    "/PANDORAE/userID",
+    "/PANDORAE/themes",
+    "/PANDORAE/flatDatasets",
   ]);
+
   createUserId();
   createThemes();
   createWindow();
   createAudioManager();
+
+  themeData = fs.readFileSync(
+    userDataPath + "/PANDORAE/themes/themes.json",
+    "utf8",
+    (err, data) => JSON.parse(data)
+  );
+
+  //weird but ok
+  themeData = JSON.parse(themeData);
 
   mainWindow.onbeforeunload = (e) => {
     BrowserView.getAllViews().forEach((view) => view.destroy());
@@ -171,7 +186,7 @@ var currentUser;
 ipcMain.on("userStatus", (event, req) => {
   if (req) {
     fs.readFile(
-      userDataPath + "/userID/user-id.json", // Read the user data file
+      userDataPath + "/PANDORAE/userID/user-id.json", // Read the user data file
       "utf8",
       (err, data) => {
         // Additional options for readFile
@@ -197,14 +212,6 @@ ipcMain.on("userStatus", (event, req) => {
   }
 });
 
-var themeData = fs.readFileSync(
-  userDataPath + "/themes/themes.json",
-  "utf8",
-  (err, data) => JSON.parse(data)
-);
-
-themeData = JSON.parse(themeData);
-
 const getTheme = () => {
   var t;
 
@@ -214,12 +221,14 @@ const getTheme = () => {
     }
   }
 
+  if (!t) {
+    t = themeData.normal;
+  }
+
   mainWindow.webContents.send("themeContent", t);
 };
 
 const setTheme = (newTheme) => {
-  //console.log(newTheme);
-  //console.log(themeData);
   for (const theme in themeData) {
     themeData[theme].selected = false;
     if (theme === newTheme) {
@@ -228,7 +237,7 @@ const setTheme = (newTheme) => {
   }
 
   fs.writeFileSync(
-    userDataPath + "/themes/themes.json",
+    userDataPath + "/PANDORAE/themes/themes.json",
     JSON.stringify(themeData),
     "utf8",
     (err) => {
@@ -249,6 +258,7 @@ ipcMain.on("theme", (event, req) => {
   switch (req.type) {
     case "read":
       getTheme();
+
       break;
 
     case "set":
@@ -411,7 +421,7 @@ app.on("window-all-closed", function () {
   // Write log
   fs.writeFile(
     // Write data
-    userDataPath + "/logs/log-" + date + ".txt",
+    userDataPath + "/PANDORAE/logs/log-" + date + ".txt",
     dataLog,
     "utf8", // Path/name, data, format
     (err) => {
@@ -524,7 +534,7 @@ ipcMain.handle("restart", async (event, mess) => {
 
 ipcMain.handle("saveDataset", async (event, target, data) => {
   dialog.showSaveDialog(target).then((filePath) => {
-    fs.writeFile(filePath.filePath, data, () => { });
+    fs.writeFile(filePath.filePath, data, () => {});
   });
 });
 
@@ -532,7 +542,7 @@ ipcMain.handle("savePNG", async (event, target) => {
   setTimeout(() => {
     mainWindow.capturePage().then((img) => {
       dialog.showSaveDialog(target).then((filePath) => {
-        fs.writeFile(filePath.filePath, img.toPNG(), () => { });
+        fs.writeFile(filePath.filePath, img.toPNG(), () => {});
       });
     });
   }, 250);
@@ -606,7 +616,7 @@ ipcMain.handle("addLocalService", async (event, m) => {
       };
 
       fs.writeFileSync(
-        userDataPath + "/userID/user-id.json",
+        userDataPath + "/PANDORAE/userID/user-id.json",
         JSON.stringify(currentUser),
         "utf8",
         (err) => {
