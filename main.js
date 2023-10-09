@@ -7,7 +7,6 @@ const fs = require("fs");
 // hack to make this truly portable
 const userDataPath = app.getPath("documents");
 
-const keytar = require("keytar"); // Load keytar to manage user API keys
 const dns = require("dns");
 
 var windowIds = {
@@ -335,18 +334,49 @@ ipcMain.on("pulsar", (event, message) => {
   mainWindow.webContents.send("pulsar", message);
 });
 
-ipcMain.on("keytar", (event, request) => {
+ipcMain.on("keyManager", (event, request) => {
+  /*
+   * This used to be managed through keytar, which raises
+   * many technical issues and doesn't make the app portable
+   * it was then moved to a flat file (with a notice to the user
+   * that their API keys are stored as flat files).
+   *
+   */
   switch (request.type) {
     case "setPassword":
+      currentUser[request.service] = {
+        user: request.user,
+        value: request.value,
+      };
+      fs.writeFileSync(
+        userDataPath + "/PANDORAE/userID/user-id.json",
+        JSON.stringify(currentUser),
+        "utf8",
+        (err) => {
+          if (err) throw err;
+          event.returnValue = request.value;
+        }
+      );
+      /*
       keytar
         .setPassword(request.service, request.user, request.value)
-        .then((password) => (event.returnValue = password));
+        .then((password) => (event.returnValue = password));*/
       break;
 
     case "getPassword":
+      fs.readFileSync(
+        userDataPath + "/PANDORAE/userID/user-id.json",
+
+        "utf8",
+        (err, data) => {
+          const user = JSON.parse(data);
+          return (event.returnValue = user[request.service].value);
+        }
+      );
+      /*
       keytar
         .getPassword(request.service, request.user)
-        .then((password) => (event.returnValue = password));
+        .then((password) => (event.returnValue = password));*/
       break;
   }
 });
