@@ -409,6 +409,11 @@ var ISSNarr = [];
 const date = () =>
   new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
 
+//===== Adding a new local service ======
+
+const accessUserID = () =>
+  ipcRenderer.send("openPath", userDataPath + "/PANDORAE/userID/");
+
 //========== Tracegraph ==========
 
 let traces = [];
@@ -634,10 +639,10 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Actioning powerValve on " +
-    JSON.stringify(item.name) +
-    " through the " +
-    fluxAction +
-    " procedure."
+      JSON.stringify(item.name) +
+      " through the " +
+      fluxAction +
+      " procedure."
   );
 
   let fluxArgs = {}; // Arguments are stored in an object
@@ -645,7 +650,7 @@ const powerValve = (fluxAction, item) => {
   let itemname = item.name; // item argument is usually stored in "this"
 
   switch (
-  fluxAction // According to function name ...
+    fluxAction // According to function name ...
   ) {
     case "wosBuild":
       fluxArgs.wosquery = wosReq;
@@ -823,11 +828,11 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Sending to CHÆROS action " +
-    fluxAction +
-    " with arguments " +
-    JSON.stringify(fluxArgs) +
-    " " +
-    message
+      fluxAction +
+      " with arguments " +
+      JSON.stringify(fluxArgs) +
+      " " +
+      message
   );
 
   ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
@@ -1523,12 +1528,12 @@ const ScopusList = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='scopColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            "</label><br> "
         );
       }
 
@@ -1604,14 +1609,14 @@ const zoteroCollectionRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          " - " +
-          coll.name +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            " - " +
+            coll.name +
+            "</label><br> "
         );
       }
 
@@ -1652,9 +1657,9 @@ const zoteroCollectionRetriever = () => {
       ipcRenderer.send(
         "console-logs",
         "Error in retrieving collections for Zotero id " +
-        zoteroUser +
-        " : " +
-        err
+          zoteroUser +
+          " : " +
+          err
       ); // Log error
     });
 };
@@ -1690,14 +1695,14 @@ const zoteroLocalRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          " - " +
-          coll.name +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            " - " +
+            coll.name +
+            "</label><br> "
         );
       }
 
@@ -1758,10 +1763,10 @@ const datasetLoader = () => {
         ipcRenderer.send(
           "console-logs",
           "Dataset " +
-          dataset.name +
-          " loaded into " +
-          JSON.stringify(target) +
-          "."
+            dataset.name +
+            " loaded into " +
+            JSON.stringify(target) +
+            "."
         ); // Log action
       });
     });
@@ -1934,7 +1939,7 @@ const hypheCorpusList = (target, prevId) => {
       } else {
       }
     })
-    .catch((e) => { });
+    .catch((e) => {});
 };
 
 const loadHyphe = (corpus, endpoint, pass) => {
@@ -2194,8 +2199,7 @@ const queryBnFSolr = (but) => {
     `bnf-solr-query-${but.serv}`
   ).value;
 
-
-  console.log("ping")
+  console.log("ping");
 
   // Ici, ne prendre que la dernière capture connue
 
@@ -2210,13 +2214,13 @@ const queryBnFSolr = (but) => {
     "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
     "&rows=0&sort=score+desc&group.ngroups=true";
 
-  console.log(query)
+  console.log(query);
 
-  // 
+  //
 
   d3.json(query).then((res) => {
-    console.log(res)
-    console.log("pong")
+    console.log(res);
+    console.log("pong");
 
     var previewer = document.getElementById(
       "bnf-solr-basic-previewer-" + but.serv
@@ -2505,8 +2509,9 @@ const manualMergeAuthors = () => {
 
             for (let j = 0; j < 5; ++j) {
               if (autharticles[j]) {
-                refs += `[<a target="_blank" href="https://doi.org/${autharticles[j]
-                  }">${j + 1}</a>] `;
+                refs += `[<a target="_blank" href="https://doi.org/${
+                  autharticles[j]
+                }">${j + 1}</a>] `;
               }
             }
           }
@@ -2733,9 +2738,8 @@ const addLocalService = () => {
 //========== STARTING FLUX ==========
 ipcRenderer.send("console-logs", "Opening Flux"); // Sending notification to console
 
-const closeWindow = () => {
+const closeWindow = () =>
   ipcRenderer.send("window-manager", "closeWindow", "flux");
-};
 
 const refreshWindow = () => {
   location.reload();
@@ -2786,6 +2790,7 @@ window.addEventListener("load", (event) => {
     { id: "showConsole", func: "fluxConsole" },
     { id: "scopus-list-display", func: "ScopusList" },
     { id: "user-button", func: "basicUserData" },
+    { id: "access-user-id", func: "accessUserID" },
     {
       id: "zoteroAPIValidation",
       func: "checkKey",
@@ -2992,10 +2997,8 @@ window.addEventListener("load", (event) => {
     localServicePreviewer.append(table);
 
     for (const service in availability.dnsLocalServiceList) {
-
       switch (availability.dnsLocalServiceList[service].type) {
         case "BNF-SOLR":
-
           const serv = service.toUpperCase().replace(" ", "-");
 
           if (selections.localSelect) {
@@ -3060,10 +3063,10 @@ window.addEventListener("load", (event) => {
   });
 
   function funcSwitch(e, but) {
-    console.log("bliblboub")
+    console.log("bliblboub");
     switch (but.func) {
       case "queryBnFSolr":
-        console.log("pang")
+        console.log("pang");
         queryBnFSolr(but);
         break;
       case "addLocalService":
@@ -3084,6 +3087,10 @@ window.addEventListener("load", (event) => {
 
       case "biorxivBasicRetriever":
         biorxivBasicRetriever();
+        break;
+
+      case "accessUserID":
+        accessUserID();
         break;
 
       case "basicUserData":
@@ -3181,26 +3188,28 @@ window.addEventListener("load", (event) => {
 });
 const getPassword = (service, user) =>
   ipcRenderer.sendSync("keyManager", {
-    user: user,
-    service: service,
+    user,
+    service,
     type: "getPassword",
   });
 const setPassword = (service, user, value) =>
   ipcRenderer.sendSync("keyManager", {
-    user: user,
-    service: service,
+    user,
+    service,
     value: value,
     type: "setPassword",
   });
 
 const getUserData = () => {
   fs.readFile(
-    userDataPath + "/userID/user-id.json", // Read the designated datafile
+    userDataPath + "/PANDORAE/userID/user-id.json", // Read the designated datafile
     "utf8",
     (err, data) => {
       if (err) throw err;
 
       let user = JSON.parse(data);
+
+      console.log(user);
 
       let userName = user.UserName;
       let userMail = user.UserMail;
@@ -3209,6 +3218,7 @@ const getUserData = () => {
       document.getElementById("userNameInput").value = userName;
       document.getElementById("userMailInput").value = userMail;
       document.getElementById("zoterouserinput").value = zoteroUser;
+
       document.getElementById("zoterokeyinput").value = getPassword(
         "Zotero",
         zoteroUser
@@ -3242,9 +3252,14 @@ const basicUserData = () => {
     };
     var data = JSON.stringify(user);
 
-    fs.writeFile(userDataPath + "/userID/user-id.json", data, "utf8", (err) => {
-      if (err) throw err;
-    });
+    fs.writeFile(
+      userDataPath + "/PANDORAE/userID/user-id.json",
+      data,
+      "utf8",
+      (err) => {
+        if (err) throw err;
+      }
+    );
 
     userButton.style.transition = "all 1s ease-out";
     userButton.style.backgroundPosition = "right bottom";
@@ -3324,6 +3339,10 @@ const checkKey = (service, status) => {
   }
 };
 
-window.addEventListener("DOMContentLoaded", (event) => {
+//getUserData();
+
+//window.addEventListener("DOMContentLoaded", getUserData);
+window.addEventListener("DOMContentLoaded", () => {
+  console.log("coucou");
   getUserData();
 });

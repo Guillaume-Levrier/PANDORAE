@@ -1,25 +1,27 @@
 const getPassword = (service, user) =>
   ipcRenderer.sendSync("keyManager", {
-    user: user,
-    service: service,
+    user,
+    service,
     type: "getPassword",
   });
 const setPassword = (service, user, value) =>
   ipcRenderer.sendSync("keyManager", {
-    user: user,
-    service: service,
+    user,
+    service,
     value: value,
     type: "setPassword",
   });
 
 const getUserData = () => {
   fs.readFile(
-    userDataPath + "/userID/user-id.json", // Read the designated datafile
+    userDataPath + "/PANDORAE/userID/user-id.json", // Read the designated datafile
     "utf8",
     (err, data) => {
       if (err) throw err;
 
       let user = JSON.parse(data);
+
+      console.log(user);
 
       let userName = user.UserName;
       let userMail = user.UserMail;
@@ -28,6 +30,7 @@ const getUserData = () => {
       document.getElementById("userNameInput").value = userName;
       document.getElementById("userMailInput").value = userMail;
       document.getElementById("zoterouserinput").value = zoteroUser;
+
       document.getElementById("zoterokeyinput").value = getPassword(
         "Zotero",
         zoteroUser
@@ -61,9 +64,14 @@ const basicUserData = () => {
     };
     var data = JSON.stringify(user);
 
-    fs.writeFile(userDataPath + "/userID/user-id.json", data, "utf8", (err) => {
-      if (err) throw err;
-    });
+    fs.writeFile(
+      userDataPath + "/PANDORAE/userID/user-id.json",
+      data,
+      "utf8",
+      (err) => {
+        if (err) throw err;
+      }
+    );
 
     userButton.style.transition = "all 1s ease-out";
     userButton.style.backgroundPosition = "right bottom";
@@ -143,6 +151,10 @@ const checkKey = (service, status) => {
   }
 };
 
-window.addEventListener("DOMContentLoaded", (event) => {
+//getUserData();
+
+//window.addEventListener("DOMContentLoaded", getUserData);
+window.addEventListener("DOMContentLoaded", () => {
+  console.log("coucou");
   getUserData();
 });

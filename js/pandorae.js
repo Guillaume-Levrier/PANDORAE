@@ -1495,7 +1495,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
   // =========== LANGUAGE SELECTION ===========
   var CM = CMT["EN"]; // Load the EN locale at start
   fs.readFile(
-    userDataPath + "/userID/user-id.json",
+    userDataPath + "/PANDORAE/userID/user-id.json",
     "utf8", // Check if the user uses another one
     (err, data) => {
       data = JSON.parse(data);
@@ -1528,14 +1528,14 @@ window.addEventListener("DOMContentLoaded", (event) => {
       CM = CMT[lg.innerText];
       populateLocale(divlist);
       fs.readFile(
-        userDataPath + "/userID/user-id.json",
+        userDataPath + "/PANDORAE/userID/user-id.json",
         "utf8",
         (err, data) => {
           data = JSON.parse(data);
           data.locale = lg.innerText;
           data = JSON.stringify(data);
           fs.writeFile(
-            userDataPath + "/userID/user-id.json",
+            userDataPath + "/PANDORAE/userID/user-id.json",
             data,
             "utf8",
             (err) => {

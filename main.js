@@ -2,6 +2,7 @@ const electron = require("electron");
 const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } =
   electron;
 const fs = require("fs");
+
 //const userDataPath = app.getPath("userData");
 
 // hack to make this truly portable
@@ -75,7 +76,7 @@ function createWindow() {
   mainWindow.loadFile("index.html");
 
   mainWindow.setMenu(null);
-  mainWindow.webContents.openDevTools();
+  //mainWindow.webContents.openDevTools();
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
@@ -177,6 +178,7 @@ const openModal = (modalFile, scrollTo) => {
         setTimeout(() => win.webContents.send("scroll-to", scrollTo), 1000);
       }
     });
+    // win.webContents.openDevTools();
   }
 };
 
@@ -348,7 +350,7 @@ ipcMain.on("keyManager", (event, request) => {
         user: request.user,
         value: request.value,
       };
-      fs.writeFileSync(
+      fs.writeFile(
         userDataPath + "/PANDORAE/userID/user-id.json",
         JSON.stringify(currentUser),
         "utf8",
@@ -364,13 +366,17 @@ ipcMain.on("keyManager", (event, request) => {
       break;
 
     case "getPassword":
-      fs.readFileSync(
+      fs.readFile(
         userDataPath + "/PANDORAE/userID/user-id.json",
-
         "utf8",
         (err, data) => {
           const user = JSON.parse(data);
-          return (event.returnValue = user[request.service].value);
+
+          if (user.hasOwnProperty(request.service)) {
+            event.returnValue = user[request.service].value;
+          } else {
+            event.returnValue = 0;
+          }
         }
       );
       /*
@@ -543,7 +549,8 @@ ipcMain.on("remote", async (event, req) => {
   let res;
   switch (req) {
     case "userDataPath":
-      res = app.getPath("userData");
+      res = app.getPath("documents");
+
       break;
 
     case "appPath":
@@ -663,3 +670,5 @@ ipcMain.handle("checkflux", async (event, mess) => {
 
   return result;
 });
+
+ipcMain.on("openPath", async (event, path) => shell.openExternal(path));
