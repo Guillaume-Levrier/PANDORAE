@@ -213,7 +213,6 @@ ipcMain.on("userStatus", (event, req) => {
   }
 });
 
-
 ipcMain.on("theme", (event, req) => {
   switch (req.type) {
     case "read":
@@ -224,8 +223,16 @@ ipcMain.on("theme", (event, req) => {
           // Additional options for readFile
           if (err) throw err;
           currentUser = JSON.parse(data);
-          mainWindow.webContents.send("themeContent", themeData[currentUser.theme.value]);
-        })
+          if (currentUser.theme) {
+            mainWindow.webContents.send(
+              "themeContent",
+              themeData[currentUser.theme.value]
+            );
+          } else {
+            mainWindow.webContents.send("themeContent", themeData.normal);
+          }
+        }
+      );
 
       break;
 
@@ -538,7 +545,7 @@ ipcMain.handle("restart", async (event, mess) => {
 
 ipcMain.handle("saveDataset", async (event, target, data) => {
   dialog.showSaveDialog(target).then((filePath) => {
-    fs.writeFile(filePath.filePath, data, () => { });
+    fs.writeFile(filePath.filePath, data, () => {});
   });
 });
 
@@ -546,7 +553,7 @@ ipcMain.handle("savePNG", async (event, target) => {
   setTimeout(() => {
     mainWindow.capturePage().then((img) => {
       dialog.showSaveDialog(target).then((filePath) => {
-        fs.writeFile(filePath.filePath, img.toPNG(), () => { });
+        fs.writeFile(filePath.filePath, img.toPNG(), () => {});
       });
     });
   }, 250);
