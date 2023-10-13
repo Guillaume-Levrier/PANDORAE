@@ -3200,41 +3200,40 @@ const setPassword = (service, user, value) =>
     type: "setPassword",
   });
 
-const getUserData = () => {
-  fs.readFile(
-    userDataPath + "/PANDORAE/userID/user-id.json", // Read the designated datafile
-    "utf8",
-    (err, data) => {
-      if (err) throw err;
+const getUserData = () => fs.readFile(
+  userDataPath + "/PANDORAE/userID/user-id.json", // Read the designated datafile
+  "utf8",
+  (err, data) => {
+    if (err) throw err;
 
-      let user = JSON.parse(data);
+    let user = JSON.parse(data);
 
-      console.log(user);
 
-      let userName = user.UserName;
-      let userMail = user.UserMail;
-      let zoteroUser = user.ZoteroID;
 
-      document.getElementById("userNameInput").value = userName;
-      document.getElementById("userMailInput").value = userMail;
-      document.getElementById("zoterouserinput").value = zoteroUser;
+    let userName = user.UserName;
+    let userMail = user.UserMail;
+    let zoteroUser = user.ZoteroID;
 
-      document.getElementById("zoterokeyinput").value = getPassword(
-        "Zotero",
-        zoteroUser
-      );
-      document.getElementById("scopuskeyinput").value = getPassword(
-        "Scopus",
-        userName
-      );
+    document.getElementById("userNameInput").value = userName;
+    document.getElementById("userMailInput").value = userMail;
+    document.getElementById("zoterouserinput").value = zoteroUser;
 
-      document.getElementById("woskeyinput").value = getPassword(
-        "WebOfScience",
-        userName
-      );
-    }
-  );
-};
+    document.getElementById("zoterokeyinput").value = getPassword(
+      "Zotero",
+      zoteroUser
+    );
+    document.getElementById("scopuskeyinput").value = getPassword(
+      "Scopus",
+      userName
+    );
+
+    document.getElementById("woskeyinput").value = getPassword(
+      "WebOfScience",
+      userName
+    );
+  }
+);
+
 
 const basicUserData = () => {
   let userButton = document.getElementById("user-button");
@@ -3266,7 +3265,7 @@ const basicUserData = () => {
     userButton.style.color = "black";
     userButton.innerText = "User credentials updated";
 
-    getUserData();
+    //getUserData();
   } else {
     userButton.style.transition = "all 1s ease-out";
     userButton.style.backgroundPosition = "right bottom";
@@ -3308,7 +3307,7 @@ const updateUserData = (service) => {
       break;
   }
 
-  getUserData();
+  // getUserData();
 };
 
 const checkKey = (service, status) => {
@@ -3343,6 +3342,5 @@ const checkKey = (service, status) => {
 
 //window.addEventListener("DOMContentLoaded", getUserData);
 window.addEventListener("DOMContentLoaded", () => {
-  console.log("coucou");
   getUserData();
 });

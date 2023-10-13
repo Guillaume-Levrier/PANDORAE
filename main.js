@@ -29,7 +29,7 @@ const createUserId = () => {
     UserName: "Enter your name",
     UserMail: "Enter your e-mail (not required)",
     ZoteroID: "Enter your Zotero ID (required to use Flux features)",
-    theme: "normal",
+    theme: { value: "normal" },
     locale: "EN",
   };
 
@@ -213,57 +213,24 @@ ipcMain.on("userStatus", (event, req) => {
   }
 });
 
-const getTheme = () => {
-  var t;
-
-  for (const theme in themeData) {
-    if (themeData[theme].selected) {
-      t = themeData[theme];
-    }
-  }
-
-  if (!t) {
-    t = themeData.normal;
-  }
-
-  mainWindow.webContents.send("themeContent", t);
-};
-
-const setTheme = (newTheme) => {
-  for (const theme in themeData) {
-    themeData[theme].selected = false;
-    if (theme === newTheme) {
-      themeData[theme].selected = true;
-    }
-  }
-
-  fs.writeFileSync(
-    userDataPath + "/PANDORAE/themes/themes.json",
-    JSON.stringify(themeData),
-    "utf8",
-    (err) => {
-      if (err) throw err;
-    }
-  );
-
-  mainWindow.webContents.send("themeContent", themeData[newTheme]);
-};
-
-//const readTheme = (themeName) => {
-//var themeData =
-
-//
-//});
 
 ipcMain.on("theme", (event, req) => {
   switch (req.type) {
     case "read":
-      getTheme();
+      fs.readFile(
+        userDataPath + "/PANDORAE/userID/user-id.json", // Read the user data file
+        "utf8",
+        (err, data) => {
+          // Additional options for readFile
+          if (err) throw err;
+          currentUser = JSON.parse(data);
+          mainWindow.webContents.send("themeContent", themeData[currentUser.theme.value]);
+        })
 
       break;
 
     case "set":
-      setTheme(req.theme);
+      mainWindow.webContents.send("themeContent", themeData[req.theme]);
       break;
   }
 });
@@ -571,7 +538,7 @@ ipcMain.handle("restart", async (event, mess) => {
 
 ipcMain.handle("saveDataset", async (event, target, data) => {
   dialog.showSaveDialog(target).then((filePath) => {
-    fs.writeFile(filePath.filePath, data, () => {});
+    fs.writeFile(filePath.filePath, data, () => { });
   });
 });
 
@@ -579,7 +546,7 @@ ipcMain.handle("savePNG", async (event, target) => {
   setTimeout(() => {
     mainWindow.capturePage().then((img) => {
       dialog.showSaveDialog(target).then((filePath) => {
-        fs.writeFile(filePath.filePath, img.toPNG(), () => {});
+        fs.writeFile(filePath.filePath, img.toPNG(), () => { });
       });
     });
   }, 250);
