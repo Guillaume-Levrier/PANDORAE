@@ -611,8 +611,8 @@ const scopusGeolocate = (dataset) => {
               if (d.affiliation[i].lon === undefined) {
                 unlocatedCities.push(
                   d.affiliation[i]["affiliation-city"] +
-                    ", " +
-                    d.affiliation[i]["affiliation-country"]
+                  ", " +
+                  d.affiliation[i]["affiliation-country"]
                 );
               }
             }
@@ -622,9 +622,9 @@ const scopusGeolocate = (dataset) => {
         ipcRenderer.send(
           "console-logs",
           "Unable to locale the " +
-            unlocatedCities.length +
-            " following cities " +
-            JSON.stringify(unlocatedCities)
+          unlocatedCities.length +
+          " following cities " +
+          JSON.stringify(unlocatedCities)
         );
         doc.content.articleGeoloc = true; // Mark file as geolocated
         pandodb.enriched.put(doc);
@@ -756,7 +756,7 @@ const webofscienceGeolocate = (dataset) => {
         ipcRenderer.send(
           "console-logs",
           "Unable to locale the following cities " +
-            JSON.stringify(unlocatedCities)
+          JSON.stringify(unlocatedCities)
         );
         doc.content.articleGeoloc = true; // Mark file as geolocated
         pandodb.enriched.put(doc);
@@ -898,10 +898,10 @@ const scopusRetriever = (user, query, bottleRate) => {
                       ipcRenderer.send(
                         "console-logs",
                         "Scopus dataset on " +
-                          query +
-                          " for user " +
-                          user +
-                          " have been successfully retrieved."
+                        query +
+                        " for user " +
+                        user +
+                        " have been successfully retrieved."
                       );
                       setTimeout(() => {
                         ipcRenderer.send("win-destroy", winId);
@@ -1232,12 +1232,12 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
   ipcRenderer.send(
     "console-logs",
     "Started retrieving collections " +
-      collections +
-      "for user " +
-      zoteroUser +
-      " under the import name " +
-      importName +
-      " into SYSTEM."
+    collections +
+    "for user " +
+    zoteroUser +
+    " under the import name " +
+    importName +
+    " into SYSTEM."
   );
 
   const limiter = new bottleneck({
@@ -1322,10 +1322,10 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
                     ipcRenderer.send(
                       "chaeros-notification",
                       "Loading " +
-                        responseAmount +
-                        " of " +
-                        responseTarget +
-                        " documents."
+                      responseAmount +
+                      " of " +
+                      responseTarget +
+                      " documents."
                     );
 
                     if (responseAmount === responseTarget) {
@@ -1382,11 +1382,11 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
   ipcRenderer.send(
     "console-logs",
     "Building collection" +
-      collectionName +
-      " for user " +
-      zoteroUser +
-      " in path " +
-      id
+    collectionName +
+    " for user " +
+    zoteroUser +
+    " in path " +
+    id
   );
 
   ipcRenderer.send(
@@ -1562,9 +1562,9 @@ const reqISSN = (user, scopid) => {
           ipcRenderer.send(
             "chaeros-notification",
             scopusISSNResponse.length +
-              "/" +
-              ISSNPromises.length +
-              " journal profiles retrieved."
+            "/" +
+            ISSNPromises.length +
+            " journal profiles retrieved."
           ); // Sending notification to console
 
           if (scopusISSNResponse.length === ISSNPromises.length) {
@@ -1740,10 +1740,10 @@ const regardsRetriever = (queryContent, legislature) => {
                       seances.forEach((seance, leg) => {
                         seanceReqs.push(
                           "https://www.nosdeputes.fr/" +
-                            seance +
-                            "/seance/" +
-                            leg +
-                            "/json"
+                          seance +
+                          "/seance/" +
+                          leg +
+                          "/json"
                         );
                       });
 
@@ -1758,9 +1758,9 @@ const regardsRetriever = (queryContent, legislature) => {
                             ipcRenderer.send(
                               "chaeros-notification",
                               "Retrieving séance " +
-                                seanceN +
-                                " of " +
-                                seanceReqs.length
+                              seanceN +
+                              " of " +
+                              seanceReqs.length
                             );
                             resSeances.push(resSeance);
                             if (resSeances.length === seanceReqs.length) {
@@ -1931,7 +1931,7 @@ const solrMetaExplorer = (req, meta) => {
   Promise.all(urlArray).then((res) => {
     // rebuild an array with all the responses
 
-    console.log(res);
+
 
     var totalResponse = [];
 
@@ -1950,7 +1950,7 @@ const solrMetaExplorer = (req, meta) => {
       name: req,
     };
 
-    console.log(dataset);
+
 
     // dataWriter(["system"], importName, [dataset]);
 
@@ -1972,9 +1972,11 @@ const solrMetaExplorer = (req, meta) => {
       content: cslData,
     };
 
-    console.log("got there");
 
-    console.log(cslConvertedDataset);
+    return cslConvertedDataset
+
+
+  }).then(cslConvertedDataset =>
 
     pandodb.csljson
       .add(cslConvertedDataset)
@@ -1983,7 +1985,7 @@ const solrMetaExplorer = (req, meta) => {
         ipcRenderer.send("pulsar", true);
         ipcRenderer.send(
           "console-logs",
-          "Bnf data successfully converted " + dataset
+          "Bnf data successfully converted"
         ); // Log success
 
         setTimeout(() => {
@@ -1992,8 +1994,9 @@ const solrMetaExplorer = (req, meta) => {
       })
       .catch((e) => {
         console.log(e);
-      });
-  });
+      })
+
+  )
 };
 
 // ===== Web of Science =====
@@ -2099,10 +2102,10 @@ const wosFullRetriever = (user, wosReq) => {
                   ipcRenderer.send(
                     "console-logs",
                     "Web of Science dataset on " +
-                      wosReq.usrQuery +
-                      " for user " +
-                      user +
-                      " have been successfully retrieved."
+                    wosReq.usrQuery +
+                    " for user " +
+                    user +
+                    " have been successfully retrieved."
                   );
                   setTimeout(() => {
                     ipcRenderer.send("win-destroy", winId);
@@ -2161,10 +2164,10 @@ const istexRetriever = (query) => {
             ipcRenderer.send(
               "console-logs",
               "ISTEX dataset on " +
-                query +
-                " for user " +
-                user +
-                " have been successfully retrieved."
+              query +
+              " for user " +
+              user +
+              " have been successfully retrieved."
             );
             setTimeout(() => {
               ipcRenderer.send("win-destroy", winId);
@@ -2187,9 +2190,8 @@ const istexRetriever = (query) => {
           // This is a quick implementation prior to getting
           // more info on this endpoint's rate limiting.
           setTimeout(() => {
-            const target = `https://api.istex.fr/document/?q=${query}&size=5000&output=*&from=${
-              i * 5000
-            }`;
+            const target = `https://api.istex.fr/document/?q=${query}&size=5000&output=*&from=${i * 5000
+              }`;
             fetch(target)
               .then((res) => res.json())
               .then((r) => {
@@ -2471,9 +2473,9 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
   ipcRenderer.send(
     "console-logs",
     "CHÆROS started a " +
-      fluxAction +
-      " process with the following arguments : " +
-      JSON.stringify(fluxArgs)
+    fluxAction +
+    " process with the following arguments : " +
+    JSON.stringify(fluxArgs)
   );
 
   switch (fluxAction) {

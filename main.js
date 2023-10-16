@@ -545,7 +545,7 @@ ipcMain.handle("restart", async (event, mess) => {
 
 ipcMain.handle("saveDataset", async (event, target, data) => {
   dialog.showSaveDialog(target).then((filePath) => {
-    fs.writeFile(filePath.filePath, data, () => {});
+    fs.writeFile(filePath.filePath, data, () => { });
   });
 });
 
@@ -553,7 +553,7 @@ ipcMain.handle("savePNG", async (event, target) => {
   setTimeout(() => {
     mainWindow.capturePage().then((img) => {
       dialog.showSaveDialog(target).then((filePath) => {
-        fs.writeFile(filePath.filePath, img.toPNG(), () => {});
+        fs.writeFile(filePath.filePath, img.toPNG(), () => { });
       });
     });
   }, 250);

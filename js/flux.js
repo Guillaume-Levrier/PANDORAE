@@ -259,10 +259,10 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Actioning powerValve on " +
-      JSON.stringify(item.name) +
-      " through the " +
-      fluxAction +
-      " procedure."
+    JSON.stringify(item.name) +
+    " through the " +
+    fluxAction +
+    " procedure."
   );
 
   let fluxArgs = {}; // Arguments are stored in an object
@@ -270,7 +270,7 @@ const powerValve = (fluxAction, item) => {
   let itemname = item.name; // item argument is usually stored in "this"
 
   switch (
-    fluxAction // According to function name ...
+  fluxAction // According to function name ...
   ) {
     case "wosBuild":
       fluxArgs.wosquery = wosReq;
@@ -448,11 +448,11 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Sending to CHÆROS action " +
-      fluxAction +
-      " with arguments " +
-      JSON.stringify(fluxArgs) +
-      " " +
-      message
+    fluxAction +
+    " with arguments " +
+    JSON.stringify(fluxArgs) +
+    " " +
+    message
   );
 
   ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
@@ -1066,7 +1066,7 @@ const affilRank = () => {
               if (art.affiliation.length > 0) {
                 art.affiliation.forEach((aff) => {
                   let affName = aff.affilname;
-                  console.log(aff);
+
                   if (affils.hasOwnProperty(affName)) {
                   } else {
                     let area = "";
@@ -1103,9 +1103,9 @@ const affilRank = () => {
                   }
 
                   affils[affName].numCount++;
-                  console.log(affils[affName].citedBy);
+
                   affils[affName].citedBy += parseInt(art["citedby-count"]);
-                  console.log(affils[affName].citedBy);
+
                 });
               }
             }
@@ -1148,12 +1148,12 @@ const ScopusList = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='scopColCheck' value='" +
-            coll.key +
-            "' name='" +
-            coll.name +
-            "' type='checkbox'/><label> " +
-            coll.key +
-            "</label><br> "
+          coll.key +
+          "' name='" +
+          coll.name +
+          "' type='checkbox'/><label> " +
+          coll.key +
+          "</label><br> "
         );
       }
 
@@ -1229,14 +1229,14 @@ const zoteroCollectionRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-            coll.key +
-            "' name='" +
-            coll.name +
-            "' type='checkbox'/><label> " +
-            coll.key +
-            " - " +
-            coll.name +
-            "</label><br> "
+          coll.key +
+          "' name='" +
+          coll.name +
+          "' type='checkbox'/><label> " +
+          coll.key +
+          " - " +
+          coll.name +
+          "</label><br> "
         );
       }
 
@@ -1277,9 +1277,9 @@ const zoteroCollectionRetriever = () => {
       ipcRenderer.send(
         "console-logs",
         "Error in retrieving collections for Zotero id " +
-          zoteroUser +
-          " : " +
-          err
+        zoteroUser +
+        " : " +
+        err
       ); // Log error
     });
 };
@@ -1315,14 +1315,14 @@ const zoteroLocalRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-            coll.key +
-            "' name='" +
-            coll.name +
-            "' type='checkbox'/><label> " +
-            coll.key +
-            " - " +
-            coll.name +
-            "</label><br> "
+          coll.key +
+          "' name='" +
+          coll.name +
+          "' type='checkbox'/><label> " +
+          coll.key +
+          " - " +
+          coll.name +
+          "</label><br> "
         );
       }
 
@@ -1383,10 +1383,10 @@ const datasetLoader = () => {
         ipcRenderer.send(
           "console-logs",
           "Dataset " +
-            dataset.name +
-            " loaded into " +
-            JSON.stringify(target) +
-            "."
+          dataset.name +
+          " loaded into " +
+          JSON.stringify(target) +
+          "."
         ); // Log action
       });
     });
@@ -1559,7 +1559,7 @@ const hypheCorpusList = (target, prevId) => {
       } else {
       }
     })
-    .catch((e) => {});
+    .catch((e) => { });
 };
 
 const loadHyphe = (corpus, endpoint, pass) => {
@@ -1819,8 +1819,6 @@ const queryBnFSolr = (but) => {
     `bnf-solr-query-${but.serv}`
   ).value;
 
-  console.log("ping");
-
   // Ici, ne prendre que la dernière capture connue
 
   const query =
@@ -1834,13 +1832,10 @@ const queryBnFSolr = (but) => {
     "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
     "&rows=0&sort=score+desc&group.ngroups=true";
 
-  console.log(query);
 
-  //
 
   d3.json(query).then((res) => {
-    console.log(res);
-    console.log("pong");
+
 
     var previewer = document.getElementById(
       "bnf-solr-basic-previewer-" + but.serv
@@ -1907,7 +1902,7 @@ const manualMergeAuthors = () => {
       const mainAlias = sortedList[0];
       sortedList.forEach((auth) => (completeMap[auth] = mainAlias));
     }
-    console.log(completeMap);
+
     // step 2 - attribute to articles
     dataset.content.forEach((article) => {
       article.creators.forEach((author) => {
@@ -2129,9 +2124,8 @@ const manualMergeAuthors = () => {
 
             for (let j = 0; j < 5; ++j) {
               if (autharticles[j]) {
-                refs += `[<a target="_blank" href="https://doi.org/${
-                  autharticles[j]
-                }">${j + 1}</a>] `;
+                refs += `[<a target="_blank" href="https://doi.org/${autharticles[j]
+                  }">${j + 1}</a>] `;
               }
             }
           }
@@ -2530,11 +2524,13 @@ window.addEventListener("load", (event) => {
   };
 
   function configureCascade() {
+
     for (const theme in selections) {
       const select = document.getElementById(theme);
       select.addEventListener("change", () => {
         selections[theme] = select.checked;
         document.getElementById("cascade").innerHTML = "";
+
         updateCascade();
       });
     }
@@ -2543,6 +2539,7 @@ window.addEventListener("load", (event) => {
   configureCascade();
 
   function updateCascade() {
+
     traces = [];
     document.getElementById("cascade").innerHTML = "";
     availability.dnslist.forEach((d) => {
@@ -2608,6 +2605,39 @@ window.addEventListener("load", (event) => {
       addHop(["OPEN", "HYPHE", "SYSTEM"]);
     }
 
+    if (selections.localSelect) {
+
+      for (const service in availability.dnsLocalServiceList) {
+        switch (availability.dnsLocalServiceList[service].type) {
+          case "BNF-SOLR":
+            const serv = service.toUpperCase().replace(" ", "-");
+
+            addHop([serv, "ZOTERO"]);
+            break;
+        }
+      }
+    }
+
+    drawFlux(svg, traces, false, true);
+
+    buttonList.forEach((but) => {
+      document.getElementById(but.id).addEventListener("click", (e) => {
+
+        funcSwitch(e, but);
+        e.preventDefault();
+        return false;
+      });
+    });
+  }
+
+
+
+  ipcRenderer.invoke("checkflux", true).then((result) => {
+    availability = JSON.parse(result);
+    updateCascade();
+
+    const buttonList = []
+
     const localServicePreviewer = document.getElementById(
       "localservices-basic-previewer"
     );
@@ -2616,14 +2646,14 @@ window.addEventListener("load", (event) => {
 
     localServicePreviewer.append(table);
 
+
+
     for (const service in availability.dnsLocalServiceList) {
       switch (availability.dnsLocalServiceList[service].type) {
         case "BNF-SOLR":
           const serv = service.toUpperCase().replace(" ", "-");
 
-          if (selections.localSelect) {
-            addHop([serv, "SYSTEM"]);
-          }
+
 
           table.innerHTML += `- ${availability.dnsLocalServiceList[service].type} - ${service}`;
 
@@ -2652,6 +2682,7 @@ window.addEventListener("load", (event) => {
             func: "queryBnFSolr",
             args: availability.dnsLocalServiceList[service],
           });
+
           buttonList.push({
             id: "bnf-solr-fullquery-" + serv,
             serv,
@@ -2666,27 +2697,21 @@ window.addEventListener("load", (event) => {
       }
     }
 
-    drawFlux(svg, traces, false, true);
-
     buttonList.forEach((but) => {
       document.getElementById(but.id).addEventListener("click", (e) => {
-        funcSwitch(e, but);
         e.preventDefault();
+        funcSwitch(e, but);
+
         return false;
       });
     });
-  }
-
-  ipcRenderer.invoke("checkflux", true).then((result) => {
-    availability = JSON.parse(result);
-    updateCascade();
   });
 
   function funcSwitch(e, but) {
-    console.log("bliblboub");
+
     switch (but.func) {
       case "queryBnFSolr":
-        console.log("pang");
+
         queryBnFSolr(but);
         break;
       case "addLocalService":
