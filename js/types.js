@@ -774,8 +774,10 @@ const archotype = (id) => {
       // invoker given that interrogating dexie is more tedious but this might
       // end up breaking at some point for framework reasons.
 
+      node.style("cursor", d => d.domain ? "move" : "pointer")
+
       if (resolver) {
-        node.style("cursor", d => d.domain ? "move" : "pointer")
+
 
         node.on("click", (e, d) => (d.domain) ? 0 :
           fetch(
@@ -785,7 +787,7 @@ const archotype = (id) => {
             .then((r) => {
 
               // console.log(`http://${resolver}/solr/netarchivebuilder/select?q=url:${JSON.stringify(d.id.replaceAll("&", "%26"))}`)
-              // console.log(r)
+              document.getElementById("tooltip").innerHTML = JSON.stringify(r);
 
               if (r.response.numFound > 0) {
 
@@ -807,6 +809,8 @@ const archotype = (id) => {
 
             })
         );
+      } else {
+        node.on("click", (e, d) => { console.log(d) })
       }
 
       node.append("title").text((d) => d.id);
