@@ -1881,15 +1881,13 @@ const solrMetaExplorer = (req, meta) => {
 
   // Third step will be taking closest capture to specified date.
 
-  //"&rows=0&sort=crawl_date%20desc&group=true&group.field=url&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0&rows=0&sort=score+desc";
-
   // Great thing that no one ever invented posting arguments as JSON objects
   const url = (req, start, end) =>
     "http://" +
     meta.but.args.url +
     ":" +
     meta.but.args.port +
-    "/solr/netarchivebuilder/" +
+    "/solr/" + meta.but.args.collection + "/" +
     "select?q=" +
     req +
     "&start=" +

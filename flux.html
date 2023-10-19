@@ -63,11 +63,18 @@
     <span class="credential">Use the fields below to add new local
       services.</span><br><br>
 
-    <div class="credential"> <input style="width:20%;" class="fluxInput" spellcheck="false" id="newServiceName"
-        type="text" value="Service name">
-      &nbsp;<input style="width:20%;" class="fluxInput" spellcheck="false" id="newServiceLocation" type="text"
-        value="IP:PORT"> &nbsp;<select style="width:20%;" class="fluxInput" spellcheck="false" id="newServiceType">
-        <option valeur="BNF-SOLR">BNF-SOLR</option>
+    <div class="credential">
+
+      <input style="width:20%;display:none" class="fluxInput" spellcheck="false" id="newServiceName" type="text"
+        value="Service name">
+      &nbsp;<input style="width:20%;display:none" class="fluxInput" spellcheck="false" id="newServiceLocation"
+        type="text" value="IP:PORT"> &nbsp;
+      &nbsp;<input style="width:20%;display:none" class="fluxInput" spellcheck="false" id="newServiceCollection"
+        type="text" value="Collection"> &nbsp;
+
+      <select style="width:20%;" class="fluxInput" spellcheck="false" id="newServiceType">
+        <option value=""></option>
+        <option value="BNF-SOLR">BNF-SOLR</option>
       </select> &nbsp;
       <button type="submit" id="new-service-button" class="flux-button">Add
         Service</button>

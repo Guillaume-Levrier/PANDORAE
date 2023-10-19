@@ -2206,7 +2206,7 @@ const queryBnFSolr = (but) => {
     but.args.url +
     ":" +
     but.args.port +
-    "/solr/netarchivebuilder/select?q=" +
+    "/solr/" + but.args.collection + "/select?q=" +
     queryContent +
     "&rows=0&sort=crawl_date%20desc&group=true&group.field=url" +
     "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
@@ -2233,6 +2233,26 @@ const queryBnFSolr = (but) => {
     }
   });
 };
+
+
+const generateLocalServiceConfig = () => {
+  const newServiceType = document.getElementById("newServiceType");
+
+  switch (newServiceType.value) {
+    case "BNF-SOLR":
+      const divs = ["newServiceName", "newServiceLocation", "newServiceCollection"]
+
+      divs.forEach(d => document.getElementById(d).style.display = "block")
+
+      break;
+
+    default:
+      break;
+  }
+
+
+}
+
 
 //==== Manual Merging of Authors ====
 // This one is a bit trick because it can be quite computationnaly intensive and yet has to stay in FLUX.
@@ -2721,13 +2741,29 @@ const addLocalService = () => {
   const serviceName = document.getElementById("newServiceName").value;
   const serviceLocation = document.getElementById("newServiceLocation").value;
   const serviceType = document.getElementById("newServiceType").value;
+  const serviceCollection = document.getElementById("newServiceCollection").value;
 
-  ipcRenderer.invoke("addLocalService", {
+  const service = {
     serviceName,
     serviceLocation,
     serviceType,
-  });
+    serviceCollection
+  }
+  console.log(service)
+  ipcRenderer.invoke("addLocalService", service);
+
+  const serviceBut = document.getElementById("new-service-button")
+
+  serviceBut.style.transition = "all 1s ease-out";
+  serviceBut.style.backgroundPosition = "right bottom";
+  serviceBut.style.color = "black";
+  serviceBut.innerText = "Service added - please reload this page";
+
 };
+
+const removeLocalService = (serviceName) => ipcRenderer.invoke("removeLocalService", serviceName);
+
+
 
 //========== STARTING FLUX ==========
 ipcRenderer.send("console-logs", "Opening Flux"); // Sending notification to console
@@ -2882,6 +2918,9 @@ window.addEventListener("load", (event) => {
     {
       id: "export-affil-rank",
       func: "affilRank",
+    }, {
+      id: "newServiceType",
+      func: "generateLocalServiceConfig",
     },
 
     {
@@ -3027,7 +3066,6 @@ window.addEventListener("load", (event) => {
     localServicePreviewer.append(table);
 
 
-
     for (const service in availability.dnsLocalServiceList) {
       switch (availability.dnsLocalServiceList[service].type) {
         case "BNF-SOLR":
@@ -3035,7 +3073,21 @@ window.addEventListener("load", (event) => {
 
 
 
-          table.innerHTML += `- ${availability.dnsLocalServiceList[service].type} - ${service}`;
+          const serviceLine = document.createElement("li");
+          serviceLine.style = "display:flex;justify-content: space-between;"
+          const serviceName = document.createElement("div");
+          serviceName.innerHTML = `- ${availability.dnsLocalServiceList[service].type} - ${service}`;
+          const serviceRemove = document.createElement("div");
+          serviceRemove.style = "font-weight:bold;"
+          serviceRemove.innerText = "x";
+          serviceRemove.addEventListener("click", () => {
+            serviceLine.remove()
+            removeLocalService(service)
+          })
+          serviceLine.append(serviceName, serviceRemove)
+
+          table.append(serviceLine)
+
 
           const solrCont = document.createElement("div");
 
@@ -3140,6 +3192,11 @@ window.addEventListener("load", (event) => {
       case "refreshWindow":
         refreshWindow();
         break;
+
+      case "generateLocalServiceConfig":
+        generateLocalServiceConfig();
+        break;
+
 
       case "regardsBasic":
         regardsBasic();

@@ -612,6 +612,21 @@ dnslist.forEach((d) => {
   });
 });
 
+ipcMain.handle("removeLocalService", async (event, service) => {
+
+  delete currentUser.localServices[service]
+
+  fs.writeFile(
+    userDataPath + "/PANDORAE/userID/user-id.json",
+    JSON.stringify(currentUser),
+    "utf8",
+    (err) => {
+      if (err) throw err;
+    }
+  );
+})
+
+
 ipcMain.handle("addLocalService", async (event, m) => {
   const loc = m.serviceLocation.split(":");
   dns.lookupService(loc[0], loc[1], (err, hostname, service) => {
@@ -624,9 +639,10 @@ ipcMain.handle("addLocalService", async (event, m) => {
         url: loc[0],
         port: loc[1],
         type: m.serviceType,
+        collection: m.serviceCollection
       };
 
-      fs.writeFileSync(
+      fs.writeFile(
         userDataPath + "/PANDORAE/userID/user-id.json",
         JSON.stringify(currentUser),
         "utf8",
@@ -640,6 +656,7 @@ ipcMain.handle("addLocalService", async (event, m) => {
 
 ipcMain.handle("checkflux", async (event, mess) => {
   const dnsLocalServiceList = currentUser.localServices;
+
   const result = JSON.stringify({ dnslist, dnsLocalServiceList });
 
   return result;
