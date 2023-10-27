@@ -76,7 +76,9 @@ function createWindow() {
   mainWindow.loadFile("index.html");
 
   mainWindow.setMenu(null);
+
   //mainWindow.webContents.openDevTools();
+
   mainWindow.on("closed", () => {
     mainWindow = null;
   });

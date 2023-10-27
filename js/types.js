@@ -803,15 +803,25 @@ const archotype = (id) => {
                   JSON.stringify(r);
 
                 if (r.response.numFound > 0) {
-                  var content = "";
-
                   const doc = r.response.docs[r.response.docs.length - 1];
 
+                  const accessButton = document.createElement("button")
+                  accessButton.innerText = "Ouvrir dans les archives"
+                  accessButton.style = "margin:10px;"
+
+                  const archtarget = `http://rntse.bnf.fr/jsp/lancerDL.jsp?appli=WAYBACK_URL&url=http://archivesinternet.bnf.fr/${doc.wayback_date}/${doc.url}`
+                  accessButton.addEventListener("click", () => shell.openExternal(archtarget))
+
+                  const content = document.createElement("div")
+
                   for (const key in doc) {
-                    content += `<div style="font-weight:bold">${key}</div><div>${doc[key]}</div><br>`;
+                    content.innerHTML += `<div style = "font-weight:bold" > ${key}</div ><div>${doc[key]}</div><br>`;
                   }
 
-                  document.getElementById("tooltip").innerHTML = content;
+                  document.getElementById("tooltip").innerHTML = "";
+
+                  document.getElementById("tooltip").append(accessButton, content);
+
                 } else {
                   document.getElementById("tooltip").innerHTML = "not found";
                 }
@@ -1196,10 +1206,10 @@ const anthropotype = (id) => {
         // The data selection below is very suboptimal, this is a quick hack that needs to be refactored
         /*
         bgrect.on("click", () => {
-          document.getElementById("tooltip").innerHTML = "";
-          menuBuilder();
+                    document.getElementById("tooltip").innerHTML = "";
+                  menuBuilder();
         });
-*/
+                  */
         const displaySelectionTooltip = (e, d) => {
           document.getElementById("tooltip").innerHTML = "";
 
@@ -2886,7 +2896,7 @@ const chronotype = (id) => {
                   d.issued["date-parts"][0][1] +
                   "-" +
                   d.issued["date-parts"][0][2];
-
+ 
                 d.date = parseTime(d.date);
 */
                 d.date = parseTime(d.rebuildDate);
@@ -4613,17 +4623,17 @@ const geotype = (id) => {
           let eachBarWidth = 1;
           /*
                      chartWidth / values.length;
-
+ 
                     if (eachBarWidth > 20) {
                         eachBarWidth = 20;
                     }
-
-
+ 
+ 
                     if (minDiff < 1) {
                         eachBarWidth = eachBarWidth * minDiff;
                     }
-
-
+ 
+ 
                     if (eachBarWidth < 1) {
                         eachBarWidth = 1;
                     }
@@ -5991,33 +6001,33 @@ const gazouillotype = (id) => {
   // Presentation Recorder
   /*
  moveTo = (step) => {
-
+ 
 let buttons = document.querySelectorAll("div.presentationStep");
-
+ 
 buttons.forEach(but=>{
 but.style.backgroundColor="white";
 but.style.color="black";
 })
-
+ 
 buttons[parseInt(step.stepIndex)-1].style.backgroundColor="black";
 buttons[parseInt(step.stepIndex)-1].style.color="white";
-
+ 
 var t = step.zoom;
-
+ 
 view.transition().duration(2000).attr("transform", t);
-
+ 
 gX.transition().duration(2000).call(xAxis.scale(t.rescaleX(x)));
 gY.transition().duration(2000).call(yAxis.scale(t.rescaleY(y)));
-
+ 
 let ext1 = parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[0])));
 let ext2 = parseInt(brushXscale(x.invert(x.range().map(t.invertX, t)[1])));
-
+ 
 d3.select("#selectionBrush")
   .select(".selection")
   .transition().duration(2000)
   .attr("x",ext1)
   .attr("width",parseInt(ext2-ext1));
-
+ 
 d3.select("#selectionBrush")
   .select("g")
   .transition().duration(2000)
@@ -6025,7 +6035,7 @@ d3.select("#selectionBrush")
     "transform",
     "translate(" + ext1 + ",50)"
   );
-
+ 
 d3.select("#selectionBrush")
   .selectAll("g")
   .select(function() {
@@ -6036,9 +6046,9 @@ d3.select("#selectionBrush")
     "transform",
     "translate(" + ext2 + ",50)"
   );
-
+ 
 tooltip.innerHTML = JSON.parse(step.tooltip);
-
+ 
 }
 */
 
