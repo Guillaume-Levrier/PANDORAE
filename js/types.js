@@ -44,7 +44,7 @@ const dataDownload = (data) => {
         { defaultPath: datasetName + ".json" },
         JSON.stringify(data)
       )
-      .then((res) => { });
+      .then((res) => {});
   });
 };
 
@@ -580,18 +580,18 @@ const multiFormat = (date) =>
   (d3.timeSecond(date) < date
     ? formatMillisecond
     : d3.timeMinute(date) < date
-      ? formatSecond
-      : d3.timeHour(date) < date
-        ? formatMinute
-        : d3.timeDay(date) < date
-          ? formatHour
-          : d3.timeMonth(date) < date
-            ? d3.timeWeek(date) < date
-              ? formatDay
-              : formatWeek
-            : d3.timeYear(date) < date
-              ? formatMonth
-              : formatYear)(date);
+    ? formatSecond
+    : d3.timeHour(date) < date
+    ? formatMinute
+    : d3.timeDay(date) < date
+    ? formatHour
+    : d3.timeMonth(date) < date
+    ? d3.timeWeek(date) < date
+      ? formatDay
+      : formatWeek
+    : d3.timeYear(date) < date
+    ? formatMonth
+    : formatYear)(date);
 
 // ========= ARCHOTYPE =========
 const archotype = (id) => {
@@ -628,7 +628,7 @@ const archotype = (id) => {
   var criteriaList = [];
   var currentCriteria = [];
 
-  let resolver, collection;
+  let resolver, arkViewer, collection;
 
   ipcRenderer.invoke("checkflux", true).then((result) => {
     availability = JSON.parse(result);
@@ -640,7 +640,8 @@ const archotype = (id) => {
             availability.dnsLocalServiceList[service].url +
             ":" +
             availability.dnsLocalServiceList[service].port;
-          collection = availability.dnsLocalServiceList[service].collection
+          collection = availability.dnsLocalServiceList[service].collection;
+          arkViewer = availability.dnsLocalServiceList[service].arkViewer;
           break;
       }
     }
@@ -792,40 +793,42 @@ const archotype = (id) => {
           d.domain
             ? 0
             : fetch(
-              `http://${resolver}/solr/${collection}/select?q=url:${JSON.stringify(
-                d.id.replaceAll("&", "%26")
-              )}`
-            )
-              .then((r) => r.json())
-              .then((r) => {
+                `http://${resolver}/solr/${collection}/select?q=url:${JSON.stringify(
+                  d.id.replaceAll("&", "%26")
+                )}`
+              )
+                .then((r) => r.json())
+                .then((r) => {
+                  document.getElementById("tooltip").innerHTML =
+                    JSON.stringify(r);
 
-                document.getElementById("tooltip").innerHTML =
-                  JSON.stringify(r);
+                  if (r.response.numFound > 0) {
+                    const doc = r.response.docs[r.response.docs.length - 1];
 
-                if (r.response.numFound > 0) {
-                  const doc = r.response.docs[r.response.docs.length - 1];
+                    const accessButton = document.createElement("button");
+                    accessButton.innerText = "Ouvrir dans les archives";
+                    accessButton.style = "margin:10px;";
 
-                  const accessButton = document.createElement("button")
-                  accessButton.innerText = "Ouvrir dans les archives"
-                  accessButton.style = "margin:10px;"
+                    const archtarget = `${arkViewer}/${doc.wayback_date}/${doc.url}`;
+                    accessButton.addEventListener("click", () =>
+                      shell.openExternal(archtarget)
+                    );
 
-                  const archtarget = `http://rntse.bnf.fr/jsp/lancerDL.jsp?appli=WAYBACK_URL&url=http://archivesinternet.bnf.fr/${doc.wayback_date}/${doc.url}`
-                  accessButton.addEventListener("click", () => shell.openExternal(archtarget))
+                    const content = document.createElement("div");
 
-                  const content = document.createElement("div")
+                    for (const key in doc) {
+                      content.innerHTML += `<div style = "font-weight:bold" > ${key}</div ><div>${doc[key]}</div><br>`;
+                    }
 
-                  for (const key in doc) {
-                    content.innerHTML += `<div style = "font-weight:bold" > ${key}</div ><div>${doc[key]}</div><br>`;
+                    document.getElementById("tooltip").innerHTML = "";
+
+                    document
+                      .getElementById("tooltip")
+                      .append(accessButton, content);
+                  } else {
+                    document.getElementById("tooltip").innerHTML = "not found";
                   }
-
-                  document.getElementById("tooltip").innerHTML = "";
-
-                  document.getElementById("tooltip").append(accessButton, content);
-
-                } else {
-                  document.getElementById("tooltip").innerHTML = "not found";
-                }
-              })
+                })
         );
       } else {
         node.on("click", (e, d) => {
@@ -1505,46 +1508,46 @@ const filotype = (id) => {
         .on("click", (event, d) => {
           d3.select("#tooltip").html(
             '<p class="legend"><strong><a target="_blank" href="https://mobile.twitter.com/' +
-            d.data.user.name +
-            '">' +
-            d.data.user.name +
-            '</a></strong> <br/><div style="border:1px solid black;"><p>' +
-            d.data.full_text +
-            "</p></div><br><br> Language: " +
-            d.data.user.lang +
-            "<br>Mentions: " +
-            d.data.mentions +
-            "<br>Date: " +
-            d.data.created_at +
-            "<br> Favorite count: " +
-            d.data.favorite_count +
-            "<br>Retweet count: " +
-            d.data.retweet_count +
-            "<br> Source: " +
-            d.data.source +
-            "<br>Tweet id: <a target='_blank' href='https://mobile.twitter.com/" +
-            d.data.user.screen_name +
-            "/status/" +
-            d.data.id_str +
-            "'>" +
-            d.data.id_str +
-            "</a>" +
-            "<br><br><strong>User info</strong><br><img src='" +
-            d.data.user.profile_image_url_https +
-            "' max-width='300'><br><br>Account creation date: " +
-            d.data.user.created_at +
-            "<br> Account name: " +
-            d.data.user.screen_name +
-            "<br> User id: " +
-            d.data.user.id +
-            "<br> User description: " +
-            d.data.user.description +
-            "<br> User follower count: " +
-            d.data.user.followers_count +
-            "<br> User friend count: " +
-            d.data.user.friends_count +
-            "<br> User tweet count: " +
-            d.data.user.statuses_count
+              d.data.user.name +
+              '">' +
+              d.data.user.name +
+              '</a></strong> <br/><div style="border:1px solid black;"><p>' +
+              d.data.full_text +
+              "</p></div><br><br> Language: " +
+              d.data.user.lang +
+              "<br>Mentions: " +
+              d.data.mentions +
+              "<br>Date: " +
+              d.data.created_at +
+              "<br> Favorite count: " +
+              d.data.favorite_count +
+              "<br>Retweet count: " +
+              d.data.retweet_count +
+              "<br> Source: " +
+              d.data.source +
+              "<br>Tweet id: <a target='_blank' href='https://mobile.twitter.com/" +
+              d.data.user.screen_name +
+              "/status/" +
+              d.data.id_str +
+              "'>" +
+              d.data.id_str +
+              "</a>" +
+              "<br><br><strong>User info</strong><br><img src='" +
+              d.data.user.profile_image_url_https +
+              "' max-width='300'><br><br>Account creation date: " +
+              d.data.user.created_at +
+              "<br> Account name: " +
+              d.data.user.screen_name +
+              "<br> User id: " +
+              d.data.user.id +
+              "<br> User description: " +
+              d.data.user.description +
+              "<br> User follower count: " +
+              d.data.user.followers_count +
+              "<br> User friend count: " +
+              d.data.user.friends_count +
+              "<br> User tweet count: " +
+              d.data.user.statuses_count
           );
         });
 
@@ -2978,12 +2981,12 @@ const chronotype = (id) => {
 
         dateAmount.forEach(
           (d) =>
-          (radialVal[d] = {
-            key: d,
-            date: parseTime(d),
-            value: 0,
-            zone: zoneCount,
-          })
+            (radialVal[d] = {
+              key: d,
+              date: parseTime(d),
+              value: 0,
+              zone: zoneCount,
+            })
         );
 
         cluster.forEach((val, key) => {
@@ -3471,10 +3474,10 @@ const chronotype = (id) => {
             })
             .text(
               currentBrush[0].getDate() +
-              "/" +
-              parseInt(currentBrush[0].getMonth() + 1) +
-              "/" +
-              currentBrush[0].getFullYear()
+                "/" +
+                parseInt(currentBrush[0].getMonth() + 1) +
+                "/" +
+                currentBrush[0].getFullYear()
             );
 
           brushLegendW
@@ -3495,10 +3498,10 @@ const chronotype = (id) => {
             })
             .text(
               currentBrush[1].getDate() +
-              "/" +
-              parseInt(currentBrush[1].getMonth() + 1) +
-              "/" +
-              currentBrush[1].getFullYear()
+                "/" +
+                parseInt(currentBrush[1].getMonth() + 1) +
+                "/" +
+                currentBrush[1].getFullYear()
             );
         }
 
@@ -5413,67 +5416,67 @@ const gazouillotype = (id) => {
                 });
               d3.select("#tooltip").html(
                 '<p class="legend"><strong><a target="_blank" href="https://mobile.twitter.com/' +
-                d.from_user_name +
-                '">' +
-                d.from_user_name +
-                '</a></strong> <br/><div style="border:1px solid black;"><p>' +
-                d.text +
-                "</p></div><br><br> Language: " +
-                d.lang +
-                "<br>Date: " +
-                d.date +
-                "<br> Favorite count: " +
-                d.favorite_count +
-                "<br>Reply count: " +
-                d.reply_count +
-                "<br>Retweet count: " +
-                d.retweet_count +
-                "<br>Links: <a target='_blank' href='" +
-                d.links +
-                "'>" +
-                d.links +
-                "</a><br> Hashtags: " +
-                d.hashtags +
-                "<br> Mentionned user names: " +
-                d.mentionned_user_names +
-                "<br> Source: " +
-                d.source_name +
-                "<br>Tweet id: <a target='_blank' href='https://mobile.twitter.com/" +
-                d.from_user_name +
-                "/status/" +
-                d.id +
-                "'>" +
-                d.id +
-                "</a><br> Possibly sensitive: " +
-                d.possibly_sensitive +
-                "<br><br> Embeded media<br><img src='" +
-                d.medias_urls +
-                "' width='300' ><br><br><strong>Location</strong><br/>City: " +
-                d.location +
-                "<br> Latitude:" +
-                d.lat +
-                "<br>Longitude: " +
-                d.lng +
-                "<br><br><strong>User info</strong><br><img src='" +
-                d.from_user_profile_image_url +
-                "' max-width='300'><br><br>Account creation date: " +
-                d.from_user_created_at +
-                "<br> Account name: " +
-                d.from_user_name +
-                "<br> User id: " +
-                d.from_user_id +
-                "<br> User description: " +
-                d.from_user_description +
-                "<br> User follower count: " +
-                d.from_user_followercount +
-                "<br> User friend count: " +
-                d.from_user_friendcount +
-                "<br> User tweet count: " +
-                d.from_user_tweetcount +
-                "" +
-                "<br><br>" +
-                requestContent +
-                "<br><br><br><br><br><br><br><br></p>"
+                  d.from_user_name +
+                  '">' +
+                  d.from_user_name +
+                  '</a></strong> <br/><div style="border:1px solid black;"><p>' +
+                  d.text +
+                  "</p></div><br><br> Language: " +
+                  d.lang +
+                  "<br>Date: " +
+                  d.date +
+                  "<br> Favorite count: " +
+                  d.favorite_count +
+                  "<br>Reply count: " +
+                  d.reply_count +
+                  "<br>Retweet count: " +
+                  d.retweet_count +
+                  "<br>Links: <a target='_blank' href='" +
+                  d.links +
+                  "'>" +
+                  d.links +
+                  "</a><br> Hashtags: " +
+                  d.hashtags +
+                  "<br> Mentionned user names: " +
+                  d.mentionned_user_names +
+                  "<br> Source: " +
+                  d.source_name +
+                  "<br>Tweet id: <a target='_blank' href='https://mobile.twitter.com/" +
+                  d.from_user_name +
+                  "/status/" +
+                  d.id +
+                  "'>" +
+                  d.id +
+                  "</a><br> Possibly sensitive: " +
+                  d.possibly_sensitive +
+                  "<br><br> Embeded media<br><img src='" +
+                  d.medias_urls +
+                  "' width='300' ><br><br><strong>Location</strong><br/>City: " +
+                  d.location +
+                  "<br> Latitude:" +
+                  d.lat +
+                  "<br>Longitude: " +
+                  d.lng +
+                  "<br><br><strong>User info</strong><br><img src='" +
+                  d.from_user_profile_image_url +
+                  "' max-width='300'><br><br>Account creation date: " +
+                  d.from_user_created_at +
+                  "<br> Account name: " +
+                  d.from_user_name +
+                  "<br> User id: " +
+                  d.from_user_id +
+                  "<br> User description: " +
+                  d.from_user_description +
+                  "<br> User follower count: " +
+                  d.from_user_followercount +
+                  "<br> User friend count: " +
+                  d.from_user_friendcount +
+                  "<br> User tweet count: " +
+                  d.from_user_tweetcount +
+                  "" +
+                  "<br><br>" +
+                  requestContent +
+                  "<br><br><br><br><br><br><br><br></p>"
               );
             });
 
@@ -5784,7 +5787,7 @@ const gazouillotype = (id) => {
 
               midDate = new Date(
                 brushContent[0].getTime() +
-                (brushContent[1].getTime() - brushContent[0].getTime()) / 2
+                  (brushContent[1].getTime() - brushContent[0].getTime()) / 2
               );
 
               // TO DO
@@ -6273,52 +6276,52 @@ const pharmacotype = (id) => {
 
           d3.select("#tooltip").html(
             "<h2>" +
-            idMod.BriefTitle +
-            "</h2>" +
-            "<h3>" +
-            idMod.Organization.OrgFullName +
-            " - " +
-            idMod.Organization.OrgClass.toLowerCase() +
-            "</h3>" +
-            "<br>" +
-            " <input type='button' style='cursor:pointer' onclick='shell.openExternal(" +
-            JSON.stringify(
-              "https://clinicaltrials.gov/ct2/show/" + idMod.NCTId
-            ) +
-            ")' value='Open on ClinicalTrials.gov'></input><br><br>" +
-            "<strong>Full title:</strong> " +
-            idMod.OfficialTitle +
-            "<br>" +
-            "<strong>NCTId:</strong> " +
-            idMod.NCTId +
-            "<br>" +
-            "<strong>Org Id:</strong> " +
-            idMod.OrgStudyIdInfo.OrgStudyId +
-            "<br>" +
-            "<br>" +
-            "<h3>Status</h3>" +
-            "<strong>Overall status:</strong> " +
-            statMod.OverallStatus +
-            "<br>" +
-            "<strong>Last verified:</strong> " +
-            statMod.StatusVerifiedDate +
-            "<br>" +
-            "<strong>Expanded access:</strong> " +
-            statMod.ExpandedAccessInfo.HasExpandedAccess +
-            "<br>" +
-            "<strong>FDA regulated:</strong> Drug [" +
-            overSight.IsFDARegulatedDrug +
-            "] - Device [" +
-            overSight.IsFDARegulatedDevice +
-            "]<br>" +
-            "<h3>Description</h3>" +
-            "<strong>Brief summary:</strong> " +
-            descMod.BriefSummary +
-            "<br>" +
-            "<br>" +
-            "<strong>Detailed description:</strong> " +
-            descMod.DetailedDescription +
-            "<br>"
+              idMod.BriefTitle +
+              "</h2>" +
+              "<h3>" +
+              idMod.Organization.OrgFullName +
+              " - " +
+              idMod.Organization.OrgClass.toLowerCase() +
+              "</h3>" +
+              "<br>" +
+              " <input type='button' style='cursor:pointer' onclick='shell.openExternal(" +
+              JSON.stringify(
+                "https://clinicaltrials.gov/ct2/show/" + idMod.NCTId
+              ) +
+              ")' value='Open on ClinicalTrials.gov'></input><br><br>" +
+              "<strong>Full title:</strong> " +
+              idMod.OfficialTitle +
+              "<br>" +
+              "<strong>NCTId:</strong> " +
+              idMod.NCTId +
+              "<br>" +
+              "<strong>Org Id:</strong> " +
+              idMod.OrgStudyIdInfo.OrgStudyId +
+              "<br>" +
+              "<br>" +
+              "<h3>Status</h3>" +
+              "<strong>Overall status:</strong> " +
+              statMod.OverallStatus +
+              "<br>" +
+              "<strong>Last verified:</strong> " +
+              statMod.StatusVerifiedDate +
+              "<br>" +
+              "<strong>Expanded access:</strong> " +
+              statMod.ExpandedAccessInfo.HasExpandedAccess +
+              "<br>" +
+              "<strong>FDA regulated:</strong> Drug [" +
+              overSight.IsFDARegulatedDrug +
+              "] - Device [" +
+              overSight.IsFDARegulatedDevice +
+              "]<br>" +
+              "<h3>Description</h3>" +
+              "<strong>Brief summary:</strong> " +
+              descMod.BriefSummary +
+              "<br>" +
+              "<br>" +
+              "<strong>Detailed description:</strong> " +
+              descMod.DetailedDescription +
+              "<br>"
           );
 
           if (
