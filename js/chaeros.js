@@ -759,6 +759,7 @@ const biorxivRetriever = (query) => {
   var scrapeTimerCount = 0;
 
   requestArray.forEach((req) => {
+    scrapeTimerCount++;
     let requestContent = {
       type: "request",
       model: "biorxiv-content-retriever",
@@ -769,7 +770,7 @@ const biorxivRetriever = (query) => {
 
     setTimeout(
       () => ipcRenderer.send("biorxiv-retrieve", requestContent),
-      scrapeTimerCount * 1000
+      scrapeTimerCount * 6000 + Math.random() * 6000
     );
   });
 
@@ -793,8 +794,8 @@ const biorxivRetriever = (query) => {
 
   const retrievedDocs = (dois) => {
     const limiter = new bottleneck({
-      maxConcurrent: 1,
-      minTime: 200,
+      maxConcurrent: 3,
+      minTime: 400,
     });
 
     ipcRenderer.send("chaeros-notification", "hydrating via bioRxiv api");
@@ -809,10 +810,13 @@ const biorxivRetriever = (query) => {
       bioRxivPromises.push("https://api.biorxiv.org/details/biorxiv/" + d)
     );
 
+    console.log(dois);
+
     limiter
       .schedule(() => Promise.all(bioRxivPromises.map((d) => fetch(d))))
       .then((res) => Promise.all(res.map((d) => d.json())))
       .then((res) => {
+        console.log(res);
         var articles = [];
 
         res.forEach((d) => articles.push(d.collection[0]));
@@ -820,78 +824,94 @@ const biorxivRetriever = (query) => {
         var cslArticles = [];
 
         articles.forEach((d) => {
-          let e = {
-            itemType: "journalArticle",
-            title: "",
-            creators: [],
-            abstractNote: "",
-            publicationTitle: "",
-            volume: "",
-            issue: "",
-            pages: "",
-            date: "",
-            series: "",
-            seriesTitle: "",
-            seriesText: "",
-            journalAbbreviation: "",
-            language: "",
-            DOI: "",
-            ISSN: "",
-            shortTitle: "",
-            url: "",
-            accessDate: "",
-            archive: "",
-            archiveLocation: "",
-            libraryCatalog: "",
-            callNumber: "",
-            rights: "",
-            extra: "",
-            tags: [],
-            collections: [],
-            relations: {},
-          };
-
-          e.DOI = d.doi;
-          e.title = d.title;
-          e.date = d.date;
-          e.abstractNote = d.abstract;
-          e.shortTitle = d.author_corresponding_institution;
-
-          let pos = 0;
-
-          e.creators.push({
-            creatorType: "author",
-            firstName: d.author_corresponding.substring(
-              0,
-              d.author_corresponding.indexOf(" ")
-            ),
-            lastName: d.author_corresponding.substring(
-              d.author_corresponding.indexOf(" ") + 1,
-              d.author_corresponding.length - 1
-            ),
-          });
-          while (pos !== -1) {
-            if (pos === 0) {
-            } else {
-              pos = pos + 2;
-            }
-            let endpos = d.authors.indexOf(";", pos);
-            if (endpos === -1) {
-              endpos = d.authors.length;
-            }
-            let auth = {
-              creatorType: "author",
-              lastName: d.authors.substring(pos, d.authors.indexOf(",", pos)),
-              firstName: d.authors.substring(
-                d.authors.indexOf(",", pos) + 1,
-                endpos
-              ),
+          if (d) {
+            let e = {
+              itemType: "journalArticle",
+              title: "",
+              creators: [],
+              abstractNote: "",
+              publicationTitle: "",
+              volume: "",
+              issue: "",
+              pages: "",
+              date: "",
+              series: "",
+              seriesTitle: "",
+              seriesText: "",
+              journalAbbreviation: "",
+              language: "",
+              DOI: "",
+              ISSN: "",
+              shortTitle: "",
+              url: "",
+              accessDate: "",
+              archive: "",
+              archiveLocation: "",
+              libraryCatalog: "",
+              callNumber: "",
+              rights: "",
+              extra: "",
+              tags: [],
+              collections: [],
+              relations: {},
             };
-            e.creators.push(auth);
-            pos = d.authors.indexOf(";", pos);
-          }
 
-          cslArticles.push(e);
+            if (d.hasOwnProperty("doi")) {
+              e.DOI = d.doi;
+            }
+
+            if (d.hasOwnProperty("title")) {
+              e.title = d.title;
+            }
+
+            if (d.hasOwnProperty("date")) {
+              e.date = d.date;
+            }
+
+            if (d.hasOwnProperty("abstract")) {
+              e.abstractNote = d.abstract;
+            }
+
+            if (d.hasOwnProperty("author_corresponding_institution")) {
+              e.shortTitle = d.author_corresponding_institution;
+            }
+
+            let pos = 0;
+
+            e.creators.push({
+              creatorType: "author",
+              firstName: d.author_corresponding.substring(
+                0,
+                d.author_corresponding.indexOf(" ")
+              ),
+              lastName: d.author_corresponding.substring(
+                d.author_corresponding.indexOf(" ") + 1,
+                d.author_corresponding.length - 1
+              ),
+            });
+            while (pos !== -1) {
+              if (pos === 0) {
+              } else {
+                pos = pos + 2;
+              }
+              let endpos = d.authors.indexOf(";", pos);
+              if (endpos === -1) {
+                endpos = d.authors.length;
+              }
+              let auth = {
+                creatorType: "author",
+                lastName: d.authors.substring(pos, d.authors.indexOf(",", pos)),
+                firstName: d.authors.substring(
+                  d.authors.indexOf(",", pos) + 1,
+                  endpos
+                ),
+              };
+              e.creators.push(auth);
+              pos = d.authors.indexOf(";", pos);
+            }
+
+            cslArticles.push(e);
+          }
         });
 
         pandodb.open();
@@ -915,7 +935,7 @@ const biorxivRetriever = (query) => {
           "bioRxiv results successfully poured in CSL-JSON database"
         ); // Log success
         setTimeout(() => {
-          ipcRenderer.send("win-destroy", winId);
+          //ipcRenderer.send("win-destroy", winId);
         }, 500);
       })
       .catch((error) => {
