@@ -259,10 +259,10 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Actioning powerValve on " +
-    JSON.stringify(item.name) +
-    " through the " +
-    fluxAction +
-    " procedure."
+      JSON.stringify(item.name) +
+      " through the " +
+      fluxAction +
+      " procedure."
   );
 
   let fluxArgs = {}; // Arguments are stored in an object
@@ -270,7 +270,7 @@ const powerValve = (fluxAction, item) => {
   let itemname = item.name; // item argument is usually stored in "this"
 
   switch (
-  fluxAction // According to function name ...
+    fluxAction // According to function name ...
   ) {
     case "wosBuild":
       fluxArgs.wosquery = wosReq;
@@ -448,11 +448,11 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Sending to CHÆROS action " +
-    fluxAction +
-    " with arguments " +
-    JSON.stringify(fluxArgs) +
-    " " +
-    message
+      fluxAction +
+      " with arguments " +
+      JSON.stringify(fluxArgs) +
+      " " +
+      message
   );
 
   ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
@@ -1105,7 +1105,6 @@ const affilRank = () => {
                   affils[affName].numCount++;
 
                   affils[affName].citedBy += parseInt(art["citedby-count"]);
-
                 });
               }
             }
@@ -1148,12 +1147,12 @@ const ScopusList = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='scopColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            "</label><br> "
         );
       }
 
@@ -1229,14 +1228,14 @@ const zoteroCollectionRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          " - " +
-          coll.name +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            " - " +
+            coll.name +
+            "</label><br> "
         );
       }
 
@@ -1277,9 +1276,9 @@ const zoteroCollectionRetriever = () => {
       ipcRenderer.send(
         "console-logs",
         "Error in retrieving collections for Zotero id " +
-        zoteroUser +
-        " : " +
-        err
+          zoteroUser +
+          " : " +
+          err
       ); // Log error
     });
 };
@@ -1315,14 +1314,14 @@ const zoteroLocalRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          " - " +
-          coll.name +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            " - " +
+            coll.name +
+            "</label><br> "
         );
       }
 
@@ -1383,10 +1382,10 @@ const datasetLoader = () => {
         ipcRenderer.send(
           "console-logs",
           "Dataset " +
-          dataset.name +
-          " loaded into " +
-          JSON.stringify(target) +
-          "."
+            dataset.name +
+            " loaded into " +
+            JSON.stringify(target) +
+            "."
         ); // Log action
       });
     });
@@ -1559,7 +1558,7 @@ const hypheCorpusList = (target, prevId) => {
       } else {
       }
     })
-    .catch((e) => { });
+    .catch((e) => {});
 };
 
 const loadHyphe = (corpus, endpoint, pass) => {
@@ -1826,17 +1825,15 @@ const queryBnFSolr = (but) => {
     but.args.url +
     ":" +
     but.args.port +
-    "/solr/" + but.args.collection + "/select?q=" +
+    "/solr/" +
+    but.args.collection +
+    "/select?q=" +
     queryContent +
     "&rows=0&sort=crawl_date%20desc&group=true&group.field=url" +
     "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
     "&rows=0&sort=score+desc&group.ngroups=true";
 
-
-
   d3.json(query).then((res) => {
-
-
     var previewer = document.getElementById(
       "bnf-solr-basic-previewer-" + but.serv
     );
@@ -1854,25 +1851,25 @@ const queryBnFSolr = (but) => {
   });
 };
 
-
 const generateLocalServiceConfig = () => {
   const newServiceType = document.getElementById("newServiceType");
 
   switch (newServiceType.value) {
     case "BNF-SOLR":
-      const divs = ["newServiceName", "newServiceLocation", "newServiceCollection"]
+      const divs = [
+        "newServiceName",
+        "newServiceLocation",
+        "newServiceCollection",
+      ];
 
-      divs.forEach(d => document.getElementById(d).style.display = "block")
+      divs.forEach((d) => (document.getElementById(d).style.display = "block"));
 
       break;
 
     default:
       break;
   }
-
-
-}
-
+};
 
 //==== Manual Merging of Authors ====
 // This one is a bit trick because it can be quite computationnaly intensive and yet has to stay in FLUX.
@@ -2144,8 +2141,9 @@ const manualMergeAuthors = () => {
 
             for (let j = 0; j < 5; ++j) {
               if (autharticles[j]) {
-                refs += `[<a target="_blank" href="https://doi.org/${autharticles[j]
-                  }">${j + 1}</a>] `;
+                refs += `[<a target="_blank" href="https://doi.org/${
+                  autharticles[j]
+                }">${j + 1}</a>] `;
               }
             }
           }
@@ -2361,29 +2359,29 @@ const addLocalService = () => {
   const serviceName = document.getElementById("newServiceName").value;
   const serviceLocation = document.getElementById("newServiceLocation").value;
   const serviceType = document.getElementById("newServiceType").value;
-  const serviceCollection = document.getElementById("newServiceCollection").value;
+  const serviceCollection = document.getElementById(
+    "newServiceCollection"
+  ).value;
 
   const service = {
     serviceName,
     serviceLocation,
     serviceType,
-    serviceCollection
-  }
-  console.log(service)
+    serviceCollection,
+  };
+  console.log(service);
   ipcRenderer.invoke("addLocalService", service);
 
-  const serviceBut = document.getElementById("new-service-button")
+  const serviceBut = document.getElementById("new-service-button");
 
   serviceBut.style.transition = "all 1s ease-out";
   serviceBut.style.backgroundPosition = "right bottom";
   serviceBut.style.color = "black";
   serviceBut.innerText = "Service added - please reload this page";
-
 };
 
-const removeLocalService = (serviceName) => ipcRenderer.invoke("removeLocalService", serviceName);
-
-
+const removeLocalService = (serviceName) =>
+  ipcRenderer.invoke("removeLocalService", serviceName);
 
 //========== STARTING FLUX ==========
 ipcRenderer.send("console-logs", "Opening Flux"); // Sending notification to console
@@ -2538,7 +2536,8 @@ window.addEventListener("load", (event) => {
     {
       id: "export-affil-rank",
       func: "affilRank",
-    }, {
+    },
+    {
       id: "newServiceType",
       func: "generateLocalServiceConfig",
     },
@@ -2563,7 +2562,6 @@ window.addEventListener("load", (event) => {
   };
 
   function configureCascade() {
-
     for (const theme in selections) {
       const select = document.getElementById(theme);
       select.addEventListener("change", () => {
@@ -2578,7 +2576,6 @@ window.addEventListener("load", (event) => {
   configureCascade();
 
   function updateCascade() {
-
     traces = [];
     document.getElementById("cascade").innerHTML = "";
     availability.dnslist.forEach((d) => {
@@ -2598,7 +2595,7 @@ window.addEventListener("load", (event) => {
 
           case "BIORXIV":
             if (selections.scientometricsSelect) {
-              addHop(["OPEN", "BIORXIV", "ENRICHMENT"]);
+              addHop(["OPEN", "BIORXIV", "ZOTERO"]);
             }
             break;
 
@@ -2645,7 +2642,6 @@ window.addEventListener("load", (event) => {
     }
 
     if (selections.localSelect) {
-
       for (const service in availability.dnsLocalServiceList) {
         switch (availability.dnsLocalServiceList[service].type) {
           case "BNF-SOLR":
@@ -2661,7 +2657,6 @@ window.addEventListener("load", (event) => {
 
     buttonList.forEach((but) => {
       document.getElementById(but.id).addEventListener("click", (e) => {
-
         funcSwitch(e, but);
         e.preventDefault();
         return false;
@@ -2669,13 +2664,11 @@ window.addEventListener("load", (event) => {
     });
   }
 
-
-
   ipcRenderer.invoke("checkflux", true).then((result) => {
     availability = JSON.parse(result);
     updateCascade();
 
-    const buttonList = []
+    const buttonList = [];
 
     const localServicePreviewer = document.getElementById(
       "localservices-basic-previewer"
@@ -2685,29 +2678,25 @@ window.addEventListener("load", (event) => {
 
     localServicePreviewer.append(table);
 
-
     for (const service in availability.dnsLocalServiceList) {
       switch (availability.dnsLocalServiceList[service].type) {
         case "BNF-SOLR":
           const serv = service.toUpperCase().replace(" ", "-");
 
-
-
           const serviceLine = document.createElement("li");
-          serviceLine.style = "display:flex;justify-content: space-between;"
+          serviceLine.style = "display:flex;justify-content: space-between;";
           const serviceName = document.createElement("div");
           serviceName.innerHTML = `- ${availability.dnsLocalServiceList[service].type} - ${service}`;
           const serviceRemove = document.createElement("div");
-          serviceRemove.style = "font-weight:bold;"
+          serviceRemove.style = "font-weight:bold;";
           serviceRemove.innerText = "x";
           serviceRemove.addEventListener("click", () => {
-            serviceLine.remove()
-            removeLocalService(service)
-          })
-          serviceLine.append(serviceName, serviceRemove)
+            serviceLine.remove();
+            removeLocalService(service);
+          });
+          serviceLine.append(serviceName, serviceRemove);
 
-          table.append(serviceLine)
-
+          table.append(serviceLine);
 
           const solrCont = document.createElement("div");
 
@@ -2760,10 +2749,8 @@ window.addEventListener("load", (event) => {
   });
 
   function funcSwitch(e, but) {
-
     switch (but.func) {
       case "queryBnFSolr":
-
         queryBnFSolr(but);
         break;
       case "addLocalService":
@@ -2816,7 +2803,6 @@ window.addEventListener("load", (event) => {
       case "generateLocalServiceConfig":
         generateLocalServiceConfig();
         break;
-
 
       case "regardsBasic":
         regardsBasic();
