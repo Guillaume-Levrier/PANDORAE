@@ -1314,6 +1314,7 @@ const clinicTrialBasicRetriever = () => {
   fetch(rootUrl + "expr=" + ctQuery + "&fmt=json")
     .then((res) => res.json())
     .then((firstResponse) => {
+      console.log(firstResponse);
       let totalResults = firstResponse.FullStudiesResponse.NStudiesFound;
 
       let requestAmount = (totalResults) => {
@@ -1324,7 +1325,8 @@ const clinicTrialBasicRetriever = () => {
         }
       };
 
-      let date = date();
+      let date =
+        new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
 
       // Display metadata in a div
       let dataBasicPreview =
@@ -1339,6 +1341,8 @@ const clinicTrialBasicRetriever = () => {
         date +
         "<br>[Reload this window to submit a different query.]<br>" +
         "<br>Amount of requests per second: <span id='scopusRangeValue'>1</span><input style='margin-left:30px' type='range' oninput='this.previousSibling.innerText=parseInt(this.value)' id='scopusRange' min='1' step='any' max='20' value='1'><br><br>";
+
+      console.log(dataBasicPreview);
 
       document.getElementById("clinical_trials-basic-previewer").innerHTML =
         dataBasicPreview;
@@ -1355,6 +1359,7 @@ const clinicTrialBasicRetriever = () => {
       document.getElementById("clinical_trials-query").style.display = "block";
     })
     .catch(function (e) {
+      console.log(e);
       fluxButtonAction(
         "scopus-basic-query",
         false,

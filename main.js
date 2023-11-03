@@ -180,7 +180,7 @@ const openModal = (modalFile, scrollTo) => {
         setTimeout(() => win.webContents.send("scroll-to", scrollTo), 1000);
       }
     });
-    // win.webContents.openDevTools();
+    win.webContents.openDevTools();
   }
 };
 
@@ -547,7 +547,7 @@ ipcMain.handle("restart", async (event, mess) => {
 
 ipcMain.handle("saveDataset", async (event, target, data) => {
   dialog.showSaveDialog(target).then((filePath) => {
-    fs.writeFile(filePath.filePath, data, () => { });
+    fs.writeFile(filePath.filePath, data, () => {});
   });
 });
 
@@ -555,7 +555,7 @@ ipcMain.handle("savePNG", async (event, target) => {
   setTimeout(() => {
     mainWindow.capturePage().then((img) => {
       dialog.showSaveDialog(target).then((filePath) => {
-        fs.writeFile(filePath.filePath, img.toPNG(), () => { });
+        fs.writeFile(filePath.filePath, img.toPNG(), () => {});
       });
     });
   }, 250);
@@ -615,8 +615,7 @@ dnslist.forEach((d) => {
 });
 
 ipcMain.handle("removeLocalService", async (event, service) => {
-
-  delete currentUser.localServices[service]
+  delete currentUser.localServices[service];
 
   fs.writeFile(
     userDataPath + "/PANDORAE/userID/user-id.json",
@@ -626,8 +625,7 @@ ipcMain.handle("removeLocalService", async (event, service) => {
       if (err) throw err;
     }
   );
-})
-
+});
 
 ipcMain.handle("addLocalService", async (event, m) => {
   const loc = m.serviceLocation.split(":");
@@ -641,7 +639,7 @@ ipcMain.handle("addLocalService", async (event, m) => {
         url: loc[0],
         port: loc[1],
         type: m.serviceType,
-        collection: m.serviceCollection
+        collection: m.serviceCollection,
       };
 
       fs.writeFile(
