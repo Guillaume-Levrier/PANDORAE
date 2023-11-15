@@ -259,10 +259,10 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Actioning powerValve on " +
-      JSON.stringify(item.name) +
-      " through the " +
-      fluxAction +
-      " procedure."
+    JSON.stringify(item.name) +
+    " through the " +
+    fluxAction +
+    " procedure."
   );
 
   let fluxArgs = {}; // Arguments are stored in an object
@@ -270,7 +270,7 @@ const powerValve = (fluxAction, item) => {
   let itemname = item.name; // item argument is usually stored in "this"
 
   switch (
-    fluxAction // According to function name ...
+  fluxAction // According to function name ...
   ) {
     case "wosBuild":
       fluxArgs.wosquery = wosReq;
@@ -278,9 +278,21 @@ const powerValve = (fluxAction, item) => {
       message = "Connecting to WoS";
       break;
     case "BNF-SOLR":
+      console.log(item)
       const fieldId = item.id.replace("full", "");
       fluxArgs.bnfsolrquery = document.getElementById(fieldId).value;
       fluxArgs.meta = solrbnfcount[fluxArgs.bnfsolrquery];
+
+      const serv = item.id.replace("bnf-solr-fullquery-", "");
+
+      fluxArgs.dateFrom = document.getElementById(
+        `bnf-solr-${serv}-date-from`
+      ).value;
+
+      fluxArgs.dateTo = document.getElementById(
+        `bnf-solr-${serv}-date-to`
+      ).value;
+
       message = "Connecting to BNF-SOLR";
       break;
 
@@ -448,11 +460,11 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Sending to CHÆROS action " +
-      fluxAction +
-      " with arguments " +
-      JSON.stringify(fluxArgs) +
-      " " +
-      message
+    fluxAction +
+    " with arguments " +
+    JSON.stringify(fluxArgs) +
+    " " +
+    message
   );
 
   ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
@@ -1152,12 +1164,12 @@ const ScopusList = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='scopColCheck' value='" +
-            coll.key +
-            "' name='" +
-            coll.name +
-            "' type='checkbox'/><label> " +
-            coll.key +
-            "</label><br> "
+          coll.key +
+          "' name='" +
+          coll.name +
+          "' type='checkbox'/><label> " +
+          coll.key +
+          "</label><br> "
         );
       }
 
@@ -1233,14 +1245,14 @@ const zoteroCollectionRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-            coll.key +
-            "' name='" +
-            coll.name +
-            "' type='checkbox'/><label> " +
-            coll.key +
-            " - " +
-            coll.name +
-            "</label><br> "
+          coll.key +
+          "' name='" +
+          coll.name +
+          "' type='checkbox'/><label> " +
+          coll.key +
+          " - " +
+          coll.name +
+          "</label><br> "
         );
       }
 
@@ -1281,9 +1293,9 @@ const zoteroCollectionRetriever = () => {
       ipcRenderer.send(
         "console-logs",
         "Error in retrieving collections for Zotero id " +
-          zoteroUser +
-          " : " +
-          err
+        zoteroUser +
+        " : " +
+        err
       ); // Log error
     });
 };
@@ -1319,14 +1331,14 @@ const zoteroLocalRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-            coll.key +
-            "' name='" +
-            coll.name +
-            "' type='checkbox'/><label> " +
-            coll.key +
-            " - " +
-            coll.name +
-            "</label><br> "
+          coll.key +
+          "' name='" +
+          coll.name +
+          "' type='checkbox'/><label> " +
+          coll.key +
+          " - " +
+          coll.name +
+          "</label><br> "
         );
       }
 
@@ -1387,10 +1399,10 @@ const datasetLoader = () => {
         ipcRenderer.send(
           "console-logs",
           "Dataset " +
-            dataset.name +
-            " loaded into " +
-            JSON.stringify(target) +
-            "."
+          dataset.name +
+          " loaded into " +
+          JSON.stringify(target) +
+          "."
         ); // Log action
       });
     });
@@ -1563,7 +1575,7 @@ const hypheCorpusList = (target, prevId) => {
       } else {
       }
     })
-    .catch((e) => {});
+    .catch((e) => { });
 };
 
 const loadHyphe = (corpus, endpoint, pass) => {
@@ -1823,6 +1835,14 @@ const queryBnFSolr = (but) => {
     `bnf-solr-query-${but.serv}`
   ).value;
 
+  const dateFrom = document.getElementById(
+    `bnf-solr-${but.serv}-date-from`
+  ).value;
+
+  const dateTo = document.getElementById(
+    `bnf-solr-${but.serv}-date-to`
+  ).value;
+
   // Ici, ne prendre que la dernière capture connue
 
   const query =
@@ -1832,7 +1852,9 @@ const queryBnFSolr = (but) => {
     but.args.port +
     "/solr/" +
     but.args.collection +
-    "/select?q=" +
+    "/select?facet.field=crawl_year&facet=on&fq=crawl_date:[" +
+    dateFrom + "T00:00:00Z" + "%20TO%20" + dateTo + "T00:00:00Z]&" +
+    "q=" +
     queryContent +
     "&rows=0&sort=crawl_date%20desc&group=true&group.field=url" +
     "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
@@ -2146,9 +2168,8 @@ const manualMergeAuthors = () => {
 
             for (let j = 0; j < 5; ++j) {
               if (autharticles[j]) {
-                refs += `[<a target="_blank" href="https://doi.org/${
-                  autharticles[j]
-                }">${j + 1}</a>] `;
+                refs += `[<a target="_blank" href="https://doi.org/${autharticles[j]
+                  }">${j + 1}</a>] `;
               }
             }
           }
@@ -2714,6 +2735,8 @@ window.addEventListener("load", (event) => {
                       <br><br>
                       <form id="bnf-solr-form" autocomplete="off">Query:<br>
                         <input class="fluxInput" spellcheck="false" id="bnf-solr-query-${serv}" type="text" value=""><br><br>
+                        rom: <input type="date" id="bnf-solr-${serv}-date-from"> - To: <input type="date" id="bnf-solr-${serv}-date-to"><br>
+                        <br>
                         <button type="submit" class="flux-button" id="bnf-solr-basic-query-${serv}">Retrieve
                           basic info</button>&nbsp;&nbsp;
                         <div id="bnf-solr-basic-previewer-${serv}" style="position:relative;"></div><br><br>
