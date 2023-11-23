@@ -180,7 +180,7 @@ const openModal = (modalFile, scrollTo) => {
         setTimeout(() => win.webContents.send("scroll-to", scrollTo), 1000);
       }
     });
-    win.webContents.openDevTools();
+    //win.webContents.openDevTools();
   }
 };
 

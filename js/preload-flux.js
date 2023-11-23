@@ -639,10 +639,10 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Actioning powerValve on " +
-    JSON.stringify(item.name) +
-    " through the " +
-    fluxAction +
-    " procedure."
+      JSON.stringify(item.name) +
+      " through the " +
+      fluxAction +
+      " procedure."
   );
 
   let fluxArgs = {}; // Arguments are stored in an object
@@ -650,7 +650,7 @@ const powerValve = (fluxAction, item) => {
   let itemname = item.name; // item argument is usually stored in "this"
 
   switch (
-  fluxAction // According to function name ...
+    fluxAction // According to function name ...
   ) {
     case "wosBuild":
       fluxArgs.wosquery = wosReq;
@@ -658,7 +658,7 @@ const powerValve = (fluxAction, item) => {
       message = "Connecting to WoS";
       break;
     case "BNF-SOLR":
-      console.log(item)
+      console.log(item);
       const fieldId = item.id.replace("full", "");
       fluxArgs.bnfsolrquery = document.getElementById(fieldId).value;
       fluxArgs.meta = solrbnfcount[fluxArgs.bnfsolrquery];
@@ -840,11 +840,11 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Sending to CHÆROS action " +
-    fluxAction +
-    " with arguments " +
-    JSON.stringify(fluxArgs) +
-    " " +
-    message
+      fluxAction +
+      " with arguments " +
+      JSON.stringify(fluxArgs) +
+      " " +
+      message
   );
 
   ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
@@ -1212,7 +1212,10 @@ const scopusBasicRetriever = (checker) => {
             return 2;
           }
         };
-        let date = date();
+        const date = () =>
+          new Date().toLocaleDateString() +
+          "-" +
+          new Date().toLocaleTimeString();
 
         // Display metadata in a div
         let dataBasicPreview =
@@ -1224,7 +1227,7 @@ const scopusBasicRetriever = (checker) => {
           "<br>Amount of requests needed to retrieve full response : " +
           requestAmount(totalResults) +
           "<br>Query date: " +
-          date +
+          date() +
           "<br>[Reload this window to submit a different query.]<br>" +
           "<br>Amount of requests per second: <span id='scopusRangeValue'>1</span><input style='margin-left:30px' type='range' oninput='this.previousSibling.innerText=parseInt(this.value)' id='scopusRange' min='1' step='any' max='20' value='1'><br><br>";
 
@@ -1242,8 +1245,10 @@ const scopusBasicRetriever = (checker) => {
         // Display next step option: send full request to Chæros
         document.getElementById("scopus-query").style.display = "block";
       }
-    })
+    });
+  /*
     .catch(function (e) {
+
       fluxButtonAction(
         "scopus-basic-query",
         false,
@@ -1251,7 +1256,7 @@ const scopusBasicRetriever = (checker) => {
         e.message
       );
       ipcRenderer.send("console-logs", "Query error : " + e); // Log error
-    });
+    });*/
 };
 
 //========== biorxivBasicRetriever ==========
@@ -1544,12 +1549,12 @@ const ScopusList = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='scopColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            "</label><br> "
         );
       }
 
@@ -1625,14 +1630,14 @@ const zoteroCollectionRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          " - " +
-          coll.name +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            " - " +
+            coll.name +
+            "</label><br> "
         );
       }
 
@@ -1673,9 +1678,9 @@ const zoteroCollectionRetriever = () => {
       ipcRenderer.send(
         "console-logs",
         "Error in retrieving collections for Zotero id " +
-        zoteroUser +
-        " : " +
-        err
+          zoteroUser +
+          " : " +
+          err
       ); // Log error
     });
 };
@@ -1711,14 +1716,14 @@ const zoteroLocalRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          " - " +
-          coll.name +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            " - " +
+            coll.name +
+            "</label><br> "
         );
       }
 
@@ -1779,10 +1784,10 @@ const datasetLoader = () => {
         ipcRenderer.send(
           "console-logs",
           "Dataset " +
-          dataset.name +
-          " loaded into " +
-          JSON.stringify(target) +
-          "."
+            dataset.name +
+            " loaded into " +
+            JSON.stringify(target) +
+            "."
         ); // Log action
       });
     });
@@ -1955,7 +1960,7 @@ const hypheCorpusList = (target, prevId) => {
       } else {
       }
     })
-    .catch((e) => { });
+    .catch((e) => {});
 };
 
 const loadHyphe = (corpus, endpoint, pass) => {
@@ -2219,9 +2224,7 @@ const queryBnFSolr = (but) => {
     `bnf-solr-${but.serv}-date-from`
   ).value;
 
-  const dateTo = document.getElementById(
-    `bnf-solr-${but.serv}-date-to`
-  ).value;
+  const dateTo = document.getElementById(`bnf-solr-${but.serv}-date-to`).value;
 
   // Ici, ne prendre que la dernière capture connue
 
@@ -2233,7 +2236,11 @@ const queryBnFSolr = (but) => {
     "/solr/" +
     but.args.collection +
     "/select?facet.field=crawl_year&facet=on&fq=crawl_date:[" +
-    dateFrom + "T00:00:00Z" + "%20TO%20" + dateTo + "T00:00:00Z]&" +
+    dateFrom +
+    "T00:00:00Z" +
+    "%20TO%20" +
+    dateTo +
+    "T00:00:00Z]&" +
     "q=" +
     queryContent +
     "&rows=0&sort=crawl_date%20desc&group=true&group.field=url" +
@@ -2548,8 +2555,9 @@ const manualMergeAuthors = () => {
 
             for (let j = 0; j < 5; ++j) {
               if (autharticles[j]) {
-                refs += `[<a target="_blank" href="https://doi.org/${autharticles[j]
-                  }">${j + 1}</a>] `;
+                refs += `[<a target="_blank" href="https://doi.org/${
+                  autharticles[j]
+                }">${j + 1}</a>] `;
               }
             }
           }
