@@ -3,10 +3,12 @@ const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } =
   electron;
 const fs = require("fs");
 
+// original
 //const userDataPath = app.getPath("userData");
 
-// hack to make this truly portable
-const userDataPath = app.getPath("documents");
+// This is an attempt to make sure all devices, including professional ones with
+// very restricted profiles can launch the app and save credentials/API keys/datasets
+const userDataPath = app.getAppPath();
 
 const dns = require("dns");
 
@@ -29,7 +31,7 @@ const createUserId = () => {
     UserName: "Enter your name",
     UserMail: "Enter your e-mail (not required)",
     ZoteroID: "Enter your Zotero ID (required to use Flux features)",
-    theme: { value: "normal" },
+    theme: { value: "vega" },
     locale: "EN",
   };
 
@@ -79,9 +81,7 @@ function createWindow() {
 
   //mainWindow.webContents.openDevTools();
 
-  mainWindow.on("closed", () => {
-    mainWindow = null;
-  });
+  mainWindow.on("closed", () => (mainWindow = null));
 }
 
 //FileSystem
@@ -547,7 +547,7 @@ ipcMain.handle("restart", async (event, mess) => {
 
 ipcMain.handle("saveDataset", async (event, target, data) => {
   dialog.showSaveDialog(target).then((filePath) => {
-    fs.writeFile(filePath.filePath, data, () => { });
+    fs.writeFile(filePath.filePath, data, () => {});
   });
 });
 
@@ -555,7 +555,7 @@ ipcMain.handle("savePNG", async (event, target) => {
   setTimeout(() => {
     mainWindow.capturePage().then((img) => {
       dialog.showSaveDialog(target).then((filePath) => {
-        fs.writeFile(filePath.filePath, img.toPNG(), () => { });
+        fs.writeFile(filePath.filePath, img.toPNG(), () => {});
       });
     });
   }, 250);
@@ -643,7 +643,7 @@ ipcMain.handle("addLocalService", async (event, m) => {
       };
 
       if (m.hasOwnProperty("serviceArkViewer")) {
-        currentUser.localServices[m.serviceName].arkViewer = m.serviceArkViewer
+        currentUser.localServices[m.serviceName].arkViewer = m.serviceArkViewer;
       }
 
       fs.writeFile(
