@@ -2216,6 +2216,9 @@ const regardsBasic = () => {
 var solrbnfcount = {};
 
 const queryBnFSolr = (but) => {
+
+  console.log(but)
+
   const queryContent = document.getElementById(
     `bnf-solr-query-${but.serv}`
   ).value;
@@ -2226,15 +2229,33 @@ const queryBnFSolr = (but) => {
 
   const dateTo = document.getElementById(`bnf-solr-${but.serv}-date-to`).value;
 
-  // Ici, ne prendre que la dernière capture connue
+const collections = document.getElementsByClassName(`bnf-solr-checkbox-${but.serv}`)
 
+// As it happens, the solr endpoint chosen by the user can have several collections
+// in it which can have different names. Rather than letting the user enter the 
+// name of the target collection in the config file, a request is sent on FLUX
+// generation to check for available collections in the target SOLR. This means
+// that the user might want to send the same request to several collections.
+// 
+// De facto, in the first use of that system, there is 1 collection per SOLR in
+// production, so the user won't have much of a choice. This is more of a "let's
+// help the user by not making them input something" choice than a future proofing
+// though it acts like it too.
+
+const targets =[]  
+
+for (let i = 0; i < collections.length; i++) {
+ const collection = collections[i];
+  console.log(collection.value)
+  // Ici, ne prendre que la dernière capture connue
+/*
   const query =
     "http://" +
     but.args.url +
     ":" +
     but.args.port +
     "/solr/" +
-    but.args.collection +
+    collection +
     "/select?facet.field=crawl_year&facet=on&fq=crawl_date:[" +
     dateFrom +
     "T00:00:00Z" +
@@ -2246,6 +2267,14 @@ const queryBnFSolr = (but) => {
     "&rows=0&sort=crawl_date%20desc&group=true&group.field=url" +
     "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
     "&rows=0&sort=score+desc&group.ngroups=true";
+    targets.push(d3.json(query))
+    */
+  }
+
+/*
+  Promise.all(targets).then(r=>{
+    console.log(r)
+  } )
 
   d3.json(query).then((res) => {
     var previewer = document.getElementById(
@@ -2263,6 +2292,8 @@ const queryBnFSolr = (but) => {
         "flex";
     }
   });
+  */
+
 };
 
 const generateLocalServiceConfig = () => {
@@ -3120,35 +3151,59 @@ window.addEventListener("load", (event) => {
           solrCont.style.display = "none";
           solrCont.className = "fluxTabs";
 
-          solrCont.innerHTML = `<!-- BNF SOLR TAB -->     
-                      <span class="flux-title">${service.toUpperCase()}</span>
-                      <br><br>
-                      <form id="bnf-solr-form" autocomplete="off">Query:<br>
-                        <input class="fluxInput" spellcheck="false" id="bnf-solr-query-${serv}" type="text" value=""><br><br>
-                        rom: <input type="date" id="bnf-solr-${serv}-date-from"> - To: <input type="date" id="bnf-solr-${serv}-date-to"><br>
-                        <br>
-                        <button type="submit" class="flux-button" id="bnf-solr-basic-query-${serv}">Retrieve
-                          basic info</button>&nbsp;&nbsp;
-                        <div id="bnf-solr-basic-previewer-${serv}" style="position:relative;"></div><br><br>
-                        <button style="display: none;" type="submit" class="flux-button" id="bnf-solr-fullquery-${serv}">Submit Full Query</button>
-                        <br><br>
-                      </form>`;
+          // Here, get the available SOLR collections
+          // SERVICE_LOCATION/solr/admin/collections?action=LIST&wt=json
 
-          document.body.append(solrCont);
-          buttonList.push({
-            id: "bnf-solr-basic-query-" + serv,
-            serv,
-            func: "queryBnFSolr",
-            args: availability.dnsLocalServiceList[service],
-          });
+          const collectionRequest = "http://"+availability.dnsLocalServiceList[service].url +":"+availability.dnsLocalServiceList[service].port +"/solr/admin/collections?action=LIST&wt=json" 
 
-          buttonList.push({
-            id: "bnf-solr-fullquery-" + serv,
-            serv,
-            func: "powerValve",
-            arg: "BNF-SOLR",
-          });
+          // The answer is in the array at r.collections
 
+          fetch(collectionRequest).then(r=>r.json()).then(r=>{
+            var collectionCheck="";
+
+            for (let i = 0; i < r.collections.length; i++) {
+              const col = r.collections[i];
+              let checked = (i===0)?"checked":"";
+
+              collectionCheck+= `<div>
+              <input type="checkbox" class="bnf-solr-checkbox-${serv}" id="${col}" name="${col}" ${checked}  />
+              <label for="${col}">${col}</label>
+            </div>`;              
+            }
+
+            solrCont.innerHTML = `<!-- BNF SOLR TAB -->     
+            <span class="flux-title">${service.toUpperCase()}</span>
+            <br><br>
+            <form id="bnf-solr-form" autocomplete="off">Query:<br>
+              <input class="fluxInput" spellcheck="false" id="bnf-solr-query-${serv}" type="text" value=""><br><br>
+              From: <input type="date" id="bnf-solr-${serv}-date-from"> - To: <input type="date" id="bnf-solr-${serv}-date-to"><br>
+              <br>Select collection:<br>
+              ${collectionCheck}<br><br>
+              <button type="submit" class="flux-button" id="bnf-solr-basic-query-${serv}">Retrieve
+                basic info</button>&nbsp;&nbsp;
+              <div id="bnf-solr-basic-previewer-${serv}" style="position:relative;"></div><br><br>
+              <button style="display: none;" type="submit" class="flux-button" id="bnf-solr-fullquery-${serv}">Submit Full Query</button>
+              <br><br>
+            </form>`;
+
+document.body.append(solrCont);
+buttonList.push({
+  id: "bnf-solr-basic-query-" + serv,
+  serv,
+  func: "queryBnFSolr",
+  args: availability.dnsLocalServiceList[service],
+});
+
+buttonList.push({
+  id: "bnf-solr-fullquery-" + serv,
+  serv,
+  func: "powerValve",
+  arg: "BNF-SOLR",
+});
+
+          })
+
+          
           break;
 
         default:

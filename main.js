@@ -525,7 +525,7 @@ ipcMain.on("remote", async (event, req) => {
   let res;
   switch (req) {
     case "userDataPath":
-      res = app.getPath("documents");
+      res = userDataPath;
 
       break;
 
@@ -639,7 +639,6 @@ ipcMain.handle("addLocalService", async (event, m) => {
         url: loc[0],
         port: loc[1],
         type: m.serviceType,
-        collection: m.serviceCollection,
       };
 
       if (m.hasOwnProperty("serviceArkViewer")) {
