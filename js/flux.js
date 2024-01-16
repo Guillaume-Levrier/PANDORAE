@@ -1893,7 +1893,7 @@ const generateLocalServiceConfig = () => {
       const divs = [
         "newServiceName",
         "newServiceLocation",
-        "newServiceCollection",
+     
         "newArkViewer",
       ];
 
@@ -2393,9 +2393,7 @@ const addLocalService = () => {
   const serviceName = document.getElementById("newServiceName").value;
   const serviceLocation = document.getElementById("newServiceLocation").value;
   const serviceType = document.getElementById("newServiceType").value;
-  const serviceCollection = document.getElementById(
-    "newServiceCollection"
-  ).value;
+ 
 
   const serviceArkViewer = document.getElementById(
     "newArkViewer"
@@ -2405,7 +2403,6 @@ const addLocalService = () => {
     serviceName,
     serviceLocation,
     serviceType,
-    serviceCollection,
     serviceArkViewer
   };
 
