@@ -14,7 +14,7 @@ const setPassword = (service, user, value) =>
 
 const getUserData = () =>
   fs.readFile(
-    userDataPath + "/PANDORAE/userID/user-id.json", // Read the designated datafile
+    userDataPath + "/PANDORAE-DATA/userID/user-id.json", // Read the designated datafile
     "utf8",
     (err, data) => {
       if (err) throw err;
@@ -54,7 +54,7 @@ const basicUserData = () => {
 
   if (userName.length > 0) {
     fs.readFile(
-      userDataPath + "/PANDORAE/userID/user-id.json", // Read the user data file
+      userDataPath + "/PANDORAE-DATA/userID/user-id.json", // Read the user data file
       "utf8",
       (err, data) => {
         const user = JSON.parse(data);
@@ -70,7 +70,7 @@ const basicUserData = () => {
         const datafile = JSON.stringify(user);
 
         fs.writeFile(
-          userDataPath + "/PANDORAE/userID/user-id.json",
+          userDataPath + "/PANDORAE-DATA/userID/user-id.json",
           datafile,
           "utf8",
           (err) => {

@@ -49,7 +49,7 @@ window.addEventListener("load", (e) => {
   const userDataPath = ipcRenderer.sendSync("remote", "userDataPath"); // Find userData folder Path
 
   fs.readFileSync(
-    userDataPath + "/PANDORAE/userID/user-id.json",
+    userDataPath + "/PANDORAE-DATA/userID/user-id.json",
     "utf8", // Check if the user uses another one
     (err, data) => {
       data = JSON.parse(data);
@@ -67,14 +67,14 @@ window.addEventListener("load", (e) => {
       const svg = d3.select("svg");
       drawFlux(svg, traces, false, true);
       fs.readFile(
-        userDataPath + "/PANDORAE/userID/user-id.json",
+        userDataPath + "/PANDORAE-DATA/userID/user-id.json",
         "utf8",
         (err, data) => {
           data = JSON.parse(data);
           data.locale = lg.innerText;
           data = JSON.stringify(data);
           fs.writeFile(
-            userDataPath + "/PANDORAE/userID/user-id.json",
+            userDataPath + "/PANDORAE-DATA/userID/user-id.json",
             data,
             "utf8",
             (err) => {

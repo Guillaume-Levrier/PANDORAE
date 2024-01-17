@@ -316,8 +316,7 @@ const CMT = {
           "<div style='text-align:center'><span class='title'>PANDORÆ  allows you to perform three main kinds of operations :</span><br><br><a data-action='scroll' data-target='Chapter1'>Load & enrich data</a><br><br><a data-action='scroll' data-target='Chapter2'>Explore data</a><br><br><i class='material-icons'><a class='arrowDown' data-action='scroll' data-target='Chapter1'>arrow_downward</a></i></div>",
         Chapter1:
           "<span class='title'><strong>Chapter 1: Loading & enriching data</strong></span><br><br>PANDORÆ enables you to load data from different types of sources.<br><br>Those sources can be online databases that aggregate documents such as scientific articles.<br> <br>But you can really add <strong>any kind of document</strong>.<br><br>PANDORÆ also supports other types of data, such as those extracted from social-media or clinical trials.<br>&nbsp;<br><div class='arrowDown'><i class='material-icons'><a class='arrowDown' data-action='scroll' data-target='flux'>arrow_downward</a></i></div>",
-        flux:
-          "<span class='title'><strong>Cascade: Available data flows</strong></span><br><br><div style='display: inline-flex'><div style='flex:auto'>   <strong>Cascade</strong> is how Flux displays its data flows. As you can see, the data flows from you to the system. Hovering a process shows to which other process it is linked.  <br>&nbsp;<br> Cascade behaves like menu : click on a process and its options will be displayed.<br>&nbsp;<br>Click <a data-action='tuto' data-target='flux'>here</a> to learn how to open Flux.<br>&nbsp;<br> <div class='arrowDown'><i class='material-icons'><a class='arrowDown' data-action='scroll' data-target='flux2'>arrow_downward</a></i></div></div><div style='flex:auto'><svg></svg></div></div><br>&nbsp;<br>",
+        flux: "<span class='title'><strong>Cascade: Available data flows</strong></span><br><br><div style='display: inline-flex'><div style='flex:auto'>   <strong>Cascade</strong> is how Flux displays its data flows. As you can see, the data flows from you to the system. Hovering a process shows to which other process it is linked.  <br>&nbsp;<br> Cascade behaves like menu : click on a process and its options will be displayed.<br>&nbsp;<br>Click <a data-action='tuto' data-target='flux'>here</a> to learn how to open Flux.<br>&nbsp;<br> <div class='arrowDown'><i class='material-icons'><a class='arrowDown' data-action='scroll' data-target='flux2'>arrow_downward</a></i></div></div><div style='flex:auto'><svg></svg></div></div><br>&nbsp;<br>",
         flux2:
           "<span class='title'><strong>Flux sections</strong></span><br><br>Flux has different types of processes. Each section has its own purpose, and relies on different services:<ul style='list-style-type: square;'><li><a data-action='scroll' data-target='user'>User</a> lets you insert your API keys and credentials.</li><li><a data-action='scroll' data-target='databases'>Databases requests</a> allow you to retrieve data from various online sources.</li><li><a data-action='scroll' data-target='enriching'>Enriching</a> allows you to edit and enrich datasets.</li><li><a data-action='scroll' data-target='system'>System</a> sends your data to PANDORAE visualisation features.</li></ul>Detail about the other sections will become available when they will be rolled out. Click on a section name to learn more about that section right now, or simply click on the arrow to continue.   <br>&nbsp;<br><div class='arrowDown'><i class='material-icons'><a class='arrowDown' data-action='scroll' data-target='databases'>arrow_downward</a></i></div>",
         databases:
@@ -352,8 +351,7 @@ const CMT = {
           "<div style='text-align:center'><span class='title'><strong>Freedom at last</strong></span><br><br>           You will learn how to use PANDORÆ mostly by trial and error.<br>&nbsp;<br> If you're a researcher and/or developer, you might want to go have a look at its            <a data-action='openEx' data-target='https://github.com/Guillaume-Levrier/PANDORAE'>source code</a>.<br>&nbsp;<br>           A wiki of the project is available <a data-action='openEx' data-target='https://github.com/Guillaume-Levrier/PANDORAE/wiki'>here</a>.           <br>&nbsp;<br>           <div class='arrowDown'>    <i class='material-icons'><a class='arrowDown' data-action='lastScroll()'>arrow_downward</a></i></div></div>",
         final8:
           "<div style='text-align:center'>This <strong>CORE</strong> is now yours. <br>&nbsp;<br>           Close the software and restart it to escape the tutorial.<br>&nbsp;<br>           Thank you for using PANDORÆ.<br><br>                    <div id='restartCount' style='font-weight: bolder'></div></div>",
-        last:
-          "<div style='margin:auto;font-size:10px;line-height: 15px;'>PANDORÆ - version 1 <br>Guillaume Levrier</div>",
+        last: "<div style='margin:auto;font-size:10px;line-height: 15px;'>PANDORÆ - version 1 <br>Guillaume Levrier</div>",
       },
     },
   },
@@ -412,7 +410,7 @@ const date = () =>
 //===== Adding a new local service ======
 
 const accessUserID = () =>
-  ipcRenderer.send("openPath", userDataPath + "/PANDORAE/userID/");
+  ipcRenderer.send("openPath", userDataPath + "/PANDORAE-DATA/userID/");
 
 //========== Tracegraph ==========
 
@@ -639,10 +637,10 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Actioning powerValve on " +
-    JSON.stringify(item.name) +
-    " through the " +
-    fluxAction +
-    " procedure."
+      JSON.stringify(item.name) +
+      " through the " +
+      fluxAction +
+      " procedure."
   );
 
   let fluxArgs = {}; // Arguments are stored in an object
@@ -650,7 +648,7 @@ const powerValve = (fluxAction, item) => {
   let itemname = item.name; // item argument is usually stored in "this"
 
   switch (
-  fluxAction // According to function name ...
+    fluxAction // According to function name ...
   ) {
     case "wosBuild":
       fluxArgs.wosquery = wosReq;
@@ -658,28 +656,27 @@ const powerValve = (fluxAction, item) => {
       message = "Connecting to WoS";
       break;
     case "BNF-SOLR":
-
       const fieldId = item.id.replace("full", "");
       fluxArgs.bnfsolrquery = document.getElementById(fieldId).value;
       fluxArgs.meta = solrbnfcount[fluxArgs.bnfsolrquery];
 
-
       const serv = item.id.replace("bnf-solr-fullquery-", "");
 
-      const collections = document.getElementsByClassName(`bnf-solr-checkbox-${serv}`)
+      const collections = document.getElementsByClassName(
+        `bnf-solr-checkbox-${serv}`
+      );
 
-      fluxArgs.collections=[];  
-      
+      fluxArgs.collections = [];
+
       // This is a WIP committed to be saved.
-      
-      for (let i = 0; i < collections.length; i++) {
-       const collection = collections[i];
-      
-        if (collection.checked){
-          fluxArgs.collections.push(collection.id)
-        } 
-      } 
 
+      for (let i = 0; i < collections.length; i++) {
+        const collection = collections[i];
+
+        if (collection.checked) {
+          fluxArgs.collections.push(collection.id);
+        }
+      }
 
       fluxArgs.dateFrom = document.getElementById(
         `bnf-solr-${serv}-date-from`
@@ -689,7 +686,7 @@ const powerValve = (fluxAction, item) => {
         `bnf-solr-${serv}-date-to`
       ).value;
 
-        console.log(fluxArgs)
+      console.log(fluxArgs);
 
       message = "Connecting to BNF-SOLR";
       break;
@@ -858,11 +855,11 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Sending to CHÆROS action " +
-    fluxAction +
-    " with arguments " +
-    JSON.stringify(fluxArgs) +
-    " " +
-    message
+      fluxAction +
+      " with arguments " +
+      JSON.stringify(fluxArgs) +
+      " " +
+      message
   );
 
   ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
@@ -1567,12 +1564,12 @@ const ScopusList = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='scopColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            "</label><br> "
         );
       }
 
@@ -1648,14 +1645,14 @@ const zoteroCollectionRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          " - " +
-          coll.name +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            " - " +
+            coll.name +
+            "</label><br> "
         );
       }
 
@@ -1696,9 +1693,9 @@ const zoteroCollectionRetriever = () => {
       ipcRenderer.send(
         "console-logs",
         "Error in retrieving collections for Zotero id " +
-        zoteroUser +
-        " : " +
-        err
+          zoteroUser +
+          " : " +
+          err
       ); // Log error
     });
 };
@@ -1734,14 +1731,14 @@ const zoteroLocalRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          " - " +
-          coll.name +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            " - " +
+            coll.name +
+            "</label><br> "
         );
       }
 
@@ -1802,10 +1799,10 @@ const datasetLoader = () => {
         ipcRenderer.send(
           "console-logs",
           "Dataset " +
-          dataset.name +
-          " loaded into " +
-          JSON.stringify(target) +
-          "."
+            dataset.name +
+            " loaded into " +
+            JSON.stringify(target) +
+            "."
         ); // Log action
       });
     });
@@ -1978,7 +1975,7 @@ const hypheCorpusList = (target, prevId) => {
       } else {
       }
     })
-    .catch((e) => { });
+    .catch((e) => {});
 };
 
 const loadHyphe = (corpus, endpoint, pass) => {
@@ -2234,8 +2231,6 @@ const regardsBasic = () => {
 var solrbnfcount = {};
 
 const queryBnFSolr = (but) => {
-
-  
   const queryContent = document.getElementById(
     `bnf-solr-query-${but.serv}`
   ).value;
@@ -2246,52 +2241,52 @@ const queryBnFSolr = (but) => {
 
   const dateTo = document.getElementById(`bnf-solr-${but.serv}-date-to`).value;
 
-const collections = document.getElementsByClassName(`bnf-solr-checkbox-${but.serv}`)
+  const collections = document.getElementsByClassName(
+    `bnf-solr-checkbox-${but.serv}`
+  );
 
-// As it happens, the solr endpoint chosen by the user can have several collections
-// in it which can have different names. Rather than letting the user enter the 
-// name of the target collection in the config file, a request is sent on FLUX
-// generation to check for available collections in the target SOLR. This means
-// that the user might want to send the same request to several collections.
-// 
-// De facto, in the first use of that system, there is 1 collection per SOLR in
-// production, so the user won't have much of a choice. This is more of a "let's
-// help the user by not making them input something" choice than a future proofing
-// though it acts like it too.
+  // As it happens, the solr endpoint chosen by the user can have several collections
+  // in it which can have different names. Rather than letting the user enter the
+  // name of the target collection in the config file, a request is sent on FLUX
+  // generation to check for available collections in the target SOLR. This means
+  // that the user might want to send the same request to several collections.
+  //
+  // De facto, in the first use of that system, there is 1 collection per SOLR in
+  // production, so the user won't have much of a choice. This is more of a "let's
+  // help the user by not making them input something" choice than a future proofing
+  // though it acts like it too.
 
-var query;
-var selectedCollection;
+  var query;
+  var selectedCollection;
 
-// This is a WIP committed to be saved.
+  // This is a WIP committed to be saved.
 
-for (let i = 0; i < collections.length; i++) {
- const collection = collections[i];
+  for (let i = 0; i < collections.length; i++) {
+    const collection = collections[i];
 
-  if (collection.checked){
-  // Ici, ne prendre que la dernière capture connue
-  selectedCollection= collection.id;
+    if (collection.checked) {
+      // Ici, ne prendre que la dernière capture connue
+      selectedCollection = collection.id;
 
-   query =
-    "http://" +
-    but.args.url +
-    ":" +
-    but.args.port +
-    "/solr/" +
-    selectedCollection +
-    "/select?facet.field=crawl_year&facet=on&fq=crawl_date:[" +
-    dateFrom +
-    "T00:00:00Z" +
-    "%20TO%20" +
-    dateTo +
-    "T00:00:00Z]&" +
-    "q=" +
-    queryContent +
-    "&rows=0&sort=crawl_date%20desc&group=true&group.field=url" +
-    "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
-    "&rows=0&sort=score+desc&group.ngroups=true";
-   
-    
-  } 
+      query =
+        "http://" +
+        but.args.url +
+        ":" +
+        but.args.port +
+        "/solr/" +
+        selectedCollection +
+        "/select?facet.field=crawl_year&facet=on&fq=crawl_date:[" +
+        dateFrom +
+        "T00:00:00Z" +
+        "%20TO%20" +
+        dateTo +
+        "T00:00:00Z]&" +
+        "q=" +
+        queryContent +
+        "&rows=0&sort=crawl_date%20desc&group=true&group.field=url" +
+        "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
+        "&rows=0&sort=score+desc&group.ngroups=true";
+    }
   }
 
   const previewer = document.getElementById(
@@ -2302,33 +2297,28 @@ for (let i = 0; i < collections.length; i++) {
   // purposes. Ideally, this limit should be echoed by the host system, not
   // hardcoded in PANDORAE.
 
-const document_limit = 50000;
+  const document_limit = 50000;
 
-d3.json(query).then(r=>{
-    
-   
-    let numFound = r.grouped.url.ngroups
+  d3.json(query)
+    .then((r) => {
+      let numFound = r.grouped.url.ngroups;
 
-    solrbnfcount[queryContent] = { count: numFound, but,selectedCollection };
+      solrbnfcount[queryContent] = { count: numFound, but, selectedCollection };
 
+      previewer.innerHTML = `<br><p>  ${numFound} documents found</p> `;
 
-    previewer.innerHTML = `<br><p>  ${numFound} documents found</p> `;
-
-    
-
-    if (numFound > 0 && numFound <document_limit ) {
-      document.getElementById("bnf-solr-fullquery-" + but.serv).style.display =
-        "flex";
-    }else if (numFound >= document_limit) {
-      previewer.innerHTML =`You cannot request more than ${document_limit} documents.`
-    } 
-
-  } ).catch(e=>{
-    console.log(e);
-    previewer.innerHTML = `<br><p>Error - do you have a missing argument?</p> `;
-  })
-
-
+      if (numFound > 0 && numFound < document_limit) {
+        document.getElementById(
+          "bnf-solr-fullquery-" + but.serv
+        ).style.display = "flex";
+      } else if (numFound >= document_limit) {
+        previewer.innerHTML = `You cannot request more than ${document_limit} documents.`;
+      }
+    })
+    .catch((e) => {
+      console.log(e);
+      previewer.innerHTML = `<br><p>Error - do you have a missing argument?</p> `;
+    });
 };
 
 const generateLocalServiceConfig = () => {
@@ -2336,12 +2326,7 @@ const generateLocalServiceConfig = () => {
 
   switch (newServiceType.value) {
     case "BNF-SOLR":
-      const divs = [
-        "newServiceName",
-        "newServiceLocation",
-     
-        "newArkViewer",
-      ];
+      const divs = ["newServiceName", "newServiceLocation", "newArkViewer"];
 
       divs.forEach((d) => (document.getElementById(d).style.display = "block"));
 
@@ -2622,8 +2607,9 @@ const manualMergeAuthors = () => {
 
             for (let j = 0; j < 5; ++j) {
               if (autharticles[j]) {
-                refs += `[<a target="_blank" href="https://doi.org/${autharticles[j]
-                  }">${j + 1}</a>] `;
+                refs += `[<a target="_blank" href="https://doi.org/${
+                  autharticles[j]
+                }">${j + 1}</a>] `;
               }
             }
           }
@@ -2839,17 +2825,14 @@ const addLocalService = () => {
   const serviceName = document.getElementById("newServiceName").value;
   const serviceLocation = document.getElementById("newServiceLocation").value;
   const serviceType = document.getElementById("newServiceType").value;
- 
 
-  const serviceArkViewer = document.getElementById(
-    "newArkViewer"
-  ).value;
+  const serviceArkViewer = document.getElementById("newArkViewer").value;
 
   const service = {
     serviceName,
     serviceLocation,
     serviceType,
-    serviceArkViewer
+    serviceArkViewer,
   };
 
   ipcRenderer.invoke("addLocalService", service);
@@ -3189,24 +3172,31 @@ window.addEventListener("load", (event) => {
           // Here, get the available SOLR collections
           // SERVICE_LOCATION/solr/admin/collections?action=LIST&wt=json
 
-          const collectionRequest = "http://"+availability.dnsLocalServiceList[service].url +":"+availability.dnsLocalServiceList[service].port +"/solr/admin/collections?action=LIST&wt=json" 
+          const collectionRequest =
+            "http://" +
+            availability.dnsLocalServiceList[service].url +
+            ":" +
+            availability.dnsLocalServiceList[service].port +
+            "/solr/admin/collections?action=LIST&wt=json";
 
           // The answer is in the array at r.collections
 
-          fetch(collectionRequest).then(r=>r.json()).then(r=>{
-            var collectionCheck="";
+          fetch(collectionRequest)
+            .then((r) => r.json())
+            .then((r) => {
+              var collectionCheck = "";
 
-            for (let i = 0; i < r.collections.length; i++) {
-              const col = r.collections[i];
-              let checked = (i===0)?"checked":"";
+              for (let i = 0; i < r.collections.length; i++) {
+                const col = r.collections[i];
+                let checked = i === 0 ? "checked" : "";
 
-              collectionCheck+= `<div>
+                collectionCheck += `<div>
               <input type="radio" name="bnf-solr-checkbox-${serv}" class="bnf-solr-checkbox-${serv}" id="${col}"  ${checked}  />
               <label for="${col}">${col}</label>
-            </div>`;              
-            }
+            </div>`;
+              }
 
-            solrCont.innerHTML = `<!-- BNF SOLR TAB -->     
+              solrCont.innerHTML = `<!-- BNF SOLR TAB -->     
             <span class="flux-title">${service.toUpperCase()}</span>
             <br><br>
             <form id="bnf-solr-form" autocomplete="off">Query:<br>
@@ -3221,49 +3211,45 @@ window.addEventListener("load", (event) => {
               <br><br>
             </form>`;
 
-document.body.append(solrCont);
+              document.body.append(solrCont);
 
-buttonList.push({
-  id: "bnf-solr-basic-query-" + serv,
-  serv,
-  func: "queryBnFSolr",
-  args: availability.dnsLocalServiceList[service],
-});
+              buttonList.push({
+                id: "bnf-solr-basic-query-" + serv,
+                serv,
+                func: "queryBnFSolr",
+                args: availability.dnsLocalServiceList[service],
+              });
 
-buttonList.push({
-  id: "bnf-solr-fullquery-" + serv,
-  serv,
-  func: "powerValve",
-  arg: "BNF-SOLR",
-});
+              buttonList.push({
+                id: "bnf-solr-fullquery-" + serv,
+                serv,
+                func: "powerValve",
+                arg: "BNF-SOLR",
+              });
 
-buttonList.forEach((but) => {
+              buttonList.forEach((but) => {
+                document
+                  .getElementById(but.id)
+                  .addEventListener("click", (e) => {
+                    e.preventDefault();
+                    funcSwitch(e, but);
 
-  document.getElementById(but.id).addEventListener("click", (e) => {
-    e.preventDefault();
-    funcSwitch(e, but);
+                    return false;
+                  });
+              });
+            });
 
-    return false;
-  });
-});
-
-          })
-
-          
           break;
 
         default:
           break;
       }
     }
-
- 
   });
 
   function funcSwitch(e, but) {
     switch (but.func) {
       case "queryBnFSolr":
-        
         queryBnFSolr(but);
         break;
       case "addLocalService":
@@ -3403,7 +3389,7 @@ const setPassword = (service, user, value) =>
 
 const getUserData = () =>
   fs.readFile(
-    userDataPath + "/PANDORAE/userID/user-id.json", // Read the designated datafile
+    userDataPath + "/PANDORAE-DATA/userID/user-id.json", // Read the designated datafile
     "utf8",
     (err, data) => {
       if (err) throw err;
@@ -3443,7 +3429,7 @@ const basicUserData = () => {
 
   if (userName.length > 0) {
     fs.readFile(
-      userDataPath + "/PANDORAE/userID/user-id.json", // Read the user data file
+      userDataPath + "/PANDORAE-DATA/userID/user-id.json", // Read the user data file
       "utf8",
       (err, data) => {
         const user = JSON.parse(data);
@@ -3459,7 +3445,7 @@ const basicUserData = () => {
         const datafile = JSON.stringify(user);
 
         fs.writeFile(
-          userDataPath + "/PANDORAE/userID/user-id.json",
+          userDataPath + "/PANDORAE-DATA/userID/user-id.json",
           datafile,
           "utf8",
           (err) => {

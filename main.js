@@ -8,7 +8,11 @@ const fs = require("fs");
 
 // This is an attempt to make sure all devices, including professional ones with
 // very restricted profiles can launch the app and save credentials/API keys/datasets
-const userDataPath = app.getAppPath();
+var userDataPath = app.getAppPath();
+
+// yes, there is probably a better way
+// no, I haven't found one that works on all platforms at this point in time
+userDataPath = userDataPath.substring(0, userDataPath.lastIndexOf("/"));
 
 const dns = require("dns");
 
@@ -40,9 +44,9 @@ const createUserId = () => {
     locale: "EN",
   };
 
-  if (!fs.existsSync(userDataPath + "/PANDORAE/userID/user-id.json")) {
+  if (!fs.existsSync(userDataPath + "/PANDORAE-DATA/userID/user-id.json")) {
     fs.writeFileSync(
-      userDataPath + "/PANDORAE/userID/user-id.json",
+      userDataPath + "/PANDORAE-DATA/userID/user-id.json",
       JSON.stringify(userID),
       "utf8",
       (err) => {
@@ -56,7 +60,7 @@ const createThemes = () => {
   // if (!fs.existsSync(userDataPath + "/themes/themes.json")) {
   fs.copyFileSync(
     basePath + "/json/themes.json",
-    userDataPath + "/PANDORAE/themes/themes.json"
+    userDataPath + "/PANDORAE-DATA/themes/themes.json"
   );
   //}
 };
@@ -103,10 +107,10 @@ var themeData;
 
 app.on("ready", () => {
   userDataDirTree(userDataPath, [
-    "/PANDORAE/logs",
-    "/PANDORAE/userID",
-    "/PANDORAE/themes",
-    "/PANDORAE/flatDatasets",
+    "/PANDORAE-DATA/logs",
+    "/PANDORAE-DATA/userID",
+    "/PANDORAE-DATA/themes",
+    "/PANDORAE-DATA/flatDatasets",
   ]);
 
   createUserId();
@@ -115,7 +119,7 @@ app.on("ready", () => {
   createAudioManager();
 
   themeData = fs.readFileSync(
-    userDataPath + "/PANDORAE/themes/themes.json",
+    userDataPath + "/PANDORAE-DATA/themes/themes.json",
     "utf8",
     (err, data) => JSON.parse(data)
   );
@@ -194,7 +198,7 @@ var currentUser;
 ipcMain.on("userStatus", (event, req) => {
   if (req) {
     fs.readFile(
-      userDataPath + "/PANDORAE/userID/user-id.json", // Read the user data file
+      userDataPath + "/PANDORAE-DATA/userID/user-id.json", // Read the user data file
       "utf8",
       (err, data) => {
         // Additional options for readFile
@@ -224,7 +228,7 @@ ipcMain.on("theme", (event, req) => {
   switch (req.type) {
     case "read":
       fs.readFile(
-        userDataPath + "/PANDORAE/userID/user-id.json", // Read the user data file
+        userDataPath + "/PANDORAE-DATA/userID/user-id.json", // Read the user data file
         "utf8",
         (err, data) => {
           // Additional options for readFile
@@ -332,7 +336,7 @@ ipcMain.on("keyManager", (event, request) => {
         value: request.value,
       };
       fs.writeFile(
-        userDataPath + "/PANDORAE/userID/user-id.json",
+        userDataPath + "/PANDORAE-DATA/userID/user-id.json",
         JSON.stringify(currentUser),
         "utf8",
         (err) => {
@@ -348,7 +352,7 @@ ipcMain.on("keyManager", (event, request) => {
 
     case "getPassword":
       fs.readFile(
-        userDataPath + "/PANDORAE/userID/user-id.json",
+        userDataPath + "/PANDORAE-DATA/userID/user-id.json",
         "utf8",
         (err, data) => {
           const user = JSON.parse(data);
@@ -438,7 +442,7 @@ app.on("window-all-closed", function () {
   // Write log
   fs.writeFile(
     // Write data
-    userDataPath + "/PANDORAE/logs/log-" + date + ".txt",
+    userDataPath + "/PANDORAE-DATA/logs/log-" + date + ".txt",
     dataLog,
     "utf8", // Path/name, data, format
     (err) => {
@@ -623,7 +627,7 @@ ipcMain.handle("removeLocalService", async (event, service) => {
   delete currentUser.localServices[service];
 
   fs.writeFile(
-    userDataPath + "/PANDORAE/userID/user-id.json",
+    userDataPath + "/PANDORAE-DATA/userID/user-id.json",
     JSON.stringify(currentUser),
     "utf8",
     (err) => {
@@ -651,7 +655,7 @@ ipcMain.handle("addLocalService", async (event, m) => {
       }
 
       fs.writeFile(
-        userDataPath + "/PANDORAE/userID/user-id.json",
+        userDataPath + "/PANDORAE-DATA/userID/user-id.json",
         JSON.stringify(currentUser),
         "utf8",
         (err) => {

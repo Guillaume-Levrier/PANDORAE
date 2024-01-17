@@ -32,7 +32,7 @@ const date = () =>
 //===== Adding a new local service ======
 
 const accessUserID = () =>
-  ipcRenderer.send("openPath", userDataPath + "/PANDORAE/userID/");
+  ipcRenderer.send("openPath", userDataPath + "/PANDORAE-DATA/userID/");
 
 //========== Tracegraph ==========
 
@@ -259,10 +259,10 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Actioning powerValve on " +
-    JSON.stringify(item.name) +
-    " through the " +
-    fluxAction +
-    " procedure."
+      JSON.stringify(item.name) +
+      " through the " +
+      fluxAction +
+      " procedure."
   );
 
   let fluxArgs = {}; // Arguments are stored in an object
@@ -270,7 +270,7 @@ const powerValve = (fluxAction, item) => {
   let itemname = item.name; // item argument is usually stored in "this"
 
   switch (
-  fluxAction // According to function name ...
+    fluxAction // According to function name ...
   ) {
     case "wosBuild":
       fluxArgs.wosquery = wosReq;
@@ -278,28 +278,27 @@ const powerValve = (fluxAction, item) => {
       message = "Connecting to WoS";
       break;
     case "BNF-SOLR":
-
       const fieldId = item.id.replace("full", "");
       fluxArgs.bnfsolrquery = document.getElementById(fieldId).value;
       fluxArgs.meta = solrbnfcount[fluxArgs.bnfsolrquery];
 
-
       const serv = item.id.replace("bnf-solr-fullquery-", "");
 
-      const collections = document.getElementsByClassName(`bnf-solr-checkbox-${serv}`)
+      const collections = document.getElementsByClassName(
+        `bnf-solr-checkbox-${serv}`
+      );
 
-      fluxArgs.collections=[];  
-      
+      fluxArgs.collections = [];
+
       // This is a WIP committed to be saved.
-      
-      for (let i = 0; i < collections.length; i++) {
-       const collection = collections[i];
-      
-        if (collection.checked){
-          fluxArgs.collections.push(collection.id)
-        } 
-      } 
 
+      for (let i = 0; i < collections.length; i++) {
+        const collection = collections[i];
+
+        if (collection.checked) {
+          fluxArgs.collections.push(collection.id);
+        }
+      }
 
       fluxArgs.dateFrom = document.getElementById(
         `bnf-solr-${serv}-date-from`
@@ -308,8 +307,6 @@ const powerValve = (fluxAction, item) => {
       fluxArgs.dateTo = document.getElementById(
         `bnf-solr-${serv}-date-to`
       ).value;
-
-      
 
       message = "Connecting to BNF-SOLR";
       break;
@@ -478,11 +475,11 @@ const powerValve = (fluxAction, item) => {
   ipcRenderer.send(
     "console-logs",
     "Sending to CHÆROS action " +
-    fluxAction +
-    " with arguments " +
-    JSON.stringify(fluxArgs) +
-    " " +
-    message
+      fluxAction +
+      " with arguments " +
+      JSON.stringify(fluxArgs) +
+      " " +
+      message
   );
 
   ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
@@ -969,7 +966,6 @@ const clinicTrialBasicRetriever = () => {
   fetch(rootUrl + "expr=" + ctQuery + "&fmt=json")
     .then((res) => res.json())
     .then((firstResponse) => {
-   
       let totalResults = firstResponse.FullStudiesResponse.NStudiesFound;
 
       let requestAmount = (totalResults) => {
@@ -996,8 +992,6 @@ const clinicTrialBasicRetriever = () => {
         date +
         "<br>[Reload this window to submit a different query.]<br>" +
         "<br>Amount of requests per second: <span id='scopusRangeValue'>1</span><input style='margin-left:30px' type='range' oninput='this.previousSibling.innerText=parseInt(this.value)' id='scopusRange' min='1' step='any' max='20' value='1'><br><br>";
-
-      
 
       document.getElementById("clinical_trials-basic-previewer").innerHTML =
         dataBasicPreview;
@@ -1187,12 +1181,12 @@ const ScopusList = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='scopColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            "</label><br> "
         );
       }
 
@@ -1268,14 +1262,14 @@ const zoteroCollectionRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          " - " +
-          coll.name +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            " - " +
+            coll.name +
+            "</label><br> "
         );
       }
 
@@ -1316,9 +1310,9 @@ const zoteroCollectionRetriever = () => {
       ipcRenderer.send(
         "console-logs",
         "Error in retrieving collections for Zotero id " +
-        zoteroUser +
-        " : " +
-        err
+          zoteroUser +
+          " : " +
+          err
       ); // Log error
     });
 };
@@ -1354,14 +1348,14 @@ const zoteroLocalRetriever = () => {
         collections.push(
           // Push a string (HTML input list) in the collections array
           "<input class='zotColCheck' value='" +
-          coll.key +
-          "' name='" +
-          coll.name +
-          "' type='checkbox'/><label> " +
-          coll.key +
-          " - " +
-          coll.name +
-          "</label><br> "
+            coll.key +
+            "' name='" +
+            coll.name +
+            "' type='checkbox'/><label> " +
+            coll.key +
+            " - " +
+            coll.name +
+            "</label><br> "
         );
       }
 
@@ -1422,10 +1416,10 @@ const datasetLoader = () => {
         ipcRenderer.send(
           "console-logs",
           "Dataset " +
-          dataset.name +
-          " loaded into " +
-          JSON.stringify(target) +
-          "."
+            dataset.name +
+            " loaded into " +
+            JSON.stringify(target) +
+            "."
         ); // Log action
       });
     });
@@ -1598,7 +1592,7 @@ const hypheCorpusList = (target, prevId) => {
       } else {
       }
     })
-    .catch((e) => { });
+    .catch((e) => {});
 };
 
 const loadHyphe = (corpus, endpoint, pass) => {
@@ -1854,8 +1848,6 @@ const regardsBasic = () => {
 var solrbnfcount = {};
 
 const queryBnFSolr = (but) => {
-
-  
   const queryContent = document.getElementById(
     `bnf-solr-query-${but.serv}`
   ).value;
@@ -1866,52 +1858,52 @@ const queryBnFSolr = (but) => {
 
   const dateTo = document.getElementById(`bnf-solr-${but.serv}-date-to`).value;
 
-const collections = document.getElementsByClassName(`bnf-solr-checkbox-${but.serv}`)
+  const collections = document.getElementsByClassName(
+    `bnf-solr-checkbox-${but.serv}`
+  );
 
-// As it happens, the solr endpoint chosen by the user can have several collections
-// in it which can have different names. Rather than letting the user enter the 
-// name of the target collection in the config file, a request is sent on FLUX
-// generation to check for available collections in the target SOLR. This means
-// that the user might want to send the same request to several collections.
-// 
-// De facto, in the first use of that system, there is 1 collection per SOLR in
-// production, so the user won't have much of a choice. This is more of a "let's
-// help the user by not making them input something" choice than a future proofing
-// though it acts like it too.
+  // As it happens, the solr endpoint chosen by the user can have several collections
+  // in it which can have different names. Rather than letting the user enter the
+  // name of the target collection in the config file, a request is sent on FLUX
+  // generation to check for available collections in the target SOLR. This means
+  // that the user might want to send the same request to several collections.
+  //
+  // De facto, in the first use of that system, there is 1 collection per SOLR in
+  // production, so the user won't have much of a choice. This is more of a "let's
+  // help the user by not making them input something" choice than a future proofing
+  // though it acts like it too.
 
-var query;
-var selectedCollection;
+  var query;
+  var selectedCollection;
 
-// This is a WIP committed to be saved.
+  // This is a WIP committed to be saved.
 
-for (let i = 0; i < collections.length; i++) {
- const collection = collections[i];
+  for (let i = 0; i < collections.length; i++) {
+    const collection = collections[i];
 
-  if (collection.checked){
-  // Ici, ne prendre que la dernière capture connue
-  selectedCollection= collection.id;
+    if (collection.checked) {
+      // Ici, ne prendre que la dernière capture connue
+      selectedCollection = collection.id;
 
-   query =
-    "http://" +
-    but.args.url +
-    ":" +
-    but.args.port +
-    "/solr/" +
-    selectedCollection +
-    "/select?facet.field=crawl_year&facet=on&fq=crawl_date:[" +
-    dateFrom +
-    "T00:00:00Z" +
-    "%20TO%20" +
-    dateTo +
-    "T00:00:00Z]&" +
-    "q=" +
-    queryContent +
-    "&rows=0&sort=crawl_date%20desc&group=true&group.field=url" +
-    "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
-    "&rows=0&sort=score+desc&group.ngroups=true";
-   
-    
-  } 
+      query =
+        "http://" +
+        but.args.url +
+        ":" +
+        but.args.port +
+        "/solr/" +
+        selectedCollection +
+        "/select?facet.field=crawl_year&facet=on&fq=crawl_date:[" +
+        dateFrom +
+        "T00:00:00Z" +
+        "%20TO%20" +
+        dateTo +
+        "T00:00:00Z]&" +
+        "q=" +
+        queryContent +
+        "&rows=0&sort=crawl_date%20desc&group=true&group.field=url" +
+        "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
+        "&rows=0&sort=score+desc&group.ngroups=true";
+    }
   }
 
   const previewer = document.getElementById(
@@ -1922,33 +1914,28 @@ for (let i = 0; i < collections.length; i++) {
   // purposes. Ideally, this limit should be echoed by the host system, not
   // hardcoded in PANDORAE.
 
-const document_limit = 50000;
+  const document_limit = 50000;
 
-d3.json(query).then(r=>{
-    
-   
-    let numFound = r.grouped.url.ngroups
+  d3.json(query)
+    .then((r) => {
+      let numFound = r.grouped.url.ngroups;
 
-    solrbnfcount[queryContent] = { count: numFound, but,selectedCollection };
+      solrbnfcount[queryContent] = { count: numFound, but, selectedCollection };
 
+      previewer.innerHTML = `<br><p>  ${numFound} documents found</p> `;
 
-    previewer.innerHTML = `<br><p>  ${numFound} documents found</p> `;
-
-    
-
-    if (numFound > 0 && numFound <document_limit ) {
-      document.getElementById("bnf-solr-fullquery-" + but.serv).style.display =
-        "flex";
-    }else if (numFound >= document_limit) {
-      previewer.innerHTML =`You cannot request more than ${document_limit} documents.`
-    } 
-
-  } ).catch(e=>{
-    console.log(e);
-    previewer.innerHTML = `<br><p>Error - do you have a missing argument?</p> `;
-  })
-
-
+      if (numFound > 0 && numFound < document_limit) {
+        document.getElementById(
+          "bnf-solr-fullquery-" + but.serv
+        ).style.display = "flex";
+      } else if (numFound >= document_limit) {
+        previewer.innerHTML = `You cannot request more than ${document_limit} documents.`;
+      }
+    })
+    .catch((e) => {
+      console.log(e);
+      previewer.innerHTML = `<br><p>Error - do you have a missing argument?</p> `;
+    });
 };
 
 const generateLocalServiceConfig = () => {
@@ -1956,12 +1943,7 @@ const generateLocalServiceConfig = () => {
 
   switch (newServiceType.value) {
     case "BNF-SOLR":
-      const divs = [
-        "newServiceName",
-        "newServiceLocation",
-     
-        "newArkViewer",
-      ];
+      const divs = ["newServiceName", "newServiceLocation", "newArkViewer"];
 
       divs.forEach((d) => (document.getElementById(d).style.display = "block"));
 
@@ -2242,8 +2224,9 @@ const manualMergeAuthors = () => {
 
             for (let j = 0; j < 5; ++j) {
               if (autharticles[j]) {
-                refs += `[<a target="_blank" href="https://doi.org/${autharticles[j]
-                  }">${j + 1}</a>] `;
+                refs += `[<a target="_blank" href="https://doi.org/${
+                  autharticles[j]
+                }">${j + 1}</a>] `;
               }
             }
           }
@@ -2459,17 +2442,14 @@ const addLocalService = () => {
   const serviceName = document.getElementById("newServiceName").value;
   const serviceLocation = document.getElementById("newServiceLocation").value;
   const serviceType = document.getElementById("newServiceType").value;
- 
 
-  const serviceArkViewer = document.getElementById(
-    "newArkViewer"
-  ).value;
+  const serviceArkViewer = document.getElementById("newArkViewer").value;
 
   const service = {
     serviceName,
     serviceLocation,
     serviceType,
-    serviceArkViewer
+    serviceArkViewer,
   };
 
   ipcRenderer.invoke("addLocalService", service);
@@ -2809,24 +2789,31 @@ window.addEventListener("load", (event) => {
           // Here, get the available SOLR collections
           // SERVICE_LOCATION/solr/admin/collections?action=LIST&wt=json
 
-          const collectionRequest = "http://"+availability.dnsLocalServiceList[service].url +":"+availability.dnsLocalServiceList[service].port +"/solr/admin/collections?action=LIST&wt=json" 
+          const collectionRequest =
+            "http://" +
+            availability.dnsLocalServiceList[service].url +
+            ":" +
+            availability.dnsLocalServiceList[service].port +
+            "/solr/admin/collections?action=LIST&wt=json";
 
           // The answer is in the array at r.collections
 
-          fetch(collectionRequest).then(r=>r.json()).then(r=>{
-            var collectionCheck="";
+          fetch(collectionRequest)
+            .then((r) => r.json())
+            .then((r) => {
+              var collectionCheck = "";
 
-            for (let i = 0; i < r.collections.length; i++) {
-              const col = r.collections[i];
-              let checked = (i===0)?"checked":"";
+              for (let i = 0; i < r.collections.length; i++) {
+                const col = r.collections[i];
+                let checked = i === 0 ? "checked" : "";
 
-              collectionCheck+= `<div>
+                collectionCheck += `<div>
               <input type="radio" name="bnf-solr-checkbox-${serv}" class="bnf-solr-checkbox-${serv}" id="${col}"  ${checked}  />
               <label for="${col}">${col}</label>
-            </div>`;              
-            }
+            </div>`;
+              }
 
-            solrCont.innerHTML = `<!-- BNF SOLR TAB -->     
+              solrCont.innerHTML = `<!-- BNF SOLR TAB -->     
             <span class="flux-title">${service.toUpperCase()}</span>
             <br><br>
             <form id="bnf-solr-form" autocomplete="off">Query:<br>
@@ -2841,49 +2828,45 @@ window.addEventListener("load", (event) => {
               <br><br>
             </form>`;
 
-document.body.append(solrCont);
+              document.body.append(solrCont);
 
-buttonList.push({
-  id: "bnf-solr-basic-query-" + serv,
-  serv,
-  func: "queryBnFSolr",
-  args: availability.dnsLocalServiceList[service],
-});
+              buttonList.push({
+                id: "bnf-solr-basic-query-" + serv,
+                serv,
+                func: "queryBnFSolr",
+                args: availability.dnsLocalServiceList[service],
+              });
 
-buttonList.push({
-  id: "bnf-solr-fullquery-" + serv,
-  serv,
-  func: "powerValve",
-  arg: "BNF-SOLR",
-});
+              buttonList.push({
+                id: "bnf-solr-fullquery-" + serv,
+                serv,
+                func: "powerValve",
+                arg: "BNF-SOLR",
+              });
 
-buttonList.forEach((but) => {
+              buttonList.forEach((but) => {
+                document
+                  .getElementById(but.id)
+                  .addEventListener("click", (e) => {
+                    e.preventDefault();
+                    funcSwitch(e, but);
 
-  document.getElementById(but.id).addEventListener("click", (e) => {
-    e.preventDefault();
-    funcSwitch(e, but);
+                    return false;
+                  });
+              });
+            });
 
-    return false;
-  });
-});
-
-          })
-
-          
           break;
 
         default:
           break;
       }
     }
-
- 
   });
 
   function funcSwitch(e, but) {
     switch (but.func) {
       case "queryBnFSolr":
-        
         queryBnFSolr(but);
         break;
       case "addLocalService":

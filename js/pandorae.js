@@ -671,9 +671,9 @@ const selectOption = (type, id) => {
     ipcRenderer.send(
       "console-logs",
       CM.console.starting[0] +
-      type +
-      CM.console.starting[1] +
-      JSON.stringify(id)
+        type +
+        CM.console.starting[1] +
+        JSON.stringify(id)
     );
   }
 };
@@ -730,7 +730,7 @@ const serialize = (svg) => {
   );
   ipcRenderer
     .invoke("saveSVG", { defaultPath: datasetName + ".svg" }, string)
-    .then((res) => { });
+    .then((res) => {});
 };
 
 const exportToHTML = () => {
@@ -939,10 +939,10 @@ const exportToHTML = () => {
                                   HTMLFILE.write(typesJS);
                                   HTMLFILE.write(
                                     "typeSwitch(" +
-                                    JSON.stringify(currentType.type) +
-                                    "," +
-                                    JSON.stringify(currentType.id) +
-                                    ");"
+                                      JSON.stringify(currentType.type) +
+                                      "," +
+                                      JSON.stringify(currentType.id) +
+                                      ");"
                                   );
                                   HTMLFILE.write(
                                     'document.getElementById("field").style.zIndex = "-10";'
@@ -966,10 +966,10 @@ const exportToHTML = () => {
                         HTMLFILE.write(typesJS);
                         HTMLFILE.write(
                           "typeSwitch(" +
-                          JSON.stringify(currentType.type) +
-                          "," +
-                          JSON.stringify(currentType.id) +
-                          ");"
+                            JSON.stringify(currentType.type) +
+                            "," +
+                            JSON.stringify(currentType.id) +
+                            ");"
                         );
                         HTMLFILE.write(
                           'document.getElementById("field").style.zIndex = "-10";'
@@ -1501,7 +1501,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
   // =========== LANGUAGE SELECTION ===========
   var CM = CMT["EN"]; // Load the EN locale at start
   fs.readFile(
-    userDataPath + "/PANDORAE/userID/user-id.json",
+    userDataPath + "/PANDORAE-DATA/userID/user-id.json",
     "utf8", // Check if the user uses another one
     (err, data) => {
       data = JSON.parse(data);
@@ -1534,14 +1534,14 @@ window.addEventListener("DOMContentLoaded", (event) => {
       CM = CMT[lg.innerText];
       populateLocale(divlist);
       fs.readFile(
-        userDataPath + "/PANDORAE/userID/user-id.json",
+        userDataPath + "/PANDORAE-DATA/userID/user-id.json",
         "utf8",
         (err, data) => {
           data = JSON.parse(data);
           data.locale = lg.innerText;
           data = JSON.stringify(data);
           fs.writeFile(
-            userDataPath + "/PANDORAE/userID/user-id.json",
+            userDataPath + "/PANDORAE-DATA/userID/user-id.json",
             data,
             "utf8",
             (err) => {
