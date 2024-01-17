@@ -29,8 +29,7 @@ let userID;
 // This is useful to make Dexie (the layer over the user agent IndexedDB)
 // work in a consistent manner in Electron
 // (cf https://github.com/dexie/Dexie.js/issues/271#issuecomment-444773780)
-app.requestSingleInstanceLock()
-
+app.requestSingleInstanceLock();
 
 const createUserId = () => {
   userID = {
@@ -85,7 +84,7 @@ function createWindow() {
 
   mainWindow.setMenu(null);
 
-  mainWindow.webContents.openDevTools();
+  //mainWindow.webContents.openDevTools();
 
   mainWindow.on("closed", () => (mainWindow = null));
 }
@@ -397,7 +396,7 @@ const chaerosCalculator = () => {
 
   chaerosWindow.webContents.on("did-finish-load", function () {
     chaerosWindow.webContents.send("id", chaerosWindow.id);
-    chaerosWindow.webContents.openDevTools();
+    //chaerosWindow.webContents.openDevTools();
   });
 };
 
@@ -671,4 +670,7 @@ ipcMain.handle("checkflux", async (event, mess) => {
   return result;
 });
 
-ipcMain.on("openPath", async (event, path) => shell.openExternal(path));
+ipcMain.on("openPath", async (event, path) => {
+  shell.openPath(path);
+  shell.openExternal(path);
+});
