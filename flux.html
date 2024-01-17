@@ -2,7 +2,8 @@
 <html>
 <meta charset="UTF-8">
 <title>PANDORÆ-FLUX</title>
-<meta http-equiv="Content-Security-Policy" content="script-src 'self';object-src 'none';base-uri 'none';">
+<meta http-equiv="Content-Security-Policy"
+  content="script-src 'self';object-src 'none';base-uri 'none';">
 
 <style>
   body {
@@ -39,19 +40,28 @@
 <!-- USER TAB -->
 <div id="user" style="display:none;" class="fluxTabs">
   <span class="flux-title">USER</span><br><br>
-  <span style="font-family: sans-serif;color:white;background-color: red;padding: 3px;">The data entered below is
-    unencrypted so as to make this application portable. It is stored in a text file in the "Documents" folder. Click on
-    the button below to access the file and delete it manually if you are on a public computer.</span><br>
-  <button type="submit" id="access-user-id" class="flux-button">Access User ID file</button><br><br><br>
+  <span
+    style="font-family: sans-serif;color:white;background-color: red;padding: 3px;">The
+    data entered below is
+    unencrypted so as to make this application portable. It is stored in a text
+    file in the "Documents" folder. Click on
+    the button below to access the file and delete it manually if you are on a
+    public computer.</span><br>
+  <button type="submit" id="access-user-id" class="flux-button">Access User ID
+    file</button> <button type="submit" id="change-user-id"
+    class="flux-button">Change user folder location</button><br><br><br>
 
   <span class="credential"><b>User information</b></span><br><br>
   <form id="user-data-form" autocomplete="off">
-    <div class="credential"> Name:<br> <input class="fluxInput" spellcheck="false" id="userNameInput" type="text"
+    <div class="credential"> Name:<br> <input class="fluxInput"
+        spellcheck="false" id="userNameInput" type="text"
         value="Enter your name"><br><br></div>
-    <div class="credential"> Email:<br> <input class="fluxInput" spellcheck="false" id="userMailInput" type="text"
+    <div class="credential"> Email:<br> <input class="fluxInput"
+        spellcheck="false" id="userMailInput" type="text"
         value="Enter your email"><br><br></div>
-    <div class="credential"> Zotero group id:<br> <input class="fluxInput" spellcheck="false" id="zoterouserinput"
-        type="text" value="Enter your zotero group code"><br><br></div>
+    <div class="credential"> Zotero group id:<br> <input class="fluxInput"
+        spellcheck="false" id="zoterouserinput" type="text"
+        value="Enter your zotero group code"><br><br></div>
     <button type="submit" id="user-button" class="flux-button">Update User
       Credentials</button><br>
 
@@ -65,14 +75,17 @@
 
     <div class="credential">
 
-      <input style="width:20%;display:none" class="fluxInput" spellcheck="false" id="newServiceName" type="text"
-        value="Service name">
-      &nbsp;<input style="width:20%;display:none" class="fluxInput" spellcheck="false" id="newServiceLocation"
-        type="text" value="IP:PORT"> &nbsp;
-      &nbsp;<input style="width:20%;display:none" class="fluxInput" spellcheck="false" id="newArkViewer" type="text"
+      <input style="width:20%;display:none" class="fluxInput" spellcheck="false"
+        id="newServiceName" type="text" value="Service name">
+      &nbsp;<input style="width:20%;display:none" class="fluxInput"
+        spellcheck="false" id="newServiceLocation" type="text" value="IP:PORT">
+      &nbsp;
+      &nbsp;<input style="width:20%;display:none" class="fluxInput"
+        spellcheck="false" id="newArkViewer" type="text"
         value="Ark Viewer Address"> &nbsp;
 
-      <select style="width:20%;" class="fluxInput" spellcheck="false" id="newServiceType">
+      <select style="width:20%;" class="fluxInput" spellcheck="false"
+        id="newServiceType">
         <option value=""></option>
         <option value="BNF-SOLR">BNF-SOLR</option>
       </select> &nbsp;
@@ -83,25 +96,30 @@
 
     <span class="credential"><b>API Keys</b></span><br><br>
     <div class="credential APIcred">
-      <i title="Click this button to check your API credentials status" class="material-icons validation"
-        id="zoteroAPIValidation">help_outline</i> Zotero API key: <input class="fluxInput" spellcheck="false"
-        id="zoterokeyinput" type="password" value="Enter your Zotero API key"><i
-        title="Click this button to update your credentials" class="material-icons updateCredentials"
-        id="Zotero">cached</i> <br><br>
+      <i title="Click this button to check your API credentials status"
+        class="material-icons validation"
+        id="zoteroAPIValidation">help_outline</i> Zotero API key: <input
+        class="fluxInput" spellcheck="false" id="zoterokeyinput" type="password"
+        value="Enter your Zotero API key"><i
+        title="Click this button to update your credentials"
+        class="material-icons updateCredentials" id="Zotero">cached</i> <br><br>
     </div>
     <div class="credential APIcred">
-      <i title="Click this button to check your API credentials status" class="material-icons validation"
-        id="scopusValidation">help_outline</i>
-      Scopus API key: <input class="fluxInput" spellcheck="false" id="scopuskeyinput" type="password" value=""><i
-        title="Click this button to update your credentials" class="material-icons updateCredentials"
-        id="Scopus">cached</i><br><br>
+      <i title="Click this button to check your API credentials status"
+        class="material-icons validation" id="scopusValidation">help_outline</i>
+      Scopus API key: <input class="fluxInput" spellcheck="false"
+        id="scopuskeyinput" type="password" value=""><i
+        title="Click this button to update your credentials"
+        class="material-icons updateCredentials" id="Scopus">cached</i><br><br>
     </div>
 
     <div class="credential APIcred">
-      <i title="Click this button to check your API credentials status" class="material-icons validation"
-        id="wosValidation">help_outline</i>
-      WoS API key: <input class="fluxInput" spellcheck="false" id="woskeyinput" type="password" value=""><i
-        title="Click this button to update your credentials" class="material-icons updateCredentials"
+      <i title="Click this button to check your API credentials status"
+        class="material-icons validation" id="wosValidation">help_outline</i>
+      WoS API key: <input class="fluxInput" spellcheck="false" id="woskeyinput"
+        type="password" value=""><i
+        title="Click this button to update your credentials"
+        class="material-icons updateCredentials"
         id="WebOfScience">cached</i><br><br>
     </div>
     <!-- <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="altmetricValidation">help_outline</i> Altmetric API key:<br> <input class="fluxInput" spellcheck="false" id="altmetrickeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Altmetric">cached</i><br><br></div>
@@ -119,11 +137,13 @@
     value="https://hyphe.medialab.sciences-po.fr/demo"><br><br>
   <button type="submit" class="flux-button" id="hyphe-checker">Check Hyphe
     endpoint</button><br><br>
-  <button type="submit" style="display:none;" class="flux-button" id="hyphe-exporter">Add to Hyphe
+  <button type="submit" style="display:none;" class="flux-button"
+    id="hyphe-exporter">Add to Hyphe
     endpoints</button><br><br>
   <button type="submit" class="flux-button" id="hypheDataset">Display available
     Hyphe endpoints</button><br>
-  <div id="hyphe-dataset-preview" style="position:relative;max-height: 200px;overflow-y: scroll;"></div>
+  <div id="hyphe-dataset-preview"
+    style="position:relative;max-height: 200px;overflow-y: scroll;"></div>
 
   <div id="hyphe-dataset-list" style="position:relative;"></div>
 
@@ -136,11 +156,14 @@
   <span class="flux-title">Clinical Trials</span>
   <br><br>
   <form id="clinical_trials-form" autocomplete="off">Clinical Trials Query:<br>
-    <input class="fluxInput" spellcheck="false" id="clinical_trialslocalqueryinput" type="text"
+    <input class="fluxInput" spellcheck="false"
+      id="clinical_trialslocalqueryinput" type="text"
       value="Enter your query"><br><br>
-    <button type="submit" class="flux-button" id="clinical_trials-basic-query">Retrieve basic info</button>&nbsp;&nbsp;
+    <button type="submit" class="flux-button"
+      id="clinical_trials-basic-query">Retrieve basic info</button>&nbsp;&nbsp;
     <div id="clinical_trials-basic-previewer" style="position:relative;"></div>
-    <button style="display:none;" type="submit" class="flux-button" id="clinical_trials-query">Submit full query to the
+    <button style="display:none;" type="submit" class="flux-button"
+      id="clinical_trials-query">Submit full query to the
       Clinical Trials API
       services</button>
     <br><br>
@@ -152,23 +175,24 @@
   <span class="flux-title">SCOPUS</span>
   <br><br>
   <form id="scopus-form" autocomplete="off">Scopus Query:<br>
-    <input class="fluxInput" spellcheck="false" id="scopuslocalqueryinput" type="text"
-      value="Enter your Scopus Query"><br><br><br>
+    <input class="fluxInput" spellcheck="false" id="scopuslocalqueryinput"
+      type="text" value="Enter your Scopus Query"><br><br><br>
     <button type="submit" class="flux-button" id="scopus-basic-query">Retrieve
       basic info</button>&nbsp;&nbsp;
     <div id="scopus-basic-previewer" style="position:relative;"></div>
-    <button style="display:none;" type="submit" class="flux-button" id="scopus-query">Submit Scopus Query</button>
+    <button style="display:none;" type="submit" class="flux-button"
+      id="scopus-query">Submit Scopus Query</button>
     <br><br>
     <hr><br><br>
     Scopus ISSN retrieval: retrieve journal profiles of articles contained in
     previous Scopus requests.<br><br>
     <button type="submit" class="flux-button" id="scopus-list-display">Update
-      available dataset list</button> &nbsp; &nbsp; &nbsp;<button type="submit" class="flux-button"
-      style="display: none;" id="issn-prepare">Request
-      Journal Profiles</button> &nbsp; &nbsp; &nbsp;<button type="submit" class="flux-button" style="display: none;"
-      id="export-cited-by">Export
-      [cited by] data</button>&nbsp; &nbsp; &nbsp;<button type="submit" class="flux-button" style="display: none;"
-      id="export-affil-rank">Export
+      available dataset list</button> &nbsp; &nbsp; &nbsp;<button type="submit"
+      class="flux-button" style="display: none;" id="issn-prepare">Request
+      Journal Profiles</button> &nbsp; &nbsp; &nbsp;<button type="submit"
+      class="flux-button" style="display: none;" id="export-cited-by">Export
+      [cited by] data</button>&nbsp; &nbsp; &nbsp;<button type="submit"
+      class="flux-button" style="display: none;" id="export-affil-rank">Export
       Affiliation ranking</button><br><br>
   </form>
   <div id="scopus-dataset-ISSN-list" style="position:relative;">No dataset
@@ -180,12 +204,13 @@
   <span class="flux-title">ISTEX</span>
   <br><br>
   <form id="istex-form" autocomplete="off">ISTEX Query:<br>
-    <input class="fluxInput" spellcheck="false" id="istexlocalqueryinput" type="text"
-      value="Enter your istex Query"><br><br><br>
+    <input class="fluxInput" spellcheck="false" id="istexlocalqueryinput"
+      type="text" value="Enter your istex Query"><br><br><br>
     <button type="submit" class="flux-button" id="istex-basic-query">Retrieve
       basic info</button>&nbsp;&nbsp;
     <div id="istex-basic-previewer" style="position:relative;"></div><br><br>
-    <button style="display:none;" type="submit" class="flux-button" id="istex-query">Submit ISTEX Query</button>
+    <button style="display:none;" type="submit" class="flux-button"
+      id="istex-query">Submit ISTEX Query</button>
     <br><br>
     <hr><br><br>
 
@@ -201,16 +226,18 @@
   <span class="flux-title">Clarivate Web of Science</span>
   <br><br>
   <form id="wos-form" autocomplete="off">Web of Science (avanced) Query:<br>
-    <input class="fluxInput" spellcheck="false" id="wosbasicqueryinput" type="text"
-      value="Enter your WoS Query"><br><br>
+    <input class="fluxInput" spellcheck="false" id="wosbasicqueryinput"
+      type="text" value="Enter your WoS Query"><br><br>
 
-    From: <input type="date" id="wos-from-date"> - to: <input type="date" id="wos-to-date">
+    From: <input type="date" id="wos-from-date"> - to: <input type="date"
+      id="wos-to-date">
     <br><br>
     <button type="submit" class="flux-button" id="wos-basic-query">Retrieve
       basic info</button>&nbsp;&nbsp;
     <br><br>
     <div id="wos-basic-previewer" style="position:relative;"></div><br><br>
-    <button style="display:none;" type="submit" class="flux-button" id="wos-query">Submit Web of Science Query</button>
+    <button style="display:none;" type="submit" class="flux-button"
+      id="wos-query">Submit Web of Science Query</button>
     <br><br>
     <hr><br><br>
   </form>
@@ -221,18 +248,24 @@
   <span class="flux-title">bioRxiv</span>
   <br><br>
   <form id="biorxiv-form" autocomplete="off">Query:<br>
-    <input class="fluxInput" spellcheck="false" id="biorxivlocalqueryinput" type="text" value=""><br><br>
-    From: <input type="date" id="biorxiv-date-from"> - To: <input type="date" id="biorxiv-date-to"><br>
-    <br> Database: <input list="biorxiv-medrxiv" id="biorxiv-list" value="biorxiv" /><br><br>
+    <input class="fluxInput" spellcheck="false" id="biorxivlocalqueryinput"
+      type="text" value=""><br><br>
+    From: <input type="date" id="biorxiv-date-from"> - To: <input type="date"
+      id="biorxiv-date-to"><br>
+    <br> Database: <input list="biorxiv-medrxiv" id="biorxiv-list"
+      value="biorxiv" /><br><br>
     <datalist id="biorxiv-medrxiv">
       <option value="biorxiv">
     </datalist>
-    Author: <input class="fluxInput" spellcheck="false" id="biorxiv-author" type="text" value=""><br><br>
-    DOI : <input class="fluxInput" spellcheck="false" id="biorxiv-doi" type="text" value=""><br><br>
+    Author: <input class="fluxInput" spellcheck="false" id="biorxiv-author"
+      type="text" value=""><br><br>
+    DOI : <input class="fluxInput" spellcheck="false" id="biorxiv-doi"
+      type="text" value=""><br><br>
     <button type="submit" class="flux-button" id="biorxiv-basic-query">Retrieve
       basic info</button>&nbsp;&nbsp;
     <div id="biorxiv-basic-previewer" style="position:relative;"></div><br><br>
-    <button style="display: none;" type="submit" class="flux-button" id="biorxiv-query">Submit bioRxiv Query</button>
+    <button style="display: none;" type="submit" class="flux-button"
+      id="biorxiv-query">Submit bioRxiv Query</button>
     <br><br>
   </form>
 </div>
@@ -242,7 +275,8 @@
   <span class="flux-title">Regards Citoyens</span>
   <br><br>
   <form id="regards-form" autocomplete="off">Query:<br>
-    <input class="fluxInput" spellcheck="false" id="regardsrecherche" type="text" value=""><br><br><br>
+    <input class="fluxInput" spellcheck="false" id="regardsrecherche"
+      type="text" value=""><br><br><br>
     <label class="fluxInput" for="legislature">Choix de législature</label>
 
     <select class="fluxInput" name="legislature" id="legislature">
@@ -254,7 +288,8 @@
     <button type="submit" class="flux-button" id="regards-basic-query">Retrieve
       basic info</button>&nbsp;&nbsp;
     <div id="regards-basic-previewer" style="position:relative;"></div><br><br>
-    <button style="display: none;" type="submit" class="flux-button" id="regards-query">Submit Full Query</button>
+    <button style="display: none;" type="submit" class="flux-button"
+      id="regards-query">Submit Full Query</button>
     <br><br>
   </form>
 </div>
@@ -278,8 +313,8 @@
     <input type="file" id="twitterQuery" accept="json"><br><br>
     Dataset Name (if a dataset with the same name already exists, it will be
     overwritten)<br>
-    <input class="fluxInput" spellcheck="false" id="twitterDatasetName" type="text"
-      value="Enter a dataset name"><br><br>
+    <input class="fluxInput" spellcheck="false" id="twitterDatasetName"
+      type="text" value="Enter a dataset name"><br><br>
     <br> <button type="submit" class="flux-button" id="twitterImporter">Import
       to SYSTEM</button>
   </form>
@@ -290,16 +325,20 @@
     <br> <br>
     JSON Dataset<br>
     <input type="file" id="twitterCatPathInput" accept="json"><br><br>
-    <input class="fluxInput" spellcheck="false" id="twitterCatName" type="text" value="Enter a dataset name"><br><br>
-    <br> <button type="submit" class="flux-button" id="twitterCatImporter">Import to SYSTEM</button>
+    <input class="fluxInput" spellcheck="false" id="twitterCatName" type="text"
+      value="Enter a dataset name"><br><br>
+    <br> <button type="submit" class="flux-button"
+      id="twitterCatImporter">Import to SYSTEM</button>
   </form>
   <h4>Twarc threads</h4> <br>
   Upload threads retrieved through twarc.
   <br> <br>
   JSON Dataset<br>
   <input type="file" id="twitterThread" accept="json"><br><br>
-  <input class="fluxInput" spellcheck="false" id="twitterThreadName" type="text" value="Enter a dataset name"><br><br>
-  <br> <button type="submit" class="flux-button" id="twitterThreadImporter">Import to SYSTEM</button>
+  <input class="fluxInput" spellcheck="false" id="twitterThreadName" type="text"
+    value="Enter a dataset name"><br><br>
+  <br> <button type="submit" class="flux-button"
+    id="twitterThreadImporter">Import to SYSTEM</button>
   </form>
 </div>
 
@@ -310,14 +349,17 @@
   <form autocomplete="off">
     <br>
     <div id="scopus-dataset-preview" style="position:relative;"></div>
-    <button type="submit" style="display: none;" class="flux-button" id="scopusGeolocate">Geolocate
+    <button type="submit" style="display: none;" class="flux-button"
+      id="scopusGeolocate">Geolocate
       Affiliations</button> <br>
     <div id="webofscience-dataset-preview" style="position:relative;"></div>
-    <button type="submit" style="display: none;" class="flux-button" id="webofscienceGeolocate">Geolocate
+    <button type="submit" style="display: none;" class="flux-button"
+      id="webofscienceGeolocate">Geolocate
       Affiliations</button>
 
     <br><br>
-    <button type="submit" class="flux-button" id="sci-api-retrieve-display">Update
+    <button type="submit" class="flux-button"
+      id="sci-api-retrieve-display">Update
       available dataset list</button>
   </form>
   <br><br>
@@ -339,7 +381,8 @@
     <div id="enriched-dataset-preview" style="position:relative;">Click on a
       dataset to display its features. </div>
     <div id="enriched-dataset-buttons" style="display:none;">
-      <input type="checkbox" class="flux-button" name="crossEnrich" id="crossEnrich"> <label for="crossEnrich">Normalize
+      <input type="checkbox" class="flux-button" name="crossEnrich"
+        id="crossEnrich"> <label for="crossEnrich">Normalize
         with
         CrossRef</label><br>
       <br>
@@ -368,7 +411,8 @@
 
     <div id="manual-dataset-buttons" style="display:none;">
 
-      <button type="submit" class="flux-button" id="manual-merge-authors">Manually merge
+      <button type="submit" class="flux-button"
+        id="manual-merge-authors">Manually merge
         authors</button>
 
     </div>
@@ -396,10 +440,11 @@
       csljson files</button><br>
     <div id="csljson-dataset-preview"></div>
     <div id="csljson-dataset-buttons" style="display:none;">
-      <input class="fluxInput" spellcheck="false" class="sendToZotero" id="zoteroCollecName" type="text"
-        value="Enter collection name">
+      <input class="fluxInput" spellcheck="false" class="sendToZotero"
+        id="zoteroCollecName" type="text" value="Enter collection name">
 
-      <button type="submit" class="flux-button sendToZotero" id="zoteroCollecBuild">Create a new Zotero
+      <button type="submit" class="flux-button sendToZotero"
+        id="zoteroCollecBuild">Create a new Zotero
         Collection</button>
     </div>
     <div id="userCsljsonCollections"></div>
@@ -417,9 +462,10 @@
 
   </div>
   <br><br><br>
-  <input class="fluxInput" spellcheck="false" id="zoteroImportName" style="display:none;" type="text"
-    value="Enter import name">
-  <button type="submit" class="flux-button" style="display:none;" id="zotitret">Import selected collections into
+  <input class="fluxInput" spellcheck="false" id="zoteroImportName"
+    style="display:none;" type="text" value="Enter import name">
+  <button type="submit" class="flux-button" style="display:none;"
+    id="zotitret">Import selected collections into
     system</button><br>
   </form>
 </div>
@@ -456,26 +502,36 @@
         Console</button>
       <br>
       <br><br>Export dataset to :<br>
-      <input class='sysDestCheck' value='chronotype' name='chronotype' type='checkbox' /><label>chronotype</label><br>
-      <input class='sysDestCheck' value='geotype' name='geotype' type='checkbox' /><label>geotype</label><br>
+      <input class='sysDestCheck' value='chronotype' name='chronotype'
+        type='checkbox' /><label>chronotype</label><br>
+      <input class='sysDestCheck' value='geotype' name='geotype'
+        type='checkbox' /><label>geotype</label><br>
       <input class='sysDestCheck' value='anthropotype' name='anthropotype'
         type='checkbox' /><label>anthropotype</label><br>
-      <input class='sysDestCheck' value='archotype' name='archotype' type='checkbox' /><label>archotype</label><br>
-      <input class='sysDestCheck' value='hyphotype' name='hyphotype' type='checkbox' /><label>hyphotype</label><br>
-      <input class='sysDestCheck' value='fieldotype' name='fieldotype' type='checkbox' /><label>fieldotype</label><br>
-      <input class='sysDestCheck' value='regards' name='regards' type='checkbox' /><label>regards</label><br>
+      <input class='sysDestCheck' value='archotype' name='archotype'
+        type='checkbox' /><label>archotype</label><br>
+      <input class='sysDestCheck' value='hyphotype' name='hyphotype'
+        type='checkbox' /><label>hyphotype</label><br>
+      <input class='sysDestCheck' value='fieldotype' name='fieldotype'
+        type='checkbox' /><label>fieldotype</label><br>
+      <input class='sysDestCheck' value='regards' name='regards'
+        type='checkbox' /><label>regards</label><br>
       <input class='sysDestCheck' value='gazouillotype' name='gazouillotype'
         type='checkbox' /><label>gazouillotype</label><br>
-      <input class='sysDestCheck' value='slider' name='slider' type='checkbox' /><label>slider</label><br>
-      <input class="fluxInput" spellcheck="false" id="systemToType" type="text" value="Enter a dataset name">
-      <button type="submit" class="flux-button" id="systitret">Export</button><br>
+      <input class='sysDestCheck' value='slider' name='slider'
+        type='checkbox' /><label>slider</label><br>
+      <input class="fluxInput" spellcheck="false" id="systemToType" type="text"
+        value="Enter a dataset name">
+      <button type="submit" class="flux-button"
+        id="systitret">Export</button><br>
     </div>
   </div>
   <div id="systemDatasetsList"></div>
   <br>
   <hr>
   <br>Import local dataset :<br>
-  <input class="fluxInput" id="localUploadPath" type="file" accept=".json" /><br><br>
+  <input class="fluxInput" id="localUploadPath" type="file"
+    accept=".json" /><br><br>
 
   <button type="submit" class="flux-button" id="load-local">Upload local dataset
     to SYSTEM</button>
@@ -483,12 +539,14 @@
 </div>
 
 <div style="position:fixed;z-index:20;padding: 5px;right:0px;top:0px;">
-  <i class="material-icons  dialog-buttons" id="fluxDisplayButton">arrow_back</i>
+  <i class="material-icons  dialog-buttons"
+    id="fluxDisplayButton">arrow_back</i>
   <i class="material-icons dialog-buttons" id="fluxRefreshButton">refresh</i>
   <i class="material-icons dialog-buttons" id="fluxCloseButton">close</i>
 </div>
 
-<div id="selectCascade" style="position:fixed;z-index:20;padding: 5px;left:5px;top:5px;">
+<div id="selectCascade"
+  style="position:fixed;z-index:20;padding: 5px;left:5px;top:5px;">
   <fieldset style="border:unset">
     <div>
       <input type="checkbox" id="scientometricsSelect" name="scientometrics">

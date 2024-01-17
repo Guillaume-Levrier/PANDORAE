@@ -316,7 +316,8 @@ const CMT = {
           "<div style='text-align:center'><span class='title'>PANDORÆ  allows you to perform three main kinds of operations :</span><br><br><a data-action='scroll' data-target='Chapter1'>Load & enrich data</a><br><br><a data-action='scroll' data-target='Chapter2'>Explore data</a><br><br><i class='material-icons'><a class='arrowDown' data-action='scroll' data-target='Chapter1'>arrow_downward</a></i></div>",
         Chapter1:
           "<span class='title'><strong>Chapter 1: Loading & enriching data</strong></span><br><br>PANDORÆ enables you to load data from different types of sources.<br><br>Those sources can be online databases that aggregate documents such as scientific articles.<br> <br>But you can really add <strong>any kind of document</strong>.<br><br>PANDORÆ also supports other types of data, such as those extracted from social-media or clinical trials.<br>&nbsp;<br><div class='arrowDown'><i class='material-icons'><a class='arrowDown' data-action='scroll' data-target='flux'>arrow_downward</a></i></div>",
-        flux: "<span class='title'><strong>Cascade: Available data flows</strong></span><br><br><div style='display: inline-flex'><div style='flex:auto'>   <strong>Cascade</strong> is how Flux displays its data flows. As you can see, the data flows from you to the system. Hovering a process shows to which other process it is linked.  <br>&nbsp;<br> Cascade behaves like menu : click on a process and its options will be displayed.<br>&nbsp;<br>Click <a data-action='tuto' data-target='flux'>here</a> to learn how to open Flux.<br>&nbsp;<br> <div class='arrowDown'><i class='material-icons'><a class='arrowDown' data-action='scroll' data-target='flux2'>arrow_downward</a></i></div></div><div style='flex:auto'><svg></svg></div></div><br>&nbsp;<br>",
+        flux:
+          "<span class='title'><strong>Cascade: Available data flows</strong></span><br><br><div style='display: inline-flex'><div style='flex:auto'>   <strong>Cascade</strong> is how Flux displays its data flows. As you can see, the data flows from you to the system. Hovering a process shows to which other process it is linked.  <br>&nbsp;<br> Cascade behaves like menu : click on a process and its options will be displayed.<br>&nbsp;<br>Click <a data-action='tuto' data-target='flux'>here</a> to learn how to open Flux.<br>&nbsp;<br> <div class='arrowDown'><i class='material-icons'><a class='arrowDown' data-action='scroll' data-target='flux2'>arrow_downward</a></i></div></div><div style='flex:auto'><svg></svg></div></div><br>&nbsp;<br>",
         flux2:
           "<span class='title'><strong>Flux sections</strong></span><br><br>Flux has different types of processes. Each section has its own purpose, and relies on different services:<ul style='list-style-type: square;'><li><a data-action='scroll' data-target='user'>User</a> lets you insert your API keys and credentials.</li><li><a data-action='scroll' data-target='databases'>Databases requests</a> allow you to retrieve data from various online sources.</li><li><a data-action='scroll' data-target='enriching'>Enriching</a> allows you to edit and enrich datasets.</li><li><a data-action='scroll' data-target='system'>System</a> sends your data to PANDORAE visualisation features.</li></ul>Detail about the other sections will become available when they will be rolled out. Click on a section name to learn more about that section right now, or simply click on the arrow to continue.   <br>&nbsp;<br><div class='arrowDown'><i class='material-icons'><a class='arrowDown' data-action='scroll' data-target='databases'>arrow_downward</a></i></div>",
         databases:
@@ -351,7 +352,8 @@ const CMT = {
           "<div style='text-align:center'><span class='title'><strong>Freedom at last</strong></span><br><br>           You will learn how to use PANDORÆ mostly by trial and error.<br>&nbsp;<br> If you're a researcher and/or developer, you might want to go have a look at its            <a data-action='openEx' data-target='https://github.com/Guillaume-Levrier/PANDORAE'>source code</a>.<br>&nbsp;<br>           A wiki of the project is available <a data-action='openEx' data-target='https://github.com/Guillaume-Levrier/PANDORAE/wiki'>here</a>.           <br>&nbsp;<br>           <div class='arrowDown'>    <i class='material-icons'><a class='arrowDown' data-action='lastScroll()'>arrow_downward</a></i></div></div>",
         final8:
           "<div style='text-align:center'>This <strong>CORE</strong> is now yours. <br>&nbsp;<br>           Close the software and restart it to escape the tutorial.<br>&nbsp;<br>           Thank you for using PANDORÆ.<br><br>                    <div id='restartCount' style='font-weight: bolder'></div></div>",
-        last: "<div style='margin:auto;font-size:10px;line-height: 15px;'>PANDORÆ - version 1 <br>Guillaume Levrier</div>",
+        last:
+          "<div style='margin:auto;font-size:10px;line-height: 15px;'>PANDORÆ - version 1 <br>Guillaume Levrier</div>",
       },
     },
   },
@@ -2204,7 +2206,7 @@ const dataDownload = (data) => {
         { defaultPath: datasetName + ".json" },
         JSON.stringify(data)
       )
-      .then((res) => {});
+      .then((res) => { });
   });
 };
 
@@ -2740,18 +2742,18 @@ const multiFormat = (date) =>
   (d3.timeSecond(date) < date
     ? formatMillisecond
     : d3.timeMinute(date) < date
-    ? formatSecond
-    : d3.timeHour(date) < date
-    ? formatMinute
-    : d3.timeDay(date) < date
-    ? formatHour
-    : d3.timeMonth(date) < date
-    ? d3.timeWeek(date) < date
-      ? formatDay
-      : formatWeek
-    : d3.timeYear(date) < date
-    ? formatMonth
-    : formatYear)(date);
+      ? formatSecond
+      : d3.timeHour(date) < date
+        ? formatMinute
+        : d3.timeDay(date) < date
+          ? formatHour
+          : d3.timeMonth(date) < date
+            ? d3.timeWeek(date) < date
+              ? formatDay
+              : formatWeek
+            : d3.timeYear(date) < date
+              ? formatMonth
+              : formatYear)(date);
 
 // ========= ARCHOTYPE =========
 const archotype = (id) => {
@@ -2788,7 +2790,7 @@ const archotype = (id) => {
   var criteriaList = [];
   var currentCriteria = [];
 
-  let resolver, arkViewer;
+  let resolver, arkViewer
 
   ipcRenderer.invoke("checkflux", true).then((result) => {
     availability = JSON.parse(result);
@@ -2800,7 +2802,7 @@ const archotype = (id) => {
             availability.dnsLocalServiceList[service].url +
             ":" +
             availability.dnsLocalServiceList[service].port;
-
+         
           arkViewer = availability.dnsLocalServiceList[service].arkViewer;
 
           break;
@@ -2952,78 +2954,86 @@ const archotype = (id) => {
       const toolSearch = document.createElement("input");
 
       toolSearch.type = "text";
-      toolSearch.placeholder = "target expression";
+      toolSearch.placeholder = "target expression"
+
+
 
       const toolContent = document.createElement("div");
 
+
+
+
       if (resolver) {
         node.on("click", (e, d) => {
-          const circle = d3.select(e.target);
-          circle.attr("stroke-width", 3).attr("stroke", "	#0FFF50");
+
+          const circle = d3.select(e.target)
+          circle.attr("stroke-width", 3).attr("stroke", "	#0FFF50")
 
           const collection = documentMap[d.id].enrichment.solrCollection;
+          
 
           d.domain
             ? 0
             : fetch(
-                `http://${resolver}/solr/${collection}/select?q=url:${JSON.stringify(
-                  d.id.replaceAll("&", "%26")
-                )}`
-              )
-                .then((r) => r.json())
-                .then((r) => {
-                  toolContent.innerHTML = JSON.stringify(r);
+              `http://${resolver}/solr/${collection}/select?q=url:${JSON.stringify(
+                d.id.replaceAll("&", "%26")
+              )}`
+            )
+              .then((r) => r.json())
+              .then((r) => {
+                toolContent.innerHTML =
+                  JSON.stringify(r);
 
-                  if (r.response.numFound > 0) {
-                    const doc = r.response.docs[r.response.docs.length - 1];
+                if (r.response.numFound > 0) {
+                  const doc = r.response.docs[r.response.docs.length - 1];
 
-                    const accessButton = document.createElement("button");
-                    accessButton.innerText = "Ouvrir dans les archives";
-                    accessButton.style = "margin:10px;";
+                  const accessButton = document.createElement("button");
+                  accessButton.innerText = "Ouvrir dans les archives";
+                  accessButton.style = "margin:10px;";
 
-                    const archtarget = `${arkViewer}/${doc.wayback_date}/${doc.url}`;
-                    accessButton.addEventListener("click", () =>
-                      shell.openExternal(archtarget)
-                    );
+                  const archtarget = `${arkViewer}/${doc.wayback_date}/${doc.url}`;
+                  accessButton.addEventListener("click", () =>
+                    shell.openExternal(archtarget)
+                  );
 
-                    const content = document.createElement("div");
+                  const content = document.createElement("div");
 
-                    var sliced = "";
+                  var sliced = "";
 
-                    const target = toolSearch.value;
+                  const target = toolSearch.value;
 
-                    if (target.length > 2) {
-                      var re = new RegExp(target, "gi"),
-                        str = doc.content;
-                      while ((match = re.exec(str)) != null) {
-                        const extrait = doc.content
-                          .substring(match.index - 150, match.index + 150)
-                          .replace(target, "<mark>" + target + "</mark>");
-                        sliced += extrait + "<br><hr><br>";
-                      }
-
-                      content.innerHTML =
-                        "<div style = 'border:1px solid black; padding:5px'>" +
-                        sliced +
-                        "</div><br><hr><br>";
+                  if (target.length > 2) {
+                    var re = new RegExp(target, "gi"),
+                      str = doc.content;
+                    while ((match = re.exec(str)) != null) {
+                      const extrait = doc.content.substring(match.index - 150, match.index + 150).replace(target, "<mark>" + target + "</mark>")
+                      sliced += extrait + "<br><hr><br>";
                     }
 
-                    for (const key in doc) {
-                      content.innerHTML += `<div style = "font-weight:bold" > ${key}</div ><div>${doc[key]}</div><br>`;
-                    }
 
-                    toolContent.innerHTML = "";
-
-                    toolContent.append(accessButton, content);
-                  } else {
-                    toolContent.innerHTML = "not found";
+                    content.innerHTML = "<div style = 'border:1px solid black; padding:5px'>" + sliced + "</div><br><hr><br>"
                   }
-                });
-        });
+
+
+
+                  for (const key in doc) {
+                    content.innerHTML += `<div style = "font-weight:bold" > ${key}</div ><div>${doc[key]}</div><br>`;
+                  }
+
+                  toolContent.innerHTML = "";
+
+                  toolContent
+                    .append(accessButton, content);
+                } else {
+                  toolContent.innerHTML = "not found";
+                }
+              })
+        }
+        );
       } else {
         node.on("click", (e, d) => {
-          const circle = d3.select(e.target);
-          circle.attr("stroke-width", 3).attr("stroke", "	#0FFF50");
+          const circle = d3.select(e.target)
+          circle.attr("stroke-width", 3).attr("stroke", "	#0FFF50")
 
           toolContent.innerHTML = "";
           for (const key in documentMap[d.id]) {
@@ -3700,46 +3710,46 @@ const filotype = (id) => {
         .on("click", (event, d) => {
           d3.select("#tooltip").html(
             '<p class="legend"><strong><a target="_blank" href="https://mobile.twitter.com/' +
-              d.data.user.name +
-              '">' +
-              d.data.user.name +
-              '</a></strong> <br/><div style="border:1px solid black;"><p>' +
-              d.data.full_text +
-              "</p></div><br><br> Language: " +
-              d.data.user.lang +
-              "<br>Mentions: " +
-              d.data.mentions +
-              "<br>Date: " +
-              d.data.created_at +
-              "<br> Favorite count: " +
-              d.data.favorite_count +
-              "<br>Retweet count: " +
-              d.data.retweet_count +
-              "<br> Source: " +
-              d.data.source +
-              "<br>Tweet id: <a target='_blank' href='https://mobile.twitter.com/" +
-              d.data.user.screen_name +
-              "/status/" +
-              d.data.id_str +
-              "'>" +
-              d.data.id_str +
-              "</a>" +
-              "<br><br><strong>User info</strong><br><img src='" +
-              d.data.user.profile_image_url_https +
-              "' max-width='300'><br><br>Account creation date: " +
-              d.data.user.created_at +
-              "<br> Account name: " +
-              d.data.user.screen_name +
-              "<br> User id: " +
-              d.data.user.id +
-              "<br> User description: " +
-              d.data.user.description +
-              "<br> User follower count: " +
-              d.data.user.followers_count +
-              "<br> User friend count: " +
-              d.data.user.friends_count +
-              "<br> User tweet count: " +
-              d.data.user.statuses_count
+            d.data.user.name +
+            '">' +
+            d.data.user.name +
+            '</a></strong> <br/><div style="border:1px solid black;"><p>' +
+            d.data.full_text +
+            "</p></div><br><br> Language: " +
+            d.data.user.lang +
+            "<br>Mentions: " +
+            d.data.mentions +
+            "<br>Date: " +
+            d.data.created_at +
+            "<br> Favorite count: " +
+            d.data.favorite_count +
+            "<br>Retweet count: " +
+            d.data.retweet_count +
+            "<br> Source: " +
+            d.data.source +
+            "<br>Tweet id: <a target='_blank' href='https://mobile.twitter.com/" +
+            d.data.user.screen_name +
+            "/status/" +
+            d.data.id_str +
+            "'>" +
+            d.data.id_str +
+            "</a>" +
+            "<br><br><strong>User info</strong><br><img src='" +
+            d.data.user.profile_image_url_https +
+            "' max-width='300'><br><br>Account creation date: " +
+            d.data.user.created_at +
+            "<br> Account name: " +
+            d.data.user.screen_name +
+            "<br> User id: " +
+            d.data.user.id +
+            "<br> User description: " +
+            d.data.user.description +
+            "<br> User follower count: " +
+            d.data.user.followers_count +
+            "<br> User friend count: " +
+            d.data.user.friends_count +
+            "<br> User tweet count: " +
+            d.data.user.statuses_count
           );
         });
 
@@ -5173,12 +5183,12 @@ const chronotype = (id) => {
 
         dateAmount.forEach(
           (d) =>
-            (radialVal[d] = {
-              key: d,
-              date: parseTime(d),
-              value: 0,
-              zone: zoneCount,
-            })
+          (radialVal[d] = {
+            key: d,
+            date: parseTime(d),
+            value: 0,
+            zone: zoneCount,
+          })
         );
 
         cluster.forEach((val, key) => {
@@ -5666,10 +5676,10 @@ const chronotype = (id) => {
             })
             .text(
               currentBrush[0].getDate() +
-                "/" +
-                parseInt(currentBrush[0].getMonth() + 1) +
-                "/" +
-                currentBrush[0].getFullYear()
+              "/" +
+              parseInt(currentBrush[0].getMonth() + 1) +
+              "/" +
+              currentBrush[0].getFullYear()
             );
 
           brushLegendW
@@ -5690,10 +5700,10 @@ const chronotype = (id) => {
             })
             .text(
               currentBrush[1].getDate() +
-                "/" +
-                parseInt(currentBrush[1].getMonth() + 1) +
-                "/" +
-                currentBrush[1].getFullYear()
+              "/" +
+              parseInt(currentBrush[1].getMonth() + 1) +
+              "/" +
+              currentBrush[1].getFullYear()
             );
         }
 
@@ -7608,67 +7618,67 @@ const gazouillotype = (id) => {
                 });
               d3.select("#tooltip").html(
                 '<p class="legend"><strong><a target="_blank" href="https://mobile.twitter.com/' +
-                  d.from_user_name +
-                  '">' +
-                  d.from_user_name +
-                  '</a></strong> <br/><div style="border:1px solid black;"><p>' +
-                  d.text +
-                  "</p></div><br><br> Language: " +
-                  d.lang +
-                  "<br>Date: " +
-                  d.date +
-                  "<br> Favorite count: " +
-                  d.favorite_count +
-                  "<br>Reply count: " +
-                  d.reply_count +
-                  "<br>Retweet count: " +
-                  d.retweet_count +
-                  "<br>Links: <a target='_blank' href='" +
-                  d.links +
-                  "'>" +
-                  d.links +
-                  "</a><br> Hashtags: " +
-                  d.hashtags +
-                  "<br> Mentionned user names: " +
-                  d.mentionned_user_names +
-                  "<br> Source: " +
-                  d.source_name +
-                  "<br>Tweet id: <a target='_blank' href='https://mobile.twitter.com/" +
-                  d.from_user_name +
-                  "/status/" +
-                  d.id +
-                  "'>" +
-                  d.id +
-                  "</a><br> Possibly sensitive: " +
-                  d.possibly_sensitive +
-                  "<br><br> Embeded media<br><img src='" +
-                  d.medias_urls +
-                  "' width='300' ><br><br><strong>Location</strong><br/>City: " +
-                  d.location +
-                  "<br> Latitude:" +
-                  d.lat +
-                  "<br>Longitude: " +
-                  d.lng +
-                  "<br><br><strong>User info</strong><br><img src='" +
-                  d.from_user_profile_image_url +
-                  "' max-width='300'><br><br>Account creation date: " +
-                  d.from_user_created_at +
-                  "<br> Account name: " +
-                  d.from_user_name +
-                  "<br> User id: " +
-                  d.from_user_id +
-                  "<br> User description: " +
-                  d.from_user_description +
-                  "<br> User follower count: " +
-                  d.from_user_followercount +
-                  "<br> User friend count: " +
-                  d.from_user_friendcount +
-                  "<br> User tweet count: " +
-                  d.from_user_tweetcount +
-                  "" +
-                  "<br><br>" +
-                  requestContent +
-                  "<br><br><br><br><br><br><br><br></p>"
+                d.from_user_name +
+                '">' +
+                d.from_user_name +
+                '</a></strong> <br/><div style="border:1px solid black;"><p>' +
+                d.text +
+                "</p></div><br><br> Language: " +
+                d.lang +
+                "<br>Date: " +
+                d.date +
+                "<br> Favorite count: " +
+                d.favorite_count +
+                "<br>Reply count: " +
+                d.reply_count +
+                "<br>Retweet count: " +
+                d.retweet_count +
+                "<br>Links: <a target='_blank' href='" +
+                d.links +
+                "'>" +
+                d.links +
+                "</a><br> Hashtags: " +
+                d.hashtags +
+                "<br> Mentionned user names: " +
+                d.mentionned_user_names +
+                "<br> Source: " +
+                d.source_name +
+                "<br>Tweet id: <a target='_blank' href='https://mobile.twitter.com/" +
+                d.from_user_name +
+                "/status/" +
+                d.id +
+                "'>" +
+                d.id +
+                "</a><br> Possibly sensitive: " +
+                d.possibly_sensitive +
+                "<br><br> Embeded media<br><img src='" +
+                d.medias_urls +
+                "' width='300' ><br><br><strong>Location</strong><br/>City: " +
+                d.location +
+                "<br> Latitude:" +
+                d.lat +
+                "<br>Longitude: " +
+                d.lng +
+                "<br><br><strong>User info</strong><br><img src='" +
+                d.from_user_profile_image_url +
+                "' max-width='300'><br><br>Account creation date: " +
+                d.from_user_created_at +
+                "<br> Account name: " +
+                d.from_user_name +
+                "<br> User id: " +
+                d.from_user_id +
+                "<br> User description: " +
+                d.from_user_description +
+                "<br> User follower count: " +
+                d.from_user_followercount +
+                "<br> User friend count: " +
+                d.from_user_friendcount +
+                "<br> User tweet count: " +
+                d.from_user_tweetcount +
+                "" +
+                "<br><br>" +
+                requestContent +
+                "<br><br><br><br><br><br><br><br></p>"
               );
             });
 
@@ -7979,7 +7989,7 @@ const gazouillotype = (id) => {
 
               midDate = new Date(
                 brushContent[0].getTime() +
-                  (brushContent[1].getTime() - brushContent[0].getTime()) / 2
+                (brushContent[1].getTime() - brushContent[0].getTime()) / 2
               );
 
               // TO DO
@@ -8468,52 +8478,52 @@ const pharmacotype = (id) => {
 
           d3.select("#tooltip").html(
             "<h2>" +
-              idMod.BriefTitle +
-              "</h2>" +
-              "<h3>" +
-              idMod.Organization.OrgFullName +
-              " - " +
-              idMod.Organization.OrgClass.toLowerCase() +
-              "</h3>" +
-              "<br>" +
-              " <input type='button' style='cursor:pointer' onclick='shell.openExternal(" +
-              JSON.stringify(
-                "https://clinicaltrials.gov/ct2/show/" + idMod.NCTId
-              ) +
-              ")' value='Open on ClinicalTrials.gov'></input><br><br>" +
-              "<strong>Full title:</strong> " +
-              idMod.OfficialTitle +
-              "<br>" +
-              "<strong>NCTId:</strong> " +
-              idMod.NCTId +
-              "<br>" +
-              "<strong>Org Id:</strong> " +
-              idMod.OrgStudyIdInfo.OrgStudyId +
-              "<br>" +
-              "<br>" +
-              "<h3>Status</h3>" +
-              "<strong>Overall status:</strong> " +
-              statMod.OverallStatus +
-              "<br>" +
-              "<strong>Last verified:</strong> " +
-              statMod.StatusVerifiedDate +
-              "<br>" +
-              "<strong>Expanded access:</strong> " +
-              statMod.ExpandedAccessInfo.HasExpandedAccess +
-              "<br>" +
-              "<strong>FDA regulated:</strong> Drug [" +
-              overSight.IsFDARegulatedDrug +
-              "] - Device [" +
-              overSight.IsFDARegulatedDevice +
-              "]<br>" +
-              "<h3>Description</h3>" +
-              "<strong>Brief summary:</strong> " +
-              descMod.BriefSummary +
-              "<br>" +
-              "<br>" +
-              "<strong>Detailed description:</strong> " +
-              descMod.DetailedDescription +
-              "<br>"
+            idMod.BriefTitle +
+            "</h2>" +
+            "<h3>" +
+            idMod.Organization.OrgFullName +
+            " - " +
+            idMod.Organization.OrgClass.toLowerCase() +
+            "</h3>" +
+            "<br>" +
+            " <input type='button' style='cursor:pointer' onclick='shell.openExternal(" +
+            JSON.stringify(
+              "https://clinicaltrials.gov/ct2/show/" + idMod.NCTId
+            ) +
+            ")' value='Open on ClinicalTrials.gov'></input><br><br>" +
+            "<strong>Full title:</strong> " +
+            idMod.OfficialTitle +
+            "<br>" +
+            "<strong>NCTId:</strong> " +
+            idMod.NCTId +
+            "<br>" +
+            "<strong>Org Id:</strong> " +
+            idMod.OrgStudyIdInfo.OrgStudyId +
+            "<br>" +
+            "<br>" +
+            "<h3>Status</h3>" +
+            "<strong>Overall status:</strong> " +
+            statMod.OverallStatus +
+            "<br>" +
+            "<strong>Last verified:</strong> " +
+            statMod.StatusVerifiedDate +
+            "<br>" +
+            "<strong>Expanded access:</strong> " +
+            statMod.ExpandedAccessInfo.HasExpandedAccess +
+            "<br>" +
+            "<strong>FDA regulated:</strong> Drug [" +
+            overSight.IsFDARegulatedDrug +
+            "] - Device [" +
+            overSight.IsFDARegulatedDevice +
+            "]<br>" +
+            "<h3>Description</h3>" +
+            "<strong>Brief summary:</strong> " +
+            descMod.BriefSummary +
+            "<br>" +
+            "<br>" +
+            "<strong>Detailed description:</strong> " +
+            descMod.DetailedDescription +
+            "<br>"
           );
 
           if (
@@ -11089,45 +11099,44 @@ const normalCore = () => {
 //Vega PANDORAE Theme JS
 
 const vega = () => {
-  let canvas = document.createElement("CANVAS");
-  canvas.id = "vega";
-  canvas.className += "purgeable themeCustom";
-  canvas.style.width = window.innerWidth + "px";
-  canvas.style.height = window.innerHeight + "px";
 
-  document.body.insertBefore(canvas, document.getElementById("signal"));
+    let canvas = document.createElement("CANVAS");
+    canvas.id ="vega";
+    canvas.className +="purgeable themeCustom";
+    canvas.style.width = window.innerWidth+"px";
+    canvas.style.height = window.innerHeight+"px";
+    
+    document.body.insertBefore(canvas,document.getElementById("signal"));
 
-  var ctx = canvas.getContext("2d");
-  var scale = window.devicePixelRatio;
-  canvas.width = window.innerWidth * scale;
-  canvas.height = window.innerHeight * scale;
-  ctx.scale(scale, scale);
+    var ctx = canvas.getContext('2d');
+    var scale = window.devicePixelRatio;
+    canvas.width = window.innerWidth*scale;
+    canvas.height = window.innerHeight*scale;
+    ctx.scale(scale, scale);
+    
+    var etalon = window.innerHeight/2;
 
-  var etalon = window.innerHeight / 2;
-
-  function circleDrawer(rayon) {
-    ctx.save();
-    var midX = canvas.offsetWidth / 2;
-    var midY = canvas.offsetHeight / 2;
-    ctx.fillstyle = "#141414";
-    ctx.arc(midX, midY, rayon, 0, 2 * Math.PI);
-    let pas = window.innerHeight / 20;
-    let clipHeight = 7000 / rayon;
-    let region = new Path2D();
-    for (let i = 0; i < canvas.offsetHeight; i = i + pas * 2) {
-      region.rect(0, i - clipHeight / 2, window.innerWidth, clipHeight);
+    function circleDrawer(rayon) {
+        ctx.save()
+        var midX = canvas.offsetWidth/2;
+        var midY = canvas.offsetHeight/2;
+        ctx.fillstyle="#141414"
+        ctx.arc(midX,midY,rayon,0,2*Math.PI);
+        let pas = window.innerHeight/20;
+        let clipHeight = 7000/rayon;
+        let region = new Path2D();
+        for (let i = 0; i < canvas.offsetHeight; i=i+(pas*2)) {
+            region.rect(0,i-clipHeight/2,window.innerWidth,clipHeight);
+        } 
+        ctx.clip(region, "evenodd");
+        ctx.fill();
+        for (let i = 0; i < canvas.offsetHeight; i=i+(pas*2)) {
+            ctx.fillRect(0,i-1,window.innerWidth,2); 
+        } 
+        ctx.restore()
     }
-    ctx.clip(region, "evenodd");
-    ctx.fill();
-    for (let i = 0; i < canvas.offsetHeight; i = i + pas * 2) {
-      ctx.fillRect(0, i - 1, window.innerWidth, 2);
-    }
-    ctx.restore();
-  }
-  for (let i = 0.1; i < 0.9; i = i + 0.1) {
-    circleDrawer(etalon * i);
-  }
-};
+    for (let i = .1; i < .9; i=i+.1) {circleDrawer(etalon*(i))};
+}
 
 // module.exports = () => {vega();};//Blood Dragon PANDORAE Theme JS
 //The mount Fuji SVG file is loaded separately
@@ -11711,7 +11720,22 @@ const cityScape = () => {
       constructor(program, uName) {
         this.u = gl.getUniformLocation(program, uName);
         this.data = new Float32Array([
-          1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
         ]);
       }
       identity() {

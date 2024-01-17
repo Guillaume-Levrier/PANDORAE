@@ -4,15 +4,10 @@ const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } =
 const fs = require("fs");
 
 // original
-//const userDataPath = app.getPath("userData");
+var userDataPath = app.getPath("userData");
 
 // This is an attempt to make sure all devices, including professional ones with
 // very restricted profiles can launch the app and save credentials/API keys/datasets
-var userDataPath = app.getAppPath();
-
-// yes, there is probably a better way
-// no, I haven't found one that works on all platforms at this point in time
-userDataPath = userDataPath.substring(0, userDataPath.lastIndexOf("/"));
 
 const dns = require("dns");
 
@@ -104,6 +99,28 @@ const userDataDirTree = (path, dirTree) =>
   });
 
 var themeData;
+
+ipcMain.on("change-udp", async (event, message) => {
+  console.log("got here");
+  userDataPath = dialog.showOpenDialogSync(null, {
+    properties: [
+      "openDirectory",
+      "createDirectory",
+      "promptToCreate",
+      "showHiddenFiles",
+    ],
+  });
+
+  userDataDirTree(userDataPath, [
+    "/PANDORAE-DATA/logs",
+    "/PANDORAE-DATA/userID",
+    "/PANDORAE-DATA/themes",
+    "/PANDORAE-DATA/flatDatasets",
+  ]);
+
+  createUserId();
+  createThemes();
+});
 
 app.on("ready", () => {
   userDataDirTree(userDataPath, [

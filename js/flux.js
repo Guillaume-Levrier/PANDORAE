@@ -34,6 +34,8 @@ const date = () =>
 const accessUserID = () =>
   ipcRenderer.send("openPath", userDataPath + "/PANDORAE-DATA/userID/");
 
+const changeUserID = () => ipcRenderer.send("change-udp", "change");
+
 //========== Tracegraph ==========
 
 let traces = [];
@@ -2509,6 +2511,7 @@ const downloadData = () => {
 
 window.addEventListener("load", (event) => {
   var buttonList = [
+    { id: "change-user-id", func: "changeUserID" },
     { id: "manual-merge-authors", func: "manualMergeAuthors" },
     { id: "wos-basic-query", func: "wosBasicRetriever" },
     {
@@ -2891,6 +2894,10 @@ window.addEventListener("load", (event) => {
 
       case "accessUserID":
         accessUserID();
+        break;
+
+      case "changeUserID":
+        changeUserID();
         break;
 
       case "basicUserData":

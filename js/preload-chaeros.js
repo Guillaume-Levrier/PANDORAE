@@ -789,7 +789,7 @@ const scopusRetriever = (user, query, bottleRate) => {
     minTime: 1000,
   });
 
-  console.log(user, query, bottleRate);
+
 
   ipcRenderer.send(
     "console-logs",
@@ -821,7 +821,7 @@ const scopusRetriever = (user, query, bottleRate) => {
   )
     .then((res) => res.json())
     .then((firstResponse) => {
-      console.log(firstResponse);
+     
       // Once you get the response
 
       let docAmount =
@@ -968,9 +968,9 @@ const biorxivRetriever = (query) => {
 
   for (let i = 1; i < totalrequests; i++) {
     requestArray.push(baseUrl + "?page=" + i);
-    console.log(baseUrl + "?page=" + i);
+   
   }
-  console.log(requestArray);
+
 
   var scrapeTimerCount = 0;
 
@@ -992,7 +992,7 @@ const biorxivRetriever = (query) => {
 
   let count = 0;
 
-  console.log(totalrequests);
+ 
 
   ipcRenderer.on("biorxiv-retrieve", (event, message) => {
     message.content.forEach((d) =>
@@ -1026,13 +1026,13 @@ const biorxivRetriever = (query) => {
       bioRxivPromises.push("https://api.biorxiv.org/details/biorxiv/" + d)
     );
 
-    console.log(dois);
+  
 
     limiter
       .schedule(() => Promise.all(bioRxivPromises.map((d) => fetch(d))))
       .then((res) => Promise.all(res.map((d) => d.json())))
       .then((res) => {
-        console.log(res);
+      
         var articles = [];
 
         res.forEach((d) => articles.push(d.collection[0]));
@@ -1644,7 +1644,7 @@ const regardsRetriever = (queryContent, legislature) => {
     minTime: 600,
   });
 
-  console.log(query);
+
 
   fetch(query)
     .then((r) => r.json())
@@ -1911,7 +1911,7 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo) => {
 
   // Great thing that no one ever invented posting arguments as JSON objects
 
-console.log(meta)
+
 
   const url = (req, start, end) =>
     "http://" +
@@ -1958,14 +1958,14 @@ console.log(meta)
     urlArray.push(fetch(url(req, 0, 200)).then((r) => r.json()));
   }
 
-console.log(urlArray)
+
 
   // send request
   Promise.all(urlArray)
     .then((res) => {
       // rebuild an array with all the responses
 
-      console.log(res)
+
 
       var totalResponse = [];
 
@@ -2005,7 +2005,7 @@ console.log(urlArray)
         content: cslData,
       };
 
-      console.log(cslConvertedDataset)
+    
 
       return cslConvertedDataset;
     })

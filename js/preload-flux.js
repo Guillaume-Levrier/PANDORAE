@@ -316,7 +316,8 @@ const CMT = {
           "<div style='text-align:center'><span class='title'>PANDORÆ  allows you to perform three main kinds of operations :</span><br><br><a data-action='scroll' data-target='Chapter1'>Load & enrich data</a><br><br><a data-action='scroll' data-target='Chapter2'>Explore data</a><br><br><i class='material-icons'><a class='arrowDown' data-action='scroll' data-target='Chapter1'>arrow_downward</a></i></div>",
         Chapter1:
           "<span class='title'><strong>Chapter 1: Loading & enriching data</strong></span><br><br>PANDORÆ enables you to load data from different types of sources.<br><br>Those sources can be online databases that aggregate documents such as scientific articles.<br> <br>But you can really add <strong>any kind of document</strong>.<br><br>PANDORÆ also supports other types of data, such as those extracted from social-media or clinical trials.<br>&nbsp;<br><div class='arrowDown'><i class='material-icons'><a class='arrowDown' data-action='scroll' data-target='flux'>arrow_downward</a></i></div>",
-        flux: "<span class='title'><strong>Cascade: Available data flows</strong></span><br><br><div style='display: inline-flex'><div style='flex:auto'>   <strong>Cascade</strong> is how Flux displays its data flows. As you can see, the data flows from you to the system. Hovering a process shows to which other process it is linked.  <br>&nbsp;<br> Cascade behaves like menu : click on a process and its options will be displayed.<br>&nbsp;<br>Click <a data-action='tuto' data-target='flux'>here</a> to learn how to open Flux.<br>&nbsp;<br> <div class='arrowDown'><i class='material-icons'><a class='arrowDown' data-action='scroll' data-target='flux2'>arrow_downward</a></i></div></div><div style='flex:auto'><svg></svg></div></div><br>&nbsp;<br>",
+        flux:
+          "<span class='title'><strong>Cascade: Available data flows</strong></span><br><br><div style='display: inline-flex'><div style='flex:auto'>   <strong>Cascade</strong> is how Flux displays its data flows. As you can see, the data flows from you to the system. Hovering a process shows to which other process it is linked.  <br>&nbsp;<br> Cascade behaves like menu : click on a process and its options will be displayed.<br>&nbsp;<br>Click <a data-action='tuto' data-target='flux'>here</a> to learn how to open Flux.<br>&nbsp;<br> <div class='arrowDown'><i class='material-icons'><a class='arrowDown' data-action='scroll' data-target='flux2'>arrow_downward</a></i></div></div><div style='flex:auto'><svg></svg></div></div><br>&nbsp;<br>",
         flux2:
           "<span class='title'><strong>Flux sections</strong></span><br><br>Flux has different types of processes. Each section has its own purpose, and relies on different services:<ul style='list-style-type: square;'><li><a data-action='scroll' data-target='user'>User</a> lets you insert your API keys and credentials.</li><li><a data-action='scroll' data-target='databases'>Databases requests</a> allow you to retrieve data from various online sources.</li><li><a data-action='scroll' data-target='enriching'>Enriching</a> allows you to edit and enrich datasets.</li><li><a data-action='scroll' data-target='system'>System</a> sends your data to PANDORAE visualisation features.</li></ul>Detail about the other sections will become available when they will be rolled out. Click on a section name to learn more about that section right now, or simply click on the arrow to continue.   <br>&nbsp;<br><div class='arrowDown'><i class='material-icons'><a class='arrowDown' data-action='scroll' data-target='databases'>arrow_downward</a></i></div>",
         databases:
@@ -351,7 +352,8 @@ const CMT = {
           "<div style='text-align:center'><span class='title'><strong>Freedom at last</strong></span><br><br>           You will learn how to use PANDORÆ mostly by trial and error.<br>&nbsp;<br> If you're a researcher and/or developer, you might want to go have a look at its            <a data-action='openEx' data-target='https://github.com/Guillaume-Levrier/PANDORAE'>source code</a>.<br>&nbsp;<br>           A wiki of the project is available <a data-action='openEx' data-target='https://github.com/Guillaume-Levrier/PANDORAE/wiki'>here</a>.           <br>&nbsp;<br>           <div class='arrowDown'>    <i class='material-icons'><a class='arrowDown' data-action='lastScroll()'>arrow_downward</a></i></div></div>",
         final8:
           "<div style='text-align:center'>This <strong>CORE</strong> is now yours. <br>&nbsp;<br>           Close the software and restart it to escape the tutorial.<br>&nbsp;<br>           Thank you for using PANDORÆ.<br><br>                    <div id='restartCount' style='font-weight: bolder'></div></div>",
-        last: "<div style='margin:auto;font-size:10px;line-height: 15px;'>PANDORÆ - version 1 <br>Guillaume Levrier</div>",
+        last:
+          "<div style='margin:auto;font-size:10px;line-height: 15px;'>PANDORÆ - version 1 <br>Guillaume Levrier</div>",
       },
     },
   },
@@ -411,6 +413,8 @@ const date = () =>
 
 const accessUserID = () =>
   ipcRenderer.send("openPath", userDataPath + "/PANDORAE-DATA/userID/");
+
+const changeUserID = () => ipcRenderer.send("change-udp", "change");
 
 //========== Tracegraph ==========
 
@@ -685,8 +689,6 @@ const powerValve = (fluxAction, item) => {
       fluxArgs.dateTo = document.getElementById(
         `bnf-solr-${serv}-date-to`
       ).value;
-
-      console.log(fluxArgs);
 
       message = "Connecting to BNF-SOLR";
       break;
@@ -1346,7 +1348,6 @@ const clinicTrialBasicRetriever = () => {
   fetch(rootUrl + "expr=" + ctQuery + "&fmt=json")
     .then((res) => res.json())
     .then((firstResponse) => {
-      console.log(firstResponse);
       let totalResults = firstResponse.FullStudiesResponse.NStudiesFound;
 
       let requestAmount = (totalResults) => {
@@ -1373,8 +1374,6 @@ const clinicTrialBasicRetriever = () => {
         date +
         "<br>[Reload this window to submit a different query.]<br>" +
         "<br>Amount of requests per second: <span id='scopusRangeValue'>1</span><input style='margin-left:30px' type='range' oninput='this.previousSibling.innerText=parseInt(this.value)' id='scopusRange' min='1' step='any' max='20' value='1'><br><br>";
-
-      console.log(dataBasicPreview);
 
       document.getElementById("clinical_trials-basic-previewer").innerHTML =
         dataBasicPreview;
@@ -2892,6 +2891,7 @@ const downloadData = () => {
 
 window.addEventListener("load", (event) => {
   var buttonList = [
+    { id: "change-user-id", func: "changeUserID" },
     { id: "manual-merge-authors", func: "manualMergeAuthors" },
     { id: "wos-basic-query", func: "wosBasicRetriever" },
     {
@@ -3274,6 +3274,10 @@ window.addEventListener("load", (event) => {
 
       case "accessUserID":
         accessUserID();
+        break;
+
+      case "changeUserID":
+        changeUserID();
         break;
 
       case "basicUserData":
