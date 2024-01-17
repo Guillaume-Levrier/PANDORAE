@@ -26,6 +26,12 @@ const basePath = app.getAppPath();
 
 let userID;
 
+// This is useful to make Dexie (the layer over the user agent IndexedDB)
+// work in a consistent manner in Electron
+// (cf https://github.com/dexie/Dexie.js/issues/271#issuecomment-444773780)
+app.requestSingleInstanceLock()
+
+
 const createUserId = () => {
   userID = {
     UserName: "Enter your name",
@@ -79,7 +85,7 @@ function createWindow() {
 
   mainWindow.setMenu(null);
 
-  //mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   mainWindow.on("closed", () => (mainWindow = null));
 }
@@ -391,7 +397,7 @@ const chaerosCalculator = () => {
 
   chaerosWindow.webContents.on("did-finish-load", function () {
     chaerosWindow.webContents.send("id", chaerosWindow.id);
-    //chaerosWindow.webContents.openDevTools();
+    chaerosWindow.webContents.openDevTools();
   });
 };
 

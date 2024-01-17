@@ -628,7 +628,7 @@ const archotype = (id) => {
   var criteriaList = [];
   var currentCriteria = [];
 
-  let resolver, arkViewer, collection;
+  let resolver, arkViewer
 
   ipcRenderer.invoke("checkflux", true).then((result) => {
     availability = JSON.parse(result);
@@ -640,7 +640,7 @@ const archotype = (id) => {
             availability.dnsLocalServiceList[service].url +
             ":" +
             availability.dnsLocalServiceList[service].port;
-          collection = availability.dnsLocalServiceList[service].collection;
+         
           arkViewer = availability.dnsLocalServiceList[service].arkViewer;
 
           break;
@@ -807,7 +807,8 @@ const archotype = (id) => {
           const circle = d3.select(e.target)
           circle.attr("stroke-width", 3).attr("stroke", "	#0FFF50")
 
-
+          const collection = documentMap[d.id].enrichment.solrCollection;
+          
 
           d.domain
             ? 0

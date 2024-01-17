@@ -663,7 +663,23 @@ const powerValve = (fluxAction, item) => {
       fluxArgs.bnfsolrquery = document.getElementById(fieldId).value;
       fluxArgs.meta = solrbnfcount[fluxArgs.bnfsolrquery];
 
+
       const serv = item.id.replace("bnf-solr-fullquery-", "");
+
+      const collections = document.getElementsByClassName(`bnf-solr-checkbox-${serv}`)
+
+      fluxArgs.collections=[];  
+      
+      // This is a WIP committed to be saved.
+      
+      for (let i = 0; i < collections.length; i++) {
+       const collection = collections[i];
+      
+        if (collection.checked){
+          fluxArgs.collections.push(collection.id)
+        } 
+      } 
+
 
       fluxArgs.dateFrom = document.getElementById(
         `bnf-solr-${serv}-date-from`
@@ -672,6 +688,8 @@ const powerValve = (fluxAction, item) => {
       fluxArgs.dateTo = document.getElementById(
         `bnf-solr-${serv}-date-to`
       ).value;
+
+        console.log(fluxArgs)
 
       message = "Connecting to BNF-SOLR";
       break;
@@ -2217,8 +2235,7 @@ var solrbnfcount = {};
 
 const queryBnFSolr = (but) => {
 
-  console.log(but)
-
+  
   const queryContent = document.getElementById(
     `bnf-solr-query-${but.serv}`
   ).value;
@@ -2242,20 +2259,25 @@ const collections = document.getElementsByClassName(`bnf-solr-checkbox-${but.ser
 // help the user by not making them input something" choice than a future proofing
 // though it acts like it too.
 
-const targets =[]  
+var query;
+var selectedCollection;
+
+// This is a WIP committed to be saved.
 
 for (let i = 0; i < collections.length; i++) {
  const collection = collections[i];
-  console.log(collection.value)
+
+  if (collection.checked){
   // Ici, ne prendre que la dernière capture connue
-/*
-  const query =
+  selectedCollection= collection.id;
+
+   query =
     "http://" +
     but.args.url +
     ":" +
     but.args.port +
     "/solr/" +
-    collection +
+    selectedCollection +
     "/select?facet.field=crawl_year&facet=on&fq=crawl_date:[" +
     dateFrom +
     "T00:00:00Z" +
@@ -2267,32 +2289,45 @@ for (let i = 0; i < collections.length; i++) {
     "&rows=0&sort=crawl_date%20desc&group=true&group.field=url" +
     "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
     "&rows=0&sort=score+desc&group.ngroups=true";
-    targets.push(d3.json(query))
-    */
+   
+    
+  } 
   }
 
-/*
-  Promise.all(targets).then(r=>{
-    console.log(r)
-  } )
+  const previewer = document.getElementById(
+    "bnf-solr-basic-previewer-" + but.serv
+  );
 
-  d3.json(query).then((res) => {
-    var previewer = document.getElementById(
-      "bnf-solr-basic-previewer-" + but.serv
-    );
+  // This is an arbitrary document limit hardcoded for alpha/beta testing
+  // purposes. Ideally, this limit should be echoed by the host system, not
+  // hardcoded in PANDORAE.
 
-    const numFound = res.grouped.url.ngroups;
+const document_limit = 50000;
 
-    previewer.innerHTML = `<br><p>  ${numFound} documents found`;
+d3.json(query).then(r=>{
+    
+   
+    let numFound = r.grouped.url.ngroups
 
-    solrbnfcount[queryContent] = { count: numFound, but };
+    solrbnfcount[queryContent] = { count: numFound, but,selectedCollection };
 
-    if (numFound > 0) {
+
+    previewer.innerHTML = `<br><p>  ${numFound} documents found</p> `;
+
+    
+
+    if (numFound > 0 && numFound <document_limit ) {
       document.getElementById("bnf-solr-fullquery-" + but.serv).style.display =
         "flex";
-    }
-  });
-  */
+    }else if (numFound >= document_limit) {
+      previewer.innerHTML =`You cannot request more than ${document_limit} documents.`
+    } 
+
+  } ).catch(e=>{
+    console.log(e);
+    previewer.innerHTML = `<br><p>Error - do you have a missing argument?</p> `;
+  })
+
 
 };
 
@@ -3166,7 +3201,7 @@ window.addEventListener("load", (event) => {
               let checked = (i===0)?"checked":"";
 
               collectionCheck+= `<div>
-              <input type="checkbox" class="bnf-solr-checkbox-${serv}" id="${col}" name="${col}" ${checked}  />
+              <input type="radio" name="bnf-solr-checkbox-${serv}" class="bnf-solr-checkbox-${serv}" id="${col}"  ${checked}  />
               <label for="${col}">${col}</label>
             </div>`;              
             }
@@ -3187,6 +3222,7 @@ window.addEventListener("load", (event) => {
             </form>`;
 
 document.body.append(solrCont);
+
 buttonList.push({
   id: "bnf-solr-basic-query-" + serv,
   serv,
@@ -3201,6 +3237,16 @@ buttonList.push({
   arg: "BNF-SOLR",
 });
 
+buttonList.forEach((but) => {
+
+  document.getElementById(but.id).addEventListener("click", (e) => {
+    e.preventDefault();
+    funcSwitch(e, but);
+
+    return false;
+  });
+});
+
           })
 
           
@@ -3211,19 +3257,13 @@ buttonList.push({
       }
     }
 
-    buttonList.forEach((but) => {
-      document.getElementById(but.id).addEventListener("click", (e) => {
-        e.preventDefault();
-        funcSwitch(e, but);
-
-        return false;
-      });
-    });
+ 
   });
 
   function funcSwitch(e, but) {
     switch (but.func) {
       case "queryBnFSolr":
+        
         queryBnFSolr(but);
         break;
       case "addLocalService":

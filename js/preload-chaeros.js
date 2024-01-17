@@ -1910,13 +1910,16 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo) => {
   // Third step will be taking closest capture to specified date.
 
   // Great thing that no one ever invented posting arguments as JSON objects
+
+console.log(meta)
+
   const url = (req, start, end) =>
     "http://" +
     meta.but.args.url +
     ":" +
     meta.but.args.port +
     "/solr/" +
-    meta.but.args.collection +
+    meta.selectedCollection +
     "/" +
     "select?facet.field=crawl_year&facet=on&fq=crawl_date:[" +
     dateFrom + "T00:00:00Z" + "%20TO%20" + dateTo + "T00:00:00Z]&q=" +
@@ -1943,8 +1946,7 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo) => {
   // make smaller packages (not necessary since supposed to be local)
   // but a good practice
 
-  // sauf qu'en réalité il faudrait savoir combien de groups au total désormais.
-  // A voir des demain.
+  // trick : need to know how many docs BY COLLECTION
 
   if (meta.count > 200) {
     for (let i = 0; i < meta.count / 200 + 1; i++) {
@@ -1956,10 +1958,14 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo) => {
     urlArray.push(fetch(url(req, 0, 200)).then((r) => r.json()));
   }
 
+console.log(urlArray)
+
   // send request
   Promise.all(urlArray)
     .then((res) => {
       // rebuild an array with all the responses
+
+      console.log(res)
 
       var totalResponse = [];
 
@@ -1971,12 +1977,13 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo) => {
         totalResponse = [...totalResponse, ...docs];
       });
 
+      /*
       const dataset = {
         data: {},
         items: totalResponse,
         key: req,
         name: req,
-      };
+      };*/
 
       // dataWriter(["system"], importName, [dataset]);
 
@@ -1989,7 +1996,7 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo) => {
 
       const cslData = [];
 
-      totalResponse.forEach((d) => cslData.push(bnfRemap(d)));
+      totalResponse.forEach((d) => cslData.push(bnfRemap(d,meta.selectedCollection)));
 
       const cslConvertedDataset = {
         id: importName,
@@ -1997,6 +2004,8 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo) => {
         name: importName,
         content: cslData,
       };
+
+      console.log(cslConvertedDataset)
 
       return cslConvertedDataset;
     })
@@ -2338,7 +2347,7 @@ const istexCSLconverter = (dataset, normalize, mail) => {
 // function to remap documents from BnF solr to Zotero compatible
 // CSL - JSON format.
 
-const bnfRemap = (doc) => {
+const bnfRemap = (doc,solrCollection) => {
   const remappedDocument = { itemType: "webpage" };
 
   const originalBnfFields = {
@@ -2379,6 +2388,7 @@ const bnfRemap = (doc) => {
     id: doc.id,
     collections: doc.collections,
     links: doc.links,
+    solrCollection
   });
 
   return remappedDocument;
@@ -2504,7 +2514,7 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
       break;
 
     case "BNF-SOLR":
-      solrMetaExplorer(fluxArgs.bnfsolrquery, fluxArgs.meta, fluxArgs.dateFrom, fluxArgs.dateTo);
+      solrMetaExplorer(fluxArgs.bnfsolrquery, fluxArgs.meta, fluxArgs.dateFrom, fluxArgs.dateTo,fluxArgs.collections);
       break;
 
     case "regards":
