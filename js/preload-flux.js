@@ -2231,6 +2231,13 @@ const regardsBasic = () => {
 var solrbnfcount = {};
 
 const queryBnFSolr = (but) => {
+
+  const previewer = document.getElementById(
+    "bnf-solr-basic-previewer-" + but.serv
+  );
+
+  previewer.innerHTML = `<br><p> Loading...</p> `;
+
   const queryContent = document.getElementById(
     `bnf-solr-query-${but.serv}`
   ).value;
@@ -2289,9 +2296,7 @@ const queryBnFSolr = (but) => {
     }
   }
 
-  const previewer = document.getElementById(
-    "bnf-solr-basic-previewer-" + but.serv
-  );
+  
 
   // This is an arbitrary document limit hardcoded for alpha/beta testing
   // purposes. Ideally, this limit should be echoed by the host system, not
