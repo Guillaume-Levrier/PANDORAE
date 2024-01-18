@@ -767,12 +767,12 @@ const istexBasicRetriever = (checker) => {
     .then((r) => {
       // Then, once the response is retrieved
 
-      let date = date();
+      let getdate = date();
 
       // Display metadata in a div
       let dataBasicPreview = `<br><strong>Query: ${query}</strong><br>
       Expected results at request time: ${r.total}<br>
-      Query date: ${date}`;
+      Query date: ${getdate}`;
 
       document.getElementById("istex-basic-previewer").innerHTML =
         dataBasicPreview;
@@ -940,6 +940,7 @@ const biorxivBasicRetriever = () => {
 };
 
 ipcRenderer.on("biorxiv-retrieve", (event, message) => {
+  console.log(message)
   switch (message.type) {
     case "biorxiv-amount":
       let dataBasicPreview = "Expected amount: " + message.content;
