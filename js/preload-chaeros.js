@@ -1422,6 +1422,8 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
     "Creating collection " + collectionName
   ); // Send message to main Display
 
+    const colName=collectionName;
+
   pandodb.csljson.get(id).then((data) => {
     var file = data.content;
 
@@ -1486,6 +1488,8 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
 
           let resultList = [];
 
+          let count = 0
+
           fetchTargets.forEach((d) => {
             limiter
               .schedule(() =>
@@ -1497,6 +1501,13 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
               .then((res) => res.json())
               .then((result) => {
                 resultList.push(result);
+
+                count++
+
+                ipcRenderer.send(
+    "chaeros-notification",
+  `Uploading ${colName} - (${count}/${fileArrays.length})`  
+  );
                 if (resultList.length === fileArrays.length) {
                   setTimeout(() => {
                     ipcRenderer.send(

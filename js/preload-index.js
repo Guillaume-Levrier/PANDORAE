@@ -2956,12 +2956,7 @@ const archotype = (id) => {
       toolSearch.type = "text";
       toolSearch.placeholder = "target expression"
 
-
-
       const toolContent = document.createElement("div");
-
-
-
 
       if (resolver) {
         node.on("click", (e, d) => {
@@ -2971,7 +2966,6 @@ const archotype = (id) => {
 
           const collection = documentMap[d.id].enrichment.solrCollection;
           
-
           d.domain
             ? 0
             : fetch(
