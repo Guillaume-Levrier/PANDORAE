@@ -287,18 +287,30 @@ const powerValve = (fluxAction, item) => {
       const serv = item.id.replace("bnf-solr-fullquery-", "");
 
       const collections = document.getElementsByClassName(
-        `bnf-solr-checkbox-${serv}`
+        `bnf-solr-radio-${serv}`
       );
 
       fluxArgs.collections = [];
-
-      // This is a WIP committed to be saved.
 
       for (let i = 0; i < collections.length; i++) {
         const collection = collections[i];
 
         if (collection.checked) {
           fluxArgs.collections.push(collection.id);
+        }
+      }
+
+ const facets = document.getElementsByClassName(
+        `bnf-solr-checkbox-${serv}`
+      );
+
+      fluxArgs.facets = [];
+      
+      for (let i = 0; i < facets.length; i++) {
+        const facet = facets[i];
+
+        if (facet.checked) {
+          fluxArgs.facets.push(facet.id);
         }
       }
 
@@ -1869,8 +1881,29 @@ const queryBnFSolr = (but) => {
   const dateTo = document.getElementById(`bnf-solr-${but.serv}-date-to`).value;
 
   const collections = document.getElementsByClassName(
-    `bnf-solr-checkbox-${but.serv}`
+    `bnf-solr-radio-${but.serv}`
   );
+
+
+
+ const facets = document.getElementsByClassName(
+        `bnf-solr-checkbox-${but.serv}`
+      );
+
+      let targetfacets = ""
+      
+      for (let i = 0; i < facets.length; i++) {
+        const facet = facets[i];
+
+        if (facet.checked) {
+          if (targetfacets.length>0)  {
+             targetfacets += " OR ";
+          }  
+          targetfacets += facet.id;
+        }
+      }
+
+      console.log(targetfacets)
 
   // As it happens, the solr endpoint chosen by the user can have several collections
   // in it which can have different names. Rather than letting the user enter the
@@ -1902,7 +1935,10 @@ const queryBnFSolr = (but) => {
         but.args.port +
         "/solr/" +
         selectedCollection +
-        "/select?facet.field=crawl_year&facet=on&fq=crawl_date:[" +
+        "/select?facet.field=crawl_year&facet=on&"+
+        "&fq=collections:"+
+        targetfacets+
+        "&fq=crawl_date:[" +
         dateFrom +
         "T00:00:00Z" +
         "%20TO%20" +
@@ -1912,11 +1948,12 @@ const queryBnFSolr = (but) => {
         queryContent +
         "&rows=0&sort=crawl_date%20desc&group=true&group.field=url" +
         "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
-        "&rows=0&sort=score+desc&group.ngroups=true";
+        "&rows=0&sort=score+desc&group.ngroups=true&facet.field=collections"
+     
     }
   }
 
-  
+  console.log(query)
 
   // This is an arbitrary document limit hardcoded for alpha/beta testing
   // purposes. Ideally, this limit should be echoed by the host system, not
@@ -1927,6 +1964,10 @@ const queryBnFSolr = (but) => {
   d3.json(query)
     .then((r) => {
       let numFound = r.grouped.url.ngroups;
+
+      let byCollection=r.facet_counts.facet_fields
+
+      console.log(byCollection);
 
       solrbnfcount[queryContent] = { count: numFound, but, selectedCollection };
 
@@ -2798,7 +2839,7 @@ window.addEventListener("load", (event) => {
           // Here, get the available SOLR collections
           // SERVICE_LOCATION/solr/admin/collections?action=LIST&wt=json
 
-          const collectionRequest =
+          const sourceRequest =
             "http://" +
             availability.dnsLocalServiceList[service].url +
             ":" +
@@ -2807,19 +2848,56 @@ window.addEventListener("load", (event) => {
 
           // The answer is in the array at r.collections
 
-          fetch(collectionRequest)
+
+var sourceSolrRadio = "";
+
+var coreSource; // In theory, there is only one core collection
+
+          fetch(sourceRequest)
             .then((r) => r.json())
             .then((r) => {
-              var collectionCheck = "";
-
+            
+            coreSource=r.collections[0] ;
               for (let i = 0; i < r.collections.length; i++) {
                 const col = r.collections[i];
                 let checked = i === 0 ? "checked" : "";
 
-                collectionCheck += `<div>
-              <input type="radio" name="bnf-solr-checkbox-${serv}" class="bnf-solr-checkbox-${serv}" id="${col}"  ${checked}  />
+                sourceSolrRadio += `<div>
+              <input type="radio" name="bnf-solr-radio-${serv}" class="bnf-solr-radio-${serv}" id="${col}"  ${checked}  />
               <label for="${col}">${col}</label>
             </div>`;
+              }
+            }).then(()=>{
+              
+          const facetRequest =
+            "http://" +
+            availability.dnsLocalServiceList[service].url +
+            ":" +
+            availability.dnsLocalServiceList[service].port +
+            "/solr/" +
+            coreSource +
+            "/select?q=*rows=0&facet=on&facet.field=collections";
+
+  fetch(facetRequest)
+            .then((facet) => facet.json())
+            .then((facets) => {
+
+              const facetList= facets.facet_counts.facet_fields.collections;
+
+              var facetCheckBox=""
+
+               for (let i = 0; i < facetList.length; i++) {
+                const face = facetList[i];
+
+                if (typeof face ==="string"){   
+
+                let checked = i === 0 ? "checked" : "";
+
+                facetCheckBox += `<div>
+              <input type="checkbox" name="bnf-solr-checkbox-${serv}" class="bnf-solr-checkbox-${serv}" id="${face}"  ${checked}  />
+              <label for="${face}">${face}</label>
+            </div>`;
+            }
               }
 
               solrCont.innerHTML = `<!-- BNF SOLR TAB -->     
@@ -2828,8 +2906,10 @@ window.addEventListener("load", (event) => {
             <form id="bnf-solr-form" autocomplete="off">Query:<br>
               <input class="fluxInput" spellcheck="false" id="bnf-solr-query-${serv}" type="text" value=""><br><br>
               From: <input type="date" id="bnf-solr-${serv}-date-from"> - To: <input type="date" id="bnf-solr-${serv}-date-to"><br>
-              <br>Select collection:<br>
-              ${collectionCheck}<br><br>
+              <br>Selected source:
+              ${sourceSolrRadio}<br><br>
+               <br>Select collection:
+              ${facetCheckBox}<br><br>
               <button type="submit" class="flux-button" id="bnf-solr-basic-query-${serv}">Retrieve
                 basic info</button>&nbsp;&nbsp;
               <div id="bnf-solr-basic-previewer-${serv}" style="position:relative;"></div><br><br>
@@ -2863,6 +2943,7 @@ window.addEventListener("load", (event) => {
                     return false;
                   });
               });
+                 });
             });
 
           break;
