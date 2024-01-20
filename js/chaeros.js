@@ -1694,19 +1694,12 @@ const regardsRetriever = (queryContent, legislature) => {
     });
 };
 
-const solrMetaExplorer = (req, meta, dateFrom, dateTo) => {
-  // Ok so this here is going to be slightly more complicated as we're going to be
-  // retrieving the latest capture closer to a target date.
-
-  // First step is taking the last capture at all
-
-  // Second step will be adding a date argument that let you specify
-
-  // Third step will be taking closest capture to specified date.
-
-  // Great thing that no one ever invented posting arguments as JSON objects
-
-
+const solrMetaExplorer = (req, meta, dateFrom, dateTo,targetCollections) => {
+  
+    const limiter = new bottleneck({
+    maxConcurrent: 3,
+    minTime: 1500,
+  });
 
   const url = (req, start, end) =>
     "http://" +
@@ -1716,7 +1709,10 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo) => {
     "/solr/" +
     meta.selectedCollection +
     "/" +
-    "select?facet.field=crawl_year&facet=on&fq=crawl_date:[" +
+      "select?facet.field=crawl_year&facet=on" +
+        "&fq=collections:" +
+        targetCollections +
+        "&fq=crawl_date:[" +
     dateFrom + "T00:00:00Z" + "%20TO%20" + dateTo + "T00:00:00Z]&q=" +
     req +
     "&start=" +
@@ -1734,60 +1730,42 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo) => {
 
   const urlArray = [];
 
-  //console.log(url(req, 0, 200))
-
-  //urlArray.push(fetch(url(req, 0, 200)).then((r) => r.json()))
-
   // make smaller packages (not necessary since supposed to be local)
   // but a good practice
 
-  // trick : need to know how many docs BY COLLECTION
-
   if (meta.count > 200) {
     for (let i = 0; i < meta.count / 200 + 1; i++) {
+     
       urlArray.push(
-        fetch(url(req, i * 200, (i + 1) * 200)).then((r) => r.json())
+        url(req, i * 200, (i + 1) * 200)
       );
     }
   } else {
-    urlArray.push(fetch(url(req, 0, 200)).then((r) => r.json()));
+    urlArray.push(
+      url(req, 0, 200)
+      );
   }
 
+ var totalResponse = [];
+ let count = 0;
 
-
-  // send request
-  Promise.all(urlArray)
+urlArray.forEach(solrReq=> { 
+   limiter
+   .schedule(() => fetch(solrReq).then(res=>res.json()))
     .then((res) => {
-      // rebuild an array with all the responses
 
+      count++
+      ipcRenderer.send("chaeros-notification",`Page ${count}/${urlArray.length}`);
+  
+      const docs = [];
 
+      res.grouped.url.groups.forEach((g) => docs.push(g.doclist.docs[0]));
 
-      var totalResponse = [];
-
-      res.forEach((d) => {
-        const docs = [];
-
-        d.grouped.url.groups.forEach((g) => docs.push(g.doclist.docs[0]));
-
-        totalResponse = [...totalResponse, ...docs];
-      });
-
-      /*
-      const dataset = {
-        data: {},
-        items: totalResponse,
-        key: req,
-        name: req,
-      };*/
-
-      // dataWriter(["system"], importName, [dataset]);
-
-      // ICI, SAUVER LE CONTENU COMPLET
+      totalResponse = [...totalResponse, ...docs];
+     
+if (count === urlArray.length){
 
       const importName = req + "-" + new Date();
-      // dataWriter(destination, importName, content);
-
-      // FAIRE UNE AUTRE FONCTION POUR BNF
 
       const cslData = [];
 
@@ -1800,17 +1778,12 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo) => {
         content: cslData,
       };
 
-    
-
-      return cslConvertedDataset;
-    })
-    .then((cslConvertedDataset) =>
       pandodb.csljson
         .add(cslConvertedDataset)
         .then(() => {
-          ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
+          ipcRenderer.send("chaeros-notification", "Dataset retrieved"); // Send a success message
           ipcRenderer.send("pulsar", true);
-          ipcRenderer.send("console-logs", "Bnf data successfully converted"); // Log success
+          ipcRenderer.send("console-logs", "Solr data successfully converted"); // Log success
 
           setTimeout(() => {
             ipcRenderer.send("win-destroy", winId);
@@ -1819,7 +1792,9 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo) => {
         .catch((e) => {
           console.log(e);
         })
-    );
+        } 
+     })
+   })
 };
 
 // ===== Web of Science =====
@@ -2309,7 +2284,7 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
       break;
 
     case "BNF-SOLR":
-      solrMetaExplorer(fluxArgs.bnfsolrquery, fluxArgs.meta, fluxArgs.dateFrom, fluxArgs.dateTo,fluxArgs.collections);
+      solrMetaExplorer(fluxArgs.bnfsolrquery, fluxArgs.meta, fluxArgs.dateFrom, fluxArgs.dateTo,fluxArgs.targetCollections);
       break;
 
     case "regards":

@@ -663,7 +663,8 @@ const powerValve = (fluxAction, item) => {
       const fieldId = item.id.replace("full", "");
       fluxArgs.bnfsolrquery = document.getElementById(fieldId).value;
       fluxArgs.meta = solrbnfcount[fluxArgs.bnfsolrquery];
-
+      fluxArgs.targetCollections=solrbnfcount.targetCollections
+      
       const serv = item.id.replace("bnf-solr-fullquery-", "");
 
       const collections = document.getElementsByClassName(
@@ -2240,7 +2241,7 @@ const regardsBasic = () => {
 };
 
 //===== Solr BNF ======
-var solrbnfcount = {};
+
 
 // These are helpers to visualize the first results from the test request.
 
@@ -2265,7 +2266,7 @@ const crawlYearData = (data) => {
     date.setFullYear(year);
     dates.push({ key: date, value: d.value });
   });
-  dates = dates.sort((a, b) => a.date - b.date);
+  dates = dates.sort((a, b) => a.key - b.key);
   return dates;
 };
 
@@ -2276,11 +2277,9 @@ const generateSolrExplorationChart = (data, type) => {
 
   if (type === "crawl_year") {
     data = crawlYearData(data);
-    console.clear();
-    console.log(data);
   }
 
-  const width = 500;
+  const width = 650;
   const height = 150;
   const marginTop = 30;
   const marginRight = 0;
@@ -2293,7 +2292,7 @@ const generateSolrExplorationChart = (data, type) => {
     .domain(
       d3.groupSort(
         data,
-        ([d]) => -d.value,
+        (d) => d.value,
         (d) => d.key
       )
     ) // descending frequency
@@ -2352,7 +2351,7 @@ const generateSolrExplorationChart = (data, type) => {
         .attr("y", 10)
         .attr("fill", "black")
         .attr("text-anchor", "start")
-        .text("↑ Captures")
+        .text("↑ Snapshots")
     );
 
   // Return the SVG element.
@@ -2360,6 +2359,7 @@ const generateSolrExplorationChart = (data, type) => {
 };
 
 // This is the actual request
+var solrbnfcount = {};
 
 const queryBnFSolr = (but) => {
   const previewer = document.getElementById(
@@ -2393,13 +2393,15 @@ const queryBnFSolr = (but) => {
 
     if (facet.checked) {
       if (targetfacets.length > 0) {
-        targetfacets += " OR ";
+        targetfacets += "%20OR%20";
       }
       targetfacets += facet.id;
     }
   }
 
-  console.log(targetfacets);
+solrbnfcount.targetCollections=targetfacets
+
+
 
   // As it happens, the solr endpoint chosen by the user can have several collections
   // in it which can have different names. Rather than letting the user enter the
@@ -2464,9 +2466,9 @@ const queryBnFSolr = (but) => {
 
       console.log(byCollection);
 
-      solrbnfcount[queryContent] = { count: numFound, but, selectedCollection };
+      solrbnfcount[queryContent] = { count: numFound, but, selectedCollection,countByCollection: parseSolrFacetFields(byCollection.collections)};
 
-      previewer.innerHTML = `<br><p>  ${numFound} documents found</p> `;
+      previewer.innerHTML = `<br><p>  ${numFound} unique documents found</p> `;
 
       if (numFound > 0 && numFound < document_limit) {
         document.getElementById(
