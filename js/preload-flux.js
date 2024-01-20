@@ -680,12 +680,12 @@ const powerValve = (fluxAction, item) => {
         }
       }
 
- const facets = document.getElementsByClassName(
+      const facets = document.getElementsByClassName(
         `bnf-solr-checkbox-${serv}`
       );
 
       fluxArgs.facets = [];
-      
+
       for (let i = 0; i < facets.length; i++) {
         const facet = facets[i];
 
@@ -1332,7 +1332,7 @@ const biorxivBasicRetriever = () => {
 };
 
 ipcRenderer.on("biorxiv-retrieve", (event, message) => {
-  console.log(message)
+  console.log(message);
   switch (message.type) {
     case "biorxiv-amount":
       let dataBasicPreview = "Expected amount: " + message.content;
@@ -2242,8 +2242,126 @@ const regardsBasic = () => {
 //===== Solr BNF ======
 var solrbnfcount = {};
 
-const queryBnFSolr = (but) => {
+// These are helpers to visualize the first results from the test request.
 
+// Turn a solr faect field into an actual array of objects
+const parseSolrFacetFields = (arr) => {
+  // This is an array, odd is key, even is value
+  // key would have to be asserted as string
+  const result = [];
+  for (let i = 0; i < arr.length; i += 2) {
+    result.push({ key: arr[i], value: arr[i + 1] });
+  }
+  return result;
+};
+
+// convert the crawl_year facet into actual JS dates
+const crawlYearData = (data) => {
+  var dates = [];
+
+  data.forEach((d) => {
+    const date = new Date();
+    const year = parseInt(d.key);
+    date.setFullYear(year);
+    dates.push({ key: date, value: d.value });
+  });
+  dates = dates.sort((a, b) => a.date - b.date);
+  return dates;
+};
+
+const generateSolrExplorationChart = (data, type) => {
+  // two possible types:
+  //- distribution by crawl years
+  //- distribution by collection
+
+  if (type === "crawl_year") {
+    data = crawlYearData(data);
+    console.clear();
+    console.log(data);
+  }
+
+  const width = 500;
+  const height = 150;
+  const marginTop = 30;
+  const marginRight = 0;
+  const marginBottom = 30;
+  const marginLeft = 40;
+
+  // Declare the x (horizontal position) scale.
+  const x = d3
+    .scaleBand()
+    .domain(
+      d3.groupSort(
+        data,
+        ([d]) => -d.value,
+        (d) => d.key
+      )
+    ) // descending frequency
+    .range([marginLeft, width - marginRight])
+    .padding(0.1);
+
+  // Declare the y (vertical position) scale.
+  const y = d3
+    .scaleLinear()
+    .domain([0, d3.max(data, (d) => d.value)])
+    .range([height - marginBottom, marginTop]);
+
+  // Create the SVG container.
+  const svg = d3
+    .create("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [0, 0, width, height])
+    .attr("style", "max-width: 100%; height: auto;");
+
+  // Add a rect for each bar.
+  svg
+    .append("g")
+    .attr("fill", "black")
+    .selectAll()
+    .data(data)
+    .join("rect")
+    .attr("x", (d) => x(d.key))
+    .attr("y", (d) => y(d.value))
+    .attr("height", (d) => y(0) - y(d.value))
+    .attr("width", x.bandwidth());
+
+  // Add the x-axis and label.
+
+  var xAxis = d3.axisBottom(x).tickSizeOuter(0);
+
+  if (type === "crawl_year") {
+    xAxis = d3.axisBottom(x).tickSizeOuter(0).tickFormat(d3.timeFormat("%Y"));
+  }
+
+  svg
+    .append("g")
+    .attr("transform", `translate(0,${height - marginBottom})`)
+    .call(xAxis);
+
+  // Add the y-axis and label, and remove the domain line.
+  svg
+    .append("g")
+    .attr("transform", `translate(${marginLeft},0)`)
+    .call(d3.axisLeft(y).ticks(5))
+    .call((g) => g.select(".domain").remove())
+    .call((g) =>
+      g
+        .append("text")
+        .attr("x", -marginLeft)
+        .attr("y", 10)
+        .attr("fill", "black")
+        .attr("text-anchor", "start")
+        .text("↑ Captures")
+    );
+
+  // Return the SVG element.
+  return svg.node();
+};
+
+// This is the actual request
+
+const queryBnFSolr = (but) => {
   const previewer = document.getElementById(
     "bnf-solr-basic-previewer-" + but.serv
   );
@@ -2264,26 +2382,24 @@ const queryBnFSolr = (but) => {
     `bnf-solr-radio-${but.serv}`
   );
 
+  const facets = document.getElementsByClassName(
+    `bnf-solr-checkbox-${but.serv}`
+  );
 
+  let targetfacets = "";
 
- const facets = document.getElementsByClassName(
-        `bnf-solr-checkbox-${but.serv}`
-      );
+  for (let i = 0; i < facets.length; i++) {
+    const facet = facets[i];
 
-      let targetfacets = ""
-      
-      for (let i = 0; i < facets.length; i++) {
-        const facet = facets[i];
-
-        if (facet.checked) {
-          if (targetfacets.length>0)  {
-             targetfacets += " OR ";
-          }  
-          targetfacets += facet.id;
-        }
+    if (facet.checked) {
+      if (targetfacets.length > 0) {
+        targetfacets += " OR ";
       }
+      targetfacets += facet.id;
+    }
+  }
 
-      console.log(targetfacets)
+  console.log(targetfacets);
 
   // As it happens, the solr endpoint chosen by the user can have several collections
   // in it which can have different names. Rather than letting the user enter the
@@ -2315,9 +2431,9 @@ const queryBnFSolr = (but) => {
         but.args.port +
         "/solr/" +
         selectedCollection +
-        "/select?facet.field=crawl_year&facet=on&"+
-        "&fq=collections:"+
-        targetfacets+
+        "/select?facet.field=crawl_year&facet=on&" +
+        "&fq=collections:" +
+        targetfacets +
         "&fq=crawl_date:[" +
         dateFrom +
         "T00:00:00Z" +
@@ -2328,12 +2444,11 @@ const queryBnFSolr = (but) => {
         queryContent +
         "&rows=0&sort=crawl_date%20desc&group=true&group.field=url" +
         "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
-        "&rows=0&sort=score+desc&group.ngroups=true&facet.field=collections"
-     
+        "&rows=0&sort=score+desc&group.ngroups=true&facet.field=collections";
     }
   }
 
-  console.log(query)
+  console.log(query);
 
   // This is an arbitrary document limit hardcoded for alpha/beta testing
   // purposes. Ideally, this limit should be echoed by the host system, not
@@ -2345,7 +2460,7 @@ const queryBnFSolr = (but) => {
     .then((r) => {
       let numFound = r.grouped.url.ngroups;
 
-      let byCollection=r.facet_counts.facet_fields
+      let byCollection = r.facet_counts.facet_fields;
 
       console.log(byCollection);
 
@@ -2357,6 +2472,16 @@ const queryBnFSolr = (but) => {
         document.getElementById(
           "bnf-solr-fullquery-" + but.serv
         ).style.display = "flex";
+
+        const yearChart = generateSolrExplorationChart(
+          parseSolrFacetFields(byCollection.crawl_year),
+          "crawl_year"
+        );
+        const collectionChart = generateSolrExplorationChart(
+          parseSolrFacetFields(byCollection.collections)
+        );
+
+        previewer.append(yearChart, collectionChart);
       } else if (numFound >= document_limit) {
         previewer.innerHTML = `You cannot request more than ${document_limit} documents.`;
       }
@@ -3228,16 +3353,14 @@ window.addEventListener("load", (event) => {
 
           // The answer is in the array at r.collections
 
+          var sourceSolrRadio = "";
 
-var sourceSolrRadio = "";
-
-var coreSource; // In theory, there is only one core collection
+          var coreSource; // In theory, there is only one core collection
 
           fetch(sourceRequest)
             .then((r) => r.json())
             .then((r) => {
-            
-            coreSource=r.collections[0] ;
+              coreSource = r.collections[0];
               for (let i = 0; i < r.collections.length; i++) {
                 const col = r.collections[i];
                 let checked = i === 0 ? "checked" : "";
@@ -3247,42 +3370,39 @@ var coreSource; // In theory, there is only one core collection
               <label for="${col}">${col}</label>
             </div>`;
               }
-            }).then(()=>{
-              
-          const facetRequest =
-            "http://" +
-            availability.dnsLocalServiceList[service].url +
-            ":" +
-            availability.dnsLocalServiceList[service].port +
-            "/solr/" +
-            coreSource +
-            "/select?q=*rows=0&facet=on&facet.field=collections";
+            })
+            .then(() => {
+              const facetRequest =
+                "http://" +
+                availability.dnsLocalServiceList[service].url +
+                ":" +
+                availability.dnsLocalServiceList[service].port +
+                "/solr/" +
+                coreSource +
+                "/select?q=*rows=0&facet=on&facet.field=collections";
 
-              console.log(facetRequest)
+              fetch(facetRequest)
+                .then((facet) => facet.json())
+                .then((facets) => {
+                  const facetList =
+                    facets.facet_counts.facet_fields.collections;
 
-  fetch(facetRequest)
-            .then((facet) => facet.json())
-            .then((facets) => {
+                  var facetCheckBox = "";
 
-              const facetList= facets.facet_counts.facet_fields.collections;
+                  for (let i = 0; i < facetList.length; i++) {
+                    const face = facetList[i];
 
-              var facetCheckBox=""
+                    if (typeof face === "string") {
+                      let checked = i === 0 ? "checked" : "";
 
-               for (let i = 0; i < facetList.length; i++) {
-                const face = facetList[i];
-
-                if (typeof face ==="string"){   
-
-                let checked = i === 0 ? "checked" : "";
-
-                facetCheckBox += `<div>
+                      facetCheckBox += `<div>
               <input type="checkbox" name="bnf-solr-checkbox-${serv}" class="bnf-solr-checkbox-${serv}" id="${face}"  ${checked}  />
               <label for="${face}">${face}</label>
             </div>`;
-            }
-              }
+                    }
+                  }
 
-              solrCont.innerHTML = `<!-- BNF SOLR TAB -->     
+                  solrCont.innerHTML = `<!-- BNF SOLR TAB -->     
             <span class="flux-title">${service.toUpperCase()}</span>
             <br><br>
             <form id="bnf-solr-form" autocomplete="off">Query:<br>
@@ -3299,33 +3419,33 @@ var coreSource; // In theory, there is only one core collection
               <br><br>
             </form>`;
 
-              document.body.append(solrCont);
+                  document.body.append(solrCont);
 
-              buttonList.push({
-                id: "bnf-solr-basic-query-" + serv,
-                serv,
-                func: "queryBnFSolr",
-                args: availability.dnsLocalServiceList[service],
-              });
-
-              buttonList.push({
-                id: "bnf-solr-fullquery-" + serv,
-                serv,
-                func: "powerValve",
-                arg: "BNF-SOLR",
-              });
-
-              buttonList.forEach((but) => {
-                document
-                  .getElementById(but.id)
-                  .addEventListener("click", (e) => {
-                    e.preventDefault();
-                    funcSwitch(e, but);
-
-                    return false;
+                  buttonList.push({
+                    id: "bnf-solr-basic-query-" + serv,
+                    serv,
+                    func: "queryBnFSolr",
+                    args: availability.dnsLocalServiceList[service],
                   });
-              });
-                 });
+
+                  buttonList.push({
+                    id: "bnf-solr-fullquery-" + serv,
+                    serv,
+                    func: "powerValve",
+                    arg: "BNF-SOLR",
+                  });
+
+                  buttonList.forEach((but) => {
+                    document
+                      .getElementById(but.id)
+                      .addEventListener("click", (e) => {
+                        e.preventDefault();
+                        funcSwitch(e, but);
+
+                        return false;
+                      });
+                  });
+                });
             });
 
           break;
