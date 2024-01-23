@@ -2,6 +2,7 @@ const electron = require("electron");
 const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } =
   electron;
 const fs = require("fs");
+var https = require("https");
 
 // original
 var userDataPath = app.getPath("userData");
@@ -695,3 +696,60 @@ ipcMain.on("openPath", async (event, path) => {
   shell.openPath(path);
   shell.openExternal(path);
 });
+
+/// get data from the pps
+
+const getPPSData = () => {
+  const delta = 1000000000;
+
+  const time = Date.now();
+
+  fs.readdir(userDataPath + "/PANDORAE-DATA/flatDatasets/", (err, files) => {
+    let initiated = 1;
+
+    files.forEach((f) => {
+      if (f.indexOf("PPS") > -1 && f.indexOf(".csv") > -1) {
+        let ftime = parseInt(f.substring(4, f.length - 4));
+
+        if (time - ftime > delta) {
+          console.log("Removing previous version.");
+          fs.unlink(userDataPath + "/PANDORAE-DATA/flatDatasets/" + f, (err) =>
+            console.log(err)
+          );
+          updatePPS(time);
+          initiated = 0;
+        } else {
+          console.log("PPS data is already up to date");
+          initiated = 0;
+        }
+      }
+    });
+
+    if (initiated) {
+      updatePPS(time);
+    }
+  });
+};
+
+const updatePPS = (time) => {
+  console.log("started PPS update");
+  var file = fs.createWriteStream(
+    userDataPath + `/PANDORAE-DATA/flatDatasets/PPS-${time}.csv`
+  );
+
+  https.get(
+    "https://dbrech.irit.fr/pls/apex/f?p=9999:3::IR%5Ballproblematicpapers%5D_CSV::::",
+    (res) => {
+      res.pipe(file);
+
+      console.log("PPS update is ongoing.");
+
+      file.on("finish", () => {
+        file.close();
+        console.log("ended PPS update");
+      });
+    }
+  );
+};
+
+getPPSData();
