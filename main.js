@@ -418,7 +418,7 @@ const chaerosCalculator = () => {
 
   chaerosWindow.webContents.on("did-finish-load", function () {
     chaerosWindow.webContents.send("id", chaerosWindow.id);
-    chaerosWindow.webContents.openDevTools();
+    //chaerosWindow.webContents.openDevTools();
   });
 };
 
@@ -699,6 +699,10 @@ ipcMain.on("openPath", async (event, path) => {
 
 /// get data from the pps
 
+let ppsFile = "";
+
+ipcMain.handle("getPPS", async (event, req) => ppsFile);
+
 const getPPSData = () => {
   const delta = 1000000000;
 
@@ -720,6 +724,7 @@ const getPPSData = () => {
           initiated = 0;
         } else {
           console.log("PPS data is already up to date");
+          ppsFile = userDataPath + "/PANDORAE-DATA/flatDatasets/" + f;
           initiated = 0;
         }
       }
@@ -733,23 +738,33 @@ const getPPSData = () => {
 
 const updatePPS = (time) => {
   console.log("started PPS update");
-  var file = fs.createWriteStream(
-    userDataPath + `/PANDORAE-DATA/flatDatasets/PPS-${time}.csv`
-  );
+  ppsFile = userDataPath + `/PANDORAE-DATA/flatDatasets/PPS-${time}.csv`;
 
-  https.get(
-    "https://dbrech.irit.fr/pls/apex/f?p=9999:3::IR%5Ballproblematicpapers%5D_CSV::::",
-    (res) => {
-      res.pipe(file);
+  const file = fs.createWriteStream(ppsFile);
 
-      console.log("PPS update is ongoing.");
+  const options = {
+    hostname: "dbrech.irit.fr",
+    port: 443,
+    path: "/pls/apex/f?p=9999:300::IR[allproblematicpapers]_CSV",
+    method: "GET",
+  };
 
-      file.on("finish", () => {
-        file.close();
-        console.log("ended PPS update");
-      });
-    }
-  );
+  const req = https.request(options, (res) => {
+    res.pipe(file);
+
+    console.log("PPS update is ongoing.");
+
+    file.on("finish", () => {
+      file.close();
+      console.log("ended PPS update");
+    });
+  });
+
+  req.on("error", (e) => {
+    console.error(e.message);
+  });
+
+  req.end();
 };
 
 getPPSData();

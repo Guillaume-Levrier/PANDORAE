@@ -19,6 +19,7 @@ const tg = require("@hownetworks/tracegraph");
 const fs = require("fs"); // FileSystem reads/writes files and directories
 const d3 = require("d3");
 const { distance, closest } = require("fastest-levenshtein");
+const csv = require("csv-parser");
 
 var CM = CMT["EN"];
 
@@ -283,8 +284,8 @@ const powerValve = (fluxAction, item) => {
       const fieldId = item.id.replace("full", "");
       fluxArgs.bnfsolrquery = document.getElementById(fieldId).value;
       fluxArgs.meta = solrbnfcount[fluxArgs.bnfsolrquery];
-      fluxArgs.targetCollections=solrbnfcount.targetCollections
-      
+      fluxArgs.targetCollections = solrbnfcount.targetCollections;
+
       const serv = item.id.replace("bnf-solr-fullquery-", "");
 
       const collections = document.getElementsByClassName(
@@ -746,6 +747,9 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
             document.getElementById(buttonId).style.display = "unset";
             document.getElementById(buttonId).style.flex = "auto";
             document.getElementById("systemToType").value = doc.id;
+            const problematics = document.getElementById("problematics");
+            problematics.innerHTML = "";
+            problematics.style.display = "none";
 
             break;
         }
@@ -1862,7 +1866,6 @@ const regardsBasic = () => {
 
 //===== Solr BNF ======
 
-
 // These are helpers to visualize the first results from the test request.
 
 // Turn a solr faect field into an actual array of objects
@@ -2019,9 +2022,7 @@ const queryBnFSolr = (but) => {
     }
   }
 
-solrbnfcount.targetCollections=targetfacets
-
-
+  solrbnfcount.targetCollections = targetfacets;
 
   // As it happens, the solr endpoint chosen by the user can have several collections
   // in it which can have different names. Rather than letting the user enter the
@@ -2086,7 +2087,12 @@ solrbnfcount.targetCollections=targetfacets
 
       console.log(byCollection);
 
-      solrbnfcount[queryContent] = { count: numFound, but, selectedCollection,countByCollection: parseSolrFacetFields(byCollection.collections)};
+      solrbnfcount[queryContent] = {
+        count: numFound,
+        but,
+        selectedCollection,
+        countByCollection: parseSolrFacetFields(byCollection.collections),
+      };
 
       previewer.innerHTML = `<br><p>  ${numFound} unique documents found</p> `;
 
@@ -2683,8 +2689,74 @@ const downloadData = () => {
   });
 };
 
+const checkPPS = () => {
+  const id = document.getElementById("system-dataset-preview").name;
+
+  const button = document.getElementById("checkPPS");
+  button.innerText = "Loading";
+  const PPSdata = [];
+  const dois = [];
+
+  var count = 0;
+
+  ipcRenderer.invoke("getPPS", true).then((res) => console.log(res));
+
+  pandodb.system
+    .get(id)
+    .then((data) => {
+      data.content.forEach((d) => {
+        d.items.forEach((item) => {
+          if (item.hasOwnProperty("DOI")) {
+            dois.push(item.DOI);
+          }
+        });
+      });
+    })
+    .then(() =>
+      ipcRenderer.invoke("getPPS", true).then((ppsFile) => {
+        fs.createReadStream(ppsFile) // Read the flatfile dataset provided by the user
+          .pipe(csv()) // pipe buffers to csv parser
+          .on("data", (data) => {
+            count++;
+            if (count % 7) {
+              button.innerText = "Loading " + count;
+            }
+            PPSdata.push(data);
+          })
+          .on("end", () => {
+            const targets = [];
+            PPSdata.forEach((pps) => {
+              if (dois.some((t) => t === pps.Doi)) {
+                targets.push(pps);
+              }
+            });
+
+            const problematics = document.getElementById("problematics");
+            problematics.style.display = "flex";
+
+            if (targets.length === 0) {
+              problematics.innerText = "No problematic paper found.";
+            } else {
+              targets.forEach((t) => {
+                problematics.innerHTML += `<div style="display:inline-flex;margin-top:3px;justify-content: space-around;border-top:1px dashed gray">
+              <div style="color:red;padding:2px;">${t.Detectors}</div>
+              <div style="padding:2px; width:300px;text-overflow: ellipsis;overflow: hidden;white-space: nowrap;">${t.Title}</div>
+              <div style="padding:2px;"><a href="https://dbrech.irit.fr/pls/apex/f?p=9999:3::::RIR:IRC_DOI:${t.Doi}" target="_blank">${t.Doi}</a></div>
+              </div>`;
+              });
+            }
+            //https://dbrech.irit.fr/pls/apex/f?p=9999:3::::RIR:IRC_DOI:\10.1088/1742-6596/1916/1/012092\
+
+            button.innerText = "Check PPS";
+          })
+          .catch((e) => console.log(e));
+      })
+    );
+};
+
 window.addEventListener("load", (event) => {
   var buttonList = [
+    { id: "checkPPS", func: "checkPPS" },
     { id: "change-user-id", func: "changeUserID" },
     { id: "manual-merge-authors", func: "manualMergeAuthors" },
     { id: "wos-basic-query", func: "wosBasicRetriever" },
@@ -2837,6 +2909,7 @@ window.addEventListener("load", (event) => {
   function updateCascade() {
     traces = [];
     document.getElementById("cascade").innerHTML = "";
+
     availability.dnslist.forEach((d) => {
       if (d.valid) {
         switch (d.name) {
@@ -3080,6 +3153,9 @@ window.addEventListener("load", (event) => {
 
   function funcSwitch(e, but) {
     switch (but.func) {
+      case "checkPPS":
+        checkPPS();
+        break;
       case "queryBnFSolr":
         queryBnFSolr(but);
         break;
