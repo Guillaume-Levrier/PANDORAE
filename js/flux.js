@@ -2738,10 +2738,10 @@ const checkPPS = () => {
               problematics.innerText = "No problematic paper found.";
             } else {
               targets.forEach((t) => {
-                problematics.innerHTML += `<div style="display:inline-flex;margin-top:3px;justify-content: space-around;border-top:1px dashed gray">
-              <div style="color:red;padding:2px;">${t.Detectors}</div>
-              <div style="padding:2px; width:300px;text-overflow: ellipsis;overflow: hidden;white-space: nowrap;">${t.Title}</div>
-              <div style="padding:2px;"><a href="https://dbrech.irit.fr/pls/apex/f?p=9999:3::::RIR:IRC_DOI:${t.Doi}" target="_blank">${t.Doi}</a></div>
+                problematics.innerHTML += `<div style="display:inline-flex;margin-top:3px;justify-content: space-around;border-top:1px dashed gray;text-align: center;">
+              <div style="color:red;padding:2px;width:20%;">${t.Detectors}</div>
+              <div style="padding:2px; width:60%;text-overflow: ellipsis;overflow: hidden;white-space: nowrap;">${t.Title}</div>
+              <div style="padding:2px;width:20%;word-break: break-all;"><a href="https://dbrech.irit.fr/pls/apex/f?p=9999:3::::RIR:IREQ_DOI:${t.Doi}" target="_blank">${t.Doi}</a></div>
               </div>`;
               });
             }
