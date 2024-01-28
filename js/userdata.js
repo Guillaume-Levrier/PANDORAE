@@ -21,8 +21,6 @@ const getUserData = () =>
     (err, data) => {
       if (err) throw err;
 
-      console.log(data);
-
       let user = JSON.parse(data);
 
       updateFields(user);
@@ -67,8 +65,6 @@ const basicUserData = () => {
       (err, data) => {
         const user = JSON.parse(data);
 
-        console.log(JSON.stringify(user));
-
         if (userName) {
           user.UserName = userName;
         }
@@ -78,8 +74,6 @@ const basicUserData = () => {
         user.locale = "EN";
 
         const datafile = JSON.stringify(user);
-
-        console.log(datafile);
 
         fs.writeFile(userIdFilePath, datafile, "utf8", (err) => {
           //if (err) throw err;
@@ -92,11 +86,6 @@ const basicUserData = () => {
             userButton.innerText = err;
             console.log(err);
           }
-
-          console.log("This data has been successfully written");
-          console.log("=====");
-          console.log(datafile);
-          console.log("=====");
 
           getUserData();
         });
