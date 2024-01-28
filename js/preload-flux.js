@@ -3121,11 +3121,10 @@ const checkPPS = () => {
                 problematics.innerHTML += `<div style="display:inline-flex;margin-top:3px;justify-content: space-around;border-top:1px dashed gray;text-align: center;">
               <div style="color:red;padding:2px;width:20%;">${t.Detectors}</div>
               <div style="padding:2px; width:60%;text-overflow: ellipsis;overflow: hidden;white-space: nowrap;">${t.Title}</div>
-              <div style="padding:2px;width:20%;word-break: break-all;"><a href="https://dbrech.irit.fr/pls/apex/f?p=9999:3::::RIR:IRC_DOI:${t.Doi}" target="_blank">${t.Doi}</a></div>
+              <div style="padding:2px;width:20%;word-break: break-all;"><a href="https://dbrech.irit.fr/pls/apex/f?p=9999:3::::RIR:IREQ_DOI:${t.Doi}" target="_blank">${t.Doi}</a></div>
               </div>`;
               });
             }
-            //https://dbrech.irit.fr/pls/apex/f?p=9999:3::::RIR:IRC_DOI:\10.1088/1742-6596/1916/1/012092\
 
             button.innerText = "Check PPS";
           })
@@ -3416,9 +3415,6 @@ window.addEventListener("load", (event) => {
           solrCont.style.display = "none";
           solrCont.className = "fluxTabs";
 
-          // Here, get the available SOLR collections
-          // SERVICE_LOCATION/solr/admin/collections?action=LIST&wt=json
-
           const sourceRequest =
             "http://" +
             availability.dnsLocalServiceList[service].url +
@@ -3678,38 +3674,46 @@ const setPassword = (service, user, value) =>
     type: "setPassword",
   });
 
+const userIdFilePath = userDataPath + "/PANDORAE-DATA/userID/user-id.json";
+
 const getUserData = () =>
   fs.readFile(
-    userDataPath + "/PANDORAE-DATA/userID/user-id.json", // Read the designated datafile
+    userIdFilePath, // Read the designated datafile
     "utf8",
     (err, data) => {
       if (err) throw err;
 
+      console.log(data);
+
       let user = JSON.parse(data);
 
-      let userName = user.UserName;
-      let userMail = user.UserMail;
-      let zoteroUser = user.ZoteroID;
-
-      document.getElementById("userNameInput").value = userName;
-      document.getElementById("userMailInput").value = userMail;
-      document.getElementById("zoterouserinput").value = zoteroUser;
-
-      document.getElementById("zoterokeyinput").value = getPassword(
-        "Zotero",
-        zoteroUser
-      );
-      document.getElementById("scopuskeyinput").value = getPassword(
-        "Scopus",
-        userName
-      );
-
-      document.getElementById("woskeyinput").value = getPassword(
-        "WebOfScience",
-        userName
-      );
+      updateFields(user);
     }
   );
+
+const updateFields = (user) => {
+  const userName = user.UserName;
+  const userMail = user.UserMail;
+  const zoteroUser = user.ZoteroID;
+
+  document.getElementById("userNameInput").value = userName;
+  document.getElementById("userMailInput").value = userMail;
+  document.getElementById("zoterouserinput").value = zoteroUser;
+
+  document.getElementById("zoterokeyinput").value = getPassword(
+    "Zotero",
+    zoteroUser
+  );
+  document.getElementById("scopuskeyinput").value = getPassword(
+    "Scopus",
+    userName
+  );
+
+  document.getElementById("woskeyinput").value = getPassword(
+    "WebOfScience",
+    userName
+  );
+};
 
 const basicUserData = () => {
   let userButton = document.getElementById("user-button");
@@ -3720,10 +3724,12 @@ const basicUserData = () => {
 
   if (userName.length > 0) {
     fs.readFile(
-      userDataPath + "/PANDORAE-DATA/userID/user-id.json", // Read the user data file
+      userIdFilePath, // Read the user data file
       "utf8",
       (err, data) => {
         const user = JSON.parse(data);
+
+        console.log(JSON.stringify(user));
 
         if (userName) {
           user.UserName = userName;
@@ -3735,22 +3741,29 @@ const basicUserData = () => {
 
         const datafile = JSON.stringify(user);
 
-        fs.writeFile(
-          userDataPath + "/PANDORAE-DATA/userID/user-id.json",
-          datafile,
-          "utf8",
-          (err) => {
-            if (err) throw err;
+        console.log(datafile);
 
-            userButton.style.transition = "all 1s ease-out";
-            userButton.style.backgroundPosition = "right bottom";
-            userButton.style.color = "black";
-            userButton.innerText = "User credentials updated";
+        fs.writeFile(userIdFilePath, datafile, "utf8", (err) => {
+          //if (err) throw err;
+
+          userButton.style.transition = "all 1s ease-out";
+          userButton.style.backgroundPosition = "right bottom";
+          userButton.style.color = "black";
+          userButton.innerText = "User credentials updated";
+          if (err) {
+            userButton.innerText = err;
+            console.log(err);
           }
-        );
+
+          console.log("This data has been successfully written");
+          console.log("=====");
+          console.log(datafile);
+          console.log("=====");
+
+          getUserData();
+        });
       }
     );
-    //getUserData();
   } else {
     userButton.style.transition = "all 1s ease-out";
     userButton.style.backgroundPosition = "right bottom";
@@ -3791,8 +3804,6 @@ const updateUserData = (service) => {
       checkKey("wosValidation");
       break;
   }
-
-  // getUserData();
 };
 
 const checkKey = (service, status) => {
@@ -3817,15 +3828,11 @@ const checkKey = (service, status) => {
   if (success) {
     document.getElementById(service).style.color = "green";
     document.getElementById(service).innerHTML = "check_circle_outline";
+    getUserData();
   } else {
     document.getElementById(service).style.color = "red";
     document.getElementById(service).innerHTML = "highlight_off";
   }
 };
 
-//getUserData();
-
-//window.addEventListener("DOMContentLoaded", getUserData);
-window.addEventListener("DOMContentLoaded", () => {
-  getUserData();
-});
+window.addEventListener("DOMContentLoaded", () => getUserData());

@@ -2745,7 +2745,6 @@ const checkPPS = () => {
               </div>`;
               });
             }
-            //https://dbrech.irit.fr/pls/apex/f?p=9999:3::::RIR:IRC_DOI:\10.1088/1742-6596/1916/1/012092\
 
             button.innerText = "Check PPS";
           })
@@ -3035,9 +3034,6 @@ window.addEventListener("load", (event) => {
           solrCont.id = serv.toLowerCase();
           solrCont.style.display = "none";
           solrCont.className = "fluxTabs";
-
-          // Here, get the available SOLR collections
-          // SERVICE_LOCATION/solr/admin/collections?action=LIST&wt=json
 
           const sourceRequest =
             "http://" +

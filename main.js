@@ -33,9 +33,9 @@ app.requestSingleInstanceLock();
 
 const createUserId = () => {
   userID = {
-    UserName: "Enter your name",
-    UserMail: "Enter your e-mail (not required)",
-    ZoteroID: "Enter your Zotero ID (required to use Flux features)",
+    UserName: "",
+    UserMail: "",
+    ZoteroID: "",
     theme: { value: "vega" },
     locale: "EN",
   };
@@ -349,23 +349,27 @@ ipcMain.on("keyManager", (event, request) => {
    */
   switch (request.type) {
     case "setPassword":
-      currentUser[request.service] = {
-        user: request.user,
-        value: request.value,
-      };
-      fs.writeFile(
+      fs.readFile(
         userDataPath + "/PANDORAE-DATA/userID/user-id.json",
-        JSON.stringify(currentUser),
         "utf8",
-        (err) => {
-          if (err) throw err;
-          event.returnValue = request.value;
+        (err, data) => {
+          currentUser = JSON.parse(data);
+          currentUser[request.service] = {
+            user: request.user,
+            value: request.value,
+          };
+          fs.writeFile(
+            userDataPath + "/PANDORAE-DATA/userID/user-id.json",
+            JSON.stringify(currentUser),
+            "utf8",
+            (err) => {
+              if (err) throw err;
+              event.returnValue = request.value;
+            }
+          );
         }
       );
-      /*
-      keytar
-        .setPassword(request.service, request.user, request.value)
-        .then((password) => (event.returnValue = password));*/
+
       break;
 
     case "getPassword":

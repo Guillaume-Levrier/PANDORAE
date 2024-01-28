@@ -1683,7 +1683,7 @@ const saveToolTip = () => {
   ipcRenderer.on("userStatus", (event, user) => kickStart(user));
 
   const kickStart = (user) => {
-    if (user.UserName === "Enter your name") {
+    if (user.UserName === "") {
       menuIcon.style.cursor = "not-allowed";
       consoleIcon.style.cursor = "not-allowed";
       document.getElementById("tutostartmenu").style.display = "block";

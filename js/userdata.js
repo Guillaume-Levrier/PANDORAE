@@ -12,38 +12,46 @@ const setPassword = (service, user, value) =>
     type: "setPassword",
   });
 
+const userIdFilePath = userDataPath + "/PANDORAE-DATA/userID/user-id.json";
+
 const getUserData = () =>
   fs.readFile(
-    userDataPath + "/PANDORAE-DATA/userID/user-id.json", // Read the designated datafile
+    userIdFilePath, // Read the designated datafile
     "utf8",
     (err, data) => {
       if (err) throw err;
 
+      console.log(data);
+
       let user = JSON.parse(data);
 
-      let userName = user.UserName;
-      let userMail = user.UserMail;
-      let zoteroUser = user.ZoteroID;
-
-      document.getElementById("userNameInput").value = userName;
-      document.getElementById("userMailInput").value = userMail;
-      document.getElementById("zoterouserinput").value = zoteroUser;
-
-      document.getElementById("zoterokeyinput").value = getPassword(
-        "Zotero",
-        zoteroUser
-      );
-      document.getElementById("scopuskeyinput").value = getPassword(
-        "Scopus",
-        userName
-      );
-
-      document.getElementById("woskeyinput").value = getPassword(
-        "WebOfScience",
-        userName
-      );
+      updateFields(user);
     }
   );
+
+const updateFields = (user) => {
+  const userName = user.UserName;
+  const userMail = user.UserMail;
+  const zoteroUser = user.ZoteroID;
+
+  document.getElementById("userNameInput").value = userName;
+  document.getElementById("userMailInput").value = userMail;
+  document.getElementById("zoterouserinput").value = zoteroUser;
+
+  document.getElementById("zoterokeyinput").value = getPassword(
+    "Zotero",
+    zoteroUser
+  );
+  document.getElementById("scopuskeyinput").value = getPassword(
+    "Scopus",
+    userName
+  );
+
+  document.getElementById("woskeyinput").value = getPassword(
+    "WebOfScience",
+    userName
+  );
+};
 
 const basicUserData = () => {
   let userButton = document.getElementById("user-button");
@@ -54,10 +62,12 @@ const basicUserData = () => {
 
   if (userName.length > 0) {
     fs.readFile(
-      userDataPath + "/PANDORAE-DATA/userID/user-id.json", // Read the user data file
+      userIdFilePath, // Read the user data file
       "utf8",
       (err, data) => {
         const user = JSON.parse(data);
+
+        console.log(JSON.stringify(user));
 
         if (userName) {
           user.UserName = userName;
@@ -69,22 +79,29 @@ const basicUserData = () => {
 
         const datafile = JSON.stringify(user);
 
-        fs.writeFile(
-          userDataPath + "/PANDORAE-DATA/userID/user-id.json",
-          datafile,
-          "utf8",
-          (err) => {
-            if (err) throw err;
+        console.log(datafile);
 
-            userButton.style.transition = "all 1s ease-out";
-            userButton.style.backgroundPosition = "right bottom";
-            userButton.style.color = "black";
-            userButton.innerText = "User credentials updated";
+        fs.writeFile(userIdFilePath, datafile, "utf8", (err) => {
+          //if (err) throw err;
+
+          userButton.style.transition = "all 1s ease-out";
+          userButton.style.backgroundPosition = "right bottom";
+          userButton.style.color = "black";
+          userButton.innerText = "User credentials updated";
+          if (err) {
+            userButton.innerText = err;
+            console.log(err);
           }
-        );
+
+          console.log("This data has been successfully written");
+          console.log("=====");
+          console.log(datafile);
+          console.log("=====");
+
+          getUserData();
+        });
       }
     );
-    //getUserData();
   } else {
     userButton.style.transition = "all 1s ease-out";
     userButton.style.backgroundPosition = "right bottom";
@@ -125,8 +142,6 @@ const updateUserData = (service) => {
       checkKey("wosValidation");
       break;
   }
-
-  // getUserData();
 };
 
 const checkKey = (service, status) => {
@@ -151,15 +166,11 @@ const checkKey = (service, status) => {
   if (success) {
     document.getElementById(service).style.color = "green";
     document.getElementById(service).innerHTML = "check_circle_outline";
+    getUserData();
   } else {
     document.getElementById(service).style.color = "red";
     document.getElementById(service).innerHTML = "highlight_off";
   }
 };
 
-//getUserData();
-
-//window.addEventListener("DOMContentLoaded", getUserData);
-window.addEventListener("DOMContentLoaded", () => {
-  getUserData();
-});
+window.addEventListener("DOMContentLoaded", () => getUserData());

@@ -54,13 +54,13 @@
   <form id="user-data-form" autocomplete="off">
     <div class="credential"> Name:<br> <input class="fluxInput"
         spellcheck="false" id="userNameInput" type="text"
-        value="Enter your name"><br><br></div>
+        placeholder="Enter your name"><br><br></div>
     <div class="credential"> Email:<br> <input class="fluxInput"
         spellcheck="false" id="userMailInput" type="text"
-        value="Enter your email"><br><br></div>
+        placeholder="Enter your email"><br><br></div>
     <div class="credential"> Zotero group id:<br> <input class="fluxInput"
         spellcheck="false" id="zoterouserinput" type="text"
-        value="Enter your zotero group code"><br><br></div>
+        placeholder="Enter your zotero group code"><br><br></div>
     <button type="submit" id="user-button" class="flux-button">Update User
       Credentials</button><br>
 
@@ -75,13 +75,14 @@
     <div class="credential">
 
       <input style="width:20%;display:none" class="fluxInput" spellcheck="false"
-        id="newServiceName" type="text" value="Service name">
+        id="newServiceName" type="text" placeholder="Service name">
       &nbsp;<input style="width:20%;display:none" class="fluxInput"
-        spellcheck="false" id="newServiceLocation" type="text" value="IP:PORT">
+        spellcheck="false" id="newServiceLocation" type="text"
+        placeholder="IP:PORT">
       &nbsp;
       &nbsp;<input style="width:20%;display:none" class="fluxInput"
         spellcheck="false" id="newArkViewer" type="text"
-        value="Ark Viewer Address"> &nbsp;
+        placeholder="Ark Viewer Address"> &nbsp;
 
       <select style="width:20%;" class="fluxInput" spellcheck="false"
         id="newServiceType">
@@ -99,8 +100,7 @@
         class="material-icons validation"
         id="zoteroAPIValidation">help_outline</i> Zotero API key: <input
         class="fluxInput" spellcheck="false" id="zoterokeyinput" type="password"
-        value="Enter your Zotero API key"><i
-        title="Click this button to update your credentials"
+        value=""><i title="Click this button to update your credentials"
         class="material-icons updateCredentials" id="Zotero">cached</i> <br><br>
     </div>
     <div class="credential APIcred">
