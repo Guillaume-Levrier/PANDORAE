@@ -3010,9 +3010,7 @@ const computePPS = () => {
       .pipe(csv()) // pipe buffers to csv parser
       .on("data", (data) => {
         const users = data.Pubpeerusers.split(",");
-
         data.users = users;
-
         users.forEach((dataUser) => {
           list.forEach((listUser) => {
             if (dataUser === listUser) {

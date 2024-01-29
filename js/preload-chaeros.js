@@ -2389,6 +2389,100 @@ const bnfRemap = (doc, solrCollection) => {
   return remappedDocument;
 };
 
+// ======== CrossRef PPS computation ========
+
+const crossRefPPS = (dataset, mail) => {
+  const limiter = new bottleneck({
+    maxConcurrent: 4,
+    minTime: 100,
+  });
+
+  function getAuthors(article) {
+    const authors = [];
+    article.author.forEach((a) =>
+      authors.push({
+        creatorType: "author",
+        firstName: a.given,
+        lastName: a.family,
+      })
+    );
+    return authors;
+  }
+
+  const query = (doi) => `https://api.crossref.org/works/${doi}?mailto=${mail}`;
+
+  const datafinish = [];
+
+  const data = dataset.content;
+
+  if (1) {
+    for (let i = 0; i < data.length; i++) {
+      const DOI = data[i].DOI;
+
+      limiter
+        .schedule(() => {
+          if (DOI) {
+            return fetch(query(DOI));
+          } else {
+            return "{data:null}";
+          }
+        })
+        .then((res) => res.json())
+        .catch((err) => console.log(err))
+        .then((res) => {
+          ipcRenderer.send(
+            "chaeros-notification",
+            `CrossRef normalization ${i}/${data.length - 1}`
+          );
+          if (res) {
+            if (res.hasOwnProperty("message")) {
+              if (res.message.hasOwnProperty("author")) {
+                datafinish.push({
+                  DOI,
+                  creators: getAuthors(res.message),
+                  article: res.message,
+                });
+              }
+            }
+          }
+
+          if (i === data.length - 1) {
+            ipcRenderer.send(
+              "chaeros-notification",
+              `CrossReff normalization successful`
+            );
+
+            console.log(datafinish);
+
+            /*  pandodb.open();
+
+            const normalized = {
+              id: "[n]" + dataset.id + date,
+              date: dataset.date,
+              name: "[n]" + dataset.name,
+              content: data,
+            };
+
+            pandodb.csljson
+              .add(normalized)
+              .then(() => {
+                ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
+                ipcRenderer.send("pulsar", true);
+                ipcRenderer.send(
+                  "console-logs",
+                  "Successfully converted " + dataset
+                ); // Log success
+                setTimeout(() => {
+                  ipcRenderer.send("win-destroy", winId);
+                }, 500);
+              })
+              .catch((err) => console.log(err)); */
+          }
+        });
+    }
+  }
+};
+
 // ======== CrossRef Enricher =====
 
 const crossRefEnricher = (dataset, mail) => {
@@ -2414,11 +2508,6 @@ const crossRefEnricher = (dataset, mail) => {
   const datafinish = [];
 
   const data = dataset.content;
-
-  /* for testing purposes
-  for (let i = 0; i < 20; i++) {
-    data.push(dataset.content[i]);
-  }*/
 
   if (1) {
     for (let i = 0; i < data.length; i++) {
