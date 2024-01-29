@@ -2998,6 +2998,120 @@ const wosBasicRetriever = () => {
     });
 };
 
+//========== PROBLEMATIC PAPER SCREENER ==========
+
+const computePPS = () => {
+  const list = document.getElementById("pubPeerUserList").value.split(",");
+
+  const PPSdataMap = {};
+
+  ipcRenderer.invoke("getPPS", true).then((ppsFile) => {
+    fs.createReadStream(ppsFile) // Read the flatfile dataset provided by the user
+      .pipe(csv()) // pipe buffers to csv parser
+      .on("data", (data) => {
+        const users = data.Pubpeerusers.split(",");
+
+        data.users = users;
+
+        users.forEach((dataUser) => {
+          list.forEach((listUser) => {
+            if (dataUser === listUser) {
+              PPSdataMap[data.Doi] = data;
+            }
+          });
+        });
+      })
+      .on("end", () => {
+        const PPSdata = Object.keys(PPSdataMap);
+        console.log(PPSdata);
+        // next step here is to send to crossref
+      });
+  });
+};
+
+const updatePPSDate = (date) =>
+  (document.getElementById(
+    "pps-last-updated"
+  ).innerText = `The PPS list available to your instance of PANDORÆ was downloaded on ${new Date(
+    date
+  ).toLocaleString()}.`);
+
+const forceUpdatePPS = () => {
+  ipcRenderer.send("forceUpdatePPS", true);
+
+  document.getElementById("pps-last-updated").innerText =
+    "You have just triggered a forced update. Please wait until the update is finished.";
+};
+
+ipcRenderer.on("forcedPPSupdateFinished", () => {
+  document.getElementById("pps-last-updated").innerText =
+    "Update finished. The PPS list available to your PANDORÆ instance was updated just now.";
+});
+
+const checkPPS = () => {
+  const id = document.getElementById("system-dataset-preview").name;
+
+  const button = document.getElementById("checkPPS");
+  button.innerText = "Loading";
+  const PPSdata = [];
+  const dois = [];
+
+  var count = 0;
+
+  //ipcRenderer.invoke("getPPS", true).then((res) => console.log(res));
+
+  pandodb.system
+    .get(id)
+    .then((data) => {
+      data.content.forEach((d) => {
+        d.items.forEach((item) => {
+          if (item.hasOwnProperty("DOI")) {
+            dois.push(item.DOI);
+          }
+        });
+      });
+    })
+    .then(() =>
+      ipcRenderer.invoke("getPPS", true).then((ppsFile) => {
+        fs.createReadStream(ppsFile) // Read the flatfile dataset provided by the user
+          .pipe(csv()) // pipe buffers to csv parser
+          .on("data", (data) => {
+            count++;
+            if (count % 7) {
+              button.innerText = "Loading " + count;
+            }
+            PPSdata.push(data);
+          })
+          .on("end", () => {
+            const targets = [];
+            PPSdata.forEach((pps) => {
+              if (dois.some((t) => t === pps.Doi)) {
+                targets.push(pps);
+              }
+            });
+
+            const problematics = document.getElementById("problematics");
+            problematics.style.display = "flex";
+
+            if (targets.length === 0) {
+              problematics.innerText = "No problematic paper found.";
+            } else {
+              targets.forEach((t) => {
+                problematics.innerHTML += `<div style="display:inline-flex;margin-top:3px;justify-content: space-around;border-top:1px dashed gray;text-align: center;">
+              <div style="color:red;padding:2px;width:20%;">${t.Detectors}</div>
+              <div style="padding:2px; width:60%;text-overflow: ellipsis;overflow: hidden;white-space: nowrap;">${t.Title}</div>
+              <div style="padding:2px;width:20%;word-break: break-all;"><a href="https://dbrech.irit.fr/pls/apex/f?p=9999:3::::RIR:IREQ_DOI:${t.Doi}" target="_blank">${t.Doi}</a></div>
+              </div>`;
+              });
+            }
+
+            button.innerText = "Check PPS";
+          })
+          .catch((e) => console.log(e));
+      })
+    );
+};
+
 //===== Adding a new local service ======
 
 const addLocalService = () => {
@@ -3069,70 +3183,6 @@ const downloadData = () => {
   });
 };
 
-const checkPPS = () => {
-  const id = document.getElementById("system-dataset-preview").name;
-
-  const button = document.getElementById("checkPPS");
-  button.innerText = "Loading";
-  const PPSdata = [];
-  const dois = [];
-
-  var count = 0;
-
-  ipcRenderer.invoke("getPPS", true).then((res) => console.log(res));
-
-  pandodb.system
-    .get(id)
-    .then((data) => {
-      data.content.forEach((d) => {
-        d.items.forEach((item) => {
-          if (item.hasOwnProperty("DOI")) {
-            dois.push(item.DOI);
-          }
-        });
-      });
-    })
-    .then(() =>
-      ipcRenderer.invoke("getPPS", true).then((ppsFile) => {
-        fs.createReadStream(ppsFile) // Read the flatfile dataset provided by the user
-          .pipe(csv()) // pipe buffers to csv parser
-          .on("data", (data) => {
-            count++;
-            if (count % 7) {
-              button.innerText = "Loading " + count;
-            }
-            PPSdata.push(data);
-          })
-          .on("end", () => {
-            const targets = [];
-            PPSdata.forEach((pps) => {
-              if (dois.some((t) => t === pps.Doi)) {
-                targets.push(pps);
-              }
-            });
-
-            const problematics = document.getElementById("problematics");
-            problematics.style.display = "flex";
-
-            if (targets.length === 0) {
-              problematics.innerText = "No problematic paper found.";
-            } else {
-              targets.forEach((t) => {
-                problematics.innerHTML += `<div style="display:inline-flex;margin-top:3px;justify-content: space-around;border-top:1px dashed gray;text-align: center;">
-              <div style="color:red;padding:2px;width:20%;">${t.Detectors}</div>
-              <div style="padding:2px; width:60%;text-overflow: ellipsis;overflow: hidden;white-space: nowrap;">${t.Title}</div>
-              <div style="padding:2px;width:20%;word-break: break-all;"><a href="https://dbrech.irit.fr/pls/apex/f?p=9999:3::::RIR:IREQ_DOI:${t.Doi}" target="_blank">${t.Doi}</a></div>
-              </div>`;
-              });
-            }
-
-            button.innerText = "Check PPS";
-          })
-          .catch((e) => console.log(e));
-      })
-    );
-};
-
 window.addEventListener("load", (event) => {
   var buttonList = [
     { id: "checkPPS", func: "checkPPS" },
@@ -3168,6 +3218,7 @@ window.addEventListener("load", (event) => {
       func: "datasetDisplay",
       arg: ["hyphe-dataset-list", "hyphe"],
     },
+    { id: "computePPS", func: "computePPS" },
     {
       id: "systemList",
       func: "datasetDisplay",
@@ -3256,6 +3307,7 @@ window.addEventListener("load", (event) => {
       id: "downloadData",
       func: "downloadData",
     },
+    { id: "forceUpdatePPS", func: "forceUpdatePPS" },
   ];
 
   const svg = d3.select("svg");
@@ -3336,6 +3388,15 @@ window.addEventListener("load", (event) => {
           case "ISTEX":
             if (selections.scientometricsSelect) {
               addHop(["OPEN", "ISTEX", "ENRICHMENT"]);
+            }
+            break;
+
+          case "PPS":
+            if (selections.scientometricsSelect) {
+              addHop(["OPEN", "PPS", "CSL-JSON"]);
+              ipcRenderer
+                .invoke("getPPSMaturity")
+                .then((time) => updatePPSDate(time));
             }
             break;
 
@@ -3570,6 +3631,9 @@ window.addEventListener("load", (event) => {
         checkKey(but.arg);
         break;
 
+      case "forceUpdatePPS":
+        forceUpdatePPS();
+        break;
       case "updateUserData":
         updateUserData(but.arg);
         break;
@@ -3596,6 +3660,10 @@ window.addEventListener("load", (event) => {
 
       case "hypheCheck":
         hypheCheck(document.getElementById("hypheaddress").value);
+        break;
+
+      case "computePPS":
+        computePPS();
         break;
 
       case "endpointConnector":
@@ -3683,8 +3751,6 @@ const getUserData = () =>
     (err, data) => {
       if (err) throw err;
 
-      console.log(data);
-
       let user = JSON.parse(data);
 
       updateFields(user);
@@ -3729,8 +3795,6 @@ const basicUserData = () => {
       (err, data) => {
         const user = JSON.parse(data);
 
-        console.log(JSON.stringify(user));
-
         if (userName) {
           user.UserName = userName;
         }
@@ -3740,8 +3804,6 @@ const basicUserData = () => {
         user.locale = "EN";
 
         const datafile = JSON.stringify(user);
-
-        console.log(datafile);
 
         fs.writeFile(userIdFilePath, datafile, "utf8", (err) => {
           //if (err) throw err;
@@ -3754,11 +3816,6 @@ const basicUserData = () => {
             userButton.innerText = err;
             console.log(err);
           }
-
-          console.log("This data has been successfully written");
-          console.log("=====");
-          console.log(datafile);
-          console.log("=====");
 
           getUserData();
         });

@@ -633,6 +633,10 @@ const dnslist = [
   { name: "Regards Citoyens", url: "nosdeputes.fr" },
   { name: "Web Of Science", url: "clarivate.com" },
   { name: "ISTEX", url: "api.istex.fr" },
+  {
+    name: "PPS",
+    url: "irit.fr",
+  },
 ];
 
 dnslist.forEach((d) => {
@@ -707,6 +711,10 @@ let ppsFile = "";
 
 ipcMain.handle("getPPS", async (event, req) => ppsFile);
 
+let ppsDate = 0;
+
+ipcMain.handle("getPPSMaturity", async (event, req) => ppsDate);
+
 const getPPSData = () => {
   const delta = 1000000000;
 
@@ -718,7 +726,7 @@ const getPPSData = () => {
     files.forEach((f) => {
       if (f.indexOf("PPS") > -1 && f.indexOf(".csv") > -1) {
         let ftime = parseInt(f.substring(4, f.length - 4));
-
+        ppsDate = ftime;
         if (time - ftime > delta) {
           console.log("Removing previous version.");
           fs.unlink(userDataPath + "/PANDORAE-DATA/flatDatasets/" + f, (err) =>
@@ -739,6 +747,12 @@ const getPPSData = () => {
     }
   });
 };
+
+ipcMain.on("forceUpdatePPS", async (event, req) => {
+  console.log("forcing update of PPS");
+
+  updatePPS(Date.now());
+});
 
 const updatePPS = (time) => {
   console.log("started PPS update");
@@ -761,6 +775,10 @@ const updatePPS = (time) => {
     file.on("finish", () => {
       file.close();
       console.log("ended PPS update");
+      BrowserWindow.fromId(windowIds.flux.id).webContents.send(
+        "forcedPPSupdateFinished",
+        true
+      );
     });
   });
 

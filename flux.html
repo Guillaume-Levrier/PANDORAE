@@ -426,6 +426,32 @@
   <br><br>
 </div>
 
+<!-- PPS TAB -->
+<div id="pps" style="display:none;" class="fluxTabs">
+  <span class="flux-title">Problematic Paper Screener</span><br><br>
+
+  <span>This tab lets you update the PANDORÆ-accessible PPS list and find
+    published documents with links to documents previously marked as problematic
+    by pubPeer users.</span><br><br>
+  <span id="pps-last-updated"></span><br><br>
+  <form id="pps-form" autocomplete="off">
+
+    <button type="submit" class="flux-button" id="forceUpdatePPS">Update PPS
+      list</button><br><br>
+    <input type="text" style="width:250px" id="pubPeerUserList"
+      placeholder="Enter a pubPeer user here">
+    <button type="submit" class="flux-button" id="computePPS">Compute linked
+      documents</button>
+    <br><br>
+
+
+  </form>
+
+  <br>
+  <br>
+</div>
+
+
 <!-- ZOTERO TAB -->
 <div id="zotero" style="display:none;" class="fluxTabs">
   <span class="flux-title">ZOTERO</span><br><br>
