@@ -52,6 +52,8 @@ var coreCanvasH = window.innerHeight;
 var coreDefW = 512;
 var coreDefH = 512;
 
+var keylock=0;
+
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that
 // couldn't be done in Chaeros can be long. In order not to freeze the user's mainWindow,
@@ -1090,6 +1092,7 @@ const loadTheme = (theme) => {
 // ====== KEYBOARD SHORTCUTS ======
 
 const keyShortCuts = (event) => {
+  if (!keylock) {  
   switch (event.isComposing || event.code) {
     case "Digit1":
       if (coreExists) {
@@ -1129,6 +1132,7 @@ const keyShortCuts = (event) => {
       }
 
       break;
+  }
   }
 };
 
@@ -1645,6 +1649,10 @@ const saveToolTip = () => {
 
 }
 */
+
+
+      field.addEventListener("focusin",()=>keylock=1)
+      field.addEventListener("focusout",()=>keylock=0)
 
   field.addEventListener("click", (event) => {
     cmdinput(field.value);

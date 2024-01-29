@@ -1697,9 +1697,9 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo, targetCollections) => {
     meta.selectedCollection +
     "/" +
     "select?facet.field=crawl_year&facet=on" +
-    "&fq=collections:" +
+    "&fq=collections:(" +
     targetCollections +
-    "&fq=crawl_date:[" +
+    ")&fq=crawl_date:[" +
     dateFrom +
     "T00:00:00Z" +
     "%20TO%20" +
@@ -1730,6 +1730,8 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo, targetCollections) => {
     }
   } else {
     urlArray.push(url(req, 0, 200));
+
+      ipcRenderer.send("console-logs",`First request: ${url(req, 0, 200)}` );
   }
 
   var totalResponse = [];

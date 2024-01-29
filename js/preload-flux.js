@@ -2434,10 +2434,10 @@ const queryBnFSolr = (but) => {
         but.args.port +
         "/solr/" +
         selectedCollection +
-        "/select?facet.field=crawl_year&facet=on&" +
-        "&fq=collections:" +
+        "/select?facet.field=crawl_year&facet=on" +
+        "&fq=collections:(" +
         targetfacets +
-        "&fq=crawl_date:[" +
+        ")&fq=crawl_date:[" +
         dateFrom +
         "T00:00:00Z" +
         "%20TO%20" +
@@ -2447,11 +2447,14 @@ const queryBnFSolr = (but) => {
         queryContent +
         "&rows=0&sort=crawl_date%20desc&group=true&group.field=url" +
         "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
-        "&rows=0&sort=score+desc&group.ngroups=true&facet.field=collections";
+        "&rows=0&sort=score+desc&group.ngroups=true&facet.field=collections"+
+        "&facet.field=domain&facet.limit=10";
+
+        // logging the request
+         ipcRenderer.send("console-logs",`Sending request: ${query}` );
     }
   }
 
-  console.log(query);
 
   // This is an arbitrary document limit hardcoded for alpha/beta testing
   // purposes. Ideally, this limit should be echoed by the host system, not
@@ -2465,7 +2468,7 @@ const queryBnFSolr = (but) => {
 
       let byCollection = r.facet_counts.facet_fields;
 
-      console.log(byCollection);
+     
 
       solrbnfcount[queryContent] = {
         count: numFound,
@@ -2489,13 +2492,28 @@ const queryBnFSolr = (but) => {
           parseSolrFacetFields(byCollection.collections)
         );
 
-        previewer.append(yearChart, collectionChart);
+   
+
+        const domainList = parseSolrFacetFields(byCollection.domain)
+
+        const domainDiv = document.createElement("div");
+
+        domainDiv.innerHTML="<strong>Captures found for the top 10 domains:</strong><br>"
+
+         domainList.forEach(dom=>{
+
+          domainDiv.innerHTML+=`${dom.key} - ${dom.value}</br>` 
+
+         })
+
+        previewer.append(yearChart, collectionChart,domainDiv);
       } else if (numFound >= document_limit) {
         previewer.innerHTML = `You cannot request more than ${document_limit} documents.`;
       }
     })
     .catch((e) => {
       console.log(e);
+       ipcRenderer.send("console-logs",`Solr error: ${JSON.stringify(e)}` );
       previewer.innerHTML = `<br><p>Error - do you have a missing argument?</p> `;
     });
 };

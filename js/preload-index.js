@@ -432,6 +432,8 @@ var coreCanvasH = window.innerHeight;
 var coreDefW = 512;
 var coreDefH = 512;
 
+var keylock=0;
+
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that
 // couldn't be done in Chaeros can be long. In order not to freeze the user's mainWindow,
@@ -1470,6 +1472,7 @@ const loadTheme = (theme) => {
 // ====== KEYBOARD SHORTCUTS ======
 
 const keyShortCuts = (event) => {
+  if (!keylock) {  
   switch (event.isComposing || event.code) {
     case "Digit1":
       if (coreExists) {
@@ -1509,6 +1512,7 @@ const keyShortCuts = (event) => {
       }
 
       break;
+  }
   }
 };
 
@@ -2025,6 +2029,10 @@ const saveToolTip = () => {
 
 }
 */
+
+
+      field.addEventListener("focusin",()=>keylock=1)
+      field.addEventListener("focusout",()=>keylock=0)
 
   field.addEventListener("click", (event) => {
     cmdinput(field.value);
@@ -2951,30 +2959,36 @@ const archotype = (id) => {
 
       node.style("cursor", (d) => (d.domain ? "move" : "pointer"));
 
-      const toolSearch = document.createElement("input");
-
-      toolSearch.type = "text";
-      toolSearch.placeholder = "target expression"
+      
 
       const toolContent = document.createElement("div");
+
+      let previousCircle=0; 
+      let previousSearch=0;
 
       if (resolver) {
         node.on("click", (e, d) => {
 
           const circle = d3.select(e.target)
-          circle.attr("stroke-width", 3).attr("stroke", "	#0FFF50")
-
-          const collection = documentMap[d.id].enrichment.solrCollection;
           
+           circle.attr("stroke-width", 3).attr("stroke", "#FF0F0F")
+
+          if(previousCircle){
+             previousCircle.attr("stroke-width", 3).attr("stroke", "#0FFF50")
+          } 
+
+           previousCircle = circle
+
           d.domain
-            ? 0
+            ?  0
             : fetch(
-              `http://${resolver}/solr/${collection}/select?q=url:${JSON.stringify(
+              `http://${resolver}/solr/${documentMap[d.id].enrichment.solrCollection}/select?q=url:${JSON.stringify(
                 d.id.replaceAll("&", "%26")
               )}`
             )
               .then((r) => r.json())
               .then((r) => {
+                 
                 toolContent.innerHTML =
                   JSON.stringify(r);
 
@@ -2992,32 +3006,62 @@ const archotype = (id) => {
 
                   const content = document.createElement("div");
 
-                  var sliced = "";
+                  
+
+                  const toolSearch = document.createElement("input");
+toolSearch.style="padding:5px;border-bottom:1px solid #141414"; 
+      toolSearch.type = "text";
+      toolSearch.placeholder = "Search term or expression";
+
+      toolSearch.addEventListener("focusin",()=>keylock=1)
+      toolSearch.addEventListener("focusout",()=>keylock=0)
+
+ const toolResult = document.createElement("div");
+
+ const searchTerm=()=>{
+ toolResult.innerHTML="Fragments from the content of the captured page:<br><br>";
+                    var sliced = "";
 
                   const target = toolSearch.value;
-
+                  previousSearch=target;
+                  
                   if (target.length > 2) {
                     var re = new RegExp(target, "gi"),
                       str = doc.content;
                     while ((match = re.exec(str)) != null) {
-                      const extrait = doc.content.substring(match.index - 150, match.index + 150).replace(target, "<mark>" + target + "</mark>")
+                     // var extrait = doc.content.substring(match.index - 150, match.index + 150)
+                      //.replace(target, "<mark>" + target + "</mark>")
+                      
+const extrait = doc.content.substring(match.index - 150,match.index)+
+"<mark>"+doc.content.substring(match.index,match.index+target.length)+"</mark>"+
+doc.content.substring(match.index+target.length,match.index + 150)
+
                       sliced += extrait + "<br><hr><br>";
                     }
 
 
-                    content.innerHTML = "<div style = 'border:1px solid black; padding:5px'>" + sliced + "</div><br><hr><br>"
+                    toolResult.innerHTML = "<div style = 'border:1px solid black; padding:5px'>" + sliced + "</div><br><hr><br>"
                   }
 
 
+ }
+ 
+ if(previousSearch){
+  toolSearch.value=previousSearch;
+          searchTerm();
+      } 
 
-                  for (const key in doc) {
-                    content.innerHTML += `<div style = "font-weight:bold" > ${key}</div ><div>${doc[key]}</div><br>`;
-                  }
-
+                  toolSearch.addEventListener("change",searchTerm)
                   toolContent.innerHTML = "";
 
+                  if (doc.hasOwnProperty("url")){
+                   content.innerHTML += `<div style = "font-weight:bold" > ${url}</div ><div>${doc["url"]}</div><br>`
+}
+  for (const key in doc) {
+                    content.innerHTML += `<div style = "font-weight:bold" > ${key}</div ><div>${doc[key]}</div><br>`;
+                  }
                   toolContent
-                    .append(accessButton, content);
+                    .append(toolSearch,accessButton,toolResult, content);
                 } else {
                   toolContent.innerHTML = "not found";
                 }
@@ -3026,8 +3070,15 @@ const archotype = (id) => {
         );
       } else {
         node.on("click", (e, d) => {
-          const circle = d3.select(e.target)
-          circle.attr("stroke-width", 3).attr("stroke", "	#0FFF50")
+          const circle = d3.select(e.target);
+
+          circle.attr("stroke-width", 3).attr("stroke", "#FF0F0F")
+
+          if(previousCircle){
+             previousCircle.attr("stroke-width", 3).attr("stroke", "#0FFF50")
+          } 
+
+           previousCircle = circle
 
           toolContent.innerHTML = "";
           for (const key in documentMap[d.id]) {
@@ -3059,9 +3110,18 @@ const archotype = (id) => {
           .on("end", dragended)
       );
 
+    const displayDomainData= (d) => {
+    
+        toolContent.innerHTML="Domain: "+d.name;
+       
+      }  
+
       // Reheat the simulation when drag starts, and fix the subject position.
       function dragstarted(event) {
         if (event.subject.domain) {
+          displayDomainData(event.subject);
+
+          
           if (!event.active) simulation.alphaTarget(0.3).restart();
           event.subject.fx = event.subject.x;
           event.subject.fy = event.subject.y;
@@ -3102,7 +3162,7 @@ const archotype = (id) => {
       }
 
       loadType();
-      document.getElementById("tooltip").append(toolSearch, toolContent);
+      document.getElementById("tooltip").append( toolContent);
     })
     .catch((error) => {
       console.log(error);

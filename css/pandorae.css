@@ -461,6 +461,8 @@ h1 {
   border-left: 1px solid gray;
   pointer-events: all;
   overflow-y: scroll;
+  overflow-x: hidden;
+  word-break: break-all;
 }
 
 li {
