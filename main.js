@@ -710,8 +710,9 @@ ipcMain.on("openPath", async (event, path) => {
 //
 // The point of this section is to keep the
 // Problematic Paper Screener (PPS) data up to date
-// both automatically (once every eleven days at least)
-// and on request (forced update).
+// on request (forced update).
+
+// The automatic update has been deactivated for now.
 
 // ppsFile should be the most recent file available
 let ppsFile = "";
