@@ -2067,14 +2067,13 @@ const queryBnFSolr = (but) => {
         queryContent +
         "&rows=0&sort=crawl_date%20desc&group=true&group.field=url" +
         "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
-        "&rows=0&sort=score+desc&group.ngroups=true&facet.field=collections"+
+        "&rows=0&sort=score+desc&group.ngroups=true&facet.field=collections" +
         "&facet.field=domain&facet.limit=10";
 
-        // logging the request
-         ipcRenderer.send("console-logs",`Sending request: ${query}` );
+      // logging the request
+      ipcRenderer.send("console-logs", `Sending request: ${query}`);
     }
   }
-
 
   // This is an arbitrary document limit hardcoded for alpha/beta testing
   // purposes. Ideally, this limit should be echoed by the host system, not
@@ -2087,8 +2086,6 @@ const queryBnFSolr = (but) => {
       let numFound = r.grouped.url.ngroups;
 
       let byCollection = r.facet_counts.facet_fields;
-
-     
 
       solrbnfcount[queryContent] = {
         count: numFound,
@@ -2112,28 +2109,25 @@ const queryBnFSolr = (but) => {
           parseSolrFacetFields(byCollection.collections)
         );
 
-   
-
-        const domainList = parseSolrFacetFields(byCollection.domain)
+        const domainList = parseSolrFacetFields(byCollection.domain);
 
         const domainDiv = document.createElement("div");
 
-        domainDiv.innerHTML="<strong>Captures found for the top 10 domains:</strong><br>"
+        domainDiv.innerHTML =
+          "<strong>Captures found for the top 10 domains:</strong><br>";
 
-         domainList.forEach(dom=>{
+        domainList.forEach((dom) => {
+          domainDiv.innerHTML += `${dom.key} - ${dom.value}</br>`;
+        });
 
-          domainDiv.innerHTML+=`${dom.key} - ${dom.value}</br>` 
-
-         })
-
-        previewer.append(yearChart, collectionChart,domainDiv);
+        previewer.append(yearChart, collectionChart, domainDiv);
       } else if (numFound >= document_limit) {
         previewer.innerHTML = `You cannot request more than ${document_limit} documents.`;
       }
     })
     .catch((e) => {
       console.log(e);
-       ipcRenderer.send("console-logs",`Solr error: ${JSON.stringify(e)}` );
+      ipcRenderer.send("console-logs", `Solr error: ${JSON.stringify(e)}`);
       previewer.innerHTML = `<br><p>Error - do you have a missing argument?</p> `;
     });
 };
@@ -2638,18 +2632,29 @@ const wosBasicRetriever = () => {
 
 //========== PROBLEMATIC PAPER SCREENER ==========
 
+// The compute function should probably be moved to chaeros.
 const computePPS = () => {
   const list = document.getElementById("pubPeerUserList").value.split(",");
 
   const PPSdataMap = {};
+
+  let count = 0;
 
   ipcRenderer.invoke("getPPS", true).then((ppsFile) => {
     fs.createReadStream(ppsFile) // Read the flatfile dataset provided by the user
       .pipe(csv()) // pipe buffers to csv parser
       .on("data", (data) => {
         const users = data.Pubpeerusers.split(",");
-        data.users = users;
-        users.forEach((dataUser) => {
+        data.users = [];
+
+        users.forEach((u) => data.users.push(u.trim()));
+
+        if (count < 10 && users.length > 1) {
+          console.log(data.users);
+          count++;
+        }
+
+        data.users.forEach((dataUser) => {
           list.forEach((listUser) => {
             if (dataUser === listUser) {
               PPSdataMap[data.Doi] = data;
@@ -2665,18 +2670,27 @@ const computePPS = () => {
   });
 };
 
-const updatePPSDate = (date) =>
-  (document.getElementById(
-    "pps-last-updated"
-  ).innerText = `The PPS list available to your instance of PANDORÆ was downloaded on ${new Date(
-    date
-  ).toLocaleString()}.`);
+const updatePPSDate = (date) => {
+  if (date > 0) {
+    document.getElementById(
+      "pps-last-updated"
+    ).innerText = `The PPS list available to your instance of PANDORÆ was downloaded on ${new Date(
+      date
+    ).toLocaleString()}.`;
+  } else {
+    document.getElementById("pps-last-updated").innerText =
+      "No PPS list found. Please click below to download the list.";
 
+    document.getElementById("forceUpdatePPS").innerText = "Download PPS list";
+  }
+};
 const forceUpdatePPS = () => {
   ipcRenderer.send("forceUpdatePPS", true);
 
   document.getElementById("pps-last-updated").innerText =
     "You have just triggered a forced update. Please wait until the update is finished.";
+
+  ipcRenderer.send("window-manager", "closeWindow", "flux");
 };
 
 ipcRenderer.on("forcedPPSupdateFinished", () => {
