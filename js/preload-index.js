@@ -11001,10 +11001,14 @@ const normalCore = () => {
 
     camera.zoom = zoomFactor;
 
+    const scale = window.devicePixelRatio;
+
+    const ratio = (scale>1)?1.6:4; 
+
     var textureSize = Math.pow(
       2,
       Math.round(
-        Math.log(parseInt(document.body.offsetWidth / 1.6)) / Math.log(2)
+        Math.log(parseInt(document.body.offsetWidth / ratio)) / Math.log(2)
       )
     );
 
