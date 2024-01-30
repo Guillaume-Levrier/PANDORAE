@@ -2665,6 +2665,7 @@ const computePPS = () => {
       .on("end", () => {
         const PPSdata = Object.keys(PPSdataMap);
         console.log(PPSdata);
+        console.log(PPSdataMap);
         // next step here is to send to crossref
       });
   });

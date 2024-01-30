@@ -10762,6 +10762,7 @@ THREE.MapControls = function (object, domElement) {
 THREE.MapControls.prototype = Object.create(THREE.EventDispatcher.prototype);
 THREE.MapControls.prototype.constructor = THREE.MapControls;
 const normalCore = () => {
+  /* 
   const {
     DepthOfFieldEffect,
     EffectComposer,
@@ -10769,7 +10770,7 @@ const normalCore = () => {
     RenderPass,
   } = require("postprocessing");
 
-  var composer;
+//  var composer;
 
   const depthOfFieldEffect = new DepthOfFieldEffect(camera, {
     focusDistance: 0.998,
@@ -10782,7 +10783,7 @@ const normalCore = () => {
   effectPass.renderToScreen = true;
 
   const clock = new THREE.Clock();
-
+ */
   // SHADERLOADER
   var ShaderLoader = function () {
     ShaderLoader.get = function (id) {
@@ -11078,10 +11079,10 @@ const normalCore = () => {
     FBO.init(width, height, renderer, simulationShader, renderShader);
     scene.add(FBO.particles);
 
-    composer = new EffectComposer(renderer);
+    //composer = new EffectComposer(renderer);
 
-    composer.addPass(new RenderPass(scene, camera));
-    composer.addPass(effectPass);
+    //composer.addPass(new RenderPass(scene, camera));
+    //composer.addPass(effectPass);
 
     window.addEventListener("resize", onResize);
     // onResize();
@@ -11143,8 +11144,8 @@ const normalCore = () => {
       //update simulation
       FBO.update();
       //render the particles at the new location
-      //renderer.render( scene, camera );
-      composer.render(clock.getDelta());
+      renderer.render(scene, camera);
+      //composer.render(clock.getDelta());
     }
   }
 };
