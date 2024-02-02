@@ -275,6 +275,17 @@ const powerValve = (fluxAction, item) => {
   switch (
     fluxAction // According to function name ...
   ) {
+    case "computePPS":
+      const list = document.getElementById("pubPeerUserList").value.split(",");
+      fluxArgs.ppUserlist = [];
+
+      list.forEach((u) => fluxArgs.ppUserlist.push(u.trim()));
+
+      fluxArgs.userMail = document.getElementById("userMailInput").value;
+
+      message = "Computing PPS requests";
+
+      break;
     case "wosBuild":
       fluxArgs.wosquery = wosReq;
       fluxArgs.user = document.getElementById("userNameInput").value;
@@ -2632,45 +2643,6 @@ const wosBasicRetriever = () => {
 
 //========== PROBLEMATIC PAPER SCREENER ==========
 
-// The compute function should probably be moved to chaeros.
-const computePPS = () => {
-  const list = document.getElementById("pubPeerUserList").value.split(",");
-
-  const PPSdataMap = {};
-
-  let count = 0;
-
-  ipcRenderer.invoke("getPPS", true).then((ppsFile) => {
-    fs.createReadStream(ppsFile) // Read the flatfile dataset provided by the user
-      .pipe(csv()) // pipe buffers to csv parser
-      .on("data", (data) => {
-        const users = data.Pubpeerusers.split(",");
-        data.users = [];
-
-        users.forEach((u) => data.users.push(u.trim()));
-
-        if (count < 10 && users.length > 1) {
-          console.log(data.users);
-          count++;
-        }
-
-        data.users.forEach((dataUser) => {
-          list.forEach((listUser) => {
-            if (dataUser === listUser) {
-              PPSdataMap[data.Doi] = data;
-            }
-          });
-        });
-      })
-      .on("end", () => {
-        const PPSdata = Object.keys(PPSdataMap);
-        console.log(PPSdata);
-        console.log(PPSdataMap);
-        // next step here is to send to crossref
-      });
-  });
-};
-
 const updatePPSDate = (date) => {
   if (date > 0) {
     document.getElementById(
@@ -2869,7 +2841,7 @@ window.addEventListener("load", (event) => {
       func: "datasetDisplay",
       arg: ["hyphe-dataset-list", "hyphe"],
     },
-    { id: "computePPS", func: "computePPS" },
+
     {
       id: "systemList",
       func: "datasetDisplay",
@@ -2934,6 +2906,12 @@ window.addEventListener("load", (event) => {
       func: "powerValve",
       arg: "zoteroCollectionBuilder",
     },
+    {
+      id: "computePPS",
+      func: "powerValve",
+      arg: "computePPS",
+    },
+
     { id: "zotcolret", func: "zoteroCollectionRetriever" },
     { id: "zotitret", func: "powerValve", arg: "zoteroItemsRetriever" },
     {
@@ -3311,10 +3289,6 @@ window.addEventListener("load", (event) => {
 
       case "hypheCheck":
         hypheCheck(document.getElementById("hypheaddress").value);
-        break;
-
-      case "computePPS":
-        computePPS();
         break;
 
       case "endpointConnector":
