@@ -3053,9 +3053,9 @@ doc.content.substring(match.index+target.length,match.index + 150)
 
                   toolSearch.addEventListener("change",searchTerm)
                   toolContent.innerHTML = "";
-
+console.log(doc)
                   if (doc.hasOwnProperty("url")){
-                   content.innerHTML += `<div style = "font-weight:bold" > ${url}</div ><div>${doc["url"]}</div><br>`
+                   content.innerHTML += `<div style = "font-weight:bold" >url</div ><div>${doc["url"]}</div><br>`
 }
   for (const key in doc) {
                     content.innerHTML += `<div style = "font-weight:bold" > ${key}</div ><div>${doc[key]}</div><br>`;
