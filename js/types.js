@@ -44,7 +44,7 @@ const dataDownload = (data) => {
         { defaultPath: datasetName + ".json" },
         JSON.stringify(data)
       )
-      .then((res) => { });
+      .then((res) => {});
   });
 };
 
@@ -580,18 +580,18 @@ const multiFormat = (date) =>
   (d3.timeSecond(date) < date
     ? formatMillisecond
     : d3.timeMinute(date) < date
-      ? formatSecond
-      : d3.timeHour(date) < date
-        ? formatMinute
-        : d3.timeDay(date) < date
-          ? formatHour
-          : d3.timeMonth(date) < date
-            ? d3.timeWeek(date) < date
-              ? formatDay
-              : formatWeek
-            : d3.timeYear(date) < date
-              ? formatMonth
-              : formatYear)(date);
+    ? formatSecond
+    : d3.timeHour(date) < date
+    ? formatMinute
+    : d3.timeDay(date) < date
+    ? formatHour
+    : d3.timeMonth(date) < date
+    ? d3.timeWeek(date) < date
+      ? formatDay
+      : formatWeek
+    : d3.timeYear(date) < date
+    ? formatMonth
+    : formatYear)(date);
 
 // ========= ARCHOTYPE =========
 const archotype = (id) => {
@@ -628,7 +628,7 @@ const archotype = (id) => {
   var criteriaList = [];
   var currentCriteria = [];
 
-  let resolver, arkViewer
+  let resolver, arkViewer;
 
   ipcRenderer.invoke("checkflux", true).then((result) => {
     availability = JSON.parse(result);
@@ -640,7 +640,7 @@ const archotype = (id) => {
             availability.dnsLocalServiceList[service].url +
             ":" +
             availability.dnsLocalServiceList[service].port;
-         
+
           arkViewer = availability.dnsLocalServiceList[service].arkViewer;
 
           break;
@@ -693,6 +693,11 @@ const archotype = (id) => {
           });
         }
 
+        // add direction to links too !
+
+        // link type 1 - describe here
+        //
+
         links.push({
           source: elem.id,
           target: d["container-title"],
@@ -715,11 +720,16 @@ const archotype = (id) => {
             getPosition(source, "/", 3)
           );
 
+          // add descriptions of links here
+          //
+
           if (nodemap.hasOwnProperty(source)) {
             thislinks.forEach((target) => {
               const domain = target.substring(7, getPosition(target, "/", 3));
 
               if (nodemap.hasOwnProperty(target)) {
+                // link type 2 - orange
+
                 links.push({ source, target, color: "darkred" });
               } else if (
                 domainMap.hasOwnProperty(domain) &&
@@ -727,6 +737,8 @@ const archotype = (id) => {
                 domain.indexOf(sourceDomain) === -1 &&
                 sourceDomain.indexOf(domain) === -1
               ) {
+                // link type 3 - orange
+
                 links.push({ source, target: domain, color: "orange" });
               }
             });
@@ -789,126 +801,139 @@ const archotype = (id) => {
 
       node.style("cursor", (d) => (d.domain ? "move" : "pointer"));
 
-      
-
       const toolContent = document.createElement("div");
 
-      let previousCircle=0; 
-      let previousSearch=0;
+      let previousCircle = 0;
+      let previousSearch = 0;
 
       if (resolver) {
         node.on("click", (e, d) => {
+          const circle = d3.select(e.target);
 
-          const circle = d3.select(e.target)
-          
-           circle.attr("stroke-width", 3).attr("stroke", "#FF0F0F")
+          circle.attr("stroke-width", 3).attr("stroke", "#FF0F0F");
 
-          if(previousCircle){
-             previousCircle.attr("stroke-width", 3).attr("stroke", "#0FFF50")
-          } 
+          if (previousCircle) {
+            previousCircle.attr("stroke-width", 3).attr("stroke", "#0FFF50");
+          }
 
-           previousCircle = circle
+          previousCircle = circle;
 
           d.domain
-            ?  0
+            ? 0
             : fetch(
-              `http://${resolver}/solr/${documentMap[d.id].enrichment.solrCollection}/select?q=url:${JSON.stringify(
-                d.id.replaceAll("&", "%26")
-              )}`
-            )
-              .then((r) => r.json())
-              .then((r) => {
-                 
-                toolContent.innerHTML =
-                  JSON.stringify(r);
+                `http://${resolver}/solr/${
+                  documentMap[d.id].enrichment.solrCollection
+                }/select?q=url:${JSON.stringify(d.id.replaceAll("&", "%26"))}`
+              )
+                .then((r) => r.json())
+                .then((r) => {
+                  toolContent.innerHTML = JSON.stringify(r);
 
-                if (r.response.numFound > 0) {
-                  const doc = r.response.docs[r.response.docs.length - 1];
+                  if (r.response.numFound > 0) {
+                    const doc = r.response.docs[r.response.docs.length - 1];
 
-                  const accessButton = document.createElement("button");
-                  accessButton.innerText = "Ouvrir dans les archives";
-                  accessButton.style = "margin:10px;";
+                    const accessButton = document.createElement("button");
+                    accessButton.innerText = "Ouvrir dans les archives";
+                    accessButton.style = "margin:10px;";
 
-                  const archtarget = `${arkViewer}/${doc.wayback_date}/${doc.url}`;
-                  accessButton.addEventListener("click", () =>
-                    shell.openExternal(archtarget)
-                  );
+                    const archtarget = `${arkViewer}/${doc.wayback_date}/${doc.url}`;
+                    accessButton.addEventListener("click", () =>
+                      shell.openExternal(archtarget)
+                    );
 
-                  const content = document.createElement("div");
+                    const content = document.createElement("div");
 
-                  
+                    const toolSearch = document.createElement("input");
+                    toolSearch.style =
+                      "padding:5px;border-bottom:1px solid #141414";
+                    toolSearch.type = "text";
+                    toolSearch.placeholder = "Search term or expression";
 
-                  const toolSearch = document.createElement("input");
-toolSearch.style="padding:5px;border-bottom:1px solid #141414"; 
-      toolSearch.type = "text";
-      toolSearch.placeholder = "Search term or expression";
+                    toolSearch.addEventListener("focusin", () => (keylock = 1));
+                    toolSearch.addEventListener(
+                      "focusout",
+                      () => (keylock = 0)
+                    );
 
-      toolSearch.addEventListener("focusin",()=>keylock=1)
-      toolSearch.addEventListener("focusout",()=>keylock=0)
+                    const toolResult = document.createElement("div");
 
- const toolResult = document.createElement("div");
+                    const searchTerm = () => {
+                      toolResult.innerHTML =
+                        "Fragments from the content of the captured page:<br><br>";
+                      var sliced = "";
 
- const searchTerm=()=>{
- toolResult.innerHTML="Fragments from the content of the captured page:<br><br>";
-                    var sliced = "";
+                      const target = toolSearch.value;
+                      previousSearch = target;
 
-                  const target = toolSearch.value;
-                  previousSearch=target;
-                  
-                  if (target.length > 2) {
-                    var re = new RegExp(target, "gi"),
-                      str = doc.content;
-                    while ((match = re.exec(str)) != null) {
-                     // var extrait = doc.content.substring(match.index - 150, match.index + 150)
-                      //.replace(target, "<mark>" + target + "</mark>")
-                      
-const extrait = doc.content.substring(match.index - 150,match.index)+
-"<mark>"+doc.content.substring(match.index,match.index+target.length)+"</mark>"+
-doc.content.substring(match.index+target.length,match.index + 150)
+                      if (target.length > 2) {
+                        var re = new RegExp(target, "gi"),
+                          str = doc.content;
+                        while ((match = re.exec(str)) != null) {
+                          // var extrait = doc.content.substring(match.index - 150, match.index + 150)
+                          //.replace(target, "<mark>" + target + "</mark>")
 
-                      sliced += extrait + "<br><hr><br>";
+                          const extrait =
+                            doc.content.substring(
+                              match.index - 150,
+                              match.index
+                            ) +
+                            "<mark>" +
+                            doc.content.substring(
+                              match.index,
+                              match.index + target.length
+                            ) +
+                            "</mark>" +
+                            doc.content.substring(
+                              match.index + target.length,
+                              match.index + 150
+                            );
+
+                          sliced += extrait + "<br><hr><br>";
+                        }
+
+                        toolResult.innerHTML =
+                          "<div style = 'border:1px solid black; padding:5px'>" +
+                          sliced +
+                          "</div><br><hr><br>";
+                      }
+                    };
+
+                    if (previousSearch) {
+                      toolSearch.value = previousSearch;
+                      searchTerm();
                     }
 
+                    toolSearch.addEventListener("change", searchTerm);
+                    toolContent.innerHTML = "";
 
-                    toolResult.innerHTML = "<div style = 'border:1px solid black; padding:5px'>" + sliced + "</div><br><hr><br>"
+                    if (doc.hasOwnProperty("url")) {
+                      content.innerHTML += `<div style = "font-weight:bold" >url</div ><div>${doc["url"]}</div><br>`;
+                    }
+                    for (const key in doc) {
+                      content.innerHTML += `<div style = "font-weight:bold" > ${key}</div ><div>${doc[key]}</div><br>`;
+                    }
+                    toolContent.append(
+                      toolSearch,
+                      accessButton,
+                      toolResult,
+                      content
+                    );
+                  } else {
+                    toolContent.innerHTML = "not found";
                   }
-
-
- }
- 
- if(previousSearch){
-  toolSearch.value=previousSearch;
-          searchTerm();
-      } 
-
-                  toolSearch.addEventListener("change",searchTerm)
-                  toolContent.innerHTML = "";
-
-                  if (doc.hasOwnProperty("url")){
-                   content.innerHTML += `<div style = "font-weight:bold" >url</div ><div>${doc["url"]}</div><br>`
-}
-  for (const key in doc) {
-                    content.innerHTML += `<div style = "font-weight:bold" > ${key}</div ><div>${doc[key]}</div><br>`;
-                  }
-                  toolContent
-                    .append(toolSearch,accessButton,toolResult, content);
-                } else {
-                  toolContent.innerHTML = "not found";
-                }
-              })
-        }
-        );
+                });
+        });
       } else {
         node.on("click", (e, d) => {
           const circle = d3.select(e.target);
 
-          circle.attr("stroke-width", 3).attr("stroke", "#FF0F0F")
+          circle.attr("stroke-width", 3).attr("stroke", "#FF0F0F");
 
-          if(previousCircle){
-             previousCircle.attr("stroke-width", 3).attr("stroke", "#0FFF50")
-          } 
+          if (previousCircle) {
+            previousCircle.attr("stroke-width", 3).attr("stroke", "#0FFF50");
+          }
 
-           previousCircle = circle
+          previousCircle = circle;
 
           toolContent.innerHTML = "";
           for (const key in documentMap[d.id]) {
@@ -940,18 +965,15 @@ doc.content.substring(match.index+target.length,match.index + 150)
           .on("end", dragended)
       );
 
-    const displayDomainData= (d) => {
-    
-        toolContent.innerHTML="Domain: "+d.name;
-       
-      }  
+      const displayDomainData = (d) => {
+        toolContent.innerHTML = "Domain: " + d.name;
+      };
 
       // Reheat the simulation when drag starts, and fix the subject position.
       function dragstarted(event) {
         if (event.subject.domain) {
           displayDomainData(event.subject);
 
-          
           if (!event.active) simulation.alphaTarget(0.3).restart();
           event.subject.fx = event.subject.x;
           event.subject.fy = event.subject.y;
@@ -992,7 +1014,7 @@ doc.content.substring(match.index+target.length,match.index + 150)
       }
 
       loadType();
-      document.getElementById("tooltip").append( toolContent);
+      document.getElementById("tooltip").append(toolContent);
     })
     .catch((error) => {
       console.log(error);
@@ -1594,46 +1616,46 @@ const filotype = (id) => {
         .on("click", (event, d) => {
           d3.select("#tooltip").html(
             '<p class="legend"><strong><a target="_blank" href="https://mobile.twitter.com/' +
-            d.data.user.name +
-            '">' +
-            d.data.user.name +
-            '</a></strong> <br/><div style="border:1px solid black;"><p>' +
-            d.data.full_text +
-            "</p></div><br><br> Language: " +
-            d.data.user.lang +
-            "<br>Mentions: " +
-            d.data.mentions +
-            "<br>Date: " +
-            d.data.created_at +
-            "<br> Favorite count: " +
-            d.data.favorite_count +
-            "<br>Retweet count: " +
-            d.data.retweet_count +
-            "<br> Source: " +
-            d.data.source +
-            "<br>Tweet id: <a target='_blank' href='https://mobile.twitter.com/" +
-            d.data.user.screen_name +
-            "/status/" +
-            d.data.id_str +
-            "'>" +
-            d.data.id_str +
-            "</a>" +
-            "<br><br><strong>User info</strong><br><img src='" +
-            d.data.user.profile_image_url_https +
-            "' max-width='300'><br><br>Account creation date: " +
-            d.data.user.created_at +
-            "<br> Account name: " +
-            d.data.user.screen_name +
-            "<br> User id: " +
-            d.data.user.id +
-            "<br> User description: " +
-            d.data.user.description +
-            "<br> User follower count: " +
-            d.data.user.followers_count +
-            "<br> User friend count: " +
-            d.data.user.friends_count +
-            "<br> User tweet count: " +
-            d.data.user.statuses_count
+              d.data.user.name +
+              '">' +
+              d.data.user.name +
+              '</a></strong> <br/><div style="border:1px solid black;"><p>' +
+              d.data.full_text +
+              "</p></div><br><br> Language: " +
+              d.data.user.lang +
+              "<br>Mentions: " +
+              d.data.mentions +
+              "<br>Date: " +
+              d.data.created_at +
+              "<br> Favorite count: " +
+              d.data.favorite_count +
+              "<br>Retweet count: " +
+              d.data.retweet_count +
+              "<br> Source: " +
+              d.data.source +
+              "<br>Tweet id: <a target='_blank' href='https://mobile.twitter.com/" +
+              d.data.user.screen_name +
+              "/status/" +
+              d.data.id_str +
+              "'>" +
+              d.data.id_str +
+              "</a>" +
+              "<br><br><strong>User info</strong><br><img src='" +
+              d.data.user.profile_image_url_https +
+              "' max-width='300'><br><br>Account creation date: " +
+              d.data.user.created_at +
+              "<br> Account name: " +
+              d.data.user.screen_name +
+              "<br> User id: " +
+              d.data.user.id +
+              "<br> User description: " +
+              d.data.user.description +
+              "<br> User follower count: " +
+              d.data.user.followers_count +
+              "<br> User friend count: " +
+              d.data.user.friends_count +
+              "<br> User tweet count: " +
+              d.data.user.statuses_count
           );
         });
 
@@ -3067,12 +3089,12 @@ const chronotype = (id) => {
 
         dateAmount.forEach(
           (d) =>
-          (radialVal[d] = {
-            key: d,
-            date: parseTime(d),
-            value: 0,
-            zone: zoneCount,
-          })
+            (radialVal[d] = {
+              key: d,
+              date: parseTime(d),
+              value: 0,
+              zone: zoneCount,
+            })
         );
 
         cluster.forEach((val, key) => {
@@ -3560,10 +3582,10 @@ const chronotype = (id) => {
             })
             .text(
               currentBrush[0].getDate() +
-              "/" +
-              parseInt(currentBrush[0].getMonth() + 1) +
-              "/" +
-              currentBrush[0].getFullYear()
+                "/" +
+                parseInt(currentBrush[0].getMonth() + 1) +
+                "/" +
+                currentBrush[0].getFullYear()
             );
 
           brushLegendW
@@ -3584,10 +3606,10 @@ const chronotype = (id) => {
             })
             .text(
               currentBrush[1].getDate() +
-              "/" +
-              parseInt(currentBrush[1].getMonth() + 1) +
-              "/" +
-              currentBrush[1].getFullYear()
+                "/" +
+                parseInt(currentBrush[1].getMonth() + 1) +
+                "/" +
+                currentBrush[1].getFullYear()
             );
         }
 
@@ -5502,67 +5524,67 @@ const gazouillotype = (id) => {
                 });
               d3.select("#tooltip").html(
                 '<p class="legend"><strong><a target="_blank" href="https://mobile.twitter.com/' +
-                d.from_user_name +
-                '">' +
-                d.from_user_name +
-                '</a></strong> <br/><div style="border:1px solid black;"><p>' +
-                d.text +
-                "</p></div><br><br> Language: " +
-                d.lang +
-                "<br>Date: " +
-                d.date +
-                "<br> Favorite count: " +
-                d.favorite_count +
-                "<br>Reply count: " +
-                d.reply_count +
-                "<br>Retweet count: " +
-                d.retweet_count +
-                "<br>Links: <a target='_blank' href='" +
-                d.links +
-                "'>" +
-                d.links +
-                "</a><br> Hashtags: " +
-                d.hashtags +
-                "<br> Mentionned user names: " +
-                d.mentionned_user_names +
-                "<br> Source: " +
-                d.source_name +
-                "<br>Tweet id: <a target='_blank' href='https://mobile.twitter.com/" +
-                d.from_user_name +
-                "/status/" +
-                d.id +
-                "'>" +
-                d.id +
-                "</a><br> Possibly sensitive: " +
-                d.possibly_sensitive +
-                "<br><br> Embeded media<br><img src='" +
-                d.medias_urls +
-                "' width='300' ><br><br><strong>Location</strong><br/>City: " +
-                d.location +
-                "<br> Latitude:" +
-                d.lat +
-                "<br>Longitude: " +
-                d.lng +
-                "<br><br><strong>User info</strong><br><img src='" +
-                d.from_user_profile_image_url +
-                "' max-width='300'><br><br>Account creation date: " +
-                d.from_user_created_at +
-                "<br> Account name: " +
-                d.from_user_name +
-                "<br> User id: " +
-                d.from_user_id +
-                "<br> User description: " +
-                d.from_user_description +
-                "<br> User follower count: " +
-                d.from_user_followercount +
-                "<br> User friend count: " +
-                d.from_user_friendcount +
-                "<br> User tweet count: " +
-                d.from_user_tweetcount +
-                "" +
-                "<br><br>" +
-                requestContent +
-                "<br><br><br><br><br><br><br><br></p>"
+                  d.from_user_name +
+                  '">' +
+                  d.from_user_name +
+                  '</a></strong> <br/><div style="border:1px solid black;"><p>' +
+                  d.text +
+                  "</p></div><br><br> Language: " +
+                  d.lang +
+                  "<br>Date: " +
+                  d.date +
+                  "<br> Favorite count: " +
+                  d.favorite_count +
+                  "<br>Reply count: " +
+                  d.reply_count +
+                  "<br>Retweet count: " +
+                  d.retweet_count +
+                  "<br>Links: <a target='_blank' href='" +
+                  d.links +
+                  "'>" +
+                  d.links +
+                  "</a><br> Hashtags: " +
+                  d.hashtags +
+                  "<br> Mentionned user names: " +
+                  d.mentionned_user_names +
+                  "<br> Source: " +
+                  d.source_name +
+                  "<br>Tweet id: <a target='_blank' href='https://mobile.twitter.com/" +
+                  d.from_user_name +
+                  "/status/" +
+                  d.id +
+                  "'>" +
+                  d.id +
+                  "</a><br> Possibly sensitive: " +
+                  d.possibly_sensitive +
+                  "<br><br> Embeded media<br><img src='" +
+                  d.medias_urls +
+                  "' width='300' ><br><br><strong>Location</strong><br/>City: " +
+                  d.location +
+                  "<br> Latitude:" +
+                  d.lat +
+                  "<br>Longitude: " +
+                  d.lng +
+                  "<br><br><strong>User info</strong><br><img src='" +
+                  d.from_user_profile_image_url +
+                  "' max-width='300'><br><br>Account creation date: " +
+                  d.from_user_created_at +
+                  "<br> Account name: " +
+                  d.from_user_name +
+                  "<br> User id: " +
+                  d.from_user_id +
+                  "<br> User description: " +
+                  d.from_user_description +
+                  "<br> User follower count: " +
+                  d.from_user_followercount +
+                  "<br> User friend count: " +
+                  d.from_user_friendcount +
+                  "<br> User tweet count: " +
+                  d.from_user_tweetcount +
+                  "" +
+                  "<br><br>" +
+                  requestContent +
+                  "<br><br><br><br><br><br><br><br></p>"
               );
             });
 
@@ -5873,7 +5895,7 @@ const gazouillotype = (id) => {
 
               midDate = new Date(
                 brushContent[0].getTime() +
-                (brushContent[1].getTime() - brushContent[0].getTime()) / 2
+                  (brushContent[1].getTime() - brushContent[0].getTime()) / 2
               );
 
               // TO DO
@@ -6362,52 +6384,52 @@ const pharmacotype = (id) => {
 
           d3.select("#tooltip").html(
             "<h2>" +
-            idMod.BriefTitle +
-            "</h2>" +
-            "<h3>" +
-            idMod.Organization.OrgFullName +
-            " - " +
-            idMod.Organization.OrgClass.toLowerCase() +
-            "</h3>" +
-            "<br>" +
-            " <input type='button' style='cursor:pointer' onclick='shell.openExternal(" +
-            JSON.stringify(
-              "https://clinicaltrials.gov/ct2/show/" + idMod.NCTId
-            ) +
-            ")' value='Open on ClinicalTrials.gov'></input><br><br>" +
-            "<strong>Full title:</strong> " +
-            idMod.OfficialTitle +
-            "<br>" +
-            "<strong>NCTId:</strong> " +
-            idMod.NCTId +
-            "<br>" +
-            "<strong>Org Id:</strong> " +
-            idMod.OrgStudyIdInfo.OrgStudyId +
-            "<br>" +
-            "<br>" +
-            "<h3>Status</h3>" +
-            "<strong>Overall status:</strong> " +
-            statMod.OverallStatus +
-            "<br>" +
-            "<strong>Last verified:</strong> " +
-            statMod.StatusVerifiedDate +
-            "<br>" +
-            "<strong>Expanded access:</strong> " +
-            statMod.ExpandedAccessInfo.HasExpandedAccess +
-            "<br>" +
-            "<strong>FDA regulated:</strong> Drug [" +
-            overSight.IsFDARegulatedDrug +
-            "] - Device [" +
-            overSight.IsFDARegulatedDevice +
-            "]<br>" +
-            "<h3>Description</h3>" +
-            "<strong>Brief summary:</strong> " +
-            descMod.BriefSummary +
-            "<br>" +
-            "<br>" +
-            "<strong>Detailed description:</strong> " +
-            descMod.DetailedDescription +
-            "<br>"
+              idMod.BriefTitle +
+              "</h2>" +
+              "<h3>" +
+              idMod.Organization.OrgFullName +
+              " - " +
+              idMod.Organization.OrgClass.toLowerCase() +
+              "</h3>" +
+              "<br>" +
+              " <input type='button' style='cursor:pointer' onclick='shell.openExternal(" +
+              JSON.stringify(
+                "https://clinicaltrials.gov/ct2/show/" + idMod.NCTId
+              ) +
+              ")' value='Open on ClinicalTrials.gov'></input><br><br>" +
+              "<strong>Full title:</strong> " +
+              idMod.OfficialTitle +
+              "<br>" +
+              "<strong>NCTId:</strong> " +
+              idMod.NCTId +
+              "<br>" +
+              "<strong>Org Id:</strong> " +
+              idMod.OrgStudyIdInfo.OrgStudyId +
+              "<br>" +
+              "<br>" +
+              "<h3>Status</h3>" +
+              "<strong>Overall status:</strong> " +
+              statMod.OverallStatus +
+              "<br>" +
+              "<strong>Last verified:</strong> " +
+              statMod.StatusVerifiedDate +
+              "<br>" +
+              "<strong>Expanded access:</strong> " +
+              statMod.ExpandedAccessInfo.HasExpandedAccess +
+              "<br>" +
+              "<strong>FDA regulated:</strong> Drug [" +
+              overSight.IsFDARegulatedDrug +
+              "] - Device [" +
+              overSight.IsFDARegulatedDevice +
+              "]<br>" +
+              "<h3>Description</h3>" +
+              "<strong>Brief summary:</strong> " +
+              descMod.BriefSummary +
+              "<br>" +
+              "<br>" +
+              "<strong>Detailed description:</strong> " +
+              descMod.DetailedDescription +
+              "<br>"
           );
 
           if (
