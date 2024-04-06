@@ -936,43 +936,67 @@ const archotype = (id) => {
         toolContent.append(toolSearch, accessButton, toolResult, content);
       };
 
-      // This
+      // This displays all available captures of that page on a timeline and loads
+      // a selected capture on click
+
+      var captureTimeline;
+
       const displayOtherCaptures = (docs) => {
+
         //purge previous timeline
-        document.getElementById("captureTimeline").remove();
+        if (captureTimeline) { 
+          captureTimeline.remove();
+          }
 
         //create new
-        const captureTimeline = svg.append("g").attr("id", "captureTimeline");
+         captureTimeline = svg.append("g")
+                              .attr("id", "captureTimeline")
+                              .attr("transform",`translate(${width-toolWidth},${height*0.1})`)
+
+          //background rect
+          captureTimeline.append("rect")
+            .attr("height",height*0.84)
+            .attr("rx",10)
+            .attr("width",200)
+            .attr("y",-height*0.02)
+            .attr("x",-80)
+            .attr("stroke","gray")
+            .attr("stroke-width",0.5)
+            .attr("fill","rgba(255,255,255,0.8)")
 
         const data = [];
-        const dateHashMap = {};
+        var dateMap = {};
 
         docs.forEach((d) => {
-          const document = {};
-          document.date = new Date(d.wayback_date);
-          document.id = d.id;
-          const day = JSON.stringify(d.wayback_date).substring(0, 7);
+          const capture = {};
+          capture.date = new Date(d.crawl_date);
+          capture.id = d.id;
+          const day = JSON.stringify(d.wayback_date).substring(0, 8);
 
-          if (!dateHashMap.hasOwnProperty(day)) {
-            dateHashMap[day] = 0;
+          capture.metadata=d;
+
+          if (!dateMap.hasOwnProperty(day)) {
+            dateMap[day] = 0;
           }
-          dateHashMap++;
-          document.count++;
 
-          data.push(document);
+          dateMap[day]++;
+
+          capture.count=dateMap[day]
+
+          data.push(capture);
         });
 
         const y = d3
           .scaleUtc()
-          .domain(d3.extent(data, (d) => d.date))
+          .domain(d3.extent(data, (d) => d.date)).nice()
           .range([height * 0.8, 0]);
 
         const x = d3
           .scaleLinear()
-          .domain(d3.extent(data, (d) => d.count))
-          .range([0, 60]);
+          .domain(d3.extent(data, (d) => d.count)).nice()
+          .range([8, 52]);
 
-        captureTimeline.append("g").call(d3.axisLeft(y));
+        captureTimeline.append("g").call(d3.axisLeft(y) .tickFormat( d3.utcFormat("%d / %m / %Y"))    );
 
         captureTimeline
           .append("g")
@@ -981,7 +1005,15 @@ const archotype = (id) => {
           .join("circle")
           .attr("cx", (d) => x(d.count))
           .attr("cy", (d) => y(d.date))
-          .attr("r", 3);
+          .attr("r", 3)
+          .style("cursor","pointer")
+          .on("click",(e, d) => {
+                d3.select(e.target).attr("fill", "green");
+                displayLastCaptureMetadata(d.metadata);
+              });
+
+          captureTimeline.transition().duration(250).attr("transform",`translate(${width-toolWidth-65},${height*0.1})`);
+
       };
 
       if (resolver) {
@@ -1005,7 +1037,6 @@ const archotype = (id) => {
               )
                 .then((r) => r.json())
                 .then((r) => {
-                  console.log(r);
 
                   toolContent.innerHTML = JSON.stringify(r);
 

@@ -2839,10 +2839,10 @@ const archotype = (id) => {
       const nodemap = {};
 
       const domainMap = {};
-      
+
       // divider is here for dev/testing purpose, when the testing machine cannot handle
       // a corpus with too many documents.
-      const divider = 1; 
+      const divider = 1;
 
       const documentMap = {};
 
@@ -2860,7 +2860,6 @@ const archotype = (id) => {
         };
 
         if (!domainMap.hasOwnProperty(d["container-title"])) {
-
           // A domain node doesn't in the dataset exist, it is just a way to group
           // all page captures together, by binding them to their hostname
 
@@ -2874,15 +2873,14 @@ const archotype = (id) => {
         // add direction to links too !
 
         // link type 1 - describe here
-        // A gray link is a link between a domain node 
-        // and a page capture node. 
-        
+        // A gray link is a link between a domain node
+        // and a page capture node.
 
         links.push({
           source: elem.id,
           target: d["container-title"],
           color: "rgba(100,100,100,0.3)",
-          weight:0.5
+          weight: 0.5,
         });
 
         nodes.push(elem);
@@ -2898,74 +2896,68 @@ const archotype = (id) => {
         // these hypertext links the page capture is listed as having
 
         if (pageCaptureHypertextLinks) {
-          
           // d.URL is the complete permalink, with the URL of the hosting service / the timestamp
           // i.e. http://archivemachine.com/20090609015145/http://www.example.com/spip.php?document8683
 
           // sourceURL is d.URL without the hosting service and the timestamp, built as an URL object
-          
+
           const sourceURL = new URL(d.URL.substring(d.URL.lastIndexOf("http")));
 
           // source is the href of the sourceURL object
           // i.e. http://www.example.com/spip.php?document8683
-          const source = sourceURL.href
+          const source = sourceURL.href;
 
           // source host is the website host
           // i.e. www.example.com
-          const sourceHost =source.host||source.hostname 
+          const sourceHost = source.host || source.hostname;
 
           if (nodemap.hasOwnProperty(source)) {
-
-
             // For each hypertext link the document is listed as having, check:
             // 1- if there is a direct link between pages at time of their latest capture (bleu link)
             // 2- if there is a link between this page and another page of the target domain, but which isn't in the corpus
 
             pageCaptureHypertextLinks.forEach((target) => {
-              
               var host;
               try {
-                   host = new URL(target).host||new URL(target).hostname
-              
-                
-           
+                host = new URL(target).host || new URL(target).hostname;
 
-              if (host.length>2){
-                 
+                if (host.length > 2) {
+                  if (nodemap.hasOwnProperty(target)) {
+                    // link type 1 - blue
 
-              if (nodemap.hasOwnProperty(target)) {
-                // link type 1 - blue
+                    links.push({
+                      source,
+                      target,
+                      color: "rgba(100,160,210,0.7)",
+                      weight: 2,
+                    });
+                  } else if (
+                    domainMap.hasOwnProperty(host) &&
+                    host != sourceHost &&
+                    host.indexOf(sourceHost) === -1 &&
+                    sourceHost.indexOf(host) === -1
+                  ) {
+                    // link type 2 - orange
+                    console.log("orange found");
 
-                links.push({ source, target, color: "rgba(100,160,210,0.7)",weight:2 });
-              } else if (
-                domainMap.hasOwnProperty(host) &&
-                host != sourceHost &&
-                host.indexOf(sourceHost) === -1 &&
-                sourceHost.indexOf(host) === -1
-              ) {
-                // link type 2 - orange
-                console.log("orange found")
-                
-                links.push({ source, target: host, color: "rgba(255,140,10,0.5)",weight:2 });
+                    links.push({
+                      source,
+                      target: host,
+                      color: "rgba(255,140,10,0.5)",
+                      weight: 2,
+                    });
+                  }
+                }
+              } catch (error) {
+                ipcRenderer.send(
+                  "console-logs",
+                  "archotype error: url " + target + " is invalid."
+                );
               }
-              }
-               } catch (error) {
-                          //  console.log(error)
-                          // console.log(target)
-                            ipcRenderer.send(
-                    "console-logs",
-                    "archotype error: url " + target + " is invalid."
-                  );
-              }
-
             });
-
-
           }
         }
       }
-
-     
 
       let domainCount = Object.keys(domainMap).length;
 
@@ -3001,7 +2993,7 @@ const archotype = (id) => {
         .selectAll()
         .data(links)
         .join("line")
-        .attr("stroke-width", d=>d.weight)
+        .attr("stroke-width", (d) => d.weight)
         .attr("stroke", (d) => d.color);
 
       // on click, fetch the data from the data source if it exists
@@ -3016,18 +3008,17 @@ const archotype = (id) => {
         .attr("r", 5)
         .attr("fill", (d) => (d.domain ? "orange" : "blue"));
 
-        const nodetitle = g
+      const nodetitle = g
         .append("g")
-        .attr("text-anchor","middle")
-        .attr("dy","-5px")
-        .style("font-size","6px")
-        .style("user-select","none")
-        .style("pointer-events","none")
+        .attr("text-anchor", "middle")
+        .attr("dy", "-5px")
+        .style("font-size", "6px")
+        .style("user-select", "none")
+        .style("pointer-events", "none")
         .selectAll()
         .data(nodes)
         .join("text")
-
-        .text(d=>d.name);
+        .text((d) => d.name);
 
       // here, it is taken as a given that the async race will be won by the
       // invoker given that interrogating dexie is more tedious but this might
@@ -3039,6 +3030,167 @@ const archotype = (id) => {
 
       let previousCircle = 0;
       let previousSearch = 0;
+
+      // This function is called when the user is within an authorized network that
+      // can resolve a web archive page capture. It shows the authorized metadata (potentially, the page's content)
+      // and lets them look for a string in the "content" field (if accessible).
+
+      const displayLastCaptureMetadata = (doc) => {
+        const accessButton = document.createElement("button");
+        accessButton.innerText = "Ouvrir dans les archives";
+        accessButton.style = "margin:10px;";
+
+        const archtarget = `${arkViewer}/${doc.wayback_date}/${doc.url}`;
+        accessButton.addEventListener("click", () =>
+          shell.openExternal(archtarget)
+        );
+
+        const content = document.createElement("div");
+
+        const toolSearch = document.createElement("input");
+        toolSearch.style = "padding:5px;border-bottom:1px solid #141414";
+        toolSearch.type = "text";
+        toolSearch.placeholder = "Search term or expression";
+
+        toolSearch.addEventListener("focusin", () => (keylock = 1));
+        toolSearch.addEventListener("focusout", () => (keylock = 0));
+
+        const toolResult = document.createElement("div");
+
+        const searchTerm = () => {
+          toolResult.innerHTML =
+            "Fragments from the content of the captured page:<br><br>";
+          var sliced = "";
+
+          const target = toolSearch.value;
+          previousSearch = target;
+
+          if (target.length > 2) {
+            var re = new RegExp(target, "gi"),
+              str = doc.content;
+            while ((match = re.exec(str)) != null) {
+              // var extrait = doc.content.substring(match.index - 150, match.index + 150)
+              //.replace(target, "<mark>" + target + "</mark>")
+
+              const extrait =
+                doc.content.substring(match.index - 150, match.index) +
+                "<mark>" +
+                doc.content.substring(
+                  match.index,
+                  match.index + target.length
+                ) +
+                "</mark>" +
+                doc.content.substring(
+                  match.index + target.length,
+                  match.index + 150
+                );
+
+              sliced += extrait + "<br><hr><br>";
+            }
+
+            toolResult.innerHTML =
+              "<div style = 'border:1px solid black; padding:5px'>" +
+              sliced +
+              "</div><br><hr><br>";
+          }
+        };
+
+        if (previousSearch) {
+          toolSearch.value = previousSearch;
+          searchTerm();
+        }
+
+        toolSearch.addEventListener("change", searchTerm);
+        toolContent.innerHTML = "";
+
+        if (doc.hasOwnProperty("url")) {
+          content.innerHTML += `<div style = "font-weight:bold" >url</div ><div>${doc["url"]}</div><br>`;
+        }
+        for (const key in doc) {
+          content.innerHTML += `<div style = "font-weight:bold" > ${key}</div ><div>${doc[key]}</div><br>`;
+        }
+        toolContent.append(toolSearch, accessButton, toolResult, content);
+      };
+
+      // This displays all available captures of that page on a timeline and loads
+      // a selected capture on click
+
+      var captureTimeline;
+
+      const displayOtherCaptures = (docs) => {
+
+        //purge previous timeline
+        if (captureTimeline) { 
+          captureTimeline.remove();
+          }
+
+        //create new
+         captureTimeline = svg.append("g")
+                              .attr("id", "captureTimeline")
+                              .attr("transform",`translate(${width-toolWidth},${height*0.1})`)
+
+          //background rect
+          captureTimeline.append("rect")
+            .attr("height",height*0.84)
+            .attr("rx",10)
+            .attr("width",200)
+            .attr("y",-height*0.02)
+            .attr("x",-80)
+            .attr("stroke","gray")
+            .attr("stroke-width",0.5)
+            .attr("fill","rgba(255,255,255,0.8)")
+
+        const data = [];
+        var dateMap = {};
+
+        docs.forEach((d) => {
+          const capture = {};
+          capture.date = new Date(d.crawl_date);
+          capture.id = d.id;
+          const day = JSON.stringify(d.wayback_date).substring(0, 8);
+
+          capture.metadata=d;
+
+          if (!dateMap.hasOwnProperty(day)) {
+            dateMap[day] = 0;
+          }
+
+          dateMap[day]++;
+
+          capture.count=dateMap[day]
+
+          data.push(capture);
+        });
+
+        const y = d3
+          .scaleUtc()
+          .domain(d3.extent(data, (d) => d.date)).nice()
+          .range([height * 0.8, 0]);
+
+        const x = d3
+          .scaleLinear()
+          .domain(d3.extent(data, (d) => d.count)).nice()
+          .range([8, 52]);
+
+        captureTimeline.append("g").call(d3.axisLeft(y) .tickFormat( d3.utcFormat("%d / %m / %Y"))    );
+
+        captureTimeline
+          .append("g")
+          .selectAll("circle")
+          .data(data)
+          .join("circle")
+          .attr("cx", (d) => x(d.count))
+          .attr("cy", (d) => y(d.date))
+          .attr("r", 3)
+          .style("cursor","pointer")
+          .on("click",(e, d) => {
+                d3.select(e.target).attr("fill", "green");
+                displayLastCaptureMetadata(d.metadata);
+              });
+
+          captureTimeline.transition().duration(250).attr("transform",`translate(${width-toolWidth-65},${height*0.1})`);
+
+      };
 
       if (resolver) {
         node.on("click", (e, d) => {
@@ -3061,96 +3213,13 @@ const archotype = (id) => {
               )
                 .then((r) => r.json())
                 .then((r) => {
+
                   toolContent.innerHTML = JSON.stringify(r);
 
                   if (r.response.numFound > 0) {
-                    const doc = r.response.docs[r.response.docs.length - 1];
-
-                    const accessButton = document.createElement("button");
-                    accessButton.innerText = "Ouvrir dans les archives";
-                    accessButton.style = "margin:10px;";
-
-                    const archtarget = `${arkViewer}/${doc.wayback_date}/${doc.url}`;
-                    accessButton.addEventListener("click", () =>
-                      shell.openExternal(archtarget)
-                    );
-
-                    const content = document.createElement("div");
-
-                    const toolSearch = document.createElement("input");
-                    toolSearch.style =
-                      "padding:5px;border-bottom:1px solid #141414";
-                    toolSearch.type = "text";
-                    toolSearch.placeholder = "Search term or expression";
-
-                    toolSearch.addEventListener("focusin", () => (keylock = 1));
-                    toolSearch.addEventListener(
-                      "focusout",
-                      () => (keylock = 0)
-                    );
-
-                    const toolResult = document.createElement("div");
-
-                    const searchTerm = () => {
-                      toolResult.innerHTML =
-                        "Fragments from the content of the captured page:<br><br>";
-                      var sliced = "";
-
-                      const target = toolSearch.value;
-                      previousSearch = target;
-
-                      if (target.length > 2) {
-                        var re = new RegExp(target, "gi"),
-                          str = doc.content;
-                        while ((match = re.exec(str)) != null) {
-                          // var extrait = doc.content.substring(match.index - 150, match.index + 150)
-                          //.replace(target, "<mark>" + target + "</mark>")
-
-                          const extrait =
-                            doc.content.substring(
-                              match.index - 150,
-                              match.index
-                            ) +
-                            "<mark>" +
-                            doc.content.substring(
-                              match.index,
-                              match.index + target.length
-                            ) +
-                            "</mark>" +
-                            doc.content.substring(
-                              match.index + target.length,
-                              match.index + 150
-                            );
-
-                          sliced += extrait + "<br><hr><br>";
-                        }
-
-                        toolResult.innerHTML =
-                          "<div style = 'border:1px solid black; padding:5px'>" +
-                          sliced +
-                          "</div><br><hr><br>";
-                      }
-                    };
-
-                    if (previousSearch) {
-                      toolSearch.value = previousSearch;
-                      searchTerm();
-                    }
-
-                    toolSearch.addEventListener("change", searchTerm);
-                    toolContent.innerHTML = "";
-
-                    if (doc.hasOwnProperty("url")) {
-                      content.innerHTML += `<div style = "font-weight:bold" >url</div ><div>${doc["url"]}</div><br>`;
-                    }
-                    for (const key in doc) {
-                      content.innerHTML += `<div style = "font-weight:bold" > ${key}</div ><div>${doc[key]}</div><br>`;
-                    }
-                    toolContent.append(
-                      toolSearch,
-                      accessButton,
-                      toolResult,
-                      content
+                    displayOtherCaptures(r.response.docs);
+                    displayLastCaptureMetadata(
+                      r.response.docs[r.response.docs.length - 1]
                     );
                   } else {
                     toolContent.innerHTML = "not found";
@@ -3191,7 +3260,6 @@ const archotype = (id) => {
         node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
 
         nodetitle.attr("x", (d) => d.x).attr("y", (d) => d.y);
-
       }
 
       node.call(
@@ -3250,54 +3318,57 @@ const archotype = (id) => {
         g.attr("transform", transform);
       }
 
-
       // legend
 
-     const legend = svg.append("g")
+      const legend = svg.append("g");
 
-     // legend bg rect
-      legend.append("rect")
-     .attr("width",160)
-     .attr("height",45)
-     .attr("stroke","black")
-     .attr("stroke-width",0.5)
-     .attr("fill","white")
-     .attr("x",10)
-     .attr("y",window.innerHeight-68)
+      // legend bg rect
+      legend
+        .append("rect")
+        .attr("width", 160)
+        .attr("height", 45)
+        .attr("stroke", "black")
+        .attr("stroke-width", 0.5)
+        .attr("fill", "white")
+        .attr("x", 10)
+        .attr("y", window.innerHeight - 68);
 
-    const linksLegend=
-    [
-     { color: "rgba(100,100,100,0.3)",
-          weight:0.5,
-          desc:"capture <-> self domain link",
-       },  { color: "rgba(100,160,210,0.7)",
-          weight:2,
-          desc:"capture -> other capture link",
-       },
-         { color: "rgba(255,140,10,0.5)",
-          weight:2,
-          desc:"capture -> other domain link",
-       },
-    ]
+      const linksLegend = [
+        {
+          color: "rgba(100,100,100,0.3)",
+          weight: 0.5,
+          desc: "capture <-> self domain link",
+        },
+        {
+          color: "rgba(100,160,210,0.7)",
+          weight: 2,
+          desc: "capture -> other capture link",
+        },
+        {
+          color: "rgba(255,140,10,0.5)",
+          weight: 2,
+          desc: "capture -> other domain link",
+        },
+      ];
 
-    for (let i = 0; i < linksLegend.length; i++) {
-      const l = linksLegend[i];
+      for (let i = 0; i < linksLegend.length; i++) {
+        const l = linksLegend[i];
 
-      legend.append("rect")
-      .attr("width",20)
-     .attr("height",l.weight*2)
-     .attr("fill",l.color)
-     .attr("x",15)
-     .attr("y",window.innerHeight-60+i*12)
+        legend
+          .append("rect")
+          .attr("width", 20)
+          .attr("height", l.weight * 2)
+          .attr("fill", l.color)
+          .attr("x", 15)
+          .attr("y", window.innerHeight - 60 + i * 12);
 
-     legend.append("text")
-     .text(l.desc)
-     .style("font-size","9px")
-     .attr("x",45)
-     .attr("y",window.innerHeight-55+i*12)
-      
-    }
-
+        legend
+          .append("text")
+          .text(l.desc)
+          .style("font-size", "9px")
+          .attr("x", 45)
+          .attr("y", window.innerHeight - 55 + i * 12);
+      }
 
       loadType();
       document.getElementById("tooltip").append(toolContent);
