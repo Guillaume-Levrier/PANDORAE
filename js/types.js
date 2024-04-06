@@ -648,6 +648,27 @@ const archotype = (id) => {
     }
   });
 
+  // size is probably not good as such, to be updated
+  svg
+    .append("defs")
+    .append("marker")
+    .attr("id", "arrow")
+    .attr("viewBox", [0, 0, 20, 20])
+    .attr("refX", 10)
+    .attr("refY", 10)
+    .attr("markerWidth", 20)
+    .attr("markerHeight", 20)
+    .attr("orient", "auto-start-reverse")
+    .append("path")
+    .attr(
+      "d",
+      d3.line()([
+        [0, 0],
+        [0, 20],
+        [20, 10],
+      ])
+    );
+
   //======== DATA CALL & SORT =========
 
   pandodb.archotype
@@ -818,7 +839,8 @@ const archotype = (id) => {
         .data(links)
         .join("line")
         .attr("stroke-width", (d) => d.weight)
-        .attr("stroke", (d) => d.color);
+        .attr("stroke", (d) => d.color)
+        .attr("marker-end", "url(#arrow)");
 
       // on click, fetch the data from the data source if it exists
 
@@ -942,27 +964,28 @@ const archotype = (id) => {
       var captureTimeline;
 
       const displayOtherCaptures = (docs) => {
-
         //purge previous timeline
-        if (captureTimeline) { 
+        if (captureTimeline) {
           captureTimeline.remove();
-          }
+        }
 
         //create new
-         captureTimeline = svg.append("g")
-                              .attr("id", "captureTimeline")
-                              .attr("transform",`translate(${width-toolWidth},${height*0.1})`)
+        captureTimeline = svg
+          .append("g")
+          .attr("id", "captureTimeline")
+          .attr("transform", `translate(${width - toolWidth},${height * 0.1})`);
 
-          //background rect
-          captureTimeline.append("rect")
-            .attr("height",height*0.84)
-            .attr("rx",10)
-            .attr("width",200)
-            .attr("y",-height*0.02)
-            .attr("x",-80)
-            .attr("stroke","gray")
-            .attr("stroke-width",0.5)
-            .attr("fill","rgba(255,255,255,0.8)")
+        //background rect
+        captureTimeline
+          .append("rect")
+          .attr("height", height * 0.84)
+          .attr("rx", 10)
+          .attr("width", 200)
+          .attr("y", -height * 0.02)
+          .attr("x", -80)
+          .attr("stroke", "gray")
+          .attr("stroke-width", 0.5)
+          .attr("fill", "rgba(255,255,255,0.8)");
 
         const data = [];
         var dateMap = {};
@@ -973,7 +996,7 @@ const archotype = (id) => {
           capture.id = d.id;
           const day = JSON.stringify(d.wayback_date).substring(0, 8);
 
-          capture.metadata=d;
+          capture.metadata = d;
 
           if (!dateMap.hasOwnProperty(day)) {
             dateMap[day] = 0;
@@ -981,22 +1004,26 @@ const archotype = (id) => {
 
           dateMap[day]++;
 
-          capture.count=dateMap[day]
+          capture.count = dateMap[day];
 
           data.push(capture);
         });
 
         const y = d3
           .scaleUtc()
-          .domain(d3.extent(data, (d) => d.date)).nice()
+          .domain(d3.extent(data, (d) => d.date))
+          .nice()
           .range([height * 0.8, 0]);
 
         const x = d3
           .scaleLinear()
-          .domain(d3.extent(data, (d) => d.count)).nice()
+          .domain(d3.extent(data, (d) => d.count))
+          .nice()
           .range([8, 52]);
 
-        captureTimeline.append("g").call(d3.axisLeft(y) .tickFormat( d3.utcFormat("%d / %m / %Y"))    );
+        captureTimeline
+          .append("g")
+          .call(d3.axisLeft(y).tickFormat(d3.utcFormat("%d / %m / %Y")));
 
         captureTimeline
           .append("g")
@@ -1006,14 +1033,19 @@ const archotype = (id) => {
           .attr("cx", (d) => x(d.count))
           .attr("cy", (d) => y(d.date))
           .attr("r", 3)
-          .style("cursor","pointer")
-          .on("click",(e, d) => {
-                d3.select(e.target).attr("fill", "green");
-                displayLastCaptureMetadata(d.metadata);
-              });
+          .style("cursor", "pointer")
+          .on("click", (e, d) => {
+            d3.select(e.target).attr("fill", "green");
+            displayLastCaptureMetadata(d.metadata);
+          });
 
-          captureTimeline.transition().duration(250).attr("transform",`translate(${width-toolWidth-65},${height*0.1})`);
-
+        captureTimeline
+          .transition()
+          .duration(250)
+          .attr(
+            "transform",
+            `translate(${width - toolWidth - 65},${height * 0.1})`
+          );
       };
 
       if (resolver) {
@@ -1037,7 +1069,6 @@ const archotype = (id) => {
               )
                 .then((r) => r.json())
                 .then((r) => {
-
                   toolContent.innerHTML = JSON.stringify(r);
 
                   if (r.response.numFound > 0) {
