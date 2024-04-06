@@ -812,6 +812,18 @@ const getPPSData = () => {
   });
 };
 
+// fullscreen main window
+
+ipcMain.handle("toggleFullScreen",async (event, req) =>{
+
+    let state = mainWindow.isFullScreen()
+
+    mainWindow.setFullScreen(!state);
+
+    mainWindow.reload();
+
+} );
+
 // Force update (or download for the first time)
 ipcMain.on("forceUpdatePPS", async (event, req) => updatePPS(Date.now()));
 

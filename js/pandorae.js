@@ -1468,6 +1468,11 @@ const cmdinput = (input) => {
         commandReturn = version;
         break;
 
+         case CM.mainField.fullscreen:
+      ipcRenderer.invoke("toggleFullScreen", true);
+       commandReturn="";
+        break;
+
       case CM.mainField.returnTutorial:
         openTutorial(tutoSlide);
         break;
@@ -1493,6 +1498,7 @@ const cmdinput = (input) => {
     }
   }
   field.value = commandReturn;
+  setTimeout(()=>field.value="",1500)
   document.getElementById("cli-field").value = commandReturn;
 };
 
