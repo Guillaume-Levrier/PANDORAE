@@ -736,7 +736,7 @@ const archotype = (id) => {
         links.push({
           source: elem.id,
           target: d["container-title"],
-          color: "rgba(100,100,100,0.3)",
+          color: "transparent",
           weight: 0.5,
           type: "page2domain",
         });
@@ -878,6 +878,7 @@ const archotype = (id) => {
         .selectAll()
         .data(links)
         .join("line")
+        .style("display",d=>(d.color==="tranparent")?"none":"block")
         .attr("stroke-width", (d) => d.weight)
         .attr("stroke", (d) => d.color)
         .attr("marker-end", (d) =>
@@ -1104,11 +1105,48 @@ const archotype = (id) => {
 
           previousCircle = circle;
 
+          if (captureTimeline) {
+          captureTimeline
+          .transition()
+          .duration(250)
+          .attr(
+            "transform",
+            `translate(${width},${height * 0.1})`
+          );
+        }
+
           switch (d.type) {
             case "domain":
+                    break;
+
+            case "ghost":
+              // interrogating ghosts, ie pages that are not in the corpus
+              // but that are linked to by captures within the corpus
+              // these may or may not be in the archive
+
+            case"capture":
+
+           // find the collection to target
+           var targetCollection;
+           
+            // if this is a capture, this is straightforward
+            if (documentMap.hasOwnProperty(d.id)) {
+             targetCollection = documentMap[d.id].enrichment.solrCollection;
+            } else {
+              // else this is a ghost, find the origine capture linking to it
+              // to make sure it is collection-consistent
+              links.forEach(l=>{
+                if (l.target.id === d.id){
+                  targetCollection = documentMap[l.source.id].enrichment.solrCollection;
+                } 
+              })
+            }  
+
+            if (targetCollection) { 
+
               fetch(
                 `http://${resolver}/solr/${
-                  documentMap[d.id].enrichment.solrCollection
+                  targetCollection
                 }/select?q=url:${JSON.stringify(d.id.replaceAll("&", "%26"))}`
               )
                 .then((r) => r.json())
@@ -1124,17 +1162,10 @@ const archotype = (id) => {
                     toolContent.innerHTML = "not found";
                   }
                 });
-
+            }
               break;
 
-            case "ghost":
-              toolContent.innerHTML = `
-                <hr>
-              ${d.id}
-                <br><hr><br>
-                This page was not captured by the archive.`;
-              break;
-
+    
             default:
               break;
           }
@@ -1260,7 +1291,7 @@ const archotype = (id) => {
       // legend bg rect
       legend
         .append("rect")
-        .attr("width", 160)
+        .attr("width", 320)
         .attr("height", 45)
         .attr("stroke", "black")
         .attr("stroke-width", 0.5)
@@ -1272,7 +1303,7 @@ const archotype = (id) => {
         {
           color: "rgba(100,100,100,0.3)",
           weight: 0.5,
-          desc: "capture <-> self domain link",
+          desc: "capture <-> ghost link",
         },
         {
           color: "rgba(100,160,210,0.7)",
@@ -1286,22 +1317,57 @@ const archotype = (id) => {
         },
       ];
 
-      for (let i = 0; i < linksLegend.length; i++) {
+       const nodeLegend = [
+        {
+          color: "rgba(100,100,100,0.3)",
+          
+          desc: "Ghost page (not in corpus)",
+        },
+        {
+          color: "blue",
+          
+          desc: "Capture page",
+        },
+        {
+          color:"orange",
+          desc: "Domain node",
+        },
+      ];
+
+      for (let i = 0; i < 3; i++) {
         const l = linksLegend[i];
+
+        const n = nodeLegend[i];
+
+        legend
+          .append("circle")
+     
+          .attr("fill", n.color)
+          .attr("cx", 20)
+          .attr("r",4)
+          .attr("cy", window.innerHeight - 58 + i * 12);
+
+
+        legend
+          .append("text")
+          .text(n.desc)
+          .style("font-size", "9px")
+          .attr("x", 35)
+          .attr("y", window.innerHeight - 55 + i * 12);
 
         legend
           .append("rect")
           .attr("width", 20)
           .attr("height", l.weight * 2)
           .attr("fill", l.color)
-          .attr("x", 15)
+          .attr("x", 165)
           .attr("y", window.innerHeight - 60 + i * 12);
 
         legend
           .append("text")
           .text(l.desc)
           .style("font-size", "9px")
-          .attr("x", 45)
+          .attr("x", 195)
           .attr("y", window.innerHeight - 55 + i * 12);
       }
 
