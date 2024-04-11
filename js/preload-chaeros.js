@@ -1999,7 +1999,7 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo, targetCollections) => {
               ); // Log success
 
               setTimeout(() => {
-                //ipcRenderer.send("win-destroy", winId);
+                ipcRenderer.send("win-destroy", winId);
               }, 500);
             })
             .catch((e) => {
@@ -2794,17 +2794,20 @@ const bnfRemap = (doc, solrCollection) => {
 
   delete remappedDocument.undefined;
 
-  // TODO
   // Here, filter out all document links that contain "mailto"
   // The warc-indexers take all <a> elements, the mailto is potentially problematic
   // in terms of personal informations.
 
   const hyperlinks = [];
 
+  if (doc.hasOwnProperty("links")){
+      doc.links.forEach(link=>(link.indexOf("mailto:")>-1)?0:hyperlinks.push(link))
+  } 
+  
   remappedDocument.shortTitle = JSON.stringify({
     id: doc.id,
     collections: doc.collections,
-    links: doc.links,
+    links: hyperlinks,
     solrCollection,
   });
 
