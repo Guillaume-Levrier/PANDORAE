@@ -649,24 +649,32 @@ const archotype = (id) => {
   });
 
   // size is probably not good as such, to be updated
+
+  let ma = 4;
+  let mb = ma / 2;
+
   svg
     .append("defs")
     .append("marker")
     .attr("id", "arrow")
-    .attr("viewBox", [0, 0, 20, 20])
-    .attr("refX", 10)
-    .attr("refY", 10)
-    .attr("markerWidth", 20)
-    .attr("markerHeight", 20)
-    .attr("orient", "auto-start-reverse")
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 15)
+    .attr("refY", 0)
+    .attr("markerWidth", 6)
+    .attr("markerHeight", 6)
+    .attr("orient", "auto")
     .append("path")
+    .attr("fill", "rgba(0,0,0,0.2)")
+    .attr("stroke", "gray")
+    .attr("stroke-width", 0.2)
     .attr(
       "d",
-      d3.line()([
+      "M 0,-2 L 4 ,0 L 0,2"
+      /* d3.line()([
         [0, 0],
-        [0, 20],
-        [20, 10],
-      ])
+        [0, ma],
+        [ma, mb],
+      ]) */
     );
 
   //======== DATA CALL & SORT =========
@@ -702,6 +710,8 @@ const archotype = (id) => {
           id,
           title: d.title,
           domain: false,
+          type: "capture",
+          color: "blue",
         };
 
         if (!domainMap.hasOwnProperty(d["container-title"])) {
@@ -712,6 +722,8 @@ const archotype = (id) => {
             id: d["container-title"],
             name: d["container-title"],
             domain: true,
+            type: "domain",
+            color: "orange",
           });
         }
 
@@ -726,12 +738,16 @@ const archotype = (id) => {
           target: d["container-title"],
           color: "rgba(100,100,100,0.3)",
           weight: 0.5,
+          type: "page2domain",
         });
 
         nodes.push(elem);
         nodemap[elem.id] = 1;
         domainMap[d["container-title"]] = 1;
       }
+
+      var ghostNodeMap = {};
+      var ghostLinksMap = {};
 
       for (let i = 0; i < documents.length / divider; ++i) {
         const d = documents[i];
@@ -775,6 +791,7 @@ const archotype = (id) => {
                       target,
                       color: "rgba(100,160,210,0.7)",
                       weight: 2,
+                      type: "page2page",
                     });
                   } else if (
                     domainMap.hasOwnProperty(host) &&
@@ -783,14 +800,24 @@ const archotype = (id) => {
                     sourceHost.indexOf(host) === -1
                   ) {
                     // link type 2 - orange
-                    console.log("orange found");
 
                     links.push({
                       source,
                       target: host,
                       color: "rgba(255,140,10,0.5)",
                       weight: 2,
+                      type: "pageNOTcorpus",
                     });
+                  } else {
+                    // this links to a page that wasn't captured, so add a ghost node+link;
+                    ghostNodeMap[target] = 1;
+                    ghostLinksMap[sourceURL + target] = {
+                      source,
+                      target,
+                      color: "rgba(100,100,100,0.3)",
+                      weight: 1,
+                      type: "ghost",
+                    };
                   }
                 }
               } catch (error) {
@@ -803,6 +830,19 @@ const archotype = (id) => {
           }
         }
       }
+
+      // add ghosts
+      Object.keys(ghostNodeMap).forEach((d) =>
+        nodes.push({
+          id: d,
+          name: "",
+          domain: false,
+          type: "ghost",
+          color: "rgba(50,50,50,0.4)",
+        })
+      );
+
+      links = [...links, ...Object.values(ghostLinksMap)];
 
       let domainCount = Object.keys(domainMap).length;
 
@@ -824,8 +864,8 @@ const archotype = (id) => {
           "link",
           d3.forceLink(links).id((d) => d.id)
         )
-        .force("charge", d3.forceManyBody(-2000))
-        .force("center", d3.forceCenter(0))
+        .force("charge", d3.forceManyBody(-5).distanceMax(200))
+        .force("center", d3.forceCenter(width / 2, height / 2).strength(1))
         .on("tick", ticked);
 
       // Create the SVG container.
@@ -840,7 +880,9 @@ const archotype = (id) => {
         .join("line")
         .attr("stroke-width", (d) => d.weight)
         .attr("stroke", (d) => d.color)
-        .attr("marker-end", "url(#arrow)");
+        .attr("marker-end", (d) =>
+          d.type === "page2domain" ? 0 : "url(#arrow)"
+        );
 
       // on click, fetch the data from the data source if it exists
 
@@ -852,7 +894,9 @@ const archotype = (id) => {
         .data(nodes)
         .join("circle")
         .attr("r", 5)
-        .attr("fill", (d) => (d.domain ? "orange" : "blue"));
+        //.attr("opacity", 0)
+        //.attr("stroke-opacity", 0)
+        .attr("fill", (d) => d.color);
 
       const nodetitle = g
         .append("g")
@@ -1060,9 +1104,9 @@ const archotype = (id) => {
 
           previousCircle = circle;
 
-          d.domain
-            ? 0
-            : fetch(
+          switch (d.type) {
+            case "domain":
+              fetch(
                 `http://${resolver}/solr/${
                   documentMap[d.id].enrichment.solrCollection
                 }/select?q=url:${JSON.stringify(d.id.replaceAll("&", "%26"))}`
@@ -1080,6 +1124,20 @@ const archotype = (id) => {
                     toolContent.innerHTML = "not found";
                   }
                 });
+
+              break;
+
+            case "ghost":
+              toolContent.innerHTML = `
+                <hr>
+              ${d.id}
+                <br><hr><br>
+                This page was not captured by the archive.`;
+              break;
+
+            default:
+              break;
+          }
         });
       } else {
         node.on("click", (e, d) => {
@@ -1094,14 +1152,36 @@ const archotype = (id) => {
           previousCircle = circle;
 
           toolContent.innerHTML = "";
-          for (const key in documentMap[d.id]) {
-            toolContent.innerHTML += `<strong>${key}</strong><br>${d[key]}  <br><hr>`;
+          switch (d.type) {
+            case "domain":
+              toolContent.innerHTML = d.id;
+              break;
+            case "ghost":
+              toolContent.innerHTML = `
+                <hr>
+              ${d.id}
+                <br><hr><br>
+                This page was not captured by the archive.`;
+              break;
+            case "capture":
+              for (const key in documentMap[d.id]) {
+                toolContent.innerHTML += `<strong>${key}</strong><br>${
+                  documentMap[d.id][key]
+                }  <br><hr>`;
+              }
+
+              documentMap[d.id].enrichment.links.forEach(
+                (l) => (toolContent.innerHTML += `<br>${l}`)
+              );
+
+              break;
           }
         });
       }
 
       node.append("title").text((d) => d.id);
 
+      link.raise();
       // Add a drag behavior.
 
       // Set the position attributes of links and nodes each time the simulation ticks.

@@ -1913,8 +1913,8 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo, targetCollections) => {
     "/solr/" +
     meta.selectedCollection +
     "/" +
-    "select?"+
-    "fl=title,description,content_type_norm,content_language,host,wayback_date,author,url,links,crawl_date,id,collections"+
+    "select?" +
+    "fl=title,description,content_type_norm,content_language,host,wayback_date,author,url,links,crawl_date,id,collections" +
     "&facet.field=crawl_year&facet=on" +
     "&fq=collections:(" +
     targetCollections +
@@ -2793,6 +2793,13 @@ const bnfRemap = (doc, solrCollection) => {
   remappedDocument.date = doc.crawl_date;
 
   delete remappedDocument.undefined;
+
+  // TODO
+  // Here, filter out all document links that contain "mailto"
+  // The warc-indexers take all <a> elements, the mailto is potentially problematic
+  // in terms of personal informations.
+
+  const hyperlinks = [];
 
   remappedDocument.shortTitle = JSON.stringify({
     id: doc.id,
