@@ -157,7 +157,7 @@
   <form id="clinical_trials-form" autocomplete="off">Clinical Trials Query:<br>
     <input class="fluxInput" spellcheck="false"
       id="clinical_trialslocalqueryinput" type="text"
-      value="Enter your query"><br><br>
+      placeholder="Enter your query"><br><br>
     <button type="submit" class="flux-button"
       id="clinical_trials-basic-query">Retrieve basic info</button>&nbsp;&nbsp;
     <div id="clinical_trials-basic-previewer" style="position:relative;"></div>
@@ -175,7 +175,7 @@
   <br><br>
   <form id="scopus-form" autocomplete="off">Scopus Query:<br>
     <input class="fluxInput" spellcheck="false" id="scopuslocalqueryinput"
-      type="text" value="Enter your Scopus Query"><br><br><br>
+      type="text" placeholder="Enter your Scopus Query"><br><br><br>
     <button type="submit" class="flux-button" id="scopus-basic-query">Retrieve
       basic info</button>&nbsp;&nbsp;
     <div id="scopus-basic-previewer" style="position:relative;"></div>
@@ -204,7 +204,7 @@
   <br><br>
   <form id="istex-form" autocomplete="off">ISTEX Query:<br>
     <input class="fluxInput" spellcheck="false" id="istexlocalqueryinput"
-      type="text" value="Enter your istex Query"><br><br><br>
+      type="text" placeholder="Enter your istex Query"><br><br><br>
     <button type="submit" class="flux-button" id="istex-basic-query">Retrieve
       basic info</button>&nbsp;&nbsp;
     <div id="istex-basic-previewer" style="position:relative;"></div><br><br>
@@ -226,7 +226,7 @@
   <br><br>
   <form id="wos-form" autocomplete="off">Web of Science (avanced) Query:<br>
     <input class="fluxInput" spellcheck="false" id="wosbasicqueryinput"
-      type="text" value="Enter your WoS Query"><br><br>
+      type="text" placeholder="Enter your WoS Query"><br><br>
 
     From: <input type="date" id="wos-from-date"> - to: <input type="date"
       id="wos-to-date">
@@ -248,7 +248,7 @@
   <br><br>
   <form id="biorxiv-form" autocomplete="off">Query:<br>
     <input class="fluxInput" spellcheck="false" id="biorxivlocalqueryinput"
-      type="text" value=""><br><br>
+      type="text" placeholder=""><br><br>
     From: <input type="date" id="biorxiv-date-from"> - To: <input type="date"
       id="biorxiv-date-to"><br>
     <br> Database: <input list="biorxiv-medrxiv" id="biorxiv-list"
@@ -313,7 +313,7 @@
     Dataset Name (if a dataset with the same name already exists, it will be
     overwritten)<br>
     <input class="fluxInput" spellcheck="false" id="twitterDatasetName"
-      type="text" value="Enter a dataset name"><br><br>
+      type="text" placeholder="Enter a dataset name"><br><br>
     <br> <button type="submit" class="flux-button" id="twitterImporter">Import
       to SYSTEM</button>
   </form>
@@ -325,7 +325,7 @@
     JSON Dataset<br>
     <input type="file" id="twitterCatPathInput" accept="json"><br><br>
     <input class="fluxInput" spellcheck="false" id="twitterCatName" type="text"
-      value="Enter a dataset name"><br><br>
+      placeholder="Enter a dataset name"><br><br>
     <br> <button type="submit" class="flux-button"
       id="twitterCatImporter">Import to SYSTEM</button>
   </form>
@@ -335,7 +335,7 @@
   JSON Dataset<br>
   <input type="file" id="twitterThread" accept="json"><br><br>
   <input class="fluxInput" spellcheck="false" id="twitterThreadName" type="text"
-    value="Enter a dataset name"><br><br>
+    placeholder="Enter a dataset name"><br><br>
   <br> <button type="submit" class="flux-button"
     id="twitterThreadImporter">Import to SYSTEM</button>
   </form>
@@ -466,7 +466,7 @@
     <div id="csljson-dataset-preview"></div>
     <div id="csljson-dataset-buttons" style="display:none;">
       <input class="fluxInput" spellcheck="false" class="sendToZotero"
-        id="zoteroCollecName" type="text" value="Enter collection name">
+        id="zoteroCollecName" type="text" placeholder="Enter collection name">
 
       <button type="submit" class="flux-button sendToZotero"
         id="zoteroCollecBuild">Create a new Zotero
@@ -488,7 +488,7 @@
   </div>
   <br><br><br>
   <input class="fluxInput" spellcheck="false" id="zoteroImportName"
-    style="display:none;" type="text" value="Enter import name">
+    style="display:none;" type="text" placeholder="Enter import name">
   <button type="submit" class="flux-button" style="display:none;"
     id="zotitret">Import selected collections into
     system</button><br>
@@ -549,7 +549,7 @@
       <input class='sysDestCheck' value='slider' name='slider'
         type='checkbox' /><label>slider</label><br>
       <input class="fluxInput" spellcheck="false" id="systemToType" type="text"
-        value="Enter a dataset name">
+        placeholder="Enter a dataset name">
       <button type="submit" class="flux-button"
         id="systitret">Export</button><br>
     </div>

@@ -942,7 +942,7 @@ const datasetDisplay = (divId, kind, altkind) => {
         line.id = file.id;
 
         let button = document.createElement("SPAN");
-        button.addEventListener("click", (e) => {
+        line.addEventListener("click", (e) => {
           datasetDetail(
             altkind + "-dataset-preview",
             kind,
@@ -1663,36 +1663,45 @@ const zoteroCollectionRetriever = () => {
     .then((zoteroColResponse) => {
       // With the response
 
-      let collections = []; // Create empty 'collections' array
+      const userCollections = document.getElementById("userZoteroCollections");
+      const collectionList = document.createElement("form");
+      collectionList.style = "line-height:1.5";
+
+      userCollections.append(collectionList);
+
+      const importname = document.getElementById("zoteroImportName");
 
       for (let i = 0; i < zoteroColResponse.length; i++) {
-        // Loop on the response
-        let coll = {}; // Create an empty object
-        coll.key = zoteroColResponse[i].data.key; // Fill it with this collection's key
-        coll.name = zoteroColResponse[i].data.name; // Fill it with this collection's name
-        collections.push(
-          // Push a string (HTML input list) in the collections array
-          "<input class='zotColCheck' value='" +
-            coll.key +
-            "' name='" +
-            coll.name +
-            "' type='checkbox'/><label> " +
-            coll.key +
-            " - " +
-            coll.name +
-            "</label><br> "
+        const checkInput = document.createElement("input");
+        checkInput.type = "checkbox";
+        checkInput.className = "zotColCheck";
+        checkInput.value = zoteroColResponse[i].data.key;
+        checkInput.name = zoteroColResponse[i].data.name;
+
+        const checkLabel = document.createElement("label");
+        checkLabel.style.paddingLeft = "5px";
+        checkLabel.innerText =
+          zoteroColResponse[i].data.key +
+          " - " +
+          zoteroColResponse[i].data.name;
+
+        checkInput.addEventListener("change", () => {
+          if (checkInput.checked) {
+            importname.value += zoteroColResponse[i].data.name;
+          } else {
+            importname.value = importname.value.replace(
+              zoteroColResponse[i].data.name,
+              ""
+            );
+          }
+        });
+
+        collectionList.append(
+          checkInput,
+          checkLabel,
+          document.createElement("br")
         );
       }
-
-      var collectionList = ""; // Create the list as a string
-      for (var k = 0; k < collections.length; ++k) {
-        // For each element of the array
-        collectionList = collectionList + collections[k]; // Add it to the string
-      }
-
-      // Display full list in div
-      document.getElementById("userZoteroCollections").innerHTML =
-        "<form style='line-height:1.5'>" + collectionList + "</form>";
 
       // Show success on button
       fluxButtonAction(

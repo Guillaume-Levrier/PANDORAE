@@ -975,8 +975,12 @@ label {
 }
 
 .fluxInput:hover {
-  background-color: #141414;
+  background-color: black;
   color: white;
+}
+
+.fluxInput::selection {
+  background-color: red;
 }
 
 .fluxInput:focus {
