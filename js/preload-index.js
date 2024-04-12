@@ -2191,6 +2191,7 @@ const csv = require("csv-parser");
 const versor = require("versor");
 //const Quill = require("quill");
 const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
+const { create } = require("d3");
 //const { min } = require("d3-array");
 //END NODE MODULES
 
@@ -2852,7 +2853,7 @@ const archotype = (id) => {
         [ma, mb],
       ]) */
     );
-
+  const toolContent = document.createElement("div");
   //======== DATA CALL & SORT =========
 
   pandodb.archotype
@@ -2862,8 +2863,8 @@ const archotype = (id) => {
 
       const documents = datajson.content[0].items;
 
-      var nodes = [];
-      var links = [];
+      var nodeData = [];
+      var linkData = [];
 
       const nodemap = {};
 
@@ -2894,7 +2895,7 @@ const archotype = (id) => {
           // A domain node doesn't in the dataset exist, it is just a way to group
           // all page captures together, by binding them to their hostname
 
-          nodes.push({
+          nodeData.push({
             id: d["container-title"],
             name: d["container-title"],
             domain: true,
@@ -2909,7 +2910,7 @@ const archotype = (id) => {
         // A gray link is a link between a domain node
         // and a page capture node.
 
-        links.push({
+        linkData.push({
           source: elem.id,
           target: d["container-title"],
           color: "transparent",
@@ -2917,7 +2918,7 @@ const archotype = (id) => {
           type: "page2domain",
         });
 
-        nodes.push(elem);
+        nodeData.push(elem);
         nodemap[elem.id] = 1;
         domainMap[d["container-title"]] = 1;
       }
@@ -2962,7 +2963,7 @@ const archotype = (id) => {
                   if (nodemap.hasOwnProperty(target)) {
                     // link type 1 - blue
 
-                    links.push({
+                    linkData.push({
                       source,
                       target,
                       color: "rgba(100,160,210,0.7)",
@@ -2977,7 +2978,7 @@ const archotype = (id) => {
                   ) {
                     // link type 2 - orange
 
-                    links.push({
+                    linkData.push({
                       source,
                       target: host,
                       color: "rgba(255,140,10,0.5)",
@@ -3007,389 +3008,106 @@ const archotype = (id) => {
         }
       }
 
-      // add ghosts
+      // add ghosts nodes
       Object.keys(ghostNodeMap).forEach((d) =>
-        nodes.push({
+        nodeData.push({
           id: d,
           name: "",
           domain: false,
           type: "ghost",
-          color: "rgba(50,50,50,0.4)",
+          color: "rgb(150,150,150)",
         })
       );
 
-      links = [...links, ...Object.values(ghostLinksMap)];
+      linkData = [...linkData, ...Object.values(ghostLinksMap)];
 
-      let domainCount = Object.keys(domainMap).length;
+      // Get node groups
+      nodeData.forEach((node, i) => (node.group = i));
+
+      // First pass, group by domain;
+      nodeData.forEach((node) => {
+        linkData.forEach((link) => {
+          if (link.source === node.id || link.target === node.id) {
+            nodeData.find((d) => d.id === link.source).group = node.group;
+            nodeData.find((d) => d.id === link.target).group = node.group;
+          }
+        });
+      });
+
+      // Second pass, do cross-domain by looking a nodes that are the target
+      // of several links from different groups;
+
+      // build an updated map of nodes;
+      const completeNodeMap = {};
+      nodeData.forEach((node) => (completeNodeMap[node.id] = node));
+
+      // build a target index
+      const nodeMapByTarget = {};
+      linkData.forEach((link) => {
+        if (!nodeMapByTarget.hasOwnProperty(link.target)) {
+          nodeMapByTarget[link.target] = {};
+        }
+
+        nodeMapByTarget[link.target][completeNodeMap[link.source].group] = 1;
+      });
+
+      // look for all nodes that are target of links from more than 1 group;
+      const mergeMap = {};
+      for (const id in nodeMapByTarget) {
+        const node = Object.values(nodeMapByTarget[id]);
+
+        if (node.length > 1) {
+          const keysArray = Object.keys(nodeMapByTarget[id]);
+          const keystring = keysArray.toString();
+          if (!mergeMap.hasOwnProperty(keystring)) {
+            mergeMap[keystring] = keysArray;
+          }
+        }
+      }
+
+      // now do the actual merge;
+      Object.values(mergeMap).forEach((mergeArray) => {
+        nodeData.forEach((node) => {
+          mergeArray.forEach((group) => {
+            if (node.group === parseInt(group)) {
+              node.group = parseInt(mergeArray[0]);
+            }
+          });
+        });
+      });
+
+      const nodegroupmap = {};
+
+      nodeData.forEach((d) => {
+        const groupName = JSON.stringify(d.group);
+        if (!nodegroupmap.hasOwnProperty(groupName)) {
+          nodegroupmap[groupName] = { nameParts: {}, nodes: [] };
+        }
+
+        nodegroupmap[groupName].nodes.push(d);
+
+        if (d.domain) {
+          nodegroupmap[groupName].nameParts[d.id] = 1;
+        }
+      });
+
+      // =========================
+      // data management is mostly above this line
+
+      // below is visualisation
 
       const g = svg.append("g");
 
-      // Some of the code below is directly taken from one of Mike Bostocks'
-      // observable notebooks, comments included.
-
-      // The force simulation mutates links and nodes, so create a copy
-      // so that re-evaluating this cell produces the same result.
-      links = links.map((d) => ({ ...d }));
-      nodes = nodes.map((d) => ({ ...d }));
-
       // Create a simulation with several forces.
       const simulation = d3
-        .forceSimulation(nodes)
-        //.alphaDecay(0.4)
+        .forceSimulation(nodeData)
         .force(
           "link",
-          d3.forceLink(links).id((d) => d.id)
+          d3.forceLink(linkData).id((d) => d.id)
         )
-        .force("charge", d3.forceManyBody(-5).distanceMax(200))
-        .force("center", d3.forceCenter(width / 2, height / 2).strength(1))
+        .force("charge", d3.forceManyBody(-300).distanceMax(1000))
+        .force("center", d3.forceCenter(width / 2, height / 2).strength(0.5))
         .on("tick", ticked);
-
-      // Create the SVG container.
-
-      // Add a line for each link, and a circle for each node.
-      const link = g
-        .append("g")
-        .attr("stroke", "#999")
-        .attr("stroke-opacity", 0.6)
-        .selectAll()
-        .data(links)
-        .join("line")
-        .style("display",d=>(d.color==="tranparent")?"none":"block")
-        .attr("stroke-width", (d) => d.weight)
-        .attr("stroke", (d) => d.color)
-        .attr("marker-end", (d) =>
-          d.type === "page2domain" ? 0 : "url(#arrow)"
-        );
-
-      // on click, fetch the data from the data source if it exists
-
-      const node = g
-        .append("g")
-        .attr("stroke", "#fff")
-        .attr("stroke-width", 1.5)
-        .selectAll()
-        .data(nodes)
-        .join("circle")
-        .attr("r", 5)
-        //.attr("opacity", 0)
-        //.attr("stroke-opacity", 0)
-        .attr("fill", (d) => d.color);
-
-      const nodetitle = g
-        .append("g")
-        .attr("text-anchor", "middle")
-        .attr("dy", "-5px")
-        .style("font-size", "6px")
-        .style("user-select", "none")
-        .style("pointer-events", "none")
-        .selectAll()
-        .data(nodes)
-        .join("text")
-        .text((d) => d.name);
-
-      // here, it is taken as a given that the async race will be won by the
-      // invoker given that interrogating dexie is more tedious but this might
-      // end up breaking at some point for framework reasons.
-
-      node.style("cursor", (d) => (d.domain ? "move" : "pointer"));
-
-      const toolContent = document.createElement("div");
-
-      let previousCircle = 0;
-      let previousSearch = 0;
-
-      // This function is called when the user is within an authorized network that
-      // can resolve a web archive page capture. It shows the authorized metadata (potentially, the page's content)
-      // and lets them look for a string in the "content" field (if accessible).
-
-      const displayLastCaptureMetadata = (doc) => {
-        const accessButton = document.createElement("button");
-        accessButton.innerText = "Ouvrir dans les archives";
-        accessButton.style = "margin:10px;";
-
-        const archtarget = `${arkViewer}/${doc.wayback_date}/${doc.url}`;
-        accessButton.addEventListener("click", () =>
-          shell.openExternal(archtarget)
-        );
-
-        const content = document.createElement("div");
-
-        const toolSearch = document.createElement("input");
-        toolSearch.style = "padding:5px;border-bottom:1px solid #141414";
-        toolSearch.type = "text";
-        toolSearch.placeholder = "Search term or expression";
-
-        toolSearch.addEventListener("focusin", () => (keylock = 1));
-        toolSearch.addEventListener("focusout", () => (keylock = 0));
-
-        const toolResult = document.createElement("div");
-
-        const searchTerm = () => {
-          toolResult.innerHTML =
-            "Fragments from the content of the captured page:<br><br>";
-          var sliced = "";
-
-          const target = toolSearch.value;
-          previousSearch = target;
-
-          if (target.length > 2) {
-            var re = new RegExp(target, "gi"),
-              str = doc.content;
-            while ((match = re.exec(str)) != null) {
-              // var extrait = doc.content.substring(match.index - 150, match.index + 150)
-              //.replace(target, "<mark>" + target + "</mark>")
-
-              const extrait =
-                doc.content.substring(match.index - 150, match.index) +
-                "<mark>" +
-                doc.content.substring(
-                  match.index,
-                  match.index + target.length
-                ) +
-                "</mark>" +
-                doc.content.substring(
-                  match.index + target.length,
-                  match.index + 150
-                );
-
-              sliced += extrait + "<br><hr><br>";
-            }
-
-            toolResult.innerHTML =
-              "<div style = 'border:1px solid black; padding:5px'>" +
-              sliced +
-              "</div><br><hr><br>";
-          }
-        };
-
-        if (previousSearch) {
-          toolSearch.value = previousSearch;
-          searchTerm();
-        }
-
-        toolSearch.addEventListener("change", searchTerm);
-        toolContent.innerHTML = "";
-
-        if (doc.hasOwnProperty("url")) {
-          content.innerHTML += `<div style = "font-weight:bold" >url</div ><div>${doc["url"]}</div><br>`;
-        }
-        for (const key in doc) {
-          content.innerHTML += `<div style = "font-weight:bold" > ${key}</div ><div>${doc[key]}</div><br>`;
-        }
-        toolContent.append(toolSearch, accessButton, toolResult, content);
-      };
-
-      // This displays all available captures of that page on a timeline and loads
-      // a selected capture on click
-
-      var captureTimeline;
-
-      const displayOtherCaptures = (docs) => {
-        //purge previous timeline
-        if (captureTimeline) {
-          captureTimeline.remove();
-        }
-
-        //create new
-        captureTimeline = svg
-          .append("g")
-          .attr("id", "captureTimeline")
-          .attr("transform", `translate(${width - toolWidth},${height * 0.1})`);
-
-        //background rect
-        captureTimeline
-          .append("rect")
-          .attr("height", height * 0.84)
-          .attr("rx", 10)
-          .attr("width", 200)
-          .attr("y", -height * 0.02)
-          .attr("x", -80)
-          .attr("stroke", "gray")
-          .attr("stroke-width", 0.5)
-          .attr("fill", "rgba(255,255,255,0.8)");
-
-        const data = [];
-        var dateMap = {};
-
-        docs.forEach((d) => {
-          const capture = {};
-          capture.date = new Date(d.crawl_date);
-          capture.id = d.id;
-          const day = JSON.stringify(d.wayback_date).substring(0, 8);
-
-          capture.metadata = d;
-
-          if (!dateMap.hasOwnProperty(day)) {
-            dateMap[day] = 0;
-          }
-
-          dateMap[day]++;
-
-          capture.count = dateMap[day];
-
-          data.push(capture);
-        });
-
-        const y = d3
-          .scaleUtc()
-          .domain(d3.extent(data, (d) => d.date))
-          .nice()
-          .range([height * 0.8, 0]);
-
-        const x = d3
-          .scaleLinear()
-          .domain(d3.extent(data, (d) => d.count))
-          .nice()
-          .range([8, 52]);
-
-        captureTimeline
-          .append("g")
-          .call(d3.axisLeft(y).tickFormat(d3.utcFormat("%d / %m / %Y")));
-
-        captureTimeline
-          .append("g")
-          .selectAll("circle")
-          .data(data)
-          .join("circle")
-          .attr("cx", (d) => x(d.count))
-          .attr("cy", (d) => y(d.date))
-          .attr("r", 3)
-          .style("cursor", "pointer")
-          .on("click", (e, d) => {
-            d3.select(e.target).attr("fill", "green");
-            displayLastCaptureMetadata(d.metadata);
-          });
-
-        captureTimeline
-          .transition()
-          .duration(250)
-          .attr(
-            "transform",
-            `translate(${width - toolWidth - 65},${height * 0.1})`
-          );
-      };
-
-      if (resolver) {
-        node.on("click", (e, d) => {
-          const circle = d3.select(e.target);
-
-          circle.attr("stroke-width", 3).attr("stroke", "#FF0F0F");
-
-          if (previousCircle) {
-            previousCircle.attr("stroke-width", 3).attr("stroke", "#0FFF50");
-          }
-
-          previousCircle = circle;
-
-          if (captureTimeline) {
-          captureTimeline
-          .transition()
-          .duration(250)
-          .attr(
-            "transform",
-            `translate(${width},${height * 0.1})`
-          );
-        }
-
-          switch (d.type) {
-            case "domain":
-                    break;
-
-            case "ghost":
-              // interrogating ghosts, ie pages that are not in the corpus
-              // but that are linked to by captures within the corpus
-              // these may or may not be in the archive
-
-            case"capture":
-
-           // find the collection to target
-           var targetCollection;
-           
-            // if this is a capture, this is straightforward
-            if (documentMap.hasOwnProperty(d.id)) {
-             targetCollection = documentMap[d.id].enrichment.solrCollection;
-            } else {
-              // else this is a ghost, find the origine capture linking to it
-              // to make sure it is collection-consistent
-              links.forEach(l=>{
-                if (l.target.id === d.id){
-                  targetCollection = documentMap[l.source.id].enrichment.solrCollection;
-                } 
-              })
-            }  
-
-            if (targetCollection) { 
-
-              fetch(
-                `http://${resolver}/solr/${
-                  targetCollection
-                }/select?q=url:${JSON.stringify(d.id.replaceAll("&", "%26"))}`
-              )
-                .then((r) => r.json())
-                .then((r) => {
-                  toolContent.innerHTML = JSON.stringify(r);
-
-                  if (r.response.numFound > 0) {
-                    displayOtherCaptures(r.response.docs);
-                    displayLastCaptureMetadata(
-                      r.response.docs[r.response.docs.length - 1]
-                    );
-                  } else {
-                    toolContent.innerHTML = "not found";
-                  }
-                });
-            }
-              break;
-
-    
-            default:
-              break;
-          }
-        });
-      } else {
-        node.on("click", (e, d) => {
-          const circle = d3.select(e.target);
-
-          circle.attr("stroke-width", 3).attr("stroke", "#FF0F0F");
-
-          if (previousCircle) {
-            previousCircle.attr("stroke-width", 3).attr("stroke", "#0FFF50");
-          }
-
-          previousCircle = circle;
-
-          toolContent.innerHTML = "";
-          switch (d.type) {
-            case "domain":
-              toolContent.innerHTML = d.id;
-              break;
-            case "ghost":
-              toolContent.innerHTML = `
-                <hr>
-              ${d.id}
-                <br><hr><br>
-                This page was not captured by the archive.`;
-              break;
-            case "capture":
-              for (const key in documentMap[d.id]) {
-                toolContent.innerHTML += `<strong>${key}</strong><br>${
-                  documentMap[d.id][key]
-                }  <br><hr>`;
-              }
-
-              documentMap[d.id].enrichment.links.forEach(
-                (l) => (toolContent.innerHTML += `<br>${l}`)
-              );
-
-              break;
-          }
-        });
-      }
-
-      node.append("title").text((d) => d.id);
-
-      link.raise();
-      // Add a drag behavior.
 
       // Set the position attributes of links and nodes each time the simulation ticks.
       function ticked() {
@@ -3402,48 +3120,498 @@ const archotype = (id) => {
         node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
 
         nodetitle.attr("x", (d) => d.x).attr("y", (d) => d.y);
+        titlecontrast
+          .attr("x", (d) => d.x - d.name.length * 2)
+          .attr("y", (d) => d.y - 7);
       }
-
-      node.call(
-        d3
-          .drag()
-          .on("start", dragstarted)
-          .on("drag", dragged)
-          .on("end", dragended)
-      );
-
-      const displayDomainData = (d) => {
-        toolContent.innerHTML = "Domain: " + d.name;
-      };
 
       // Reheat the simulation when drag starts, and fix the subject position.
       function dragstarted(event) {
-        if (event.subject.domain) {
-          displayDomainData(event.subject);
-
-          if (!event.active) simulation.alphaTarget(0.3).restart();
-          event.subject.fx = event.subject.x;
-          event.subject.fy = event.subject.y;
-        }
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        event.subject.fx = event.subject.x;
+        event.subject.fy = event.subject.y;
       }
 
       // Update the subject (dragged node) position during drag.
       function dragged(event) {
-        if (event.subject.domain) {
-          event.subject.fx = event.x;
-          event.subject.fy = event.y;
-        }
+        event.subject.fx = event.x;
+        event.subject.fy = event.y;
       }
 
       // Restore the target alpha so the simulation cools after dragging ends.
       // Unfix the subject position now that it’s no longer being dragged.
       function dragended(event) {
-        if (event.subject.domain) {
-          if (!event.active) simulation.alphaTarget(0);
-          event.subject.fx = null;
-          event.subject.fy = null;
-        }
+        if (!event.active) simulation.alphaTarget(0);
+        event.subject.fx = null;
+        event.subject.fy = null;
       }
+
+      var currentSelection = 0;
+
+      const nodeGroupArray = Object.values(nodegroupmap).sort(
+        (a, b) => a.nodes.length - b.nodes.length
+      );
+
+      const archotypeSelectionMenu = () => {
+        toolContent.innerHTML = "<h3>Select a cluster</h3><br><hr><br>";
+
+        link.style("display", "block");
+        node.style("display", "block");
+
+        nodeGroupArray.forEach((group, i) => {
+          // radio selection
+
+          const groupName = `${Object.keys(group.nameParts).toString()} (${
+            group.nodes.length
+          })`;
+
+          const radioGroup = document.createElement("input");
+          radioGroup.type = "radio";
+          radioGroup.checked = currentSelection === i;
+          radioGroup.value = groupName;
+          radioGroup.name = "nodeCluster";
+          radioGroup.id = groupName;
+
+          radioGroup.addEventListener("change", () => {
+            if (radioGroup.checked) {
+              regenerateGraph(group.nodes);
+              currentSelection = i;
+            }
+          });
+
+          const radioLabel = document.createElement("label");
+          radioLabel.innerText = groupName;
+          radioLabel.for = radioLabel;
+          toolContent.append(
+            radioGroup,
+            radioLabel,
+            document.createElement("br")
+          );
+        });
+      };
+
+      bgrect.on("click", archotypeSelectionMenu);
+
+      //let domainCount = Object.keys(domainMap).length;
+
+      var node = g.append("g");
+      var link = g.append("g");
+      var nodetitle = g.append("g");
+      var titlecontrast = g.append("g");
+
+      const regenerateGraph = (localNodeData) => {
+        // purge existing graph
+        node.remove();
+        link.remove();
+        nodetitle.remove();
+        titlecontrast.remove();
+
+        // recreate linkData
+
+        const localLinkData = [];
+
+        const nodeMap = {};
+        const localDomainData = [];
+
+        localNodeData.forEach((d) => {
+          nodeMap[d.id] = 1;
+
+          if (d.domain) {
+            localDomainData.push(d);
+          }
+        });
+
+        linkData.forEach((link) => {
+          if (
+            nodeMap.hasOwnProperty(link.target.id) ||
+            nodeMap.hasOwnProperty(link.source.id)
+          ) {
+            localLinkData.push(link);
+          }
+        });
+
+        //recreate SVG groups
+
+        // Add a line for each link, and a circle for each node.
+        link = g
+          .append("g")
+          .attr("stroke", "#999")
+          .attr("stroke-opacity", 0.6)
+          .selectAll()
+          .data(localLinkData)
+          .join("line")
+          .style("display", (d) =>
+            d.color === "tranparent" ? "none" : "block"
+          )
+          .attr("stroke-width", (d) => d.weight)
+          .attr("stroke", (d) => d.color)
+          .attr("marker-end", (d) =>
+            d.type === "page2domain" ? 0 : "url(#arrow)"
+          );
+
+        // on click, fetch the data from the data source if it exists
+
+        node = g
+          .append("g")
+          .attr("stroke", "#fff")
+          .attr("stroke-width", 1.5)
+          .selectAll()
+          .data(localNodeData)
+          .join("circle")
+          .attr("r", 5)
+          .style("display", (d) => (d.domain ? "none" : "block"))
+
+          .attr("fill", (d) => d.color);
+
+        titlecontrast = g
+          .append("g")
+          .selectAll()
+          .data(localDomainData)
+          .join("rect")
+          .attr("fill", "rgba(255,255,255,0.8)")
+          .attr("width", (d) => d.name.length * 4)
+          .attr("height", 9);
+
+        nodetitle = g
+          .append("g")
+          .attr("text-anchor", "middle")
+          .attr("dy", "-5px")
+          .style("user-select", "none")
+          .style("pointer-events", "none")
+          .style("font-weight", "bolder")
+          .selectAll()
+          .data(localDomainData)
+          .join("text")
+          .style("font-size", "6px")
+          .attr("fill", "black")
+          .text((d) => d.name);
+
+        // here, it is taken as a given that the async race will be won by the
+        // invoker given that interrogating dexie is more tedious but this might
+        // end up breaking at some point for framework reasons.
+
+        node.style("cursor", (d) => (d.domain ? "move" : "pointer"));
+
+        let previousCircle = 0;
+        let previousSearch = 0;
+
+        // This function is called when the user is within an authorized network that
+        // can resolve a web archive page capture. It shows the authorized metadata (potentially, the page's content)
+        // and lets them look for a string in the "content" field (if accessible).
+
+        const displayLastCaptureMetadata = (doc) => {
+          const accessButton = document.createElement("button");
+          accessButton.innerText = "Ouvrir dans les archives";
+          accessButton.style = "margin:10px;";
+
+          const archtarget = `${arkViewer}/${doc.wayback_date}/${doc.url}`;
+          accessButton.addEventListener("click", () =>
+            shell.openExternal(archtarget)
+          );
+
+          const content = document.createElement("div");
+
+          const toolSearch = document.createElement("input");
+          toolSearch.style = "padding:5px;border-bottom:1px solid #141414";
+          toolSearch.type = "text";
+          toolSearch.placeholder = "Search term or expression";
+
+          toolSearch.addEventListener("focusin", () => (keylock = 1));
+          toolSearch.addEventListener("focusout", () => (keylock = 0));
+
+          const toolResult = document.createElement("div");
+
+          const searchTerm = () => {
+            toolResult.innerHTML =
+              "Fragments from the content of the captured page:<br><br>";
+            var sliced = "";
+
+            const target = toolSearch.value;
+            previousSearch = target;
+
+            if (target.length > 2) {
+              var re = new RegExp(target, "gi"),
+                str = doc.content;
+              while ((match = re.exec(str)) != null) {
+                // var extrait = doc.content.substring(match.index - 150, match.index + 150)
+                //.replace(target, "<mark>" + target + "</mark>")
+
+                const extrait =
+                  doc.content.substring(match.index - 150, match.index) +
+                  "<mark>" +
+                  doc.content.substring(
+                    match.index,
+                    match.index + target.length
+                  ) +
+                  "</mark>" +
+                  doc.content.substring(
+                    match.index + target.length,
+                    match.index + 150
+                  );
+
+                sliced += extrait + "<br><hr><br>";
+              }
+
+              toolResult.innerHTML =
+                "<div style = 'border:1px solid black; padding:5px'>" +
+                sliced +
+                "</div><br><hr><br>";
+            }
+          };
+
+          if (previousSearch) {
+            toolSearch.value = previousSearch;
+            searchTerm();
+          }
+
+          toolSearch.addEventListener("change", searchTerm);
+          toolContent.innerHTML = "";
+
+          if (doc.hasOwnProperty("url")) {
+            content.innerHTML += `<div style = "font-weight:bold" >url</div ><div>${doc["url"]}</div><br>`;
+          }
+          for (const key in doc) {
+            content.innerHTML += `<div style = "font-weight:bold" > ${key}</div ><div>${doc[key]}</div><br>`;
+          }
+          toolContent.append(toolSearch, accessButton, toolResult, content);
+        };
+
+        // This displays all available captures of that page on a timeline and loads
+        // a selected capture on click
+
+        var captureTimeline;
+
+        const displayOtherCaptures = (docs) => {
+          //purge previous timeline
+          if (captureTimeline) {
+            captureTimeline.remove();
+          }
+
+          //create new
+          captureTimeline = svg
+            .append("g")
+            .attr("id", "captureTimeline")
+            .attr(
+              "transform",
+              `translate(${width - toolWidth},${height * 0.1})`
+            );
+
+          //background rect
+          captureTimeline
+            .append("rect")
+            .attr("height", height * 0.84)
+            .attr("rx", 10)
+            .attr("width", 200)
+            .attr("y", -height * 0.02)
+            .attr("x", -80)
+            .attr("stroke", "gray")
+            .attr("stroke-width", 0.5)
+            .attr("fill", "rgba(255,255,255,0.8)");
+
+          const data = [];
+          var dateMap = {};
+
+          docs.forEach((d) => {
+            const capture = {};
+            capture.date = new Date(d.crawl_date);
+            capture.id = d.id;
+            const day = JSON.stringify(d.wayback_date).substring(0, 8);
+
+            capture.metadata = d;
+
+            if (!dateMap.hasOwnProperty(day)) {
+              dateMap[day] = 0;
+            }
+
+            dateMap[day]++;
+
+            capture.count = dateMap[day];
+
+            data.push(capture);
+          });
+
+          const y = d3
+            .scaleUtc()
+            .domain(d3.extent(data, (d) => d.date))
+            .nice()
+            .range([height * 0.8, 0]);
+
+          const x = d3
+            .scaleLinear()
+            .domain(d3.extent(data, (d) => d.count))
+            .nice()
+            .range([8, 52]);
+
+          captureTimeline
+            .append("g")
+            .call(d3.axisLeft(y).tickFormat(d3.utcFormat("%d / %m / %Y")));
+
+          captureTimeline
+            .append("g")
+            .selectAll("circle")
+            .data(data)
+            .join("circle")
+            .attr("cx", (d) => x(d.count))
+            .attr("cy", (d) => y(d.date))
+            .attr("r", 3)
+            .style("cursor", "pointer")
+            .on("click", (e, d) => {
+              d3.select(e.target).attr("fill", "green");
+              displayLastCaptureMetadata(d.metadata);
+            });
+
+          captureTimeline
+            .transition()
+            .duration(250)
+            .attr(
+              "transform",
+              `translate(${width - toolWidth - 65},${height * 0.1})`
+            );
+        };
+
+        node.on("click", (e, d) => {
+          const circle = d3.select(e.target);
+
+          const linkedNodeMap = {};
+          linkedNodeMap[d.id] = 1;
+
+          link.style("display", (l) => {
+            if (l.target.id === d.id) {
+              linkedNodeMap[l.source.id] = 1;
+              return "block";
+            } else if (l.source.id === d.id) {
+              linkedNodeMap[l.target.id] = 1;
+              return "block";
+            } else {
+              return "none";
+            }
+          });
+
+          node.style("display", (n) => {
+            if (linkedNodeMap.hasOwnProperty(n.id)) {
+              return "block";
+            } else {
+              return "none";
+            }
+          });
+
+          circle.attr("stroke-width", 3).attr("stroke", "#FF0F0F");
+
+          if (previousCircle) {
+            previousCircle.attr("stroke-width", 3).attr("stroke", "#0FFF50");
+          }
+
+          previousCircle = circle;
+          if (resolver) {
+            if (captureTimeline) {
+              captureTimeline
+                .transition()
+                .duration(250)
+                .attr("transform", `translate(${width},${height * 0.1})`);
+            }
+
+            switch (d.type) {
+              case "domain":
+                break;
+
+              case "ghost":
+              // interrogating ghosts, ie pages that are not in the corpus
+              // but that are linked to by captures within the corpus
+              // these may or may not be in the archive
+
+              case "capture":
+                // find the collection to target
+                var targetCollection;
+
+                // if this is a capture, this is straightforward
+                if (documentMap.hasOwnProperty(d.id)) {
+                  targetCollection =
+                    documentMap[d.id].enrichment.solrCollection;
+                } else {
+                  // else this is a ghost, find the origine capture linking to it
+                  // to make sure it is collection-consistent
+                  links.forEach((l) => {
+                    if (l.target.id === d.id) {
+                      targetCollection =
+                        documentMap[l.source.id].enrichment.solrCollection;
+                    }
+                  });
+                }
+
+                if (targetCollection) {
+                  fetch(
+                    `http://${resolver}/solr/${targetCollection}/select?q=url:${JSON.stringify(
+                      d.id.replaceAll("&", "%26")
+                    )}`
+                  )
+                    .then((r) => r.json())
+                    .then((r) => {
+                      toolContent.innerHTML = JSON.stringify(r);
+
+                      if (r.response.numFound > 0) {
+                        displayOtherCaptures(r.response.docs);
+                        displayLastCaptureMetadata(
+                          r.response.docs[r.response.docs.length - 1]
+                        );
+                      } else {
+                        toolContent.innerHTML =
+                          "<hr>" + d.id + " not found.<hr>";
+                      }
+                    });
+                }
+                break;
+
+              default:
+                break;
+            }
+          } else {
+            toolContent.innerHTML = "";
+            switch (d.type) {
+              case "domain":
+                toolContent.innerHTML = d.id;
+                break;
+              case "ghost":
+                toolContent.innerHTML = `
+                <hr>
+              ${d.id}
+                <br><hr><br>
+                You are not connected to the archive repository.`;
+                break;
+              case "capture":
+                for (const key in documentMap[d.id]) {
+                  toolContent.innerHTML += `<strong>${key}</strong><br>${
+                    documentMap[d.id][key]
+                  }  <br><hr>`;
+                }
+
+                documentMap[d.id].enrichment.links.forEach(
+                  (l) => (toolContent.innerHTML += `<br>${l}`)
+                );
+
+                break;
+            }
+          }
+        });
+
+        node.append("title").text((d) => d.id);
+
+        link.raise();
+
+        // drag behavior
+        node.call(
+          d3
+            .drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended)
+        );
+
+        simulation.nodes(localNodeData).on("tick", ticked);
+        simulation.force("link").links(localLinkData);
+        simulation.alpha(1).restart();
+      };
+
+      regenerateGraph(nodeGroupArray[0].nodes);
 
       svg.call(
         d3
@@ -3461,94 +3629,97 @@ const archotype = (id) => {
       }
 
       // legend
+      const createLegend = () => {
+        const legend = svg.append("g");
 
-      const legend = svg.append("g");
-
-      // legend bg rect
-      legend
-        .append("rect")
-        .attr("width", 320)
-        .attr("height", 45)
-        .attr("stroke", "black")
-        .attr("stroke-width", 0.5)
-        .attr("fill", "white")
-        .attr("x", 10)
-        .attr("y", window.innerHeight - 68);
-
-      const linksLegend = [
-        {
-          color: "rgba(100,100,100,0.3)",
-          weight: 0.5,
-          desc: "capture <-> ghost link",
-        },
-        {
-          color: "rgba(100,160,210,0.7)",
-          weight: 2,
-          desc: "capture -> other capture link",
-        },
-        {
-          color: "rgba(255,140,10,0.5)",
-          weight: 2,
-          desc: "capture -> other domain link",
-        },
-      ];
-
-       const nodeLegend = [
-        {
-          color: "rgba(100,100,100,0.3)",
-          
-          desc: "Ghost page (not in corpus)",
-        },
-        {
-          color: "blue",
-          
-          desc: "Capture page",
-        },
-        {
-          color:"orange",
-          desc: "Domain node",
-        },
-      ];
-
-      for (let i = 0; i < 3; i++) {
-        const l = linksLegend[i];
-
-        const n = nodeLegend[i];
-
-        legend
-          .append("circle")
-     
-          .attr("fill", n.color)
-          .attr("cx", 20)
-          .attr("r",4)
-          .attr("cy", window.innerHeight - 58 + i * 12);
-
-
-        legend
-          .append("text")
-          .text(n.desc)
-          .style("font-size", "9px")
-          .attr("x", 35)
-          .attr("y", window.innerHeight - 55 + i * 12);
-
+        // legend bg rect
         legend
           .append("rect")
-          .attr("width", 20)
-          .attr("height", l.weight * 2)
-          .attr("fill", l.color)
-          .attr("x", 165)
-          .attr("y", window.innerHeight - 60 + i * 12);
+          .attr("width", 320)
+          .attr("height", 45)
+          .attr("stroke", "black")
+          .attr("stroke-width", 0.5)
+          .attr("fill", "white")
+          .attr("x", 10)
+          .attr("y", window.innerHeight - 68);
 
-        legend
-          .append("text")
-          .text(l.desc)
-          .style("font-size", "9px")
-          .attr("x", 195)
-          .attr("y", window.innerHeight - 55 + i * 12);
-      }
+        const linksLegend = [
+          {
+            color: "rgba(100,100,100,0.3)",
+            weight: 0.5,
+            desc: "capture <-> ghost link",
+          },
+          {
+            color: "rgba(100,160,210,0.7)",
+            weight: 2,
+            desc: "capture -> other capture link",
+          },
+          {
+            color: "rgba(255,140,10,0.5)",
+            weight: 2,
+            desc: "capture -> other domain link",
+          },
+        ];
+
+        const nodeLegend = [
+          {
+            color: "rgba(100,100,100,0.3)",
+            desc: "Ghost page (not in corpus)",
+          },
+          {
+            color: "blue",
+            desc: "Capture page",
+          },
+          {
+            color: "transparent",
+            desc: "",
+          },
+        ];
+
+        for (let i = 0; i < 3; i++) {
+          const l = linksLegend[i];
+
+          const n = nodeLegend[i];
+
+          legend
+            .append("circle")
+
+            .attr("fill", n.color)
+            .attr("cx", 20)
+            .attr("r", 4)
+            .attr("cy", window.innerHeight - 58 + i * 12);
+
+          legend
+            .append("text")
+            .text(n.desc)
+            .style("font-size", "9px")
+            .attr("x", 35)
+            .attr("y", window.innerHeight - 55 + i * 12);
+
+          legend
+            .append("rect")
+            .attr("width", 20)
+            .attr("height", l.weight * 2)
+            .attr("fill", l.color)
+            .attr("x", 165)
+            .attr("y", window.innerHeight - 60 + i * 12);
+
+          legend
+            .append("text")
+            .text(l.desc)
+            .style("font-size", "9px")
+            .attr("x", 195)
+            .attr("y", window.innerHeight - 55 + i * 12);
+        }
+      };
+
+      createLegend();
 
       loadType();
+
       document.getElementById("tooltip").append(toolContent);
+
+      archotypeSelectionMenu();
     })
     .catch((error) => {
       console.log(error);
@@ -3566,7 +3737,7 @@ const archotype = (id) => {
     view.attr("transform", thatZoom);
   };
 
-  ipcRenderer.send("console-logs", "Starting anthropotype");
+  ipcRenderer.send("console-logs", "Starting archotype");
 };
 
 // ========= ANTHROPOTYPE =========
