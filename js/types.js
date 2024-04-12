@@ -659,24 +659,16 @@ const archotype = (id) => {
     .append("marker")
     .attr("id", "arrow")
     .attr("viewBox", "0 -5 10 10")
-    .attr("refX", 15)
+    .attr("refX", 55)
     .attr("refY", 0)
     .attr("markerWidth", 6)
     .attr("markerHeight", 6)
     .attr("orient", "auto")
     .append("path")
-    .attr("fill", "rgba(0,0,0,0.2)")
+    .attr("fill", "black")
     .attr("stroke", "gray")
     .attr("stroke-width", 0.2)
-    .attr(
-      "d",
-      "M 0,-2 L 4 ,0 L 0,2"
-      /* d3.line()([
-        [0, 0],
-        [0, ma],
-        [ma, mb],
-      ]) */
-    );
+    .attr("d", "M 0,-2 L 4 ,0 L 0,2");
   const toolContent = document.createElement("div");
   //======== DATA CALL & SORT =========
 
@@ -790,8 +782,8 @@ const archotype = (id) => {
                     linkData.push({
                       source,
                       target,
-                      color: "rgba(100,160,210,0.7)",
-                      weight: 2,
+                      color: "rgb(100,160,210)",
+                      weight: 0.5,
                       type: "page2page",
                     });
                   } else if (
@@ -805,8 +797,8 @@ const archotype = (id) => {
                     linkData.push({
                       source,
                       target: host,
-                      color: "rgba(255,140,10,0.5)",
-                      weight: 2,
+                      color: "rgb(255,140,10)",
+                      weight: 0.5,
                       type: "pageNOTcorpus",
                     });
                   } else {
@@ -815,8 +807,8 @@ const archotype = (id) => {
                     ghostLinksMap[sourceURL + target] = {
                       source,
                       target,
-                      color: "rgba(100,100,100,0.3)",
-                      weight: 1,
+                      color: "rgb(150,150,150)",
+                      weight: 0.1,
                       type: "ghost",
                     };
                   }
@@ -1060,7 +1052,6 @@ const archotype = (id) => {
         link = g
           .append("g")
           .attr("stroke", "#999")
-          .attr("stroke-opacity", 0.6)
           .selectAll()
           .data(localLinkData)
           .join("line")
@@ -1083,8 +1074,6 @@ const archotype = (id) => {
           .data(localNodeData)
           .join("circle")
           .attr("r", 5)
-          .style("display", (d) => (d.domain ? "none" : "block"))
-
           .attr("fill", (d) => d.color);
 
         titlecontrast = g
@@ -1469,17 +1458,17 @@ const archotype = (id) => {
 
         const linksLegend = [
           {
-            color: "rgba(100,100,100,0.3)",
+            color: "rgb(100,100,100)",
             weight: 0.5,
             desc: "capture <-> ghost link",
           },
           {
-            color: "rgba(100,160,210,0.7)",
+            color: "rgb(100,160,210)",
             weight: 2,
             desc: "capture -> other capture link",
           },
           {
-            color: "rgba(255,140,10,0.5)",
+            color: "rgb(255,140,10)",
             weight: 2,
             desc: "capture -> other domain link",
           },
@@ -1487,16 +1476,16 @@ const archotype = (id) => {
 
         const nodeLegend = [
           {
-            color: "rgba(100,100,100,0.3)",
+            color: "rgb(150,150,150)",
             desc: "Ghost page (not in corpus)",
           },
           {
             color: "blue",
-            desc: "Capture page",
+            desc: "Page capture",
           },
           {
-            color: "transparent",
-            desc: "",
+            color: "orange",
+            desc: "Host",
           },
         ];
 
