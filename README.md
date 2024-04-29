@@ -2,31 +2,26 @@
 
 # PANDORÆ
 
-For more information on PANDORÆ, go to the [project page](https://guillaume-levrier.github.io/PANDORAE/), check the [Wiki](https://github.com/Guillaume-Levrier/PANDORAE/wiki) and the [Twitter](https://mobile.twitter.com/PANDORAE_CORE) account.
+PANDORÆ is a software built for scientific research. Its purpose is to enable its users to retrieve, normalize, and explore collections of documents from various established sources.
 
-Please put your extracted PANDORÆ folder/app where you usually put apps on your computer (i.e. Program Files on Windows, Applications on macOS). It might still work if you don't.
+This software is under active development. Some endpoints might not work due to bugs on either ends. Do not hesitate to [tag me on twitter](https://twitter.com/g_levrier) if you need help.
 
-### Roadmap
+PANDORÆ is an [electron-based](https://www.electronjs.org/) portable desktop application. You can click on the [releases link](https://github.com/Guillaume-Levrier/PANDORAE/releases) and download the most recent version relevant to your operating system. It does not need to be installed. If your computer can support the Google Chrome web browser, chances are you can run PANDORÆ.
 
-Future version : "1.0.04"
+## Why use PANDORÆ?
 
-#### Goals for 1.0.04
+Most databases useful for research now offer APIs, that is software interfaces made to answer requests sent by other software. PANDORÆ helps you send such request without having to write any type of code, store the retrieved content in [Zotero](https://www.zotero.org/), and explore the resulting collection using its visualization tools. It offers a range of premade connections with services such as:
 
-_Main_
+- Scientific research outputs providers such as [bioRxiv](https://www.biorxiv.org/), [Scopus](https://www.scopus.com/), [Web of Science](clarivate.com) or [ISTEX](https://www.istex.fr/).
+- Institutional repositories such as the [Bibliothèque de France Web Archives](https://www.bnf.fr/en/web-legal-deposit) or the French parliamentary debates data collected by [Regards Citoyens](https://www.regardscitoyens.org/).
+- Web crawling exploration strategies such as [Hyphe](https://hyphe.medialab.sciences-po.fr/).
+- Social media such as Twitter (now under the form of flat datasets).
+- [Clinical trials](https://clinicaltrials.gov/) data.
 
-- continuous integration at each release using GitHub actions
+You can find an example of what PANDORÆ can do in [this article](https://hal.science/hal-04309075).
 
-_FLUX/CHAEROS_
+Using PANDORÆ gives you a stable and (to some extent) reproducible way to obtain data, save it on multiple supports, and explore it following several types of perspectives. 
 
-- calculate flux based on available services
-- direct Twitter and WoS API requests
-- direct HAL requests
+## Enriching exploration
 
-_Main/PANDORAE.JS_
-
-- Localize main field/console commands
-- drag&drop PÆ dataset
-
-_Tutorial_
-
-- update/localize tutorial
+PANDORÆ is an open-source software which welcomes enhancements. If a data source you need is not available, or if you would like to have a different way to explore a collection, do ask for it or even propose a [pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) if you're up to it!
