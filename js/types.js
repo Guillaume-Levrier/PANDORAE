@@ -669,7 +669,13 @@ const archotype = (id) => {
     .attr("stroke", "gray")
     .attr("stroke-width", 0.2)
     .attr("d", "M 0,-2 L 4 ,0 L 0,2");
+
+
   const toolContent = document.createElement("div");
+
+        var captureTimeline;
+
+
   //======== DATA CALL & SORT =========
 
   pandodb.archotype
@@ -969,6 +975,17 @@ const archotype = (id) => {
       );
 
       const archotypeSelectionMenu = () => {
+
+         if (captureTimeline) {
+               captureTimeline
+            .transition()
+            .duration(250)
+            .attr(
+              "transform",
+              `translate(${width },${height * 0.1})`
+            );
+          }
+
         toolContent.innerHTML = "<h3>Select a cluster</h3><br><hr><br>";
 
         link.style("display", "block");
@@ -1192,7 +1209,7 @@ const archotype = (id) => {
         // This displays all available captures of that page on a timeline and loads
         // a selected capture on click
 
-        var captureTimeline;
+  
 
         const displayOtherCaptures = (docs) => {
           //purge previous timeline
@@ -1266,7 +1283,7 @@ const archotype = (id) => {
             .join("circle")
             .attr("cx", (d) => x(d.count))
             .attr("cy", (d) => y(d.date))
-            .attr("r", 3)
+            .attr("r", 5)
             .style("cursor", "pointer")
             .on("click", (e, d) => {
               d3.select(e.target).attr("fill", "green");
@@ -1322,6 +1339,8 @@ const archotype = (id) => {
                 .duration(250)
                 .attr("transform", `translate(${width},${height * 0.1})`);
             }
+
+     
 
             switch (d.type) {
               case "domain":
