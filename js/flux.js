@@ -2818,7 +2818,7 @@ const downloadData = () => {
 window.addEventListener("load", (event) => {
   var buttonList = [
     { id: "checkPPS", func: "checkPPS" },
-    { id: "change-user-id", func: "changeUserID" },
+    //    { id: "change-user-id", func: "changeUserID" },
     { id: "manual-merge-authors", func: "manualMergeAuthors" },
     { id: "wos-basic-query", func: "wosBasicRetriever" },
     {

@@ -1,112 +1,108 @@
 <!DOCTYPE html>
 <html>
-  <meta charset="UTF-8" />
-  <meta
-    http-equiv="Content-Security-Policy"
-    content="script-src 'self';object-src 'none';base-uri 'none';"
-  />
-  <title>PANDORÆ-FLUX</title>
-  <link rel="stylesheet" type="text/css" href="css/pandorae.css" />
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy"
+  content="script-src 'self';object-src 'none';base-uri 'none';" />
+<title>PANDORÆ-FLUX</title>
+<link rel="stylesheet" type="text/css" href="css/pandorae.css" />
 
-  <style>
-    body {
-      overflow: scroll;
-      text-align: justify;
-      color: black;
-      opacity: 0;
+<style>
+  body {
+    overflow: scroll;
+    text-align: justify;
+    color: black;
+    opacity: 0;
+    background-color: white;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  #slideSections {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  .step {
+    font-family: "Noto Sans", "Noto Sans SC", sans-serif;
+    font-size: 16px;
+    line-height: 26px;
+  }
+
+  .centerStep {
+    text-align: center;
+  }
+
+  a {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  sections .title {
+    font-family: "Noto Sans", "Noto Sans SC", sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 2px;
+    color: #262626;
+    line-height: 1.2em;
+  }
+
+  .commands {
+    font-size: 16px;
+    font-family: monospace;
+  }
+
+  #dialogDiv {
+    position: fixed;
+    z-index: 20;
+    padding: 5px;
+    right: 0px;
+    top: 0px;
+    width: 60px;
+  }
+
+  @keyframes invert {
+    from {
       background-color: white;
+      color: black;
     }
 
-    ::-webkit-scrollbar {
-      display: none;
+    to {
+      background-color: black;
+      color: white;
     }
-    #slideSections {
-      padding-left: 40px;
-      padding-right: 40px;
-    }
+  }
 
-    .step {
-      font-family: "Noto Sans", "Noto Sans SC", sans-serif;
-      font-size: 16px;
-      line-height: 26px;
-    }
+  #progressBar {
+    position: fixed;
+    z-index: 19;
+    top: 0px;
+    left: calc(100%-4px);
+    width: 4px;
+    height: 0px;
+    background-color: #141414;
+  }
+</style>
 
-    .centerStep {
-      text-align: center;
-    }
+<body>
+  <div id="slideSections"></div>
+  <div id="progressBar"></div>
 
-    a {
-      text-decoration: underline;
-      cursor: pointer;
-    }
-
-    sections .title {
-      font-family: "Noto Sans", "Noto Sans SC", sans-serif;
-      font-size: 18px;
-      font-weight: 900;
-      margin-bottom: 2px;
-      color: #262626;
-      line-height: 1.2em;
-    }
-
-    .commands {
-      font-size: 16px;
-      font-family: monospace;
-    }
-
-    #dialogDiv {
-      position: fixed;
-      z-index: 20;
-      padding: 5px;
-      right: 0px;
-      top: 0px;
-      width: 60px;
-    }
-
-    @keyframes invert {
-      from {
-        background-color: white;
-        color: black;
-      }
-      to {
-        background-color: black;
-        color: white;
-      }
-    }
-
-    #progressBar {
-      position: fixed;
-      z-index: 19;
-      top: 0px;
-      left: calc(100%-4px);
-      width: 4px;
-      height: 0px;
-      background-color: #141414;
-    }
-  </style>
-  <body>
-    <div id="slideSections"></div>
-    <div id="progressBar"></div>
-
-    <div id="dialogDiv">
-      <i
-        class="material-icons dialog-buttons"
-        id="backarrow"
-        style="display: none"
-        >arrow_back</i
-      >
-      <i class="material-icons dialog-buttons" id="refresher">refresh</i>
-      <i class="material-icons dialog-buttons" id="closeDisplay">close</i>
-      <div
-        id="lang"
-        style="margin-top: 0px; margin-left: 30px; width: 30px; display: block"
-      >
-        <div class="locale">FR</div>
-        <div class="locale">EN</div>
-        <div class="locale">中文</div>
-      </div>
+  <div id="dialogDiv">
+    <i class="material-icons dialog-buttons" id="backarrow"
+      style="display: none">arrow_back</i>
+    <i class="material-icons dialog-buttons" id="refresher">refresh</i>
+    <i class="material-icons dialog-buttons" id="closeDisplay">close</i>
+    <div id="lang"
+      style="margin-top: 0px; margin-left: 30px; width: 30px; display: block">
+      <div class="locale">FR</div>
+      <div class="locale">EN</div>
+      <!-- <div class="locale">中文</div> -->
     </div>
+  </div>
 
-    <link rel="icon" type="image/png" href="img/AE-favicon.png" />
-  </body>
+  <link rel="icon" type="image/png" href="img/AE-favicon.png" />
+</body>
+
 </html>

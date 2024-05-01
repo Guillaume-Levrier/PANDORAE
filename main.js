@@ -172,6 +172,8 @@ const openHelper = (helperFile, message) => {
   windowIds.tutorialHelper.id = win.id;
   windowIds.tutorialHelper.open = true;
 
+  console.log(message);
+
   win.once("ready-to-show", () => {
     win.webContents.send("tutorial-types", message);
     win.show();
@@ -426,7 +428,7 @@ const chaerosCalculator = () => {
 
   chaerosWindow.webContents.on("did-finish-load", function () {
     chaerosWindow.webContents.send("id", chaerosWindow.id);
-   // chaerosWindow.webContents.openDevTools();
+    // chaerosWindow.webContents.openDevTools();
   });
 };
 
@@ -814,15 +816,13 @@ const getPPSData = () => {
 
 // fullscreen main window
 
-ipcMain.handle("toggleFullScreen",async (event, req) =>{
+ipcMain.handle("toggleFullScreen", async (event, req) => {
+  let state = mainWindow.isFullScreen();
 
-    let state = mainWindow.isFullScreen()
+  mainWindow.setFullScreen(!state);
 
-    mainWindow.setFullScreen(!state);
-
-    mainWindow.reload();
-
-} );
+  mainWindow.reload();
+});
 
 // Force update (or download for the first time)
 ipcMain.on("forceUpdatePPS", async (event, req) => updatePPS(Date.now()));

@@ -52,7 +52,7 @@ var coreCanvasH = window.innerHeight;
 var coreDefW = 512;
 var coreDefH = 512;
 
-var keylock=0;
+var keylock = 0;
 
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that
@@ -1092,47 +1092,47 @@ const loadTheme = (theme) => {
 // ====== KEYBOARD SHORTCUTS ======
 
 const keyShortCuts = (event) => {
-  if (!keylock) {  
-  switch (event.isComposing || event.code) {
-    case "Digit1":
-      if (coreExists) {
+  if (!keylock) {
+    switch (event.isComposing || event.code) {
+      case "Digit1":
+        if (coreExists) {
+          toggleMenu();
+        }
+        break;
+
+      case "Digit2":
+        toggleFlux();
         toggleMenu();
-      }
-      break;
+        break;
 
-    case "Digit2":
-      toggleFlux();
-      toggleMenu();
-      break;
-
-    case "Digit3":
-      if (coreExists) {
-        if (toggledMenu === false) {
-          toggleMenu();
+      case "Digit3":
+        if (coreExists) {
+          if (toggledMenu === false) {
+            toggleMenu();
+          }
+          categoryLoader("type");
         }
-        categoryLoader("type");
-      }
-      break;
+        break;
 
-    case "Backquote":
-      location.reload();
+      case "Backquote":
+        location.reload();
 
-      break;
+        break;
 
-    case "Digit4":
-      toggleConsole();
-      break;
+      case "Digit4":
+        toggleConsole();
+        break;
 
-    case "Digit5":
-      if (xtypeExists) {
-        if (toggledMenu === false) {
-          toggleMenu();
+      case "Digit5":
+        if (xtypeExists) {
+          if (toggledMenu === false) {
+            toggleMenu();
+          }
+          categoryLoader("export");
         }
-        categoryLoader("export");
-      }
 
-      break;
-  }
+        break;
+    }
   }
 };
 
@@ -1468,9 +1468,9 @@ const cmdinput = (input) => {
         commandReturn = version;
         break;
 
-         case CM.mainField.fullscreen:
-      ipcRenderer.invoke("toggleFullScreen", true);
-       commandReturn="";
+      case CM.mainField.fullscreen:
+        ipcRenderer.invoke("toggleFullScreen", true);
+        commandReturn = "";
         break;
 
       case CM.mainField.returnTutorial:
@@ -1498,7 +1498,7 @@ const cmdinput = (input) => {
     }
   }
   field.value = commandReturn;
-  setTimeout(()=>field.value="",1500)
+  setTimeout(() => (field.value = ""), 1500);
   document.getElementById("cli-field").value = commandReturn;
 };
 
@@ -1656,9 +1656,8 @@ const saveToolTip = () => {
 }
 */
 
-
-      field.addEventListener("focusin",()=>keylock=1)
-      field.addEventListener("focusout",()=>keylock=0)
+  field.addEventListener("focusin", () => (keylock = 1));
+  field.addEventListener("focusout", () => (keylock = 0));
 
   field.addEventListener("click", (event) => {
     cmdinput(field.value);
@@ -1722,13 +1721,16 @@ const saveToolTip = () => {
 
     switch (message) {
       case "flux":
+      case "istexRequest":
+      case "sendToZotero":
       case "zoteroImport":
+      case "reImportToSystem":
         openHelper("tutorialHelper", message);
         blinker("menu-icon");
         blinker("fluxMenu");
         break;
 
-      case "chronotype":
+      /* case "chronotype":
         openHelper("tutorialHelper", message);
         blinker("menu-icon");
         blinker("type");
@@ -1748,7 +1750,7 @@ const saveToolTip = () => {
         blinker("menu-icon");
         blinker("type");
         field.removeEventListener("click", openModal);
-        break;
+        break; */
 
       case "openTutorial":
         openTutorial(tutoSlide);

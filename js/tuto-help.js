@@ -16,19 +16,14 @@ let fluxContent =
 let zoteroImport =
   "<br><br>Let's now import sample data from Zotero to PANDORÆ.<br><br>" +
   "Go back to Flux, and go to the USER tab. <br><br>" +
-  "You can then enter the coordinates of the following library.<br><br>" +
-  "<i>Zotero group id:</i> <span style='font-family:monospace;'>2301232</span><br><br>" +
-  "Press 'Update User Crendentials', and then enter the API key.<br><br>" +
-  "<i>Zotero API key:</i> <span style='font-family:monospace;'>cyEn5eKACVuNTABpwtAp4V4C</span>.<br><br>" +
+  "You can then enter the coordinates of your Zotero group library.<br><br>" +
+  "This id is in the URL of the group <span style='font-family:monospace;'>https://www.zotero.org/groups/<strong>GROUP_ID</strong>/my-great-library</span><br><br>" +
+  "Press 'Update User Crendentials', and then enter the group's read/write API key.<br><br>" +
   "Press the Update <i class='material-icons'>cached</i> button.<br><br>" +
-  "The Zotero Tab should now display three sample collections.<br><br>" +
-  "Import each in the system, then go to the System Tab.<br><br>" +
-  "Import the 'intersection' dataset in 'geotype'. Name it like you want.<br><br>" +
-  "Import the 'Controversy' dataset in 'anthropotype'. Name it like you want.<br><br>" +
-  "Now Import the other two datasets <strong>at once</strong> in 'chronotype'.<br><br>" +
+  "The Zotero Tab should now display the library's collections if there are any.<br><br>" +
   "Click <a data-target='Zotero2'>here</a> to go back to the tutorial.";
 
-let chronotype =
+/* let chronotype =
   "<br><br>Open the menu again.<br><br>" +
   "Click on 'Type -> Chronotype' to display available datasets <br><br>" +
   "Click on the sample dataset you previously imported in there from Zotero through Flux.<br><br>" +
@@ -45,6 +40,36 @@ let anthropotype =
   "Click on 'Type -> Anthropotype' to display available datasets <br><br>" +
   "Click on the sample dataset you previously imported in there from Zotero through Flux.<br><br>" +
   "Click <a data-target='anthropotype'>here</a> to go back to the tutorial.";
+ */
+let istexRequest = `<br><br>Let's now learn how to send a request to ISTEX.<br><br>
+  Go back to FLUX, but this time select the ISTEX tab.<br><br>
+  For the sake of this exercise, we will use a smaller request, though a larger one may work.<br><br>
+  Type <span style='font-family:monospace;'>"Phengaris arion"</span> (quotes included) and click "retrieve basic info".<br><br>
+  This request should yield between 15 and 20 documents.<br><br>
+  If this is indeed the case, click "Submit ISTEX Query".<br><br>
+  When the main screen shows the data has been retrieved, 
+  click <a data-target='Zotero3'>here</a> to go back to the tutorial.
+  `;
+
+let sendToZotero = `Let's now learn how to send our retrieved data to our Zotero library.<br><br>
+This really is two steps: first convert to CSL-JSON, a format Zotero understands, and then proceed with the shipping.<br><br>
+Open once again FLUX and go to the <strong>CSL-JSON tab</strong>. <br><br> 
+Click on your "Phengaris arion" dataset, and click on the "Convert to CSL" button.<br><br> 
+Once the "Dataset converted" message appears again, open Flux again.<br><br>
+Go to the <strong>Zotero tab</strong> and click on the "Display available csljson files" button.<br><br> 
+Click on your "Phengaris arion" dataset, <strong>add a collection name</strong>, and click "Create a new Zotero Collection".<br><br> 
+Now go on your Zotero account and check that the collection appears in your library. 
+Click <a data-target='Chapter2'>here</a> to go back to the tutorial and learn how to reimport this data in PANDORÆ.<br><br> 
+`;
+
+let reImportToSystem = `<br><br>Let's now learn how to re-import data from our Zotero library.<br><br>
+Go back to FLUX, select the Zotero tab, and click on "Display online library collections".<br><br>
+This will show your available collections. If you imported data in Chapter 1, select the Phengaris dataset.
+Else, choose one of your collections. For the sake of this tutorial, please keep it small (lower than 200 items).<br><br>
+Click "import selected collections into system", and then click <a data-target='typeSelect'>here</a> to go back to the tutorial.
+<br><br>
+
+`;
 
 ipcRenderer.on("tutorial-types", (event, message) => {
   let content = document.createElement("div");
@@ -57,6 +82,18 @@ ipcRenderer.on("tutorial-types", (event, message) => {
     case "zoteroImport":
       content.innerHTML = zoteroImport;
       break;
+    case "istexRequest":
+      content.innerHTML = istexRequest;
+      break;
+
+    case "sendToZotero":
+      content.innerHTML = sendToZotero;
+      break;
+
+    case "reImportToSystem":
+      content.innerHTML = reImportToSystem;
+      break;
+    /* 
     case "chronotype":
       content.innerHTML = chronotype;
       break;
@@ -66,7 +103,7 @@ ipcRenderer.on("tutorial-types", (event, message) => {
 
     case "anthropotype":
       content.innerHTML = anthropotype;
-      break;
+      break; */
   }
 
   document.body.appendChild(content);
