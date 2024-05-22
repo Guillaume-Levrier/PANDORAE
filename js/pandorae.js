@@ -667,7 +667,12 @@ const selectOption = (type, id) => {
     field.value = CM.global.field.starting + type;
     currentType = { type: type, id: id };
     //types.typeSwitch(type, id);
-    typeSwitch(type, id);
+    
+    // Give time to the menu to get closed
+    setTimeout(() => typeSwitch(type, id), 400);
+    
+
+
     ipcRenderer.send("audio-channel", "button2");
     pulse(1, 1, 10);
     ipcRenderer.send(
@@ -1386,41 +1391,20 @@ const cmdinput = (input) => {
         //toggleHelp();
         break;
 
+ 
+
+      case "gazouillotype":
+      case "archotype":
+      case "anthropotype":
+      case "geotype":
       case "chronotype":
         toggleMenu();
         categoryLoader("type");
-        mainDisplay("chronotype");
+        mainDisplay(input);
         break;
 
-      case "regards":
-        toggleMenu();
-        categoryLoader("type");
-        mainDisplay("regards");
-        break;
 
-      case "geotype":
-        toggleMenu();
-        categoryLoader("type");
-        mainDisplay("geotype");
-        break;
 
-      case "anthropotype":
-        toggleMenu();
-        categoryLoader("type");
-        mainDisplay("anthropotype");
-        break;
-
-      case "archotype":
-        toggleMenu();
-        categoryLoader("type");
-        mainDisplay("archotype");
-        break;
-
-      case "gazouillotype":
-        toggleMenu();
-        categoryLoader("type");
-        mainDisplay("gazouillotype");
-        break;
 
       case CM.mainField.reload:
         document.body.style.animation = "fadeout 0.5s";

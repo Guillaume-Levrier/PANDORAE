@@ -1160,7 +1160,12 @@ const selectOption = (type, id) => {
     field.value = CM.global.field.starting + type;
     currentType = { type: type, id: id };
     //types.typeSwitch(type, id);
-    typeSwitch(type, id);
+    
+    // Give time to the menu to get closed
+    setTimeout(() => typeSwitch(type, id), 400);
+    
+
+
     ipcRenderer.send("audio-channel", "button2");
     pulse(1, 1, 10);
     ipcRenderer.send(
@@ -1879,41 +1884,20 @@ const cmdinput = (input) => {
         //toggleHelp();
         break;
 
+ 
+
+      case "gazouillotype":
+      case "archotype":
+      case "anthropotype":
+      case "geotype":
       case "chronotype":
         toggleMenu();
         categoryLoader("type");
-        mainDisplay("chronotype");
+        mainDisplay(input);
         break;
 
-      case "regards":
-        toggleMenu();
-        categoryLoader("type");
-        mainDisplay("regards");
-        break;
 
-      case "geotype":
-        toggleMenu();
-        categoryLoader("type");
-        mainDisplay("geotype");
-        break;
 
-      case "anthropotype":
-        toggleMenu();
-        categoryLoader("type");
-        mainDisplay("anthropotype");
-        break;
-
-      case "archotype":
-        toggleMenu();
-        categoryLoader("type");
-        mainDisplay("archotype");
-        break;
-
-      case "gazouillotype":
-        toggleMenu();
-        categoryLoader("type");
-        mainDisplay("gazouillotype");
-        break;
 
       case CM.mainField.reload:
         document.body.style.animation = "fadeout 0.5s";
@@ -2966,7 +2950,6 @@ const archotype = (id) => {
 
         var captureTimeline;
 
-
   //======== DATA CALL & SORT =========
 
   pandodb.archotype
@@ -3060,7 +3043,7 @@ const archotype = (id) => {
 
           // source host is the website host
           // i.e. www.example.com
-          const sourceHost = source.host || source.hostname;
+          const sourceHost = sourceURL.host // || source.hostname;
 
           if (nodemap.hasOwnProperty(source)) {
             // For each hypertext link the document is listed as having, check:
@@ -3070,7 +3053,19 @@ const archotype = (id) => {
             pageCaptureHypertextLinks.forEach((target) => {
               var host;
               try {
-                host = new URL(target).host || new URL(target).hostname;
+                const thisURL =new URL(target)
+                host = thisURL.host  //|| thisURL.hostname;
+                 } catch (error) {
+               
+               console.log(error)
+                ipcRenderer.send(
+                  "console-logs",
+                  "archotype error: url " + target + " is invalid."
+                );
+
+                //This will allow skipping the next part
+                host="";
+              }
 
                 if (host.length > 2) {
                   if (nodemap.hasOwnProperty(target)) {
@@ -3110,12 +3105,7 @@ const archotype = (id) => {
                     };
                   }
                 }
-              } catch (error) {
-                ipcRenderer.send(
-                  "console-logs",
-                  "archotype error: url " + target + " is invalid."
-                );
-              }
+             
             });
           }
         }
@@ -3265,6 +3255,53 @@ const archotype = (id) => {
         (a, b) => a.nodes.length - b.nodes.length
       );
 
+
+let clusterMeta="";
+
+      const selectedClusterMetadata=(nodes)=>{
+
+
+const div = document.getElementById("clusterMetaData")
+
+if (div){ 
+var counter = {ghosts:0,captures:0,domains:[]};
+
+nodes.forEach(n=>{
+
+  switch (n.type) {
+     case "capture":
+      counter.captures++
+      break;
+
+    case "ghost":
+      counter.ghosts++
+      break;
+
+      case "domain":
+      
+      counter.domains.push(n.id)
+      break;
+  
+    default:
+      break;
+  }
+
+} )
+
+
+clusterMeta= `<br><hr><br>For this corpus, this cluster contains: <br>
+- ${counter.captures} captured pages available in the archive<br>
+- ${counter.ghosts} pages "linked to pages" by the most recent available capture in the corpus, which might or might not be in the corpus<br>
+<br><br>
+The captures in this cluster come from ${counter.domains.length} domain(s):<br>
+` 
+
+counter.domains.forEach(d=>clusterMeta+="- "+d+"<br>")
+
+div.innerHTML=clusterMeta;
+}
+} 
+
       const archotypeSelectionMenu = () => {
 
          if (captureTimeline) {
@@ -3277,7 +3314,15 @@ const archotype = (id) => {
             );
           }
 
-        toolContent.innerHTML = "<h3>Select a cluster</h3><br><hr><br>";
+
+          if (clusterMeta){
+            
+              toolContent.innerHTML = "<div id='clusterMetaData'>"+clusterMeta+"</div><br><hr><br>";
+          } else{
+  toolContent.innerHTML = "<div id='clusterMetaData'><h3>Select a cluster</h3></div><br><hr><br>";
+          } 
+
+      
 
         link.style("display", "block");
         node.style("display", "block");
@@ -3732,11 +3777,16 @@ const archotype = (id) => {
         simulation.nodes(localNodeData).on("tick", ticked);
         simulation.force("link").links(localLinkData);
         simulation.alpha(1).restart();
+
+        selectedClusterMetadata(localNodeData);
       };
 
-      regenerateGraph(nodeGroupArray[0].nodes);
 
-      svg.call(
+      //select first, smallest corpus to display something on start
+      regenerateGraph(nodeGroupArray[0].nodes);
+      
+
+svg.call(
         d3
           .zoom()
           .extent([

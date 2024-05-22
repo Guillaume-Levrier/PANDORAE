@@ -2038,7 +2038,19 @@ const queryBnFSolr = (but) => {
       if (targetfacets.length > 0) {
         targetfacets += "%20OR%20";
       }
-      targetfacets += facet.id;
+      console.log(facet.id)
+
+      // solr needs a " for two words or more, and no " if not;
+
+      
+
+      if (facet.id.split(" ").length>1){
+        targetfacets +=`"${facet.id}"`
+      } else{
+targetfacets +=facet.id
+      }  
+
+      
     }
   }
 
@@ -3154,6 +3166,9 @@ window.addEventListener("load", (event) => {
               fetch(facetRequest)
                 .then((facet) => facet.json())
                 .then((facets) => {
+
+                  console.log(facets)
+
                   const facetList =
                     facets.facet_counts.facet_fields.collections;
 
