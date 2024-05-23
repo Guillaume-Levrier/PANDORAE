@@ -1106,8 +1106,10 @@ const keyShortCuts = (event) => {
         break;
 
       case "Digit2":
+           if (coreExists) {
         toggleFlux();
         toggleMenu();
+           } 
         break;
 
       case "Digit3":

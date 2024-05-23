@@ -702,6 +702,8 @@ const archotype = (id) => {
 
         const id = d.URL.substring(d.URL.lastIndexOf("http"));
 
+       // console.log(id)
+
         documentMap[id] = d;
 
         const elem = {
@@ -712,13 +714,20 @@ const archotype = (id) => {
           color: "blue",
         };
 
-        if (!domainMap.hasOwnProperty(d["container-title"])) {
-          // A domain node doesn't in the dataset exist, it is just a way to group
-          // all page captures together, by binding them to their hostname
+        // To establish the domain, one could in theory use the "container-title" property
+        // however this proves to be unreliable accross time, collection and captures.
+        // hence the need to rebuild it manually.
 
+        const domain = new URL(id).host;
+        d.domain=false
+
+        if (!domainMap.hasOwnProperty(domain)) {
+          // A domain node doesn't exist in the dataset, it is just a way to group
+          // all page captures together, by binding them to their host
+          //console.log(domain)
           nodeData.push({
-            id: d["container-title"],
-            name: d["container-title"],
+            id:domain,
+            name: domain,
             domain: true,
             type: "domain",
             color: "orange",
@@ -733,7 +742,7 @@ const archotype = (id) => {
 
         linkData.push({
           source: elem.id,
-          target: d["container-title"],
+          target: domain,
           color: "transparent",
           weight: 0.5,
           type: "page2domain",
@@ -741,7 +750,7 @@ const archotype = (id) => {
 
         nodeData.push(elem);
         nodemap[elem.id] = 1;
-        domainMap[d["container-title"]] = 1;
+        domainMap[domain] = 1;
       }
 
       var ghostNodeMap = {};
@@ -818,6 +827,7 @@ const archotype = (id) => {
                       weight: 0.5,
                       type: "pageNOTcorpus",
                     });
+
                   } else {
                     // this links to a page that wasn't captured, so add a ghost node+link;
                     ghostNodeMap[target] = 1;
@@ -850,6 +860,12 @@ const archotype = (id) => {
       linkData = [...linkData, ...Object.values(ghostLinksMap)];
 
       // Get node groups
+      // The decision here is to only list 1 degree common ghosts,
+      // that is finding when two captures have a common outgoing links.
+
+ ipcRenderer.send("chaeros-notification",
+                      "rebuilding by domain");
+
       nodeData.forEach((node, i) => (node.group = i));
 
       // First pass, group by domain;
@@ -865,12 +881,16 @@ const archotype = (id) => {
       // Second pass, do cross-domain by looking a nodes that are the target
       // of several links from different groups;
 
+ ipcRenderer.send("chaeros-notification","mapping nodes");
+
       // build an updated map of nodes;
       const completeNodeMap = {};
+      //
       nodeData.forEach((node) => (completeNodeMap[node.id] = node));
 
       // build a target index
       const nodeMapByTarget = {};
+
       linkData.forEach((link) => {
         if (!nodeMapByTarget.hasOwnProperty(link.target)) {
           nodeMapByTarget[link.target] = {};
@@ -879,21 +899,62 @@ const archotype = (id) => {
         nodeMapByTarget[link.target][completeNodeMap[link.source].group] = 1;
       });
 
+
+ ipcRenderer.send("chaeros-notification","building clusters");
+
       // look for all nodes that are target of links from more than 1 group;
       const mergeMap = {};
+      //
       for (const id in nodeMapByTarget) {
-        const node = Object.values(nodeMapByTarget[id]);
+        const linksFromGroups = Object.keys(nodeMapByTarget[id]);
 
-        if (node.length > 1) {
-          const keysArray = Object.keys(nodeMapByTarget[id]);
-          const keystring = keysArray.toString();
+        if (linksFromGroups.length > 1) {
+        //  const keysArray = Object.keys(nodeMapByTarget[id]);
+          
+          const keystring = linksFromGroups.toString();
+       
           if (!mergeMap.hasOwnProperty(keystring)) {
-            mergeMap[keystring] = keysArray;
+            mergeMap[keystring] = linksFromGroups;
           }
         }
       }
 
+      
+      console.log(mergeMap)
+
+      const mergedgroupmap=new Map()
+
+      const mergedMapVal =[...Object.values(mergeMap)]
+
+           mergedMapVal.forEach((mergeArray) => {
+            // the mergeArray here is an array of values (stringified numbers)
+            // that are group of nodes that should be grouped together as ["9","47","123"]
+            // which means that group 47 and 123 should be 9
+            
+            // Iterate over the array. If it is already in mergegroupmap, give it the group value
+            // else, give it the value of the first group of the array
+            
+            for (let i = 0; i < mergeArray.length; i++) {
+              const g = mergeArray[i];
+                if (!mergedgroupmap.has(g)){
+                  mergedgroupmap.set(g, mergeArray[0]); 
+                }             
+            }
+           }) 
+
+           console.log(mergedgroupmap)
+
+nodeData.forEach((node) => {
+   if (mergedgroupmap.has(JSON.stringify(node.group))){
+    node.group = parseInt(mergedgroupmap.get(node.group)) 
+   }
+})  
+
+      // merge groups together
+
+/*
       // now do the actual merge;
+      
       Object.values(mergeMap).forEach((mergeArray) => {
         nodeData.forEach((node) => {
           mergeArray.forEach((group) => {
@@ -903,7 +964,7 @@ const archotype = (id) => {
           });
         });
       });
-
+*/
       const nodegroupmap = {};
 
       nodeData.forEach((d) => {
@@ -1068,7 +1129,9 @@ div.innerHTML=clusterMeta;
 
           radioGroup.addEventListener("change", () => {
             if (radioGroup.checked) {
+             
               regenerateGraph(group.nodes);
+              
               currentSelection = i;
             }
           });
@@ -1123,6 +1186,8 @@ div.innerHTML=clusterMeta;
             localLinkData.push(link);
           }
         });
+
+       
 
         //recreate SVG groups
 
@@ -1368,6 +1433,7 @@ div.innerHTML=clusterMeta;
 
           link.style("display", (l) => {
             if (l.target.id === d.id) {
+           
               linkedNodeMap[l.source.id] = 1;
               return "block";
             } else if (l.source.id === d.id) {
@@ -1401,7 +1467,8 @@ div.innerHTML=clusterMeta;
                 .attr("transform", `translate(${width},${height * 0.1})`);
             }
 
-     
+     var targetCollection;
+
 
             switch (d.type) {
               case "domain":
@@ -1412,24 +1479,23 @@ div.innerHTML=clusterMeta;
               // but that are linked to by captures within the corpus
               // these may or may not be in the archive
 
-              case "capture":
-                // find the collection to target
-                var targetCollection;
-
-                // if this is a capture, this is straightforward
-                if (documentMap.hasOwnProperty(d.id)) {
-                  targetCollection =
-                    documentMap[d.id].enrichment.solrCollection;
-                } else {
-                  // else this is a ghost, find the origine capture linking to it
+              //  this is a ghost, find the origine capture linking to it
                   // to make sure it is collection-consistent
-                  links.forEach((l) => {
+            
+                  localLinkData.forEach((l) => {
                     if (l.target.id === d.id) {
                       targetCollection =
                         documentMap[l.source.id].enrichment.solrCollection;
                     }
                   });
-                }
+
+              case "capture":
+                // find the collection to target
+                // if this is a capture, this is straightforward
+                if (documentMap.hasOwnProperty(d.id)) {
+                  targetCollection =
+                    documentMap[d.id].enrichment.solrCollection;
+                } 
 
                 if (targetCollection) {
                   fetch(
@@ -1439,6 +1505,7 @@ div.innerHTML=clusterMeta;
                   )
                     .then((r) => r.json())
                     .then((r) => {
+                   
                       toolContent.innerHTML = JSON.stringify(r);
 
                       if (r.response.numFound > 0) {
