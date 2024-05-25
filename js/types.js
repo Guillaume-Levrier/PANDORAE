@@ -15,6 +15,7 @@ const csv = require("csv-parser");
 const versor = require("versor");
 //const Quill = require("quill");
 const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
+const helpers = require("mnemonist/set");
 const { create } = require("d3");
 //const { min } = require("d3-array");
 //END NODE MODULES
@@ -670,10 +671,9 @@ const archotype = (id) => {
     .attr("stroke-width", 0.2)
     .attr("d", "M 0,-2 L 4 ,0 L 0,2");
 
-
   const toolContent = document.createElement("div");
 
-        var captureTimeline;
+  var captureTimeline;
 
   //======== DATA CALL & SORT =========
 
@@ -700,9 +700,11 @@ const archotype = (id) => {
       for (let i = 0; i < documents.length / divider; ++i) {
         const d = documents[i];
 
-        const id = d.URL.substring(d.URL.lastIndexOf("http"));
+        const coreURL = d.URL.substring(d.URL.lastIndexOf("http"));
+        const parsedURL = new URL(coreURL);
+        // console.log(id)
 
-       // console.log(id)
+        const id = parsedURL.href;
 
         documentMap[id] = d;
 
@@ -718,15 +720,15 @@ const archotype = (id) => {
         // however this proves to be unreliable accross time, collection and captures.
         // hence the need to rebuild it manually.
 
-        const domain = new URL(id).host;
-        d.domain=false
+        const domain = parsedURL.host;
+        d.domain = false;
 
         if (!domainMap.hasOwnProperty(domain)) {
           // A domain node doesn't exist in the dataset, it is just a way to group
           // all page captures together, by binding them to their host
           //console.log(domain)
           nodeData.push({
-            id:domain,
+            id: domain,
             name: domain,
             domain: true,
             type: "domain",
@@ -777,70 +779,68 @@ const archotype = (id) => {
 
           // source host is the website host
           // i.e. www.example.com
-          const sourceHost = sourceURL.host // || source.hostname;
+          const sourceHost = sourceURL.host; // || source.hostname;
 
           if (nodemap.hasOwnProperty(source)) {
             // For each hypertext link the document is listed as having, check:
-            // 1- if there is a direct link between pages at time of their latest capture (bleu link)
+            // 1- if there is a direct link between pages at time of their latest capture (blue link)
             // 2- if there is a link between this page and another page of the target domain, but which isn't in the corpus
 
             pageCaptureHypertextLinks.forEach((target) => {
               var host;
               try {
-                const thisURL =new URL(target)
-                host = thisURL.host  //|| thisURL.hostname;
-                 } catch (error) {
-               
-               console.log(error)
+                const thisURL = new URL(target);
+                host = thisURL.host; //|| thisURL.hostname;
+              } catch (error) {
+                console.log(error);
                 ipcRenderer.send(
                   "console-logs",
                   "archotype error: url " + target + " is invalid."
                 );
 
                 //This will allow skipping the next part
-                host="";
+                host = "";
               }
 
-                if (host.length > 2) {
-                  if (nodemap.hasOwnProperty(target)) {
-                    // link type 1 - blue
+              if (host.length > 2) {
+                if (nodemap.hasOwnProperty(target)) {
+                  // link type 1 - blue
 
-                    linkData.push({
-                      source,
-                      target,
-                      color: "rgb(100,160,210)",
-                      weight: 0.5,
-                      type: "page2page",
-                    });
-                  } else if (
-                    domainMap.hasOwnProperty(host) &&
-                    host != sourceHost &&
-                    host.indexOf(sourceHost) === -1 &&
-                    sourceHost.indexOf(host) === -1
-                  ) {
-                    // link type 2 - orange
-
-                    linkData.push({
-                      source,
-                      target: host,
-                      color: "rgb(255,140,10)",
-                      weight: 0.5,
-                      type: "pageNOTcorpus",
-                    });
-
-                  } else {
-                    // this links to a page that wasn't captured, so add a ghost node+link;
-                    ghostNodeMap[target] = 1;
-                    ghostLinksMap[sourceURL + target] = {
-                      source,
-                      target,
-                      color: "rgb(150,150,150)",
-                      weight: 0.1,
-                      type: "ghost",
-                    };
-                  }
+                  linkData.push({
+                    source,
+                    target,
+                    color: "rgb(100,160,210)",
+                    weight: 0.5,
+                    type: "page2page",
+                  });
+                } else if (
+                  domainMap.hasOwnProperty(host) &&
+                  host != sourceHost &&
+                  host.indexOf(sourceHost) === -1 &&
+                  sourceHost.indexOf(host) === -1
+                ) {
+                  // link type 2 - orange
+                  //deactivated for testing
+                  /* linkData.push({
+                    source,
+                    target: host,
+                    color: "rgb(255,140,10)",
+                    weight: 0.5,
+                    type: "pageNOTcorpus",
+                  });
+                   */
+                } else {
+                  // this links to a page that wasn't captured, so add a ghost node+link;
+                  ghostNodeMap[target] = 1;
+                  ghostLinksMap[sourceURL + target] = {
+                    source,
+                    target,
+                    color: "rgb(150,150,150)",
+                    weight: 0.1,
+                    type: "ghost",
+                  };
                 }
-             
+              }
             });
           }
         }
@@ -863,112 +863,263 @@ const archotype = (id) => {
       // The decision here is to only list 1 degree common ghosts,
       // that is finding when two captures have a common outgoing links.
 
- ipcRenderer.send("chaeros-notification",
-                      "rebuilding by domain");
+      ipcRenderer.send("chaeros-notification", "rebuilding by domain");
 
-      nodeData.forEach((node, i) => (node.group = i));
+      //========== REBUILDING CLUSTERS
+      //This function is the first step.
+      //It puts nodes belonging to the same domain
+      //in a same group.
+      //
 
-      // First pass, group by domain;
-      nodeData.forEach((node) => {
+      function groupCapturesByDomain() {
+        // map all domains
+        const domainMap = {};
+
         linkData.forEach((link) => {
-          if (link.source === node.id || link.target === node.id) {
-            nodeData.find((d) => d.id === link.source).group = node.group;
-            nodeData.find((d) => d.id === link.target).group = node.group;
+          if (link.type === "page2domain") {
+            if (!domainMap.hasOwnProperty(link.target)) {
+              domainMap[link.target] = new Set();
+            }
+            domainMap[link.target].add(link.source);
           }
         });
-      });
 
-      // Second pass, do cross-domain by looking a nodes that are the target
-      // of several links from different groups;
+        nodeData.forEach((node) => {
+          for (const domain in domainMap) {
+            if (domainMap[domain].has(node.id)) {
+              node.group = domain;
+            }
+          }
+        });
+      }
 
- ipcRenderer.send("chaeros-notification","mapping nodes");
+      // This is the second step
+      // grouping ghosts to captures;
 
-      // build an updated map of nodes;
-      const completeNodeMap = {};
-      //
-      nodeData.forEach((node) => (completeNodeMap[node.id] = node));
+      function groupGhostsByCapture() {
+        const captureMap = {};
 
-      // build a target index
-      const nodeMapByTarget = {};
+        // Map all captures and their ghosts
+        linkData.forEach((link) => {
+          if (link.type === "ghost") {
+            if (!captureMap.hasOwnProperty(link.source)) {
+              captureMap[link.source] = new Set();
+            }
+            captureMap[link.source].add(link.target);
+          }
+        });
 
-      linkData.forEach((link) => {
-        if (!nodeMapByTarget.hasOwnProperty(link.target)) {
-          nodeMapByTarget[link.target] = {};
+        //create a map of nodes to get faster access
+        //because RAM is free real estate
+
+        const nodeMap = {};
+
+        nodeData.forEach((n) => (nodeMap[n.id] = n));
+
+        for (const capture in captureMap) {
+          //for each capture, iterate over ghosts
+          //and give tem the capture's group
+
+          captureMap[capture].forEach(
+            (ghostID) => (nodeMap[ghostID].group = nodeMap[capture].group)
+          );
+        }
+      }
+
+      // Link by capture to capture
+
+      function groupByCaptureToCaptureLinks() {
+        const linkSet = new Set();
+
+        linkData.forEach((d) => {
+          if (d.type === "page2page") {
+            const sourceHost = new URL(d.source).host;
+            const targetHost = new URL(d.target).host;
+
+            if (sourceHost != targetHost) {
+              linkSet.add({ sourceHost, targetHost });
+            }
+          }
+        });
+
+        // remove the symmetry
+        const linkMap = {};
+
+        linkSet.forEach((d) => {
+          if (!linkMap.hasOwnProperty(d.targetHost + d.sourceHost)) {
+            linkMap[d.sourceHost + d.targetHost] = d;
+          }
+        });
+
+        const groupMap = {};
+
+        for (const id in linkMap) {
+          groupMap[linkMap[id].sourceHost] = id;
+          groupMap[linkMap[id].targetHost] = id;
         }
 
-        nodeMapByTarget[link.target][completeNodeMap[link.source].group] = 1;
-      });
+        nodeData.forEach((node) => {
+          if (groupMap.hasOwnProperty(node.group)) {
+            node.group = groupMap[node.group];
+          }
+        });
+      }
 
+      // find ghosts who recieve more than 1 link
+      // and see if these links come from nodes
+      // coming from different groups
 
- ipcRenderer.send("chaeros-notification","building clusters");
+      function groupByGhostBridgeLinks() {
+        // first, map all ghosts
 
-      // look for all nodes that are target of links from more than 1 group;
-      const mergeMap = {};
-      //
-      for (const id in nodeMapByTarget) {
-        const linksFromGroups = Object.keys(nodeMapByTarget[id]);
+        const ghostMap = {};
 
-        if (linksFromGroups.length > 1) {
-        //  const keysArray = Object.keys(nodeMapByTarget[id]);
-          
-          const keystring = linksFromGroups.toString();
-       
-          if (!mergeMap.hasOwnProperty(keystring)) {
-            mergeMap[keystring] = linksFromGroups;
+        nodeData.forEach((node) => {
+          if (node.type === "ghost") {
+            ghostMap[node.id] = node;
+          }
+        });
+
+        const linkByTarget = {};
+
+        // then, iterate on links and map them by target;
+
+        linkData.forEach((link) => {
+          if (link.type === "ghost") {
+            if (!linkByTarget.hasOwnProperty(link.target)) {
+              linkByTarget[link.target] = [];
+            }
+            linkByTarget[link.target].push(link);
+          }
+        });
+
+        //prepare a nodemap
+        const nodeMap = {};
+        nodeData.forEach((n) => (nodeMap[n.id] = n));
+
+        //store bridge links in an array
+        const bridgeLinks = new Set();
+
+        for (const target in linkByTarget) {
+          const linksArray = linkByTarget[target];
+
+          //if there is only one link, it cannot
+          //be a bridge
+          if (linksArray.length === 1) {
+            delete linkByTarget[target];
+          } else {
+            linksArray.forEach((link) => {
+              const sourceHost = new URL(link.source).host;
+              const targetHost = new URL(link.target).host;
+
+              if (sourceHost != targetHost) {
+                bridgeLinks.add({ sourceHost, targetHost });
+              }
+            });
+          }
+        }
+
+        // remove the multiples
+        const linkMap = {};
+
+        bridgeLinks.forEach((d) => (linkMap[d.sourceHost + d.targetHost] = d));
+
+        //now map by targets
+        const targetMap = {};
+
+        Object.values(linkMap).forEach((target) => {
+          if (!targetMap.hasOwnProperty(target.targetHost)) {
+            targetMap[target.targetHost] = [];
+          }
+          targetMap[target.targetHost].push(target.sourceHost);
+        });
+
+        // now comes the tedious part
+        // first, iterate over the map
+
+        for (const target in targetMap) {
+          // make an array of hosts that belong to the same group
+          const hosts = targetMap[target];
+          hosts.push(target);
+
+          // make it a set
+          const hostSet = new Set(hosts);
+
+          //create a group name
+          const groupName = "GROUPNAME:" + hosts.toString();
+
+          //find the groups all these nodes belong to
+          //and add them to a set
+
+          const relevantGroups = new Set();
+
+          nodeData.forEach((node) => {
+            if (node.type != "domain") {
+              const nodeHost = new URL(node.id).host;
+              if (hostSet.has(nodeHost)) {
+                relevantGroups.add(node.group);
+              }
+            }
+          });
+
+          // if they already belong to the same group,
+          // no action needed. If not, these groups
+          // need to be merged.
+
+          if (relevantGroups.size > 1) {
+            nodeData.forEach((node) => {
+              if (relevantGroups.has(node.group)) {
+                node.group = groupName;
+              }
+            });
           }
         }
       }
 
-      
-      console.log(mergeMap)
+      // last pass, let the domains find their groups
+      // that were lost in the process
 
-      const mergedgroupmap=new Map()
+      function reattributeDomains() {
+        //prepare a nodemap
+        const nodeMap = {};
+        nodeData.forEach((n) => (nodeMap[n.id] = n));
 
-      const mergedMapVal =[...Object.values(mergeMap)]
-
-           mergedMapVal.forEach((mergeArray) => {
-            // the mergeArray here is an array of values (stringified numbers)
-            // that are group of nodes that should be grouped together as ["9","47","123"]
-            // which means that group 47 and 123 should be 9
-            
-            // Iterate over the array. If it is already in mergegroupmap, give it the group value
-            // else, give it the value of the first group of the array
-            
-            for (let i = 0; i < mergeArray.length; i++) {
-              const g = mergeArray[i];
-                if (!mergedgroupmap.has(g)){
-                  mergedgroupmap.set(g, mergeArray[0]); 
-                }             
-            }
-           }) 
-
-           console.log(mergedgroupmap)
-
-nodeData.forEach((node) => {
-   if (mergedgroupmap.has(JSON.stringify(node.group))){
-    node.group = parseInt(mergedgroupmap.get(node.group)) 
-   }
-})  
-
-      // merge groups together
-
-/*
-      // now do the actual merge;
-      
-      Object.values(mergeMap).forEach((mergeArray) => {
-        nodeData.forEach((node) => {
-          mergeArray.forEach((group) => {
-            if (node.group === parseInt(group)) {
-              node.group = parseInt(mergeArray[0]);
-            }
-          });
+        linkData.forEach((link) => {
+          if (link.type === "page2domain") {
+            nodeMap[link.target].group = nodeMap[link.source].group;
+          }
         });
-      });
-*/
+      }
+
+      function groupNodes() {
+        // step one, group captures by domain.
+        groupCapturesByDomain();
+
+        // step two, group ghosts by capture
+        // and give them the domain name
+        groupGhostsByCapture();
+
+        // now all nodes have group.
+        // next step is to connect clusters that link to one another.
+        groupByCaptureToCaptureLinks();
+
+        // last step is to connect the groups that link
+        // to common ghosts
+
+        groupByGhostBridgeLinks();
+
+        // solve domains
+        reattributeDomains();
+      }
+
+      groupNodes();
+
+      /// ============ END OF REBUILDING CLUSTERS
+
       const nodegroupmap = {};
 
       nodeData.forEach((d) => {
-        const groupName = JSON.stringify(d.group);
+        const groupName = d.group;
         if (!nodegroupmap.hasOwnProperty(groupName)) {
           nodegroupmap[groupName] = { nameParts: {}, nodes: [] };
         }
@@ -1041,74 +1192,61 @@ nodeData.forEach((node) => {
         (a, b) => a.nodes.length - b.nodes.length
       );
 
+      let clusterMeta = "";
 
-let clusterMeta="";
+      const selectedClusterMetadata = (nodes) => {
+        const div = document.getElementById("clusterMetaData");
 
-      const selectedClusterMetadata=(nodes)=>{
+        if (div) {
+          var counter = { ghosts: 0, captures: 0, domains: [] };
 
+          nodes.forEach((n) => {
+            switch (n.type) {
+              case "capture":
+                counter.captures++;
+                break;
 
-const div = document.getElementById("clusterMetaData")
+              case "ghost":
+                counter.ghosts++;
+                break;
 
-if (div){ 
-var counter = {ghosts:0,captures:0,domains:[]};
+              case "domain":
+                counter.domains.push(n.id);
+                break;
 
-nodes.forEach(n=>{
+              default:
+                break;
+            }
+          });
 
-  switch (n.type) {
-     case "capture":
-      counter.captures++
-      break;
-
-    case "ghost":
-      counter.ghosts++
-      break;
-
-      case "domain":
-      
-      counter.domains.push(n.id)
-      break;
-  
-    default:
-      break;
-  }
-
-} )
-
-
-clusterMeta= `<br><hr><br>For this corpus, this cluster contains: <br>
+          clusterMeta = `<br><hr><br>For this corpus, this cluster contains: <br>
 - ${counter.captures} captured pages available in the archive<br>
 - ${counter.ghosts} pages "linked to pages" by the most recent available capture in the corpus, which might or might not be in the corpus<br>
 <br><br>
 The captures in this cluster come from ${counter.domains.length} domain(s):<br>
-` 
+`;
 
-counter.domains.forEach(d=>clusterMeta+="- "+d+"<br>")
+          counter.domains.forEach((d) => (clusterMeta += "- " + d + "<br>"));
 
-div.innerHTML=clusterMeta;
-}
-} 
+          div.innerHTML = clusterMeta;
+        }
+      };
 
       const archotypeSelectionMenu = () => {
-
-         if (captureTimeline) {
-               captureTimeline
+        if (captureTimeline) {
+          captureTimeline
             .transition()
             .duration(250)
-            .attr(
-              "transform",
-              `translate(${width },${height * 0.1})`
-            );
-          }
+            .attr("transform", `translate(${width},${height * 0.1})`);
+        }
 
-
-          if (clusterMeta){
-            
-              toolContent.innerHTML = "<div id='clusterMetaData'>"+clusterMeta+"</div><br><hr><br>";
-          } else{
-  toolContent.innerHTML = "<div id='clusterMetaData'><h3>Select a cluster</h3></div><br><hr><br>";
-          } 
-
-      
+        if (clusterMeta) {
+          toolContent.innerHTML =
+            "<div id='clusterMetaData'>" + clusterMeta + "</div><br><hr><br>";
+        } else {
+          toolContent.innerHTML =
+            "<div id='clusterMetaData'><h3>Select a cluster</h3></div><br><hr><br>";
+        }
 
         link.style("display", "block");
         node.style("display", "block");
@@ -1129,9 +1267,8 @@ div.innerHTML=clusterMeta;
 
           radioGroup.addEventListener("change", () => {
             if (radioGroup.checked) {
-             
               regenerateGraph(group.nodes);
-              
+
               currentSelection = i;
             }
           });
@@ -1181,13 +1318,11 @@ div.innerHTML=clusterMeta;
         linkData.forEach((link) => {
           if (
             nodeMap.hasOwnProperty(link.target.id) ||
-            nodeMap.hasOwnProperty(link.source.id)
+            nodeMap.hasOwnProperty(link.source)
           ) {
             localLinkData.push(link);
           }
         });
-
-       
 
         //recreate SVG groups
 
@@ -1335,8 +1470,6 @@ div.innerHTML=clusterMeta;
         // This displays all available captures of that page on a timeline and loads
         // a selected capture on click
 
-  
-
         const displayOtherCaptures = (docs) => {
           //purge previous timeline
           if (captureTimeline) {
@@ -1433,7 +1566,6 @@ div.innerHTML=clusterMeta;
 
           link.style("display", (l) => {
             if (l.target.id === d.id) {
-           
               linkedNodeMap[l.source.id] = 1;
               return "block";
             } else if (l.source.id === d.id) {
@@ -1467,27 +1599,26 @@ div.innerHTML=clusterMeta;
                 .attr("transform", `translate(${width},${height * 0.1})`);
             }
 
-     var targetCollection;
-
+            var targetCollection;
 
             switch (d.type) {
               case "domain":
                 break;
 
               case "ghost":
-              // interrogating ghosts, ie pages that are not in the corpus
-              // but that are linked to by captures within the corpus
-              // these may or may not be in the archive
+                // interrogating ghosts, ie pages that are not in the corpus
+                // but that are linked to by captures within the corpus
+                // these may or may not be in the archive
 
-              //  this is a ghost, find the origine capture linking to it
-                  // to make sure it is collection-consistent
-            
-                  localLinkData.forEach((l) => {
-                    if (l.target.id === d.id) {
-                      targetCollection =
-                        documentMap[l.source.id].enrichment.solrCollection;
-                    }
-                  });
+                //  this is a ghost, find the origine capture linking to it
+                // to make sure it is collection-consistent
+
+                localLinkData.forEach((l) => {
+                  if (l.target.id === d.id) {
+                    targetCollection =
+                      documentMap[l.source.id].enrichment.solrCollection;
+                  }
+                });
 
               case "capture":
                 // find the collection to target
@@ -1495,7 +1626,7 @@ div.innerHTML=clusterMeta;
                 if (documentMap.hasOwnProperty(d.id)) {
                   targetCollection =
                     documentMap[d.id].enrichment.solrCollection;
-                } 
+                }
 
                 if (targetCollection) {
                   fetch(
@@ -1505,7 +1636,6 @@ div.innerHTML=clusterMeta;
                   )
                     .then((r) => r.json())
                     .then((r) => {
-                   
                       toolContent.innerHTML = JSON.stringify(r);
 
                       if (r.response.numFound > 0) {
@@ -1516,6 +1646,33 @@ div.innerHTML=clusterMeta;
                       } else {
                         toolContent.innerHTML =
                           "<hr>" + d.id + " not found.<hr>";
+                      }
+                    })
+                    .catch((e) => {
+                      toolContent.innerHTML = "";
+                      switch (d.type) {
+                        case "domain":
+                          toolContent.innerHTML = d.id;
+                          break;
+                        case "ghost":
+                          toolContent.innerHTML = `
+                          <hr>
+                        ${d.id}
+                          <br><hr><br>
+                          You are not connected to the archive repository.`;
+                          break;
+                        case "capture":
+                          for (const key in documentMap[d.id]) {
+                            toolContent.innerHTML += `<strong>${key}</strong><br>${
+                              documentMap[d.id][key]
+                            }  <br><hr>`;
+                          }
+
+                          documentMap[d.id].enrichment.links.forEach(
+                            (l) => (toolContent.innerHTML += `<br>${l}`)
+                          );
+
+                          break;
                       }
                     });
                 }
@@ -1573,12 +1730,10 @@ div.innerHTML=clusterMeta;
         selectedClusterMetadata(localNodeData);
       };
 
-
       //select first, smallest corpus to display something on start
       regenerateGraph(nodeGroupArray[0].nodes);
-      
 
-svg.call(
+      svg.call(
         d3
           .zoom()
           .extent([
@@ -1620,9 +1775,10 @@ svg.call(
             desc: "capture -> other capture link",
           },
           {
+            //deactivated
             color: "rgb(255,140,10)",
-            weight: 2,
-            desc: "capture -> other domain link",
+            weight: 0,
+            desc: "", //"capture -> other domain link",
           },
         ];
 
