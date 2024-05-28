@@ -2295,6 +2295,8 @@ const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage oth
 const helpers = require("mnemonist/set");
 const { create } = require("d3");
 //const { min } = require("d3-array");
+const { clipboard } = require('electron')
+
 //END NODE MODULES
 
 var field;
@@ -2977,8 +2979,9 @@ const archotype = (id) => {
       for (let i = 0; i < documents.length / divider; ++i) {
         const d = documents[i];
 
-        const coreURL = d.URL.substring(d.URL.lastIndexOf("http"));
-        const parsedURL = new URL(coreURL);
+        const coreURL = d.URL.replace(arkViewer,"");
+
+        const parsedURL = new URL(coreURL.substring(coreURL.indexOf("http")));
         // console.log(id)
 
         const id = parsedURL.href;
@@ -3668,13 +3671,24 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
         // and lets them look for a string in the "content" field (if accessible).
 
         const displayLastCaptureMetadata = (doc) => {
+          /*
           const accessButton = document.createElement("button");
-          accessButton.innerText = "Ouvrir dans les archives";
+          accessButton.innerText = "Open in archive explorer";
           accessButton.style = "margin:10px;";
 
           const archtarget = `${arkViewer}/${doc.wayback_date}/${doc.url}`;
+
           accessButton.addEventListener("click", () =>
             shell.openExternal(archtarget)
+          );
+*/
+           const copyButton = document.createElement("button");
+          copyButton.innerText = "Copy permalink";
+          copyButton.style = "margin:10px;";
+
+          const permalink = `${arkViewer}/${doc.wayback_date}/${doc.url}`;
+          copyButton.addEventListener("click", () =>
+            clipboard.writeText(permalink)
           );
 
           const content = document.createElement("div");
@@ -3741,7 +3755,7 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
           for (const key in doc) {
             content.innerHTML += `<div style = "font-weight:bold" > ${key}</div ><div>${doc[key]}</div><br>`;
           }
-          toolContent.append(toolSearch, accessButton, toolResult, content);
+          toolContent.append(toolSearch, copyButton, toolResult, content);
         };
 
         // This displays all available captures of that page on a timeline and loads
