@@ -40,9 +40,9 @@ const targets = [
     arch: 'ia32'
   }, */
   {
-    name: "Windows",
+    name: "Windows-64bit",
     platform: "win32",
-    arch: "x64",
+    arch: "x86",
   },
   {
     name: "MacOSX",

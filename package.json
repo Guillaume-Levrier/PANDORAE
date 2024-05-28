@@ -34,7 +34,7 @@
     "whois-json": "^2.0.4"
   },
   "devDependencies": {
-    "cross-env": "^5.2.1",
+    "cross-env": "^7.0.3",
     "del": "^4.1.1",
     "electron": "^22.0.0",
     "electron-builder": "^23.6.0",
