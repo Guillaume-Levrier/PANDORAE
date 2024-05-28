@@ -42,7 +42,7 @@ const targets = [
   {
     name: "Windows-64bit",
     platform: "win32",
-    arch: "x86",
+    arch: "x64",
   },
   {
     name: "MacOSX",
@@ -64,6 +64,10 @@ webpackP(cfg)
 function packageAll() {
   return Promise.all(
     targets.map((target) => {
+      console.log("packaging new platform");
+      console.log(target.name);
+      console.log(target.platform);
+      console.log(target.arch);
       return packageP(
         Object.assign({}, packOptions, {
           platform: target.platform,
