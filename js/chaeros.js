@@ -1293,7 +1293,8 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
                     ipcRenderer.send("win-destroy", winId);
                   }, 2000);
                 } // If all responses have been recieved, delay then close chaeros
-              });
+              })
+              .catch((e) => ipcRenderer.send("console-logs", e));
             ipcRenderer.send(
               "console-logs",
               "Collection " + JSON.stringify(collectionName) + " built."
@@ -1302,7 +1303,6 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
         });
     } catch (e) {
       ipcRenderer.send("console-logs", e);
-    } finally {
     }
   });
 };
@@ -2584,10 +2584,12 @@ const bnfRemap = (doc, solrCollection) => {
 
   const hyperlinks = [];
 
-  if (doc.hasOwnProperty("links")){
-      doc.links.forEach(link=>(link.indexOf("mailto:")>-1)?0:hyperlinks.push(link))
-  } 
-  
+  if (doc.hasOwnProperty("links")) {
+    doc.links.forEach((link) =>
+      link.indexOf("mailto:") > -1 ? 0 : hyperlinks.push(link)
+    );
+  }
+
   remappedDocument.shortTitle = JSON.stringify({
     id: doc.id,
     collections: doc.collections,
@@ -2596,6 +2598,176 @@ const bnfRemap = (doc, solrCollection) => {
   });
 
   return remappedDocument;
+};
+
+// ======== GallicaFullQuery =====
+
+const gallicaSRU2JSON = (xml) => {
+  const parser = new DOMParser();
+  const parseDoc = (xml) => parser.parseFromString(xml, "application/xml");
+  const docToJSON = (element) => {
+    const object = {};
+
+    for (let i = 0; i < element.children.length; ++i) {
+      const child = element.children[i];
+      const key = child.tagName;
+      if (!object.hasOwnProperty(key)) {
+        object[key] = [];
+      }
+      object[key].push(child.textContent);
+    }
+
+    for (const key in object) {
+      object[key] = object[key].toString();
+    }
+
+    return object;
+  };
+
+  const convertElements = (elementCollection) => {
+    const result = [];
+    for (let i = 0; i < elementCollection.length; ++i) {
+      result.push(docToJSON(elementCollection[i]));
+    }
+
+    return result;
+  };
+
+  const doc = parseDoc(xml);
+  return convertElements(doc.getElementsByTagName("oai_dc:dc"));
+};
+
+const dublinCore2csljson = (item) => {
+  //article.creators.push({ creatorType: "author", firstName, lastName });
+
+  const thisDoc = {
+    itemType: "document",
+    title: item["dc:title"],
+    creators: [],
+    extra: item["dc:subject"],
+    abstractNote: item["dc:description"],
+    publisher: item["dc:publisher"],
+
+    date: item["dc:date"],
+
+    libraryCatalog: item["dc:source"],
+    language: item["dc:language"],
+    rights: item["dc:rights"],
+  };
+
+  if (item["dc:creator"]) {
+    thisDoc.creators.push({ creatorType: "author", name: item["dc:creator"] });
+  }
+
+  if (item["dc:contributor"]) {
+    thisDoc.creators.push({
+      creatorType: "contributor",
+      name: item["dc:contributor"],
+    });
+  }
+
+  const shortTitle = {
+    type: item["dc:type"],
+    format: item["dc:format"],
+    identifier: item["dc:identifier"],
+    relation: item["dc:relation"],
+    coverage: item["dc:coverage"],
+  };
+
+  thisDoc.shortTitle = JSON.stringify(shortTitle);
+
+  return thisDoc;
+};
+
+const GallicaFullQuery = (targetExpression) => {
+  const limiter = new bottleneck({
+    maxConcurrent: 4,
+    minTime: 1000,
+  });
+
+  const max = 5000;
+
+  const recordNum = (xml) => {
+    const parser = new DOMParser(); // Gallica only yields XML, so prepare a parser
+    const parseDoc = (xml) => parser.parseFromString(xml, "application/xml"); // function to parse the xml
+    const doc = parseDoc(xml); // calling the function, its result is an HTML collection pointed to by the variable "doc"
+    return parseInt(
+      doc.getElementsByTagName("srw:numberOfRecords")[0].textContent //return the parsed content of the element containing the number of results
+    );
+  };
+
+  const query = `https://gallica.bnf.fr/SRU?version=1.2&operation=searchRetrieve&query=${targetExpression}&startRecord=1&maximumRecords=1`;
+
+  const queryManufacture = (start) =>
+    `https://gallica.bnf.fr/SRU?version=1.2&operation=searchRetrieve&query=${targetExpression}&startRecord=${start}&maximumRecords=50`;
+
+  fetch(query)
+    .then((response) => response.text()) // parse the result as text, as the SRU only yields XML and not JSON
+    .then((r) => {
+      const results = recordNum(r);
+
+      if (results < max) {
+        const reqNum = Math.floor(results / 50);
+
+        var content = [];
+
+        for (let i = 0; i <= reqNum; i++) {
+          limiter
+            .schedule(() => fetch(queryManufacture(50 * i)))
+            .then((res) => res.text())
+            .catch((err) => console.log(err))
+            .then((res) => {
+              ipcRenderer.send(
+                "chaeros-notification",
+                `Gallica page ${i}/${reqNum}`
+              );
+
+              content = [...content, ...gallicaSRU2JSON(res)];
+
+              if (i === reqNum) {
+                ipcRenderer.send(
+                  "chaeros-notification",
+                  `Gallica retrieveal complete`
+                );
+
+                const finalContent = [];
+
+                content.forEach((doc) =>
+                  finalContent.push(dublinCore2csljson(doc))
+                );
+
+                const normalized = {
+                  id: targetExpression + date,
+                  date: date,
+                  name: targetExpression,
+                  content: finalContent,
+                };
+
+                pandodb.open();
+                pandodb.csljson
+                  .add(normalized)
+                  .then(() => {
+                    ipcRenderer.send(
+                      "chaeros-notification",
+                      "Gallica data retrieved"
+                    ); // Send a success message
+                    ipcRenderer.send("pulsar", true);
+                    ipcRenderer.send(
+                      "console-logs",
+                      "Successfully converted " + targetExpression
+                    ); // Log success
+                    setTimeout(() => {
+                      ipcRenderer.send("win-destroy", winId);
+                    }, 500);
+                  })
+                  .catch((err) => console.log(err));
+
+                // - end
+              }
+            });
+        }
+      }
+    });
 };
 
 // ======== CrossRef Enricher =====
@@ -2763,6 +2935,10 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
 
     case "scopusGeolocate":
       scopusGeolocate(fluxArgs.scopusGeolocate.dataset);
+      break;
+
+    case "GallicaFullQuery":
+      GallicaFullQuery(fluxArgs.GallicaFullQuery.queryString);
       break;
 
     case "webofscienceGeolocate":

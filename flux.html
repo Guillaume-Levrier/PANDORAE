@@ -469,6 +469,91 @@
   <br>
 </div>
 
+<!-- GALLICA TAB -->
+<div id="gallica" style="display:none;" class="fluxTabs">
+  <span class="flux-title">GALLICA SRU</span><br><br>
+
+  <span>This tab lets you access the Gallica search and retrieve
+    system. Select a Dublin Core category to interrogate. Select none if you
+    want to craft your own SRU request.</span><br><br>
+
+
+
+  <form id="gallica-form" autocomplete="off">
+    <div id="gallicaDublinCoreRadio"
+      style="display:flex; width: 400px; justify-content: space-around;">
+      <div>
+        <input class='gallicaDCradio' value='none' name='gallicaDublinCoreRadio'
+          type='radio' /><label>None</label><br>
+        <input class='gallicaDCradio' value='title'
+          name='gallicaDublinCoreRadio' type='radio' /><label>Title</label><br>
+        <input class='gallicaDCradio' value='creator'
+          name='gallicaDublinCoreRadio'
+          type='radio' /><label>Creator</label><br>
+        <input class='gallicaDCradio' value='subject'
+          name='gallicaDublinCoreRadio'
+          type='radio' /><label>Subject</label><br>
+        <input class='gallicaDCradio' value='date' name='gallicaDublinCoreRadio'
+          type='radio' /><label>Date</label><br>
+        <input class='gallicaDCradio' value='description'
+          name='gallicaDublinCoreRadio'
+          type='radio' /><label>Description</label><br>
+      </div>
+      <div>
+        <input class='gallicaDCradio' value='format'
+          name='gallicaDublinCoreRadio' type='radio' /><label>Format</label><br>
+        <input class='gallicaDCradio' value='identifier'
+          name='gallicaDublinCoreRadio'
+          type='radio' /><label>Identifier</label><br>
+        <input class='gallicaDCradio' value='publisher'
+          name='gallicaDublinCoreRadio'
+          type='radio' /><label>Publisher</label><br>
+        <input class='gallicaDCradio' value='relation'
+          name='gallicaDublinCoreRadio'
+          type='radio' /><label>Relation</label><br>
+        <input class='gallicaDCradio' value='rights'
+          name='gallicaDublinCoreRadio' type='radio' /><label>Rights</label><br>
+      </div>
+      <div>
+        <input class='gallicaDCradio' value='source'
+          name='gallicaDublinCoreRadio' type='radio' /><label>Source</label><br>
+        <input class='gallicaDCradio' value='subject'
+          name='gallicaDublinCoreRadio'
+          type='radio' /><label>Subject</label><br>
+        <input class='gallicaDCradio' value='type' name='gallicaDublinCoreRadio'
+          type='radio' /><label>Type</label><br>
+        <input class='gallicaDCradio' value='contributor'
+          name='gallicaDublinCoreRadio'
+          type='radio' /><label>Contributor</label><br>
+        <input class='gallicaDCradio' value='language'
+          name='gallicaDublinCoreRadio'
+          type='radio' /><label>Language</label><br>
+      </div>
+    </div>
+    <br>
+    <br>
+    Gallica Query:<br>
+    <input class="fluxInput" spellcheck="false" id="gallicalocalqueryinput"
+      type="text" placeholder="Enter your Gallica Query"><br><br>
+
+    <button type="submit" class="flux-button" id="gallica-basic-query">Retrieve
+      basic info</button>&nbsp;&nbsp;
+    <br><br>
+    <div id="gallica-basic-previewer" style="position:relative;"></div>
+    <br>
+    <button style="display:none;" type="submit" class="flux-button"
+      id="gallica-full-query">Submit full Gallica query</button>
+    <br><br>
+
+
+
+
+  </form>
+
+  <br>
+  <br>
+</div>
+
 
 <!-- ZOTERO TAB -->
 <div id="zotero" style="display:none;" class="fluxTabs">

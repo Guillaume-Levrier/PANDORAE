@@ -428,7 +428,7 @@ const chaerosCalculator = () => {
 
   chaerosWindow.webContents.on("did-finish-load", function () {
     chaerosWindow.webContents.send("id", chaerosWindow.id);
-    // chaerosWindow.webContents.openDevTools();
+    //chaerosWindow.webContents.openDevTools();
   });
 };
 
@@ -632,6 +632,7 @@ ipcMain.handle("openEx", async (event, target) => {
 // Check if PANDORAE-FLUX has a access to pregistered domains
 
 const dnslist = [
+  { name: "Gallica", url: "gallica.bnf.fr" },
   { name: "Scopus", url: "api.elsevier.com" },
   { name: "BIORXIV", url: "www.biorxiv.org" },
   { name: "Zotero", url: "api.zotero.org" },

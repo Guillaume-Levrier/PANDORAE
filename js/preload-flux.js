@@ -860,6 +860,33 @@ const powerValve = (fluxAction, item) => {
       message = "Converting to CSL-JSON";
       break;
 
+    case "GallicaFullQuery":
+      const radioButtons = document.getElementsByClassName("gallicaDCradio");
+
+      let selected;
+
+      for (let i = 0; i < radioButtons.length; i++) {
+        const rad = radioButtons[i];
+        if (rad.checked && rad.value != "none") {
+          selected = rad.value;
+        }
+      }
+
+      var queryString;
+      const targetExpression = document.getElementById(
+        "gallicalocalqueryinput"
+      ).value;
+
+      if (selected) {
+        queryString = `(dc.${selected} all '${targetExpression}')`;
+      } else {
+        queryString = targetExpression;
+      }
+      fluxArgs.GallicaFullQuery = { queryString };
+
+      message = "Querying Gallica";
+      break;
+
     case "scopusGeolocate":
       fluxArgs.scopusGeolocate = { dataset: itemname };
 
@@ -2346,6 +2373,68 @@ const localUpload = () => {
   });
 };
 
+//===== Gallica  ======
+// On a given Request sent to gallica, find how many records
+// are listed in the database.
+
+const recordNum = (xml) => {
+  const parser = new DOMParser(); // Gallica only yields XML, so prepare a parser
+  const parseDoc = (xml) => parser.parseFromString(xml, "application/xml"); // function to parse the xml
+  const doc = parseDoc(xml); // calling the function, its result is an HTML collection pointed to by the variable "doc"
+  return parseInt(
+    doc.getElementsByTagName("srw:numberOfRecords")[0].textContent //return the parsed content of the element containing the number of results
+  );
+};
+
+const gallicaBasic = () => {
+  const radioButtons = document.getElementsByClassName("gallicaDCradio");
+
+  let selected;
+
+  for (let i = 0; i < radioButtons.length; i++) {
+    const rad = radioButtons[i];
+    if (rad.checked && rad.value != "none") {
+      selected = rad.value;
+    }
+  }
+
+  var queryString;
+  const targetExpression = document.getElementById(
+    "gallicalocalqueryinput"
+  ).value;
+
+  if (selected) {
+    queryString = `(dc.${selected} all '${targetExpression}')`;
+  } else {
+    queryString = targetExpression;
+  }
+
+  const query = `https://gallica.bnf.fr/SRU?version=1.2&operation=searchRetrieve&query=${queryString}&startRecord=1&maximumRecords=1`;
+
+  return fetch(query)
+    .then((response) => response.text()) // parse the result as text, as the SRU only yields XML and not JSON
+    .then((r) => {
+      const resultDiv = document.getElementById("gallica-basic-previewer"); // find the result div
+      const results = recordNum(r); // parse the text, extract the number of results,
+      resultDiv.innerHTML = `This query yields ${results} results.`; // and put it in the result div.
+
+      // Then authorize the actual collection if the number of results seems reasonable.
+
+      const max = 5000;
+
+      if (results < max) {
+        const fullQuery = document.getElementById("gallica-full-query");
+        fullQuery.style.display = "block";
+      } else {
+        resultDiv.innerHTML += `<br><br>You can only submit full requests that yield less than ${max} results.`;
+      }
+    })
+    .catch(
+      (e) =>
+        (document.getElementById("gallica-basic-previewer").innerText =
+          "Error - The SRU interface cannot make sense of this request.")
+    );
+};
 //===== Regards Citoyens ======
 
 const regardsBasic = () => {
@@ -2531,19 +2620,15 @@ const queryBnFSolr = (but) => {
       if (targetfacets.length > 0) {
         targetfacets += "%20OR%20";
       }
-      console.log(facet.id)
+      console.log(facet.id);
 
       // solr needs a " for two words or more, and no " if not;
 
-      
-
-      if (facet.id.split(" ").length>1){
-        targetfacets +=`"${facet.id}"`
-      } else{
-targetfacets +=facet.id
-      }  
-
-      
+      if (facet.id.split(" ").length > 1) {
+        targetfacets += `"${facet.id}"`;
+      } else {
+        targetfacets += facet.id;
+      }
     }
   }
 
@@ -3382,6 +3467,8 @@ window.addEventListener("load", (event) => {
     { id: "twitterCatImporter", func: "twitterCat" },
     { id: "twitterThreadImporter", func: "twitterThread" },
     { id: "scopusGeolocate", func: "powerValve", arg: "scopusGeolocate" },
+    { id: "gallica-full-query", func: "powerValve", arg: "GallicaFullQuery" },
+
     {
       id: "webofscienceGeolocate",
       func: "powerValve",
@@ -3389,6 +3476,7 @@ window.addEventListener("load", (event) => {
     },
     { id: "regards-basic-query", func: "regardsBasic" },
     { id: "regards-query", func: "powerValve", arg: "regards" },
+    { id: "gallica-basic-query", func: "gallicaBasic" },
     {
       id: "sci-api-retrieve-display",
       func: "datasetDisplay",
@@ -3487,6 +3575,10 @@ window.addEventListener("load", (event) => {
     availability.dnslist.forEach((d) => {
       if (d.valid) {
         switch (d.name) {
+          case "Gallica":
+            addHop(["OPEN", "GALLICA", "ZOTERO"]);
+
+            break;
           case "Scopus":
             if (selections.scientometricsSelect) {
               addHop(["USER", "SCOPUS", "ENRICHMENT"]);
@@ -3659,8 +3751,7 @@ window.addEventListener("load", (event) => {
               fetch(facetRequest)
                 .then((facet) => facet.json())
                 .then((facets) => {
-
-                  console.log(facets)
+                  console.log(facets);
 
                   const facetList =
                     facets.facet_counts.facet_fields.collections;
@@ -3798,6 +3889,10 @@ window.addEventListener("load", (event) => {
 
       case "generateLocalServiceConfig":
         generateLocalServiceConfig();
+        break;
+
+      case "gallicaBasic":
+        gallicaBasic();
         break;
 
       case "regardsBasic":
