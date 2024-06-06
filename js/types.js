@@ -774,6 +774,9 @@ const archotype = (id) => {
 
           // sourceURL is d.URL without the hosting service and the timestamp, built as an URL object
 
+          try {
+            
+          
           const sourceURL = new URL(d.URL.substring(d.URL.lastIndexOf("http")));
 
           // source is the href of the sourceURL object
@@ -846,9 +849,12 @@ const archotype = (id) => {
               }
             });
           }
-        }
+        
+        } catch (error) {
+        console.log(error)           
+          }
       }
-
+}
       // add ghosts nodes
       Object.keys(ghostNodeMap).forEach((d) =>
         nodeData.push({
@@ -1321,9 +1327,11 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
         linkData.forEach((link) => {
           if (
             nodeMap.hasOwnProperty(link.target.id) ||
-            nodeMap.hasOwnProperty(link.source)
+            nodeMap.hasOwnProperty(link.source.id)
           ) {
-            localLinkData.push(link);
+            if (link.target.id != link.source.id){ 
+              localLinkData.push(link);
+            }
           }
         });
 
@@ -1341,8 +1349,11 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
           )
           .attr("stroke-width", (d) => d.weight)
           .attr("stroke", (d) => d.color)
-          .attr("marker-end", (d) =>
-            d.type === "page2domain" ? 0 : "url(#arrow)"
+          .attr("marker-end", (d) =>{ 
+            if (d.type === "page2page" && d.color != "transparent"){ 
+            return  "url(#arrow)"
+            }
+            }
           );
 
         // on click, fetch the data from the data source if it exists
@@ -1640,6 +1651,7 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
                 if (documentMap.hasOwnProperty(d.id)) {
                   targetCollection =
                     documentMap[d.id].enrichment.solrCollection;
+                    console.log(documentMap[d.id])
                 }
 
                 if (targetCollection) {
