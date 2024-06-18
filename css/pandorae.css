@@ -1081,3 +1081,8 @@ z-index: 20;
   border: 3px solid red;
   border-radius: 5px;
 }
+#selectedCollection{
+  margin: 10px;
+  padding: 10px;
+ 
+} 

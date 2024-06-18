@@ -3417,6 +3417,15 @@ const archotype = (id) => {
         }
       });
 
+      // circleSet is a set of ids. If a node has been clicked,
+      // it is stored in the set. This was, the user knows which
+      // circle they have clicked on before. 
+      const circleSet = new Set();
+
+      // foundSet is also a set of ids. It is the same idea,
+      // for ghost pages found in the archive.
+      const foundSet = new Set();
+
       // =========================
       // data management is mostly above this line
 
@@ -3643,7 +3652,7 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
           .data(localNodeData)
           .join("circle")
           .attr("r", 5)
-          .attr("fill", (d) => d.color);
+          .attr("fill", (d) =>foundSet.has(d.id)?"purple":d.color);
 
         titlecontrast = g
           .append("g")
@@ -3673,6 +3682,7 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
         // end up breaking at some point for framework reasons.
 
         node.style("cursor", (d) => (d.domain ? "move" : "pointer"));
+        node.attr("stroke-width",d=> circleSet.has(d.id)? 3:0).attr("stroke",d=>circleSet.has(d.id)?"#0FFF50":"null");
 
         let previousCircle = 0;
         let previousSearch = 0;
@@ -3886,11 +3896,20 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
             }
           });
 
+          // circlemap
+
+
+          node.attr("stroke-width",d=> circleSet.has(d.id)? 3:0).attr("stroke",d=>circleSet.has(d.id)?"#0FFF50":"null");
+
+
+          circleSet.add(d.id);
+
           circle.attr("stroke-width", 3).attr("stroke", "#FF0F0F");
 
+          /*
           if (previousCircle) {
             previousCircle.attr("stroke-width", 3).attr("stroke", "#0FFF50");
-          }
+          }*/
 
           previousCircle = circle;
           if (resolver) {
@@ -3946,6 +3965,8 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
                         displayLastCaptureMetadata(
                           r.response.docs[r.response.docs.length - 1]
                         );
+                        foundSet.add(d.id)
+                        circle.attr("fill","purple")
                       } else {
                         toolContent.innerHTML =
                           "<hr>" + d.id + " not found.<hr>";

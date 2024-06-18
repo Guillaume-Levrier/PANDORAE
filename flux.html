@@ -558,14 +558,18 @@
 <!-- ZOTERO TAB -->
 <div id="zotero" style="display:none;" class="fluxTabs">
   <span class="flux-title">ZOTERO</span><br><br>
-
+  This tab lets you send a collection of documents retrieved by PANDORÆ to Zotero, and lets import a Zotero collection (regardless
+  of its origin) to PANDORÆ.
+<br><br><hr><br>
   <form id="zotero-export-form" autocomplete="off">
-    <div id="selectedCollection">
-    </div>
+    
+    
 
-    <br><br>
+    
+    This button lets you display the datasets in <strong>PANDORÆ's memory on your local device</strong> and upload them to Zotero.<br><br>
     <button type="submit" class="flux-button" id="cslcolret">Display available
       csljson files</button><br>
+      <div id="selectedCollection">
     <div id="csljson-dataset-preview"></div>
     <div id="csljson-dataset-buttons" style="display:none;">
       <input class="fluxInput" spellcheck="false" class="sendToZotero"
@@ -574,11 +578,12 @@
       <button type="submit" class="flux-button sendToZotero"
         id="zoteroCollecBuild">Create a new Zotero
         Collection</button>
-    </div>
+    </div></div>
     <div id="userCsljsonCollections"></div>
   </form>
-  <br><br>
+  <br><hr><br>
   <form id="zotero-import-form" autocomplete="off"></form>
+  This button lets you display the collections of documents on <strong>your online Zotero library</strong> and download them to your system.<br><br>
   <button type="submit" class="flux-button" id="zotcolret">Display online
     library collections</button><br><br>
   <!-- <button type="submit" class="flux-button" id="zotcolret" onclick="zoteroLocalRetriever();return false">Display local zotero instance collections</button><br><br> -->
