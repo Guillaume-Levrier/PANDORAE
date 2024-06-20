@@ -3406,7 +3406,7 @@ const downloadData = () => {
 };
 
 window.addEventListener("load", (event) => {
-  var buttonList = [
+  const buttonList = [
     { id: "checkPPS", func: "checkPPS" },
     //    { id: "change-user-id", func: "changeUserID" },
     { id: "manual-merge-authors", func: "manualMergeAuthors" },
@@ -3663,8 +3663,18 @@ window.addEventListener("load", (event) => {
     drawFlux(svg, traces, false, true);
 
     buttonList.forEach((but) => {
+      var clickable=1
       document.getElementById(but.id).addEventListener("click", (e) => {
+        if (clickable){ 
         funcSwitch(e, but);
+        clickable=0;
+        setTimeout(()=>clickable=1,5000)
+        }else{
+           ipcRenderer.send(
+    "console-logs",
+   `Cooldown not finished for action ${but.id}.` 
+  );
+        }  
         e.preventDefault();
         return false;
       });

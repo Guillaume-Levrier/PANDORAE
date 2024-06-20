@@ -1415,19 +1415,10 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
         // and lets them look for a string in the "content" field (if accessible).
 
         const displayLastCaptureMetadata = (doc) => {
-          /*
-          const accessButton = document.createElement("button");
-          accessButton.innerText = "Open in archive explorer";
-          accessButton.style = "margin:10px;";
-
-          const archtarget = `${arkViewer}/${doc.wayback_date}/${doc.url}`;
-
-          accessButton.addEventListener("click", () =>
-            shell.openExternal(archtarget)
-          );
-*/
+       
           const copyButton = document.createElement("button");
           copyButton.innerText = "Copy permalink";
+          copyButton.className="flux-button"
           copyButton.style = "margin:10px;";
 
           const permalink = `${arkViewer}/${doc.wayback_date}/${doc.url}`;
@@ -3810,6 +3801,7 @@ const chronotype = (id) => {
 
     if (d.hasOwnProperty("DOI")) {
       const doiResolveButton = document.createElement("button");
+      doiResolveButton.className="flux-button"
       doiResolveButton.innerText = "Resolve DOI in browser";
       //doiResolveButton.id = "https://dx.doi.org/" + d.DOI;
       doiResolveButton.addEventListener("click", (e) =>
