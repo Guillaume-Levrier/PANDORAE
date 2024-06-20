@@ -1157,7 +1157,7 @@ const selectOption = (type, id) => {
       },
       { once: true }
     );
-    field.value = CM.global.field.starting + type;
+    field.value = CM.global.field.starting +" "+ type;
     currentType = { type: type, id: id };
     //types.typeSwitch(type, id);
     
@@ -5706,7 +5706,7 @@ const hyphotype = (id) => {
 
 // ========== regardotype ==========
 const regards = (id) => {
-  // When called, draw the chronotype
+  // When called, draw the regards chronology
 
   var svg = d3.select(xtype).append("svg").attr("id", "xtypeSVG");
 
@@ -5958,7 +5958,7 @@ const regards = (id) => {
       field.value = "error - invalid dataset";
       ipcRenderer.send(
         "console-logs",
-        "Chronotype error: dataset " + id + " is invalid."
+        "Regards chronology error: dataset " + id + " is invalid."
       );
     });
   let dragger = svg
@@ -6075,6 +6075,10 @@ const chronotype = (id) => {
       "#c56883",
       "#a68199",
     ]);
+
+    // Doc detail can be dependent on document type, as some metadata can only be available
+    // within local, protected networks.
+    const docDetailSet= new Set();
 
   //======== DATA CALL & SORT =========
   pandodb.chronotype
@@ -6344,6 +6348,8 @@ const chronotype = (id) => {
       var node = view.selectAll("nodes"),
         nodetext = view.selectAll("nodetext"),
         link = view.selectAll("link");
+
+
 
       simulation
         .nodes(currentNodes) // Start the force graph with "docs" as data
@@ -6879,10 +6885,60 @@ const chronotype = (id) => {
             .attr("stroke-opacity", 0.6) // Node stroke color
             .attr("stroke-width", 0.1) // Node stroke width
             .style("cursor", "context-menu") // Type of cursor on node hover
-            .style("opacity", 0.9) // Node opacity
+            //.style("opacity", 0.9) // Node opacity
             .raise() // Nodes are displayed above the rest
             .merge(node)
-            .lower(); // Merge the nodes
+            .lower(); // Merge the nodes then lower them
+
+            console.log(node)
+
+            node.on("click",(e, d) => {
+
+              const circle = d3.select(e.target); // Select this node
+              
+              node.style("opacity", 0.3) // Dim all nodes
+              circle.style("opacity", 0.9) // Highlight this specific node 
+              link.style("stroke-opacity",l=>(l.source.id===d.id||l.target.id===d.id)?1:0.3) 
+         console.log(e,d)
+
+
+tooltip.innerHTML=""; // purge tooltip
+
+if (d.hasOwnProperty("DOI")){
+  const doiOpener = document.createElement("button")
+  doiOpener.innerText="Open through DOI in browser";
+  doiOpener.addEventListener("mouseclick", (e) => { console.log("coucou")
+                ipcRenderer.invoke("openEx", "https://dx.doi.org/" + d.DOI);
+              });
+              
+  //shell.openExternal("https://dx.doi.org/" + d.DOI))
+tooltip.append(doiOpener)
+} 
+
+              // populate tooltip with document metadata
+         for (const key in d) {
+          switch (key) {
+            case "shortTitle":
+              case "enrichment":
+              
+              break;
+          
+            default:
+              tooltip.innerHTML+=`<hr><strong>${key}</strong><br>${JSON.stringify(d[key])} `
+              break;
+          }
+          
+         }
+         
+         
+        });
+
+        dragger.on("click",(e, d) =>{
+ link.style("stroke-opacity",1 )
+node.style("opacity", 1)
+tooltip.innerHTML=""; // purge tooltip
+tooltip.appendChild(currentDocList); // repopulate with document list
+        }  )
 
           link = link
             .data(links, (item) => item) // Select all relevant nodes

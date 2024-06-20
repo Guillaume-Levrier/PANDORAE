@@ -664,7 +664,7 @@ const selectOption = (type, id) => {
       },
       { once: true }
     );
-    field.value = CM.global.field.starting + type;
+    field.value = CM.global.field.starting +" "+ type;
     currentType = { type: type, id: id };
     //types.typeSwitch(type, id);
     
