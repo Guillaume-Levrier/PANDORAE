@@ -18,7 +18,7 @@ const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage oth
 const helpers = require("mnemonist/set");
 const { create } = require("d3");
 //const { min } = require("d3-array");
-const { clipboard } = require('electron')
+const { clipboard } = require("electron");
 
 //END NODE MODULES
 
@@ -702,7 +702,7 @@ const archotype = (id) => {
       for (let i = 0; i < documents.length / divider; ++i) {
         const d = documents[i];
 
-        const coreURL = d.URL.replace(arkViewer,"");
+        const coreURL = d.URL.replace(arkViewer, "");
 
         const parsedURL = new URL(coreURL.substring(coreURL.indexOf("http")));
         // console.log(id)
@@ -775,59 +775,59 @@ const archotype = (id) => {
           // sourceURL is d.URL without the hosting service and the timestamp, built as an URL object
 
           try {
-            
-          
-          const sourceURL = new URL(d.URL.substring(d.URL.lastIndexOf("http")));
+            const sourceURL = new URL(
+              d.URL.substring(d.URL.lastIndexOf("http"))
+            );
 
-          // source is the href of the sourceURL object
-          // i.e. http://www.example.com/spip.php?document8683
-          const source = sourceURL.href;
+            // source is the href of the sourceURL object
+            // i.e. http://www.example.com/spip.php?document8683
+            const source = sourceURL.href;
 
-          // source host is the website host
-          // i.e. www.example.com
-          const sourceHost = sourceURL.host; // || source.hostname;
+            // source host is the website host
+            // i.e. www.example.com
+            const sourceHost = sourceURL.host; // || source.hostname;
 
-          if (nodemap.hasOwnProperty(source)) {
-            // For each hypertext link the document is listed as having, check:
-            // 1- if there is a direct link between pages at time of their latest capture (blue link)
-            // 2- if there is a link between this page and another page of the target domain, but which isn't in the corpus
+            if (nodemap.hasOwnProperty(source)) {
+              // For each hypertext link the document is listed as having, check:
+              // 1- if there is a direct link between pages at time of their latest capture (blue link)
+              // 2- if there is a link between this page and another page of the target domain, but which isn't in the corpus
 
-            pageCaptureHypertextLinks.forEach((target) => {
-              var host;
-              try {
-                const thisURL = new URL(target);
-                host = thisURL.host; //|| thisURL.hostname;
-              } catch (error) {
-                console.log(error);
-                ipcRenderer.send(
-                  "console-logs",
-                  "archotype error: url " + target + " is invalid."
-                );
+              pageCaptureHypertextLinks.forEach((target) => {
+                var host;
+                try {
+                  const thisURL = new URL(target);
+                  host = thisURL.host; //|| thisURL.hostname;
+                } catch (error) {
+                  console.log(error);
+                  ipcRenderer.send(
+                    "console-logs",
+                    "archotype error: url " + target + " is invalid."
+                  );
 
-                //This will allow skipping the next part
-                host = "";
-              }
+                  //This will allow skipping the next part
+                  host = "";
+                }
 
-              if (host.length > 2) {
-                if (nodemap.hasOwnProperty(target)) {
-                  // link type 1 - blue
+                if (host.length > 2) {
+                  if (nodemap.hasOwnProperty(target)) {
+                    // link type 1 - blue
 
-                  linkData.push({
-                    source,
-                    target,
-                    color: "rgb(100,160,210)",
-                    weight: 0.5,
-                    type: "page2page",
-                  });
-                } else if (
-                  domainMap.hasOwnProperty(host) &&
-                  host != sourceHost &&
-                  host.indexOf(sourceHost) === -1 &&
-                  sourceHost.indexOf(host) === -1
-                ) {
-                  // link type 2 - orange
-                  //deactivated for testing
-                  /* linkData.push({
+                    linkData.push({
+                      source,
+                      target,
+                      color: "rgb(100,160,210)",
+                      weight: 0.5,
+                      type: "page2page",
+                    });
+                  } else if (
+                    domainMap.hasOwnProperty(host) &&
+                    host != sourceHost &&
+                    host.indexOf(sourceHost) === -1 &&
+                    sourceHost.indexOf(host) === -1
+                  ) {
+                    // link type 2 - orange
+                    //deactivated for testing
+                    /* linkData.push({
                     source,
                     target: host,
                     color: "rgb(255,140,10)",
@@ -835,26 +835,25 @@ const archotype = (id) => {
                     type: "pageNOTcorpus",
                   });
                    */
-                } else {
-                  // this links to a page that wasn't captured, so add a ghost node+link;
-                  ghostNodeMap[target] = 1;
-                  ghostLinksMap[sourceURL + target] = {
-                    source,
-                    target,
-                    color: "rgb(150,150,150)",
-                    weight: 0.1,
-                    type: "ghost",
-                  };
+                  } else {
+                    // this links to a page that wasn't captured, so add a ghost node+link;
+                    ghostNodeMap[target] = 1;
+                    ghostLinksMap[sourceURL + target] = {
+                      source,
+                      target,
+                      color: "rgb(150,150,150)",
+                      weight: 0.1,
+                      type: "ghost",
+                    };
+                  }
                 }
-              }
-            });
+              });
+            }
+          } catch (error) {
+            console.log(error);
           }
-        
-        } catch (error) {
-        console.log(error)           
-          }
+        }
       }
-}
       // add ghosts nodes
       Object.keys(ghostNodeMap).forEach((d) =>
         nodeData.push({
@@ -1142,7 +1141,7 @@ const archotype = (id) => {
 
       // circleSet is a set of ids. If a node has been clicked,
       // it is stored in the set. This was, the user knows which
-      // circle they have clicked on before. 
+      // circle they have clicked on before.
       const circleSet = new Set();
 
       // foundSet is also a set of ids. It is the same idea,
@@ -1338,7 +1337,7 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
             nodeMap.hasOwnProperty(link.target.id) ||
             nodeMap.hasOwnProperty(link.source.id)
           ) {
-            if (link.target.id != link.source.id){ 
+            if (link.target.id != link.source.id) {
               localLinkData.push(link);
             }
           }
@@ -1358,12 +1357,11 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
           )
           .attr("stroke-width", (d) => d.weight)
           .attr("stroke", (d) => d.color)
-          .attr("marker-end", (d) =>{ 
-            if (d.type === "page2page" && d.color != "transparent"){ 
-            return  "url(#arrow)"
+          .attr("marker-end", (d) => {
+            if (d.type === "page2page" && d.color != "transparent") {
+              return "url(#arrow)";
             }
-            }
-          );
+          });
 
         // on click, fetch the data from the data source if it exists
 
@@ -1375,7 +1373,7 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
           .data(localNodeData)
           .join("circle")
           .attr("r", 5)
-          .attr("fill", (d) =>foundSet.has(d.id)?"purple":d.color);
+          .attr("fill", (d) => (foundSet.has(d.id) ? "purple" : d.color));
 
         titlecontrast = g
           .append("g")
@@ -1405,7 +1403,9 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
         // end up breaking at some point for framework reasons.
 
         node.style("cursor", (d) => (d.domain ? "move" : "pointer"));
-        node.attr("stroke-width",d=> circleSet.has(d.id)? 3:0).attr("stroke",d=>circleSet.has(d.id)?"#0FFF50":"null");
+        node
+          .attr("stroke-width", (d) => (circleSet.has(d.id) ? 3 : 0))
+          .attr("stroke", (d) => (circleSet.has(d.id) ? "#0FFF50" : "null"));
 
         let previousCircle = 0;
         let previousSearch = 0;
@@ -1426,7 +1426,7 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
             shell.openExternal(archtarget)
           );
 */
-           const copyButton = document.createElement("button");
+          const copyButton = document.createElement("button");
           copyButton.innerText = "Copy permalink";
           copyButton.style = "margin:10px;";
 
@@ -1621,9 +1621,9 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
 
           // circlemap
 
-
-          node.attr("stroke-width",d=> circleSet.has(d.id)? 3:0).attr("stroke",d=>circleSet.has(d.id)?"#0FFF50":"null");
-
+          node
+            .attr("stroke-width", (d) => (circleSet.has(d.id) ? 3 : 0))
+            .attr("stroke", (d) => (circleSet.has(d.id) ? "#0FFF50" : "null"));
 
           circleSet.add(d.id);
 
@@ -1670,7 +1670,7 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
                 if (documentMap.hasOwnProperty(d.id)) {
                   targetCollection =
                     documentMap[d.id].enrichment.solrCollection;
-                    console.log(documentMap[d.id])
+                  console.log(documentMap[d.id]);
                 }
 
                 if (targetCollection) {
@@ -1688,8 +1688,8 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
                         displayLastCaptureMetadata(
                           r.response.docs[r.response.docs.length - 1]
                         );
-                        foundSet.add(d.id)
-                        circle.attr("fill","purple")
+                        foundSet.add(d.id);
+                        circle.attr("fill", "purple");
                       } else {
                         toolContent.innerHTML =
                           "<hr>" + d.id + " not found.<hr>";
@@ -3799,17 +3799,50 @@ const chronotype = (id) => {
       "#a68199",
     ]);
 
-    // Doc detail can be dependent on document type, as some metadata can only be available
-    // within local, protected networks.
-    const docDetailSet= new Set();
+  // Doc detail can be dependent on document type, as some metadata can only be available
+  // within local, protected networks.
+  const docDetailSet = new Set();
+
+  const displayDoc = (d) => {
+    tooltip.innerHTML = ""; // purge tooltip
+
+    const content = document.createElement("div");
+
+    if (d.hasOwnProperty("DOI")) {
+      const doiResolveButton = document.createElement("button");
+      doiResolveButton.innerText = "Resolve DOI in browser";
+      //doiResolveButton.id = "https://dx.doi.org/" + d.DOI;
+      doiResolveButton.addEventListener("click", (e) =>
+        ipcRenderer.invoke("openEx", "https://dx.doi.org/" + d.DOI)
+      );
+
+      //shell.openExternal("https://dx.doi.org/" + d.DOI))
+      tooltip.append(doiResolveButton);
+    }
+
+    tooltip.append(content);
+
+    // populate tooltip with document metadata
+    for (const key in d) {
+      switch (key) {
+        case "shortTitle":
+        case "enrichment":
+          break;
+
+        default:
+          content.innerHTML += `<hr><strong>${key}</strong><br>${JSON.stringify(
+            d[key]
+          )} `;
+          break;
+      }
+    }
+  };
 
   //======== DATA CALL & SORT =========
   pandodb.chronotype
     .get(id)
     .then((datajson) => {
       dataDownload(datajson);
-
-      console.log(datajson);
 
       var docs = datajson.content; // Second array is the documents (docs)
       // const clusters = [];
@@ -4023,7 +4056,7 @@ const chronotype = (id) => {
           .attr("stroke", color(corpus.zone))
           .attr("fill", color(corpus.zone))
           .style("opacity", 0.5)
-          .attr("d", arcBars);
+          .attr("d", (d) => (d.value > 0 ? arcBars(d) : ""));
       });
 
       //==========  NODE SUB-GRAPHS =======
@@ -4069,10 +4102,8 @@ const chronotype = (id) => {
 
       //Declaring node variables
       var node = view.selectAll("nodes"),
-        nodetext = view.selectAll("nodetext"),
+        //nodetext = view.selectAll("nodetext"),
         link = view.selectAll("link");
-
-
 
       simulation
         .nodes(currentNodes) // Start the force graph with "docs" as data
@@ -4094,9 +4125,9 @@ const chronotype = (id) => {
           .attr("cx", (d) => d.x) // Node coordinates
           .attr("cy", (d) => d.y);
 
-        nodetext // Nodetext (doc number) coordinates
+        /* nodetext // Nodetext (doc number) coordinates
           .attr("x", (d) => d.x)
-          .attr("y", (d) => d.y);
+          .attr("y", (d) => d.y); */
       }
 
       // Circular Brush, based on Elijah Meeks https://github.com/emeeks/d3.svg.circularbrush
@@ -4508,7 +4539,7 @@ const chronotype = (id) => {
 
           currentNodes = [];
           links = [];
-          authors = new MultiSet();
+
           let buffLinks = [];
 
           function dateTest(node) {
@@ -4532,13 +4563,40 @@ const chronotype = (id) => {
               zone: d.zone,
               DOI: d.DOI,
             });
-
-            // add authors to multiset list
-            d.authors.forEach((aut) => authors.add(aut));
           });
 
-          authors.forEachMultiplicity((ct, key) => {
+          const linkByProperty = (prop) => {
+            const perspective = {};
+
+            currentNodes.forEach((d) => {
+              if (d.hasOwnProperty(prop)) {
+                d[prop].forEach((b) => {
+                  if (!perspective.hasOwnProperty(b)) {
+                    perspective[b] = [];
+                  }
+                  perspective[b].push(d.id);
+                });
+              }
+            });
+            Object.values(perspective).forEach((b) => {
+              if (b.length > 1) {
+                for (let i = 0; i < b.length; i++) {
+                  for (let j = i; j < b.length; j++) {
+                    if (i != j) {
+                      links.push({ source: b[i], target: b[j] });
+                    }
+                  }
+                }
+              }
+            });
+          };
+
+          linkByProperty("authors");
+
+          /* authors.forEachMultiplicity((ct, key) => {
             if (ct > 1) {
+              console.log(ct);
+              console.log(key);
               // if an author as authored more than 1 document
               let linkBase = [];
               currentNodes.forEach((d) => {
@@ -4564,7 +4622,7 @@ const chronotype = (id) => {
                 target: bf[i].id,
               });
             }
-          });
+          }); */
 
           var currentDocList = document.createElement("OL");
 
@@ -4573,9 +4631,7 @@ const chronotype = (id) => {
             docTitle.style.color = color(d.zone);
             docTitle.id = "list-" + d.id;
             docTitle.innerText = d.title;
-            docTitle.addEventListener("click", (e) => {
-              ipcRenderer.invoke("openEx", "https://dx.doi.org/" + d.DOI);
-            });
+            docTitle.addEventListener("click", (e) => displayDoc(d));
             docTitle.addEventListener("mouseover", (e) => {
               node.style("opacity", ".2");
               document.getElementById("node" + d.id).style.opacity = 1;
@@ -4605,7 +4661,7 @@ const chronotype = (id) => {
             .attr("fill", (d) => color(d.zone)) // Node color
             .attr("id", (d) => "node" + d.id) // Node ID (based on code)
             .attr("stroke", (d) => color(d.zone)) // Node stroke color
-            .attr("stroke-opacity", 0.6) // Node stroke color
+            //.attr("stroke-opacity", 1) // Node stroke color
             .attr("stroke-width", 0.1) // Node stroke width
             .style("cursor", "context-menu") // Type of cursor on node hover
             //.style("opacity", 0.9) // Node opacity
@@ -4613,55 +4669,44 @@ const chronotype = (id) => {
             .merge(node)
             .lower(); // Merge the nodes then lower them
 
-            console.log(node)
+          node.on("mouseover", (e, d) => {
+            for (let i = 0; i < currentDocList.children.length; i++) {
+              const element = currentDocList.children[i];
+              element.style.opacity = 0.2;
+            }
 
-            node.on("click",(e, d) => {
+            const target = document.getElementById("list-" + d.id);
 
-              const circle = d3.select(e.target); // Select this node
-              
-              node.style("opacity", 0.3) // Dim all nodes
-              circle.style("opacity", 0.9) // Highlight this specific node 
-              link.style("stroke-opacity",l=>(l.source.id===d.id||l.target.id===d.id)?1:0.3) 
-         console.log(e,d)
+            target.style.opacity = 1;
+            target.style.scrollMarginTop = "20px";
+            target.scrollIntoView({ behavior: "smooth", inline: "nearest" });
+          });
 
+          node.on("click", (e, d) => {
+            const circle = d3.select(e.target); // Select this node
 
-tooltip.innerHTML=""; // purge tooltip
+            node.style("opacity", 0.3); // Dim all nodes
+            circle.style("opacity", 0.9); // Highlight this specific node
+            link.style("stroke-opacity", (l) =>
+              l.source.id === d.id || l.target.id === d.id ? 1 : 0.3
+            );
 
-if (d.hasOwnProperty("DOI")){
-  const doiOpener = document.createElement("button")
-  doiOpener.innerText="Open through DOI in browser";
-  doiOpener.addEventListener("mouseclick", (e) => { console.log("coucou")
-                ipcRenderer.invoke("openEx", "https://dx.doi.org/" + d.DOI);
-              });
-              
-  //shell.openExternal("https://dx.doi.org/" + d.DOI))
-tooltip.append(doiOpener)
-} 
+            displayDoc(d);
+          });
 
-              // populate tooltip with document metadata
-         for (const key in d) {
-          switch (key) {
-            case "shortTitle":
-              case "enrichment":
-              
-              break;
-          
-            default:
-              tooltip.innerHTML+=`<hr><strong>${key}</strong><br>${JSON.stringify(d[key])} `
-              break;
-          }
-          
-         }
-         
-         
-        });
+          dragger.on("mouseover", (e, d) => {
+            for (let i = 0; i < currentDocList.children.length; i++) {
+              const element = currentDocList.children[i];
+              element.style.opacity = 1;
+            }
+          });
 
-        dragger.on("click",(e, d) =>{
- link.style("stroke-opacity",1 )
-node.style("opacity", 1)
-tooltip.innerHTML=""; // purge tooltip
-tooltip.appendChild(currentDocList); // repopulate with document list
-        }  )
+          dragger.on("click", (e, d) => {
+            link.style("stroke-opacity", 1).style("opacity", 1);
+            node.style("opacity", 1);
+            tooltip.innerHTML = ""; // purge tooltip
+            tooltip.appendChild(currentDocList); // repopulate with document list
+          });
 
           link = link
             .data(links, (item) => item) // Select all relevant nodes
@@ -4675,7 +4720,7 @@ tooltip.appendChild(currentDocList); // repopulate with document list
             .lower();
 
           //Node icons are nodes displayed on top of Nodes
-          nodetext = nodetext
+          /* nodetext = nodetext
             .data(currentNodes, (item) => item) // Select all relevant nodes
             .join("text") // Append the text
             .attr("dy", 0.8) // Relative Y position to each node
@@ -4699,7 +4744,7 @@ tooltip.appendChild(currentDocList); // repopulate with document list
             .merge(nodetext); // Merge the nodes
 
           nodetext.append("title").text((d) => d.title); // Hovering a node displays its title as "alt"
-
+ */
           simulation.nodes(currentNodes);
           simulation.force("link").links(links);
           simulation.alpha(1).restart();
