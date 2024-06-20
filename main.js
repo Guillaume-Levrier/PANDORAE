@@ -4,6 +4,16 @@ const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } =
 const fs = require("fs");
 var https = require("https");
 
+
+// only one instance at once
+
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+  app.quit()
+}
+
+
 // original
 var userDataPath = app.getPath("userData");
 
