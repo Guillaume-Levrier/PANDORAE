@@ -2615,9 +2615,14 @@ const loadType = (type, id) => {
     iconCreator("back-to-pres", backToPres);
   } else {
     iconCreator("export-icon", toggleMenu);
-    iconCreator("step-icon", addPresentationStep);
-    iconCreator("slide-icon", createSlide);
-    iconCreator("save-icon", savePresentation);
+    //
+    //  CURRENT DEACTIVATED
+    //
+    //  PRESENTATION SYSTEM DEPENDENT
+    //
+    //  iconCreator("step-icon", addPresentationStep);
+    //  iconCreator("slide-icon", createSlide);
+    //  iconCreator("save-icon", savePresentation);
   }
 
   document.getElementById("fluxMenu").style.display = "none";
@@ -3692,10 +3697,9 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
         // and lets them look for a string in the "content" field (if accessible).
 
         const displayLastCaptureMetadata = (doc) => {
-       
           const copyButton = document.createElement("button");
           copyButton.innerText = "Copy permalink";
-          copyButton.className="flux-button"
+          copyButton.className = "flux-button";
           copyButton.style = "margin:10px;";
 
           const permalink = `${arkViewer}/${doc.wayback_date}/${doc.url}`;
@@ -6078,7 +6082,7 @@ const chronotype = (id) => {
 
     if (d.hasOwnProperty("DOI")) {
       const doiResolveButton = document.createElement("button");
-      doiResolveButton.className="flux-button"
+      doiResolveButton.className = "flux-button";
       doiResolveButton.innerText = "Resolve DOI in browser";
       //doiResolveButton.id = "https://dx.doi.org/" + d.DOI;
       doiResolveButton.addEventListener("click", (e) =>
@@ -6107,13 +6111,15 @@ const chronotype = (id) => {
     }
   };
 
+  const propertySet = new Set();
+
   //======== DATA CALL & SORT =========
   pandodb.chronotype
     .get(id)
     .then((datajson) => {
       dataDownload(datajson);
 
-      var docs = datajson.content; // Second array is the documents (docs)
+      const docs = datajson.content; // Second array is the documents (docs)
       // const clusters = [];
       var links = []; // Declaring links as empty array
       const nodeDocs = [];
@@ -6211,11 +6217,48 @@ const chronotype = (id) => {
             } else {
               d.toPurge = true;
             }
+
+            for (const key in d) {
+              propertySet.add(key);
+            }
+
+            if (d.hasOwnProperty("enrichment")) {
+              for (const key in d.enrichment) {
+                propertySet.add(key);
+                d[key] = d.enrichment[key];
+              }
+            }
           });
         }
       };
 
       dataSorter();
+
+      const linkByProperty = (prop) => {
+        const perspective = {};
+
+        currentNodes.forEach((d) => {
+          if (d.hasOwnProperty(prop)) {
+            d[prop].forEach((b) => {
+              if (!perspective.hasOwnProperty(b)) {
+                perspective[b] = [];
+              }
+              perspective[b].push(d.id);
+            });
+          }
+        });
+        Object.values(perspective).forEach((b) => {
+          if (b.length > 1) {
+            for (let i = 0; i < b.length; i++) {
+              for (let j = i; j < b.length; j++) {
+                if (i != j) {
+                  links.push({ source: b[i], target: b[j] });
+                }
+              }
+            }
+          }
+        });
+      };
 
       var firstDate = d3.min(nodeDocs, (d) => d.date);
       var lastDate = d3.max(nodeDocs, (d) => d.date);
@@ -6442,6 +6485,7 @@ const chronotype = (id) => {
             .enter()
             .insert("path", "path.resize")
             .attr("d", _arc)
+            .attr("stroke", "red")
             .attr("class", function (d) {
               return d.class + " circularbrush";
             });
@@ -6809,8 +6853,6 @@ const chronotype = (id) => {
           currentNodes = [];
           links = [];
 
-          let buffLinks = [];
-
           function dateTest(node) {
             if (node.date > currentBrush[0] && node.date < currentBrush[1]) {
               return true;
@@ -6833,65 +6875,6 @@ const chronotype = (id) => {
               DOI: d.DOI,
             });
           });
-
-          const linkByProperty = (prop) => {
-            const perspective = {};
-
-            currentNodes.forEach((d) => {
-              if (d.hasOwnProperty(prop)) {
-                d[prop].forEach((b) => {
-                  if (!perspective.hasOwnProperty(b)) {
-                    perspective[b] = [];
-                  }
-                  perspective[b].push(d.id);
-                });
-              }
-            });
-            Object.values(perspective).forEach((b) => {
-              if (b.length > 1) {
-                for (let i = 0; i < b.length; i++) {
-                  for (let j = i; j < b.length; j++) {
-                    if (i != j) {
-                      links.push({ source: b[i], target: b[j] });
-                    }
-                  }
-                }
-              }
-            });
-          };
-
-          linkByProperty("authors");
-
-          /* authors.forEachMultiplicity((ct, key) => {
-            if (ct > 1) {
-              console.log(ct);
-              console.log(key);
-              // if an author as authored more than 1 document
-              let linkBase = [];
-              currentNodes.forEach((d) => {
-                //iterate on documents
-                d.authors.forEach((e) => {
-                  // iterate on authors
-                  if (e === key) {
-                    // if this doc has this author
-                    linkBase.push(d);
-                  }
-                });
-              });
-              buffLinks.push(linkBase);
-            }
-          });
-
-          //Create links among all
-          buffLinks.forEach((bf) => {
-            // for each array of articles by the same author(s)
-            for (let i = 1; i < bf.length; i++) {
-              links.push({
-                source: bf[i - 1].id,
-                target: bf[i].id,
-              });
-            }
-          }); */
 
           var currentDocList = document.createElement("OL");
 
@@ -6922,6 +6905,8 @@ const chronotype = (id) => {
           });
 
           tooltip.appendChild(currentDocList);
+
+          linkByProperty(previousCriteriaSelected);
 
           node = node
             .data(currentNodes, (item) => item) // Select all relevant nodes
@@ -7185,6 +7170,52 @@ const chronotype = (id) => {
       d3.selectAll("text").style("user-select", "none");
       radialBrush.raise();
       // brushCircle.lower();
+
+      const availableProperties = [...propertySet];
+
+      var previousCriteriaSelected = "";
+
+      const radioMenu = document.createElement("div");
+
+      availableProperties.forEach((d) => {
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.id = d;
+        radio.name = "selectCriteria";
+        const label = document.createElement("label");
+        label.innerText = d;
+        label.setAttribute("for", "selectCriteria");
+
+        const line = document.createElement("br");
+
+        radio.addEventListener("click", () => {
+          link.remove();
+          linkByProperty(d);
+          previousCriteriaSelected = d;
+
+          link = link
+            .data(links, (item) => item) // Select all relevant nodes
+            .join("line") // Append the nodes
+            .attr("fill", "red") // Node color
+            .attr("id", (d) => "link" + d.source + "-" + d.target) // Node ID (based on code)
+            .style("stroke", "red") // Node stroke color
+            .style("stroke-width", 0.1) // Node stroke width
+            .raise() // Nodes are displayed above the rest
+            .merge(link)
+            .lower();
+
+          simulation.force("link").links(links);
+          simulation.alpha(1).restart();
+        });
+
+        radioMenu.append(radio, label, line);
+      });
+
+      iconCreator("sort-icon", () => {
+        tooltip.innerHTML = "<h3>Select a link criteria</h3><hr>"; // purge tooltip
+        tooltip.append(radioMenu);
+      });
+
       loadType();
     })
     .catch((error) => {
@@ -7616,9 +7647,9 @@ const geotype = (id) => {
                 }
               }
 
-              docDOM.addEventListener("click", (e) => {
-                ipcRenderer.invoke("openEx", url);
-              });
+              docDOM.addEventListener("click", (e) =>
+                ipcRenderer.invoke("openEx", url)
+              );
             }
             document.getElementById("tooltip").appendChild(inst);
             document.getElementById("tooltip").appendChild(list);
@@ -9625,55 +9656,65 @@ const pharmacotype = (id) => {
           let descMod = d.Study.ProtocolSection.DescriptionModule;
           let overSight = d.Study.ProtocolSection.OversightModule;
 
-          d3.select("#tooltip").html(
-            "<h2>" +
-              idMod.BriefTitle +
-              "</h2>" +
-              "<h3>" +
-              idMod.Organization.OrgFullName +
-              " - " +
-              idMod.Organization.OrgClass.toLowerCase() +
-              "</h3>" +
-              "<br>" +
-              " <input type='button' style='cursor:pointer' onclick='shell.openExternal(" +
-              JSON.stringify(
-                "https://clinicaltrials.gov/ct2/show/" + idMod.NCTId
-              ) +
-              ")' value='Open on ClinicalTrials.gov'></input><br><br>" +
-              "<strong>Full title:</strong> " +
-              idMod.OfficialTitle +
-              "<br>" +
-              "<strong>NCTId:</strong> " +
-              idMod.NCTId +
-              "<br>" +
-              "<strong>Org Id:</strong> " +
-              idMod.OrgStudyIdInfo.OrgStudyId +
-              "<br>" +
-              "<br>" +
-              "<h3>Status</h3>" +
-              "<strong>Overall status:</strong> " +
-              statMod.OverallStatus +
-              "<br>" +
-              "<strong>Last verified:</strong> " +
-              statMod.StatusVerifiedDate +
-              "<br>" +
-              "<strong>Expanded access:</strong> " +
-              statMod.ExpandedAccessInfo.HasExpandedAccess +
-              "<br>" +
-              "<strong>FDA regulated:</strong> Drug [" +
-              overSight.IsFDARegulatedDrug +
-              "] - Device [" +
-              overSight.IsFDARegulatedDevice +
-              "]<br>" +
-              "<h3>Description</h3>" +
-              "<strong>Brief summary:</strong> " +
-              descMod.BriefSummary +
-              "<br>" +
-              "<br>" +
-              "<strong>Detailed description:</strong> " +
-              descMod.DetailedDescription +
-              "<br>"
+          const openButton = document.createElement("button");
+          openButton.innerText = "Open on ClinicalTrials.gov";
+
+          openButton.addEventListener("click", (e) =>
+            ipcRenderer.invoke(
+              "openEx",
+              "https://clinicaltrials.gov/ct2/show/" + idMod.NCTId
+            )
           );
+
+          const trialDesc = document.createElement("div");
+
+          trialDesc.innerHTML =
+            "<h2>" +
+            idMod.BriefTitle +
+            "</h2>" +
+            "<h3>" +
+            idMod.Organization.OrgFullName +
+            " - " +
+            idMod.Organization.OrgClass.toLowerCase() +
+            "</h3>" +
+            "<br>" +
+            "<strong>Full title:</strong> " +
+            idMod.OfficialTitle +
+            "<br>" +
+            "<strong>NCTId:</strong> " +
+            idMod.NCTId +
+            "<br>" +
+            "<strong>Org Id:</strong> " +
+            idMod.OrgStudyIdInfo.OrgStudyId +
+            "<br>" +
+            "<br>" +
+            "<h3>Status</h3>" +
+            "<strong>Overall status:</strong> " +
+            statMod.OverallStatus +
+            "<br>" +
+            "<strong>Last verified:</strong> " +
+            statMod.StatusVerifiedDate +
+            "<br>" +
+            "<strong>Expanded access:</strong> " +
+            statMod.ExpandedAccessInfo.HasExpandedAccess +
+            "<br>" +
+            "<strong>FDA regulated:</strong> Drug [" +
+            overSight.IsFDARegulatedDrug +
+            "] - Device [" +
+            overSight.IsFDARegulatedDevice +
+            "]<br>" +
+            "<h3>Description</h3>" +
+            "<strong>Brief summary:</strong> " +
+            descMod.BriefSummary +
+            "<br>" +
+            "<br>" +
+            "<strong>Detailed description:</strong> " +
+            descMod.DetailedDescription +
+            "<br>";
+
+          tooltip.innerHTML = "";
+
+          tooltip.append(openButton, trialDesc);
 
           if (
             document.getElementById(JSON.stringify(d.Rank)).style.fill ===

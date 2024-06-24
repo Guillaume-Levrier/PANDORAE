@@ -462,7 +462,7 @@ h1 {
   pointer-events: all;
   overflow-y: scroll;
   overflow-x: hidden;
-  word-break: break-all;
+  word-break: break-word;
 }
 
 li {
