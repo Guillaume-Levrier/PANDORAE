@@ -4662,10 +4662,10 @@ const chronotype = (id) => {
           node.on("click", (e, d) => {
             const circle = d3.select(e.target); // Select this node
 
-            node.style("opacity", 0.3); // Dim all nodes
+            node.style("opacity", 0.1); // Dim all nodes
             circle.style("opacity", 0.9); // Highlight this specific node
             link.style("stroke-opacity", (l) =>
-              l.source.id === d.id || l.target.id === d.id ? 1 : 0.3
+              l.source.id === d.id || l.target.id === d.id ? 1 : 0.1
             );
 
             displayDoc(d);

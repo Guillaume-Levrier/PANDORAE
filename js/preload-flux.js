@@ -213,6 +213,32 @@ pandodb.version(10).stores({
   istex: structureV1,
 });
 
+pandodb.version(11).stores({
+  fieldotype: structureV1,
+  filotype: structureV1,
+  doxatype: structureV1,
+  hyphotype: structureV1,
+  enriched: structureV1,
+  scopus: structureV1,
+  webofscience: structureV1,
+  csljson: structureV1,
+  zotero: structureV1,
+  twitter: structureV1,
+  archotype: structureV1,
+  anthropotype: structureV1,
+  chronotype: structureV1,
+  geotype: structureV1,
+  pharmacotype: structureV1,
+  publicdebate: structureV1,
+  gazouillotype: structureV1,
+  hyphe: structureV1,
+  system: structureV1,
+  slider: structureV1,
+  regards: structureV1,
+  istex: structureV1,
+  dimensions: structureV1,
+});
+
 pandodb.open();
 const CMT = {
   EN: {
@@ -853,10 +879,12 @@ const powerValve = (fluxAction, item) => {
       break;
 
     case "cslConverter":
-      fluxArgs.dataset = itemname;
-      fluxArgs.corpusType = item.dataset.corpusType;
       fluxArgs.normalize = document.getElementById("crossEnrich").checked;
       fluxArgs.userMail = document.getElementById("userMailInput").value;
+      fluxArgs.source = document.getElementById("sciento-source").innerText;
+      fluxArgs.corpusType =
+        document.getElementById("sciento-corpusType").innerText;
+      fluxArgs.dataset = document.getElementById("sciento-dataset").innerText;
       message = "Converting to CSL-JSON";
       break;
 
@@ -1153,6 +1181,7 @@ const datasetRemove = (kind, id) => {
     datasetDetail(null, kind, null, null);
   });
 };
+
 //========== datasetDetail ==========
 // Clicking on a dataset displayed by the previous function displays some of its metadata and allows for further actions
 // to be triggered (such as sending a larger request to Chæros).
@@ -1163,6 +1192,8 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
   //var datasetDetail = {}; // Create the dataDetail object
   let dataPreview = ""; // Created dataPreview variable
 
+  const altID = prevId.split("-")[0];
+
   if (prevId === null) {
     document.getElementById(kind + "-dataset-preview").innerText =
       "Dataset deleted";
@@ -1172,7 +1203,25 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
   } else {
     try {
       pandodb[kind].get(id).then((doc) => {
+        if (altID === "sciento") {
+          document.getElementById("sciento-dataset-buttons").style.display =
+            "block";
+          document.getElementById("sciento-source").innerText = kind;
+          document.getElementById("sciento-corpusType").innerText = kind;
+          document.getElementById("sciento-dataset").innerText = doc.id;
+        }
         switch (kind) {
+          case "dimensions":
+            dataPreview = `<strong> ${doc.name} </strong>
+              <br>Origin: ${doc.content.type}
+              <br>Total results: ${doc.content.entries.length} 
+              <br>Upload date: ${doc.date}`;
+
+            document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
+            // document.getElementById(buttonId).style.display = "block";
+
+            convertButton.dataset.corpusType = doc.content.type;
+            break;
           case "webofscience":
             dataPreview = `<strong> ${doc.name} </strong>
               <br>Origin: ${doc.content.type}
@@ -1186,7 +1235,7 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
               "block";
             document.getElementById("webofscienceGeolocate").name = doc.id;
             //document.getElementById("altmetricRetriever").name = doc.id;
-
+            convertButton.dataset.corpusType = doc.content.type;
             break;
           case "scopus":
             dataPreview =
@@ -1206,7 +1255,7 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
             document.getElementById("scopusGeolocate").style.display = "block";
             document.getElementById("scopusGeolocate").name = doc.id;
             //document.getElementById("altmetricRetriever").name = doc.id;
-
+            convertButton.dataset.corpusType = doc.content.type;
             break;
 
           case "enriched":
@@ -1291,6 +1340,16 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
       ipcRenderer.send("console-logs", error); // Log error
     }
   }
+};
+
+//========== scientoDisplay ==========
+// Cumulative display from different sources + enriched
+
+const scientoDisplay = () => {
+  //datasetDisplay(divId, kind, altkind)
+  const sources = ["scopus", "webofscience", "dimensions", "enriched"];
+
+  sources.forEach((s) => datasetDisplay(`sciento-list-${s}`, s, "sciento"));
 };
 
 //========== istexBasicRetriever ==========
@@ -2373,6 +2432,61 @@ const localUpload = () => {
   });
 };
 
+// ==== Dimensions ====
+
+const dimensionsUpload = () => {
+  //ipcRenderer.send("coreSignal", "importing categorized tweets"); // Sending notification to console
+  //ipcRenderer.send("pulsar", false);
+
+  const button = document.getElementById("dimensionsUploadName");
+  const datasetName = button.value;
+  const datasetPath = document.getElementById("dimensionsUploadPath").files[0]
+    .path;
+
+  const datadetail = document.getElementById("dimensions-dataset-detail");
+
+  let count = 0;
+
+  const content = { entries: [], type: "dimensions" };
+
+  fs.createReadStream(datasetPath) // Read the flatfile dataset provided by the user
+    .pipe(csv()) // pipe buffers to csv parser
+    .on("data", (data) => {
+      count++;
+      if (count % 7) {
+        button.innerText = "Loading " + count;
+      }
+      content.entries.push(data);
+    })
+    .on("end", () => {
+      let id = datasetName + date();
+
+      pandodb.open();
+
+      pandodb.dimensions
+        .add({
+          id: id,
+          date: date(),
+          name: datasetName,
+          content: content,
+        })
+        .then(() => {
+          console.log("success");
+          fluxButtonAction(
+            "load-dimensions",
+            true,
+            `Dataset saved with ${count} items`,
+            ""
+          );
+          ipcRenderer.send(
+            "console-logs",
+            "Imported dimensions data " + datasetName
+          ); // Sending notification to console
+        });
+    });
+  //.catch((e) => console.log(e));
+};
+
 //===== Gallica  ======
 // On a given Request sent to gallica, find how many records
 // are listed in the database.
@@ -3418,6 +3532,16 @@ window.addEventListener("load", (event) => {
     },
     { id: "new-service-button", func: "addLocalService" },
     { id: "showConsole", func: "fluxConsole" },
+    {
+      id: "istex-list-display",
+      func: "datasetDisplay",
+      arg: ["istex-list", "istex"],
+    },
+    {
+      id: "dimensions-list-display",
+      func: "datasetDisplay",
+      arg: ["dimensions-list", "dimensions"],
+    },
     { id: "scopus-list-display", func: "ScopusList" },
     { id: "user-button", func: "basicUserData" },
     { id: "access-user-id", func: "accessUserID" },
@@ -3446,6 +3570,8 @@ window.addEventListener("load", (event) => {
       func: "datasetDisplay",
       arg: ["systemDatasetsList", "system"],
     },
+
+    { id: "load-dimensions", func: "dimensionsUpload" },
     { id: "load-local", func: "localUpload" },
     { id: "systitret", func: "powerValve", arg: "sysExport" },
     {
@@ -3489,9 +3615,8 @@ window.addEventListener("load", (event) => {
     },
     { id: "convert-csl", func: "powerValve", arg: "cslConverter" },
     {
-      id: "scopus-display",
-      func: "datasetDisplay",
-      arg: ["enriched-dataset-list", "enriched"],
+      id: "sciento-db-display",
+      func: "scientoDisplay",
     },
     {
       id: "cslcolret",
@@ -3626,6 +3751,12 @@ window.addEventListener("load", (event) => {
             }
             break;
 
+          case "Dimensions":
+            if (selections.scientometricsSelect) {
+              addHop(["USER", "DIMENSIONS", "ENRICHMENT"]);
+            }
+            break;
+
           case "PPS":
             if (selections.scientometricsSelect) {
               addHop(["OPEN", "PPS", "CSL-JSON"]);
@@ -3663,18 +3794,18 @@ window.addEventListener("load", (event) => {
     drawFlux(svg, traces, false, true);
 
     buttonList.forEach((but) => {
-      var clickable=1
+      var clickable = 1;
       document.getElementById(but.id).addEventListener("click", (e) => {
-        if (clickable){ 
-        funcSwitch(e, but);
-        clickable=0;
-        setTimeout(()=>clickable=1,5000)
-        }else{
-           ipcRenderer.send(
-    "console-logs",
-   `Cooldown not finished for action ${but.id}.` 
-  );
-        }  
+        if (clickable) {
+          funcSwitch(e, but);
+          clickable = 0;
+          setTimeout(() => (clickable = 1), 5000);
+        } else {
+          ipcRenderer.send(
+            "console-logs",
+            `Cooldown not finished for action ${but.id}.`
+          );
+        }
         e.preventDefault();
         return false;
       });
@@ -3867,6 +3998,10 @@ window.addEventListener("load", (event) => {
         accessUserID();
         break;
 
+      case "scientoDisplay":
+        scientoDisplay();
+        break;
+
       case "changeUserID":
         changeUserID();
         break;
@@ -3903,6 +4038,10 @@ window.addEventListener("load", (event) => {
 
       case "gallicaBasic":
         gallicaBasic();
+        break;
+
+      case "dimensionsUpload":
+        dimensionsUpload();
         break;
 
       case "regardsBasic":
@@ -3953,6 +4092,13 @@ window.addEventListener("load", (event) => {
         zoteroCollectionRetriever();
         break;
 
+      case "istexList":
+        istexList();
+        break;
+
+      case "dimensionsList":
+        dimensionsList();
+        break;
       case "ScopusList":
         ScopusList();
         break;

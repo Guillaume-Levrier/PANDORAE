@@ -213,6 +213,32 @@ pandodb.version(10).stores({
   istex: structureV1,
 });
 
+pandodb.version(11).stores({
+  fieldotype: structureV1,
+  filotype: structureV1,
+  doxatype: structureV1,
+  hyphotype: structureV1,
+  enriched: structureV1,
+  scopus: structureV1,
+  webofscience: structureV1,
+  csljson: structureV1,
+  zotero: structureV1,
+  twitter: structureV1,
+  archotype: structureV1,
+  anthropotype: structureV1,
+  chronotype: structureV1,
+  geotype: structureV1,
+  pharmacotype: structureV1,
+  publicdebate: structureV1,
+  gazouillotype: structureV1,
+  hyphe: structureV1,
+  system: structureV1,
+  slider: structureV1,
+  regards: structureV1,
+  istex: structureV1,
+  dimensions: structureV1,
+});
+
 pandodb.open();
 //========== CHÆEROS ==========
 //When Flux actions are too heavy to be quasi-instantaneous, powerValve sends a message to the main process. This
@@ -250,12 +276,12 @@ const getPassword = (service, user) =>
 //========== scopusConverter ==========
 //scopusConverter converts a scopus JSON dataset into a Zotero CSL-JSON dataset.
 
-const scopusConverter = (dataset, normalize, email) => {
+const scopusConverter = (dataset, source, normalize, email) => {
   // [dataset] is the file to be converted
   ipcRenderer.send("console-logs", "Starting scopusConverter on " + dataset); // Notify console conversion started
   let convertedDataset = []; // Create an array
 
-  pandodb.enriched.get(dataset).then((doc) => {
+  pandodb[source].get(dataset).then((doc) => {
     // Open the database in which the scopus dataset is stored
     try {
       // If the file is valid, do the following:
@@ -358,7 +384,7 @@ const scopusConverter = (dataset, normalize, email) => {
 //========== webofscienceConverter ==========
 //webofscienceConverter converts a scopus JSON dataset into a Zotero CSL-JSON dataset.
 
-const webofscienceConverter = (dataset, normalize, mail) => {
+const webofscienceConverter = (dataset, source, normalize, mail) => {
   // [dataset] is the file to be converted
   ipcRenderer.send(
     "console-logs",
@@ -366,7 +392,7 @@ const webofscienceConverter = (dataset, normalize, mail) => {
   ); // Notify console conversion started
   let convertedDataset = []; // Create an array
 
-  pandodb.enriched.get(dataset).then((doc) => {
+  pandodb[source].get(dataset).then((doc) => {
     // Open the database in which the scopus dataset is stored
 
     try {
@@ -751,8 +777,6 @@ const webofscienceGeolocate = (dataset) => {
             }
           }
         });
-
-        //console.log(doc);
 
         ipcRenderer.send(
           "console-logs",
@@ -2540,6 +2564,120 @@ const openAlextoCSLJSON = (d) => {
   return article;
 };
 
+// ====== dimensions csl converter =====
+
+const dimensionsCSLconverter = (dataset, source, normalize, email) => {
+  const dimensionsToZoteroCSL = (item) => {
+    const article = {
+      itemType: "journalArticle",
+      creators: [],
+      pages: "",
+      series: "",
+      seriesTitle: "",
+      seriesText: "",
+      journalAbbreviation: "",
+      language: "",
+      url: "",
+      accessDate: "",
+      archive: "",
+      archiveLocation: "",
+      libraryCatalog: "",
+      callNumber: "",
+      rights: "",
+      extra: "",
+      tags: [],
+      collections: [],
+      relations: {},
+    };
+
+    article.title = item.Title;
+    article.abstractNote = item.Abstract;
+    article.publicationTitle = item["Source title"];
+    article.volume = item.Volume;
+    article.date = item["Publication date"];
+
+    if (item.hasOwnProperty("DOI")) {
+      article.DOI = item.DOI;
+    }
+
+    const authors = item.Authors.split("; ");
+
+    authors.forEach((auth) => {
+      const names = auth.split(", ");
+      const firstName = names[0];
+      var lastName = "";
+      for (let i = 1; i < names.length; ++i) {
+        lastName += names[i];
+      }
+      article.creators.push({ creatorType: "author", firstName, lastName });
+    });
+
+    article.shortTitle = JSON.stringify(item);
+
+    return article;
+  };
+
+  ipcRenderer.send("console-logs", "Starting istexConverter on " + dataset); // Notify console conversion started
+  let convertedDataset = []; // Create an array
+
+  pandodb[source].get(dataset).then((doc) => {
+    // Open the database in which the scopus dataset is stored
+
+    try {
+      // If the file is valid, do the following:
+      const articles = doc.content.entries; // Select the array filled with the targeted articles
+
+      for (let i = 0; i < articles.length; i++) {
+        const converted = dimensionsToZoteroCSL(articles[i]);
+
+        ipcRenderer.send(
+          "chaeros-notification",
+          `Converting ${i + 1}/${articles.length}`
+        );
+
+        convertedDataset.push(converted);
+      }
+    } catch (err) {
+      ipcRenderer.send("chaeros-failure", JSON.stringify(err)); // On failure, send error notification to main process
+      ipcRenderer.send("pulsar", true);
+      ipcRenderer.send("console-logs", JSON.stringify(err)); // On failure, send error to console
+    } finally {
+      const id = dataset + "-converted";
+
+      if (normalize) {
+        const converted = {
+          id: id,
+          date: date,
+          name: dataset,
+          content: convertedDataset,
+        };
+        crossRefEnricher(converted, email);
+      } else {
+        pandodb.open();
+
+        pandodb.csljson
+          .add({
+            id,
+            date,
+            name: dataset,
+            content: convertedDataset,
+          })
+          .then(() => {
+            ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
+            ipcRenderer.send("pulsar", true);
+            ipcRenderer.send(
+              "console-logs",
+              "dimensionsConverter successfully converted " + dataset
+            ); // Log success
+            setTimeout(() => {
+              ipcRenderer.send("win-destroy", winId);
+            }, 500);
+          });
+      }
+    }
+  });
+};
+
 // ========= ISTEX RETRIEVER ==========
 
 const istexRetriever = (query) => {
@@ -2630,7 +2768,7 @@ const istexRetriever = (query) => {
 
 // ====== ISTEX CONVERTER ======
 
-const istexCSLconverter = (dataset, normalize, mail) => {
+const istexCSLconverter = (dataset, source, normalize, email) => {
   const istexToZoteroCSL = (item) => {
     const article = {
       itemType: "journalArticle",
@@ -2697,8 +2835,8 @@ const istexCSLconverter = (dataset, normalize, mail) => {
   ipcRenderer.send("console-logs", "Starting istexConverter on " + dataset); // Notify console conversion started
   let convertedDataset = []; // Create an array
 
-  pandodb.enriched.get(dataset).then((doc) => {
-    // Open the database in which the scopus dataset is stored
+  pandodb[source].get(dataset).then((doc) => {
+    // Open the database in which the dataset is stored
     try {
       // If the file is valid, do the following:
       const articles = doc.content.entries; // Select the array filled with the targeted articles
@@ -3120,9 +3258,11 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
 
     case "cslConverter":
       switch (fluxArgs.corpusType) {
+        case "Scopus":
         case "Scopus-dataset":
           scopusConverter(
             fluxArgs.dataset,
+            fluxArgs.source,
             fluxArgs.normalize,
             fluxArgs.userMail
           );
@@ -3131,6 +3271,7 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
         case "WoS-dataset":
           webofscienceConverter(
             fluxArgs.dataset,
+            fluxArgs.source,
             fluxArgs.normalize,
             fluxArgs.userMail
           );
@@ -3138,10 +3279,22 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
         case "ISTEX-dataset":
           istexCSLconverter(
             fluxArgs.dataset,
+            fluxArgs.source,
             fluxArgs.normalize,
             fluxArgs.userMail
           );
           break;
+
+        case "dimensions":
+          dimensionsCSLconverter(
+            fluxArgs.dataset,
+            fluxArgs.source,
+            fluxArgs.normalize,
+            fluxArgs.userMail
+          );
+          break;
+
+        case "ISTEX-dataset":
 
         default:
           break;

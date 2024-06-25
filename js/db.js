@@ -213,4 +213,30 @@ pandodb.version(10).stores({
   istex: structureV1,
 });
 
+pandodb.version(11).stores({
+  fieldotype: structureV1,
+  filotype: structureV1,
+  doxatype: structureV1,
+  hyphotype: structureV1,
+  enriched: structureV1,
+  scopus: structureV1,
+  webofscience: structureV1,
+  csljson: structureV1,
+  zotero: structureV1,
+  twitter: structureV1,
+  archotype: structureV1,
+  anthropotype: structureV1,
+  chronotype: structureV1,
+  geotype: structureV1,
+  pharmacotype: structureV1,
+  publicdebate: structureV1,
+  gazouillotype: structureV1,
+  hyphe: structureV1,
+  system: structureV1,
+  slider: structureV1,
+  regards: structureV1,
+  istex: structureV1,
+  dimensions: structureV1,
+});
+
 pandodb.open();

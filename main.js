@@ -4,15 +4,13 @@ const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } =
 const fs = require("fs");
 var https = require("https");
 
-
 // only one instance at once
 
-const gotTheLock = app.requestSingleInstanceLock()
+const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
-  app.quit()
+  app.quit();
 }
-
 
 // original
 var userDataPath = app.getPath("userData");
@@ -248,9 +246,9 @@ ipcMain.on("userStatus", (event, req) => {
           }
         }
 
-        if (currentUser.UserName.length > 0) {
-          getPPSData();
-        }
+        //if (currentUser.UserName.length > 0) {
+        //          getPPSData();
+        //        }
 
         mainWindow.webContents.send("userStatus", currentUser);
       }
@@ -650,6 +648,7 @@ const dnslist = [
   { name: "Regards Citoyens", url: "nosdeputes.fr" },
   { name: "Web Of Science", url: "clarivate.com" },
   { name: "ISTEX", url: "api.istex.fr" },
+  { name: "Dimensions", url: "app.dimensions.ai" },
   {
     name: "PPS",
     url: "irit.fr",

@@ -213,6 +213,32 @@ pandodb.version(10).stores({
   istex: structureV1,
 });
 
+pandodb.version(11).stores({
+  fieldotype: structureV1,
+  filotype: structureV1,
+  doxatype: structureV1,
+  hyphotype: structureV1,
+  enriched: structureV1,
+  scopus: structureV1,
+  webofscience: structureV1,
+  csljson: structureV1,
+  zotero: structureV1,
+  twitter: structureV1,
+  archotype: structureV1,
+  anthropotype: structureV1,
+  chronotype: structureV1,
+  geotype: structureV1,
+  pharmacotype: structureV1,
+  publicdebate: structureV1,
+  gazouillotype: structureV1,
+  hyphe: structureV1,
+  system: structureV1,
+  slider: structureV1,
+  regards: structureV1,
+  istex: structureV1,
+  dimensions: structureV1,
+});
+
 pandodb.open();
 const CMT = {
   EN: {
@@ -6939,10 +6965,10 @@ const chronotype = (id) => {
           node.on("click", (e, d) => {
             const circle = d3.select(e.target); // Select this node
 
-            node.style("opacity", 0.3); // Dim all nodes
+            node.style("opacity", 0.1); // Dim all nodes
             circle.style("opacity", 0.9); // Highlight this specific node
             link.style("stroke-opacity", (l) =>
-              l.source.id === d.id || l.target.id === d.id ? 1 : 0.3
+              l.source.id === d.id || l.target.id === d.id ? 1 : 0.1
             );
 
             displayDoc(d);

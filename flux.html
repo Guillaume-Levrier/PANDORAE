@@ -231,11 +231,51 @@
     <br><br>
     <hr><br><br>
 
+    <div id="istex-list" style="position:relative;"></div><br><br>
+
     <button type="submit" class="flux-button" id="istex-list-display">Update
       available dataset list</button> &nbsp; &nbsp; &nbsp;
   </form>
 
 </div>
+
+<!-- DIMENSIONS TAB -->
+<div id="dimensions" style="display:none;" class="fluxTabs">
+  <span class="flux-title">DIMENSIONS</span>
+  <br><br>
+  <form id="dimensions-form" autocomplete="off">Dimensions export dataset<br>
+    File should be in CSV, with the first line as column head (and not a data
+    source disclaimer).
+    <br><br>
+    <input class="fluxInput" id="dimensionsUploadName" type="text"
+      placeholder="Enter dataset name here" /><br><br>
+    <input class="fluxInput" id="dimensionsUploadPath" type="file"
+      accept=".csv" /><br><br>
+
+
+
+    <button type="submit" class="flux-button" id="load-dimensions">Upload
+      Dimensions dataset</button>
+    <br>
+
+    <br><br>
+
+    <br><br>
+    <hr><br><br>
+
+    <div id="dimensions-dataset-preview" style="position:relative;"></div>
+
+
+
+    <div id="dimensions-list" style="position:relative;"></div><br><br>
+
+    <button type="submit" class="flux-button"
+      id="dimensions-list-display">Update
+      available dataset list</button> &nbsp; &nbsp; &nbsp;
+  </form>
+
+</div>
+
 
 
 <!-- WEB OF SCIENCE TAB -->
@@ -395,22 +435,45 @@
 <div id="csl-json" style="display:none;" class="fluxTabs">
   <span class="flux-title">CSL-JSON</span><br><br>
   <form autocomplete="off">
-    <div id="enriched-dataset-preview" style="position:relative;">Click on a
+    <div id="sciento-dataset-preview" style="position:relative;">Click on a
       dataset to display its features. </div>
-    <div id="enriched-dataset-buttons" style="display:none;">
+    <div id="sciento-dataset-buttons" style="display:none;">
       <input type="checkbox" class="flux-button" name="crossEnrich"
         id="crossEnrich"> <label for="crossEnrich">Normalize
         with
         CrossRef</label><br>
       <br>
+      <div id="sciento-corpusType" style="display: none;"></div>
+      <div id="sciento-dataset" style="display: none;"></div>
+      <div id="sciento-source" style="display: none;"></div>
+      <br>
       <button type="submit" class="flux-button" id="convert-csl">Convert to
         CSL</button>
     </div><br><br>
-    <button type="submit" class="flux-button" id="scopus-display">Update
+    <button type="submit" class="flux-button" id="sciento-db-display">Update
       available dataset list</button>
   </form>
-  <div id="enriched-dataset-list" style="position:relative;">No dataset loaded
-    yet.</div>
+  <div style="border: 1px solid black; margin : 15px;padding:5px;">Scopus
+    <hr>
+    <div id="sciento-list-scopus" style="position:relative;">No dataset loaded
+      yet.</div>
+  </div>
+  <div style="border: 1px solid black; margin : 15px;padding:5px;">Web of
+    Science
+    <hr>
+    <div id="sciento-list-webofscience" style="position:relative;">No dataset
+      loaded yet.</div>
+  </div>
+  <div style="border: 1px solid black; margin : 15px;padding:5px;">Dimensions
+    <hr>
+    <div id="sciento-list-dimensions" style="position:relative;">No dataset
+      loaded yet.</div>
+  </div>
+  <div style="border: 1px solid black; margin : 15px;padding:5px;">Enriched
+    <hr>
+    <div id="sciento-list-enriched" style="position:relative;">No dataset loaded
+      yet.</div>
+  </div>
 </div>
 
 <!-- MANUAL TAB -->
@@ -558,32 +621,38 @@
 <!-- ZOTERO TAB -->
 <div id="zotero" style="display:none;" class="fluxTabs">
   <span class="flux-title">ZOTERO</span><br><br>
-  This tab lets you send a collection of documents retrieved by PANDORÆ to Zotero, and lets import a Zotero collection (regardless
+  This tab lets you send a collection of documents retrieved by PANDORÆ to
+  Zotero, and lets import a Zotero collection (regardless
   of its origin) to PANDORÆ.
-<br><br><hr><br>
+  <br><br>
+  <hr><br>
   <form id="zotero-export-form" autocomplete="off">
-    
-    
 
-    
-    This button lets you display the datasets in <strong>PANDORÆ's memory on your local device</strong> and upload them to Zotero.<br><br>
+
+
+
+    This button lets you display the datasets in <strong>PANDORÆ's memory on
+      your local device</strong> and upload them to Zotero.<br><br>
     <button type="submit" class="flux-button" id="cslcolret">Display available
       csljson files</button><br>
-      <div id="selectedCollection">
-    <div id="csljson-dataset-preview"></div>
-    <div id="csljson-dataset-buttons" style="display:none;">
-      <input class="fluxInput" spellcheck="false" class="sendToZotero"
-        id="zoteroCollecName" type="text" placeholder="Enter collection name">
+    <div id="selectedCollection">
+      <div id="csljson-dataset-preview"></div>
+      <div id="csljson-dataset-buttons" style="display:none;">
+        <input class="fluxInput" spellcheck="false" class="sendToZotero"
+          id="zoteroCollecName" type="text" placeholder="Enter collection name">
 
-      <button type="submit" class="flux-button sendToZotero"
-        id="zoteroCollecBuild">Create a new Zotero
-        Collection</button>
-    </div></div>
+        <button type="submit" class="flux-button sendToZotero"
+          id="zoteroCollecBuild">Create a new Zotero
+          Collection</button>
+      </div>
+    </div>
     <div id="userCsljsonCollections"></div>
   </form>
-  <br><hr><br>
+  <br>
+  <hr><br>
   <form id="zotero-import-form" autocomplete="off"></form>
-  This button lets you display the collections of documents on <strong>your online Zotero library</strong> and download them to your system.<br><br>
+  This button lets you display the collections of documents on <strong>your
+    online Zotero library</strong> and download them to your system.<br><br>
   <button type="submit" class="flux-button" id="zotcolret">Display online
     library collections</button><br><br>
   <!-- <button type="submit" class="flux-button" id="zotcolret" onclick="zoteroLocalRetriever();return false">Display local zotero instance collections</button><br><br> -->
