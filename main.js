@@ -246,9 +246,9 @@ ipcMain.on("userStatus", (event, req) => {
           }
         }
 
-        //if (currentUser.UserName.length > 0) {
-        //          getPPSData();
-        //        }
+        if (currentUser.UserName.length > 0) {
+          getPPSData();
+        }
 
         mainWindow.webContents.send("userStatus", currentUser);
       }

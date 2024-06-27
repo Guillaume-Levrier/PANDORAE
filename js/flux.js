@@ -2914,11 +2914,37 @@ const checkPPS = () => {
               problematics.innerText = "No problematic paper found.";
             } else {
               targets.forEach((t) => {
-                problematics.innerHTML += `<div style="display:inline-flex;margin-top:3px;justify-content: space-around;border-top:1px dashed gray;text-align: center;">
-              <div style="color:red;padding:2px;width:20%;">${t.Detectors}</div>
-              <div style="padding:2px; width:60%;text-overflow: ellipsis;overflow: hidden;white-space: nowrap;">${t.Title}</div>
-              <div style="padding:2px;width:20%;word-break: break-all;"><a href="https://dbrech.irit.fr/pls/apex/f?p=9999:3::::RIR:IREQ_DOI:${t.Doi}" target="_blank">${t.Doi}</a></div>
-              </div>`;
+                const container = document.createElement("div");
+                container.style =
+                  "display:inline-flex;margin-top:3px;justify-content: space-around;border-top:1px dashed gray;text-align: center;";
+
+                problematics.append(container);
+
+                const detectors = document.createElement("div");
+                detectors.style = "color:red;padding:2px;width:20%;";
+                detectors.innerText = t.Detectors;
+
+                const title = document.createElement("div");
+                title.style =
+                  "padding:2px; width:60%;text-overflow: ellipsis;overflow: hidden;white-space: nowrap;";
+                title.innerText = t.Title;
+
+                const linkcontainer = document.createElement("div");
+                linkcontainer.style =
+                  "padding:2px;width:20%;word-break: break-all;";
+
+                const anchor = document.createElement("a");
+                linkcontainer.append(anchor);
+                anchor.style = "text-decoration:underline";
+                anchor.innerText = t.Doi;
+                anchor.addEventListener("click", () =>
+                  ipcRenderer.invoke(
+                    "openEx",
+                    `https://dbrech.irit.fr/pls/apex/f?p=9999:3::::RIR:IREQ_DOI:${t.Doi}`
+                  )
+                );
+
+                container.append(detectors, title, linkcontainer);
               });
             }
 
