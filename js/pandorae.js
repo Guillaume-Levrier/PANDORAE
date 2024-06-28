@@ -166,7 +166,7 @@ const iconTypes = [
   { name: "back-to-pres", code: "arrow_back_ios" },
 ];
 
-const iconCreator = (target, action) => {
+const iconCreator = (target, action, hoverMessage) => {
   iconTypes.forEach((icon) => {
     if (target === icon.name) {
       var thisIcon = document.createElement("i");
@@ -178,9 +178,12 @@ const iconCreator = (target, action) => {
 
       var thisIconDiv = document.createElement("div");
       thisIconDiv.className = "themeCustom";
+      thisIconDiv.title = hoverMessage;
       thisIconDiv.style =
         "margin-bottom:10px;background-color:white;border: 1px solid rgb(230,230,230);cursor:pointer;";
+
       thisIconDiv.appendChild(thisIcon);
+
       document.getElementById("icons").appendChild(thisIconDiv);
     }
   });
@@ -493,7 +496,7 @@ const slideCreator = () => {
     }, 100);
   });
 
-  iconCreator("save-icon", saveSlides);
+  iconCreator("save-icon", saveSlides, "Save slides");
 
   var quillCont = document.createElement("div");
   quillCont.style.margin = "15%";
@@ -664,14 +667,12 @@ const selectOption = (type, id) => {
       },
       { once: true }
     );
-    field.value = CM.global.field.starting +" "+ type;
+    field.value = CM.global.field.starting + " " + type;
     currentType = { type: type, id: id };
     //types.typeSwitch(type, id);
-    
+
     // Give time to the menu to get closed
     setTimeout(() => typeSwitch(type, id), 400);
-    
-
 
     ipcRenderer.send("audio-channel", "button2");
     pulse(1, 1, 10);
@@ -1106,10 +1107,10 @@ const keyShortCuts = (event) => {
         break;
 
       case "Digit2":
-           if (coreExists) {
-        toggleFlux();
-        toggleMenu();
-           } 
+        if (coreExists) {
+          toggleFlux();
+          toggleMenu();
+        }
         break;
 
       case "Digit3":
@@ -1214,7 +1215,7 @@ const categoryLoader = (cat) => {
         notLoadingMenu = true;
         break;
       case "export":
-        blocks = ["interactive", "svg", "png", "description"];
+        blocks = ["svg", "png", "description", "json"];
         ipcRenderer.send("console-logs", "Displaying available export formats");
         blocks.forEach((thisBlock) => {
           let typeContainer = document.createElement("div");
@@ -1246,8 +1247,15 @@ const saveAs = (format) => {
         savePNG();
         break;
 
-      case "interactive":
-        exportToHTML();
+      //case "interactive":
+      //exportToHTML();
+      //break;
+
+      case "json":
+        //saveToolTip();
+        if (dataExport) {
+          dataExport();
+        }
         break;
 
       case "description":
@@ -1393,8 +1401,6 @@ const cmdinput = (input) => {
         //toggleHelp();
         break;
 
- 
-
       case "gazouillotype":
       case "archotype":
       case "anthropotype":
@@ -1404,9 +1410,6 @@ const cmdinput = (input) => {
         categoryLoader("type");
         mainDisplay(input);
         break;
-
-
-
 
       case CM.mainField.reload:
         document.body.style.animation = "fadeout 0.5s";
@@ -1572,7 +1575,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
   menu = document.getElementById("menu");
   consoleDiv = document.getElementById("console");
 
-  iconCreator("menu-icon", toggleMenu);
+  iconCreator("menu-icon", toggleMenu, "Toggle menu");
   // Menu behaviors
 
   // =========== MENU BUTTONS ===========
@@ -1610,7 +1613,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
     .getElementById("quitBut")
     .addEventListener("click", (e) => closeWindow());
 
-  iconCreator("option-icon", toggleConsole);
+  iconCreator("option-icon", toggleConsole, "Toggle console");
 
   log = document.getElementById("log");
 

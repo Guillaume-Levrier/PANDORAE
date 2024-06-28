@@ -3276,6 +3276,7 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
             fluxArgs.userMail
           );
           break;
+        case "istex":
         case "ISTEX-dataset":
           istexCSLconverter(
             fluxArgs.dataset,

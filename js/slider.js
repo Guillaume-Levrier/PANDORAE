@@ -526,7 +526,7 @@ const populateSlides = (id) => {
           }, 100);
         });
 
-        iconCreator("export-icon", exportSlides);
+        iconCreator("export-icon", exportSlides, "Export slides");
       }, 1000);
     }
   });

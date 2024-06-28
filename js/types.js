@@ -28,6 +28,8 @@ window.onload = function () {
   field = document.getElementById("field");
 };
 
+var dataExport;
+
 const dataDownload = (data) => {
   var source = document.getElementById("source");
 
@@ -41,15 +43,15 @@ const dataDownload = (data) => {
 
   source.style.cursor = "pointer";
 
-  source.addEventListener("click", (e) => {
-    ipcRenderer
-      .invoke(
-        "saveDataset",
-        { defaultPath: datasetName + ".json" },
-        JSON.stringify(data)
-      )
-      .then((res) => {});
-  });
+  const triggerDownload = () =>
+    ipcRenderer.invoke(
+      "saveDataset",
+      { defaultPath: datasetName + ".json" },
+      JSON.stringify(data)
+    );
+
+  dataExport = triggerDownload;
+  source.addEventListener("click", triggerDownload);
 };
 
 const localDownload = (data) => {
@@ -335,9 +337,9 @@ const loadType = (type, id) => {
   const exporter = () => categoryLoader("export");
 
   if (currentMainPresStep.step) {
-    iconCreator("back-to-pres", backToPres);
+    iconCreator("back-to-pres", backToPres, "Back to presentation");
   } else {
-    iconCreator("export-icon", toggleMenu);
+    iconCreator("export-icon", toggleMenu, "Export");
     //
     //  CURRENT DEACTIVATED
     //
@@ -2277,7 +2279,7 @@ const anthropotype = (id) => {
         }
       }
 
-      iconCreator("sort-icon", toggleCrit);
+      iconCreator("sort-icon", toggleCrit, "Toggle criteria");
 
       loadType();
       menuBuilder();
@@ -4934,10 +4936,14 @@ const chronotype = (id) => {
         radioMenu.append(radio, label, line);
       });
 
-      iconCreator("sort-icon", () => {
-        tooltip.innerHTML = "<h3>Select a link criteria</h3><hr>"; // purge tooltip
-        tooltip.append(radioMenu);
-      });
+      iconCreator(
+        "sort-icon",
+        () => {
+          tooltip.innerHTML = "<h3>Select a link criteria</h3><hr>"; // purge tooltip
+          tooltip.append(radioMenu);
+        },
+        "Sort by property"
+      );
 
       loadType();
     })
@@ -7580,8 +7586,8 @@ const pharmacotype = (id) => {
         }
       };
 
-      iconCreator("sort-icon", trialSorter);
-      iconCreator("align-icon", alignTrialTitles);
+      iconCreator("sort-icon", trialSorter, "Sort by property");
+      iconCreator("align-icon", alignTrialTitles, "Align titles");
 
       loadType();
     })

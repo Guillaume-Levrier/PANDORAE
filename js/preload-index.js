@@ -685,7 +685,7 @@ const iconTypes = [
   { name: "back-to-pres", code: "arrow_back_ios" },
 ];
 
-const iconCreator = (target, action) => {
+const iconCreator = (target, action, hoverMessage) => {
   iconTypes.forEach((icon) => {
     if (target === icon.name) {
       var thisIcon = document.createElement("i");
@@ -697,9 +697,12 @@ const iconCreator = (target, action) => {
 
       var thisIconDiv = document.createElement("div");
       thisIconDiv.className = "themeCustom";
+      thisIconDiv.title = hoverMessage;
       thisIconDiv.style =
         "margin-bottom:10px;background-color:white;border: 1px solid rgb(230,230,230);cursor:pointer;";
+
       thisIconDiv.appendChild(thisIcon);
+
       document.getElementById("icons").appendChild(thisIconDiv);
     }
   });
@@ -1012,7 +1015,7 @@ const slideCreator = () => {
     }, 100);
   });
 
-  iconCreator("save-icon", saveSlides);
+  iconCreator("save-icon", saveSlides, "Save slides");
 
   var quillCont = document.createElement("div");
   quillCont.style.margin = "15%";
@@ -1183,14 +1186,12 @@ const selectOption = (type, id) => {
       },
       { once: true }
     );
-    field.value = CM.global.field.starting +" "+ type;
+    field.value = CM.global.field.starting + " " + type;
     currentType = { type: type, id: id };
     //types.typeSwitch(type, id);
-    
+
     // Give time to the menu to get closed
     setTimeout(() => typeSwitch(type, id), 400);
-    
-
 
     ipcRenderer.send("audio-channel", "button2");
     pulse(1, 1, 10);
@@ -1625,10 +1626,10 @@ const keyShortCuts = (event) => {
         break;
 
       case "Digit2":
-           if (coreExists) {
-        toggleFlux();
-        toggleMenu();
-           } 
+        if (coreExists) {
+          toggleFlux();
+          toggleMenu();
+        }
         break;
 
       case "Digit3":
@@ -1733,7 +1734,7 @@ const categoryLoader = (cat) => {
         notLoadingMenu = true;
         break;
       case "export":
-        blocks = ["interactive", "svg", "png", "description"];
+        blocks = ["svg", "png", "description", "json"];
         ipcRenderer.send("console-logs", "Displaying available export formats");
         blocks.forEach((thisBlock) => {
           let typeContainer = document.createElement("div");
@@ -1765,8 +1766,15 @@ const saveAs = (format) => {
         savePNG();
         break;
 
-      case "interactive":
-        exportToHTML();
+      //case "interactive":
+      //exportToHTML();
+      //break;
+
+      case "json":
+        //saveToolTip();
+        if (dataExport) {
+          dataExport();
+        }
         break;
 
       case "description":
@@ -1912,8 +1920,6 @@ const cmdinput = (input) => {
         //toggleHelp();
         break;
 
- 
-
       case "gazouillotype":
       case "archotype":
       case "anthropotype":
@@ -1923,9 +1929,6 @@ const cmdinput = (input) => {
         categoryLoader("type");
         mainDisplay(input);
         break;
-
-
-
 
       case CM.mainField.reload:
         document.body.style.animation = "fadeout 0.5s";
@@ -2091,7 +2094,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
   menu = document.getElementById("menu");
   consoleDiv = document.getElementById("console");
 
-  iconCreator("menu-icon", toggleMenu);
+  iconCreator("menu-icon", toggleMenu, "Toggle menu");
   // Menu behaviors
 
   // =========== MENU BUTTONS ===========
@@ -2129,7 +2132,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
     .getElementById("quitBut")
     .addEventListener("click", (e) => closeWindow());
 
-  iconCreator("option-icon", toggleConsole);
+  iconCreator("option-icon", toggleConsole, "Toggle console");
 
   log = document.getElementById("log");
 
@@ -2331,6 +2334,8 @@ window.onload = function () {
   field = document.getElementById("field");
 };
 
+var dataExport;
+
 const dataDownload = (data) => {
   var source = document.getElementById("source");
 
@@ -2344,15 +2349,15 @@ const dataDownload = (data) => {
 
   source.style.cursor = "pointer";
 
-  source.addEventListener("click", (e) => {
-    ipcRenderer
-      .invoke(
-        "saveDataset",
-        { defaultPath: datasetName + ".json" },
-        JSON.stringify(data)
-      )
-      .then((res) => {});
-  });
+  const triggerDownload = () =>
+    ipcRenderer.invoke(
+      "saveDataset",
+      { defaultPath: datasetName + ".json" },
+      JSON.stringify(data)
+    );
+
+  dataExport = triggerDownload;
+  source.addEventListener("click", triggerDownload);
 };
 
 const localDownload = (data) => {
@@ -2638,9 +2643,9 @@ const loadType = (type, id) => {
   const exporter = () => categoryLoader("export");
 
   if (currentMainPresStep.step) {
-    iconCreator("back-to-pres", backToPres);
+    iconCreator("back-to-pres", backToPres, "Back to presentation");
   } else {
-    iconCreator("export-icon", toggleMenu);
+    iconCreator("export-icon", toggleMenu, "Export");
     //
     //  CURRENT DEACTIVATED
     //
@@ -4580,7 +4585,7 @@ const anthropotype = (id) => {
         }
       }
 
-      iconCreator("sort-icon", toggleCrit);
+      iconCreator("sort-icon", toggleCrit, "Toggle criteria");
 
       loadType();
       menuBuilder();
@@ -7237,10 +7242,14 @@ const chronotype = (id) => {
         radioMenu.append(radio, label, line);
       });
 
-      iconCreator("sort-icon", () => {
-        tooltip.innerHTML = "<h3>Select a link criteria</h3><hr>"; // purge tooltip
-        tooltip.append(radioMenu);
-      });
+      iconCreator(
+        "sort-icon",
+        () => {
+          tooltip.innerHTML = "<h3>Select a link criteria</h3><hr>"; // purge tooltip
+          tooltip.append(radioMenu);
+        },
+        "Sort by property"
+      );
 
       loadType();
     })
@@ -9883,8 +9892,8 @@ const pharmacotype = (id) => {
         }
       };
 
-      iconCreator("sort-icon", trialSorter);
-      iconCreator("align-icon", alignTrialTitles);
+      iconCreator("sort-icon", trialSorter, "Sort by property");
+      iconCreator("align-icon", alignTrialTitles, "Align titles");
 
       loadType();
     })
@@ -10897,7 +10906,7 @@ const populateSlides = (id) => {
           }, 100);
         });
 
-        iconCreator("export-icon", exportSlides);
+        iconCreator("export-icon", exportSlides, "Export slides");
       }, 1000);
     }
   });

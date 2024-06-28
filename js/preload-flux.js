@@ -1211,6 +1211,17 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
           document.getElementById("sciento-dataset").innerText = doc.id;
         }
         switch (kind) {
+          case "istex":
+            dataPreview = `<strong> ${doc.name} </strong>
+              <br>Origin: ${doc.content.type}
+              <br>Total results: ${doc.content.entries.length} 
+              <br>Upload date: ${doc.date}`;
+
+            document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
+            // document.getElementById(buttonId).style.display = "block";
+
+            convertButton.dataset.corpusType = doc.content.type;
+            break;
           case "dimensions":
             dataPreview = `<strong> ${doc.name} </strong>
               <br>Origin: ${doc.content.type}
@@ -1347,7 +1358,7 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
 
 const scientoDisplay = () => {
   //datasetDisplay(divId, kind, altkind)
-  const sources = ["scopus", "webofscience", "dimensions", "enriched"];
+  const sources = ["scopus", "webofscience", "dimensions", "istex"];
 
   sources.forEach((s) => datasetDisplay(`sciento-list-${s}`, s, "sciento"));
 };
@@ -3698,6 +3709,7 @@ window.addEventListener("load", (event) => {
 
   const selections = {
     scientometricsSelect: true,
+    digitalLibrariesSelect: false,
     clinicalTrialsSelect: false,
     parliamentsSelect: false,
     twitterSelect: false,
@@ -3727,18 +3739,19 @@ window.addEventListener("load", (event) => {
       if (d.valid) {
         switch (d.name) {
           case "Gallica":
-            addHop(["OPEN", "GALLICA", "ZOTERO"]);
-
+            if (selections.digitalLibrariesSelect) {
+              addHop(["OPEN", "GALLICA", "ZOTERO"]);
+            }
             break;
           case "Scopus":
             if (selections.scientometricsSelect) {
-              addHop(["USER", "SCOPUS", "ENRICHMENT"]);
+              addHop(["USER", "SCOPUS", "CSL-JSON"]);
             }
             break;
 
           case "Web Of Science":
             if (selections.scientometricsSelect) {
-              addHop(["USER", "WEBㅤOFㅤSCIENCE", "ENRICHMENT"]);
+              addHop(["USER", "WEBㅤOFㅤSCIENCE", "CSL-JSON"]);
             }
             break;
 
@@ -3749,14 +3762,8 @@ window.addEventListener("load", (event) => {
             break;
 
           case "Zotero":
-            addHop([
-              "USER",
-              "ENRICHMENT",
-              "CSL-JSON",
-              "MANUAL",
-              "ZOTERO",
-              "SYSTEM",
-            ]);
+            addHop(["USER", "CSL-JSON", "MANUAL", "ZOTERO", "SYSTEM"]);
+            addHop(["CSL-JSON", "ZOTERO"]);
             break;
 
           case "Clinical Trials":
@@ -3773,13 +3780,13 @@ window.addEventListener("load", (event) => {
 
           case "ISTEX":
             if (selections.scientometricsSelect) {
-              addHop(["OPEN", "ISTEX", "ENRICHMENT"]);
+              addHop(["OPEN", "ISTEX", "CSL-JSON"]);
             }
             break;
 
           case "Dimensions":
             if (selections.scientometricsSelect) {
-              addHop(["USER", "DIMENSIONS", "ENRICHMENT"]);
+              addHop(["USER", "DIMENSIONS", "CSL-JSON"]);
             }
             break;
 
