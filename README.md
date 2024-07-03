@@ -4,7 +4,7 @@
 
 PANDORÆ is a software built for scientific research. Its purpose is to enable its users to retrieve, normalize, and explore collections of documents from various established sources.
 
-This software is under active development. Some endpoints might not work due to bugs on either ends. Do not hesitate to [tag me on twitter](https://twitter.com/g_levrier) if you need help.
+This software is under active development. You can find installation and usage help on the [PANDORÆ user forum](https://pandorae.politique.science/). Please use the GitHub issues only for code related issues.
 
 PANDORÆ is an [electron-based](https://www.electronjs.org/) portable desktop application. You can click on the [releases link](https://github.com/Guillaume-Levrier/PANDORAE/releases) and download the most recent version relevant to your operating system. It does not need to be installed. If your computer can support the Google Chrome web browser, chances are you can run PANDORÆ.
 
