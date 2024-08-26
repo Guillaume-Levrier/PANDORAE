@@ -2207,7 +2207,7 @@ const saveToolTip = () => {
     if (user.UserName === "") {
       menuIcon.style.cursor = "not-allowed";
       consoleIcon.style.cursor = "not-allowed";
-      document.getElementById("tutostartmenu").style.display = "block";
+      //document.getElementById("tutostartmenu").style.display = "block";
       field.style.pointerEvents = "all";
       field.style.cursor = "pointer";
       field.value = "start tutorial";
