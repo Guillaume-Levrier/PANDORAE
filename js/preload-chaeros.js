@@ -538,6 +538,26 @@ const webofscienceConverter = (dataset, source, normalize, mail) => {
   });
 };
 
+//========== GEOLOCATION ==========
+// Several strategies are applicable. One is to take data from most populated cities,
+// another is to ask a services such as geocode.earth.
+
+// It now makes more sense to first uniformize the document and then enrich it.
+
+const geolocateAffiliations = (dataset) => {
+  const geocode_api_key = "";
+  pandodb.enriched.get(dataset).then((data) => {
+    const documents = doc.content.entries;
+
+    // map affiliations
+
+    /* fetch(
+      `https://api.geocode.earth/v1/search?api_key=${geocode_api_key}&text=${affiliation}`
+    ).then((response) => response.json()); 
+    */
+  });
+};
+
 //========== scopusGeolocate ==========
 // scopusGeolocate gets cities/countries geographical coordinates from affiliations.
 

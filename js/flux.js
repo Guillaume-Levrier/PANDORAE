@@ -3189,7 +3189,7 @@ window.addEventListener("load", (event) => {
   var availability;
 
   const selections = {
-    scientometricsSelect: true,
+    scientometricsSelect: false,
     digitalLibrariesSelect: false,
     clinicalTrialsSelect: false,
     parliamentsSelect: false,
