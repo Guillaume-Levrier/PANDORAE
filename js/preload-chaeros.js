@@ -3101,7 +3101,7 @@ const GallicaFullQuery = (targetExpression) => {
               if (i === reqNum) {
                 ipcRenderer.send(
                   "chaeros-notification",
-                  `Gallica retrieveal complete`
+                  `Gallica retrieval complete`
                 );
 
                 const finalContent = [];
