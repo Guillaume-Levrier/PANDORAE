@@ -541,7 +541,7 @@ const fs = require("fs");
 const d3 = require("d3");
 const THREE = require("three");
 const Quill = require("quill");
-const { zoomIdentity } = require("d3");
+
 var dispose = false;
 var CM = CMT["EN"]; // Load the EN locale first
 var typeSelector = false;
