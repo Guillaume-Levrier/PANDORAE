@@ -631,10 +631,10 @@ const archotype = (id) => {
     .translateExtent([
       [-Infinity, -Infinity],
       [Infinity, Infinity],
-    ])
-    .on("zoom", ({ transform }, d) => {
+    ]);
+  /* .on("zoom", ({ transform }, d) => {
       zoomed(transform);
-    });
+    }); */
 
   var criteriaList = [];
   var currentCriteria = [];
@@ -1160,7 +1160,7 @@ const archotype = (id) => {
 
       // below is visualisation
 
-      const g = svg.append("g");
+      // const g = svg.append("g");
 
       // Create a simulation with several forces.
       const simulation = d3
@@ -1218,13 +1218,51 @@ const archotype = (id) => {
 
       let clusterMeta = "";
 
-      const selectedClusterMetadata = (nodes) => {
+      const selectedClusterMetadata = (
+        localNodeData,
+        localLinkData,
+        node,
+        link
+      ) => {
         const div = document.getElementById("clusterMetaData");
-
         if (div) {
+          // look for solo ghosts by mapping links
+
+          const soloGhosts = new Set();
+          const soloMap = {};
+          localLinkData.forEach((l) => {
+            if (l.target.type === "ghost") {
+              if (!soloMap.hasOwnProperty(l.target.id)) {
+                soloMap[l.target.id] = 0;
+              }
+              soloMap[l.target.id]++;
+            }
+          });
+
+          for (const id in soloMap) {
+            if (soloMap[id] < 2) {
+              soloGhosts.add(id);
+            }
+          }
+
+          const toggleSoloGhosts = (display) => {
+            node.style("display", (n) => {
+              if (soloGhosts.has(n.id)) {
+                return display;
+              }
+            });
+            link.style("display", (l) => {
+              if (soloGhosts.has(l.target.id)) {
+                return display;
+              }
+            });
+          };
+
+          // count node types to provide metadata to the user
+
           var counter = { ghosts: 0, captures: 0, domains: [] };
 
-          nodes.forEach((n) => {
+          localNodeData.forEach((n) => {
             switch (n.type) {
               case "capture":
                 counter.captures++;
@@ -1250,9 +1288,71 @@ const archotype = (id) => {
 The captures in this cluster come from ${counter.domains.length} domain(s):<br>
 `;
 
-          counter.domains.forEach((d) => (clusterMeta += "- " + d + "<br>"));
-
           div.innerHTML = clusterMeta;
+
+          // add domains
+
+          counter.domains.forEach((d) => {
+            const host = document.createElement("div");
+            host.innerText = "- " + d;
+            host.className = "flux-button";
+            host.style = "padding:0px;padding-left:3px;margin-top:3px;";
+            host.addEventListener("click", () => {
+              const domainNode = node
+                .filter((n, i) => n.type === "domain" && n.id === d)
+                .node();
+
+              /* 
+
+// for now this is not going to be a thing
+// PANDORAE needs an electron version upgrade
+// and a dev env upgrade as well (using webpack)
+// which will enable using ESM & hence d3 v7
+
+              console.log(domainNode);
+
+              console.log(d3);
+              console.log(d3.ZoomTransform);
+              console.log(ZoomTransform);
+
+              const transform = new d3.ZoomTransform( // only in d3 V7
+                1,
+                parseInt(domainNode.getAttribute("cx") - width / 2),
+                parseInt(domainNode.getAttribute("cy") - height / 2)
+              );
+
+              console.log(transform);
+
+              zoomed(transform, 750); */
+            });
+
+            div.append(host);
+          });
+
+          // add ghost tickbox
+
+          const ghostBox = document.createElement("div");
+          const ghostTick = document.createElement("input");
+          ghostTick.type = "checkbox";
+          ghostTick.checked = true;
+          ghostTick.id = "ghostTick";
+          ghostTick.name = "ghostTick";
+          const ghostLabel = document.createElement("label");
+          ghostLabel.for = "ghostTick";
+          ghostLabel.innerText = "Hide solo ghosts";
+
+          ghostTick.addEventListener("click", () => {
+            if (ghostTick.checked) {
+              toggleSoloGhosts("none");
+            } else {
+              toggleSoloGhosts("block");
+            }
+          });
+
+          ghostBox.append(ghostTick, ghostLabel);
+          div.append(ghostBox);
+
+          toggleSoloGhosts("none");
         }
       };
 
@@ -1312,10 +1412,10 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
 
       //let domainCount = Object.keys(domainMap).length;
 
-      var node = g.append("g");
-      var link = g.append("g");
-      var nodetitle = g.append("g");
-      var titlecontrast = g.append("g");
+      var node = view.append("g");
+      var link = view.append("g");
+      var nodetitle = view.append("g");
+      var titlecontrast = view.append("g");
 
       const regenerateGraph = (localNodeData) => {
         // purge existing graph
@@ -1353,7 +1453,7 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
         //recreate SVG groups
 
         // Add a line for each link, and a circle for each node.
-        link = g
+        link = view
           .append("g")
           .attr("stroke", "#999")
           .selectAll()
@@ -1372,7 +1472,7 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
 
         // on click, fetch the data from the data source if it exists
 
-        node = g
+        node = view
           .append("g")
           .attr("stroke", "#fff")
           .attr("stroke-width", 1.5)
@@ -1382,7 +1482,7 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
           .attr("r", 5)
           .attr("fill", (d) => (foundSet.has(d.id) ? "purple" : d.color));
 
-        titlecontrast = g
+        titlecontrast = view
           .append("g")
           .selectAll()
           .data(localDomainData)
@@ -1391,7 +1491,7 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
           .attr("width", (d) => d.name.length * 4)
           .attr("height", 9);
 
-        nodetitle = g
+        nodetitle = view
           .append("g")
           .attr("text-anchor", "middle")
           .attr("dy", "-5px")
@@ -1771,26 +1871,11 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
         simulation.force("link").links(localLinkData);
         simulation.alpha(1).restart();
 
-        selectedClusterMetadata(localNodeData);
+        selectedClusterMetadata(localNodeData, localLinkData, node, link);
       };
 
       //select first, smallest corpus to display something on start
       regenerateGraph(nodeGroupArray[0].nodes);
-
-      svg.call(
-        d3
-          .zoom()
-          .extent([
-            [0, 0],
-            [width, height],
-          ])
-          .scaleExtent([-999, 10])
-          .on("zoom", zoomed)
-      );
-
-      function zoomed({ transform }) {
-        g.attr("transform", transform);
-      }
 
       // legend
       const createLegend = () => {
@@ -1896,11 +1981,27 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
     });
 
   //======== ZOOM & RESCALE ===========
-  svg.call(zoom).on("dblclick.zoom", null);
-
+  //svg.call(zoom).on("dblclick.zoom", null);
+  /* 
   zoomed = (thatZoom, transTime) => {
-    view.attr("transform", thatZoom);
-  };
+    if (transTime) {
+      view.transition().duration(transTime).attr("transform", thatZoom);
+    } else {
+      view.attr("transform", thatZoom);
+    }
+  }; */
+
+  svg.call(zoom.on("zoom", (d) => zoomed(d.transform)));
+
+  function zoomed(transform, time) {
+    //console.log(transform);
+    //console.log(time);
+    if (time) {
+      view.transition().duration(time).attr("transform", transform);
+    } else {
+      view.attr("transform", transform);
+    }
+  }
 
   ipcRenderer.send("console-logs", "Starting archotype");
 };

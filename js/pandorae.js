@@ -1122,6 +1122,7 @@ const keyShortCuts = (event) => {
         }
         break;
 
+      case "IntlBackslash":
       case "Backquote":
         location.reload();
 
