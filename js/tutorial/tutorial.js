@@ -7,16 +7,16 @@ ipcRenderer.on("scroll-to", (event, message) => {
 });
 
 const tuto = (step) => {
-  ipcRenderer.send("tutorial", step);
+  window.electron.send("tutorial", step);
   closeWindow();
 };
 
 const closeWindow = () => {
-  ipcRenderer.send("window-manager", "closeWindow", "tutorial");
+  window.electron.send("window-manager", "closeWindow", "tutorial");
 };
 
 const closeAndDisplay = () => {
-  ipcRenderer.send(
+  window.electron.send(
     "chaeros-notification",
     "return to tutorial",
     sectionList[activeIndex].id
@@ -46,7 +46,7 @@ const lastScroll = () => {
     setInterval(secMinus, 1000);
 
     setTimeout(() => {
-      ipcRenderer.invoke("restart", true);
+      window.electron.invoke("restart", true);
     }, 10000);
   }, 7000);
 };

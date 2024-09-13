@@ -1,19 +1,20 @@
+const { ipcRenderer } = require("electron");
 
- const { ipcRenderer } = require("electron");
+var winId = 0;
 
-var winId=0
-
- //window.addEventListener('DOMContentLoaded', (event) => {
- ipcRenderer.on('id', (event, id) => {
-  winId=id;
-})
+//window.addEventListener('DOMContentLoaded', (event) => {
+ipcRenderer.on("id", (event, id) => {
+  winId = id;
+});
 // })
 
-window.addEventListener('load', e=> {
+window.addEventListener("load", (e) => {
   let resAmount = document.getElementById("page-title").innerText;
-  ipcRenderer.send('biorxiv-retrieve',{type:"biorxiv-amount",content:resAmount});
-        setTimeout(() => {
-          ipcRenderer.send("win-destroy",winId);
-       }, 200);
-})
-
+  window.electron.send("biorxiv-retrieve", {
+    type: "biorxiv-amount",
+    content: resAmount,
+  });
+  setTimeout(() => {
+    window.electron.send("win-destroy", winId);
+  }, 200);
+});

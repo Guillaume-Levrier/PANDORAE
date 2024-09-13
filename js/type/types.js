@@ -44,7 +44,7 @@ const dataDownload = (data) => {
   source.style.cursor = "pointer";
 
   const triggerDownload = () =>
-    ipcRenderer.invoke(
+    window.electron.invoke(
       "saveDataset",
       { defaultPath: datasetName + ".json" },
       JSON.stringify(data)
@@ -313,7 +313,7 @@ const backToPres = () => {
   document.body.style.animation = "fadeout 0.7s";
   setTimeout(() => {
     document.body.remove();
-    ipcRenderer.send("backToPres", currentMainPresStep);
+    window.electron.send("backToPres", currentMainPresStep);
   }, 700);
 };
 
@@ -332,7 +332,7 @@ const loadType = (type, id) => {
   xtypeExists = true;
   coreExists = false;
 
-  ipcRenderer.send("audio-channel", "button1");
+  window.electron.send("audio-channel", "button1");
   field.value = "";
   const exporter = () => categoryLoader("export");
 
@@ -641,7 +641,7 @@ const archotype = (id) => {
 
   let resolver, arkViewer;
 
-  ipcRenderer.invoke("checkflux", true).then((result) => {
+  window.electron.invoke("checkflux", true).then((result) => {
     availability = JSON.parse(result);
 
     for (const service in availability.dnsLocalServiceList) {
@@ -806,7 +806,7 @@ const archotype = (id) => {
                   host = thisURL.host; //|| thisURL.hostname;
                 } catch (error) {
                   console.log(error);
-                  ipcRenderer.send(
+                  window.electron.send(
                     "console-logs",
                     "archotype error: url " + target + " is invalid."
                   );
@@ -878,7 +878,7 @@ const archotype = (id) => {
       // The decision here is to only list 1 degree common ghosts,
       // that is finding when two captures have a common outgoing links.
 
-      ipcRenderer.send("chaeros-notification", "rebuilding by domain");
+      window.electron.send("chaeros-notification", "rebuilding by domain");
 
       //========== REBUILDING CLUSTERS
       //This function is the first step.
@@ -1974,7 +1974,7 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
     .catch((error) => {
       console.log(error);
       field.value = "error - invalid dataset";
-      ipcRenderer.send(
+      window.electron.send(
         "console-logs",
         "archotype error: dataset " + id + " is invalid."
       );
@@ -2003,7 +2003,7 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
     }
   }
 
-  ipcRenderer.send("console-logs", "Starting archotype");
+  window.electron.send("console-logs", "Starting archotype");
 };
 
 // ========= ANTHROPOTYPE =========
@@ -2388,7 +2388,7 @@ const anthropotype = (id) => {
     })
     .catch((error) => {
       field.value = "error - invalid dataset";
-      ipcRenderer.send(
+      window.electron.send(
         "console-logs",
         "Anthropotype error: dataset " + id + " is invalid."
       );
@@ -2401,7 +2401,7 @@ const anthropotype = (id) => {
     view.attr("transform", thatZoom);
   };
 
-  ipcRenderer.send("console-logs", "Starting anthropotype");
+  window.electron.send("console-logs", "Starting anthropotype");
 };
 
 // ========= FILOTYPE =========
@@ -2734,7 +2734,7 @@ const filotype = (id) => {
     .catch((error) => {
       console.log(error);
       field.value = "filotype error";
-      ipcRenderer.send(
+      window.electron.send(
         "console-logs",
         "Filotype error: cannot start corpus " + id + "."
       );
@@ -2745,7 +2745,7 @@ const filotype = (id) => {
 
   zoomed = (thatZoom, transTime) => view.attr("transform", thatZoom);
 
-  ipcRenderer.send("console-logs", "Starting Filotype");
+  window.electron.send("console-logs", "Starting Filotype");
 };
 
 // ========= DOXATYPE =========
@@ -2842,13 +2842,13 @@ const doxatype = (id) => {
     .catch((error) => {
       console.log(error);
       field.value = "error - Cannot start corpus";
-      ipcRenderer.send(
+      window.electron.send(
         "console-logs",
         "Doxa error: cannot start corpus " + id + "."
       );
     });
 
-  ipcRenderer.send("console-logs", "Starting Doxatype");
+  window.electron.send("console-logs", "Starting Doxatype");
 };
 
 // ========= HYPHOTYPE =========
@@ -3441,7 +3441,7 @@ const hyphotype = (id) => {
     .catch((error) => {
       console.log(error);
       field.value = "error - Cannot start corpus";
-      ipcRenderer.send(
+      window.electron.send(
         "console-logs",
         "Hyphotype error: cannot start corpus " + id + "."
       );
@@ -3522,7 +3522,7 @@ const hyphotype = (id) => {
 
   // Presentation Recorder
 
-  ipcRenderer.send("console-logs", "Starting Hyphotype");
+  window.electron.send("console-logs", "Starting Hyphotype");
 };
 
 // ========== regardotype ==========
@@ -3777,7 +3777,7 @@ const regards = (id) => {
     })
     .catch((error) => {
       field.value = "error - invalid dataset";
-      ipcRenderer.send(
+      window.electron.send(
         "console-logs",
         "Regards chronology error: dataset " + id + " is invalid."
       );
@@ -3845,7 +3845,7 @@ const chronotype = (id) => {
       .transition()
       .duration(2000) // Resetting takes some time
       .call(zoom.transform, d3.zoomIdentity); // Using "zoomIdentity", go back to initial position
-    ipcRenderer.send(
+    window.electron.send(
       "console-logs",
       "Resetting chronotype to initial position."
     ); // Send message in the "console"
@@ -3912,7 +3912,7 @@ const chronotype = (id) => {
       doiResolveButton.innerText = "Resolve DOI in browser";
       //doiResolveButton.id = "https://dx.doi.org/" + d.DOI;
       doiResolveButton.addEventListener("click", (e) =>
-        ipcRenderer.invoke("openEx", "https://dx.doi.org/" + d.DOI)
+        window.electron.invoke("openEx", "https://dx.doi.org/" + d.DOI)
       );
 
       //shell.openExternal("https://dx.doi.org/" + d.DOI))
@@ -4151,7 +4151,7 @@ const chronotype = (id) => {
           if (radialVal[key] && val.length > 0) {
             radialVal[key].value = val.length;
           } else {
-            ipcRenderer.send(
+            window.electron.send(
               "console-logs",
               "error generating bar at" + JSON.stringify(val)
             );
@@ -5050,7 +5050,7 @@ const chronotype = (id) => {
     })
     .catch((error) => {
       field.value = "error - invalid dataset";
-      ipcRenderer.send(
+      window.electron.send(
         "console-logs",
         "Chronotype error: dataset " + id + " is invalid."
       );
@@ -5078,7 +5078,7 @@ const chronotype = (id) => {
     view.attr("transform", thatZoom);
   };
 
-  ipcRenderer.send("console-logs", "Starting chronotype"); // Starting Chronotype
+  window.electron.send("console-logs", "Starting chronotype"); // Starting Chronotype
 }; // Close Chronotype function
 
 // =========== GEOTYPE =========
@@ -5478,7 +5478,7 @@ const geotype = (id) => {
               }
 
               docDOM.addEventListener("click", (e) =>
-                ipcRenderer.invoke("openEx", url)
+                window.electron.invoke("openEx", url)
               );
             }
             document.getElementById("tooltip").appendChild(inst);
@@ -6163,7 +6163,7 @@ const geotype = (id) => {
     .catch((error) => {
       console.log(error);
       field.value = "error - invalid dataset";
-      ipcRenderer.send(
+      window.electron.send(
         "console-logs",
         "Geotype error: dataset " + id + " is invalid."
       );
@@ -6328,7 +6328,7 @@ const geotype = (id) => {
       .style("transform", "scale(" + thatZoom.k + ")");
   };
 
-  ipcRenderer.send("console-logs", "Starting geotype");
+  window.electron.send("console-logs", "Starting geotype");
 };
 
 // ========= GAZOUILLOTYPE =========
@@ -6434,7 +6434,7 @@ const gazouillotype = (id) => {
             tranche.tweets.push(data); // add tweet to this new pile
 
             /*
-            ipcRenderer.send(
+            window.electron.send(
               "chaeros-notification",
               twtAmount + " tweets loaded"
             ); // send new total to main display
@@ -6444,7 +6444,7 @@ const gazouillotype = (id) => {
         .on("end", () => {
           // Once file has been totally read
 
-          ipcRenderer.send("chaeros-notification", "rebuilding data"); // send new total to main display
+          window.electron.send("chaeros-notification", "rebuilding data"); // send new total to main display
 
           datajson.content.tweets.shift(); // Remove first empty value
 
@@ -7130,7 +7130,7 @@ const gazouillotype = (id) => {
     .catch((error) => {
       console.log(error);
       field.value = " error";
-      ipcRenderer.send(
+      window.electron.send(
         "console-logs",
         " error: cannot start corpus " + id + "."
       );
@@ -7319,7 +7319,7 @@ tooltip.innerHTML = JSON.parse(step.tooltip);
 
   regenerateSteps();
 
-  ipcRenderer.send("console-logs", "Starting gazouillotype"); // Starting gazouillotype
+  window.electron.send("console-logs", "Starting gazouillotype"); // Starting gazouillotype
 }; // Close gazouillotype function
 
 // PHARMACOTYPE IS BACK
@@ -7490,7 +7490,7 @@ const pharmacotype = (id) => {
           openButton.innerText = "Open on ClinicalTrials.gov";
 
           openButton.addEventListener("click", (e) =>
-            ipcRenderer.invoke(
+            window.electron.invoke(
               "openEx",
               "https://clinicaltrials.gov/ct2/show/" + idMod.NCTId
             )
@@ -7695,7 +7695,7 @@ const pharmacotype = (id) => {
     .catch((error) => {
       console.log(error);
       field.value = " error";
-      ipcRenderer.send(
+      window.electron.send(
         "console-logs",
         " error: cannot start corpus " + id + "."
       );
@@ -7783,7 +7783,7 @@ const pharmacotype = (id) => {
     gX.call(xAxis.scale(thatZoom.rescaleX(x)));
     gX.lower();
   };
-  ipcRenderer.send("console-logs", "Starting Pharmacotype");
+  window.electron.send("console-logs", "Starting Pharmacotype");
 };
 
 const fieldotype = (id) => {
@@ -8094,7 +8094,7 @@ const fieldotype = (id) => {
     .catch((error) => {
       console.log(error);
       field.value = "error - invalid dataset";
-      ipcRenderer.send(
+      window.electron.send(
         "console-logs",
         "Fieldotype error: dataset " + id + " is invalid."
       );
@@ -8105,7 +8105,7 @@ const fieldotype = (id) => {
     view.attr("transform", thatZoom);
   };
 
-  ipcRenderer.send("console-logs", "Starting fieldotype");
+  window.electron.send("console-logs", "Starting fieldotype");
 };
 
 //========== typesSwitch ==========

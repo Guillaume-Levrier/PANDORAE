@@ -14,7 +14,7 @@
 
 //========== REQUIRED MODULES ==========
 const { ipcRenderer, shell } = require("electron"); // ipcRenderer manages messages with Main Process
-const userDataPath = ipcRenderer.sendSync("remote", "userDataPath"); // Find userData folder Path
+const userDataPath = window.electron.sendSync("remote", "userDataPath"); // Find userData folder Path
 const tg = require("@hownetworks/tracegraph");
 const fs = require("fs"); // FileSystem reads/writes files and directories
 const d3 = require("d3");
@@ -33,9 +33,9 @@ const date = () =>
 //===== Adding a new local service ======
 
 const accessUserID = () =>
-  ipcRenderer.send("openPath", userDataPath + "/PANDORAE-DATA/userID/");
+  window.electron.send("openPath", userDataPath + "/PANDORAE-DATA/userID/");
 
-const changeUserID = () => ipcRenderer.send("change-udp", "change");
+const changeUserID = () => window.electron.send("change-udp", "change");
 
 //========== Tracegraph ==========
 
@@ -259,7 +259,7 @@ const fluxDisplay = (tab) => {
 const powerValve = (fluxAction, item) => {
   // powerValve main function
 
-  ipcRenderer.send(
+  window.electron.send(
     "console-logs",
     "Actioning powerValve on " +
       JSON.stringify(item.name) +
@@ -528,7 +528,7 @@ const powerValve = (fluxAction, item) => {
       break;
   }
 
-  ipcRenderer.send(
+  window.electron.send(
     "console-logs",
     "Sending to CHÆROS action " +
       fluxAction +
@@ -538,9 +538,9 @@ const powerValve = (fluxAction, item) => {
       message
   );
 
-  ipcRenderer.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
-  ipcRenderer.send("pulsar", false);
-  ipcRenderer.send("window-manager", "closeWindow", "flux");
+  window.electron.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
+  window.electron.send("pulsar", false);
+  window.electron.send("window-manager", "closeWindow", "flux");
 };
 
 //========== fluxButtonAction ==========
@@ -605,7 +605,7 @@ const datasetDisplay = (divId, kind, altkind) => {
         download.className = "fluxDelDataset material-icons";
         download.addEventListener("click", (e) => {
           let name = file.name + ".json";
-          ipcRenderer.invoke(
+          window.electron.invoke(
             "saveDataset",
             { defaultPath: name },
             JSON.stringify(file, replacer)
@@ -655,7 +655,7 @@ const datasetRemove = (kind, id) => {
     document
       .getElementById(id)
       .parentNode.removeChild(document.getElementById(id));
-    ipcRenderer.send(
+    window.electron.send(
       "console-logs",
       "Removed " + id + " from database: " + kind
     );
@@ -829,7 +829,7 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
     } catch (error) {
       // If it fails at one point
       document.getElementById(prevId).innerHTML = error; // Display error message
-      ipcRenderer.send("console-logs", error); // Log error
+      window.electron.send("console-logs", error); // Log error
     }
   }
 };
@@ -854,7 +854,7 @@ const istexBasicRetriever = (checker) => {
 
   let query = document.getElementById("istexlocalqueryinput").value; // Request Content
 
-  ipcRenderer.send(
+  window.electron.send(
     "console-logs",
     "Sending ISTEX the following query : " + query
   ); // Log query
@@ -894,7 +894,7 @@ const istexBasicRetriever = (checker) => {
         "Query Basic Info Error",
         e.message
       );
-      ipcRenderer.send("console-logs", "Query error : " + e); // Log error
+      window.electron.send("console-logs", "Query error : " + e); // Log error
     });
 };
 
@@ -908,7 +908,7 @@ const scopusBasicRetriever = (checker) => {
 
   let scopusQuery = document.getElementById("scopuslocalqueryinput").value; // Request Content
 
-  ipcRenderer.send(
+  window.electron.send(
     "console-logs",
     "Sending Scopus the following query : " + scopusQuery
   ); // Log query
@@ -991,7 +991,7 @@ const scopusBasicRetriever = (checker) => {
         "Query Basic Info Error",
         e.message
       );
-      ipcRenderer.send("console-logs", "Query error : " + e); // Log error
+      window.electron.send("console-logs", "Query error : " + e); // Log error
     });*/
 };
 
@@ -1035,7 +1035,7 @@ const biorxivBasicRetriever = () => {
     address: reqURL,
   };
 
-  ipcRenderer.send("biorxiv-retrieve", req);
+  window.electron.send("biorxiv-retrieve", req);
 };
 
 ipcRenderer.on("biorxiv-retrieve", (event, message) => {
@@ -1058,7 +1058,7 @@ ipcRenderer.on("biorxiv-retrieve", (event, message) => {
 const clinicTrialBasicRetriever = () => {
   let ctQuery = document.getElementById("clinical_trialslocalqueryinput").value; // Request Content
 
-  ipcRenderer.send(
+  window.electron.send(
     "console-logs",
     "Sending Clinical Trial APIs the following query : " + ctQuery
   ); // Log query
@@ -1117,7 +1117,7 @@ const clinicTrialBasicRetriever = () => {
         "Query Basic Info Error",
         e.message
       );
-      ipcRenderer.send("console-logs", "Query error : " + e); // Log error
+      window.electron.send("console-logs", "Query error : " + e); // Log error
     });
 };
 
@@ -1173,8 +1173,11 @@ const exportCitedBy = () => {
       content: citedby,
     };
     pandodb.system.add(data).then(() => {
-      ipcRenderer.send("coreSignal", "poured citedby in SYSTEM"); // Sending notification to console
-      ipcRenderer.send("console-logs", "Poured citedby in SYSTEM " + data.id); // Sending notification to console
+      window.electron.send("coreSignal", "poured citedby in SYSTEM"); // Sending notification to console
+      window.electron.send(
+        "console-logs",
+        "Poured citedby in SYSTEM " + data.id
+      ); // Sending notification to console
       setTimeout(() => {
         closeWindow();
       }, 500);
@@ -1256,8 +1259,11 @@ const affilRank = () => {
     };
 
     pandodb.system.add(data).then(() => {
-      ipcRenderer.send("coreSignal", "poured citedby in SYSTEM"); // Sending notification to console
-      ipcRenderer.send("console-logs", "Poured citedby in SYSTEM " + data.id); // Sending notification to console
+      window.electron.send("coreSignal", "poured citedby in SYSTEM"); // Sending notification to console
+      window.electron.send(
+        "console-logs",
+        "Poured citedby in SYSTEM " + data.id
+      ); // Sending notification to console
       setTimeout(() => {
         closeWindow();
       }, 500);
@@ -1268,7 +1274,7 @@ const affilRank = () => {
 //========== Scopus List ==========
 
 const ScopusList = () => {
-  ipcRenderer.send("console-logs", "Listing available scopus datasets."); // Log collection request
+  window.electron.send("console-logs", "Listing available scopus datasets."); // Log collection request
 
   pandodb.scopus
     .toArray((files) => {
@@ -1320,7 +1326,7 @@ const ScopusList = () => {
     })
     .catch(function (err) {
       fluxButtonAction("scopus-dataset-ISSN-list", false, "Failure", err);
-      ipcRenderer.send(
+      window.electron.send(
         "console-logs",
         "Error in fetching Scopus data : " + err
       ); // Log error
@@ -1334,7 +1340,7 @@ const ScopusList = () => {
 const zoteroCollectionRetriever = () => {
   let zoteroUser = document.getElementById("zoterouserinput").value; // Get the Zotero user code to request
 
-  ipcRenderer.send(
+  window.electron.send(
     "console-logs",
     "Retrieving collections for Zotero id " + zoteroUser
   ); // Log collection request
@@ -1418,7 +1424,7 @@ const zoteroCollectionRetriever = () => {
         "Zotero Collections Successfully Retrieved",
         err
       );
-      ipcRenderer.send(
+      window.electron.send(
         "console-logs",
         "Error in retrieving collections for Zotero id " +
           zoteroUser +
@@ -1434,7 +1440,7 @@ const zoteroCollectionRetriever = () => {
 // and here https://github.com/zotero/zotero-connectors
 
 const zoteroLocalRetriever = () => {
-  ipcRenderer.send("console-logs", "Retrieving local Zotero collections."); // Log collection request
+  window.electron.send("console-logs", "Retrieving local Zotero collections."); // Log collection request
 
   let zoteroApiKey = getPassword("Zotero", zoteroUser);
 
@@ -1500,7 +1506,7 @@ const zoteroLocalRetriever = () => {
     .catch((err) => {
       console.log(err);
       /*   fluxButtonAction ("zotcolret",false,"Zotero Collections Successfully Retrieved",err);
-        ipcRenderer.send('console-logs',"Error in retrieving collections for Zotero id "+ zoteroUser + " : "+err); //  */
+        window.electron.send('console-logs',"Error in retrieving collections for Zotero id "+ zoteroUser + " : "+err); //  */
     });
 };
 
@@ -1524,7 +1530,7 @@ const datasetLoader = () => {
     uploadedFiles.forEach((dataset) => {
       targets.forEach((target) => {
         pandodb[target].put(dataset);
-        ipcRenderer.send(
+        window.electron.send(
           "console-logs",
           "Dataset " +
             dataset.name +
@@ -1535,7 +1541,7 @@ const datasetLoader = () => {
       });
     });
   } catch (e) {
-    ipcRenderer.send("console-logs", e); // Log error
+    window.electron.send("console-logs", e); // Log error
   } finally {
     fluxButtonAction("load-local", true, "Uploaded", "");
   }
@@ -1819,8 +1825,8 @@ const loadHyphe = (corpus, endpoint, pass) => {
 };
 
 const twitterCat = () => {
-  ipcRenderer.send("coreSignal", "importing categorized tweets"); // Sending notification to console
-  ipcRenderer.send("pulsar", false);
+  window.electron.send("coreSignal", "importing categorized tweets"); // Sending notification to console
+  window.electron.send("pulsar", false);
 
   var datasetName = document.getElementById("twitterCatName").value;
   var datasetPath = document.getElementById("twitterCatPathInput").files[0]
@@ -1839,9 +1845,9 @@ const twitterCat = () => {
         content: classifiedData,
       })
       .then(() => {
-        ipcRenderer.send("coreSignal", "imported categorized tweets"); // Sending notification to console
-        ipcRenderer.send("pulsar", true);
-        ipcRenderer.send(
+        window.electron.send("coreSignal", "imported categorized tweets"); // Sending notification to console
+        window.electron.send("pulsar", true);
+        window.electron.send(
           "console-logs",
           "Imported categorized tweets " + datasetName
         ); // Sending notification to console
@@ -1853,8 +1859,8 @@ const twitterCat = () => {
 };
 
 const twitterThread = () => {
-  ipcRenderer.send("coreSignal", "importing thread"); // Sending notification to console
-  ipcRenderer.send("pulsar", false);
+  window.electron.send("coreSignal", "importing thread"); // Sending notification to console
+  window.electron.send("pulsar", false);
 
   var datasetName = document.getElementById("twitterThreadName").value;
   var datasetPath = document.getElementById("twitterThread").files[0].path;
@@ -1878,9 +1884,9 @@ const twitterThread = () => {
         content: thread,
       })
       .then(() => {
-        ipcRenderer.send("coreSignal", "imported thread"); // Sending notification to console
-        ipcRenderer.send("pulsar", true);
-        ipcRenderer.send("console-logs", "Imported thread" + datasetName); // Sending notification to console
+        window.electron.send("coreSignal", "imported thread"); // Sending notification to console
+        window.electron.send("pulsar", true);
+        window.electron.send("console-logs", "Imported thread" + datasetName); // Sending notification to console
         setTimeout(() => {
           closeWindow();
         }, 500);
@@ -1889,8 +1895,8 @@ const twitterThread = () => {
 };
 
 const localUpload = () => {
-  ipcRenderer.send("coreSignal", "importing local dataset"); // Sending notification to console
-  ipcRenderer.send("pulsar", false);
+  window.electron.send("coreSignal", "importing local dataset"); // Sending notification to console
+  window.electron.send("pulsar", false);
 
   var datasetPath = document.getElementById("localUploadPath").files[0].path;
 
@@ -1911,9 +1917,12 @@ const localUpload = () => {
     pandodb.system
       .add(data)
       .then(() => {
-        ipcRenderer.send("coreSignal", "imported local dataset"); // Sending notification to console
-        ipcRenderer.send("pulsar", true);
-        ipcRenderer.send("console-logs", "Imported local dataset " + data.id); // Sending notification to console
+        window.electron.send("coreSignal", "imported local dataset"); // Sending notification to console
+        window.electron.send("pulsar", true);
+        window.electron.send(
+          "console-logs",
+          "Imported local dataset " + data.id
+        ); // Sending notification to console
         setTimeout(() => {
           closeWindow();
         }, 500);
@@ -1927,8 +1936,8 @@ const localUpload = () => {
 // ==== Dimensions ====
 
 const dimensionsUpload = () => {
-  //ipcRenderer.send("coreSignal", "importing categorized tweets"); // Sending notification to console
-  //ipcRenderer.send("pulsar", false);
+  //window.electron.send("coreSignal", "importing categorized tweets"); // Sending notification to console
+  //window.electron.send("pulsar", false);
 
   const button = document.getElementById("dimensionsUploadName");
   const datasetName = button.value;
@@ -1970,7 +1979,7 @@ const dimensionsUpload = () => {
             `Dataset saved with ${count} items`,
             ""
           );
-          ipcRenderer.send(
+          window.electron.send(
             "console-logs",
             "Imported dimensions data " + datasetName
           ); // Sending notification to console
@@ -2287,7 +2296,7 @@ const queryBnFSolr = (but) => {
         "&facet.field=domain&facet.limit=10";
 
       // logging the request
-      ipcRenderer.send("console-logs", `Sending request: ${query}`);
+      window.electron.send("console-logs", `Sending request: ${query}`);
     }
   }
 
@@ -2343,7 +2352,7 @@ const queryBnFSolr = (but) => {
     })
     .catch((e) => {
       console.log(e);
-      ipcRenderer.send("console-logs", `Solr error: ${JSON.stringify(e)}`);
+      window.electron.send("console-logs", `Solr error: ${JSON.stringify(e)}`);
       previewer.innerHTML = `<br><p>Error - do you have a missing argument?</p> `;
     });
 };
@@ -2453,8 +2462,11 @@ const manualMergeAuthors = () => {
     pandodb.csljson
       .add(dataset)
       .then(() => {
-        ipcRenderer.send("coreSignal", "Saved author merging"); // Sending notification to console
-        ipcRenderer.send("console-logs", "Saved author merging " + dataset.id); // Sending notification to console
+        window.electron.send("coreSignal", "Saved author merging"); // Sending notification to console
+        window.electron.send(
+          "console-logs",
+          "Saved author merging " + dataset.id
+        ); // Sending notification to console
         setTimeout(() => {
           console.log("closing window");
           closeWindow();
@@ -2760,7 +2772,7 @@ const manualMergeAuthors = () => {
       downloadMerged.addEventListener("click", (e) => {
         e.preventDefault();
 
-        ipcRenderer.invoke(
+        window.electron.invoke(
           "saveDataset",
           { defaultPath: "authors_" + data.name + ".json" },
           JSON.stringify(authorMergeMap)
@@ -2863,12 +2875,12 @@ const updatePPSDate = (date) => {
   }
 };
 const forceUpdatePPS = () => {
-  ipcRenderer.send("forceUpdatePPS", true);
+  window.electron.send("forceUpdatePPS", true);
 
   document.getElementById("pps-last-updated").innerText =
     "You have just triggered a forced update. Please wait until the update is finished.";
 
-  ipcRenderer.send("window-manager", "closeWindow", "flux");
+  window.electron.send("window-manager", "closeWindow", "flux");
 };
 
 ipcRenderer.on("forcedPPSupdateFinished", () => {
@@ -2886,7 +2898,7 @@ const checkPPS = () => {
 
   var count = 0;
 
-  //ipcRenderer.invoke("getPPS", true).then((res) => console.log(res));
+  //window.electron.invoke("getPPS", true).then((res) => console.log(res));
 
   pandodb.system
     .get(id)
@@ -2900,7 +2912,7 @@ const checkPPS = () => {
       });
     })
     .then(() =>
-      ipcRenderer.invoke("getPPS", true).then((ppsFile) => {
+      window.electron.invoke("getPPS", true).then((ppsFile) => {
         fs.createReadStream(ppsFile) // Read the flatfile dataset provided by the user
           .pipe(csv()) // pipe buffers to csv parser
           .on("data", (data) => {
@@ -2949,7 +2961,7 @@ const checkPPS = () => {
                 anchor.style = "text-decoration:underline";
                 anchor.innerText = t.Doi;
                 anchor.addEventListener("click", () =>
-                  ipcRenderer.invoke(
+                  window.electron.invoke(
                     "openEx",
                     `https://dbrech.irit.fr/pls/apex/f?p=9999:3::::RIR:IREQ_DOI:${t.Doi}`
                   )
@@ -2982,7 +2994,7 @@ const addLocalService = () => {
     serviceArkViewer,
   };
 
-  ipcRenderer.invoke("addLocalService", service);
+  window.electron.invoke("addLocalService", service);
 
   const serviceBut = document.getElementById("new-service-button");
 
@@ -2993,13 +3005,13 @@ const addLocalService = () => {
 };
 
 const removeLocalService = (serviceName) =>
-  ipcRenderer.invoke("removeLocalService", serviceName);
+  window.electron.invoke("removeLocalService", serviceName);
 
 //========== STARTING FLUX ==========
-ipcRenderer.send("console-logs", "Opening Flux"); // Sending notification to console
+window.electron.send("console-logs", "Opening Flux"); // Sending notification to console
 
 const closeWindow = () =>
-  ipcRenderer.send("window-manager", "closeWindow", "flux");
+  window.electron.send("window-manager", "closeWindow", "flux");
 
 const refreshWindow = () => {
   location.reload();
@@ -3029,7 +3041,7 @@ const downloadData = () => {
   var id = document.getElementById("system-dataset-preview").name;
 
   pandodb.system.get(id).then((data) => {
-    ipcRenderer.invoke(
+    window.electron.invoke(
       "saveDataset",
       { defaultPath: id + ".json" },
       JSON.stringify(data, replacer)
@@ -3315,7 +3327,7 @@ window.addEventListener("load", (event) => {
           clickable = 0;
           setTimeout(() => (clickable = 1), 5000);
         } else {
-          ipcRenderer.send(
+          window.electron.send(
             "console-logs",
             `Cooldown not finished for action ${but.id}.`
           );
@@ -3326,7 +3338,7 @@ window.addEventListener("load", (event) => {
     });
   }
 
-  ipcRenderer.invoke("checkflux", true).then((result) => {
+  window.electron.invoke("checkflux", true).then((result) => {
     availability = JSON.parse(result);
     updateCascade();
 
@@ -3492,7 +3504,7 @@ window.addEventListener("load", (event) => {
         addLocalService();
         break;
       case "fluxConsole":
-        ipcRenderer.invoke("fluxDevTools", true);
+        window.electron.invoke("fluxDevTools", true);
 
         var id = document.getElementById("system-dataset-preview").name;
 

@@ -24,18 +24,18 @@ window.addEventListener("load", (e) => {
       // make sure that this chaeros process ID is known
 
       try {
-        ipcRenderer.send("biorxiv-retrieve", {
+        window.electron.send("biorxiv-retrieve", {
           type: "biorxiv-content",
           content: DOIs,
           charWindId: charWinId,
         });
       } catch (err) {
         console.log(err);
-        ipcRenderer.send("console-logs", err);
-        ipcRenderer.send("chaeros-failure", JSON.stringify(err));
+        window.electron.send("console-logs", err);
+        window.electron.send("chaeros-failure", JSON.stringify(err));
       } finally {
         setTimeout(() => {
-          ipcRenderer.send("win-destroy", selfWinId);
+          window.electron.send("win-destroy", selfWinId);
         }, 200);
         clearInterval(sendInterval);
       }

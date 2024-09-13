@@ -616,7 +616,7 @@ ipcMain.handle("saveSVG", async (event, target, string) => {
   dialog.showSaveDialog(target).then((filePath) => {
     fs.writeFile(filePath.filePath, string, "utf8", (err) => {
       if (err) {
-        ipcRenderer.send("console-logs", JSON.stringify(err));
+        window.electron.send("console-logs", JSON.stringify(err));
       }
     });
   });

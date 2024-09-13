@@ -1,11 +1,11 @@
 const getPassword = (service, user) =>
-  ipcRenderer.sendSync("keyManager", {
+  window.electron.sendSync("keyManager", {
     user,
     service,
     type: "getPassword",
   });
 const setPassword = (service, user, value) =>
-  ipcRenderer.sendSync("keyManager", {
+  window.electron.sendSync("keyManager", {
     user,
     service,
     value: value,

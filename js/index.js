@@ -1,11 +1,10 @@
 import "../css/pandorae.css";
-import { pandodb } from "./db";
-import { CMT } from "./locales";
+import { initializeMainScreen } from "./pandorae-interface/pandorae";
 
 //const preloadPath = window.electron.getPreloadPath();
 
 console.log(window.electron);
 
-console.log("cooucou");
+console.log("coucou");
 
-console.log(window.versions.node());
+window.addEventListener("DOMContentLoaded", initializeMainScreen);

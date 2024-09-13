@@ -8,8 +8,8 @@
 //and the field's value.
 
 const { ipcRenderer } = require("electron"); // Load ipc to communicate with main process
-const userDataPath = ipcRenderer.sendSync("remote", "userDataPath"); // Find userData folder Path
-const appPath = ipcRenderer.sendSync("remote", "appPath");
+const userDataPath = window.electron.sendSync("remote", "userDataPath"); // Find userData folder Path
+const appPath = window.electron.sendSync("remote", "appPath");
 const bottleneck = require("bottleneck"); // Load bottleneck to manage API request limits
 const fs = require("fs"); // Load filesystem to manage flatfiles
 const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage other data structures
@@ -25,7 +25,7 @@ var geolocationActive = false;
 var altmetricActive = false;
 
 const getPassword = (service, user) =>
-  ipcRenderer.sendSync("keyManager", {
+  window.electron.sendSync("keyManager", {
     user: user,
     service: service,
     type: "getPassword",
@@ -36,7 +36,10 @@ const getPassword = (service, user) =>
 
 const scopusConverter = (dataset, source, normalize, email) => {
   // [dataset] is the file to be converted
-  ipcRenderer.send("console-logs", "Starting scopusConverter on " + dataset); // Notify console conversion started
+  window.electron.send(
+    "console-logs",
+    "Starting scopusConverter on " + dataset
+  ); // Notify console conversion started
   let convertedDataset = []; // Create an array
 
   pandodb[source].get(dataset).then((doc) => {
@@ -100,9 +103,9 @@ const scopusConverter = (dataset, source, normalize, email) => {
         convertedDataset.push(pushedArticle); // Then push the article in the array of converted articles
       }
     } catch (err) {
-      ipcRenderer.send("chaeros-failure", JSON.stringify(err)); // On failure, send error notification to main process
-      ipcRenderer.send("pulsar", true);
-      ipcRenderer.send("console-logs", JSON.stringify(err)); // On failure, send error to console
+      window.electron.send("chaeros-failure", JSON.stringify(err)); // On failure, send error notification to main process
+      window.electron.send("pulsar", true);
+      window.electron.send("console-logs", JSON.stringify(err)); // On failure, send error to console
     } finally {
       const id = dataset;
       if (normalize) {
@@ -124,14 +127,14 @@ const scopusConverter = (dataset, source, normalize, email) => {
             content: convertedDataset,
           })
           .then(() => {
-            ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
-            ipcRenderer.send("pulsar", true);
-            ipcRenderer.send(
+            window.electron.send("chaeros-notification", "Dataset converted"); // Send a success message
+            window.electron.send("pulsar", true);
+            window.electron.send(
               "console-logs",
               "scopusConverter successfully converted " + dataset
             ); // Log success
             setTimeout(() => {
-              ipcRenderer.send("win-destroy", winId);
+              window.electron.send("win-destroy", winId);
             }, 500);
           });
       }
@@ -144,7 +147,7 @@ const scopusConverter = (dataset, source, normalize, email) => {
 
 const webofscienceConverter = (dataset, source, normalize, mail) => {
   // [dataset] is the file to be converted
-  ipcRenderer.send(
+  window.electron.send(
     "console-logs",
     "Starting webofscienceConverter on " + dataset
   ); // Notify console conversion started
@@ -257,9 +260,9 @@ const webofscienceConverter = (dataset, source, normalize, mail) => {
       }
     } catch (err) {
       console.log(err);
-      ipcRenderer.send("chaeros-failure", JSON.stringify(err)); // On failure, send error notification to main process
-      ipcRenderer.send("pulsar", true);
-      ipcRenderer.send("console-logs", JSON.stringify(err)); // On failure, send error to console
+      window.electron.send("chaeros-failure", JSON.stringify(err)); // On failure, send error notification to main process
+      window.electron.send("pulsar", true);
+      window.electron.send("console-logs", JSON.stringify(err)); // On failure, send error to console
     } finally {
       const id = dataset;
       if (normalize) {
@@ -281,14 +284,14 @@ const webofscienceConverter = (dataset, source, normalize, mail) => {
             content: convertedDataset,
           })
           .then(() => {
-            ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
-            ipcRenderer.send("pulsar", true);
-            ipcRenderer.send(
+            window.electron.send("chaeros-notification", "Dataset converted"); // Send a success message
+            window.electron.send("pulsar", true);
+            window.electron.send(
               "console-logs",
               "webofscienceConverter successfully converted " + dataset
             ); // Log success
             setTimeout(() => {
-              ipcRenderer.send("win-destroy", winId);
+              window.electron.send("win-destroy", winId);
             }, 500);
           });
       }
@@ -321,8 +324,8 @@ const geolocateAffiliations = (dataset) => {
 
 const scopusGeolocate = (dataset) => {
   geolocationActive = true;
-  ipcRenderer.send("chaeros-notification", "Geolocating affiliations");
-  ipcRenderer.send("console-logs", "Started scopusGeolocate on " + dataset);
+  window.electron.send("chaeros-notification", "Geolocating affiliations");
+  window.electron.send("console-logs", "Started scopusGeolocate on " + dataset);
 
   pandodb.enriched.get(dataset).then((doc) => {
     fs.readFile(
@@ -395,7 +398,7 @@ const scopusGeolocate = (dataset) => {
 
                 if (country === cityIndex[l].country) {
                   if (city === cityIndex[l].city) {
-                    ipcRenderer.send(
+                    window.electron.send(
                       "chaeros-notification",
                       "Located " + d.affiliation[k]["affilname"] + " in " + city
                     );
@@ -424,7 +427,7 @@ const scopusGeolocate = (dataset) => {
           }
         });
 
-        ipcRenderer.send(
+        window.electron.send(
           "console-logs",
           "Unable to locale the " +
             unlocatedCities.length +
@@ -434,15 +437,15 @@ const scopusGeolocate = (dataset) => {
         doc.content.articleGeoloc = true; // Mark file as geolocated
         pandodb.enriched.put(doc);
 
-        ipcRenderer.send("chaeros-notification", "Affiliations geolocated"); //Send success message to main process
-        ipcRenderer.send("pulsar", true);
-        ipcRenderer.send(
+        window.electron.send("chaeros-notification", "Affiliations geolocated"); //Send success message to main process
+        window.electron.send("pulsar", true);
+        window.electron.send(
           "console-logs",
           "scopusGeolocate successfully added geolocations on " + dataset
         );
 
         setTimeout(() => {
-          ipcRenderer.send("win-destroy", winId);
+          window.electron.send("win-destroy", winId);
         }, 2000);
       }
     );
@@ -454,8 +457,8 @@ const scopusGeolocate = (dataset) => {
 
 const webofscienceGeolocate = (dataset) => {
   geolocationActive = true;
-  ipcRenderer.send("chaeros-notification", "Geolocating affiliations");
-  ipcRenderer.send(
+  window.electron.send("chaeros-notification", "Geolocating affiliations");
+  window.electron.send(
     "console-logs",
     "Started webofscienceGeolocate on " + dataset
   );
@@ -531,7 +534,7 @@ const webofscienceGeolocate = (dataset) => {
 
                 if (country === cityIndex[l].country) {
                   if (city === cityIndex[l].city) {
-                    ipcRenderer.send(
+                    window.electron.send(
                       "chaeros-notification",
                       "Located " + d.affiliation[k]["affilname"] + " in " + city
                     );
@@ -556,7 +559,7 @@ const webofscienceGeolocate = (dataset) => {
           }
         });
 
-        ipcRenderer.send(
+        window.electron.send(
           "console-logs",
           "Unable to locale the following cities " +
             JSON.stringify(unlocatedCities)
@@ -564,15 +567,15 @@ const webofscienceGeolocate = (dataset) => {
         doc.content.articleGeoloc = true; // Mark file as geolocated
         pandodb.enriched.put(doc);
 
-        ipcRenderer.send("chaeros-notification", "Affiliations geolocated"); //Send success message to main process
-        ipcRenderer.send("pulsar", true);
-        ipcRenderer.send(
+        window.electron.send("chaeros-notification", "Affiliations geolocated"); //Send success message to main process
+        window.electron.send("pulsar", true);
+        window.electron.send(
           "console-logs",
           "scopusGeolocate successfully added geolocations on " + dataset
         );
 
         setTimeout(() => {
-          ipcRenderer.send("win-destroy", winId);
+          window.electron.send("win-destroy", winId);
         }, 2000);
       }
     );
@@ -592,7 +595,7 @@ const scopusRetriever = (user, query, bottleRate) => {
     minTime: 1000,
   });
 
-  ipcRenderer.send(
+  window.electron.send(
     "console-logs",
     "Started scopusRetriever on " + query + " for user " + user
   ); // Log the process
@@ -690,12 +693,12 @@ const scopusRetriever = (user, query, bottleRate) => {
                       content,
                     })
                     .then(() => {
-                      ipcRenderer.send(
+                      window.electron.send(
                         "chaeros-notification",
                         "Scopus API data retrieved"
                       ); // signal success to main process
-                      ipcRenderer.send("pulsar", true);
-                      ipcRenderer.send(
+                      window.electron.send("pulsar", true);
+                      window.electron.send(
                         "console-logs",
                         "Scopus dataset on " +
                           query +
@@ -704,7 +707,7 @@ const scopusRetriever = (user, query, bottleRate) => {
                           " have been successfully retrieved."
                       );
                       setTimeout(() => {
-                        ipcRenderer.send("win-destroy", winId);
+                        window.electron.send("win-destroy", winId);
                       }, 500); // Close Chaeros
                     });
                 });
@@ -713,16 +716,16 @@ const scopusRetriever = (user, query, bottleRate) => {
           })
           .catch((e) => {
             console.log(e);
-            ipcRenderer.send("chaeros-failure", e); // Send error to main process
-            ipcRenderer.send("pulsar", true);
+            window.electron.send("chaeros-failure", e); // Send error to main process
+            window.electron.send("pulsar", true);
           });
       });
     })
 
     .catch((e) => {
       console.log(e);
-      ipcRenderer.send("chaeros-failure", e); // Send error to main process
-      ipcRenderer.send("pulsar", true);
+      window.electron.send("chaeros-failure", e); // Send error to main process
+      window.electron.send("pulsar", true);
     });
 };
 
@@ -783,7 +786,7 @@ const biorxivRetriever = (query) => {
     };
 
     setTimeout(
-      () => ipcRenderer.send("biorxiv-retrieve", requestContent),
+      () => window.electron.send("biorxiv-retrieve", requestContent),
       scrapeTimerCount * 6000 + Math.random() * 6000
     );
   });
@@ -795,7 +798,7 @@ const biorxivRetriever = (query) => {
       doiBuffer.push(d.replace("doi: https://doi.org/", "").replace(" ", ""))
     );
     count++;
-    ipcRenderer.send(
+    window.electron.send(
       "chaeros-notification",
       "scraping page " + count + " of " + totalrequests
     );
@@ -810,8 +813,8 @@ const biorxivRetriever = (query) => {
       minTime: 400,
     });
 
-    ipcRenderer.send("chaeros-notification", "hydrating via bioRxiv api");
-    ipcRenderer.send(
+    window.electron.send("chaeros-notification", "hydrating via bioRxiv api");
+    window.electron.send(
       "console-logs",
       "biorxivRetriever has retrieved DOIs and will now interrogate bioRxiv database"
     ); // Log the process
@@ -934,17 +937,17 @@ const biorxivRetriever = (query) => {
           content: cslArticles,
         }); // Save array in local database
 
-        ipcRenderer.send(
+        window.electron.send(
           "chaeros-notification",
           "bioRxiv results poured in csl-json"
         ); // Send a success message
-        ipcRenderer.send("pulsar", true);
-        ipcRenderer.send(
+        window.electron.send("pulsar", true);
+        window.electron.send(
           "console-logs",
           "bioRxiv results successfully poured in CSL-JSON database"
         ); // Log success
         setTimeout(() => {
-          //ipcRenderer.send("win-destroy", winId);
+          //window.electron.send("win-destroy", winId);
         }, 500);
       })
       .catch((error) => {
@@ -966,7 +969,7 @@ const clinTriRetriever = (query) => {
     minTime: 500, // Every 500 milliseconds
   });
 
-  ipcRenderer.send(
+  window.electron.send(
     "console-logs",
     "Started retrieving clinical trials data for query: " + query
   ); // Log the process
@@ -1028,19 +1031,19 @@ const clinTriRetriever = (query) => {
             })
             .then(() => {
               setTimeout(() => {
-                ipcRenderer.send(
+                window.electron.send(
                   "chaeros-notification",
                   "clinical trials for " + query + " retrieved"
                 );
-                ipcRenderer.send("pulsar", true);
-                ipcRenderer.send("win-destroy", winId);
+                window.electron.send("pulsar", true);
+                window.electron.send("win-destroy", winId);
               }, 500); // Close Chaeros
             });
         })
         .catch((e) => {
           console.log(e);
-          ipcRenderer.send("chaeros-failure", e); // Send error to main process
-          ipcRenderer.send("pulsar", true);
+          window.electron.send("chaeros-failure", e); // Send error to main process
+          window.electron.send("pulsar", true);
         });
     });
 };
@@ -1050,7 +1053,7 @@ const clinTriRetriever = (query) => {
 // retrieve 100 items, which can easily trigger the rate limiting.
 
 const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
-  ipcRenderer.send(
+  window.electron.send(
     "console-logs",
     "Started retrieving collections " +
       collections +
@@ -1140,7 +1143,7 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
                     f.items.push(d);
 
                     responseAmount++;
-                    ipcRenderer.send(
+                    window.electron.send(
                       "chaeros-notification",
                       "Loading " +
                         responseAmount +
@@ -1181,18 +1184,18 @@ const dataWriter = (destination, importName, content) => {
     let table = pandodb[d];
     let id = importName + date;
     table.add({ id: id, date: date, name: importName, content: content });
-    ipcRenderer.send(
+    window.electron.send(
       "console-logs",
       "Retrieval successful. " + importName + " was imported in " + d
     );
   });
-  ipcRenderer.send(
+  window.electron.send(
     "chaeros-notification",
     "dataset loaded into " + destination
   );
-  ipcRenderer.send("pulsar", true);
+  window.electron.send("pulsar", true);
   setTimeout(() => {
-    ipcRenderer.send("win-destroy", winId);
+    window.electron.send("win-destroy", winId);
   }, 1000);
 };
 
@@ -1200,7 +1203,7 @@ const dataWriter = (destination, importName, content) => {
 // zoteroCollectionBuilder creates a new collection from a CSL-JSON dataset.
 
 const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
-  ipcRenderer.send(
+  window.electron.send(
     "console-logs",
     "Building collection" +
       collectionName +
@@ -1210,7 +1213,7 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
       id
   );
 
-  ipcRenderer.send(
+  window.electron.send(
     "chaeros-notification",
     "Creating collection " + collectionName
   ); // Send message to main Display
@@ -1297,30 +1300,30 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
 
                 count++;
 
-                ipcRenderer.send(
+                window.electron.send(
                   "chaeros-notification",
                   `Uploading ${colName} - (${count}/${fileArrays.length})`
                 );
                 if (resultList.length === fileArrays.length) {
                   setTimeout(() => {
-                    ipcRenderer.send(
+                    window.electron.send(
                       "chaeros-notification",
                       "Collection created"
                     ); // Send success message to main Display
-                    ipcRenderer.send("pulsar", true);
-                    ipcRenderer.send("win-destroy", winId);
+                    window.electron.send("pulsar", true);
+                    window.electron.send("win-destroy", winId);
                   }, 2000);
                 } // If all responses have been recieved, delay then close chaeros
               })
-              .catch((e) => ipcRenderer.send("console-logs", e));
-            ipcRenderer.send(
+              .catch((e) => window.electron.send("console-logs", e));
+            window.electron.send(
               "console-logs",
               "Collection " + JSON.stringify(collectionName) + " built."
             ); // Send success message to console
           });
         });
     } catch (e) {
-      ipcRenderer.send("console-logs", e);
+      window.electron.send("console-logs", e);
     }
   });
 };
@@ -1391,7 +1394,7 @@ const reqISSN = (user, scopid) => {
         .then((result) => {
           scopusISSNResponse.push(result);
 
-          ipcRenderer.send(
+          window.electron.send(
             "chaeros-notification",
             scopusISSNResponse.length +
               "/" +
@@ -1410,11 +1413,14 @@ const reqISSN = (user, scopid) => {
 
             pandodb.open();
             pandodb.system.add(data).then(() => {
-              ipcRenderer.send("chaeros-notification", "ISSN poured in SYSTEM"); // Sending notification to console
-              ipcRenderer.send("pulsar", true);
-              ipcRenderer.send("console-logs", "ISSN poured in SYSTEM"); // Sending notification to console
+              window.electron.send(
+                "chaeros-notification",
+                "ISSN poured in SYSTEM"
+              ); // Sending notification to console
+              window.electron.send("pulsar", true);
+              window.electron.send("console-logs", "ISSN poured in SYSTEM"); // Sending notification to console
               setTimeout(() => {
-                ipcRenderer.send("win-destroy", winId);
+                window.electron.send("win-destroy", winId);
               }, 500);
             });
           }
@@ -1480,7 +1486,7 @@ const regardsRetriever = (queryContent, legislature) => {
           .then((res) => res.json())
           .then((resPage) => {
             pageN++;
-            ipcRenderer.send(
+            window.electron.send(
               "chaeros-notification",
               "Retrieving page " + pageN + " of " + pagesReq.length
             );
@@ -1529,7 +1535,7 @@ const regardsRetriever = (queryContent, legislature) => {
                   .then((res) => res.json())
                   .then((documentResponse) => {
                     docN++;
-                    ipcRenderer.send(
+                    window.electron.send(
                       "chaeros-notification",
                       "Retrieving document " + docN + " of " + docReq.length
                     );
@@ -1585,7 +1591,7 @@ const regardsRetriever = (queryContent, legislature) => {
                           .then((res) => res.json())
                           .then((resSeance) => {
                             seanceN++;
-                            ipcRenderer.send(
+                            window.electron.send(
                               "chaeros-notification",
                               "Retrieving séance " +
                                 seanceN +
@@ -1674,18 +1680,21 @@ const regardsRetriever = (queryContent, legislature) => {
                                       regContent
                                     );
                                   } else {
-                                    ipcRenderer.send(
+                                    window.electron.send(
                                       "chaeros-notification",
                                       "Failure to retrieve data from Regards API"
                                     ); // Sending notification to console
-                                    ipcRenderer.send("pulsar", true);
-                                    ipcRenderer.send(
+                                    window.electron.send("pulsar", true);
+                                    window.electron.send(
                                       "console-logs",
                                       "Failure to retrieve data from Regards API"
                                     ); // Sending notification to console
 
                                     setTimeout(() => {
-                                      ipcRenderer.send("win-destroy", winId);
+                                      window.electron.send(
+                                        "win-destroy",
+                                        winId
+                                      );
                                     }, 500);
                                   }
                                 });
@@ -1752,7 +1761,7 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo, targetCollections) => {
   } else {
     urlArray.push(url(req, 0, 200));
 
-    ipcRenderer.send("console-logs", `First request: ${url(req, 0, 200)}`);
+    window.electron.send("console-logs", `First request: ${url(req, 0, 200)}`);
   }
 
   var totalResponse = [];
@@ -1763,7 +1772,7 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo, targetCollections) => {
       .schedule(() => fetch(solrReq).then((res) => res.json()))
       .then((res) => {
         count++;
-        ipcRenderer.send(
+        window.electron.send(
           "chaeros-notification",
           `Page ${count}/${urlArray.length}`
         );
@@ -1793,15 +1802,15 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo, targetCollections) => {
           pandodb.csljson
             .add(cslConvertedDataset)
             .then(() => {
-              ipcRenderer.send("chaeros-notification", "Dataset retrieved"); // Send a success message
-              ipcRenderer.send("pulsar", true);
-              ipcRenderer.send(
+              window.electron.send("chaeros-notification", "Dataset retrieved"); // Send a success message
+              window.electron.send("pulsar", true);
+              window.electron.send(
                 "console-logs",
                 "Solr data successfully converted"
               ); // Log success
 
               setTimeout(() => {
-                ipcRenderer.send("win-destroy", winId);
+                window.electron.send("win-destroy", winId);
               }, 500);
             })
             .catch((e) => {
@@ -1907,12 +1916,12 @@ const wosFullRetriever = (user, wosReq) => {
                   })
                 )
                 .then(() => {
-                  ipcRenderer.send(
+                  window.electron.send(
                     "chaeros-notification",
                     "Web of Science API data retrieved"
                   ); // signal success to main process
-                  ipcRenderer.send("pulsar", true);
-                  ipcRenderer.send(
+                  window.electron.send("pulsar", true);
+                  window.electron.send(
                     "console-logs",
                     "Web of Science dataset on " +
                       wosReq.usrQuery +
@@ -1921,7 +1930,7 @@ const wosFullRetriever = (user, wosReq) => {
                       " have been successfully retrieved."
                   );
                   setTimeout(() => {
-                    ipcRenderer.send("win-destroy", winId);
+                    window.electron.send("win-destroy", winId);
                   }, 500); // Close Chaeros
                 });
             }
@@ -1955,7 +1964,7 @@ const computePPS = (ppUserlist, mail) => {
 
   const id = JSON.stringify(...ppUserlist);
 
-  ipcRenderer.invoke("getPPS", true).then((ppsFile) => {
+  window.electron.invoke("getPPS", true).then((ppsFile) => {
     fs.createReadStream(ppsFile) // Read the flatfile dataset provided by the user
       .pipe(csv()) // pipe buffers to csv parser
       .on("data", (data) => {
@@ -2015,7 +2024,7 @@ const crossRefPPS = (
     });
     query = (doi) => `https://api.crossref.org/works/${doi}?mailto=${mail}`;
 
-    ipcRenderer.send(
+    window.electron.send(
       "console-logs",
       "Request to CrossRef using email, the faster way."
     );
@@ -2026,7 +2035,7 @@ const crossRefPPS = (
     });
     query = (doi) => `https://api.crossref.org/works/${doi}`;
 
-    ipcRenderer.send(
+    window.electron.send(
       "console-logs",
       "Request to CrossRef in slow mode, add email to go faster."
     );
@@ -2069,7 +2078,7 @@ const crossRefPPS = (
         .then((res) => res.json())
         .catch((err) => console.log(err))
         .then((res) => {
-          ipcRenderer.send(
+          window.electron.send(
             "chaeros-notification",
             `CrossRef rehydration ${i + 1}/${dataDOI.length}`
           );
@@ -2086,7 +2095,7 @@ const crossRefPPS = (
           }
 
           if (i === dataDOI.length - 1) {
-            ipcRenderer.send("chaeros-notification", `Computing results…`);
+            window.electron.send("chaeros-notification", `Computing results…`);
 
             const authorMap = {};
             const ISSNMap = {};
@@ -2196,17 +2205,17 @@ const crossRefPPS = (
                 pandodb.csljson
                   .add(cslDataset)
                   .then(() => {
-                    ipcRenderer.send(
+                    window.electron.send(
                       "chaeros-notification",
                       `Dataset retrieved`
                     );
-                    ipcRenderer.send("pulsar", true);
-                    ipcRenderer.send(
+                    window.electron.send("pulsar", true);
+                    window.electron.send(
                       "console-logs",
                       "Successfully added " + id
                     ); // Log success
                     setTimeout(() => {
-                      ipcRenderer.send("win-destroy", winId);
+                      window.electron.send("win-destroy", winId);
                     }, 500);
                   })
                   .catch((err) => console.log(err));
@@ -2234,7 +2243,7 @@ const crossRefPPS = (
                 )
                 .then((r) => {
                   oApageCount++;
-                  ipcRenderer.send(
+                  window.electron.send(
                     "chaeros-notification",
                     `OpenAlex Page ${oApageCount} received`
                   );
@@ -2280,10 +2289,10 @@ const crossRefPPS = (
         });
     }
   } else {
-    ipcRenderer.send("chaeros-notification", `user not found`);
-    ipcRenderer.send("pulsar", true);
+    window.electron.send("chaeros-notification", `user not found`);
+    window.electron.send("pulsar", true);
     setTimeout(() => {
-      ipcRenderer.send("win-destroy", winId);
+      window.electron.send("win-destroy", winId);
     }, 500);
   }
 };
@@ -2395,7 +2404,7 @@ const dimensionsCSLconverter = (dataset, source, normalize, email) => {
     return article;
   };
 
-  ipcRenderer.send("console-logs", "Starting istexConverter on " + dataset); // Notify console conversion started
+  window.electron.send("console-logs", "Starting istexConverter on " + dataset); // Notify console conversion started
   let convertedDataset = []; // Create an array
 
   pandodb[source].get(dataset).then((doc) => {
@@ -2408,7 +2417,7 @@ const dimensionsCSLconverter = (dataset, source, normalize, email) => {
       for (let i = 0; i < articles.length; i++) {
         const converted = dimensionsToZoteroCSL(articles[i]);
 
-        ipcRenderer.send(
+        window.electron.send(
           "chaeros-notification",
           `Converting ${i + 1}/${articles.length}`
         );
@@ -2416,9 +2425,9 @@ const dimensionsCSLconverter = (dataset, source, normalize, email) => {
         convertedDataset.push(converted);
       }
     } catch (err) {
-      ipcRenderer.send("chaeros-failure", JSON.stringify(err)); // On failure, send error notification to main process
-      ipcRenderer.send("pulsar", true);
-      ipcRenderer.send("console-logs", JSON.stringify(err)); // On failure, send error to console
+      window.electron.send("chaeros-failure", JSON.stringify(err)); // On failure, send error notification to main process
+      window.electron.send("pulsar", true);
+      window.electron.send("console-logs", JSON.stringify(err)); // On failure, send error to console
     } finally {
       const id = dataset + "-converted";
 
@@ -2441,14 +2450,14 @@ const dimensionsCSLconverter = (dataset, source, normalize, email) => {
             content: convertedDataset,
           })
           .then(() => {
-            ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
-            ipcRenderer.send("pulsar", true);
-            ipcRenderer.send(
+            window.electron.send("chaeros-notification", "Dataset converted"); // Send a success message
+            window.electron.send("pulsar", true);
+            window.electron.send(
               "console-logs",
               "dimensionsConverter successfully converted " + dataset
             ); // Log success
             setTimeout(() => {
-              ipcRenderer.send("win-destroy", winId);
+              window.electron.send("win-destroy", winId);
             }, 500);
           });
       }
@@ -2493,12 +2502,12 @@ const istexRetriever = (query) => {
             content,
           })
           .then(() => {
-            ipcRenderer.send(
+            window.electron.send(
               "chaeros-notification",
               "ISTEX API data retrieved"
             ); // signal success to main process
-            ipcRenderer.send("pulsar", true);
-            ipcRenderer.send(
+            window.electron.send("pulsar", true);
+            window.electron.send(
               "console-logs",
               "ISTEX dataset on " +
                 query +
@@ -2507,7 +2516,7 @@ const istexRetriever = (query) => {
                 " have been successfully retrieved."
             );
             setTimeout(() => {
-              ipcRenderer.send("win-destroy", winId);
+              window.electron.send("win-destroy", winId);
             }, 500); // Close Chaeros
           });
       });
@@ -2610,7 +2619,7 @@ const istexCSLconverter = (dataset, source, normalize, email) => {
     return article;
   };
 
-  ipcRenderer.send("console-logs", "Starting istexConverter on " + dataset); // Notify console conversion started
+  window.electron.send("console-logs", "Starting istexConverter on " + dataset); // Notify console conversion started
   let convertedDataset = []; // Create an array
 
   pandodb[source].get(dataset).then((doc) => {
@@ -2622,7 +2631,7 @@ const istexCSLconverter = (dataset, source, normalize, email) => {
       for (let i = 0; i < articles.length; i++) {
         const converted = istexToZoteroCSL(articles[i]);
 
-        ipcRenderer.send(
+        window.electron.send(
           "chaeros-notification",
           `Converting ${i + 1}/${articles.length}`
         );
@@ -2630,9 +2639,9 @@ const istexCSLconverter = (dataset, source, normalize, email) => {
         convertedDataset.push(converted);
       }
     } catch (err) {
-      ipcRenderer.send("chaeros-failure", JSON.stringify(err)); // On failure, send error notification to main process
-      ipcRenderer.send("pulsar", true);
-      ipcRenderer.send("console-logs", JSON.stringify(err)); // On failure, send error to console
+      window.electron.send("chaeros-failure", JSON.stringify(err)); // On failure, send error notification to main process
+      window.electron.send("pulsar", true);
+      window.electron.send("console-logs", JSON.stringify(err)); // On failure, send error to console
     } finally {
       const id = dataset + "-converted";
       if (normalize) {
@@ -2654,14 +2663,14 @@ const istexCSLconverter = (dataset, source, normalize, email) => {
             content: convertedDataset,
           })
           .then(() => {
-            ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
-            ipcRenderer.send("pulsar", true);
-            ipcRenderer.send(
+            window.electron.send("chaeros-notification", "Dataset converted"); // Send a success message
+            window.electron.send("pulsar", true);
+            window.electron.send(
               "console-logs",
               "istexConverter successfully converted " + dataset
             ); // Log success
             setTimeout(() => {
-              ipcRenderer.send("win-destroy", winId);
+              window.electron.send("win-destroy", winId);
             }, 500);
           });
       }
@@ -2849,7 +2858,7 @@ const GallicaFullQuery = (targetExpression) => {
             .then((res) => res.text())
             .catch((err) => console.log(err))
             .then((res) => {
-              ipcRenderer.send(
+              window.electron.send(
                 "chaeros-notification",
                 `Gallica page ${i}/${reqNum}`
               );
@@ -2857,7 +2866,7 @@ const GallicaFullQuery = (targetExpression) => {
               content = [...content, ...gallicaSRU2JSON(res)];
 
               if (i === reqNum) {
-                ipcRenderer.send(
+                window.electron.send(
                   "chaeros-notification",
                   `Gallica retrieval complete`
                 );
@@ -2879,17 +2888,17 @@ const GallicaFullQuery = (targetExpression) => {
                 pandodb.csljson
                   .add(normalized)
                   .then(() => {
-                    ipcRenderer.send(
+                    window.electron.send(
                       "chaeros-notification",
                       "Gallica data retrieved"
                     ); // Send a success message
-                    ipcRenderer.send("pulsar", true);
-                    ipcRenderer.send(
+                    window.electron.send("pulsar", true);
+                    window.electron.send(
                       "console-logs",
                       "Successfully converted " + targetExpression
                     ); // Log success
                     setTimeout(() => {
-                      ipcRenderer.send("win-destroy", winId);
+                      window.electron.send("win-destroy", winId);
                     }, 500);
                   })
                   .catch((err) => console.log(err));
@@ -2943,7 +2952,7 @@ const crossRefEnricher = (dataset, mail) => {
         .then((res) => res.json())
         .catch((err) => console.log(err))
         .then((res) => {
-          ipcRenderer.send(
+          window.electron.send(
             "chaeros-notification",
             `CrossRef normalization ${i}/${data.length - 1}`
           );
@@ -2956,7 +2965,7 @@ const crossRefEnricher = (dataset, mail) => {
           }
 
           if (i === data.length - 1) {
-            ipcRenderer.send(
+            window.electron.send(
               "chaeros-notification",
               `CrossRef normalization successful`
             );
@@ -2981,14 +2990,17 @@ const crossRefEnricher = (dataset, mail) => {
             pandodb.csljson
               .add(normalized)
               .then(() => {
-                ipcRenderer.send("chaeros-notification", "Dataset converted"); // Send a success message
-                ipcRenderer.send("pulsar", true);
-                ipcRenderer.send(
+                window.electron.send(
+                  "chaeros-notification",
+                  "Dataset converted"
+                ); // Send a success message
+                window.electron.send("pulsar", true);
+                window.electron.send(
                   "console-logs",
                   "Successfully converted " + dataset
                 ); // Log success
                 setTimeout(() => {
-                  ipcRenderer.send("win-destroy", winId);
+                  window.electron.send("win-destroy", winId);
                 }, 500);
               })
               .catch((err) => console.log(err));
@@ -3002,7 +3014,7 @@ const crossRefEnricher = (dataset, mail) => {
 // Switch used to choose the function to execute in CHÆROS.
 
 const chaerosSwitch = (fluxAction, fluxArgs) => {
-  ipcRenderer.send(
+  window.electron.send(
     "console-logs",
     "CHÆROS started a " +
       fluxAction +
@@ -3179,8 +3191,8 @@ window.addEventListener("load", (event) => {
         try {
           chaerosSwitch(fluxAction, fluxArgs);
         } catch (err) {
-          ipcRenderer.send("console-logs", err);
-          ipcRenderer.send("chaeros-failure", JSON.stringify(err));
+          window.electron.send("console-logs", err);
+          window.electron.send("chaeros-failure", JSON.stringify(err));
         } finally {
           clearInterval(switchInterval);
         }
@@ -3188,5 +3200,5 @@ window.addEventListener("load", (event) => {
     }, 50);
   });
 
-  ipcRenderer.send("chaeros-is-ready", "ready");
+  window.electron.send("chaeros-is-ready", "ready");
 });

@@ -289,9 +289,9 @@ const exportSlides = () => {
     dialog.showSaveDialog({ defaultPath: slides.name + ".json" }).then((fp) => {
       fs.writeFile(fp.filePath, JSON.stringify(slides), "utf8", (err) => {
         if (err) {
-          ipcRenderer.send("console-logs", JSON.stringify(err));
+          window.electron.send("console-logs", JSON.stringify(err));
         } else {
-          ipcRenderer.send("console-logs", "Exporting current slides deck");
+          window.electron.send("console-logs", "Exporting current slides deck");
         }
       });
     });

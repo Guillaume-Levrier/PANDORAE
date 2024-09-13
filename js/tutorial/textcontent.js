@@ -1,5 +1,5 @@
 // text
-//const userDataPath = ipcRenderer.sendSync("remote", "userDataPath"); // Find userData folder Path
+//const userDataPath = window.electron.sendSync("remote", "userDataPath"); // Find userData folder Path
 
 var CM = CMT["EN"];
 
@@ -27,7 +27,7 @@ const populateTutorial = () => {
           break;
 
         case "openEx":
-          ipcRenderer.invoke("openEx", link.dataset.target);
+          window.electron.invoke("openEx", link.dataset.target);
           break;
 
         case "lastScroll()":
@@ -46,7 +46,7 @@ window.addEventListener("load", (e) => {
   // =========== LANGUAGE SELECTION ===========
 
   const fs = require("fs");
-  const userDataPath = ipcRenderer.sendSync("remote", "userDataPath"); // Find userData folder Path
+  const userDataPath = window.electron.sendSync("remote", "userDataPath"); // Find userData folder Path
 
   fs.readFileSync(
     userDataPath + "/PANDORAE-DATA/userID/user-id.json",
