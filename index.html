@@ -1,91 +1,82 @@
 <!DOCTYPE html>
 <html>
-  <meta charset="UTF-8" />
-  <title>PANDORÆ-CORE</title>
-  <meta
-    http-equiv="Content-Security-Policy"
-    content="script-src 'self';object-src 'none';base-uri 'none';"
-  />
-  <link rel="stylesheet" type="text/css" href="css/pandorae.css" />
-  <link rel="stylesheet" type="text/css" href="css/quill.snow.css" />
-  <link rel="icon" type="image/png" href="img/AE-favicon.png" />
+<meta charset="UTF-8" />
+<title>PANDORÆ-CORE</title>
+<!-- <meta http-equiv="Content-Security-Policy"
+  content="script-src 'self';object-src 'none';base-uri 'none';" />
+ -->
+<!-- <link rel="stylesheet" type="text/css" href="css/pandorae.css" />
+<link rel="stylesheet" type="text/css" href="css/quill.snow.css" /> -->
 
-  <!--Core/Theme-->
-  <div id="signal"></div>
-  <div class="themeCustom" id="core-logo"></div>
-  <div class="themeCustom" id="version"></div>
+<link rel="icon" type="image/png" href="img/AE-favicon.png" />
 
-  <!--Main field-->
-  <div>
+<!--Core/Theme-->
+<div id="signal"></div>
+<div class="themeCustom" id="core-logo"></div>
+<div class="themeCustom" id="version"></div>
+
+<!--Main field-->
+<div>
+  <form autocomplete="off">
+    <input class="themeCustom" spellcheck="false" type="text" maxlength="36"
+      id="field" value="" />
+  </form>
+</div>
+
+<!--Menu-->
+<div id="icons"></div>
+
+<div id="menu" class="themeCustom">
+  <img id="aelogo" class="menu-item" width="100%"
+    src="./svg/pandorae-app-logo.svg" />
+  <div id="fluxMenu" class="tabs menu-item"></div>
+  <div id="type" class="tabs menu-item"></div>
+  <div id="slideBut" class="tabs menu-item"></div>
+  <div id="tutostartmenu" class="tabs menu-item"></div>
+  <div id="quitBut" class="tabs menu-item"></div>
+  <div id="lang">
+    <!-- <div class="locale">FR</div> -->
+    <!-- <div class="locale">EN</div> -->
+    <!-- <div class="locale">中文</div> -->
+  </div>
+</div>
+
+<div id="secmenu" class="themeCustom">
+  <div id="secMenTopTab" class="secMenuTabs"></div>
+  <div id="secMenContent"></div>
+</div>
+
+<div id="thirdmenu" class="themeCustom">
+  <div id="secMenTopTab" class="secMenuTabs"></div>
+  <div id="thirdMenuContent"></div>
+</div>
+
+<!--Sources-->
+<div id="xtype">
+  <div id="source"></div>
+</div>
+
+<!-- Slide Sections -->
+<div id="mainSlideSections"></div>
+
+<!--Console-->
+<div id="console" class="themeCustom">
+  <div id="log"></div>
+  <div id="cli" class="themeCustom">
+    $PANDORÆ~:
     <form autocomplete="off">
-      <input
-        class="themeCustom"
-        spellcheck="false"
-        type="text"
-        maxlength="36"
-        id="field"
-        value=""
-      />
+      <input spellcheck="false" type="text" id="cli-field" value="" />
     </form>
   </div>
+  <div id="console-options"></div>
+</div>
 
-  <!--Menu-->
-  <div id="icons"></div>
-
-  <div id="menu" class="themeCustom">
-    <img
-      id="aelogo"
-      class="menu-item"
-      width="100%"
-      src="svg/pandorae-app-logo.svg"
-    />
-    <div id="fluxMenu" class="tabs menu-item"></div>
-    <div id="type" class="tabs menu-item"></div>
-    <div id="slideBut" class="tabs menu-item"></div>
-    <div id="tutostartmenu" class="tabs menu-item"></div>
-    <div id="quitBut" class="tabs menu-item"></div>
-    <div id="lang">
-      <!-- <div class="locale">FR</div> -->
-      <!-- <div class="locale">EN</div> -->
-      <!-- <div class="locale">中文</div> -->
-    </div>
-  </div>
-
-  <div id="secmenu" class="themeCustom">
-    <div id="secMenTopTab" class="secMenuTabs"></div>
-    <div id="secMenContent"></div>
-  </div>
-
-  <div id="thirdmenu" class="themeCustom">
-    <div id="secMenTopTab" class="secMenuTabs"></div>
-    <div id="thirdMenuContent"></div>
-  </div>
-
-  <!--Sources-->
-  <div id="xtype">
-    <div id="source"></div>
-  </div>
-
-  <!-- Slide Sections -->
-  <div id="mainSlideSections"></div>
-
-  <!--Console-->
-  <div id="console" class="themeCustom">
-    <div id="log"></div>
-    <div id="cli" class="themeCustom">
-      $PANDORÆ~:
-      <form autocomplete="off">
-        <input spellcheck="false" type="text" id="cli-field" value="" />
-      </form>
-    </div>
-    <div id="console-options"></div>
-  </div>
-
-  <!--Scripts-->
-  <!-- 
+<!--Scripts-->
+<!-- 
 <script src="js/db.js"></script>
 <script src="js/locales.js"></script>
 <script src="js/pandorae.js"></script>
 <script src="js/slider.js"></script>
 <script src="js/lib/OrbitControls.js"></script>  -->
+
 </html>

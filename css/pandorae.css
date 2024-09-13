@@ -7,7 +7,7 @@
   font-family: "Material Icons";
   font-style: normal;
   font-weight: 100;
-  src: url(fonts/material-icons-outlined.woff2) format("woff2");
+  src: url(./fonts/material-icons-outlined.woff2) format("woff2");
 }
 
 .material-icons {
@@ -30,13 +30,13 @@
 
 @font-face {
   font-family: "Noto Sans";
-  src: url("/noto/NotoSansMono-Light.ttf") format("ttf");
+  src: url("./fonts/NotoSansMono-Regular.ttf") format("ttf");
 }
 
 /* ============ ROAD-RAGE by Youssef Habchi ============ */
 @font-face {
   font-family: RoadRage;
-  src: url("fonts/Road_Rage.otf") format("opentype");
+  src: url("./fonts/Road_Rage.otf") format("opentype");
 }
 
 /* ================================================================ */

@@ -1,5 +1,7 @@
 // =========== DATABASE ===========
-const Dexie = require("dexie");
+//const Dexie = require("dexie");
+
+import Dexie from "dexie";
 
 Dexie.debug = false;
 
@@ -240,3 +242,5 @@ pandodb.version(11).stores({
 });
 
 pandodb.open();
+
+export { pandodb };

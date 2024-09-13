@@ -275,3 +275,5 @@ const CMT = {
     },
   }, */
 };
+
+export { CMT };

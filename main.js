@@ -79,22 +79,28 @@ function createWindow() {
     frame: true,
     resizable: true,
     webPreferences: {
-      preload: basePath + "/js/preload-index.js",
+      //preload: basePath + "/js/preload-index.js",
+      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       nodeIntegrationInWorker: true,
-      plugins: true,
+      /* plugins: true, */
     },
   });
 
   windowIds.index.id = mainWindow.id;
   windowIds.index.open = true;
 
-  mainWindow.loadFile("index.html");
+  //mainWindow.loadFile("index.html");
+  mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   mainWindow.setMenu(null);
 
-  //mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   mainWindow.on("closed", () => (mainWindow = null));
+
+  ipcMain.on("get-preload-path", (e) => {
+    e.returnValue = WINDOW_PRELOAD_WEBPACK_ENTRY;
+  });
 }
 
 //FileSystem
@@ -131,7 +137,7 @@ ipcMain.on("change-udp", async (event, message) => {
   createThemes();
 });
 
-app.on("ready", () => {
+app.whenReady().then(() => {
   userDataDirTree(userDataPath, [
     "/PANDORAE-DATA/logs",
     "/PANDORAE-DATA/userID",
