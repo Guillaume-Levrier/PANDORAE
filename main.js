@@ -3,6 +3,7 @@ const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } =
   electron;
 const fs = require("fs");
 var https = require("https");
+const path = require("path");
 
 // only one instance at once
 
@@ -199,7 +200,7 @@ const openModal = (modalFile, scrollTo) => {
       parent: mainWindow,
       modal: true,
       transparent: true,
-      alwaysOnTop: false,
+      alwaysOnTop: true,
       frame: false,
       resizable: false,
       show: false,
@@ -210,8 +211,8 @@ const openModal = (modalFile, scrollTo) => {
       },
     });
 
-    var path = "file://" + __dirname + "/html/" + modalFile + ".html";
-    win.loadURL(path);
+    //var path = basePath + "/html/" + modalFile + ".html";
+    win.loadFile("html/" + modalFile + ".html");
     win.once("ready-to-show", () => {
       win.show();
       windowIds[modalFile].id = win.id;
@@ -220,7 +221,7 @@ const openModal = (modalFile, scrollTo) => {
         setTimeout(() => win.webContents.send("scroll-to", scrollTo), 1000);
       }
     });
-    //win.webContents.openDevTools();
+    win.webContents.openDevTools();
   }
 };
 

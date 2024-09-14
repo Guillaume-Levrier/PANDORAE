@@ -1,3 +1,5 @@
+console.log("|==== FLUX PRELOAD STARTS HERE ====|");
+
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electron", {
