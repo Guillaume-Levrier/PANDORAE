@@ -47,3 +47,5 @@ const keyShortCuts = (event) => {
     }
   }
 };
+
+export { keyShortCuts };

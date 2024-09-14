@@ -15,7 +15,15 @@
 const msg =
   "      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ";
 
+console.log(window.electron);
+
 import { CMT } from "../locales";
+import { toggleConsole } from "./console";
+import { iconCreator } from "./icon";
+import { keyShortCuts } from "./keyboard-shortcuts";
+import { toggleMenu } from "./menu";
+import { nameDisplay } from "./pulse";
+import { requestTheme } from "./themes";
 
 var dispose = false;
 
@@ -49,7 +57,7 @@ var keylock = 0;
 // couldn't be done in Chaeros can be long. In order not to freeze the user's mainWindow,
 // most of the math to be done is sent to a Shared Worker which loads the data and sends
 // back to Types only what it needs to know.
-if (!!window.SharedWorker) {
+if (!window.SharedWorker) {
   // If the SharedWorker doesn't exist yet
 
   var multiThreader = new Worker("js/mul[type]threader.js"); // Create a SharedWorker named multiThreader based on that file
@@ -78,18 +86,6 @@ if (!!window.SharedWorker) {
   };
 }
 
-const mainDisplay = (type) => {
-  field.value = "preparing " + type;
-  window.electron.send("console-logs", "Preparing " + type);
-  displayCore();
-  purgeXtype();
-  toggleTertiaryMenu();
-  listTableDatasets(type);
-};
-
-var logContent = "";
-let log;
-
 var mainPresContent = [];
 var mainPresEdit = false;
 var priorDate = false;
@@ -98,65 +94,8 @@ const initializeMainScreen = () => {
   const iconDiv = document.getElementById("icons");
   const xtype = document.getElementById("xtype"); // xtype is a div containing each (-type) visualisation
 
-  // =========== LANGUAGE SELECTION ===========
-  var CM = CMT["EN"]; // Load the EN locale at start
-
-  fs.readFile(
-    userDataPath + "/PANDORAE-DATA/userID/user-id.json",
-    "utf8", // Check if the user uses another one
-    (err, data) => {
-      data = JSON.parse(data);
-      if (data.locale) {
-        CM = CMT[data.locale];
-      } else {
-        CM = CMT.EN;
-      }
-    }
-  );
-
-  const populateLocale = (divlist) => {
-    divlist.forEach((div) => {
-      document.getElementById(div.id).innerText = CM.menu[div.path];
-    });
-  };
-
-  var divlist = [
-    { id: "fluxMenu", path: "flux" },
-    { id: "type", path: "type" },
-    { id: "slideBut", path: "slide" },
-    { id: "quitBut", path: "quit" },
-    { id: "tutostartmenu", path: "returnToTutorial" },
-  ];
-
-  populateLocale(divlist);
-
-  document.getElementById("lang").childNodes.forEach((lg) => {
-    lg.addEventListener("click", (e) => {
-      CM = CMT[lg.innerText];
-      populateLocale(divlist);
-      fs.readFile(
-        userDataPath + "/PANDORAE-DATA/userID/user-id.json",
-        "utf8",
-        (err, data) => {
-          data = JSON.parse(data);
-          data.locale = lg.innerText;
-          data = JSON.stringify(data);
-          fs.writeFile(
-            userDataPath + "/PANDORAE-DATA/userID/user-id.json",
-            data,
-            "utf8",
-            (err) => {
-              if (err) throw err;
-            }
-          );
-        }
-      );
-    });
-  });
-
   // =========== MAIN LOGO ===========
   // Main logo is a text that can be changed through the nameDisplay function
-  let coreLogoArchive = "";
 
   document.getElementById("version").innerHTML = version;
 
@@ -174,8 +113,8 @@ const initializeMainScreen = () => {
   // =========== MENU ===========
   // menu elements
 
-  menu = document.getElementById("menu");
-  consoleDiv = document.getElementById("console");
+  const menu = document.getElementById("menu");
+  const consoleDiv = document.getElementById("console");
 
   iconCreator("menu-icon", toggleMenu, "Toggle menu");
   // Menu behaviors
@@ -217,14 +156,13 @@ const initializeMainScreen = () => {
 
   iconCreator("option-icon", toggleConsole, "Toggle console");
 
-  log = document.getElementById("log");
-
+  /* TO BE REINSTATED
   ipcRenderer.on("console-messages", (event, message) => addToLog(message));
 
   ipcRenderer.on("mainWindowReload", (event, message) => {
     location.reload();
   });
-
+ */
   // ========== MAIN MENU OPTIONS ========
 
   field.addEventListener("focusin", () => (keylock = 1));
@@ -243,78 +181,25 @@ const initializeMainScreen = () => {
 
   // ========== MAIN FIELD COMMAND INPUT ========
 
-  menuIcon = document.getElementById("menu-icon");
-  consoleIcon = document.getElementById("option-icon");
+  const menuIcon = document.getElementById("menu-icon");
+  const consoleIcon = document.getElementById("option-icon");
 
   //// ========== WINDOW MANAGEMENT ========
 
-  const closeWindow = () => {
+  const closeWindow = () =>
     window.electron.send("window-manager", "closeWindow", "index");
-  };
 
   const refreshWindow = () => {
     location.reload();
   };
 
-  const reframeMainWindow = () => {
-    // remote.mainWindow({ frame: true });
-  };
-
-  //// ========== TUTORIAL ========
-
-  window.electron.send("userStatus", true);
-
-  ipcRenderer.on("userStatus", (event, user) => kickStart(user));
-
-  const kickStart = (user) => {
-    if (user.UserName === "") {
-      menuIcon.style.cursor = "not-allowed";
-      consoleIcon.style.cursor = "not-allowed";
-      //document.getElementById("tutostartmenu").style.display = "block";
-      field.style.pointerEvents = "all";
-      field.style.cursor = "pointer";
-      field.value = "start tutorial";
-    } else {
-      document.getElementById("menu-icon").onclick = toggleMenu;
-      document.getElementById("option-icon").onclick = toggleConsole;
-      document.getElementById("menu-icon").style.cursor = "pointer";
-      document.getElementById("option-icon").style.cursor = "pointer";
-      document.getElementById("version").innerHTML =
-        user.UserName.toUpperCase() + " | " + version;
-    }
-  };
-
-  ipcRenderer.on("tutorial", (event, message) => {
-    menuIcon.onclick = toggleMenu;
-    menuIcon.style.cursor = "pointer";
-    consoleIcon.style.cursor = "pointer";
-
-    tutoSlide = "message";
-
-    switch (message) {
-      case "flux":
-      case "istexRequest":
-      case "sendToZotero":
-      case "zoteroImport":
-      case "reImportToSystem":
-        openHelper("tutorialHelper", message);
-        blinker("menu-icon");
-        blinker("fluxMenu");
-        break;
-
-      case "openTutorial":
-        openTutorial(tutoSlide);
-        break;
-    }
-  });
+  //const reframeMainWindow = () => {
+  // remote.mainWindow({ frame: true });
+  //};
 
   document.addEventListener("keydown", keyShortCuts);
 
   requestTheme();
-
-  ipcRenderer.on("cmdInputFromRenderer", (event, command) => {
-    cmdinput(command);
-  });
 };
 
 export { initializeMainScreen };

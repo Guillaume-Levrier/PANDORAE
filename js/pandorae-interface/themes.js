@@ -1,6 +1,6 @@
 const selectTheme = (themeName) => {
   window.electron.send("theme", { type: "set", theme: themeName });
-  window.electron.sendSync("keyManager", {
+  window.electron.send("keyManager", {
     user: "NA",
     service: "theme",
     value: themeName,
@@ -12,7 +12,7 @@ const requestTheme = () => {
   window.electron.send("theme", { type: "read" });
 };
 
-ipcRenderer.on("themeContent", (event, theme) => loadTheme(theme));
+window.electron.themeContent((event, theme) => loadTheme(theme));
 
 const loadTheme = (theme) => {
   switch (theme.script) {
@@ -91,3 +91,5 @@ const zoomThemeScreen = (theme) => {
     }
   }
 };
+
+export { requestTheme };

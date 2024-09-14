@@ -888,3 +888,11 @@ const updatePPS = (time) => {
 };
 
 // ===== end of PPS routines =====
+
+// ==== read files ====
+
+ipcMain.on("readFile", async (event, req) => readFlatFile(event, req));
+
+const readFlatFile = (event, req) => {
+  console.log(event), console.log(req);
+};

@@ -1,3 +1,5 @@
+console.log("|==== INDEX.JS STARTS HERE ====|");
+
 import "../css/pandorae.css";
 import { initializeMainScreen } from "./pandorae-interface/pandorae";
 

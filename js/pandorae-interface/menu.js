@@ -1,5 +1,7 @@
-// ====== MENU ======
+import { CMT } from "../locales";
 
+// ====== MENU ======
+const CM = CMT["EN"];
 let menu, consoleDiv, iconDiv;
 let toggledMenu = false;
 
@@ -13,6 +15,7 @@ const purgeMenuItems = (menu) => {
 const toggleMenu = () => {
   field.removeEventListener("click", tutorialOpener);
   if (toggledMenu) {
+    console.log(window.electron.send);
     window.electron.send("console-logs", CM.console.menu.closing);
     if (toggledSecondaryMenu) {
       toggleSecondaryMenu();

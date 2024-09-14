@@ -2,6 +2,9 @@
 
 let toggledConsole = false;
 
+const log = document.getElementById("log");
+var logContent = "";
+
 const toggleConsole = () => {
   if (toggledConsole) {
     window.electron.send("console-logs", "Hiding console");
@@ -20,6 +23,15 @@ const addToLog = (message) => {
   logContent += message;
   log.innerText = logContent;
   log.scrollTop = log.scrollHeight;
+};
+
+const mainDisplay = (type) => {
+  field.value = "preparing " + type;
+  window.electron.send("console-logs", "Preparing " + type);
+  displayCore();
+  purgeXtype();
+  toggleTertiaryMenu();
+  listTableDatasets(type);
 };
 
 const cmdinput = (input) => {
@@ -168,3 +180,9 @@ const cmdinput = (input) => {
   setTimeout(() => (field.value = ""), 1500);
   document.getElementById("cli-field").value = commandReturn;
 };
+
+//ipcRenderer.on("cmdInputFromRenderer", (event, command) => cmdinput(command));
+
+window.electron.cmdInputFromRenderer((data) => cmdinput(command));
+
+export { toggleConsole, addToLog, mainDisplay };

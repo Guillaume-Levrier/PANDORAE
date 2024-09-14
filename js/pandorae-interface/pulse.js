@@ -1,5 +1,5 @@
 var pump = {};
-
+let coreLogoArchive = "";
 const pulse = (status, coeff, rhythm, clear) => {
   let rate = (number) => {
     status = status += 0.1 * coeff;
@@ -51,13 +51,14 @@ const progBarSign = (prog) => {
     "%)";
 };
 
-ipcRenderer.on("progressBar", (event, prog) => {
+/* ipcRenderer.on("progressBar", (event, prog) => {
   progBarSign(prog);
 });
-
+ */
 // ========== CORE SIGNALS ===========
 
-ipcRenderer.on("coreSignal", (event, fluxAction, fluxArgs, message) => {
+window.electron.coreSignal((data) => {
+  console.log(data);
   try {
     field.value = message;
   } catch (err) {
@@ -65,6 +66,8 @@ ipcRenderer.on("coreSignal", (event, fluxAction, fluxArgs, message) => {
   }
 });
 
+// TO BE REINSTATED
+/* 
 ipcRenderer.on("chaeros-notification", (event, message, options) => {
   field.value = message;
   if (message === "return to tutorial") {
@@ -79,7 +82,7 @@ ipcRenderer.on("chaeros-failure", (event, message) => {
 
 ipcRenderer.on("pulsar", (event, message) => {
   pulse(1, 1, 10, message);
-});
+}); */
 
 const nameDisplay = (name) => {
   document
@@ -98,3 +101,5 @@ const nameDisplay = (name) => {
     .getElementById("core-logo")
     .animate([{ opacity: 0 }, { opacity: 1 }], 700);
 };
+
+export { nameDisplay };
