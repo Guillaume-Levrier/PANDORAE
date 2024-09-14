@@ -1,9 +1,14 @@
 import { CMT } from "../locales";
+import { displayCore } from "./core";
 
 // ====== MENU ======
 const CM = CMT["EN"];
-let menu, consoleDiv, iconDiv;
 let toggledMenu = false;
+
+const iconDiv = document.getElementById("icons");
+const xtype = document.getElementById("xtype"); // xtype is a div containing each (-type) visualisation
+const menu = document.getElementById("menu");
+const consoleDiv = document.getElementById("console");
 
 const purgeMenuItems = (menu) => {
   let menuContent = document.getElementById(menu);
@@ -15,7 +20,6 @@ const purgeMenuItems = (menu) => {
 const toggleMenu = () => {
   field.removeEventListener("click", tutorialOpener);
   if (toggledMenu) {
-    console.log(window.electron.send);
     window.electron.send("console-logs", CM.console.menu.closing);
     if (toggledSecondaryMenu) {
       toggleSecondaryMenu();
@@ -33,12 +37,12 @@ const toggleMenu = () => {
       for (let i = 0; i < menuItems.length; i++) {
         menuItems[i].style.left = "-150px";
       }
-      document.getElementById("logostate").remove(); // Remove the status svg
+
       toggledMenu = false;
     }
   } else {
     window.electron.send("console-logs", CM.console.menu.opening);
-    logostatus();
+
     menu.style.left = "0px";
     consoleDiv.style.left = "150px";
     iconDiv.style.left = "175px";
@@ -116,37 +120,6 @@ const tutorialOpener = () => {
 };
 
 // =========== MENU LOGO ===========
-// The menu logo behavior. This feature isn't called by any process yet.
-var logostatus = (statuserror) => {
-  let svg = d3
-    .select(menu)
-    .append("svg")
-    .attr("id", "logostate")
-    .attr("width", "90")
-    .attr("height", "90")
-    .attr("position", "absolute")
-    .style("top", "0");
-
-  var statuserror = false;
-
-  var lifelines = svg.append("g").attr("class", "lifeline");
-  lifelines
-    .append("polyline")
-    .attr("id", "networkstatus")
-    .attr("points", "26,45, 45,55, 64,45");
-  lifelines
-    .append("polyline")
-    .attr("id", "corestatus")
-    .attr("points", "26,48, 45,58, 64,48");
-  lifelines
-    .append("polyline")
-    .attr("id", "datastatus")
-    .attr("points", "26,51, 45,61, 64,51");
-
-  if ((statuserror = false)) {
-    lifelines.attr("class", "lifelinerror");
-  }
-};
 
 const blinker = (item) => {
   let blinking;
@@ -182,5 +155,6 @@ export {
   toggleTertiaryMenu,
   openHelper,
   toggleFlux,
-  logostatus,
+  blinker,
+  toggledMenu,
 };

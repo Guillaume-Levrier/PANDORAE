@@ -1,4 +1,6 @@
-const normalCore = () => {
+import * as THREE from "three";
+
+const normalCore = (coreCanvasW, coreCanvasH) => {
   /* 
   const {
     DepthOfFieldEffect,
@@ -240,7 +242,7 @@ const normalCore = () => {
 
     const scale = window.devicePixelRatio;
 
-    const ratio = (scale>1)?1.6:4; 
+    const ratio = scale > 1 ? 1.6 : 4;
 
     var textureSize = Math.pow(
       2,
@@ -392,3 +394,5 @@ const normalCore = () => {
 };
 
 //module.exports = () => {normalCore();};
+
+export { normalCore };

@@ -1,3 +1,9 @@
+import { toggledMenu } from "./menu";
+
+var mainPresContent = [];
+var mainPresEdit = false;
+var priorDate = false;
+
 const saveSlides = () => {
   let name = document.getElementById("presNamer").value;
   mainPresContent[activeIndex].text =

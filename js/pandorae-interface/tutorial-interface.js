@@ -1,5 +1,7 @@
 //// ========== TUTORIAL ========
 
+const menuIcon = document.getElementById("menu-icon");
+
 const openTutorial = (tutoSlide) => {
   if (tutoSlide) {
     window.electron.send("window-manager", "openModal", "tutorial", tutoSlide);

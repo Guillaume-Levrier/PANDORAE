@@ -1,8 +1,14 @@
 // =========== CONSOLE ===========
 
+import { displayCore } from "./core";
+
 let toggledConsole = false;
 
 const log = document.getElementById("log");
+const menu = document.getElementById("menu");
+const consoleDiv = document.getElementById("console");
+const menuIcon = document.getElementById("menu-icon");
+
 var logContent = "";
 
 const toggleConsole = () => {

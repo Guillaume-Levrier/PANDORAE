@@ -1,12 +1,9 @@
 console.log("|==== INDEX.JS STARTS HERE ====|");
 
+// This file is voluntarily left as short/small as possible
+// The main file is the pandorae.js script
+
 import "../css/pandorae.css";
 import { initializeMainScreen } from "./pandorae-interface/pandorae";
-
-//const preloadPath = window.electron.getPreloadPath();
-
-console.log(window.electron);
-
-console.log("coucou");
 
 window.addEventListener("DOMContentLoaded", initializeMainScreen);

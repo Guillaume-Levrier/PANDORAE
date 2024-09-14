@@ -327,7 +327,7 @@ ipcMain.on("console-logs", (event, message) => {
   let newLine =
     "\r\n" + new Date().toLocaleTimeString("fr-FR") + " ~ " + message;
   dataLog = dataLog + newLine;
-  mainWindow.webContents.send("console-messages", newLine); // send it to requester
+  mainWindow.webContents.send("consoleMessages", newLine); // send it to requester
 });
 
 // CHAEROS

@@ -1,10 +1,11 @@
+import { pandodb } from "../db";
+import { purgeMenuItems, toggleSecondaryMenu } from "./menu";
+
 const typeSelect = () => {
   toggleMenu();
   typeSelector = true;
   categoryLoader("type");
 };
-
-var menuIcon, consoleIcon;
 
 let notLoadingMenu = true;
 
@@ -172,3 +173,5 @@ const listTableDatasets = (table) => {
     }
   });
 };
+
+export { categoryLoader };

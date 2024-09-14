@@ -1,5 +1,17 @@
 // ====== KEYBOARD SHORTCUTS ======
 
+import { toggleConsole } from "./console";
+import { coreExists, xtypeExists } from "./core";
+import { toggledMenu, toggleFlux, toggleMenu } from "./menu";
+import { categoryLoader } from "./type-loader";
+
+var keylock = 0;
+
+const setkeylock = (n) => (keylock = n);
+
+field.addEventListener("focusin", () => (keylock = 1));
+field.addEventListener("focusout", () => (keylock = 0));
+
 const keyShortCuts = (event) => {
   if (!keylock) {
     switch (event.isComposing || event.code) {
@@ -48,4 +60,4 @@ const keyShortCuts = (event) => {
   }
 };
 
-export { keyShortCuts };
+export { keyShortCuts, keylock, setkeylock };

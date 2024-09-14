@@ -1,3 +1,6 @@
+//import { normalCore } from "../../themes/normal/normal";
+import { vega } from "../../themes/vega/vega";
+
 const selectTheme = (themeName) => {
   window.electron.send("theme", { type: "set", theme: themeName });
   window.electron.send("keyManager", {
@@ -8,16 +11,22 @@ const selectTheme = (themeName) => {
   });
 };
 
-const requestTheme = () => {
-  window.electron.send("theme", { type: "read" });
-};
+var coreCanvasW = window.innerWidth;
+var coreCanvasH = window.innerHeight;
 
-window.electron.themeContent((event, theme) => loadTheme(theme));
+var coreDefW = 512;
+var coreDefH = 512;
+
+var fullscreenable;
+
+const requestTheme = () => window.electron.send("theme", { type: "read" });
+
+window.electron.themeContent((theme) => loadTheme(theme));
 
 const loadTheme = (theme) => {
   switch (theme.script) {
     case "normal":
-      normalCore();
+      normalCore(coreCanvasW, coreCanvasH);
       break;
 
     case "vega":
@@ -92,4 +101,4 @@ const zoomThemeScreen = (theme) => {
   }
 };
 
-export { requestTheme };
+export { requestTheme, selectTheme };

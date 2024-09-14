@@ -19,6 +19,8 @@ const helpers = require("mnemonist/set");
 const { create } = require("d3");
 //const { min } = require("d3-array");
 const { clipboard } = require("electron");
+const { setkeylock } = require("../pandorae-interface/keyboard-shortcuts");
+const { setCoreExists, setxtypeExists } = require("../pandorae-interface/core");
 
 //END NODE MODULES
 
@@ -329,8 +331,8 @@ const loadType = (type, id) => {
   dispose = true;
   xtypeDisplay();
   purgeCore();
-  xtypeExists = true;
-  coreExists = false;
+  setxtypeExists(1);
+  setCoreExists(0);
 
   window.electron.send("audio-channel", "button1");
   field.value = "";
@@ -1539,8 +1541,8 @@ The captures in this cluster come from ${counter.domains.length} domain(s):<br>
           toolSearch.type = "text";
           toolSearch.placeholder = "Search term or expression";
 
-          toolSearch.addEventListener("focusin", () => (keylock = 1));
-          toolSearch.addEventListener("focusout", () => (keylock = 0));
+          toolSearch.addEventListener("focusin", () => setkeylock(1));
+          toolSearch.addEventListener("focusout", () => setkeylock(0));
 
           const toolResult = document.createElement("div");
 

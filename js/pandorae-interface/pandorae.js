@@ -13,14 +13,15 @@
 //
 
 const msg =
-  "      ______\n     / _____|\n    /  ∖____  Anthropos\n   / /∖  ___|     Ecosystems\n  / /  ∖ ∖__\n /_/    ∖___|           PANDORÆ";
+  "      ______\n     / _____|\n    /  ∖____   PANDORÆ \n   / /∖  ___|     \n  / /  ∖ ∖__\n /_/    ∖___|           ";
 
-console.log(window.electron);
+console.log(msg);
 
 import { CMT } from "../locales";
 import { toggleConsole } from "./console";
 import { iconCreator } from "./icon";
 import { keyShortCuts } from "./keyboard-shortcuts";
+import { activateMenu } from "./locale-select";
 import { toggleMenu } from "./menu";
 import { nameDisplay } from "./pulse";
 import { requestTheme } from "./themes";
@@ -38,19 +39,9 @@ var presentationStep = [];
 var tutoSlide;
 var field;
 var pandoratio = 0; // Used in three.js transitions (from one shape to another)
-var xtypeExists = false; // xtype SVG doesn't exist on document load
-var coreExists = true; // core does exist on document load
+
 var xtype;
 var activeTheme;
-var fullscreenable;
-
-var coreCanvasW = window.innerWidth;
-var coreCanvasH = window.innerHeight;
-
-var coreDefW = 512;
-var coreDefH = 512;
-
-var keylock = 0;
 
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that
@@ -61,8 +52,6 @@ if (!window.SharedWorker) {
   // If the SharedWorker doesn't exist yet
 
   var multiThreader = new Worker("js/mul[type]threader.js"); // Create a SharedWorker named multiThreader based on that file
-
-  //console.log(multiThreader)
 
   multiThreader.postMessage({
     type: "checkup",
@@ -86,38 +75,26 @@ if (!window.SharedWorker) {
   };
 }
 
-var mainPresContent = [];
-var mainPresEdit = false;
-var priorDate = false;
-
 const initializeMainScreen = () => {
-  const iconDiv = document.getElementById("icons");
-  const xtype = document.getElementById("xtype"); // xtype is a div containing each (-type) visualisation
-
   // =========== MAIN LOGO ===========
   // Main logo is a text that can be changed through the nameDisplay function
 
-  document.getElementById("version").innerHTML = version;
+  // Version right now
+  document.getElementById("version").innerHTML = "VERSION vX.x.x";
 
-  let coreLogo = CM.global.coreLogo;
-
-  nameDisplay(coreLogo);
+  nameDisplay(CM.global.coreLogo);
 
   // clicking the pandorae menu logo reloads the mainWindow. So does typing "reload" in the main field.
-  aelogo.addEventListener("dblclick", () => {
-    location.reload();
-  });
+  aelogo.addEventListener("dblclick", () => location.reload());
 
-  field = document.getElementById("field"); // Field is the main field
+  const field = document.getElementById("field"); // Field is the main field
 
   // =========== MENU ===========
   // menu elements
+  activateMenu();
 
-  const menu = document.getElementById("menu");
-  const consoleDiv = document.getElementById("console");
-
+  // MENU ICONS
   iconCreator("menu-icon", toggleMenu, "Toggle menu");
-  // Menu behaviors
 
   // =========== MENU BUTTONS ===========
 
@@ -137,41 +114,17 @@ const initializeMainScreen = () => {
     }
   });
 
-  document
-    .getElementById("fluxMenu")
-    .addEventListener("click", (e) => toggleFlux());
-  document
-    .getElementById("type")
-    .addEventListener("click", (e) => categoryLoader("type"));
-  document
-    .getElementById("slideBut")
-    .addEventListener("click", (e) => categoryLoader("slide"));
-  document.getElementById("tutostartmenu").addEventListener("click", (e) => {
-    toggleMenu();
-    tutorialOpener();
-  });
-  document
-    .getElementById("quitBut")
-    .addEventListener("click", (e) => closeWindow());
+  //activate Main Menu
 
+  // ====== CONSOLE ======
+
+  // create icons
   iconCreator("option-icon", toggleConsole, "Toggle console");
 
-  /* TO BE REINSTATED
-  ipcRenderer.on("console-messages", (event, message) => addToLog(message));
+  // enter command on click
+  field.addEventListener("click", (event) => cmdinput(field.value));
 
-  ipcRenderer.on("mainWindowReload", (event, message) => {
-    location.reload();
-  });
- */
-  // ========== MAIN MENU OPTIONS ========
-
-  field.addEventListener("focusin", () => (keylock = 1));
-  field.addEventListener("focusout", () => (keylock = 0));
-
-  field.addEventListener("click", (event) => {
-    cmdinput(field.value);
-  });
-
+  // enter command on enter keydown
   field.addEventListener("keydown", (e) => {
     if (e.code === "Enter") {
       cmdinput(field.value);
@@ -179,27 +132,21 @@ const initializeMainScreen = () => {
     }
   });
 
-  // ========== MAIN FIELD COMMAND INPUT ========
+  // ========== EVENTS FROM MAIN =========
+  // log to console
+  window.electron.consoleMessages((message) => addToLog(message));
+  // force reload from main
+  window.electron.mainWindowReload(() => location.reload());
 
-  const menuIcon = document.getElementById("menu-icon");
-  const consoleIcon = document.getElementById("option-icon");
-
-  //// ========== WINDOW MANAGEMENT ========
-
-  const closeWindow = () =>
-    window.electron.send("window-manager", "closeWindow", "index");
-
-  const refreshWindow = () => {
-    location.reload();
-  };
-
-  //const reframeMainWindow = () => {
-  // remote.mainWindow({ frame: true });
-  //};
+  // ========== KEYBOARD INTERACTIONS =========
 
   document.addEventListener("keydown", keyShortCuts);
 
+  //  ========== LOAD SELECTED THEME =========
+
   requestTheme();
+
+  // ========== MAIN MENU OPTIONS ========
 };
 
 export { initializeMainScreen };
