@@ -1,11 +1,17 @@
+const accessUserID = () =>
+  window.electron.send("openPath", userDataPath + "/PANDORAE-DATA/userID/");
+
+const changeUserID = () => window.electron.send("change-udp", "change");
+
 const getPassword = (service, user) =>
-  window.electron.sendSync("keyManager", {
+  window.electron.send("keyManager", {
     user,
     service,
     type: "getPassword",
   });
+
 const setPassword = (service, user, value) =>
-  window.electron.sendSync("keyManager", {
+  window.electron.send("keyManager", {
     user,
     service,
     value: value,
@@ -162,4 +168,6 @@ const checkKey = (service, status) => {
   }
 };
 
-window.addEventListener("DOMContentLoaded", () => getUserData());
+//window.addEventListener("DOMContentLoaded", () => getUserData());
+
+export { accessUserID, basicUserData, changeUserID, checkKey, updateUserData };

@@ -7,3 +7,5 @@ const scientoDisplay = () => {
 
   sources.forEach((s) => datasetDisplay(`sciento-list-${s}`, s, "sciento"));
 };
+
+export { scientoDisplay };

@@ -60,3 +60,5 @@ const gallicaBasic = () => {
           "Error - The SRU interface cannot make sense of this request.")
     );
 };
+
+export { gallicaBasic };

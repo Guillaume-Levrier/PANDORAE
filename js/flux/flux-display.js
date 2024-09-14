@@ -1,5 +1,6 @@
 //========== fluxDisplay ==========
 // Display relevant tab when called according to the tab's id.
+var db = "";
 const fluxDisplay = (tab) => {
   db = tab;
 
@@ -18,4 +19,4 @@ const fluxDisplay = (tab) => {
   document.getElementById(tab).style.display = "block"; // Display the div corresponding to the clicked button
 };
 
-export { fluxDisplay };
+export { fluxDisplay, db };

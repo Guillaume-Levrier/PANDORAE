@@ -67,3 +67,5 @@ const twitterThread = () => {
       });
   });
 };
+
+export { twitterCat, twitterThread };

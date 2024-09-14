@@ -52,3 +52,5 @@ const dimensionsUpload = () => {
     });
   //.catch((e) => console.log(e));
 };
+
+export { dimensionsUpload };

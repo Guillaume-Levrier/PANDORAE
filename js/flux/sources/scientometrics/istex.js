@@ -51,3 +51,5 @@ const istexBasicRetriever = (checker) => {
       window.electron.send("console-logs", "Query error : " + e); // Log error
     });
 };
+
+export { istexBasicRetriever };

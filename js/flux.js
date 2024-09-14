@@ -4,6 +4,6 @@ console.log("|==== FLUX.JS STARTS HERE ====|");
 // The main file is the pandorae.js script
 
 import "../css/pandorae.css";
-//import { initializeFlux } from "./pandorae-interface/pandorae";
+import { initializeFlux } from "./flux/flux-interface";
 
-//window.addEventListener("DOMContentLoaded", initializeMainScreen);
+window.addEventListener("DOMContentLoaded", initializeFlux);

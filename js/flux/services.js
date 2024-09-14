@@ -26,3 +26,5 @@ const addLocalService = () => {
 
 const removeLocalService = (serviceName) =>
   window.electron.invoke("removeLocalService", serviceName);
+
+export { addLocalService, removeLocalService };

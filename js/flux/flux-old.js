@@ -9,8 +9,6 @@ const csv = require("csv-parser");
 
 var CM = CMT["EN"];
 
-var db = "";
-
 var ISSNarr = [];
 
 const date = () =>

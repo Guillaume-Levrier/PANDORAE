@@ -1,5 +1,6 @@
 //======== Hyphe Endpoint Chercker ======
 var hyphetarget;
+
 const hypheCheck = (target) => {
   let chk = document.getElementById("hyphe-checker");
 
@@ -243,3 +244,5 @@ const endpointConnector = (service, target) => {
   document.getElementById(service + "-exporter").innerText =
     "Added to " + service + " endpoints";
 };
+
+export { hypheCheck, endpointConnector };

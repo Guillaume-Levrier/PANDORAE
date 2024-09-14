@@ -107,11 +107,14 @@ const openHelper = (helperFile, section) => {
 const openModal = (modalFile) =>
   window.electron.send("windowManager", { type: "openModal", file: modalFile });
 
+const openFlux = () =>
+  window.electron.send("windowManager", { type: "openFlux" });
+
 const toggleFlux = () => {
   window.electron.send("console-logs", "Opening Flux");
   toggleMenu();
   displayCore();
-  openModal("flux");
+  openFlux();
 };
 
 const tutorialOpener = () => {

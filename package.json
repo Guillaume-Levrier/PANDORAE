@@ -75,6 +75,14 @@
                   "preload": {
                     "js": "./js/preload-index.js"
                   }
+                },
+                {
+                  "name": "flux",
+                  "html": "./html/flux.html",
+                  "js": "./js/flux.js",
+                  "preload": {
+                    "js": "./js/preload-flux.js"
+                  }
                 }
               ]
             }

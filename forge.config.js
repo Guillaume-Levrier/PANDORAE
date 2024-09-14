@@ -39,6 +39,12 @@ module.exports = {
           stats: "verbose",
           hot: false,
           inline: false,
+          client: {
+            overlay: {
+              errors: false,
+              warnings: false,
+            },
+          },
         },
         mainConfig: "./webpack.main.config.js",
         renderer: {
@@ -50,6 +56,14 @@ module.exports = {
               js: "./js/index.js",
               preload: {
                 js: "./js/preload-index.js",
+              },
+            },
+            {
+              name: "flux",
+              html: "./html/flux.html",
+              js: "./js/flux.js",
+              preload: {
+                js: "./js/preload-flux.js",
               },
             },
           ],

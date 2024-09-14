@@ -174,3 +174,5 @@ const zoteroLocalRetriever = () => {
           window.electron.send('console-logs',"Error in retrieving collections for Zotero id "+ zoteroUser + " : "+err); //  */
     });
 };
+
+export { zoteroCollectionRetriever, zoteroLocalRetriever };

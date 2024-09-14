@@ -59,3 +59,5 @@ const wosBasicRetriever = () => {
       }
     });
 };
+
+export { wosBasicRetriever };

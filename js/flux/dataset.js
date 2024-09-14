@@ -1,6 +1,26 @@
 //========== datasetDisplay ==========
 // datasetDisplay shows the datasets (usually JSON or CSV files) available in the relevant /datasets/ subdirectory.
 
+function replacer(key, value) {
+  if (value instanceof Map) {
+    return {
+      dataType: "Map",
+      value: Array.from(value.entries()), // or with spread: value: [...value]
+    };
+  } else {
+    return value;
+  }
+}
+
+function reviver(key, value) {
+  if (typeof value === "object" && value !== null) {
+    if (value.dataType === "Map") {
+      return new Map(value.value);
+    }
+  }
+  return value;
+}
+
 const datasetDisplay = (divId, kind, altkind) => {
   try {
     // Try the following block
@@ -383,3 +403,5 @@ const downloadData = () => {
     );
   });
 };
+
+export { datasetDisplay, localUpload, downloadData };

@@ -28,3 +28,5 @@ const regardsBasic = () => {
       }
     });
 };
+
+export { regardsBasic };

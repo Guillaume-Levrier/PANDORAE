@@ -288,3 +288,5 @@ const generateLocalServiceConfig = () => {
       break;
   }
 };
+
+export { queryBnFSolr, generateLocalServiceConfig };

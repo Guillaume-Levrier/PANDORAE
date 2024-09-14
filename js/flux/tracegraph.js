@@ -1,8 +1,9 @@
 //========== Tracegraph ==========
+import * as d3 from "d3";
+import * as tg from "@hownetworks/tracegraph";
+import { fluxDisplay } from "./flux-display";
 
-let traces = [];
-
-const addHop = (steparr) => {
+const addHop = (steparr, traces) => {
   const hops = {
     hops: [],
   };

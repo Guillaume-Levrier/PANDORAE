@@ -291,3 +291,5 @@ const powerValve = (fluxAction, item) => {
   window.electron.send("pulsar", false);
   window.electron.send("windowManager", "closeWindow", "flux");
 };
+
+export { powerValve };

@@ -23,7 +23,7 @@ const forceUpdatePPS = () => {
   window.electron.send("windowManager", "closeWindow", "flux");
 };
 
-ipcRenderer.on("forcedPPSupdateFinished", () => {
+window.electron.forcedPPSupdateFinished(() => {
   document.getElementById("pps-last-updated").innerText =
     "Update finished. The PPS list available to your PANDORÆ instance was updated just now.";
 });
@@ -117,3 +117,5 @@ const checkPPS = () => {
       })
     );
 };
+
+export { checkPPS, forceUpdatePPS, updatePPSDate };

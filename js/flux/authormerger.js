@@ -420,3 +420,5 @@ const manualMergeAuthors = () => {
     })
     .catch((err) => console.log(err));
 };
+
+export { manualMergeAuthors };

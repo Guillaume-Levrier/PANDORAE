@@ -194,6 +194,35 @@ const openHelper = (helperFile, message) => {
   win.loadURL(path);
 };
 
+const openFlux = () => {
+  let win = new BrowserWindow({
+    parent: mainWindow,
+    modal: true,
+    transparent: true,
+    alwaysOnTop: true,
+    frame: false,
+    resizable: false,
+    show: false,
+    y: 100,
+    webPreferences: {
+      preload: FLUX_PRELOAD_WEBPACK_ENTRY,
+      //preload: basePath + "/js/preload-" + modalFile + ".js",
+      nodeIntegrationInWorker: true,
+    },
+  });
+
+  //var path = basePath + "/html/" + modalFile + ".html";
+  //win.loadFile("html/" + modalFile + ".html");
+  win.loadURL(FLUX_WEBPACK_ENTRY);
+
+  win.once("ready-to-show", () => {
+    win.show();
+    windowIds["flux"].id = win.id;
+    windowIds["flux"].open = true;
+  });
+  win.webContents.openDevTools();
+};
+
 const openModal = (modalFile, scrollTo) => {
   if (windowIds[modalFile].open === false) {
     let win = new BrowserWindow({
@@ -305,7 +334,9 @@ ipcMain.on("windowManager", (event, message) => {
     case "openHelper":
       openHelper(file, section);
       break;
-
+    case "openFlux":
+      openFlux();
+      break;
     case "openModal":
       openModal(file, scrollTo);
       break;

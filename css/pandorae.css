@@ -1080,3 +1080,8 @@ z-index: 20;
   padding: 10px;
  
 } 
+
+/*Dev issue*/
+#webpack-dev-server-client-overlay{
+display: none;
+}

@@ -306,3 +306,5 @@ const ScopusList = () => {
       ); // Log error
     });
 };
+
+export { scopusBasicRetriever, ScopusList, exportCitedBy, affilRank };

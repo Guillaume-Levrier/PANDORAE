@@ -56,3 +56,5 @@ ipcRenderer.on("biorxiv-retrieve", (event, message) => {
       break;
   }
 });
+
+export { biorxivBasicRetriever };

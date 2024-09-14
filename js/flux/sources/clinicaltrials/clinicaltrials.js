@@ -64,3 +64,5 @@ const clinicTrialBasicRetriever = () => {
       window.electron.send("console-logs", "Query error : " + e); // Log error
     });
 };
+
+export { clinicTrialBasicRetriever };
