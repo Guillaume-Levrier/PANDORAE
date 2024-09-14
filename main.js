@@ -116,7 +116,6 @@ const userDataDirTree = (path, dirTree) =>
 var themeData;
 
 ipcMain.on("change-udp", async (event, message) => {
-  console.log("got here");
   userDataPath = dialog.showOpenDialogSync(null, {
     properties: [
       "openDirectory",
@@ -186,13 +185,11 @@ const openHelper = (helperFile, message) => {
   windowIds.tutorialHelper.id = win.id;
   windowIds.tutorialHelper.open = true;
 
-  console.log(message);
-
   win.once("ready-to-show", () => {
     win.webContents.send("tutorial-types", message);
     win.show();
   });
-  var path = "file://" + __dirname + "/" + helperFile + ".html";
+  var path = "file://" + __dirname + "/html/" + helperFile + ".html";
   win.loadURL(path);
 };
 
@@ -213,7 +210,7 @@ const openModal = (modalFile, scrollTo) => {
       },
     });
 
-    var path = "file://" + __dirname + "/" + modalFile + ".html";
+    var path = "file://" + __dirname + "/html/" + modalFile + ".html";
     win.loadURL(path);
     win.once("ready-to-show", () => {
       win.show();
@@ -295,7 +292,12 @@ ipcMain.on("win-destroy", (event, winId) => {
   BrowserWindow.fromId(winId).destroy();
 });
 
-ipcMain.on("window-manager", (event, type, file, scrollTo, section) => {
+ipcMain.on("windowManager", (event, message) => {
+  const type = message.type;
+  const file = message.file;
+  const scrollTo = message.scrollTo;
+  const section = message.section;
+
   let win = {};
 
   switch (type) {
@@ -438,7 +440,7 @@ const chaerosCalculator = () => {
     },
   });
 
-  chaerosWindow.loadFile("chaeros.html");
+  chaerosWindow.loadFile("html/chaeros.html");
 
   chaerosWindow.webContents.on("did-finish-load", function () {
     chaerosWindow.webContents.send("id", chaerosWindow.id);
@@ -458,7 +460,7 @@ const createAudioManager = () => {
     },
   });
 
-  audioManager.loadFile("audioManager.html");
+  audioManager.loadFile("html/audioManager.html");
   audioManager.webContents.on("did-finish-load", function () {
     // audioManager.webContents.openDevTools();
   });

@@ -1,7 +1,7 @@
 // ========== WINDOW MANAGEMENT ========
 
 const closeWindow = () =>
-  window.electron.send("window-manager", "closeWindow", "index");
+  window.electron.send("windowManager", "closeWindow", "index");
 
 const refreshWindow = () => location.reload();
 

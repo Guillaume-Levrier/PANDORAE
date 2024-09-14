@@ -4,9 +4,9 @@ const menuIcon = document.getElementById("menu-icon");
 
 const openTutorial = (tutoSlide) => {
   if (tutoSlide) {
-    window.electron.send("window-manager", "openModal", "tutorial", tutoSlide);
+    window.electron.send("windowManager", "openModal", "tutorial", tutoSlide);
   } else {
-    window.electron.send("window-manager", "openModal", "tutorial");
+    window.electron.send("windowManager", "openModal", "tutorial");
   }
 };
 

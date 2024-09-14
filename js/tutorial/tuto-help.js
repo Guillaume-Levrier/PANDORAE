@@ -1,10 +1,10 @@
 const { ipcRenderer } = require("electron");
 
 const goBack = (slide) => {
-  window.electron.send("window-manager", "closeWindow", "flux");
+  window.electron.send("windowManager", "closeWindow", "flux");
   window.electron.send("mainWindowReload", "reload");
-  window.electron.send("window-manager", "openModal", "tutorial", slide);
-  window.electron.send("window-manager", "closeWindow", "tutorialHelper");
+  window.electron.send("windowManager", "openModal", "tutorial", slide);
+  window.electron.send("windowManager", "closeWindow", "tutorialHelper");
 };
 
 let fluxContent =

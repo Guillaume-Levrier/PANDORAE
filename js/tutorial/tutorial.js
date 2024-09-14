@@ -12,7 +12,7 @@ const tuto = (step) => {
 };
 
 const closeWindow = () => {
-  window.electron.send("window-manager", "closeWindow", "tutorial");
+  window.electron.send("windowManager", "closeWindow", "tutorial");
 };
 
 const closeAndDisplay = () => {

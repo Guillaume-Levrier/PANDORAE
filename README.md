@@ -1,4 +1,4 @@
-<p align="center"><img src="./PANDORAE.png" width="200px" alt="PANDORAE Logo">
+<p align="center"><img src="./icons/PANDORAE.png" width="200px" alt="PANDORAE Logo">
 
 # PANDORÆ
 
@@ -20,7 +20,7 @@ Most databases useful for research now offer APIs, that is software interfaces m
 
 You can find an example of what PANDORÆ can do in [this article](https://hal.science/hal-04309075).
 
-Using PANDORÆ gives you a stable and (to some extent) reproducible way to obtain data, save it on multiple supports, and explore it following several types of perspectives. 
+Using PANDORÆ gives you a stable and (to some extent) reproducible way to obtain data, save it on multiple supports, and explore it following several types of perspectives.
 
 ## Enriching exploration
 

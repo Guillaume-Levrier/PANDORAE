@@ -46,7 +46,7 @@ module.exports = {
           entryPoints: [
             {
               name: "main_window",
-              html: "./index.html",
+              html: "./html/index.html",
               js: "./js/index.js",
               preload: {
                 js: "./js/preload-index.js",

@@ -18,7 +18,7 @@ const msg =
 console.log(msg);
 
 import { CMT } from "../locales";
-import { toggleConsole } from "./console";
+import { addToLog, toggleConsole } from "./console";
 import { iconCreator } from "./icon";
 import { keyShortCuts } from "./keyboard-shortcuts";
 import { activateMenu } from "./locale-select";
@@ -114,8 +114,6 @@ const initializeMainScreen = () => {
     }
   });
 
-  //activate Main Menu
-
   // ====== CONSOLE ======
 
   // create icons
@@ -134,7 +132,9 @@ const initializeMainScreen = () => {
 
   // ========== EVENTS FROM MAIN =========
   // log to console
+
   window.electron.consoleMessages((message) => addToLog(message));
+
   // force reload from main
   window.electron.mainWindowReload(() => location.reload());
 

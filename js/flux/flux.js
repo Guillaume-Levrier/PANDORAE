@@ -540,7 +540,7 @@ const powerValve = (fluxAction, item) => {
 
   window.electron.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
   window.electron.send("pulsar", false);
-  window.electron.send("window-manager", "closeWindow", "flux");
+  window.electron.send("windowManager", "closeWindow", "flux");
 };
 
 //========== fluxButtonAction ==========
@@ -2880,7 +2880,7 @@ const forceUpdatePPS = () => {
   document.getElementById("pps-last-updated").innerText =
     "You have just triggered a forced update. Please wait until the update is finished.";
 
-  window.electron.send("window-manager", "closeWindow", "flux");
+  window.electron.send("windowManager", "closeWindow", "flux");
 };
 
 ipcRenderer.on("forcedPPSupdateFinished", () => {
@@ -3011,7 +3011,7 @@ const removeLocalService = (serviceName) =>
 window.electron.send("console-logs", "Opening Flux"); // Sending notification to console
 
 const closeWindow = () =>
-  window.electron.send("window-manager", "closeWindow", "flux");
+  window.electron.send("windowManager", "closeWindow", "flux");
 
 const refreshWindow = () => {
   location.reload();

@@ -102,11 +102,11 @@ const toggleTertiaryMenu = () => {
 
 const openHelper = (helperFile, section) => {
   window.electron.send("console-logs", "Opening helper window");
-  window.electron.send("window-manager", "openHelper", helperFile, "", section);
+  window.electron.send("windowManager", "openHelper", helperFile, "", section);
 };
-const openModal = (modalFile) => {
-  window.electron.send("window-manager", "openModal", modalFile);
-};
+const openModal = (modalFile) =>
+  window.electron.send("windowManager", { type: "openModal", file: modalFile });
+
 const toggleFlux = () => {
   window.electron.send("console-logs", "Opening Flux");
   toggleMenu();

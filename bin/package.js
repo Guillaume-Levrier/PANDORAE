@@ -19,7 +19,7 @@ const packOptions = {
   name: "PANDORAE",
   asar: true,
   ignore: ignored.concat(devModules), // include runtime deps
-  icon: "PANDORAE",
+  icon: "icons/PANDORAE",
   version: electronPkg.version,
 };
 
