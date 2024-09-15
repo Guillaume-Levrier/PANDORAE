@@ -106,6 +106,11 @@ async function saveSVG(target, string) {
   });
 }
 
+const exportDataset = (target, data) =>
+  dialog.showSaveDialog(target).then((filePath) => {
+    fs.writeFile(filePath.filePath, data, () => {});
+  });
+
 export {
   readFlatFile,
   userDataDirTree,
@@ -114,4 +119,5 @@ export {
   themeData,
   savePNG,
   saveSVG,
+  exportDataset,
 };

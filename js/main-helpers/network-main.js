@@ -51,4 +51,23 @@ async function addLocalService(message) {
   });
 }
 
-export { availableServicesLookup, addLocalService };
+async function removeLocalService(service) {
+  delete currentUser.localServices[service];
+
+  writeUserIDfile(userDataPath, currentUser);
+}
+
+async function getAvailableFlux() {
+  const dnsLocalServiceList = currentUser.localServices;
+
+  const result = JSON.stringify({ dnslist, dnsLocalServiceList });
+
+  return result;
+}
+
+export {
+  availableServicesLookup,
+  addLocalService,
+  removeLocalService,
+  getAvailableFlux,
+};

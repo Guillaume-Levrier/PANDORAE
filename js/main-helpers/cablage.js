@@ -1,11 +1,22 @@
 const electron = require("electron");
-const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } =
-  electron;
+const { BrowserWindow, ipcMain, shell, app } = electron;
+const userDataPath = app.getPath("userData");
+const appPath = app.getAppPath();
 
 import { feedChaerosData, startChaerosProcess } from "./chaeros-main";
 import { addLineToConsole } from "./console-main";
-import { changeUDP, savePNG, saveSVG } from "./filesystem-main";
-import { addLocalService } from "./network-main";
+import {
+  changeUDP,
+  exportDataset,
+  readFlatFile,
+  savePNG,
+  saveSVG,
+} from "./filesystem-main";
+import {
+  addLocalService,
+  getAvailableFlux,
+  removeLocalService,
+} from "./network-main";
 import { manageTheme } from "./theme-main";
 import { getUserStatus, manageUserKeys } from "./user-main";
 import {
@@ -24,6 +35,22 @@ import {
 const activateMainListeners = () => {
   ipcMain.on("get-preload-path", (e) => {
     e.returnValue = WINDOW_PRELOAD_WEBPACK_ENTRY;
+  });
+
+  // ==== APP ====
+  ipcMain.on("remote", async (event, req) => {
+    let res;
+    switch (req) {
+      case "userDataPath":
+        res = userDataPath;
+
+        break;
+
+      case "appPath":
+        res = appPath;
+        break;
+    }
+    event.returnValue = res;
   });
 
   // ==== USER ====
@@ -69,13 +96,40 @@ const activateMainListeners = () => {
     addLocalService(message)
   );
 
-  // ==== FILE SAVING ====
+  ipcMain.handle("removeLocalService", async (event, service) =>
+    removeLocalService(service)
+  );
+
+  ipcMain.handle("openEx", async (event, target) => shell.openExternal(target));
+
+  ipcMain.handle("checkflux", async (event, mess) => getAvailableFlux());
+
+  ipcMain.on("forceUpdatePPS", async (event, req) => updatePPS(Date.now()));
+
+  // ==== FILE SAVING/MANAGEMENT ====
 
   ipcMain.handle("savePNG", async (event, target) => savePNG(target));
 
   ipcMain.handle("saveSVG", async (event, target, string) =>
     saveSVG(target, string)
   );
+
+  ipcMain.handle("saveDataset", async (event, target, data) =>
+    exportDataset(target, data)
+  );
+
+  ipcMain.on(
+    "read-file",
+    async (event, filepath) =>
+      (event.returnValue = dialog.showSaveDialog(filepath))
+  );
+
+  ipcMain.on("openPath", async (event, path) => {
+    shell.openPath(path);
+    shell.openExternal(path);
+  });
+
+  ipcMain.on("readFile", async (event, req) => readFlatFile(event, req));
 
   // ==== CHAEROS ====
 
