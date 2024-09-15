@@ -10,7 +10,7 @@ ipcRenderer.on("id", (event, id) => {
 
 window.addEventListener("load", (e) => {
   let resAmount = document.getElementById("page-title").innerText;
-  window.electron.send("biorxiv-retrieve", {
+  window.electron.send("biorxivRetrieve", {
     type: "biorxiv-amount",
     content: resAmount,
   });

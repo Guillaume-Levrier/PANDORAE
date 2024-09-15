@@ -1,5 +1,6 @@
 //========== biorxivBasicRetriever ==========
 let bioRxivAmount = 0;
+
 const biorxivBasicRetriever = () => {
   let endUrl =
     "%20numresults%3A1%20sort%3Apublication-date%20direction%3Adescending%20format_result%3Acondensed";
@@ -38,11 +39,10 @@ const biorxivBasicRetriever = () => {
     address: reqURL,
   };
 
-  window.electron.send("biorxiv-retrieve", req);
+  window.electron.send("biorxivRetrieve", req);
 };
 
-ipcRenderer.on("biorxiv-retrieve", (event, message) => {
-  console.log(message);
+window.electron.biorxivRetrieve((message) => {
   switch (message.type) {
     case "biorxiv-amount":
       let dataBasicPreview = "Expected amount: " + message.content;

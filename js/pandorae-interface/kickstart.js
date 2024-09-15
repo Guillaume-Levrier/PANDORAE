@@ -1,4 +1,7 @@
-//// ========== TUTORIAL ========
+import { toggleMenu } from "./menu";
+import { toggleConsole } from "./console";
+
+//// ========== KICKSTART ========
 
 const menuIcon = document.getElementById("menu-icon");
 
@@ -10,12 +13,12 @@ const openTutorial = (tutoSlide) => {
   }
 };
 
-//to be reinstated
+const requestStatus = () => window.electron.send("userStatus", true);
 
-window.electron.send("userStatus", true);
-ipcRenderer.on("userStatus", (event, user) => kickStart(user));
+window.electron.userStatus((user) => kickStart(user));
 
 const kickStart = (user) => {
+  console.log(user);
   if (user.UserName === "") {
     menuIcon.style.cursor = "not-allowed";
     consoleIcon.style.cursor = "not-allowed";
@@ -33,7 +36,7 @@ const kickStart = (user) => {
   }
 };
 
-ipcRenderer.on("tutorial", (event, message) => {
+window.electron.tutorial((message) => {
   menuIcon.onclick = toggleMenu;
   menuIcon.style.cursor = "pointer";
   consoleIcon.style.cursor = "pointer";
@@ -56,3 +59,5 @@ ipcRenderer.on("tutorial", (event, message) => {
       break;
   }
 });
+
+export { requestStatus };

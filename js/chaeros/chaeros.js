@@ -786,14 +786,14 @@ const biorxivRetriever = (query) => {
     };
 
     setTimeout(
-      () => window.electron.send("biorxiv-retrieve", requestContent),
+      () => window.electron.send("biorxivRetrieve", requestContent),
       scrapeTimerCount * 6000 + Math.random() * 6000
     );
   });
 
   let count = 0;
 
-  ipcRenderer.on("biorxiv-retrieve", (event, message) => {
+  ipcRenderer.on("biorxivRetrieve", (event, message) => {
     message.content.forEach((d) =>
       doiBuffer.push(d.replace("doi: https://doi.org/", "").replace(" ", ""))
     );

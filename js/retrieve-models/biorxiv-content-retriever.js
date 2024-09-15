@@ -24,7 +24,7 @@ window.addEventListener("load", (e) => {
       // make sure that this chaeros process ID is known
 
       try {
-        window.electron.send("biorxiv-retrieve", {
+        window.electron.send("biorxivRetrieve", {
           type: "biorxiv-content",
           content: DOIs,
           charWindId: charWinId,

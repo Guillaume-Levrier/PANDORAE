@@ -1,25 +1,28 @@
 const electron = require("electron");
-const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } =
-  electron;
+const { app, BrowserWindow, ipcMain, shell, dialog } = electron;
+
+const {
+  writeUserIDfile,
+  readUserIDfile,
+} = require("./js/main-helpers/user-main");
+
+const dns = require("dns");
+const {
+  readFlatFile,
+
+  startRoutine,
+} = require("./js/main-helpers/filesystem-main");
+const { updatePPS } = require("./js/main-helpers/pps-main");
+
 const fs = require("fs");
 var https = require("https");
 const path = require("path");
-
-// only one instance at once
-
-const gotTheLock = app.requestSingleInstanceLock();
-
-if (!gotTheLock) {
-  app.quit();
-}
+const { mainWindow } = require("./js/main-helpers/window-creator");
+const { availableServicesLookup } = require("./js/main-helpers/network-main");
+const { writeLogFlatFile } = require("./js/main-helpers/console-main");
 
 // original
-var userDataPath = app.getPath("userData");
-
-// This is an attempt to make sure all devices, including professional ones with
-// very restricted profiles can launch the app and save credentials/API keys/datasets
-
-const dns = require("dns");
+const userDataPath = app.getPath("userData");
 
 var windowIds = {
   flux: { id: 0, open: false },
@@ -29,340 +32,40 @@ var windowIds = {
   index: { id: 0, open: false },
 };
 
-let mainWindow;
+// ====== BASIC APP BEHAVIOR =======
 
-const basePath = app.getAppPath();
-
-let userID;
-
-// This is useful to make Dexie (the layer over the user agent IndexedDB)
-// work in a consistent manner in Electron
-// (cf https://github.com/dexie/Dexie.js/issues/271#issuecomment-444773780)
-app.requestSingleInstanceLock();
-
-const createUserId = () => {
-  userID = {
-    UserName: "",
-    UserMail: "",
-    ZoteroID: "",
-    theme: { value: "vega" },
-    locale: "EN",
-  };
-
-  if (!fs.existsSync(userDataPath + "/PANDORAE-DATA/userID/user-id.json")) {
-    fs.writeFileSync(
-      userDataPath + "/PANDORAE-DATA/userID/user-id.json",
-      JSON.stringify(userID),
-      "utf8",
-      (err) => {
-        if (err) throw err;
-      }
-    );
-  }
-};
-
-const createThemes = () => {
-  // if (!fs.existsSync(userDataPath + "/themes/themes.json")) {
-  fs.copyFileSync(
-    basePath + "/json/themes.json",
-    userDataPath + "/PANDORAE-DATA/themes/themes.json"
-  );
-  //}
-};
-
-function createWindow() {
-  mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    fullscreenable: true,
-    backgroundColor: "white",
-    titleBarStyle: "hidden",
-    frame: true,
-    resizable: true,
-    webPreferences: {
-      //preload: basePath + "/js/preload-index.js",
-      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-      nodeIntegrationInWorker: true,
-      /* plugins: true, */
-    },
-  });
-
-  windowIds.index.id = mainWindow.id;
-  windowIds.index.open = true;
-
-  //mainWindow.loadFile("index.html");
-  mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-
-  mainWindow.setMenu(null);
-
-  mainWindow.webContents.openDevTools();
-
-  mainWindow.on("closed", () => (mainWindow = null));
-
-  ipcMain.on("get-preload-path", (e) => {
-    e.returnValue = WINDOW_PRELOAD_WEBPACK_ENTRY;
-  });
+// allow only one instance (more than one will create DB access issues)
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
 }
 
-//FileSystem
-const userDataDirTree = (path, dirTree) =>
-  dirTree.forEach((d) => {
-    if (!fs.existsSync(path + d)) {
-      fs.mkdirSync(path + d, { recursive: true }, (err) => {
-        if (err) throw err;
-      });
-    }
-  });
-
-var themeData;
-
-ipcMain.on("change-udp", async (event, message) => {
-  userDataPath = dialog.showOpenDialogSync(null, {
-    properties: [
-      "openDirectory",
-      "createDirectory",
-      "promptToCreate",
-      "showHiddenFiles",
-    ],
-  });
-
-  userDataDirTree(userDataPath, [
-    "/PANDORAE-DATA/logs",
-    "/PANDORAE-DATA/userID",
-    "/PANDORAE-DATA/themes",
-    "/PANDORAE-DATA/flatDatasets",
-  ]);
-
-  createUserId();
-  createThemes();
-});
-
-app.whenReady().then(() => {
-  userDataDirTree(userDataPath, [
-    "/PANDORAE-DATA/logs",
-    "/PANDORAE-DATA/userID",
-    "/PANDORAE-DATA/themes",
-    "/PANDORAE-DATA/flatDatasets",
-  ]);
-
-  createUserId();
-  createThemes();
-  createWindow();
-  createAudioManager();
-
-  themeData = fs.readFileSync(
-    userDataPath + "/PANDORAE-DATA/themes/themes.json",
-    "utf8",
-    (err, data) => JSON.parse(data)
-  );
-
-  //weird but ok
-  themeData = JSON.parse(themeData);
-
-  mainWindow.onbeforeunload = (e) => {
-    BrowserView.getAllViews().forEach((view) => view.destroy());
-  };
-});
-
-const openHelper = (helperFile, message) => {
-  let screenWidth = electron.screen.getPrimaryDisplay().workAreaSize.width;
-  let screenHeight = electron.screen.getPrimaryDisplay().workAreaSize.height;
-
-  let win = new BrowserWindow({
-    backgroundColor: "white",
-    resizable: false,
-    frame: true,
-    width: 350,
-    height: 700,
-    alwaysOnTop: true,
-    autoHideMenuBar: true,
-    x: screenWidth - 350,
-    y: 100,
-    webPreferences: {
-      preload: basePath + "/js/tuto-help.js",
-    },
-  });
-
-  windowIds.tutorialHelper.id = win.id;
-  windowIds.tutorialHelper.open = true;
-
-  win.once("ready-to-show", () => {
-    win.webContents.send("tutorial-types", message);
-    win.show();
-  });
-  var path = "file://" + __dirname + "/html/" + helperFile + ".html";
-  win.loadURL(path);
-};
-
-const openFlux = () => {
-  let win = new BrowserWindow({
-    parent: mainWindow,
-    modal: true,
-    transparent: true,
-    alwaysOnTop: true,
-    frame: false,
-    resizable: false,
-    show: false,
-    y: 100,
-    webPreferences: {
-      preload: FLUX_PRELOAD_WEBPACK_ENTRY,
-      //preload: basePath + "/js/preload-" + modalFile + ".js",
-      nodeIntegrationInWorker: true,
-    },
-  });
-
-  //var path = basePath + "/html/" + modalFile + ".html";
-  //win.loadFile("html/" + modalFile + ".html");
-  win.loadURL(FLUX_WEBPACK_ENTRY);
-
-  win.once("ready-to-show", () => {
-    win.show();
-    windowIds["flux"].id = win.id;
-    windowIds["flux"].open = true;
-  });
-  win.webContents.openDevTools();
-};
-
-const openModal = (modalFile, scrollTo) => {
-  if (windowIds[modalFile].open === false) {
-    let win = new BrowserWindow({
-      parent: mainWindow,
-      modal: true,
-      transparent: true,
-      alwaysOnTop: true,
-      frame: false,
-      resizable: false,
-      show: false,
-      y: 100,
-      webPreferences: {
-        preload: basePath + "/js/preload-" + modalFile + ".js",
-        nodeIntegrationInWorker: true,
-      },
-    });
-
-    //var path = basePath + "/html/" + modalFile + ".html";
-    win.loadFile("html/" + modalFile + ".html");
-    win.once("ready-to-show", () => {
-      win.show();
-      windowIds[modalFile].id = win.id;
-      windowIds[modalFile].open = true;
-      if (scrollTo) {
-        setTimeout(() => win.webContents.send("scroll-to", scrollTo), 1000);
-      }
-    });
-    win.webContents.openDevTools();
+// Create main app window on app start
+app.on("activate", () => {
+  if (mainWindow === null) {
+    createMainWindow();
   }
+});
+
+// Get everything ready
+app.whenReady().then(() => startRoutine());
+
+// When all windows are closed.
+// Log everything
+// Then close the app
+const closingRoutine = () => {
+  // Write log (this is write sync)
+  writeLogFlatFile();
+  app.quit();
 };
+
+app.on("window-all-closed", () => closingRoutine());
+
+// ===== NETWORK =====
+
+// Check if PANDORAE-FLUX has a access to pregistered domains
+availableServicesLookup();
 
 var currentUser;
-
-ipcMain.on("userStatus", (event, req) => {
-  if (req) {
-    fs.readFile(
-      userDataPath + "/PANDORAE-DATA/userID/user-id.json", // Read the user data file
-      "utf8",
-      (err, data) => {
-        // Additional options for readFile
-        if (err) throw err;
-        currentUser = JSON.parse(data);
-        if (currentUser.hasOwnProperty("localServices")) {
-          for (const service in currentUser.localServices) {
-            const d = currentUser.localServices[service];
-
-            dns.lookupService(d.url, d.port, (err, hostname, service) => {
-              if (hostname || service) {
-                d.valid = true;
-              } else {
-                d.valid = false;
-              }
-            });
-          }
-        }
-
-        if (currentUser.UserName.length > 0) {
-          getPPSData();
-        }
-
-        mainWindow.webContents.send("userStatus", currentUser);
-      }
-    );
-  }
-});
-
-ipcMain.on("theme", (event, req) => {
-  switch (req.type) {
-    case "read":
-      fs.readFile(
-        userDataPath + "/PANDORAE-DATA/userID/user-id.json", // Read the user data file
-        "utf8",
-        (err, data) => {
-          // Additional options for readFile
-          if (err) throw err;
-          currentUser = JSON.parse(data);
-          if (currentUser.theme) {
-            mainWindow.webContents.send(
-              "themeContent",
-              themeData[currentUser.theme.value]
-            );
-          } else {
-            mainWindow.webContents.send("themeContent", themeData.normal);
-          }
-        }
-      );
-
-      break;
-
-    case "set":
-      mainWindow.webContents.send("themeContent", themeData[req.theme]);
-      break;
-  }
-});
-
-ipcMain.on("win-destroy", (event, winId) => {
-  BrowserWindow.fromId(winId).destroy();
-});
-
-ipcMain.on("windowManager", (event, message) => {
-  const type = message.type;
-  const file = message.file;
-  const scrollTo = message.scrollTo;
-  const section = message.section;
-
-  let win = {};
-
-  switch (type) {
-    case "openHelper":
-      openHelper(file, section);
-      break;
-    case "openFlux":
-      openFlux();
-      break;
-    case "openModal":
-      openModal(file, scrollTo);
-      break;
-
-    case "closeWindow":
-      try {
-        BrowserWindow.fromId(windowIds[file].id).close();
-        windowIds[file].open = false;
-      } catch (e) {
-        console.log(e);
-      }
-      break;
-  }
-});
-
-//CONSOLE
-
-let date = new Date().toJSON().replace(/:/g, "-"); // Create a timestamp
-var dataLog = "PANDORÆ Log - " + date;
-
-ipcMain.on("console-logs", (event, message) => {
-  let newLine =
-    "\r\n" + new Date().toLocaleTimeString("fr-FR") + " ~ " + message;
-  dataLog = dataLog + newLine;
-  mainWindow.webContents.send("consoleMessages", newLine); // send it to requester
-});
 
 // CHAEROS
 const powerValveArgsArray = [];
@@ -394,56 +97,35 @@ ipcMain.on("pulsar", (event, message) => {
 });
 
 ipcMain.on("keyManager", (event, request) => {
-  /*
-   * This used to be managed through keytar, which raises
-   * many technical issues and doesn't make the app portable
-   * it was then moved to a flat file (with a notice to the user
-   * that their API keys are stored as flat files).
-   *
-   */
+  // This used to be managed through keytar, which raises
+  // many technical issues and doesn't make the app portable
+  // it was then moved to a flat file (with a notice to the user
+  // that their API keys are stored as flat files).
+
+  const data = readUserIDfile(userDataPath);
+
   switch (request.type) {
     case "setPassword":
-      fs.readFile(
-        userDataPath + "/PANDORAE-DATA/userID/user-id.json",
-        "utf8",
-        (err, data) => {
-          currentUser = JSON.parse(data);
-          currentUser[request.service] = {
-            user: request.user,
-            value: request.value,
-          };
-          fs.writeFile(
-            userDataPath + "/PANDORAE-DATA/userID/user-id.json",
-            JSON.stringify(currentUser),
-            "utf8",
-            (err) => {
-              if (err) throw err;
-              event.returnValue = request.value;
-            }
-          );
-        }
-      );
+      currentUser = JSON.parse(data);
+
+      currentUser[request.service] = {
+        user: request.user,
+        value: request.value,
+      };
+
+      writeUserIDfile(userDataPath, currentUser);
 
       break;
 
     case "getPassword":
-      fs.readFile(
-        userDataPath + "/PANDORAE-DATA/userID/user-id.json",
-        "utf8",
-        (err, data) => {
-          const user = JSON.parse(data);
+      const user = JSON.parse(data);
 
-          if (user.hasOwnProperty(request.service)) {
-            event.returnValue = user[request.service].value;
-          } else {
-            event.returnValue = 0;
-          }
-        }
-      );
-      /*
-      keytar
-        .getPassword(request.service, request.user)
-        .then((password) => (event.returnValue = password));*/
+      if (user.hasOwnProperty(request.service)) {
+        event.returnValue = user[request.service].value;
+      } else {
+        event.returnValue = 0;
+      }
+
       break;
   }
 });
@@ -455,78 +137,6 @@ ipcMain.on("chaeros-is-ready", (event, arg) => {
     action.fluxAction,
     action.fluxArgs,
     action.message
-  );
-});
-
-const chaerosCalculator = () => {
-  let chaerosWindow = new BrowserWindow({
-    width: 10,
-    height: 10,
-    frame: false,
-    transparent: true,
-    show: false,
-    webPreferences: {
-      preload: basePath + "/js/preload-chaeros.js",
-      nodeIntegrationInWorker: true,
-      plugins: true,
-    },
-  });
-
-  chaerosWindow.loadFile("html/chaeros.html");
-
-  chaerosWindow.webContents.on("did-finish-load", function () {
-    chaerosWindow.webContents.send("id", chaerosWindow.id);
-    //chaerosWindow.webContents.openDevTools();
-  });
-};
-
-const createAudioManager = () => {
-  let audioManager = new BrowserWindow({
-    width: 10,
-    height: 10,
-    frame: false,
-    transparent: true,
-    show: false,
-    webPreferences: {
-      preload: basePath + "/js/preload-audio.js",
-    },
-  });
-
-  audioManager.loadFile("html/audioManager.html");
-  audioManager.webContents.on("did-finish-load", function () {
-    // audioManager.webContents.openDevTools();
-  });
-  ipcMain.on("audio-channel", (event, audio) => {
-    audioManager.webContents.send("audio-channel", audio);
-  });
-
-  mainWindow.on("closed", () => {
-    setTimeout(() => {
-      app.quit();
-    }, 1000);
-  });
-};
-
-app.on("activate", () => {
-  if (mainWindow === null) {
-    createWindow();
-  }
-});
-
-// Quit when all windows are closed.
-app.on("window-all-closed", function () {
-  // Write log
-  fs.writeFile(
-    // Write data
-    userDataPath + "/PANDORAE-DATA/logs/log-" + date + ".txt",
-    dataLog,
-    "utf8", // Path/name, data, format
-    (err) => {
-      if (err) throw err;
-      setTimeout(() => {
-        app.quit();
-      }, 1000);
-    }
   );
 });
 
@@ -556,32 +166,7 @@ ipcMain.on("backToPres", (event, message) => {
   }, 500);
 });
 
-const biorXivScraper = (model, address, chaerosWinId) => {
-  let biorXivWindow = new BrowserWindow({
-    width: 10,
-    height: 10,
-    frame: false,
-    transparent: true,
-    show: false,
-    webPreferences: {
-      preload: basePath + "/js/retrieve-models/" + model + ".js",
-    },
-  });
-
-  biorXivWindow.loadURL(address);
-
-  biorXivWindow.webContents.on("did-finish-load", function () {
-    biorXivWindow.webContents.send("id", biorXivWindow.id);
-
-    if (chaerosWinId) {
-      biorXivWindow.webContents.send("chaeros-id", chaerosWinId);
-    }
-
-    //  biorXivWindow.webContents.openDevTools();
-  });
-};
-
-ipcMain.on("biorxiv-retrieve", (event, message) => {
+ipcMain.on("biorxivRetrieve", (event, message) => {
   switch (message.type) {
     case "request":
       biorXivScraper(message.model, message.address, message.winId);
@@ -589,14 +174,14 @@ ipcMain.on("biorxiv-retrieve", (event, message) => {
 
     case "biorxiv-amount":
       BrowserWindow.fromId(windowIds.flux.id).webContents.send(
-        "biorxiv-retrieve",
+        "biorxivRetrieve",
         message
       );
       break;
 
     case "biorxiv-content":
       BrowserWindow.fromId(message.charWindId).webContents.send(
-        "biorxiv-retrieve",
+        "biorxivRetrieve",
         message
       );
 
@@ -677,45 +262,10 @@ ipcMain.handle("openEx", async (event, target) => {
   shell.openExternal(target);
 });
 
-// Check if PANDORAE-FLUX has a access to pregistered domains
-
-const dnslist = [
-  { name: "Gallica", url: "gallica.bnf.fr" },
-  { name: "Scopus", url: "api.elsevier.com" },
-  { name: "BIORXIV", url: "www.biorxiv.org" },
-  { name: "Zotero", url: "api.zotero.org" },
-  { name: "Clinical Trials", url: "clinicaltrials.gov" },
-  { name: "Regards Citoyens", url: "nosdeputes.fr" },
-  { name: "Web Of Science", url: "clarivate.com" },
-  { name: "ISTEX", url: "api.istex.fr" },
-  { name: "Dimensions", url: "app.dimensions.ai" },
-  {
-    name: "PPS",
-    url: "irit.fr",
-  },
-];
-
-dnslist.forEach((d) => {
-  dns.lookup(d.url, (err, address, family) => {
-    if (address) {
-      d.valid = true;
-    } else {
-      d.valid = false;
-    }
-  });
-});
-
 ipcMain.handle("removeLocalService", async (event, service) => {
   delete currentUser.localServices[service];
 
-  fs.writeFile(
-    userDataPath + "/PANDORAE-DATA/userID/user-id.json",
-    JSON.stringify(currentUser),
-    "utf8",
-    (err) => {
-      if (err) throw err;
-    }
-  );
+  writeUserIDfile(userDataPath, currentUser);
 });
 
 ipcMain.handle("addLocalService", async (event, m) => {
@@ -736,14 +286,7 @@ ipcMain.handle("addLocalService", async (event, m) => {
         currentUser.localServices[m.serviceName].arkViewer = m.serviceArkViewer;
       }
 
-      fs.writeFile(
-        userDataPath + "/PANDORAE-DATA/userID/user-id.json",
-        JSON.stringify(currentUser),
-        "utf8",
-        (err) => {
-          if (err) throw err;
-        }
-      );
+      writeUserIDfile(userDataPath, currentUser);
     }
   });
 });
@@ -761,172 +304,11 @@ ipcMain.on("openPath", async (event, path) => {
   shell.openExternal(path);
 });
 
-/// ===== Update PPS =====
-// This might not be best placed in main.js?
-//
-// The point of this section is to keep the
-// Problematic Paper Screener (PPS) data up to date
-// on request (forced update).
-
-// The automatic update has been deactivated for now.
-
-// ppsFile should be the most recent file available
-let ppsFile = "";
-
-ipcMain.handle("getPPS", async (event, req) => ppsFile);
-
-// ppsDate is the date of most recent pps file update
-let ppsDate = 0;
-
-ipcMain.handle("getPPSMaturity", async (event, req) => ppsDate);
-
-// Remove expired files
-
-const removeExpired = (files) =>
-  files.forEach((file) => fs.unlink(file.path, (err) => console.log(err)));
-
-// Get PPSData's purpose is to check that there is a flat PPS dataset
-// that is not expired, and update it if it is.
-
-const getPPSData = () => {
-  // delta is 11 days in milliseconds
-  const delta = 1000000000;
-
-  // time is now (so a few ms after app instance boot)
-  const time = Date.now();
-
-  // directory path where the PPS flat dataset should be located in
-  const dirPath = userDataPath + "/PANDORAE-DATA/flatDatasets/";
-
-  // read the flat dataset (usually CSVs) directory to
-  // look for PPS data.
-  fs.readdir(dirPath, (err, files) => {
-    var ppsFiles = [];
-
-    // iterate over available datasets
-    files.forEach((f) => {
-      // check if this dataset is a PPS dataset
-      if (f.indexOf("PPS") > -1 && f.indexOf(".csv") > -1) {
-        const ppsDataset = {
-          path: dirPath + f,
-          ftime: parseInt(f.substring(4, f.length - 4)),
-          f,
-        };
-
-        ppsFiles.push(ppsDataset);
-      }
-    });
-
-    // Option 1 - there is no PPS data so it needs to be downloaded
-    // for the first time
-
-    if (ppsFiles.length === 0) {
-      updatePPS(time);
-    } else {
-      // Option 2 - there is some PPS data
-
-      // sort the dataset by most recent.
-      ppsFiles = ppsFiles.sort((a, b) => b.ftime - a.ftime);
-
-      //check if the most recent dataset has been downloaded
-      // less than 11 days ago.
-
-      if (time - ppsFiles[0].ftime < delta) {
-        // The most recent file is still valid, so we can
-        // remove all ppsFiles except the most recent one
-
-        ppsDate = ppsFiles[0].ftime;
-        ppsFile = ppsFiles[0].path;
-
-        if (ppsFiles.length > 1) {
-          // calling "shift" to the ppsFiles array remove the first value
-          // which due to our sorting above is the most recent one.
-          ppsFiles.shift();
-          removeExpired(ppsFiles);
-        }
-      } else {
-        // if that's not the case, we need to remove all older files
-        // and get a new one.
-
-        // This has been checked before, but who knows what has happened
-        // with the async races in the meantime
-        if (ppsFile.length > 0) {
-          removeExpired(ppsFiles);
-        }
-
-        // Then update the PPS
-        // There is no risk for this one to be deleted by the remove
-        // expired routine since it targets precise file names and
-        // not a format.
-        updatePPS(time);
-      }
-    }
-  });
-};
-
-// fullscreen main window
-
-ipcMain.handle("toggleFullScreen", async (event, req) => {
-  let state = mainWindow.isFullScreen();
-
-  mainWindow.setFullScreen(!state);
-
-  mainWindow.reload();
-});
-
 // Force update (or download for the first time)
 ipcMain.on("forceUpdatePPS", async (event, req) => updatePPS(Date.now()));
-
-const updatePPS = (time) => {
-  ppsFile = userDataPath + `/PANDORAE-DATA/flatDatasets/PPS-${time}.csv`;
-
-  mainWindow.webContents.send("pulsar", false);
-  mainWindow.webContents.send("chaeros-notification", "UPDATING PPS DATASET");
-
-  const file = fs.createWriteStream(ppsFile);
-
-  const options = {
-    hostname: "dbrech.irit.fr",
-    port: 443,
-    path: "/pls/apex/f?p=9999:300::IR[allproblematicpapers]_CSV",
-    method: "GET",
-  };
-
-  const req = https.request(options, (res) => {
-    res.pipe(file);
-
-    mainWindow.webContents.send("chaeros-notification", "WRITING FILE");
-
-    file.on("finish", () => {
-      file.close();
-
-      // This will cleanup the former files.
-      getPPSData();
-
-      mainWindow.webContents.send(
-        "chaeros-notification",
-        "PPS DATASET UPDATED"
-      );
-
-      mainWindow.webContents.send("pulsar", true);
-    });
-  });
-
-  req.on("error", (e) => {
-    mainWindow.webContents.send("chaeros-notification", "PPS UPDATE ERROR");
-    mainWindow.webContents.send("pulsar", true);
-    console.error(e.message);
-  });
-
-  req.end();
-};
 
 // ===== end of PPS routines =====
 
 // ==== read files ====
 
 ipcMain.on("readFile", async (event, req) => readFlatFile(event, req));
-
-const readFlatFile = (event, req) => {
-  console.log(event), console.log(req);
-};

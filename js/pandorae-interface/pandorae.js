@@ -25,6 +25,7 @@ import { activateMenu } from "./locale-select";
 import { toggleMenu } from "./menu";
 import { nameDisplay } from "./pulse";
 import { requestTheme } from "./themes";
+import { requestStatus } from "./kickstart";
 
 var dispose = false;
 
@@ -146,7 +147,8 @@ const initializeMainScreen = () => {
 
   requestTheme();
 
-  // ========== MAIN MENU OPTIONS ========
+  // =========== KICKSTART ===========
+  requestStatus();
 };
 
 export { initializeMainScreen };

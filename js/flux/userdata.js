@@ -1,3 +1,5 @@
+const userDataPath = window.electron.userDataPath;
+
 const accessUserID = () =>
   window.electron.send("openPath", userDataPath + "/PANDORAE-DATA/userID/");
 
