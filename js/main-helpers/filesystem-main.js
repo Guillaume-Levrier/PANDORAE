@@ -86,4 +86,32 @@ const startRoutine = () => {
   };
 };
 
-export { readFlatFile, userDataDirTree, changeUDP, startRoutine, themeData };
+async function savePNG(target) {
+  setTimeout(() => {
+    mainWindow.capturePage().then((img) => {
+      dialog.showSaveDialog(target).then((filePath) => {
+        fs.writeFile(filePath.filePath, img.toPNG(), () => {});
+      });
+    });
+  }, 250);
+}
+
+async function saveSVG(target, string) {
+  dialog.showSaveDialog(target).then((filePath) => {
+    fs.writeFile(filePath.filePath, string, "utf8", (err) => {
+      if (err) {
+        window.electron.send("console-logs", JSON.stringify(err));
+      }
+    });
+  });
+}
+
+export {
+  readFlatFile,
+  userDataDirTree,
+  changeUDP,
+  startRoutine,
+  themeData,
+  savePNG,
+  saveSVG,
+};

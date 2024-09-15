@@ -249,6 +249,29 @@ async function toggleFullScreen() {
   mainWindow.reload();
 }
 
+const bioRxivManager = (message) => {
+  switch (message.type) {
+    case "request":
+      biorXivScraper(message.model, message.address, message.winId);
+      break;
+
+    case "biorxiv-amount":
+      BrowserWindow.fromId(windowIds.flux.id).webContents.send(
+        "biorxivRetrieve",
+        message
+      );
+      break;
+
+    case "biorxiv-content":
+      BrowserWindow.fromId(message.charWindId).webContents.send(
+        "biorxivRetrieve",
+        message
+      );
+
+      break;
+  }
+};
+
 export {
   createMainWindow,
   createAudioManager,
@@ -258,4 +281,6 @@ export {
   openHelper,
   windowManager,
   toggleFullScreen,
+  windowIds,
+  bioRxivManager,
 };

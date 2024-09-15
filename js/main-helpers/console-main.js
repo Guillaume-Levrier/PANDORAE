@@ -1,3 +1,5 @@
+import { mainWindow } from "./window-creator";
+
 const electron = require("electron");
 const { app } = electron;
 const userDataPath = app.getPath("userData");

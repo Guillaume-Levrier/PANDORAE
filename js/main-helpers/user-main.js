@@ -69,10 +69,45 @@ const getUserStatus = (req) => {
   }
 };
 
+const manageUserKeys = (event, requests) => {
+  // This used to be managed through keytar, which raises
+  // many technical issues and doesn't make the app portable
+  // it was then moved to a flat file (with a notice to the user
+  // that their API keys are stored as flat files).
+
+  const data = readUserIDfile(userDataPath);
+
+  switch (request.type) {
+    case "setPassword":
+      currentUser = JSON.parse(data);
+
+      currentUser[request.service] = {
+        user: request.user,
+        value: request.value,
+      };
+
+      writeUserIDfile(userDataPath, currentUser);
+
+      break;
+
+    case "getPassword":
+      const user = JSON.parse(data);
+
+      if (user.hasOwnProperty(request.service)) {
+        event.returnValue = user[request.service].value;
+      } else {
+        event.returnValue = 0;
+      }
+
+      break;
+  }
+};
+
 export {
   createUserId,
   writeUserIDfile,
   readUserIDfile,
   getUserStatus,
   currentUser,
+  manageUserKeys,
 };

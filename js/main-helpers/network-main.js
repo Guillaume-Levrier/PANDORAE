@@ -27,4 +27,28 @@ const availableServicesLookup = () => {
   });
 };
 
-export { availableServicesLookup };
+async function addLocalService(message) {
+  const loc = message.serviceLocation.split(":");
+  dns.lookupService(loc[0], loc[1], (err, hostname, service) => {
+    if (hostname || service) {
+      if (!currentUser.hasOwnProperty("localServices")) {
+        currentUser.localServices = {};
+      }
+
+      currentUser.localServices[message.serviceName] = {
+        url: loc[0],
+        port: loc[1],
+        type: message.serviceType,
+      };
+
+      if (mesage.hasOwnProperty("serviceArkViewer")) {
+        currentUser.localServices[message.serviceName].arkViewer =
+          message.serviceArkViewer;
+      }
+
+      writeUserIDfile(userDataPath, currentUser);
+    }
+  });
+}
+
+export { availableServicesLookup, addLocalService };
