@@ -16,8 +16,7 @@ const MultiSet = require("mnemonist/multi-set"); // Load Mnemonist to manage oth
 const d3 = require("d3");
 const csv = require("csv-parser");
 const { promises } = require("dns");
-const date =
-  new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
+
 var winId = 0;
 var currentDoc = {};
 

@@ -69,9 +69,7 @@ const activateMainListeners = () => {
   // ==== WINDOW MANAGEMENT ====
 
   //destroy a window
-  ipcMain.on("win-destroy", (event, winId) =>
-    BrowserWindow.fromId(winId).destroy()
-  );
+  ipcMain.on("win-destroy", (event) => event.sender.destroy());
 
   // open or close a window
   ipcMain.on("windowManager", (event, message) => windowManager(message));

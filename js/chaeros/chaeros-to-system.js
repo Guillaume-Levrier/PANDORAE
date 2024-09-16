@@ -1,3 +1,8 @@
+import { pandodb } from "../db";
+
+const date =
+  new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
+
 //========== sysExport ==========
 const sysExport = (destination, importName, id) => {
   pandodb.open();
@@ -25,15 +30,15 @@ const dataWriter = (destination, importName, content) => {
   );
   window.electron.send("pulsar", true);
   setTimeout(() => {
-    window.electron.send("win-destroy", winId);
+    window.electron.send("win-destroy", true);
   }, 1000);
 };
 
-const getPassword = (service, user) =>
+const getPasswordFromChaeros = (service, user) =>
   window.electron.sendSync("keyManager", {
     user: user,
     service: service,
     type: "getPassword",
   });
 
-export { sysExport, dataWriter, getPassword };
+export { sysExport, dataWriter, getPasswordFromChaeros, date };

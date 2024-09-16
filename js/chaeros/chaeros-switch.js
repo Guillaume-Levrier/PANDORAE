@@ -1,3 +1,8 @@
+import {
+  zoteroCollectionBuilder,
+  zoteroItemsRetriever,
+} from "./zotero-chaeros";
+
 //========== chaerosSwitch ==========
 // Switch used to choose the function to execute in CHÆROS.
 
@@ -166,6 +171,7 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
   } catch (err) {
     window.electron.send("console-logs", err);
     window.electron.send("chaeros-failure", JSON.stringify(err));
+    throw err;
   }
 };
 

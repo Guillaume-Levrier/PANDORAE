@@ -4,6 +4,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electron", {
   send: (channel, message) => ipcRenderer.send(channel, message),
+  sendSync: (channel, message) => ipcRenderer.sendSync(channel, message),
   invoke: (channel) => ipcRenderer.invoke(channel, true),
   chaerosCompute: (callback) =>
     ipcRenderer.on("chaerosCompute", (e, ...args) => callback(args[0])),

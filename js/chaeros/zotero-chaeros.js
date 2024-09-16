@@ -2,6 +2,9 @@
 // zoteroItemsRetriever retrieves all the documents from one or more zotero collections. A zotero API request can only
 // retrieve 100 items, which can easily trigger the rate limiting.
 
+import bottleneck from "bottleneck";
+import { dataWriter, getPasswordFromChaeros } from "./chaeros-to-system";
+
 const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
   window.electron.send(
     "console-logs",
@@ -14,15 +17,18 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
       " into SYSTEM."
   );
 
+  console.log("starting zotero item retriever");
+
   const limiter = new bottleneck({
     // Create a bottleneck to prevent API rate limit
     maxConcurrent: 1, // Only one request at once
     minTime: 500, // Every 500 milliseconds
   });
 
-  let zoteroPromises = [];
-  var zoteroResponse = [];
-  let zoteroApiKey = getPassword("Zotero", zoteroUser);
+  const zoteroPromises = [];
+
+  const zoteroApiKey = getPasswordFromChaeros("Zotero", zoteroUser);
+  console.log(zoteroApiKey);
 
   for (let j = 0; j < collections.length; j++) {
     // Loop on collections
@@ -52,7 +58,7 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
 
         if (zoteroCollectionResponse.length === zoteroPromises.length) {
           zoteroCollectionResponse.forEach((f) => {
-            thisCollectionAmount = parseInt(f.meta.numItems);
+            var thisCollectionAmount = parseInt(f.meta.numItems);
             responseTarget = responseTarget + thisCollectionAmount;
 
             f.name = f.data.name;
