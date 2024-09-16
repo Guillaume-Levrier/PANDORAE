@@ -54,8 +54,6 @@ const windowManager = (message) => {
   const scrollTo = message.scrollTo;
   const section = message.section;
 
-  let win = {};
-
   switch (type) {
     case "openHelper":
       openHelper(file, section);
@@ -205,11 +203,12 @@ const chaerosCalculator = () => {
     },
   });
 
-  chaerosWindow.loadFile("html/chaeros.html");
+  chaerosWindow.loadURL(CHAEROS_WEBPACK_ENTRY);
+  //chaerosWindow.loadFile("html/chaeros.html");
 
   chaerosWindow.webContents.on("did-finish-load", function () {
     chaerosWindow.webContents.send("id", chaerosWindow.id);
-    //chaerosWindow.webContents.openDevTools();
+    chaerosWindow.webContents.openDevTools();
   });
 };
 
@@ -286,4 +285,5 @@ export {
   windowIds,
   bioRxivManager,
   fluxWindow,
+  chaerosCalculator,
 };

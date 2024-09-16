@@ -37,8 +37,6 @@ const updateFields = (user) => {
   document.getElementById("userMailInput").value = userMail;
   document.getElementById("zoterouserinput").value = zoteroUser;
 
-  console.log(user);
-
   if (user.hasOwnProperty("Zotero")) {
     document.getElementById("zoterokeyinput").value = user.Zotero.value;
   }
@@ -135,8 +133,6 @@ const updateUserData = (service) => {
 };
 
 const checkKey = (service, status) => {
-  console.log("runningCheckKey");
-
   /* 
   let success = false;
 

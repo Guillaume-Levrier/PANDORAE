@@ -15,7 +15,7 @@ import {
   updateUserData,
 } from "./userdata";
 import { fluxDisplay } from "./flux-display";
-import { closeWindow, refreshWindow } from "./window";
+import { closeFluxWindow, refreshFluxWindow } from "./window";
 import { gallicaBasic } from "./sources/BNF/gallica";
 import { dimensionsUpload } from "./sources/scientometrics/dimensions";
 import { regardsBasic } from "./sources/parlements/regardscitoyens";
@@ -71,8 +71,8 @@ const buttonList = [
   { id: "Scopus", func: "updateUserData", arg: "Scopus" },
   { id: "WebOfScience", func: "updateUserData", arg: "WebOfScience" },
   { id: "fluxDisplayButton", func: "fluxDisplay", arg: "flux-manager" },
-  { id: "fluxCloseButton", func: "closeWindow" },
-  { id: "fluxRefreshButton", func: "refreshWindow" },
+  { id: "fluxCloseButton", func: "closeFluxWindow" },
+  { id: "fluxRefreshButton", func: "refreshFluxWindow" },
   { id: "hyphe-checker", func: "hypheCheck" },
   { id: "hyphe-exporter", func: "endpointConnector" },
   {
@@ -242,12 +242,12 @@ function funcSwitch(e, but) {
       fluxDisplay(but.arg);
       break;
 
-    case "closeWindow":
-      closeWindow();
+    case "closeFluxWindow":
+      closeFluxWindow();
       break;
 
-    case "refreshWindow":
-      refreshWindow();
+    case "refreshFluxWindow":
+      refreshFluxWindow();
       break;
 
     case "generateLocalServiceConfig":

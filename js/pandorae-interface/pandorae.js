@@ -18,7 +18,7 @@ const msg =
 console.log(msg);
 
 import { CMT } from "../locales";
-import { addToLog, toggleConsole } from "./console";
+import { addToLog, cmdinput, toggleConsole } from "./console";
 import { iconCreator } from "./icon";
 import { keyShortCuts } from "./keyboard-shortcuts";
 import { activateMenu } from "./locale-select";

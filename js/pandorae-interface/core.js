@@ -1,7 +1,5 @@
 // ========== CORE ACTIONS ===========
 
-var commandReturn = "";
-
 var coreExists = true; // core does exist on document load
 const setCoreExists = (n) => (coreExists = n);
 
@@ -9,7 +7,8 @@ var xtypeExists = false; // xtype SVG doesn't exist on document load
 const setxtypeExists = (n) => (xtypeExists = n);
 
 const xtypeDisplay = () => {
-  (xtype.style.opacity = "1"), (xtype.style.zIndex = "6"), (commandReturn = "");
+  xtype.style.opacity = "1";
+  xtype.style.zIndex = "6";
   createTooltip();
 };
 
@@ -61,7 +60,6 @@ export {
   purgeXtype,
   displayCore,
   purgeCore,
-  commandReturn,
   coreExists,
   setCoreExists,
   xtypeExists,

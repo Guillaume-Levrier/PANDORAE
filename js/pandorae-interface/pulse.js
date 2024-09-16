@@ -57,8 +57,7 @@ const progBarSign = (prog) => {
  */
 // ========== CORE SIGNALS ===========
 
-window.electron.coreSignal((data) => {
-  console.log(data);
+window.electron.coreSignal((message) => {
   try {
     field.value = message;
   } catch (err) {

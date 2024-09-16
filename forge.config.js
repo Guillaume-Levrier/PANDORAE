@@ -63,6 +63,14 @@ module.exports = {
                 js: "./js/preload-flux.js",
               },
             },
+            {
+              name: "chaeros",
+              html: "./html/chaeros.html",
+              js: "./js/chaeros.js",
+              preload: {
+                js: "./js/preload-chaeros.js",
+              },
+            },
           ],
         },
       },

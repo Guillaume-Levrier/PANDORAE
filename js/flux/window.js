@@ -1,6 +1,8 @@
-const closeWindow = () =>
-  window.electron.send("windowManager", "closeWindow", "flux");
+const closeFluxWindow = () => {
+  console.log("sending message to close flux window");
+  window.electron.send("windowManager", { type: "closeWindow", file: "flux" });
+};
 
-const refreshWindow = () => location.reload();
+const refreshFluxWindow = () => location.reload();
 
-export { closeWindow, refreshWindow };
+export { closeFluxWindow, refreshFluxWindow };

@@ -1,7 +1,13 @@
+import { chaerosCalculator, mainWindow } from "./window-creator";
+
+// there is a challenge here
+// so that the right process goes to the right window
+// as there can be many concurrent chaeros windows
+
 const powerValveArgsArray = [];
 
 const startChaerosProcess = (fluxAction, fluxArgs, message) => {
-  mainWindow.webContents.send("coreSignal", fluxAction, fluxArgs, message);
+  mainWindow.webContents.send("coreSignal", message);
 
   let powerValveAction = {};
 
@@ -16,12 +22,9 @@ const startChaerosProcess = (fluxAction, fluxArgs, message) => {
 
 const feedChaerosData = (event) => {
   const action = powerValveArgsArray[powerValveArgsArray.length - 1];
-  event.sender.send(
-    "chaeros-compute",
-    action.fluxAction,
-    action.fluxArgs,
-    action.message
-  );
+  console.log("sending a message to chaeros compute");
+  console.log(event.sender.send);
+  event.sender.send("chaerosCompute", action);
 };
 
 export { startChaerosProcess, feedChaerosData };

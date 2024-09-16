@@ -1,6 +1,9 @@
 // =========== CONSOLE ===========
 
+import { CMT } from "../locales";
 import { displayCore } from "./core";
+
+const CM = CMT.EN;
 
 let toggledConsole = false;
 
@@ -9,6 +12,7 @@ const menu = document.getElementById("menu");
 const consoleDiv = document.getElementById("console");
 const menuIcon = document.getElementById("menu-icon");
 
+var commandReturn = "";
 var logContent = "";
 
 const toggleConsole = () => {
@@ -191,4 +195,4 @@ const cmdinput = (input) => {
 
 window.electron.cmdInputFromRenderer((data) => cmdinput(command));
 
-export { toggleConsole, addToLog, mainDisplay };
+export { toggleConsole, addToLog, mainDisplay, cmdinput };

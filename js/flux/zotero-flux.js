@@ -8,6 +8,10 @@ import { checkKey, getPassword } from "./userdata";
 const zoteroCollectionRetriever = () => {
   let zoteroUser = document.getElementById("zoterouserinput").value; // Get the Zotero user code to request
 
+  // hide the validator icon
+  const icon = document.getElementById("zoteroAPIValidation");
+  icon.innerText = "hourglass_empty";
+
   window.electron.send(
     "console-logs",
     "Retrieving collections for Zotero id " + zoteroUser
@@ -88,6 +92,7 @@ const zoteroCollectionRetriever = () => {
       document.getElementById("zoteroImportInstruction").style.display =
         "inline-flex";
 
+      //      icon.style.display = "block";
       checkKey("zoteroAPIValidation", true);
     })
     .catch(function (err) {

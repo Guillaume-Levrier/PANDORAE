@@ -5,6 +5,8 @@
 // - those "heavy" functions are sent to the main process through the 'dataFlux' channel (and dispatched to Chæeros)
 // - the flux  modal window is closed
 
+import { closeFluxWindow } from "./window";
+
 const powerValve = (fluxAction, item) => {
   // powerValve main function
 
@@ -236,7 +238,7 @@ const powerValve = (fluxAction, item) => {
         fluxArgs.zoteroItemsRetriever.importName = document
           .getElementById("zoteroImportName")
           .value.replace(/\s/g, "");
-        message = "Retrieving user collections";
+        message = "Retrieving user collections…";
       }
       break;
 
@@ -277,19 +279,17 @@ const powerValve = (fluxAction, item) => {
       break;
   }
 
-  window.electron.send(
-    "console-logs",
-    "Sending to CHÆROS action " +
-      fluxAction +
-      " with arguments " +
-      JSON.stringify(fluxArgs) +
-      " " +
-      message
-  );
+  const logMessage = `Sending to CHÆROS action ${fluxAction} with arguments ${JSON.stringify(
+    fluxArgs
+  )}.`;
 
-  window.electron.send("dataFlux", fluxAction, fluxArgs, message); // Send request to main process
+  window.electron.send("console-logs", logMessage);
+
+  console.log(logMessage);
+
+  window.electron.send("dataFlux", { fluxAction, fluxArgs, message }); // Send request to main process
   window.electron.send("pulsar", false);
-  window.electron.send("windowManager", "closeWindow", "flux");
+  closeFluxWindow();
 };
 
 export { powerValve };

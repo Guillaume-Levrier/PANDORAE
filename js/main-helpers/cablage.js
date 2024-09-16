@@ -138,8 +138,8 @@ const activateMainListeners = () => {
   // get the order to start a chaeros process
   // open a chaeros window
   // store arguments guiding process for when chaeros is ready
-  ipcMain.on("dataFlux", (event, fluxAction, fluxArgs, message) =>
-    startChaerosProcess(fluxAction, fluxArgs, message)
+  ipcMain.on("dataFlux", (event, data) =>
+    startChaerosProcess(data.fluxAction, data.fluxArgs, data.message)
   );
 
   // when chaeros is ready
