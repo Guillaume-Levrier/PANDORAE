@@ -10,7 +10,6 @@
     "url": "https://github.com/Guillaume-Levrier/PANDORAE/"
   },
   "scripts": {
-    "postinstall": "electron-builder install-app-deps",
     "update": "git pull && npm i",
     "start": "electron-forge start",
     "build:all": "cross-env NODE_ENV=production node bin/package.js",
