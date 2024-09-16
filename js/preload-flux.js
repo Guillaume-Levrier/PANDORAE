@@ -15,6 +15,34 @@ contextBridge.exposeInMainWorld("electron", {
     ),
   biorxivRetrieve: (callback) =>
     ipcRenderer.on("biorxivRetrieve", (e, ...args) => callback(args[0])),
+  getUserDetails: (callback) =>
+    ipcRenderer.on("getUserDetails", (e, ...args) => callback(args[0])),
+});
+
+ipcRenderer.invoke("checkflux", true).then((result) => {
+  const domainsToAllow = JSON.parse(result);
+
+  const meta = document.createElement("meta");
+  meta.httpEquiv = "Content-Security-Policy";
+  meta.content = "default-src 'self';connect-src ";
+
+  // allow external API sources
+  domainsToAllow.dnslist.forEach((d) => {
+    if (d.valid) {
+      meta.content += "https://" + d.url + " ";
+    }
+  });
+
+  // allow local API sources
+  Object.values(domainsToAllow.dnsLocalServiceList).forEach((d) => {
+    if (d.valid) {
+      meta.content += "https://" + d.url + ":" + d.port + " ";
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", () =>
+    document.getElementsByTagName("head")[0].append(meta)
+  );
 });
 
 console.log("|==== FLUX PRELOAD ENDS HERE ====|");

@@ -1,4 +1,7 @@
 //========== scientoDisplay ==========
+
+import { datasetDisplay } from "../../dataset";
+
 // Cumulative display from different sources + enriched
 
 const scientoDisplay = () => {

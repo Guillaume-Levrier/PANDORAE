@@ -135,9 +135,10 @@ const openModal = (modalFile, scrollTo) => {
     win.webContents.openDevTools();
   }
 };
+var fluxWindow;
 
 const openFlux = () => {
-  let win = new BrowserWindow({
+  fluxWindow = new BrowserWindow({
     parent: mainWindow,
     modal: true,
     transparent: true,
@@ -155,14 +156,15 @@ const openFlux = () => {
 
   //var path = basePath + "/html/" + modalFile + ".html";
   //win.loadFile("html/" + modalFile + ".html");
-  win.loadURL(FLUX_WEBPACK_ENTRY);
+  fluxWindow.loadURL(FLUX_WEBPACK_ENTRY);
 
-  win.once("ready-to-show", () => {
-    win.show();
-    windowIds["flux"].id = win.id;
+  fluxWindow.once("ready-to-show", () => {
+    fluxWindow.show();
+    windowIds["flux"].id = fluxWindow.id;
     windowIds["flux"].open = true;
   });
-  win.webContents.openDevTools();
+
+  fluxWindow.webContents.openDevTools();
 };
 const biorXivScraper = (model, address, chaerosWinId) => {
   let biorXivWindow = new BrowserWindow({
@@ -283,4 +285,5 @@ export {
   toggleFullScreen,
   windowIds,
   bioRxivManager,
+  fluxWindow,
 };

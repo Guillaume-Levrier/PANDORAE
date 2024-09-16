@@ -19,4 +19,7 @@ const fluxDisplay = (tab) => {
   document.getElementById(tab).style.display = "block"; // Display the div corresponding to the clicked button
 };
 
-export { fluxDisplay, db };
+const date = () =>
+  new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
+
+export { fluxDisplay, db, date };

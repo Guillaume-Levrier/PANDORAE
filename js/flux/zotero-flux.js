@@ -2,6 +2,9 @@
 // Retrieve collections from a Zotero user code. To be noted that a user code can be something else than a user: it can
 // also be a group library ID, allowing for group or even public work on a same Zotero/PANDORÆ corpus.
 
+import { fluxButtonAction } from "./actionbuttons";
+import { checkKey, getPassword } from "./userdata";
+
 const zoteroCollectionRetriever = () => {
   let zoteroUser = document.getElementById("zoterouserinput").value; // Get the Zotero user code to request
 
@@ -14,7 +17,7 @@ const zoteroCollectionRetriever = () => {
   // URL Building blocks
   let rootUrl = "https://api.zotero.org/groups/";
   let urlCollections = "/collections";
-  var zoteroVersion = "&v=3&key=";
+  var zoteroVersion = "v=3&key=";
 
   //build the url
   let zoteroCollectionRequest =
@@ -25,7 +28,12 @@ const zoteroCollectionRetriever = () => {
     .then((zoteroColResponse) => {
       // With the response
 
+      // select container div
       const userCollections = document.getElementById("userZoteroCollections");
+      // purge it of content
+      userCollections.innerHTML = "";
+
+      // add list
       const collectionList = document.createElement("form");
       collectionList.style = "line-height:1.5";
 
@@ -83,10 +91,11 @@ const zoteroCollectionRetriever = () => {
       checkKey("zoteroAPIValidation", true);
     })
     .catch(function (err) {
+      checkKey("zoteroAPIValidation", false);
       fluxButtonAction(
         "zotcolret",
         false,
-        "Zotero Collections Successfully Retrieved",
+        "Failed at retrieving Zotero collections",
         err
       );
       window.electron.send(

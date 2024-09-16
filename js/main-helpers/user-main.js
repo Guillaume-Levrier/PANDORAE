@@ -1,13 +1,14 @@
-import { mainWindow } from "./window-creator";
+import { fluxWindow, mainWindow } from "./window-creator";
 
 const fs = require("fs");
 const dns = require("dns");
 const electron = require("electron");
-const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } =
-  electron;
+const { app } = electron;
 const userDataPath = app.getPath("userData");
 
 var currentUser;
+
+const setCurrentUser = (key, value) => (currentUser[key] = value);
 
 const createUserId = (userDataPath) => {
   const userID = {
@@ -40,6 +41,11 @@ const readUserIDfile = () =>
     (err, data) => JSON.parse(data)
   );
 
+const getUserDetails = () => {
+  const user = JSON.parse(readUserIDfile(userDataPath));
+  fluxWindow.webContents.send("getUserDetails", user);
+};
+
 const getUserStatus = (req) => {
   if (req) {
     const data = JSON.parse(readUserIDfile(userDataPath));
@@ -65,11 +71,12 @@ const getUserStatus = (req) => {
     //  if (currentUser.UserName.length > 0) {
     //    getPPSData();
     //  }
+
     mainWindow.webContents.send("userStatus", currentUser);
   }
 };
 
-const manageUserKeys = (event, requests) => {
+const manageUserKeys = (event, request) => {
   // This used to be managed through keytar, which raises
   // many technical issues and doesn't make the app portable
   // it was then moved to a flat file (with a notice to the user
@@ -110,4 +117,6 @@ export {
   getUserStatus,
   currentUser,
   manageUserKeys,
+  setCurrentUser,
+  getUserDetails,
 };

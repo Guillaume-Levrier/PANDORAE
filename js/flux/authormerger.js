@@ -1,6 +1,9 @@
 //==== Manual Merging of Authors ====
 // This one is a bit trick because it can be quite computationnaly intensive and yet has to stay in FLUX.
 // Maybe some chaeros-led hand curation will have to happen at some point, maybe not.
+
+import { date } from "./flux-display";
+
 // Might be worth it making FLUX bigger for that purpose. (upsize then downsize when over)
 
 const manualMergeAuthors = () => {
@@ -93,7 +96,6 @@ const manualMergeAuthors = () => {
           "Saved author merging " + dataset.id
         ); // Sending notification to console
         setTimeout(() => {
-          console.log("closing window");
           closeWindow();
         }, 500);
       })

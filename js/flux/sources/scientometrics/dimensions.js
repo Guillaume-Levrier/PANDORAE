@@ -37,7 +37,6 @@ const dimensionsUpload = () => {
           content: content,
         })
         .then(() => {
-          console.log("success");
           fluxButtonAction(
             "load-dimensions",
             true,

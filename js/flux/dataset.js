@@ -1,4 +1,7 @@
 //========== datasetDisplay ==========
+
+import { pandodb } from "../db";
+
 // datasetDisplay shows the datasets (usually JSON or CSV files) available in the relevant /datasets/ subdirectory.
 
 function replacer(key, value) {

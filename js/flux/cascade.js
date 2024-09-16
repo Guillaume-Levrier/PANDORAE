@@ -94,7 +94,7 @@ function updateCascade() {
         case "PPS":
           if (selections.scientometricsSelect) {
             addHop(["OPEN", "PPS", "CSL-JSON"], traces);
-            ipcRenderer
+            window.electron
               .invoke("getPPSMaturity")
               .then((time) => updatePPSDate(time));
           }
@@ -149,6 +149,7 @@ function updateCascade() {
 const retrieveAvailableServices = () =>
   window.electron.invoke("checkflux", true).then((result) => {
     availability = JSON.parse(result);
+
     updateCascade();
 
     const buttonList = [];
@@ -162,92 +163,91 @@ const retrieveAvailableServices = () =>
     localServicePreviewer.append(table);
 
     for (const service in availability.dnsLocalServiceList) {
-      switch (availability.dnsLocalServiceList[service].type) {
-        case "BNF-SOLR":
-          const serv = service.toUpperCase().replace(" ", "-");
+      if (availability.dnsLocalServiceList[service].type.valid) {
+        switch (availability.dnsLocalServiceList[service].type) {
+          case "BNF-SOLR":
+            const serv = service.toUpperCase().replace(" ", "-");
 
-          const serviceLine = document.createElement("li");
-          serviceLine.style = "display:flex;justify-content: space-between;";
-          const serviceName = document.createElement("div");
-          serviceName.innerHTML = `- ${availability.dnsLocalServiceList[service].type} - ${service}`;
-          const serviceRemove = document.createElement("div");
-          serviceRemove.style = "font-weight:bold;";
-          serviceRemove.innerText = "x";
-          serviceRemove.addEventListener("click", () => {
-            serviceLine.remove();
-            removeLocalService(service);
-          });
-          serviceLine.append(serviceName, serviceRemove);
+            const serviceLine = document.createElement("li");
+            serviceLine.style = "display:flex;justify-content: space-between;";
+            const serviceName = document.createElement("div");
+            serviceName.innerHTML = `- ${availability.dnsLocalServiceList[service].type} - ${service}`;
+            const serviceRemove = document.createElement("div");
+            serviceRemove.style = "font-weight:bold;";
+            serviceRemove.innerText = "x";
+            serviceRemove.addEventListener("click", () => {
+              serviceLine.remove();
+              removeLocalService(service);
+            });
+            serviceLine.append(serviceName, serviceRemove);
 
-          table.append(serviceLine);
+            table.append(serviceLine);
 
-          const solrCont = document.createElement("div");
+            const solrCont = document.createElement("div");
 
-          solrCont.id = serv.toLowerCase();
-          solrCont.style.display = "none";
-          solrCont.className = "fluxTabs";
+            solrCont.id = serv.toLowerCase();
+            solrCont.style.display = "none";
+            solrCont.className = "fluxTabs";
 
-          const sourceRequest =
-            "http://" +
-            availability.dnsLocalServiceList[service].url +
-            ":" +
-            availability.dnsLocalServiceList[service].port +
-            "/solr/admin/collections?action=LIST&wt=json";
+            const sourceRequest =
+              "http://" +
+              availability.dnsLocalServiceList[service].url +
+              ":" +
+              availability.dnsLocalServiceList[service].port +
+              "/solr/admin/collections?action=LIST&wt=json";
 
-          // The answer is in the array at r.collections
+            // The answer is in the array at r.collections
 
-          var sourceSolrRadio = "";
+            var sourceSolrRadio = "";
 
-          var coreSource; // In theory, there is only one core collection
+            var coreSource; // In theory, there is only one core collection
 
-          fetch(sourceRequest)
-            .then((r) => r.json())
-            .then((r) => {
-              coreSource = r.collections[0];
-              for (let i = 0; i < r.collections.length; i++) {
-                const col = r.collections[i];
-                let checked = i === 0 ? "checked" : "";
+            fetch(sourceRequest)
+              .then((r) => r.json())
+              .then((r) => {
+                coreSource = r.collections[0];
+                for (let i = 0; i < r.collections.length; i++) {
+                  const col = r.collections[i];
+                  let checked = i === 0 ? "checked" : "";
 
-                sourceSolrRadio += `<div>
+                  sourceSolrRadio += `<div>
             <input type="radio" name="bnf-solr-radio-${serv}" class="bnf-solr-radio-${serv}" id="${col}"  ${checked}  />
             <label for="${col}">${col}</label>
           </div>`;
-              }
-            })
-            .then(() => {
-              const facetRequest =
-                "http://" +
-                availability.dnsLocalServiceList[service].url +
-                ":" +
-                availability.dnsLocalServiceList[service].port +
-                "/solr/" +
-                coreSource +
-                "/select?q=*rows=0&facet=on&facet.field=collections";
+                }
+              })
+              .then(() => {
+                const facetRequest =
+                  "http://" +
+                  availability.dnsLocalServiceList[service].url +
+                  ":" +
+                  availability.dnsLocalServiceList[service].port +
+                  "/solr/" +
+                  coreSource +
+                  "/select?q=*rows=0&facet=on&facet.field=collections";
 
-              fetch(facetRequest)
-                .then((facet) => facet.json())
-                .then((facets) => {
-                  console.log(facets);
+                fetch(facetRequest)
+                  .then((facet) => facet.json())
+                  .then((facets) => {
+                    const facetList =
+                      facets.facet_counts.facet_fields.collections;
 
-                  const facetList =
-                    facets.facet_counts.facet_fields.collections;
+                    var facetCheckBox = "";
 
-                  var facetCheckBox = "";
+                    for (let i = 0; i < facetList.length; i++) {
+                      const face = facetList[i];
 
-                  for (let i = 0; i < facetList.length; i++) {
-                    const face = facetList[i];
+                      if (typeof face === "string") {
+                        let checked = i === 0 ? "checked" : "";
 
-                    if (typeof face === "string") {
-                      let checked = i === 0 ? "checked" : "";
-
-                      facetCheckBox += `<div>
+                        facetCheckBox += `<div>
             <input type="checkbox" name="bnf-solr-checkbox-${serv}" class="bnf-solr-checkbox-${serv}" id="${face}"  ${checked}  />
             <label for="${face}">${face}</label>
           </div>`;
+                      }
                     }
-                  }
 
-                  solrCont.innerHTML = `<!-- BNF SOLR TAB -->     
+                    solrCont.innerHTML = `<!-- BNF SOLR TAB -->     
           <span class="flux-title">${service.toUpperCase()}</span>
           <br><br>
           <form id="bnf-solr-form" autocomplete="off">Query:<br>
@@ -264,39 +264,40 @@ const retrieveAvailableServices = () =>
             <br><br>
           </form>`;
 
-                  document.body.append(solrCont);
+                    document.body.append(solrCont);
 
-                  buttonList.push({
-                    id: "bnf-solr-basic-query-" + serv,
-                    serv,
-                    func: "queryBnFSolr",
-                    args: availability.dnsLocalServiceList[service],
+                    buttonList.push({
+                      id: "bnf-solr-basic-query-" + serv,
+                      serv,
+                      func: "queryBnFSolr",
+                      args: availability.dnsLocalServiceList[service],
+                    });
+
+                    buttonList.push({
+                      id: "bnf-solr-fullquery-" + serv,
+                      serv,
+                      func: "powerValve",
+                      arg: "BNF-SOLR",
+                    });
+
+                    buttonList.forEach((but) => {
+                      document
+                        .getElementById(but.id)
+                        .addEventListener("click", (e) => {
+                          e.preventDefault();
+                          funcSwitch(e, but);
+
+                          return false;
+                        });
+                    });
                   });
+              });
 
-                  buttonList.push({
-                    id: "bnf-solr-fullquery-" + serv,
-                    serv,
-                    func: "powerValve",
-                    arg: "BNF-SOLR",
-                  });
+            break;
 
-                  buttonList.forEach((but) => {
-                    document
-                      .getElementById(but.id)
-                      .addEventListener("click", (e) => {
-                        e.preventDefault();
-                        funcSwitch(e, but);
-
-                        return false;
-                      });
-                  });
-                });
-            });
-
-          break;
-
-        default:
-          break;
+          default:
+            break;
+        }
       }
     }
   });

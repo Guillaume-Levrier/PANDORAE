@@ -17,8 +17,6 @@ const categoryLoader = (cat) => {
 
     let blocks;
 
-    console.log(cat);
-
     switch (cat) {
       case "type":
         blocks = [
@@ -39,8 +37,6 @@ const categoryLoader = (cat) => {
 
         blocks.forEach((block) => {
           pandodb[block].count().then((thisBlock) => {
-            console.log(thisBlock);
-
             if (thisBlock > 0) {
               let typeContainer = document.createElement("div");
               typeContainer.style.display = "flex";

@@ -18,7 +18,6 @@ const requestStatus = () => window.electron.send("userStatus", true);
 window.electron.userStatus((user) => kickStart(user));
 
 const kickStart = (user) => {
-  console.log(user);
   if (user.UserName === "") {
     menuIcon.style.cursor = "not-allowed";
     consoleIcon.style.cursor = "not-allowed";

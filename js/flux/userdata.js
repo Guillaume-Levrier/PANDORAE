@@ -1,16 +1,16 @@
+import { scopusBasicRetriever } from "./sources/scientometrics/scopus";
+import { zoteroCollectionRetriever } from "./zotero-flux";
+
 const userDataPath = window.electron.userDataPath;
+
+var currentUser;
 
 const accessUserID = () =>
   window.electron.send("openPath", userDataPath + "/PANDORAE-DATA/userID/");
 
 const changeUserID = () => window.electron.send("change-udp", "change");
 
-const getPassword = (service, user) =>
-  window.electron.send("keyManager", {
-    user,
-    service,
-    type: "getPassword",
-  });
+const getPassword = (service) => currentUser[service].value;
 
 const setPassword = (service, user, value) =>
   window.electron.send("keyManager", {
@@ -22,20 +22,13 @@ const setPassword = (service, user, value) =>
 
 const userIdFilePath = userDataPath + "/PANDORAE-DATA/userID/user-id.json";
 
-const getUserData = () =>
-  fs.readFile(
-    userIdFilePath, // Read the designated datafile
-    "utf8",
-    (err, data) => {
-      if (err) throw err;
+const getUserData = () => window.electron.send("getUserDetails", true);
 
-      let user = JSON.parse(data);
-
-      updateFields(user);
-    }
-  );
+window.electron.getUserDetails((user) => updateFields(user));
 
 const updateFields = (user) => {
+  currentUser = user;
+
   const userName = user.UserName;
   const userMail = user.UserMail;
   const zoteroUser = user.ZoteroID;
@@ -44,19 +37,19 @@ const updateFields = (user) => {
   document.getElementById("userMailInput").value = userMail;
   document.getElementById("zoterouserinput").value = zoteroUser;
 
-  document.getElementById("zoterokeyinput").value = getPassword(
-    "Zotero",
-    zoteroUser
-  );
-  document.getElementById("scopuskeyinput").value = getPassword(
-    "Scopus",
-    userName
-  );
+  console.log(user);
 
-  document.getElementById("woskeyinput").value = getPassword(
-    "WebOfScience",
-    userName
-  );
+  if (user.hasOwnProperty("Zotero")) {
+    document.getElementById("zoterokeyinput").value = user.Zotero.value;
+  }
+
+  if (user.hasOwnProperty("Scopus")) {
+    document.getElementById("scopuskeyinput").value = user.Scopus.value;
+  }
+
+  if (user.hasOwnProperty("wos")) {
+    document.getElementById("woskeyinput").value = user.WoS.value;
+  }
 };
 
 const basicUserData = () => {
@@ -142,25 +135,29 @@ const updateUserData = (service) => {
 };
 
 const checkKey = (service, status) => {
+  console.log("runningCheckKey");
+
+  /* 
   let success = false;
 
-  switch (service) {
-    case "zoteroAPIValidation":
-      if (status === undefined) {
+  if (status === undefined) {
+    switch (service) {
+      case "zoteroAPIValidation":
         zoteroCollectionRetriever();
-      }
-      break;
 
-    case "scopusValidation":
-      if (status === undefined) {
+        break;
+
+      case "scopusValidation":
         scopusBasicRetriever(true);
-      }
-      break;
+
+        break;
+    }
   }
 
   success = status;
 
-  if (success) {
+ */
+  if (status) {
     document.getElementById(service).style.color = "green";
     document.getElementById(service).innerHTML = "check_circle_outline";
     getUserData();
@@ -172,4 +169,12 @@ const checkKey = (service, status) => {
 
 //window.addEventListener("DOMContentLoaded", () => getUserData());
 
-export { accessUserID, basicUserData, changeUserID, checkKey, updateUserData };
+export {
+  accessUserID,
+  basicUserData,
+  changeUserID,
+  checkKey,
+  updateUserData,
+  getUserData,
+  getPassword,
+};

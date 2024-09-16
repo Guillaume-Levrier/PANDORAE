@@ -151,7 +151,6 @@ const queryBnFSolr = (but) => {
       if (targetfacets.length > 0) {
         targetfacets += "%20OR%20";
       }
-      console.log(facet.id);
 
       // solr needs a " for two words or more, and no " if not;
 

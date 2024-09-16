@@ -1,3 +1,7 @@
+import { fluxButtonAction } from "../../actionbuttons";
+
+var ISSNarr = [];
+
 //========== scopusBasicRetriever ==========
 // Send a single request for a single document to Scopus in order to retrieve the request's metadata and give the user a
 // rough idea of how big (and therefore how many requests) the response represents. The user is then offered to proceed

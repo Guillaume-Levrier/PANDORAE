@@ -13,13 +13,13 @@
 // but it could technically be reopened once Chæros is done processing the powerValve request. As it can be frustrating for // advanced user, this feature isn't currently enforced.
 
 import { retrieveAvailableServices } from "./cascade";
-
-console.log(window.electron.send);
+import { getPassword, getUserData } from "./userdata";
 
 window.electron.send("console-logs", "Opening Flux"); // Sending notification to console
 
 const initializeFlux = () => {
   retrieveAvailableServices();
+  getUserData();
 };
 
 export { initializeFlux };

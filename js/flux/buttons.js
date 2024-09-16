@@ -63,8 +63,8 @@ const buttonList = [
   { id: "access-user-id", func: "accessUserID" },
   {
     id: "zoteroAPIValidation",
-    func: "checkKey",
-    arg: "zoteroAPIValidation",
+    func: "zoteroCollectionRetriever",
+    //arg: "zoteroAPIValidation",
   },
   { id: "Zotero", func: "updateUserData", arg: "Zotero" },
   { id: "scopusValidation", func: "checkKey", arg: "scopusValidation" },

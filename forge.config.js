@@ -32,9 +32,6 @@ module.exports = {
     {
       name: "@electron-forge/plugin-webpack",
       config: {
-        /* devContentSecurityPolicy:
-          "default-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-eval' 'unsafe-inline' data:", */
-
         devServer: {
           stats: "verbose",
           hot: false,

@@ -18,7 +18,7 @@ import {
   removeLocalService,
 } from "./network-main";
 import { manageTheme } from "./theme-main";
-import { getUserStatus, manageUserKeys } from "./user-main";
+import { getUserDetails, getUserStatus, manageUserKeys } from "./user-main";
 import {
   bioRxivManager,
   mainWindow,
@@ -86,6 +86,8 @@ const activateMainListeners = () => {
   ipcMain.handle("fluxDevTools", async (event, target) => {
     BrowserWindow.fromId(windowIds.flux.id).openDevTools();
   });
+
+  ipcMain.on("getUserDetails", (event, req) => getUserDetails(event));
 
   // ==== CONSOLE ====
   ipcMain.on("console-logs", (event, message) => addLineToConsole(message));
