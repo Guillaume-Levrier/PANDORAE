@@ -1,8 +1,10 @@
 console.log("|==== CHAEROS.JS STARTS HERE ====|");
 
 // This file is voluntarily left as short/small as possible
-// The main file is the chaeros-start.js script
+// The main file is the chaeros-switch.js script
 
-import { listenForOrders } from "./chaeros/chaeros-start";
+import { chaerosSwitch } from "./chaeros/chaeros-switch";
 
-window.addEventListener("load", listenForOrders);
+window.electron.chaerosCompute((data) =>
+  chaerosSwitch(data.fluxAction, data.fluxArgs)
+);

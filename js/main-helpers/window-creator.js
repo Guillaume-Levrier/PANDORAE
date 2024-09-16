@@ -189,7 +189,7 @@ const biorXivScraper = (model, address, chaerosWinId) => {
   });
 };
 
-const chaerosCalculator = () => {
+const chaerosCalculator = (powerValveAction) => {
   let chaerosWindow = new BrowserWindow({
     width: 10,
     height: 10,
@@ -204,11 +204,11 @@ const chaerosCalculator = () => {
   });
 
   chaerosWindow.loadURL(CHAEROS_WEBPACK_ENTRY);
-  //chaerosWindow.loadFile("html/chaeros.html");
 
   chaerosWindow.webContents.on("did-finish-load", function () {
     chaerosWindow.webContents.send("id", chaerosWindow.id);
     chaerosWindow.webContents.openDevTools();
+    chaerosWindow.webContents.send("chaerosCompute", powerValveAction);
   });
 };
 

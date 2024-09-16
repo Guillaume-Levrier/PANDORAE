@@ -1,30 +1,16 @@
 import { chaerosCalculator, mainWindow } from "./window-creator";
 
-// there is a challenge here
-// so that the right process goes to the right window
-// as there can be many concurrent chaeros windows
-
-const powerValveArgsArray = [];
+// Flux requires Chaeros to do some heavy lifting
+//
+// The way to do that in PANDORAE is to create a chaeros calculator,
+// that is a new headless context that is created for that single purpose
+// and that will be destroyed after storing the result in a pandorae
+// database.
 
 const startChaerosProcess = (fluxAction, fluxArgs, message) => {
   mainWindow.webContents.send("coreSignal", message);
-
-  let powerValveAction = {};
-
-  powerValveAction.fluxAction = fluxAction;
-  powerValveAction.fluxArgs = fluxArgs;
-  powerValveAction.message = message;
-
-  powerValveArgsArray.push(powerValveAction);
-
-  chaerosCalculator();
+  const powerValveAction = { fluxAction, fluxArgs };
+  chaerosCalculator(powerValveAction);
 };
 
-const feedChaerosData = (event) => {
-  const action = powerValveArgsArray[powerValveArgsArray.length - 1];
-  console.log("sending a message to chaeros compute");
-  console.log(event.sender.send);
-  event.sender.send("chaerosCompute", action);
-};
-
-export { startChaerosProcess, feedChaerosData };
+export { startChaerosProcess };
