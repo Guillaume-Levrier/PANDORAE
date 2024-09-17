@@ -424,6 +424,7 @@ h1 {
   cursor: pointer;
   z-index: 10;
   border-bottom: 1px solid rgba(192, 192, 192, 0.3);
+  user-select: none;
 }
 
 .tabs:hover {
@@ -1060,6 +1061,7 @@ z-index: 20;
   z-index: 22;
   top: 25px;
   transition: 0.3s;
+  user-select: none;
 }
 
 .observablehq {

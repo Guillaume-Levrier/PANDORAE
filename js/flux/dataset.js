@@ -39,57 +39,60 @@ const datasetDisplay = (divId, kind, altkind) => {
 
     let list = document.createElement("UL");
 
-    pandodb[kind].toArray((files) => {
-      files.forEach((file) => {
-        let line = document.createElement("LI");
-        line.id = file.id;
+    pandodb.flux
+      .where("source")
+      .equals(kind)
+      .toArray((files) => {
+        files.forEach((file) => {
+          let line = document.createElement("LI");
+          line.id = file.id;
 
-        let button = document.createElement("SPAN");
-        line.addEventListener("click", (e) => {
-          datasetDetail(
-            altkind + "-dataset-preview",
-            kind,
-            file.id,
-            altkind + "-dataset-buttons"
-          );
+          let button = document.createElement("SPAN");
+          line.addEventListener("click", (e) => {
+            datasetDetail(
+              altkind + "-dataset-preview",
+              kind,
+              file.id,
+              altkind + "-dataset-buttons"
+            );
+          });
+          button.innerText = file.name;
+
+          let download = document.createElement("i");
+          download.className = "fluxDelDataset material-icons";
+          download.addEventListener("click", (e) => {
+            let name = file.name + ".json";
+            window.electron.invoke(
+              "saveDataset",
+              { defaultPath: name },
+              JSON.stringify(file, replacer)
+            );
+          });
+
+          download.innerText = "download";
+
+          let remove = document.createElement("i");
+          remove.className = "fluxDelDataset material-icons";
+          remove.addEventListener("click", (e) => {
+            datasetRemove(kind, file.id);
+          });
+          remove.innerText = "close";
+
+          line.appendChild(button);
+          line.appendChild(remove);
+          line.appendChild(download);
+
+          list.appendChild(line);
         });
-        button.innerText = file.name;
 
-        let download = document.createElement("i");
-        download.className = "fluxDelDataset material-icons";
-        download.addEventListener("click", (e) => {
-          let name = file.name + ".json";
-          window.electron.invoke(
-            "saveDataset",
-            { defaultPath: name },
-            JSON.stringify(file, replacer)
-          );
-        });
-
-        download.innerText = "download";
-
-        let remove = document.createElement("i");
-        remove.className = "fluxDelDataset material-icons";
-        remove.addEventListener("click", (e) => {
-          datasetRemove(kind, file.id);
-        });
-        remove.innerText = "close";
-
-        line.appendChild(button);
-        line.appendChild(remove);
-        line.appendChild(download);
-
-        list.appendChild(line);
+        if (files.length === 0) {
+          document.getElementById(divId).innerHTML =
+            "No dataset available in the system";
+        } else {
+          document.getElementById(divId).innerHTML = "";
+          document.getElementById(divId).appendChild(list);
+        }
       });
-
-      if (files.length === 0) {
-        document.getElementById(divId).innerHTML =
-          "No dataset available in the system";
-      } else {
-        document.getElementById(divId).innerHTML = "";
-        document.getElementById(divId).appendChild(list);
-      }
-    });
   } catch (err) {
     console.log(err);
     document.getElementById(divId).innerHTML = err; // Display error in the result div
@@ -97,14 +100,18 @@ const datasetDisplay = (divId, kind, altkind) => {
 };
 
 const datasetRemove = (kind, id) => {
-  pandodb[kind].get(id).then((dataset) => {
+  pandodb.flux.toArray().then((datasets) => {
+    var dataset;
+
+    datasets.forEach((d) => (d.id === id ? (dataset = d) : false));
+
     if (dataset.content.hasOwnProperty("path")) {
       fs.unlink(dataset.content.path, (err) => {
         if (err) throw err;
       });
     }
 
-    pandodb[kind].delete(id);
+    pandodb.flux.delete(id);
 
     document
       .getElementById(id)
@@ -129,6 +136,8 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
 
   const altID = prevId.split("-")[0];
 
+  console.log(prevId, kind, id, buttonId);
+
   if (prevId === null) {
     document.getElementById(kind + "-dataset-preview").innerText =
       "Dataset deleted";
@@ -137,7 +146,11 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
     hypheCorpusList(id, prevId);
   } else {
     try {
-      pandodb[kind].get(id).then((doc) => {
+      pandodb.flux.toArray().then((docs) => {
+        let doc;
+
+        docs.forEach((d) => (d.id === id ? (doc = d) : false));
+
         if (altID === "sciento") {
           document.getElementById("sciento-dataset-buttons").style.display =
             "block";
@@ -147,6 +160,7 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
         }
         switch (kind) {
           case "istex":
+            console.log("hello");
             dataPreview = `<strong> ${doc.name} </strong>
                 <br>Origin: ${doc.content.type}
                 <br>Total results: ${doc.content.entries.length} 
@@ -398,7 +412,11 @@ const localUpload = () => {
 const downloadData = () => {
   var id = document.getElementById("system-dataset-preview").name;
 
-  pandodb.system.get(id).then((data) => {
+  pandodb.source.toArray().then((datasets) => {
+    var data;
+
+    datasets.forEach((d) => (d.id === id ? (data = d) : false));
+
     window.electron.invoke(
       "saveDataset",
       { defaultPath: id + ".json" },

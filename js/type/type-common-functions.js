@@ -78,9 +78,11 @@ presentationBox.id = "presentationBox";
 
 window.addEventListener("load", (event) => {
   xtype = document.getElementById("xtype");
-  width = xtype.clientWidth; // Fetching client width
-  height = xtype.clientHeight; // Fetching client height
-  toolWidth = 0.3 * width + 20; // The tooltip is around a third of total available screen width
+  if (xtype) {
+    width = xtype.clientWidth; // Fetching client width
+    height = xtype.clientHeight; // Fetching client height
+    toolWidth = 0.3 * width + 20; // The tooltip is around a third of total available screen width
+  }
   document.body.appendChild(presentationBox);
 });
 

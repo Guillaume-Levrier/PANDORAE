@@ -9,7 +9,7 @@ The "type" nomenclature used to be strict. The timeline was named "chronotype". 
 | timeline        | Timeline        | Chronologie      | ?            | chronotype    |
 | geolocator      | Geolocator      | Cartographe      | ?            | geotype       |
 | network         | Network         | Réseau           | ?            | anthropotype  |
-| webArchives     | Web archive     | Registre Web     | ?            | webArchive    |
+| webArchive      | Web archive     | Registre Web     | ?            | archotype     |
 | clinicalTrials  | Clinical trials | Essais cliniques | ?            | pharmacotype  |
 | socialMedia     | Social media    | Médias sociaux   | ?            | gazouillotype |
 | hyphe           | Hyphe           | Hyphe            | Hyphe        | hyphotype     |

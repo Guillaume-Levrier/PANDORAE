@@ -1,3 +1,6 @@
+import { pandodb } from "../../db";
+import { date } from "../chaeros-to-system";
+
 // ========= ISTEX RETRIEVER ==========
 
 const istexRetriever = (query) => {
@@ -19,9 +22,10 @@ const istexRetriever = (query) => {
 
     pandodb.open();
 
-    pandodb.istex
+    pandodb.flux
       .add({
         id,
+        source: "istex",
         date,
         name: query,
         content,

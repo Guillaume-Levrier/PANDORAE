@@ -7,6 +7,7 @@ import { reqISSN } from "./api-retrievers/scopus-api-retriever";
 import { wosFullRetriever } from "./api-retrievers/wos-api-retriever";
 import { sysExport } from "./chaeros-to-system";
 import { dimensionsCSLconverter } from "./csljson-remappers/dimensions2csljson";
+import { istexCSLconverter } from "./csljson-remappers/istex2csljson";
 import { scopusConverter } from "./csljson-remappers/scopus2csljson";
 import { webofscienceConverter } from "./csljson-remappers/wos2csljson";
 import { computePPS } from "./flatfile-parsers/pps-computer";

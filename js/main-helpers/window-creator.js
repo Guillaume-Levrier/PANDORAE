@@ -67,6 +67,8 @@ const windowManager = (message) => {
 
     case "closeWindow":
       try {
+        console.log("trying to close");
+        console.log(file);
         BrowserWindow.fromId(windowIds[file].id).close();
         windowIds[file].open = false;
       } catch (e) {
