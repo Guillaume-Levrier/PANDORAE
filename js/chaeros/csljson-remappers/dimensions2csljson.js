@@ -1,5 +1,7 @@
 // ====== dimensions csl converter =====
 
+import { pandodb } from "../../db";
+
 const dimensionsCSLconverter = (dataset, source, normalize, email) => {
   const dimensionsToZoteroCSL = (item) => {
     const article = {

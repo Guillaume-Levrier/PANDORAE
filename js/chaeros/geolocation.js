@@ -1,5 +1,8 @@
 //========== GEOLOCATION ==========
 // Several strategies are applicable. One is to take data from most populated cities,
+
+import { pandodb } from "../db";
+
 // another is to ask a services such as geocode.earth.
 
 // It now makes more sense to first uniformize the document and then enrich it.

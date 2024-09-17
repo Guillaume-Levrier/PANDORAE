@@ -1,5 +1,7 @@
 //======= NARRATIVE FUNCTIONS =======
 
+import { pandodb } from "../db";
+
 var zoomed = (targetDrag, transTime) => {
   console.log("error: zoom couldn't load");
 };

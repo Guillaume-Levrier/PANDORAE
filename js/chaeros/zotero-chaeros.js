@@ -4,6 +4,7 @@
 
 import bottleneck from "bottleneck";
 import { dataWriter, getPasswordFromChaeros } from "./chaeros-to-system";
+import { pandodb } from "../db";
 
 const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
   window.electron.send(

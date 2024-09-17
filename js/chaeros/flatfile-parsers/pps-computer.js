@@ -1,5 +1,7 @@
 // ========= PROBLEMATIC PAPER SCREENER ==========
 
+import { pandodb } from "../../db";
+
 // The compute function aims at:
 // - taking a subsection of the PPS list, here the articles commented
 //   by a (list of) PubPeer users.

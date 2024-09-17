@@ -1,3 +1,5 @@
+import { pandodb } from "../../db";
+
 const solrMetaExplorer = (req, meta, dateFrom, dateTo, targetCollections) => {
   const limiter = new bottleneck({
     maxConcurrent: 3,

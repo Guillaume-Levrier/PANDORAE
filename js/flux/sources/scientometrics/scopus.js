@@ -1,3 +1,4 @@
+import { pandodb } from "../../../db";
 import { fluxButtonAction } from "../../actionbuttons";
 
 var ISSNarr = [];
@@ -132,6 +133,7 @@ const exportCitedBy = () => {
       cols.push(collecs[i].value);
     }
   }
+
   pandodb.scopus.toArray((files) => {
     files.forEach((d) => {
       cols.forEach((e) => {

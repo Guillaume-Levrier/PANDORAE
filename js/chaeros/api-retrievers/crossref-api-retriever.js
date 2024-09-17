@@ -1,5 +1,7 @@
 // ======== CrossRef Enricher =====
 
+import { pandodb } from "../../db";
+
 const crossRefEnricher = (dataset, mail) => {
   const limiter = new bottleneck({
     maxConcurrent: 4,

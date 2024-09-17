@@ -1,3 +1,5 @@
+import { pandodb } from "../../db";
+
 //========== biorxivRetriever ==========
 const biorxivRetriever = (query) => {
   let amount = query.amount;
