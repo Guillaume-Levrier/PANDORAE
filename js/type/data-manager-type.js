@@ -1,3 +1,5 @@
+var dataExport;
+
 const dataDownload = (data) => {
   var source = document.getElementById("source");
 
@@ -51,4 +53,4 @@ const localDownload = (data) => {
   }, 300);
 };
 
-export { dataDownload, localDownload };
+export { dataDownload, localDownload, dataExport };

@@ -532,3 +532,4 @@ const populateSlides = (id) => {
     }
   });
 };
+export { currentMainPresStep };

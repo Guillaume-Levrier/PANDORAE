@@ -1,8 +1,22 @@
+import * as d3 from "d3";
+
+import {
+  purgeCore,
+  setCoreExists,
+  setxtypeExists,
+  xtypeDisplay,
+} from "../pandorae-interface/core";
+import { iconCreator } from "../pandorae-interface/icon";
+import { toggleMenu } from "../pandorae-interface/menu";
+
 // =========== LOADTYPE ===========
 // LoadType is the process that removes the main display canvas and then displays
 // the xtype div and xtype SVG element. It is usually called when the data has been
 // loaded and rekindled by the type function, i.e. when the visualisation is (almost)
 // ready to show
+
+var dispose = false;
+
 const loadType = (type, id) => {
   type = type;
   id = id;
@@ -17,19 +31,21 @@ const loadType = (type, id) => {
   field.value = "";
   const exporter = () => categoryLoader("export");
 
-  if (currentMainPresStep.step) {
-    iconCreator("back-to-pres", backToPres, "Back to presentation");
-  } else {
-    iconCreator("export-icon", toggleMenu, "Export");
-    //
-    //  CURRENT DEACTIVATED
-    //
-    //  PRESENTATION SYSTEM DEPENDENT
-    //
-    //  iconCreator("step-icon", addPresentationStep);
-    //  iconCreator("slide-icon", createSlide);
-    //  iconCreator("save-icon", savePresentation);
-  }
+  iconCreator("export-icon", toggleMenu, "Export");
+
+  //
+  //  CURRENT DEACTIVATED
+  //
+  //  PRESENTATION SYSTEM DEPENDENT
+
+  //if (!currentMainPresStep.step) {
+  // iconCreator("back-to-pres", backToPres, "Back to presentation");
+
+  //
+  //  iconCreator("step-icon", addPresentationStep);
+  //  iconCreator("slide-icon", createSlide);
+  //  iconCreator("save-icon", savePresentation);
+  //}
 
   document.getElementById("fluxMenu").style.display = "none";
   document.getElementById("type").style.display = "none";
@@ -50,12 +66,12 @@ const loadType = (type, id) => {
     .getElementById("menu")
     .insertBefore(exportButton, document.getElementById("quitBut"));
 
-  window.onresize = resizer;
+  //window.onresize = resizer;
 };
 
 // =========== XTYPE ===========
 
-var width, height, toolWidth;
+var width, height, toolWidth, xtype;
 
 var presentationBox = document.createElement("div");
 presentationBox.id = "presentationBox";
@@ -284,3 +300,5 @@ const multiFormat = (date) =>
     : d3.timeYear(date) < date
     ? formatMonth
     : formatYear)(date);
+
+export { loadType, width, height, toolWidth };

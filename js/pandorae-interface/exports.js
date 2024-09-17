@@ -1,3 +1,6 @@
+import { dataExport } from "../type/data-manager-type";
+import { toggleMenu } from "./menu";
+
 const savePNG = () => {
   document.getElementById("icons").style.display = "none";
 

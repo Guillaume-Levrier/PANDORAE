@@ -1,3 +1,9 @@
+//import * as whois from "whois-json";
+
+var whois;
+
+// this somehow causes a bug, to be inquired
+
 // ========= HYPHOTYPE =========
 const hyphotype = (id) => {
   //  SVG VIEW
@@ -314,8 +320,6 @@ const hyphotype = (id) => {
               document.getElementById("whois").innerHTML = "";
 
               (async function () {
-                const whois = require("whois-json");
-
                 var whoisDetails = await whois(d.name);
 
                 var whoisResult = "<h3>Whois result</h3>";

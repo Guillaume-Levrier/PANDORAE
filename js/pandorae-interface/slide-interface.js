@@ -1,5 +1,5 @@
 import { CMT } from "../locales";
-import { typeSwitch } from "../type/types-old";
+import { typeSwitch } from "../type/typeswitch";
 import { toggledMenu, toggleMenu } from "./menu";
 import { pulse } from "./pulse";
 import {

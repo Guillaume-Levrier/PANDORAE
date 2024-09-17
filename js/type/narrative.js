@@ -1,7 +1,5 @@
 //======= NARRATIVE FUNCTIONS =======
 
-const zoom = d3.zoom();
-
 var zoomed = (targetDrag, transTime) => {
   console.log("error: zoom couldn't load");
 };

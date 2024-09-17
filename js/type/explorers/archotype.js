@@ -1,11 +1,20 @@
+import * as d3 from "d3";
+import { width, height, toolWidth, loadType } from "../type-common-functions";
+import { pandodb } from "../../db";
+import { dataDownload } from "../data-manager-type";
+
 // ========= ARCHOTYPE =========
 const archotype = (id) => {
   // When called, draw the archotype
+
+  var availability;
 
   //========== SVG VIEW =============
   const svg = d3.select(xtype).append("svg").attr("id", "xtypeSVG"); // Creating the SVG DOM node
 
   svg.attr("width", width).attr("height", height); // Attributing width and height to svg
+
+  const zoom = d3.zoom();
 
   const bgrect = svg
     .append("rect")

@@ -78,3 +78,5 @@ const typeSwitch = (type, id) => {
 
   document.getElementById("source").innerText = "Source: " + id;
 };
+
+export { typeSwitch };

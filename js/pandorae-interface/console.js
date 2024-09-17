@@ -2,7 +2,7 @@
 
 import { CMT } from "../locales";
 import { displayCore, purgeXtype } from "./core";
-import { toggleTertiaryMenu } from "./menu";
+import { toggleMenu, toggleSecondaryMenu, toggleTertiaryMenu } from "./menu";
 import { resetPandoratio } from "./pulse";
 import { listTableDatasets } from "./type-loader";
 

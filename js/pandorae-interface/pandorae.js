@@ -27,8 +27,6 @@ import { nameDisplay } from "./pulse";
 import { requestTheme } from "./themes";
 import { requestStatus } from "./kickstart";
 
-var dispose = false;
-
 var CM = CMT["EN"]; // Load the EN locale first
 
 // for export purposes
