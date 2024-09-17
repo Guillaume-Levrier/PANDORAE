@@ -395,3 +395,5 @@ const anthropotype = (id) => {
 
   window.electron.send("console-logs", "Starting anthropotype");
 };
+
+export { anthropotype };

@@ -459,3 +459,5 @@ const pharmacotype = (id) => {
   };
   window.electron.send("console-logs", "Starting Pharmacotype");
 };
+
+export { pharmacotype };

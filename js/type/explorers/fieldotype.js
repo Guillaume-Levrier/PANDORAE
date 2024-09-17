@@ -319,3 +319,5 @@ const fieldotype = (id) => {
 
   window.electron.send("console-logs", "Starting fieldotype");
 };
+
+export { fieldotype };

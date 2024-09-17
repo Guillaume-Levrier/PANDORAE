@@ -5,6 +5,18 @@
 // support certain types of data. Each focuses on a certain perspective, and helps the user
 // discover patterns on potentially larger datasets.
 
+import { anthropotype } from "./explorers/anthropotype";
+import { archotype } from "./explorers/archotype";
+import { chronotype } from "./explorers/chronotype";
+import { doxatype } from "./explorers/doxatype";
+import { fieldotype } from "./explorers/fieldotype";
+import { filotype } from "./explorers/filotype";
+import { gazouillotype } from "./explorers/gazouillotype";
+import { geotype } from "./explorers/geotype";
+import { hyphotype } from "./explorers/hyphotype";
+import { pharmacotype } from "./explorers/pharmacotype";
+import { regards } from "./explorers/regardotype";
+
 //========== typesSwitch ==========
 // Switch used to which type to draw/generate
 

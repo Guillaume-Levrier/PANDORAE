@@ -1276,3 +1276,5 @@ const chronotype = (id) => {
 
   window.electron.send("console-logs", "Starting chronotype"); // Starting Chronotype
 }; // Close Chronotype function
+
+export { chronotype };

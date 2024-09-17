@@ -1399,3 +1399,5 @@ const archotype = (id) => {
 
   window.electron.send("console-logs", "Starting archotype");
 };
+
+export { archotype };

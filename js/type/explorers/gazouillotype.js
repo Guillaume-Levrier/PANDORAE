@@ -988,3 +988,5 @@ const gazouillotype = (id) => {
 
   window.electron.send("console-logs", "Starting gazouillotype"); // Starting gazouillotype
 }; // Close gazouillotype function
+
+export { gazouillotype };

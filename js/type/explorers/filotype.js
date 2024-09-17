@@ -341,3 +341,5 @@ const filotype = (id) => {
 
   window.electron.send("console-logs", "Starting Filotype");
 };
+
+export { filotype };

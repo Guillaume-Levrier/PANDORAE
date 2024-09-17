@@ -671,3 +671,5 @@ const hyphotype = (id) => {
 
   window.electron.send("console-logs", "Starting Hyphotype");
 };
+
+export { hyphotype };

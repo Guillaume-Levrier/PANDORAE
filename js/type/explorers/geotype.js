@@ -1246,3 +1246,5 @@ const geotype = (id) => {
 
   window.electron.send("console-logs", "Starting geotype");
 };
+
+export { geotype };

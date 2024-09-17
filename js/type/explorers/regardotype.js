@@ -274,3 +274,5 @@ const regards = (id) => {
     view.attr("transform", thatZoom);
   };
 };
+
+export { regards };

@@ -100,3 +100,5 @@ const doxatype = (id) => {
 
   window.electron.send("console-logs", "Starting Doxatype");
 };
+
+export { doxatype };
