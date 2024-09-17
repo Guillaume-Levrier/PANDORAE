@@ -227,4 +227,4 @@ const reqISSN = (user, scopid) => {
   });
 };
 
-export { scopusRetriever };
+export { scopusRetriever, reqISSN };

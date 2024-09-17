@@ -1,3 +1,15 @@
+import { biorxivRetriever } from "./api-retrievers/biorxiv-retriever";
+import { solrMetaExplorer } from "./api-retrievers/bnfsolr-api-retriever";
+import { clinTriRetriever } from "./api-retrievers/clinical-trials-api-retriever";
+import { istexRetriever } from "./api-retrievers/istex-api-retriever";
+import { regardsRetriever } from "./api-retrievers/regards-citoyens-api-retriever";
+import { reqISSN } from "./api-retrievers/scopus-api-retriever";
+import { wosFullRetriever } from "./api-retrievers/wos-api-retriever";
+import { sysExport } from "./chaeros-to-system";
+import { dimensionsCSLconverter } from "./csljson-remappers/dimensions2csljson";
+import { scopusConverter } from "./csljson-remappers/scopus2csljson";
+import { webofscienceConverter } from "./csljson-remappers/wos2csljson";
+import { computePPS } from "./flatfile-parsers/pps-computer";
 import {
   zoteroCollectionBuilder,
   zoteroItemsRetriever,
@@ -24,7 +36,6 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
 
       case "wosBuild":
         wosFullRetriever(fluxArgs.user, fluxArgs.wosquery);
-
         break;
 
       case "BNF-SOLR":
@@ -80,8 +91,6 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
             );
             break;
 
-          case "ISTEX-dataset":
-
           default:
             break;
         }
@@ -92,19 +101,21 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
         scopusGeolocate(fluxArgs.scopusGeolocate.dataset);
         break;
 
-      case "GallicaFullQuery":
-        GallicaFullQuery(fluxArgs.GallicaFullQuery.queryString);
-        break;
-
       case "webofscienceGeolocate":
         webofscienceGeolocate(fluxArgs.webofscienceGeolocate.dataset);
         break;
 
-      case "altmetricRetriever":
+      /* case "altmetricRetriever":
         altmetricRetriever(
           fluxArgs.altmetricRetriever.id,
           fluxArgs.altmetricRetriever.user
         );
+        break; */
+
+      // ==== RETRIEVERS ====
+
+      case "GallicaFullQuery":
+        GallicaFullQuery(fluxArgs.GallicaFullQuery.queryString);
         break;
 
       case "istexRetriever":
@@ -158,10 +169,6 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
           fluxArgs.tweetImporter.query,
           fluxArgs.tweetImporter.datasetName
         );
-        break;
-
-      case "clinTriRetriever":
-        clinTriRetriever(fluxArgs.clinTriRetriever.query);
         break;
 
       case "reqISSN":

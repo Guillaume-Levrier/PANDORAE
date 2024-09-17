@@ -117,3 +117,5 @@ const wosFullRetriever = (user, wosReq) => {
       //      console.log(JSON.stringify(documents[0]));
     });
 };
+
+export { wosFullRetriever };

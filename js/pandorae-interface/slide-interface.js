@@ -1,8 +1,19 @@
-import { toggledMenu } from "./menu";
+import { CMT } from "../locales";
+import { typeSwitch } from "../type/types-old";
+import { toggledMenu, toggleMenu } from "./menu";
+import { pulse } from "./pulse";
+import {
+  listTableDatasets,
+  setTypeSelector,
+  typeSelector,
+} from "./type-loader";
 
 var mainPresContent = [];
 var mainPresEdit = false;
 var priorDate = false;
+var currentType;
+
+const CM = CMT.EN;
 
 const saveSlides = () => {
   let name = document.getElementById("presNamer").value;
@@ -144,7 +155,7 @@ const slideDisp = (block) => {
 
 var quillEdit;
 
-ipcRenderer.on("backToPres", (event, message) => {
+window.electron.backToPres((event, message) => {
   setTimeout(() => {
     populateSlides(message.id);
     setTimeout(() => {
@@ -165,7 +176,8 @@ const selectOption = (type, id) => {
       "/actionType]";
     let editor = document.getElementsByClassName("ql-editor")[0];
     editor.innerHTML = editor.innerHTML + order;
-    typeSelector = false;
+
+    setTypeSelector(false);
     toggleMenu();
   } else {
     if (toggledMenu) {
@@ -198,3 +210,5 @@ const selectOption = (type, id) => {
     );
   }
 };
+
+export { selectOption, currentType };

@@ -280,3 +280,5 @@ const webofscienceGeolocate = (dataset) => {
     );
   });
 };
+
+export { scopusGeolocate };

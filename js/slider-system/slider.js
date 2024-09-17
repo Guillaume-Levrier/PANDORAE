@@ -1,5 +1,6 @@
 // Slider script
 const { Runtime, Inspector } = require("@observablehq/runtime");
+const { selectOption } = require("../pandorae-interface/slide-interface");
 
 const createObsCell = (
   slide,

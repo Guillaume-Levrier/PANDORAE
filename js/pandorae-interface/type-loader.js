@@ -1,5 +1,11 @@
 import { pandodb } from "../db";
-import { purgeMenuItems, toggleSecondaryMenu } from "./menu";
+import { mainDisplay } from "./console";
+import { purgeMenuItems, toggleMenu, toggleSecondaryMenu } from "./menu";
+import { selectOption } from "./slide-interface";
+
+var typeSelector;
+
+const setTypeSelector = (n) => (typeSelector = n);
 
 const typeSelect = () => {
   toggleMenu();
@@ -45,9 +51,11 @@ const categoryLoader = (cat) => {
               typeContainer.id = block;
               typeContainer.className += "tabs menu-item";
               typeContainer.innerText = block;
-              typeContainer.addEventListener("click", (e) => {
-                mainDisplay(block);
-              });
+
+              typeContainer.addEventListener("click", (e) =>
+                mainDisplay(block)
+              );
+
               document
                 .getElementById("secMenContent")
                 .appendChild(typeContainer);
@@ -175,4 +183,4 @@ const listTableDatasets = (table) => {
   });
 };
 
-export { categoryLoader };
+export { categoryLoader, listTableDatasets, setTypeSelector, typeSelector };

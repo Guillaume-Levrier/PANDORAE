@@ -122,3 +122,5 @@ const istexCSLconverter = (dataset, source, normalize, email) => {
     }
   });
 };
+
+export { istexCSLconverter };

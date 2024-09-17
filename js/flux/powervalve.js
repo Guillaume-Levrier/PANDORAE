@@ -89,13 +89,13 @@ const powerValve = (fluxAction, item) => {
       message = "Connecting to BNF-SOLR";
       break;
 
-    case "altmetricRetriever":
+    /* case "altmetricRetriever":
       fluxArgs.altmetricRetriever = {};
       fluxArgs.altmetricRetriever.id =
         document.getElementById("altmetricRetriever").name;
       fluxArgs.altmetricRetriever.user =
         document.getElementById("userNameInput").value;
-      break;
+      break; */
 
     case "reqISSN":
       prepareISSN();

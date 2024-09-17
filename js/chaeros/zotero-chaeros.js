@@ -17,8 +17,6 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
       " into SYSTEM."
   );
 
-  console.log("starting zotero item retriever");
-
   const limiter = new bottleneck({
     // Create a bottleneck to prevent API rate limit
     maxConcurrent: 1, // Only one request at once
@@ -28,7 +26,6 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
   const zoteroPromises = [];
 
   const zoteroApiKey = getPasswordFromChaeros("Zotero", zoteroUser);
-  console.log(zoteroApiKey);
 
   for (let j = 0; j < collections.length; j++) {
     // Loop on collections
@@ -63,10 +60,6 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
 
             f.name = f.data.name;
             f.items = [];
-
-            console.log(
-              "la collection " + f.name + " comporte " + thisCollectionAmount
-            );
 
             let itemRequests = [];
 

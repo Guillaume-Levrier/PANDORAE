@@ -1,5 +1,6 @@
 import { CMT } from "../locales";
 import { displayCore } from "./core";
+import { pulse } from "./pulse";
 
 // ====== MENU ======
 const CM = CMT["EN"];

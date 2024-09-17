@@ -90,3 +90,5 @@ const GallicaFullQuery = (targetExpression) => {
       }
     });
 };
+
+export { GallicaFullQuery };

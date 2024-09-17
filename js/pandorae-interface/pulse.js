@@ -1,5 +1,9 @@
 var pump = {};
 let coreLogoArchive = "";
+var pandoratio = 0;
+
+const resetPandoratio = () => (pandoratio = 0);
+
 const pulse = (status, coeff, rhythm, clear) => {
   let rate = (number) => {
     status = status += 0.1 * coeff;
@@ -16,6 +20,9 @@ const pulse = (status, coeff, rhythm, clear) => {
     }, rhythm);
   }
 };
+
+var decrement = 0;
+var floor = 0;
 
 const detransfect = () => {
   var reach = true;
@@ -101,4 +108,4 @@ const nameDisplay = (name) => {
     .animate([{ opacity: 0 }, { opacity: 1 }], 700);
 };
 
-export { nameDisplay };
+export { nameDisplay, pulse, resetPandoratio };

@@ -62,7 +62,7 @@ const biorxivRetriever = (query) => {
 
   let count = 0;
 
-  ipcRenderer.on("biorxivRetrieve", (event, message) => {
+  window.electron.biorxivRetrieve((event, message) => {
     message.content.forEach((d) =>
       doiBuffer.push(d.replace("doi: https://doi.org/", "").replace(" ", ""))
     );
@@ -224,3 +224,5 @@ const biorxivRetriever = (query) => {
       });
   };
 };
+
+export { biorxivRetriever };

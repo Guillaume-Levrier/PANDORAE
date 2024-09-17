@@ -108,3 +108,5 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo, targetCollections) => {
       });
   });
 };
+
+export { solrMetaExplorer };

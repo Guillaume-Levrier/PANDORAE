@@ -111,3 +111,5 @@ const dimensionsCSLconverter = (dataset, source, normalize, email) => {
     }
   });
 };
+
+export { dimensionsCSLconverter };

@@ -85,3 +85,5 @@ const istexRetriever = (query) => {
       }
     });
 };
+
+export { istexRetriever };

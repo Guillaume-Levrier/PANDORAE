@@ -31,18 +31,12 @@ var dispose = false;
 
 var CM = CMT["EN"]; // Load the EN locale first
 
-var typeSelector = false;
-
 // for export purposes
-var currentType; // Once a type is started, know which one
+
 var presentationStep = [];
 
 var tutoSlide;
 var field;
-var pandoratio = 0; // Used in three.js transitions (from one shape to another)
-
-var xtype;
-var activeTheme;
 
 // =========== SHARED WORKER ===========
 // Some datasets can be very large, and the data rekindling necessary before display that

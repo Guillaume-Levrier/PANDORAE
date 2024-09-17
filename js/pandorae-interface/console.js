@@ -1,7 +1,10 @@
 // =========== CONSOLE ===========
 
 import { CMT } from "../locales";
-import { displayCore } from "./core";
+import { displayCore, purgeXtype } from "./core";
+import { toggleTertiaryMenu } from "./menu";
+import { resetPandoratio } from "./pulse";
+import { listTableDatasets } from "./type-loader";
 
 const CM = CMT.EN;
 
@@ -129,7 +132,7 @@ const cmdinput = (input) => {
         break;
 
       case CM.mainField.reloadCore:
-        pandoratio = 0;
+        resetPandoratio();
         break;
 
       case "transfect":
