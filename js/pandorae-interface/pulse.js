@@ -64,6 +64,8 @@ const progBarSign = (prog) => {
  */
 // ========== CORE SIGNALS ===========
 
+console.log(window.electron);
+
 window.electron.coreSignal((message) => {
   try {
     field.value = message;

@@ -160,7 +160,7 @@ const exportToHTML = () => {
                         "chronotype",
                         "geotype",
                         "anthropotype",
-                        "archotype",
+                        "webArchive",
                         "gazouillotype",
                         "hyphotype",
                         "doxatype",

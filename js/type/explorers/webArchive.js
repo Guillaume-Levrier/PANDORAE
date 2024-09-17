@@ -3,9 +3,9 @@ import { width, height, toolWidth, loadType } from "../type-common-functions";
 import { pandodb } from "../../db";
 import { dataDownload } from "../data-manager-type";
 
-// ========= ARCHOTYPE =========
-const archotype = (id) => {
-  // When called, draw the archotype
+// ========= webArchive =========
+const webArchive = (id) => {
+  // When called, draw the webArchive
 
   var availability;
 
@@ -89,7 +89,7 @@ const archotype = (id) => {
 
   //======== DATA CALL & SORT =========
 
-  pandodb.archotype
+  pandodb.webArchive
     .get(id)
     .then((datajson) => {
       dataDownload(datajson);
@@ -211,7 +211,7 @@ const archotype = (id) => {
                   console.log(error);
                   window.electron.send(
                     "console-logs",
-                    "archotype error: url " + target + " is invalid."
+                    "webArchive error: url " + target + " is invalid."
                   );
 
                   //This will allow skipping the next part
@@ -759,7 +759,7 @@ const archotype = (id) => {
         }
       };
 
-      const archotypeSelectionMenu = () => {
+      const webArchiveSelectionMenu = () => {
         if (captureTimeline) {
           captureTimeline
             .transition()
@@ -811,7 +811,7 @@ const archotype = (id) => {
         });
       };
 
-      bgrect.on("click", archotypeSelectionMenu);
+      bgrect.on("click", webArchiveSelectionMenu);
 
       //let domainCount = Object.keys(domainMap).length;
 
@@ -1372,14 +1372,14 @@ const archotype = (id) => {
 
       document.getElementById("tooltip").append(toolContent);
 
-      archotypeSelectionMenu();
+      webArchiveSelectionMenu();
     })
     .catch((error) => {
       console.log(error);
       field.value = "error - invalid dataset";
       window.electron.send(
         "console-logs",
-        "archotype error: dataset " + id + " is invalid."
+        "webArchive error: dataset " + id + " is invalid."
       );
     });
 
@@ -1406,7 +1406,7 @@ const archotype = (id) => {
     }
   }
 
-  window.electron.send("console-logs", "Starting archotype");
+  window.electron.send("console-logs", "Starting webArchive");
 };
 
-export { archotype };
+export { webArchive };

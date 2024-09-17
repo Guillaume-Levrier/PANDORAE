@@ -1,3 +1,8 @@
+import * as d3 from "d3";
+import { width, height, toolWidth, loadType } from "../type-common-functions";
+import { pandodb } from "../../db";
+import { dataDownload } from "../data-manager-type";
+
 // ========= GAZOUILLOTYPE =========
 const gazouillotype = (id) => {
   // When called, draw the gazouillotype

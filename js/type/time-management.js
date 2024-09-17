@@ -1,3 +1,5 @@
+import * as d3 from "d3";
+
 // ========== TIME ===========
 const currentTime = new Date(); // Precise time when the page has loaded
 const Past = d3.timeYear.offset(currentTime, -1); // Precise time minus one year
@@ -214,3 +216,5 @@ const multiFormat = (date) =>
     : d3.timeYear(date) < date
     ? formatMonth
     : formatYear)(date);
+
+export { parseTime };

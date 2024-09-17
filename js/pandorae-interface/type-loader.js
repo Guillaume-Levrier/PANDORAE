@@ -30,7 +30,7 @@ const categoryLoader = (cat) => {
           "chronotype",
           "geotype",
           "anthropotype",
-          "archotype",
+          "webArchive",
           "gazouillotype",
           "hyphotype",
           "doxatype",

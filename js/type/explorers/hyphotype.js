@@ -1,4 +1,7 @@
-//import * as whois from "whois-json";
+import * as d3 from "d3";
+import { width, height, toolWidth, loadType } from "../type-common-functions";
+import { pandodb } from "../../db";
+import { dataDownload } from "../data-manager-type";
 
 var whois;
 

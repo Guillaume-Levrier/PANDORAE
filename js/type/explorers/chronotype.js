@@ -1,9 +1,20 @@
+import * as d3 from "d3";
+import { width, height, toolWidth, loadType } from "../type-common-functions";
+import { pandodb } from "../../db";
+import { dataDownload } from "../data-manager-type";
+import { parseTime } from "../time-management";
+import { iconCreator } from "../../pandorae-interface/icon";
+
+var zoomed, _originalBrushData;
+
 // ========== CHRONOTYPE ==========
 const chronotype = (id) => {
   // When called, draw the chronotype
 
   //========== SVG VIEW =============
   var svg = d3.select(xtype).append("svg").attr("id", "xtypeSVG");
+
+  const zoom = d3.zoom();
 
   svg
     .attr("width", width - toolWidth)

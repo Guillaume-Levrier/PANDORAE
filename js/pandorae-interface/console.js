@@ -107,7 +107,7 @@ const cmdinput = (input) => {
         break;
 
       case "gazouillotype":
-      case "archotype":
+      case "webArchive":
       case "anthropotype":
       case "geotype":
       case "chronotype":

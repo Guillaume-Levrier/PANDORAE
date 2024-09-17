@@ -6,7 +6,7 @@
 // discover patterns on potentially larger datasets.
 
 import { anthropotype } from "./explorers/anthropotype";
-import { archotype } from "./explorers/archotype";
+import { webArchive } from "./explorers/webArchive";
 import { chronotype } from "./explorers/chronotype";
 import { doxatype } from "./explorers/doxatype";
 import { fieldotype } from "./explorers/fieldotype";
@@ -50,8 +50,8 @@ const typeSwitch = (type, id) => {
     case "anthropotype":
       anthropotype(id);
       break;
-    case "archotype":
-      archotype(id);
+    case "webArchive":
+      webArchive(id);
       break;
 
     case "chronotype":
