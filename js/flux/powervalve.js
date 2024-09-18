@@ -196,10 +196,8 @@ const powerValve = (fluxAction, item) => {
 
     case "sysExport":
       fluxArgs.sysExport = {};
-      fluxArgs.sysExport.id = document.getElementById(
-        "system-dataset-preview"
-      ).name;
-      fluxArgs.sysExport.name = document.getElementById("systemToType").value;
+      fluxArgs.sysExport.id = item.id;
+      fluxArgs.sysExport.name = item.name;
       fluxArgs.sysExport.dest = [];
       var dest = document.getElementsByClassName("sysDestCheck");
       for (let i = 0; i < dest.length; i++) {
@@ -211,35 +209,29 @@ const powerValve = (fluxAction, item) => {
       break;
 
     case "zoteroItemsRetriever":
-      if (document.getElementById("zotitret").name === "block") {
-        fluxButtonAction(
-          "zotcolret",
-          false,
-          "Zotero Collections Successfully Retrieved",
-          "Please select a destination"
-        );
-      } else {
-        fluxArgs.zoteroItemsRetriever = {
-          collections: [],
-          destination: [],
-        };
-        var collecs = document.getElementsByClassName("zotColCheck");
-        for (let i = 0; i < collecs.length; i++) {
-          if (collecs[i].checked) {
-            fluxArgs.zoteroItemsRetriever.collections.push({
-              key: collecs[i].value,
-              name: collecs[i].name,
-            });
-          }
-        }
+      fluxArgs.zoteroItemsRetriever = {
+        collections: [],
+        destination: [],
+      };
 
-        fluxArgs.zoteroItemsRetriever.zoteroUser =
-          document.getElementById("zoterouserinput").value;
-        fluxArgs.zoteroItemsRetriever.importName = document
-          .getElementById("zoteroImportName")
-          .value.replace(/\s/g, "");
-        message = "Retrieving user collections…";
+      var collecs = document.getElementsByClassName("zotColCheck");
+      for (let i = 0; i < collecs.length; i++) {
+        if (collecs[i].checked) {
+          fluxArgs.zoteroItemsRetriever.collections.push({
+            key: collecs[i].value,
+            name: collecs[i].name,
+          });
+        }
       }
+
+      fluxArgs.zoteroItemsRetriever.zoteroUser =
+        document.getElementById("zoterouserinput").value;
+
+      fluxArgs.zoteroItemsRetriever.importName = document
+        .getElementById("zoteroImportName")
+        .value.replace(/\s/g, "");
+      message = "Retrieving user collections…";
+
       break;
 
     case "zoteroCollectionBuilder":

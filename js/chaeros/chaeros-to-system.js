@@ -13,25 +13,35 @@ const sysExport = (destination, importName, id) => {
 };
 
 //========== dataWriter ==========
-const dataWriter = (destination, importName, content) => {
+const dataWriter = (destination, importName, content, datasetType) => {
   pandodb.open();
-  destination.forEach((d) => {
-    let table = pandodb[d];
-    let id = importName + date;
-    table.add({ id: id, date: date, name: importName, content: content });
-    window.electron.send(
-      "console-logs",
-      "Retrieval successful. " + importName + " was imported in " + d
-    );
-  });
-  window.electron.send(
-    "chaeros-notification",
-    "dataset loaded into " + destination
-  );
-  window.electron.send("pulsar", true);
-  setTimeout(() => {
-    window.electron.send("win-destroy", true);
-  }, 1000);
+  destination
+    .forEach((d) => {
+      let table = pandodb[d];
+
+      let id = importName + date;
+      table
+        .add({
+          id: id,
+          date: date,
+          name: importName,
+          datasetType,
+          content: content,
+        })
+        .then(() => {
+          window.electron.send(
+            "console-logs",
+            "Retrieval successful. " + importName + " was imported in " + d
+          );
+        });
+      window.electron.send(
+        "chaeros-notification",
+        "dataset loaded into " + destination
+      );
+      window.electron.send("pulsar", true);
+      window.electron.send("win-destroy", true);
+    })
+    .catch((e) => console.log(e));
 };
 
 const getPasswordFromChaeros = (service, user) =>

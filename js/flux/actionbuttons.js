@@ -5,21 +5,47 @@
 // - successPhrase is the string to be displayed as button value (the text of the button) if success = true
 // - errorPhrase is the same thing if success = false
 
-const fluxButtonAction = (buttonID, success, successPhrase, errorPhrase) => {
-  document.getElementById(buttonID).style.transition = "all 1s ease-out"; // Animate button
-  document.getElementById(buttonID).style.backgroundPosition = "left bottom"; // Move background white->black
-  document.getElementById(buttonID).style.color = "white"; // Change button font color to white
-
-  if (success) {
+const fluxButtonAction = (
+  buttonElement,
+  success,
+  successPhrase,
+  errorPhrase
+) => {
+  //to be moved to the DOM builder
+  /* buttonElement.style.transition = "all 1s ease-out"; // Animate button
+  buttonElement.style.backgroundPosition = "left bottom"; // Move background white->black
+  buttonElement.style.color = "white"; // Change button font color to white
+ */
+  /*   if (success) {
     // If success = true
-    document.getElementById(buttonID).innerText = successPhrase; // Display success phrase
+    buttonElement.innerText = successPhrase; // Display success phrase
   } else {
     // If success = false
-    document.getElementById(buttonID).innerText = errorPhrase; // Display error phrase
+    buttonElement.innerText = errorPhrase; // Display error phrase
   }
 
   // Disable button after request to prevent external request spamming and subsequent API throttling.
-  document.getElementById(buttonID).disabled = true;
+  buttonElement.disabled = true; */
 };
 
-export { fluxButtonAction };
+const fluxButtonClicked = (buttonElement, disable, buttonText) => {
+  //buttonElement.style.transition = "all 1s ease-in"; // Animate button
+  buttonElement.style.backgroundPosition = "left bottom"; // Move background white->black
+  buttonElement.style.color = "white"; // Change button font color to white
+  buttonElement.disabled = disable;
+  buttonElement.style.cursor = disable ? "not-allowed" : "pointer";
+
+  if (buttonText) {
+    buttonElement.innerText = buttonText;
+  }
+
+  if (!disable) {
+    // reset the style
+    setTimeout(() => {
+      buttonElement.style.backgroundPosition = "right bottom"; // Move background white->black
+      buttonElement.style.color = "black"; // Change button font color to white
+    }, 1300);
+  }
+};
+
+export { fluxButtonAction, fluxButtonClicked };

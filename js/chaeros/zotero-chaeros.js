@@ -104,9 +104,10 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
 
                     if (responseAmount === responseTarget) {
                       dataWriter(
-                        ["system"],
+                        ["flux"],
                         importName,
-                        zoteroCollectionResponse
+                        zoteroCollectionResponse,
+                        "system"
                       );
                     }
                   });

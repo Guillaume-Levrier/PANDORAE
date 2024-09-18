@@ -69,7 +69,11 @@ const istexCSLconverter = (dataset, source, normalize, email) => {
   window.electron.send("console-logs", "Starting istexConverter on " + dataset); // Notify console conversion started
   let convertedDataset = []; // Create an array
 
-  pandodb[source].get(dataset).then((doc) => {
+  pandodb.flux.toArray().then((docs) => {
+    var doc;
+
+    docs.forEach((d) => (d.id === dataset ? (doc = d) : false));
+
     // Open the database in which the dataset is stored
     try {
       // If the file is valid, do the following:
@@ -102,10 +106,11 @@ const istexCSLconverter = (dataset, source, normalize, email) => {
       } else {
         pandodb.open();
 
-        pandodb.csljson
+        pandodb.flux
           .add({
             id,
             date,
+            source: "csljson",
             name: dataset,
             content: convertedDataset,
           })

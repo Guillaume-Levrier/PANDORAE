@@ -8,9 +8,9 @@ let pandodb = new Dexie("PandoraeDatabase");
 
 pandodb.version(1).stores({
   type: "type",
-  flux: "source",
-  system: "id",
+  flux: "datasetType",
 });
+
 pandodb.open();
 
 export { pandodb };

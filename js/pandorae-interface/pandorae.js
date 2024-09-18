@@ -17,7 +17,7 @@ const msg =
 
 console.log(msg);
 
-import { CMT } from "../locales";
+import { CMT } from "../locales/locales";
 import { addToLog, cmdinput, toggleConsole } from "./console";
 import { iconCreator } from "./icon";
 import { keyShortCuts } from "./keyboard-shortcuts";

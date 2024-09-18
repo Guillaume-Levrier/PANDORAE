@@ -180,6 +180,7 @@ h1 {
   font-size: 16px;
   color: #141414;
   z-index: 5;
+  user-select: none;
 }
 
 .dialog-buttons:hover {
@@ -894,6 +895,7 @@ label {
   height: 90%;
   overflow-y: auto;
   overflow-x: hidden;
+  user-select: none;
 }
 
 .flux-button {
@@ -906,6 +908,7 @@ label {
   background: linear-gradient(to right, black 50%, white 50%);
   background-size: 200% 100%;
   background-position: right bottom;
+  transition:all 1s;
 }
 
 .flux-button:hover {
@@ -1054,6 +1057,15 @@ z-index: 20;
   position: absolute;
 }
 
+.tabSection{
+  padding-left:1rem;
+  padding-bottom:1rem;
+}
+
+.fluxDatasetList{
+  padding:1rem;
+}
+
 #icons {
   left: 25px;
   position: fixed;
@@ -1062,6 +1074,10 @@ z-index: 20;
   top: 25px;
   transition: 0.3s;
   user-select: none;
+}
+
+.flux-description{
+  padding: 1rem;
 }
 
 .observablehq {
@@ -1086,4 +1102,27 @@ z-index: 20;
 /*Dev issue*/
 #webpack-dev-server-client-overlay{
 display: none;
+}
+
+
+.fluxQueryResult{   
+  padding: 1rem;
+  margin: 1rem;
+  border: 1px dashed black;
+  border-radius: 0.5rem;
+}
+
+.systemOption{
+  display: flex;
+    align-items: flex-start;
+    flex-direction: row;
+    padding-bottom: 2px;
+}
+
+.systemOption:hover{
+  border:1px solid black;
+}
+
+.sysDestCheck{
+  margin-right:10px;
 }

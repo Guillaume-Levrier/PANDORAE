@@ -1,4 +1,4 @@
-import { CMT } from "../locales";
+import { CMT } from "../locales/locales";
 import { displayCore } from "./core";
 import { pulse } from "./pulse";
 

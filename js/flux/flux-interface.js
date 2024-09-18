@@ -14,10 +14,27 @@
 
 import { retrieveAvailableServices } from "./cascade";
 import { getPassword, getUserData } from "./userdata";
+import { closeFluxWindow, refreshFluxWindow } from "./window";
 
 window.electron.send("console-logs", "Opening Flux"); // Sending notification to console
 
 const initializeFlux = () => {
+  // top-right buttons of the flux window
+
+  document.getElementById("fluxDisplayButton").addEventListener("click", () => {
+    document.getElementById("flux-manager").style.display = "block";
+    document.getElementById("cascade").style.display = "block";
+    document.getElementById("selectCascade").style.display = "block";
+  });
+
+  document
+    .getElementById("fluxRefreshButton")
+    .addEventListener("click", () => refreshFluxWindow());
+
+  document
+    .getElementById("fluxCloseButton")
+    .addEventListener("click", () => closeFluxWindow());
+
   retrieveAvailableServices();
   getUserData();
 };

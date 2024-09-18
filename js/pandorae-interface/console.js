@@ -1,8 +1,8 @@
 // =========== CONSOLE ===========
 
-import { CMT } from "../locales";
+import { CMT } from "../locales/locales";
 import { displayCore, purgeXtype } from "./core";
-import { toggleMenu, toggleSecondaryMenu, toggleTertiaryMenu } from "./menu";
+import { toggleMenu, toggleTertiaryMenu } from "./menu";
 import { resetPandoratio } from "./pulse";
 import { listTableDatasets } from "./type-loader";
 

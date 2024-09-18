@@ -1,4 +1,4 @@
-import { CMT } from "../locales";
+import { CMT } from "../locales/locales";
 import { toggleFlux, toggleMenu } from "./menu";
 import { categoryLoader } from "./type-loader";
 import { closeWindow } from "./window";

@@ -1,4 +1,4 @@
-import { CMT } from "../locales";
+import { CMT } from "../locales/locales";
 import { typeSwitch } from "../type/typeswitch";
 import { toggledMenu, toggleMenu } from "./menu";
 import { pulse } from "./pulse";

@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import { addHop, drawFlux } from "./tracegraph";
-import { buttonList, funcSwitch } from "./buttons";
+import { buttonList, fluxSwitch } from "./buttons";
 
 const svg = d3.select("svg");
 
@@ -128,21 +128,24 @@ function updateCascade() {
   drawFlux(svg, traces, false, true);
 
   buttonList.forEach((but) => {
-    var clickable = 1;
-    document.getElementById(but.id).addEventListener("click", (e) => {
-      if (clickable) {
-        funcSwitch(e, but);
-        clickable = 0;
-        setTimeout(() => (clickable = 1), 5000);
-      } else {
-        window.electron.send(
-          "console-logs",
-          `Cooldown not finished for action ${but.id}.`
-        );
-      }
-      e.preventDefault();
-      return false;
-    });
+    const buttonDOM = document.getElementById(but.id);
+    if (buttonDOM) {
+      var clickable = 1;
+      buttonDOM.addEventListener("click", (e) => {
+        if (clickable) {
+          fluxSwitch(e, but);
+          clickable = 0;
+          setTimeout(() => (clickable = 1), 5000);
+        } else {
+          window.electron.send(
+            "console-logs",
+            `Cooldown not finished for action ${but.id}.`
+          );
+        }
+        e.preventDefault();
+        return false;
+      });
+    }
   });
 }
 
@@ -285,7 +288,7 @@ const retrieveAvailableServices = () =>
                         .getElementById(but.id)
                         .addEventListener("click", (e) => {
                           e.preventDefault();
-                          funcSwitch(e, but);
+                          fluxSwitch(e, but);
 
                           return false;
                         });

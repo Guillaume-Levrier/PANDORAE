@@ -1,6 +1,7 @@
 //========== datasetDisplay ==========
 
 import { pandodb } from "../db";
+import { powerValve } from "./powervalve";
 
 // datasetDisplay shows the datasets (usually JSON or CSV files) available in the relevant /datasets/ subdirectory.
 
@@ -24,23 +25,14 @@ function reviver(key, value) {
   return value;
 }
 
-const datasetDisplay = (divId, kind, altkind) => {
+const datasetDisplay = (displayDiv, kind, detailDiv) => {
   try {
-    // Try the following block
-
-    // The altkind thing is a hack. Normally, 1 flux tab equals to 1 db.
-    // With manual, we find ourselves editing/updating csl-json data.
-    // Might walk this one back in the future, seems the lesser of two
-    // evils right now.
-
-    if (!altkind) {
-      altkind = kind;
-    }
-
     let list = document.createElement("UL");
 
+    pandodb.flux.toArray().then((r) => console.log(r));
+
     pandodb.flux
-      .where("source")
+      .where("datasetType")
       .equals(kind)
       .toArray((files) => {
         files.forEach((file) => {
@@ -49,12 +41,7 @@ const datasetDisplay = (divId, kind, altkind) => {
 
           let button = document.createElement("SPAN");
           line.addEventListener("click", (e) => {
-            datasetDetail(
-              altkind + "-dataset-preview",
-              kind,
-              file.id,
-              altkind + "-dataset-buttons"
-            );
+            datasetDetail(detailDiv, kind, file.id);
           });
           button.innerText = file.name;
 
@@ -86,16 +73,15 @@ const datasetDisplay = (divId, kind, altkind) => {
         });
 
         if (files.length === 0) {
-          document.getElementById(divId).innerHTML =
-            "No dataset available in the system";
+          displayDiv.innerHTML = "No dataset available in the system";
         } else {
-          document.getElementById(divId).innerHTML = "";
-          document.getElementById(divId).appendChild(list);
+          displayDiv.innerHTML = "";
+          displayDiv.appendChild(list);
         }
       });
   } catch (err) {
     console.log(err);
-    document.getElementById(divId).innerHTML = err; // Display error in the result div
+    displayDiv.innerHTML = err; // Display error in the result div
   }
 };
 
@@ -128,98 +114,82 @@ const datasetRemove = (kind, id) => {
 // Clicking on a dataset displayed by the previous function displays some of its metadata and allows for further actions
 // to be triggered (such as sending a larger request to Chæros).
 
-const datasetDetail = (prevId, kind, id, buttonId) => {
+const datasetDetail = (detailDiv, kind, id) => {
   // This function provides info on a specific dataset
 
-  //var datasetDetail = {}; // Create the dataDetail object
   let dataPreview = ""; // Created dataPreview variable
 
-  const altID = prevId.split("-")[0];
+  // hyphe to rebuild
+  //hypheCorpusList(id, prevId);
 
-  console.log(prevId, kind, id, buttonId);
+  try {
+    pandodb.flux.toArray().then((docs) => {
+      let doc;
 
-  if (prevId === null) {
-    document.getElementById(kind + "-dataset-preview").innerText =
-      "Dataset deleted";
-    document.getElementById(kind + "-dataset-buttons").style.display = "none";
-  } else if (kind === "hyphe") {
-    hypheCorpusList(id, prevId);
-  } else {
-    try {
-      pandodb.flux.toArray().then((docs) => {
-        let doc;
+      docs.forEach((d) => (d.id === id ? (doc = d) : false));
 
-        docs.forEach((d) => (d.id === id ? (doc = d) : false));
-
-        if (altID === "sciento") {
-          document.getElementById("sciento-dataset-buttons").style.display =
-            "block";
-          document.getElementById("sciento-source").innerText = kind;
-          document.getElementById("sciento-corpusType").innerText = kind;
-          document.getElementById("sciento-dataset").innerText = doc.id;
-        }
-        switch (kind) {
-          case "istex":
-            console.log("hello");
-            dataPreview = `<strong> ${doc.name} </strong>
+      switch (kind) {
+        case "istex":
+          console.log("hello");
+          dataPreview = `<strong> ${doc.name} </strong>
                 <br>Origin: ${doc.content.type}
                 <br>Total results: ${doc.content.entries.length} 
                 <br>Upload date: ${doc.date}`;
 
-            document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
-            // document.getElementById(buttonId).style.display = "block";
+          document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
+          // document.getElementById(buttonId).style.display = "block";
 
-            convertButton.dataset.corpusType = doc.content.type;
-            break;
-          case "dimensions":
-            dataPreview = `<strong> ${doc.name} </strong>
+          convertButton.dataset.corpusType = doc.content.type;
+          break;
+        case "dimensions":
+          dataPreview = `<strong> ${doc.name} </strong>
                 <br>Origin: ${doc.content.type}
                 <br>Total results: ${doc.content.entries.length} 
                 <br>Upload date: ${doc.date}`;
 
-            document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
-            // document.getElementById(buttonId).style.display = "block";
+          document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
+          // document.getElementById(buttonId).style.display = "block";
 
-            convertButton.dataset.corpusType = doc.content.type;
-            break;
-          case "webofscience":
-            dataPreview = `<strong> ${doc.name} </strong>
+          convertButton.dataset.corpusType = doc.content.type;
+          break;
+        case "webofscience":
+          dataPreview = `<strong> ${doc.name} </strong>
                 <br>Origin: ${doc.content.type}
                 <br>Query: ${doc.content.query} 
                 <br>Total results: ${doc.content.entries.length} 
                 <br>Query date: ${doc.date}`;
 
-            document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
-            // document.getElementById(buttonId).style.display = "block";
-            document.getElementById("webofscienceGeolocate").style.display =
-              "block";
-            document.getElementById("webofscienceGeolocate").name = doc.id;
-            //document.getElementById("altmetricRetriever").name = doc.id;
-            convertButton.dataset.corpusType = doc.content.type;
-            break;
-          case "scopus":
-            dataPreview =
-              "<strong>" +
-              doc.name +
-              "</strong>" + // dataPreview is the displayed information in the div
-              "<br>Origin: Scopus" +
-              "<br>Query: " +
-              doc.content.query +
-              "<br>Total results: " +
-              doc.content.entries.length +
-              "<br>Query date: " +
-              doc.date;
+          document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
+          // document.getElementById(buttonId).style.display = "block";
+          document.getElementById("webofscienceGeolocate").style.display =
+            "block";
+          document.getElementById("webofscienceGeolocate").name = doc.id;
+          //document.getElementById("altmetricRetriever").name = doc.id;
+          convertButton.dataset.corpusType = doc.content.type;
+          break;
+        case "scopus":
+          dataPreview =
+            "<strong>" +
+            doc.name +
+            "</strong>" + // dataPreview is the displayed information in the div
+            "<br>Origin: Scopus" +
+            "<br>Query: " +
+            doc.content.query +
+            "<br>Total results: " +
+            doc.content.entries.length +
+            "<br>Query date: " +
+            doc.date;
 
-            document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
-            //document.getElementById(buttonId).style.display = "block";
-            document.getElementById("scopusGeolocate").style.display = "block";
-            document.getElementById("scopusGeolocate").name = doc.id;
-            //document.getElementById("altmetricRetriever").name = doc.id;
-            convertButton.dataset.corpusType = doc.content.type;
-            break;
+          document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
+          //document.getElementById(buttonId).style.display = "block";
+          document.getElementById("scopusGeolocate").style.display = "block";
+          document.getElementById("scopusGeolocate").name = doc.id;
+          //document.getElementById("altmetricRetriever").name = doc.id;
+          convertButton.dataset.corpusType = doc.content.type;
+          break;
 
-          case "enriched":
-            dataPreview = `<strong>${doc.name} </strong>
+        case "enriched":
+          dataPreview = `<strong>${doc.name} </strong>
                 <br>Origin: ${doc.content.type}
                 <br>Query: ${doc.content.query}
                 <br>Total results: ${doc.content.entries.length}
@@ -227,78 +197,141 @@ const datasetDetail = (prevId, kind, id, buttonId) => {
                 <br>Affiliations geolocated:${doc.content.articleGeoloc}
                 <br>Altmetric metadata retrieved: ${doc.content.altmetricEnriched}`;
 
-            document.getElementById(prevId).innerHTML = dataPreview;
-            document.getElementById(buttonId).style.display = "block";
-            const convertButton = document.getElementById("convert-csl");
-            convertButton.style.display = "inline-flex";
-            convertButton.name = doc.id;
-            convertButton.dataset.corpusType = doc.content.type;
-            break;
+          document.getElementById(prevId).innerHTML = dataPreview;
+          document.getElementById(buttonId).style.display = "block";
+          const convertButton = document.getElementById("convert-csl");
+          convertButton.style.display = "inline-flex";
+          convertButton.name = doc.id;
+          convertButton.dataset.corpusType = doc.content.type;
+          break;
 
-          case "manual":
-          case "csljson":
+        case "manual":
+        case "csljson":
+          dataPreview =
+            "<strong>" +
+            doc.name +
+            "</strong><br>Item amount : " +
+            doc.content.length;
+          document.getElementById(prevId).innerHTML = dataPreview;
+          document.getElementById(prevId).name = doc.id;
+          document.getElementById(buttonId).style.display = "inline-flex";
+          break;
+
+        case "system":
+          //refer to explorer-explainer.md
+          const typeList = [
+            "timeline",
+            "geolocator",
+            "network",
+            "webArchive",
+            "clinicalTrials",
+            "socialMedia",
+            "hyphe",
+            "parliament",
+          ];
+          let subArrayContent = "";
+
+          if (doc.content.isArray) {
+            doc.content.forEach((d) => {
+              let subContent =
+                "<tr><td>" +
+                d.name +
+                "</td><td>" +
+                d.items.length +
+                " </td><td>" +
+                d.library.name +
+                "</td></tr>";
+              subArrayContent += subContent;
+            });
             dataPreview =
-              "<strong>" +
+              "<br><strong>" +
               doc.name +
-              "</strong><br>Item amount : " +
-              doc.content.length;
-            document.getElementById(prevId).innerHTML = dataPreview;
-            document.getElementById(prevId).name = doc.id;
-            document.getElementById(buttonId).style.display = "inline-flex";
-            break;
+              "</strong><br>" +
+              "Dataset date: " +
+              doc.date +
+              "<br><br>Arrays contained in the dataset" +
+              "<br><table style='border-collapse: collapse;'><thead><tr style='border:1px solid #141414;'><th>Name</th><th>#</th><th>Origin</th></tr></thead>" +
+              "<tbody>" +
+              subArrayContent +
+              "</tbody></table>";
+          } else {
+            dataPreview =
+              "<br><strong>" +
+              doc.name +
+              "</strong><br>" +
+              "Dataset date: " +
+              doc.date +
+              "<br>";
+            "Dataset type: " + doc.content.type + "<br>";
+          }
 
-          case "system":
-            let subArrayContent = "";
-            if (doc.content.isArray) {
-              doc.content.forEach((d) => {
-                let subContent =
-                  "<tr><td>" +
-                  d.name +
-                  "</td><td>" +
-                  d.items.length +
-                  " </td><td>" +
-                  d.library.name +
-                  "</td></tr>";
-                subArrayContent += subContent;
-              });
-              dataPreview =
-                "<br><strong>" +
-                doc.name +
-                "</strong><br>" +
-                "Dataset date: " +
-                doc.date +
-                "<br><br>Arrays contained in the dataset" +
-                "<br><table style='border-collapse: collapse;'><thead><tr style='border:1px solid #141414;'><th>Name</th><th>#</th><th>Origin</th></tr></thead>" +
-                "<tbody>" +
-                subArrayContent +
-                "</tbody></table>";
-            } else {
-              dataPreview =
-                "<br><strong>" +
-                doc.name +
-                "</strong><br>" +
-                "Dataset date: " +
-                doc.date +
-                "<br>";
-              "Dataset type: " + doc.content.type + "<br>";
-            }
-            document.getElementById(prevId).innerHTML = dataPreview;
-            document.getElementById(prevId).name = doc.id;
-            document.getElementById(buttonId).style.display = "unset";
-            document.getElementById(buttonId).style.flex = "auto";
-            document.getElementById("systemToType").value = doc.id;
-            const problematics = document.getElementById("problematics");
-            problematics.innerHTML = "";
-            problematics.style.display = "none";
+          const dataPreviewDiv = document.createElement("div");
+          dataPreviewDiv.style.padding = "5%";
+          dataPreviewDiv.style.width = "40%";
+          dataPreviewDiv.innerHTML = dataPreview;
 
-            break;
-        }
-      });
-    } catch (error) {
-      // If it fails at one point
-      document.getElementById(prevId).innerHTML = error; // Display error message
-      window.electron.send("console-logs", error); // Log error
-    }
+          const optionList = document.createElement("div");
+          optionList.style.padding = "5%";
+
+          detailDiv.style.display = "flex";
+
+          detailDiv.append(dataPreviewDiv, optionList);
+
+          typeList.forEach((dataType) => {
+            const systemOption = document.createElement("div");
+            systemOption.className = "systemOption";
+            const optionData = document.createElement("input");
+            optionData.className = "sysDestCheck";
+            optionData.value = dataType;
+            optionData.name = dataType;
+            optionData.type = "checkbox";
+            const optionLabel = document.createElement("label");
+            optionLabel.innerText = dataType;
+            systemOption.append(optionData, optionLabel);
+            optionList.append(systemOption);
+          });
+
+          const exportOptions = document.createElement("div");
+          exportOptions.style = "display:flex;margin-top:1rem;";
+
+          const datasetNameInput = document.createElement("input");
+          datasetNameInput.className = "fluxInput";
+          datasetNameInput.spellcheck = false;
+          datasetNameInput.id = "systemToType";
+          datasetNameInput.type = "text";
+          datasetNameInput.placeholder = "Enter a dataset name";
+          datasetNameInput.value = doc.name;
+
+          const exportButton = document.createElement("button");
+          exportButton.type = "submit";
+          exportButton.className = "flux-button";
+          exportButton.innerText = "Export";
+          exportButton.addEventListener("click", () =>
+            powerValve("sysExport", {
+              id: doc.id,
+              name: datasetNameInput.value,
+            })
+          );
+
+          exportOptions.append(datasetNameInput, exportButton);
+
+          optionList.append(exportOptions);
+
+          //document.getElementById(prevId).name = doc.id;
+          //document.getElementById(buttonId).style.display = "unset";
+          //document.getElementById(buttonId).style.flex = "auto";
+          //document.getElementById("systemToType").value = doc.id;
+          //const problematics = document.getElementById("problematics");
+          //problematics.innerHTML = "";
+          //problematics.style.display = "none";
+
+          break;
+      }
+    });
+  } catch (error) {
+    // If it fails at one point
+    displayDiv.innerHTML = error; // Display error message
+    window.electron.send("console-logs", error); // Log error
   }
 };
 

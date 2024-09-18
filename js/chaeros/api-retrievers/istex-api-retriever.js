@@ -25,38 +25,38 @@ const istexRetriever = (query) => {
     pandodb.flux
       .add({
         id,
-        source: "istex",
+        datasetType: "istex",
         date,
         name: query,
         content,
       })
-      .then(() => {
+      /* .then(() => {
         pandodb.enriched
           .add({
             id,
             date,
             name: query,
             content,
-          })
-          .then(() => {
-            window.electron.send(
-              "chaeros-notification",
-              "ISTEX API data retrieved"
-            ); // signal success to main process
-            window.electron.send("pulsar", true);
-            window.electron.send(
-              "console-logs",
-              "ISTEX dataset on " +
-                query +
-                " for user " +
-                user +
-                " have been successfully retrieved."
-            );
-            setTimeout(() => {
-              window.electron.send("win-destroy", winId);
-            }, 500); // Close Chaeros
-          });
+          }) */
+      .then(() => {
+        window.electron.send(
+          "chaeros-notification",
+          "ISTEX API data retrieved"
+        ); // signal success to main process
+        window.electron.send("pulsar", true);
+        window.electron.send(
+          "console-logs",
+          "ISTEX dataset on " +
+            query +
+            " for user " +
+            user +
+            " have been successfully retrieved."
+        );
+        setTimeout(() => {
+          window.electron.send("win-destroy", winId);
+        }, 500); // Close Chaeros
       });
+    //   });
   }
 
   fetch(target)

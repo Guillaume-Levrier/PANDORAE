@@ -3,9 +3,10 @@
 // also be a group library ID, allowing for group or even public work on a same Zotero/PANDORÆ corpus.
 
 import { fluxButtonAction } from "./actionbuttons";
+import { powerValve } from "./powervalve";
 import { checkKey, getPassword } from "./userdata";
 
-const zoteroCollectionRetriever = () => {
+const zoteroCollectionRetriever = (options) => {
   let zoteroUser = document.getElementById("zoterouserinput").value; // Get the Zotero user code to request
 
   // hide the validator icon
@@ -27,23 +28,46 @@ const zoteroCollectionRetriever = () => {
   let zoteroCollectionRequest =
     rootUrl + zoteroUser + urlCollections + "?" + zoteroVersion + zoteroApiKey;
 
+  // select container div
+  const userCollections = options.resultDiv;
+
+  // purge it of content
+  userCollections.innerHTML = "";
+
   fetch(zoteroCollectionRequest)
     .then((res) => res.json())
     .then((zoteroColResponse) => {
       // With the response
 
-      // select container div
-      const userCollections = document.getElementById("userZoteroCollections");
-      // purge it of content
-      userCollections.innerHTML = "";
+      // create import buttons
+      const importDiv = document.createElement("div");
+      importDiv.style.padding = "1rem";
+
+      const importName = document.createElement("input");
+      importName.className = "fluxInput";
+      importName.spellcheck = false;
+      importName.type = "text";
+      importName.placeholder = "Enter import name";
+      importName.id = "zoteroImportName";
+
+      const importButton = document.createElement("button");
+      importButton.className = "flux-button";
+      importButton.type = "submit";
+      importButton.innerText = "Import selected collections into system";
+
+      importButton.addEventListener("click", () => {
+        powerValve("zoteroItemsRetriever", {
+          name: "Zotero Collection Retriever",
+        });
+      });
+
+      importDiv.append(importName, importButton);
 
       // add list
       const collectionList = document.createElement("form");
       collectionList.style = "line-height:1.5";
 
       userCollections.append(collectionList);
-
-      const importname = document.getElementById("zoteroImportName");
 
       for (let i = 0; i < zoteroColResponse.length; i++) {
         const checkInput = document.createElement("input");
@@ -61,9 +85,9 @@ const zoteroCollectionRetriever = () => {
 
         checkInput.addEventListener("change", () => {
           if (checkInput.checked) {
-            importname.value += zoteroColResponse[i].data.name;
+            importName.value += zoteroColResponse[i].data.name;
           } else {
-            importname.value = importname.value.replace(
+            importName.value = importName.value.replace(
               zoteroColResponse[i].data.name,
               ""
             );
@@ -77,25 +101,16 @@ const zoteroCollectionRetriever = () => {
         );
       }
 
-      // Show success on button
-      fluxButtonAction(
-        "zotcolret",
-        true,
-        "Zotero Collections Successfully Retrieved",
-        "errorPhrase"
-      );
+      userCollections.append(importDiv);
 
-      // Preparing and showing additional options
-      document.getElementById("zotitret").style.display = "inline-flex";
-      document.getElementById("zoteroResults").style.display = "flex";
-      document.getElementById("zoteroImportName").style.display = "inline-flex";
-      document.getElementById("zoteroImportInstruction").style.display =
-        "inline-flex";
+      userCollections.style.display = "block";
 
-      //      icon.style.display = "block";
       checkKey("zoteroAPIValidation", true);
     })
     .catch(function (err) {
+      console.log(err);
+      userCollections.innerHTML = "Failed retrieving data from Zotero";
+      userCollections.style.display = "block";
       checkKey("zoteroAPIValidation", false);
       fluxButtonAction(
         "zotcolret",

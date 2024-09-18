@@ -182,14 +182,14 @@ const buttonList = [
   { id: "forceUpdatePPS", func: "forceUpdatePPS" },
 ];
 
-function funcSwitch(e, but) {
-  switch (but.func) {
+function fluxSwitch(funcName, args) {
+  switch (funcName) {
     case "checkPPS":
       checkPPS();
 
       break;
     case "queryBnFSolr":
-      queryBnFSolr(but);
+      queryBnFSolr(...args);
       break;
     case "addLocalService":
       addLocalService();
@@ -228,18 +228,18 @@ function funcSwitch(e, but) {
       break;
 
     case "checkKey":
-      checkKey(but.arg);
+      checkKey(...args);
       break;
 
     case "forceUpdatePPS":
       forceUpdatePPS();
       break;
     case "updateUserData":
-      updateUserData(but.arg);
+      updateUserData(...args);
       break;
 
     case "fluxDisplay":
-      fluxDisplay(but.arg);
+      fluxDisplay(...args);
       break;
 
     case "closeFluxWindow":
@@ -275,7 +275,7 @@ function funcSwitch(e, but) {
       break;
 
     case "datasetDisplay":
-      datasetDisplay(but.arg[0], but.arg[1], but.arg[2]);
+      datasetDisplay(...args);
       break;
 
     case "localUpload":
@@ -307,7 +307,7 @@ function funcSwitch(e, but) {
       break;
 
     case "zoteroCollectionRetriever":
-      zoteroCollectionRetriever();
+      zoteroCollectionRetriever(args);
       break;
 
     case "istexList":
@@ -339,4 +339,4 @@ function funcSwitch(e, but) {
   }
 }
 
-export { buttonList, funcSwitch };
+export { buttonList, fluxSwitch };
