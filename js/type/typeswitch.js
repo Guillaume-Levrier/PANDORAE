@@ -20,59 +20,59 @@ import { regards } from "./explorers/regardotype";
 //========== typesSwitch ==========
 // Switch used to which type to draw/generate
 
-const typeSwitch = (type, id) => {
+const typeSwitch = (type, data) => {
   document.getElementById("field").value = "loading " + type;
 
   switch (type) {
     case "regards":
-      regards(id);
+      regards(data);
       break;
     case "fieldotype":
-      fieldotype(id);
+      fieldotype(data);
       break;
 
     case "pharmacotype":
-      pharmacotype(id);
+      pharmacotype(data);
       break;
 
     case "hyphotype":
-      hyphotype(id);
+      hyphotype(data);
       break;
 
     case "filotype":
-      filotype(id);
+      filotype(data);
       break;
 
     case "doxatype":
-      doxatype(id);
+      doxatype(data);
       break;
 
     case "anthropotype":
-      anthropotype(id);
+      anthropotype(data);
       break;
     case "webArchive":
-      webArchive(id);
+      webArchive(data);
       break;
 
     case "chronotype":
-      chronotype(id);
+      chronotype(data);
       break;
 
     case "gazouillotype":
-      gazouillotype(id);
+      gazouillotype(data);
       break;
 
     case "geotype":
-      geotype(id);
+      geotype(data);
 
       break;
 
     case "pharmacotype":
-      pharmacotype(id);
+      pharmacotype(data);
       break;
 
     case "topotype":
-      topotype(id);
+      topotype(data);
       break;
   }
 

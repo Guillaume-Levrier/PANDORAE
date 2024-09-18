@@ -166,7 +166,7 @@ window.electron.backToPres((event, message) => {
   }, 200);
 });
 
-const selectOption = (type, id) => {
+const selectOption = (type, dataset) => {
   if (typeSelector) {
     let order =
       "[actionType:" +
@@ -197,7 +197,7 @@ const selectOption = (type, id) => {
     //types.typeSwitch(type, id);
 
     // Give time to the menu to get closed
-    setTimeout(() => typeSwitch(type, id), 400);
+    setTimeout(() => typeSwitch(type, dataset), 400);
 
     window.electron.send("audio-channel", "button2");
     pulse(1, 1, 10);

@@ -38,13 +38,13 @@ const addToLog = (message) => {
   log.scrollTop = log.scrollHeight;
 };
 
-const mainDisplay = (type) => {
+const mainDisplay = (datasets, type) => {
   field.value = "preparing " + type;
   window.electron.send("console-logs", "Preparing " + type);
   displayCore();
   purgeXtype();
   toggleTertiaryMenu();
-  listTableDatasets(type);
+  listTableDatasets(datasets, type);
 };
 
 const cmdinput = (input) => {

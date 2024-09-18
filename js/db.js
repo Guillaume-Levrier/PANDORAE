@@ -7,8 +7,8 @@ Dexie.debug = false;
 let pandodb = new Dexie("PandoraeDatabase");
 
 pandodb.version(1).stores({
-  type: "type",
-  flux: "datasetType",
+  type: "id,datasetType",
+  flux: "id,datasetType",
 });
 
 pandodb.open();

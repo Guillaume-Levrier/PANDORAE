@@ -4,44 +4,61 @@ const date =
   new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
 
 //========== sysExport ==========
-const sysExport = (destination, importName, id) => {
+const sysExport = (destinations, importName, id) => {
   pandodb.open();
-
-  pandodb.system.get(id).then((dataset) => {
-    dataWriter(destination, importName, dataset.content);
+  pandodb.flux.toArray().then((datasets) => {
+    datasets.forEach((dataset) => {
+      if (dataset.id === id) {
+        console.log("got there");
+        destinations.forEach((dests) =>
+          dataWriter(["type"], importName, dataset.content, dests)
+        );
+      }
+    });
   });
 };
 
 //========== dataWriter ==========
 const dataWriter = (destination, importName, content, datasetType) => {
   pandodb.open();
-  destination
-    .forEach((d) => {
-      let table = pandodb[d];
+  console.log(datasetType);
+  console.log(destination);
+  destination.forEach((d) => {
+    console.log("got there 2");
+    const table = pandodb[d];
 
-      let id = importName + date;
-      table
-        .add({
-          id: id,
-          date: date,
-          name: importName,
-          datasetType,
-          content: content,
-        })
-        .then(() => {
-          window.electron.send(
-            "console-logs",
-            "Retrieval successful. " + importName + " was imported in " + d
-          );
-        });
-      window.electron.send(
-        "chaeros-notification",
-        "dataset loaded into " + destination
-      );
-      window.electron.send("pulsar", true);
-      window.electron.send("win-destroy", true);
-    })
-    .catch((e) => console.log(e));
+    console.log(table);
+
+    const id = importName + date;
+
+    const dataToInsert = {
+      id,
+      date,
+      name: importName,
+      datasetType,
+      content,
+    };
+
+    console.log(dataToInsert);
+
+    table
+      .add(dataToInsert)
+      .catch((e) => console.log(e))
+      .then((res) => {
+        console.log(res);
+        table.toArray().then((r) => console.log(r));
+        window.electron.send(
+          "console-logs",
+          "Retrieval successful. " + importName + " was imported in " + d
+        );
+      });
+    window.electron.send(
+      "chaeros-notification",
+      "dataset loaded into " + destination
+    );
+    window.electron.send("pulsar", true);
+    //window.electron.send("win-destroy", true);
+  });
 };
 
 const getPasswordFromChaeros = (service, user) =>

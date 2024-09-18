@@ -114,6 +114,16 @@ const EN = {
     console: {},
   },
   types: {
+    names: {
+      timeline: "Timeline",
+      geolocator: "Geolocator",
+      network: "Network",
+      webArchive: "Web archive",
+      clinicalTrials: "Clinical trials",
+      socialMedia: "Social media",
+      hyphe: "Hyphe",
+      parliament: "Parliaments",
+    },
     console: {},
     tooltip: {},
   },
