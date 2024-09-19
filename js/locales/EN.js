@@ -103,7 +103,7 @@ const EN = {
           {
             type: "addServiceCredentials",
             data: {
-              name: "Zotero",
+              name: "zotero",
               libraries: [],
               apikey: "",
             },

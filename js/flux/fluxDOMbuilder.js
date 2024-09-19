@@ -1,6 +1,8 @@
 import { fluxButtonClicked } from "./actionbuttons";
 import { fluxSwitch } from "./buttons";
 import { datasetDisplay } from "./dataset";
+import { serviceTester } from "./service-tester";
+import { generateLocalServiceConfig } from "./sources/BNF/archivesinternet";
 import { userData } from "./userdata";
 
 const userDataPath = window.electron.userDataPath;
@@ -32,6 +34,7 @@ const addDatasetDisplaySection = (tabData, sectionData, tab) => {
   displayAvailableDatasetsButton.innerText = "Display available datasets";
 
   const datasetDetailDiv = document.createElement("div");
+  datasetDetailDiv.className = "datasetDetail";
 
   displayAvailableDatasetsButton.addEventListener("click", () => {
     fluxButtonClicked(displayAvailableDatasetsButton, true, "Datasets loaded");
@@ -139,13 +142,13 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
   serviceContainer.style = "padding:0.5rem";
   const title = document.createElement("div");
   title.innerText = sectionData.name;
-  title.style = "font-size:14px;";
+  title.style = "font-size:14px; text-transform: capitalize;";
   serviceContainer.append(title);
 
   if (sectionData.hasOwnProperty("libraries")) {
     let count = 1;
     const librarylist = document.createElement("div");
-    const addLibraryField = () => {
+    const addLibraryField = (libID) => {
       const libraryfieldContainer = document.createElement("div");
       libraryfieldContainer.style = `display: flex;
     width: 220px;
@@ -157,13 +160,12 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
       label.innerText = `Library ${count} : `;
 
       const libraryfield = document.createElement("input");
-      libraryfield.className = "zoteroLibraryField";
-      libraryfield.className = "fluxInput";
-      libraryfield.style = "font-size;12px;width:100px;font-family:monospace";
-      libraryfield.type = "password";
+      libraryfield.className = "zoteroLibraryField fluxInput";
+      libraryfield.type = "text";
       libraryfield.placeholder = "0000000"; //5361175
       libraryfield.spellcheck = false;
-      libraryfield.id = sectionData.name + "-APIkey";
+      libraryfield.id = libID ? libID : sectionData.name + count + "-Library";
+      libraryfield.value = libID ? libID : "";
 
       const addLib = document.createElement("i");
       addLib.style.fontSize = "10px";
@@ -178,26 +180,48 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
       libraryfieldContainer.append(label, libraryfield, addLib);
       librarylist.append(libraryfieldContainer);
       count++;
-      //<span class="material-symbols-outlined">add_circle </span>
     };
-    addLibraryField();
+    if (userData.distantServices.hasOwnProperty("zotero")) {
+      if (userData.distantServices.zotero.libraries.length > 0) {
+        userData.distantServices.zotero.libraries.forEach((d) =>
+          addLibraryField(d)
+        );
+      }
+    } else {
+      addLibraryField();
+    }
     serviceContainer.append(librarylist);
   }
 
   if (sectionData.hasOwnProperty("apikey")) {
     const label = document.createElement("label");
-    label.innerText = `${sectionData.name} API key : `;
+    label.innerText = `API key : `;
     const apikeyfield = document.createElement("input");
-    apikeyfield.style = "font-size;12px;width:400px;";
+    apikeyfield.style = "font-size;12px;width:auto;margin-top:15px;";
     apikeyfield.type = "password";
     apikeyfield.className = "fluxInput";
     apikeyfield.placeholder =
       "Paste your " + sectionData.name + " API key here";
     apikeyfield.spellcheck = false;
     apikeyfield.id = sectionData.name + "-APIkey";
+    const apikey = userData.distantServices[sectionData.name].apikey;
+    apikeyfield.value = apikey ? apikey : 0;
     serviceContainer.append(label, apikeyfield);
   }
-  console.log(sectionData);
+
+  // service tester
+  // button to click to load the relevant datasets
+  const serviceTesterButton = document.createElement("button");
+  serviceTesterButton.type = "submit";
+  serviceTesterButton.className = "flux-button";
+  serviceTesterButton.innerText = "Test service connectivity";
+
+  serviceTesterButton.addEventListener("click", () => {
+    fluxButtonClicked(serviceTesterButton, true, "Requests sent");
+    serviceTester(sectionData.name, userData.distantServices[sectionData.name]);
+  });
+
+  serviceContainer.append(serviceTesterButton);
 
   tab.append(genHr(), serviceContainer);
 };

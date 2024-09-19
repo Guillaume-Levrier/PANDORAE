@@ -1135,7 +1135,7 @@ display: none;
   font-family: sans-serif;
   color:white;
   background-color: red;
-  padding: 10px;
+  padding: 3px;
   text-align: center;
   display: flex;
   align-items: center;
@@ -1143,6 +1143,7 @@ display: none;
   margin-left: 2rem;
   margin-right: 2rem;
   margin-bottom: 2rem;
+  font-size: 13px;
 }
 
 .buttonDisclaimer{
@@ -1153,4 +1154,16 @@ display: none;
 .buttonDisclaimer:hover{
   color:red;
   background-color: white;
+}
+
+.zoteroLibraryField{
+  font-size:12px;
+  width:55px;
+  font-family:monospace;
+  text-align: center;
+}
+
+hr{
+  margin-top:1rem;
+  
 }

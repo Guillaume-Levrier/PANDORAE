@@ -4,109 +4,102 @@
 
 import { fluxButtonAction } from "./actionbuttons";
 import { powerValve } from "./powervalve";
-import { checkKey, getPassword } from "./userdata";
+import { checkKey, getPassword, userData } from "./userdata";
 
 const zoteroCollectionRetriever = (options) => {
-  let zoteroUser = document.getElementById("zoterouserinput").value; // Get the Zotero user code to request
+  console.log(options);
 
-  // hide the validator icon
-  const icon = document.getElementById("zoteroAPIValidation");
-  icon.innerText = "hourglass_empty";
-
-  window.electron.send(
-    "console-logs",
-    "Retrieving collections for Zotero id " + zoteroUser
-  ); // Log collection request
-
-  let zoteroApiKey = getPassword("Zotero", zoteroUser);
-  // URL Building blocks
-  let rootUrl = "https://api.zotero.org/groups/";
-  let urlCollections = "/collections";
-  var zoteroVersion = "v=3&key=";
-
-  //build the url
-  let zoteroCollectionRequest =
-    rootUrl + zoteroUser + urlCollections + "?" + zoteroVersion + zoteroApiKey;
-
-  // select container div
   const userCollections = options.resultDiv;
 
+  options.resultDiv.style.display = "block";
   // purge it of content
   userCollections.innerHTML = "";
 
-  fetch(zoteroCollectionRequest)
-    .then((res) => res.json())
-    .then((zoteroColResponse) => {
-      // With the response
+  userData.distantServices.zotero.libraries.forEach((libraryID) => {
+    window.electron.send("console-logs", `Retrieving library ${libraryID}`); // Log collection request
 
-      // create import buttons
-      const importDiv = document.createElement("div");
-      importDiv.style.padding = "1rem";
+    const url = `https://api.zotero.org/groups/${libraryID}/collections?v=3&key=${userData.distantServices.zotero.apikey}`;
+    fetch(url)
+      .then((r) => r.json())
+      .then((r) => {
+        console.log(r);
+        const zoteroColResponse = r;
+        // create import buttons
+        const importDiv = document.createElement("div");
+        importDiv.style.padding = "1rem";
 
-      const importName = document.createElement("input");
-      importName.className = "fluxInput";
-      importName.spellcheck = false;
-      importName.type = "text";
-      importName.placeholder = "Enter import name";
-      importName.id = "zoteroImportName";
+        const libTitle = document.createElement("div");
+        libTitle.style = "font-weight:bold;font-size:13px;";
+        libTitle.innerText = r[0].library.name;
+        userCollections.append(libTitle);
 
-      const importButton = document.createElement("button");
-      importButton.className = "flux-button";
-      importButton.type = "submit";
-      importButton.innerText = "Import selected collections into system";
+        const importName = document.createElement("input");
+        importName.className = "fluxInput";
+        importName.spellcheck = false;
+        importName.type = "text";
+        importName.placeholder = "Enter import name";
+        importName.id = "zoteroImportName";
 
-      importButton.addEventListener("click", () => {
-        powerValve("zoteroItemsRetriever", {
-          name: "Zotero Collection Retriever",
-        });
-      });
+        const importButton = document.createElement("button");
+        importButton.className = "flux-button";
+        importButton.type = "submit";
+        importButton.innerText = "Import selected collections into system";
 
-      importDiv.append(importName, importButton);
-
-      // add list
-      const collectionList = document.createElement("form");
-      collectionList.style = "line-height:1.5";
-
-      userCollections.append(collectionList);
-
-      for (let i = 0; i < zoteroColResponse.length; i++) {
-        const checkInput = document.createElement("input");
-        checkInput.type = "checkbox";
-        checkInput.className = "zotColCheck";
-        checkInput.value = zoteroColResponse[i].data.key;
-        checkInput.name = zoteroColResponse[i].data.name;
-
-        const checkLabel = document.createElement("label");
-        checkLabel.style.paddingLeft = "5px";
-        checkLabel.innerText =
-          zoteroColResponse[i].data.key +
-          " - " +
-          zoteroColResponse[i].data.name;
-
-        checkInput.addEventListener("change", () => {
-          if (checkInput.checked) {
-            importName.value += zoteroColResponse[i].data.name;
-          } else {
-            importName.value = importName.value.replace(
-              zoteroColResponse[i].data.name,
-              ""
-            );
-          }
+        importButton.addEventListener("click", () => {
+          powerValve("zoteroItemsRetriever", {
+            name: "Zotero Collection Retriever",
+          });
         });
 
-        collectionList.append(
-          checkInput,
-          checkLabel,
-          document.createElement("br")
-        );
-      }
+        importDiv.append(importName, importButton);
 
-      userCollections.append(importDiv);
+        // add list
+        const collectionList = document.createElement("form");
+        collectionList.style = "line-height:1.5";
 
-      userCollections.style.display = "block";
+        userCollections.append(collectionList);
 
-      checkKey("zoteroAPIValidation", true);
-    })
+        for (let i = 0; i < zoteroColResponse.length; i++) {
+          const checkInput = document.createElement("input");
+          checkInput.type = "checkbox";
+          checkInput.className = "zotColCheck";
+          checkInput.value = zoteroColResponse[i].data.key;
+          checkInput.name = zoteroColResponse[i].data.name;
+
+          const checkLabel = document.createElement("label");
+          checkLabel.style.paddingLeft = "5px";
+          checkLabel.innerText =
+            zoteroColResponse[i].data.key +
+            " - " +
+            zoteroColResponse[i].data.name;
+
+          checkInput.addEventListener("change", () => {
+            if (checkInput.checked) {
+              importName.value += zoteroColResponse[i].data.name;
+            } else {
+              importName.value = importName.value.replace(
+                zoteroColResponse[i].data.name,
+                ""
+              );
+            }
+          });
+
+          collectionList.append(
+            checkInput,
+            checkLabel,
+            document.createElement("br")
+          );
+        }
+
+        userCollections.append(importDiv);
+
+        userCollections.style.display = "block";
+      })
+      .catch((e) => {});
+  });
+
+  // checkKey("zoteroAPIValidation", true);
+  /* })
     .catch(function (err) {
       console.log(err);
       userCollections.innerHTML = "Failed retrieving data from Zotero";
@@ -125,7 +118,7 @@ const zoteroCollectionRetriever = (options) => {
           " : " +
           err
       ); // Log error
-    });
+    }); */
 };
 
 //========== zoteroLocalRetriever ==========
