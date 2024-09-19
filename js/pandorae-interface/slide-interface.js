@@ -11,7 +11,6 @@ import {
 var mainPresContent = [];
 var mainPresEdit = false;
 var priorDate = false;
-var currentType;
 
 const CM = CMT.EN;
 
@@ -165,50 +164,3 @@ window.electron.backToPres((event, message) => {
     }, 1500);
   }, 200);
 });
-
-const selectOption = (type, dataset) => {
-  if (typeSelector) {
-    let order =
-      "[actionType:" +
-      JSON.stringify(type) +
-      "," +
-      JSON.stringify(id) +
-      "/actionType]";
-    let editor = document.getElementsByClassName("ql-editor")[0];
-    editor.innerHTML = editor.innerHTML + order;
-
-    setTypeSelector(false);
-    toggleMenu();
-  } else {
-    if (toggledMenu) {
-      toggleMenu();
-    }
-
-    document.getElementById("menu-icon").onclick = "";
-    document.getElementById("menu-icon").addEventListener(
-      "click",
-      () => {
-        location.reload();
-      },
-      { once: true }
-    );
-    field.value = CM.global.field.starting + " " + type;
-    currentType = { type: type, id: id };
-    //types.typeSwitch(type, id);
-
-    // Give time to the menu to get closed
-    setTimeout(() => typeSwitch(type, dataset), 400);
-
-    window.electron.send("audio-channel", "button2");
-    pulse(1, 1, 10);
-    window.electron.send(
-      "console-logs",
-      CM.console.starting[0] +
-        type +
-        CM.console.starting[1] +
-        JSON.stringify(id)
-    );
-  }
-};
-
-export { selectOption, currentType };

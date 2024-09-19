@@ -76,6 +76,40 @@ const EN = {
   },
   flux: {
     tabs: {
+      user: {
+        id: "user", // id of the main div
+        title: "USER", // title of the tab (displayed on the page)
+        description: `The user tab lets you fill in your information and API keys. Do scroll down and click "save user information" when you make a change : the system does <span style="font-weight:bold">not</span> save your information automatically.`,
+        sections: [
+          {
+            type: "warningDisclaimer",
+            data: {
+              content:
+                "The data entered below is unencrypted so as to make this application portable. Click on the button to access the file and delete it manually if you are on a public computer.",
+              func: {
+                text: "Open User ID directory",
+                id: "openUserDirectory",
+              },
+            },
+          },
+          {
+            type: "personalInformation",
+            data: { id: "UserName", name: "Name" },
+          },
+          {
+            type: "personalInformation",
+            data: { id: "UserMail", name: "Email" },
+          },
+          {
+            type: "addServiceCredentials",
+            data: {
+              name: "Zotero",
+              libraries: [],
+              apikey: "",
+            },
+          },
+        ],
+      },
       zotero: {
         id: "zotero", // id of the main div
         title: "ZOTERO", // title of the tab (displayed on the page)

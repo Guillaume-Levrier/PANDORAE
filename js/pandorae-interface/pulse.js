@@ -2,8 +2,6 @@ var pump = {};
 let coreLogoArchive = "";
 var pandoratio = 0;
 
-console.log("this shouldn't be invoked by flux");
-
 const resetPandoratio = () => (pandoratio = 0);
 
 const pulse = (status, coeff, rhythm, clear) => {
@@ -68,7 +66,6 @@ const progBarSign = (prog) => {
 // ========== CORE SIGNALS ===========
 // TO BE REINSTATED
 
-console.log(window.electron);
 /* 
 window.electron.coreSignal((message) => {
   try {

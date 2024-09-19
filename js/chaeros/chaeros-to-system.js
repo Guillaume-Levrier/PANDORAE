@@ -21,13 +21,9 @@ const sysExport = (destinations, importName, id) => {
 //========== dataWriter ==========
 const dataWriter = (destination, importName, content, datasetType) => {
   pandodb.open();
-  console.log(datasetType);
-  console.log(destination);
-  destination.forEach((d) => {
-    console.log("got there 2");
-    const table = pandodb[d];
 
-    console.log(table);
+  destination.forEach((d) => {
+    const table = pandodb[d];
 
     const id = importName + date;
 
@@ -39,13 +35,10 @@ const dataWriter = (destination, importName, content, datasetType) => {
       content,
     };
 
-    console.log(dataToInsert);
-
     table
       .add(dataToInsert)
       .catch((e) => console.log(e))
       .then((res) => {
-        console.log(res);
         table.toArray().then((r) => console.log(r));
         window.electron.send(
           "console-logs",
@@ -57,7 +50,7 @@ const dataWriter = (destination, importName, content, datasetType) => {
       "dataset loaded into " + destination
     );
     window.electron.send("pulsar", true);
-    //window.electron.send("win-destroy", true);
+    window.electron.send("win-destroy", true);
   });
 };
 

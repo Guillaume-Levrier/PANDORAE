@@ -1,10 +1,11 @@
 import * as d3 from "d3";
 import { width, height, toolWidth, loadType } from "../type-common-functions";
-import { pandodb } from "../../db";
 import { dataDownload } from "../data-manager-type";
 
 // ========= webArchive =========
-const webArchive = (id) => {
+const webArchive = (datajson) => {
+  console.log(datajson);
+
   // When called, draw the webArchive
 
   var availability;
@@ -44,54 +45,56 @@ const webArchive = (id) => {
 
   let resolver, arkViewer;
 
-  window.electron.invoke("checkflux", true).then((result) => {
-    availability = JSON.parse(result);
+  window.electron
+    .invoke("checkflux", true)
+    .then((result) => {
+      availability = JSON.parse(result);
 
-    for (const service in availability.dnsLocalServiceList) {
-      switch (availability.dnsLocalServiceList[service].type) {
-        case "BNF-SOLR":
-          resolver =
-            availability.dnsLocalServiceList[service].url +
-            ":" +
-            availability.dnsLocalServiceList[service].port;
+      for (const service in availability.dnsLocalServiceList) {
+        switch (availability.dnsLocalServiceList[service].type) {
+          case "BNF-SOLR":
+            resolver =
+              availability.dnsLocalServiceList[service].url +
+              ":" +
+              availability.dnsLocalServiceList[service].port;
 
-          arkViewer = availability.dnsLocalServiceList[service].arkViewer;
+            arkViewer = availability.dnsLocalServiceList[service].arkViewer;
 
-          break;
+            break;
+        }
       }
-    }
-  });
+    })
+    .then(() => {
+      // size is probably not good as such, to be updated
 
-  // size is probably not good as such, to be updated
+      let ma = 4;
+      let mb = ma / 2;
 
-  let ma = 4;
-  let mb = ma / 2;
+      svg
+        .append("defs")
+        .append("marker")
+        .attr("id", "arrow")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 55)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("fill", "black")
+        .attr("stroke", "gray")
+        .attr("stroke-width", 0.2)
+        .attr("d", "M 0,-2 L 4 ,0 L 0,2");
 
-  svg
-    .append("defs")
-    .append("marker")
-    .attr("id", "arrow")
-    .attr("viewBox", "0 -5 10 10")
-    .attr("refX", 55)
-    .attr("refY", 0)
-    .attr("markerWidth", 6)
-    .attr("markerHeight", 6)
-    .attr("orient", "auto")
-    .append("path")
-    .attr("fill", "black")
-    .attr("stroke", "gray")
-    .attr("stroke-width", 0.2)
-    .attr("d", "M 0,-2 L 4 ,0 L 0,2");
+      const toolContent = document.createElement("div");
 
-  const toolContent = document.createElement("div");
+      var captureTimeline;
 
-  var captureTimeline;
+      //======== DATA CALL & SORT =========
 
-  //======== DATA CALL & SORT =========
-
-  pandodb.webArchive
+      /* pandodb.webArchive
     .get(id)
-    .then((datajson) => {
+    .then((datajson) => { */
       dataDownload(datajson);
 
       const documents = datajson.content[0].items;

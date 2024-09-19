@@ -149,6 +149,8 @@ function updateCascade() {
   });
 }
 
+const localServicePreviewer = document.createElement("div");
+
 const retrieveAvailableServices = () =>
   window.electron.invoke("checkflux", true).then((result) => {
     availability = JSON.parse(result);
@@ -156,10 +158,6 @@ const retrieveAvailableServices = () =>
     updateCascade();
 
     const buttonList = [];
-
-    const localServicePreviewer = document.getElementById(
-      "localservices-basic-previewer"
-    );
 
     const table = document.createElement("UL");
 
@@ -305,4 +303,4 @@ const retrieveAvailableServices = () =>
     }
   });
 
-export { retrieveAvailableServices };
+export { retrieveAvailableServices, localServicePreviewer };

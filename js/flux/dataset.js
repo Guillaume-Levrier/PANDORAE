@@ -119,6 +119,8 @@ const datasetDetail = (detailDiv, kind, id) => {
 
   let dataPreview = ""; // Created dataPreview variable
 
+  detailDiv.innerHTML = "";
+
   // hyphe to rebuild
   //hypheCorpusList(id, prevId);
 
@@ -130,7 +132,6 @@ const datasetDetail = (detailDiv, kind, id) => {
 
       switch (kind) {
         case "istex":
-          console.log("hello");
           dataPreview = `<strong> ${doc.name} </strong>
                 <br>Origin: ${doc.content.type}
                 <br>Total results: ${doc.content.entries.length} 

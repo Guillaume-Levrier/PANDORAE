@@ -937,7 +937,11 @@ label {
 }
 
 .credential {
-  padding-left: 40px;
+  padding: 0.2rem;
+  
+  width:500px;
+    display: flex;
+    justify-content: flex-start;
 }
 
 .validation {
@@ -1125,4 +1129,28 @@ display: none;
 
 .sysDestCheck{
   margin-right:10px;
+}
+
+.warning-flux{
+  font-family: sans-serif;
+  color:white;
+  background-color: red;
+  padding: 10px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+  margin-left: 2rem;
+  margin-right: 2rem;
+  margin-bottom: 2rem;
+}
+
+.buttonDisclaimer{
+  border:1px solid white;
+  padding:5px;
+  cursor:pointer
+}
+.buttonDisclaimer:hover{
+  color:red;
+  background-color: white;
 }

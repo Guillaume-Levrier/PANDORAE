@@ -36,7 +36,7 @@
 </div>
 
 <!-- USER TAB -->
-<div id="user" style="display:none;" class="fluxTabs">
+<!-- <div id="user" style="display:none;" class="fluxTabs">
   <span class="flux-title">USER</span><br><br>
   <span
     style="font-family: sans-serif;color:white;background-color: red;padding: 5px;text-align: center;display: flex;">The
@@ -46,102 +46,99 @@
     public computer.</span><br>
   <button type="submit" id="access-user-id" class="flux-button">Access User ID
     file</button>
-  <!-- <button type="submit" id="change-user-id" class="flux-button">Change user folder location</button> -->
+  
+<br>
+
+<br>
+<hr>
+<br>
+
+<span class="credential"><b>User information</b></span><br><br>
+<form id="user-data-form" autocomplete="off">
+  <div class="credential"> Name:<br> <input class="fluxInput" spellcheck="false"
+      id="userNameInput" type="text" placeholder="Enter your name"><br><br>
+  </div>
+  <div class="credential"> Email:<br> <input class="fluxInput"
+      spellcheck="false" id="userMailInput" type="text"
+      placeholder="Enter your email"><br><br></div>
+  <div class="credential"> Zotero group id:<br> <input class="fluxInput"
+      spellcheck="false" id="zoterouserinput" type="text"
+      placeholder="Enter your zotero group code"><br><br></div>
+  <button type="submit" id="user-button" class="flux-button">Update User
+    Credentials</button><br>
+
+  <hr>
   <br>
+  <span class="credential"><b>API Keys</b></span><br><br>
+  <div class="credential APIcred">
+    <i title="Click this button to check your API credentials status"
+      class="material-icons validation"
+      id="zoteroAPIValidation">help_outline</i> Zotero API key: <input
+      class="fluxInput" spellcheck="false" id="zoterokeyinput" type="password"
+      value=""><i title="Click this button to update your credentials"
+      class="material-icons updateCredentials" id="Zotero">cached</i> <br><br>
+  </div>
+  <div class="credential APIcred">
+    <i title="Click this button to check your API credentials status"
+      class="material-icons validation" id="scopusValidation">help_outline</i>
+    Scopus API key: <input class="fluxInput" spellcheck="false"
+      id="scopuskeyinput" type="password" value=""><i
+      title="Click this button to update your credentials"
+      class="material-icons updateCredentials" id="Scopus">cached</i><br><br>
+  </div>
+
+  <div class="credential APIcred">
+    <i title="Click this button to check your API credentials status"
+      class="material-icons validation" id="wosValidation">help_outline</i>
+    WoS API key: <input class="fluxInput" spellcheck="false" id="woskeyinput"
+      type="password" value=""><i
+      title="Click this button to update your credentials"
+      class="material-icons updateCredentials"
+      id="WebOfScience">cached</i><br><br>
+  </div>
 
   <br>
   <hr>
   <br>
 
-  <span class="credential"><b>User information</b></span><br><br>
-  <form id="user-data-form" autocomplete="off">
-    <div class="credential"> Name:<br> <input class="fluxInput"
-        spellcheck="false" id="userNameInput" type="text"
-        placeholder="Enter your name"><br><br></div>
-    <div class="credential"> Email:<br> <input class="fluxInput"
-        spellcheck="false" id="userMailInput" type="text"
-        placeholder="Enter your email"><br><br></div>
-    <div class="credential"> Zotero group id:<br> <input class="fluxInput"
-        spellcheck="false" id="zoterouserinput" type="text"
-        placeholder="Enter your zotero group code"><br><br></div>
-    <button type="submit" id="user-button" class="flux-button">Update User
-      Credentials</button><br>
+  <span class="credential"><b>Local services</b></span><br><br>
+  <div class="credential">
+    <div id="localservices-basic-previewer" style="position:relative;">
+    </div>
+  </div>
 
-    <hr>
+  <span class="credential">Use the fields below to add new local
+    services.</span><br><br>
+
+  <div class="credential">
+
+    <input style="width:20%;display:none" class="fluxInput" spellcheck="false"
+      id="newServiceName" type="text" placeholder="Service name">
+    &nbsp;<input style="width:20%;display:none" class="fluxInput"
+      spellcheck="false" id="newServiceLocation" type="text"
+      placeholder="IP:PORT">
+    &nbsp;
+    &nbsp;<input style="width:20%;display:none" class="fluxInput"
+      spellcheck="false" id="newArkViewer" type="text"
+      placeholder="Ark Viewer Address"> &nbsp;
+
+    <select style="width:20%;" class="fluxInput" spellcheck="false"
+      id="newServiceType">
+      <option value=""></option>
+      <option value="BNF-SOLR">BNF-SOLR</option>
+    </select> &nbsp;
+    <button type="submit" id="new-service-button" class="flux-button">Add
+      Service</button>
+    <br><br>
     <br>
-    <span class="credential"><b>API Keys</b></span><br><br>
-    <div class="credential APIcred">
-      <i title="Click this button to check your API credentials status"
-        class="material-icons validation"
-        id="zoteroAPIValidation">help_outline</i> Zotero API key: <input
-        class="fluxInput" spellcheck="false" id="zoterokeyinput" type="password"
-        value=""><i title="Click this button to update your credentials"
-        class="material-icons updateCredentials" id="Zotero">cached</i> <br><br>
-    </div>
-    <div class="credential APIcred">
-      <i title="Click this button to check your API credentials status"
-        class="material-icons validation" id="scopusValidation">help_outline</i>
-      Scopus API key: <input class="fluxInput" spellcheck="false"
-        id="scopuskeyinput" type="password" value=""><i
-        title="Click this button to update your credentials"
-        class="material-icons updateCredentials" id="Scopus">cached</i><br><br>
-    </div>
-
-    <div class="credential APIcred">
-      <i title="Click this button to check your API credentials status"
-        class="material-icons validation" id="wosValidation">help_outline</i>
-      WoS API key: <input class="fluxInput" spellcheck="false" id="woskeyinput"
-        type="password" value=""><i
-        title="Click this button to update your credentials"
-        class="material-icons updateCredentials"
-        id="WebOfScience">cached</i><br><br>
-    </div>
-
     <br>
-    <hr>
     <br>
 
-    <span class="credential"><b>Local services</b></span><br><br>
-    <div class="credential">
-      <div id="localservices-basic-previewer" style="position:relative;">
-      </div>
-    </div>
-
-    <span class="credential">Use the fields below to add new local
-      services.</span><br><br>
-
-    <div class="credential">
-
-      <input style="width:20%;display:none" class="fluxInput" spellcheck="false"
-        id="newServiceName" type="text" placeholder="Service name">
-      &nbsp;<input style="width:20%;display:none" class="fluxInput"
-        spellcheck="false" id="newServiceLocation" type="text"
-        placeholder="IP:PORT">
-      &nbsp;
-      &nbsp;<input style="width:20%;display:none" class="fluxInput"
-        spellcheck="false" id="newArkViewer" type="text"
-        placeholder="Ark Viewer Address"> &nbsp;
-
-      <select style="width:20%;" class="fluxInput" spellcheck="false"
-        id="newServiceType">
-        <option value=""></option>
-        <option value="BNF-SOLR">BNF-SOLR</option>
-      </select> &nbsp;
-      <button type="submit" id="new-service-button" class="flux-button">Add
-        Service</button>
-      <br><br>
-      <br>
-      <br>
-      <br>
 
 
-
-    </div>
-    <!-- <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="altmetricValidation">help_outline</i> Altmetric API key:<br> <input class="fluxInput" spellcheck="false" id="altmetrickeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Altmetric">cached</i><br><br></div>
-      <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="twitterValidation">help_outline</i> Twitter API key:<br> <input class="fluxInput" spellcheck="false" id="twitterkeyinput" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="Twitter">cached</i><br><br></div>
-      <div class="credential"><i title="Click this button to check your API credentials status" class="material-icons validation" onclick="checkKey(this.id)" id="openAccessValidation">help_outline</i> OAbutton API key:<br> <input class="fluxInput" spellcheck="false" id="OAbutton" type="password" value=""><i title="Click this button to update your credentials" class="material-icons updateCredentials" onclick="updateUserData(this.id)" id="OAbutton">cached</i><br><br></div> -->
-  </form>
-</div>
+  </div>
+</form>
+</div> -->
 
 <!-- HYPHE TAB -->
 <div id="hyphe" style="display:none;" class="fluxTabs">

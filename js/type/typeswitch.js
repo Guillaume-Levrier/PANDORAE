@@ -7,7 +7,7 @@
 
 import { anthropotype } from "./explorers/anthropotype";
 import { webArchive } from "./explorers/webArchive";
-import { chronotype } from "./explorers/chronotype";
+import { timeline } from "./explorers/timeline";
 import { doxatype } from "./explorers/doxatype";
 import { fieldotype } from "./explorers/fieldotype";
 import { filotype } from "./explorers/filotype";
@@ -54,8 +54,8 @@ const typeSwitch = (type, data) => {
       webArchive(data);
       break;
 
-    case "chronotype":
-      chronotype(data);
+    case "timeline":
+      timeline(data);
       break;
 
     case "gazouillotype":
@@ -76,7 +76,7 @@ const typeSwitch = (type, data) => {
       break;
   }
 
-  document.getElementById("source").innerText = "Source: " + id;
+  document.getElementById("source").innerText = "Source: " + data.id;
 };
 
 export { typeSwitch };

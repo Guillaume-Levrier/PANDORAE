@@ -8,7 +8,6 @@ import { biorxivBasicRetriever } from "./sources/scientometrics/biorxiv";
 import { scientoDisplay } from "./sources/scientometrics/combined";
 import { wosBasicRetriever } from "./sources/scientometrics/wos";
 import {
-  accessUserID,
   changeUserID,
   basicUserData,
   checkKey,

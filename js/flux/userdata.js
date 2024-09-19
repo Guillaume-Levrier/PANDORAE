@@ -1,12 +1,6 @@
-import { scopusBasicRetriever } from "./sources/scientometrics/scopus";
-import { zoteroCollectionRetriever } from "./zotero-flux";
-
 const userDataPath = window.electron.userDataPath;
 
 var currentUser;
-
-const accessUserID = () =>
-  window.electron.send("openPath", userDataPath + "/PANDORAE-DATA/userID/");
 
 const changeUserID = () => window.electron.send("change-udp", "change");
 
@@ -24,9 +18,11 @@ const userIdFilePath = userDataPath + "/PANDORAE-DATA/userID/user-id.json";
 
 const getUserData = () => window.electron.send("getUserDetails", true);
 
-window.electron.getUserDetails((user) => updateFields(user));
+var userData = {};
 
-const updateFields = (user) => {
+window.electron.getUserDetails((user) => (userData = user));
+
+/* const updateFields = (user) => {
   currentUser = user;
 
   const userName = user.UserName;
@@ -48,7 +44,7 @@ const updateFields = (user) => {
   if (user.hasOwnProperty("wos")) {
     document.getElementById("woskeyinput").value = user.WoS.value;
   }
-};
+}; */
 
 const basicUserData = () => {
   let userButton = document.getElementById("user-button");
@@ -133,26 +129,6 @@ const updateUserData = (service) => {
 };
 
 const checkKey = (service, status) => {
-  /* 
-  let success = false;
-
-  if (status === undefined) {
-    switch (service) {
-      case "zoteroAPIValidation":
-        zoteroCollectionRetriever();
-
-        break;
-
-      case "scopusValidation":
-        scopusBasicRetriever(true);
-
-        break;
-    }
-  }
-
-  success = status;
-
- */
   if (status) {
     document.getElementById(service).style.color = "green";
     document.getElementById(service).innerHTML = "check_circle_outline";
@@ -163,14 +139,12 @@ const checkKey = (service, status) => {
   }
 };
 
-//window.addEventListener("DOMContentLoaded", () => getUserData());
-
 export {
-  accessUserID,
   basicUserData,
   changeUserID,
   checkKey,
   updateUserData,
   getUserData,
   getPassword,
+  userData,
 };

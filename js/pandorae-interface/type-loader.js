@@ -1,10 +1,20 @@
 import { pandodb } from "../db";
 import { CMT } from "../locales/locales";
+import { typeSwitch } from "../type/typeswitch";
 import { mainDisplay } from "./console";
-import { purgeMenuItems, toggleMenu, toggleSecondaryMenu } from "./menu";
-import { selectOption } from "./slide-interface";
+import {
+  purgeMenuItems,
+  toggledMenu,
+  toggleMenu,
+  toggleSecondaryMenu,
+} from "./menu";
+import { pulse } from "./pulse";
 
 var typeSelector;
+
+var currentType;
+
+const CM = CMT.EN;
 
 const setTypeSelector = (n) => (typeSelector = n);
 
@@ -43,7 +53,6 @@ const categoryLoader = (cat) => {
         const typeDatasetMap = {};
 
         pandodb.type.toArray().then((datasets) => {
-          console.log(datasets);
           datasets.forEach((dataset) => {
             if (!typeDatasetMap.hasOwnProperty(dataset.datasetType)) {
               typeDatasetMap[dataset.datasetType] = [];
@@ -53,10 +62,8 @@ const categoryLoader = (cat) => {
 
           let loadingCount = 0;
 
-          console.log(Object.keys(typeDatasetMap));
           Object.keys(typeDatasetMap).forEach((datasetType) => {
-            console.log(datasetType);
-            let typeContainer = document.createElement("div");
+            const typeContainer = document.createElement("div");
             typeContainer.style.display = "flex";
             typeContainer.style.borderBottom =
               "1px solid rgba(192,192,192,0.3)";
@@ -127,7 +134,6 @@ const categoryLoader = (cat) => {
 };
 
 const listTableDatasets = (datasets, type) => {
-  console.log(datasets);
   datasets.forEach((d) => {
     // datasetContainer
     let datasetContainer = document.createElement("div");
@@ -167,4 +173,56 @@ const listTableDatasets = (datasets, type) => {
   });
 };
 
-export { categoryLoader, listTableDatasets, setTypeSelector, typeSelector };
+const selectOption = (type, dataset) => {
+  if (typeSelector) {
+    let order =
+      "[actionType:" +
+      JSON.stringify(type) +
+      "," +
+      JSON.stringify(dataset.id) +
+      "/actionType]";
+    let editor = document.getElementsByClassName("ql-editor")[0];
+    editor.innerHTML = editor.innerHTML + order;
+
+    setTypeSelector(false);
+    toggleMenu();
+  } else {
+    if (toggledMenu) {
+      toggleMenu();
+    }
+
+    //document.getElementById("menu-icon").onclick = "";
+    document.getElementById("menu-icon").addEventListener(
+      "click",
+      () => {
+        location.reload();
+      },
+      { once: true }
+    );
+    field.value = CM.global.field.starting + " " + type;
+    currentType = { type: type, id: dataset.id };
+    //types.typeSwitch(type, id);
+
+    // Give time to the menu to get closed
+    setTimeout(() => typeSwitch(type, dataset), 400);
+
+    window.electron.send("audio-channel", "button2");
+    pulse(1, 1, 10);
+
+    window.electron.send(
+      "console-logs",
+      CM.console.starting[0] +
+        type +
+        CM.console.starting[1] +
+        JSON.stringify(dataset.id)
+    );
+  }
+};
+
+export {
+  categoryLoader,
+  listTableDatasets,
+  setTypeSelector,
+  typeSelector,
+  currentType,
+};

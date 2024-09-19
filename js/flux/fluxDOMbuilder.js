@@ -1,6 +1,9 @@
 import { fluxButtonClicked } from "./actionbuttons";
 import { fluxSwitch } from "./buttons";
 import { datasetDisplay } from "./dataset";
+import { userData } from "./userdata";
+
+const userDataPath = window.electron.userDataPath;
 
 // These functions create the necessary HTML elements for each available cascade option.
 //
@@ -105,6 +108,132 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
   tab.append(genHr(), tabSection);
 };
 
+const addUserField = (tabData, sectionData, tab) => {
+  console.log(userData);
+  const userFieldContainer = document.createElement("div");
+  userFieldContainer.className = "credential";
+
+  const label = document.createElement("label");
+  label.innerText = `${sectionData.name} : `;
+  label.style.width = "100px";
+
+  const field = document.createElement("input");
+  field.className = "fluxInput";
+  field.style = "font-size;12px;width:400px;";
+  field.type = "text";
+  field.placeholder = "Enter your " + sectionData.name;
+  field.spellcheck = false;
+  field.id = sectionData.id + "Input";
+
+  if (userData.hasOwnProperty(sectionData.id)) {
+    field.value = userData[sectionData.id];
+  }
+
+  userFieldContainer.append(label, field);
+
+  tab.append(userFieldContainer);
+};
+
+const addServiceCredentials = (tabData, sectionData, tab) => {
+  const serviceContainer = document.createElement("div");
+  serviceContainer.style = "padding:0.5rem";
+  const title = document.createElement("div");
+  title.innerText = sectionData.name;
+  title.style = "font-size:14px;";
+  serviceContainer.append(title);
+
+  if (sectionData.hasOwnProperty("libraries")) {
+    let count = 1;
+    const librarylist = document.createElement("div");
+    const addLibraryField = () => {
+      const libraryfieldContainer = document.createElement("div");
+      libraryfieldContainer.style = `display: flex;
+    width: 220px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;padding:0.3rem;`;
+
+      const label = document.createElement("label");
+      label.innerText = `Library ${count} : `;
+
+      const libraryfield = document.createElement("input");
+      libraryfield.className = "zoteroLibraryField";
+      libraryfield.className = "fluxInput";
+      libraryfield.style = "font-size;12px;width:100px;font-family:monospace";
+      libraryfield.type = "password";
+      libraryfield.placeholder = "0000000"; //5361175
+      libraryfield.spellcheck = false;
+      libraryfield.id = sectionData.name + "-APIkey";
+
+      const addLib = document.createElement("i");
+      addLib.style.fontSize = "10px";
+      addLib.style.cursor = "pointer";
+      addLib.innerText = "add_circle";
+      addLib.className = "material-icons";
+      addLib.addEventListener("click", () => {
+        addLibraryField();
+        addLib.remove();
+      });
+
+      libraryfieldContainer.append(label, libraryfield, addLib);
+      librarylist.append(libraryfieldContainer);
+      count++;
+      //<span class="material-symbols-outlined">add_circle </span>
+    };
+    addLibraryField();
+    serviceContainer.append(librarylist);
+  }
+
+  if (sectionData.hasOwnProperty("apikey")) {
+    const label = document.createElement("label");
+    label.innerText = `${sectionData.name} API key : `;
+    const apikeyfield = document.createElement("input");
+    apikeyfield.style = "font-size;12px;width:400px;";
+    apikeyfield.type = "password";
+    apikeyfield.className = "fluxInput";
+    apikeyfield.placeholder =
+      "Paste your " + sectionData.name + " API key here";
+    apikeyfield.spellcheck = false;
+    apikeyfield.id = sectionData.name + "-APIkey";
+    serviceContainer.append(label, apikeyfield);
+  }
+  console.log(sectionData);
+
+  tab.append(genHr(), serviceContainer);
+};
+
+const addWarningDisclaimer = (tabData, sectionData, tab) => {
+  const tabSection = document.createElement("div");
+  tabSection.className = "warning-flux";
+
+  const warningText = document.createElement("div");
+  warningText.innerText = sectionData.content;
+
+  tabSection.append(warningText);
+  if (sectionData.hasOwnProperty("func")) {
+    const button = document.createElement("div");
+    button.innerText = sectionData.func.text;
+    button.className = "buttonDisclaimer";
+    button.addEventListener("click", () => {
+      switch (sectionData.func.id) {
+        case "openUserDirectory":
+          window.electron.send(
+            "openPath",
+            userDataPath + "/PANDORAE-DATA/userID/"
+          );
+
+          break;
+
+        default:
+          break;
+      }
+    });
+    tabSection.append(button);
+  }
+
+  tab.append(tabSection);
+};
+
 // A tab is only created when it is first called.
 var previousTab = false;
 var removePreviousTab = () => (previousTab ? previousTab.remove() : false);
@@ -127,7 +256,7 @@ const createCascadeTab = (tabData) => {
   // main description DOM element
   const description = document.createElement("div");
   description.className = "flux-description";
-  description.innerText = tabData.description;
+  description.innerHTML = tabData.description;
 
   tab.append(title, description);
 
@@ -135,6 +264,16 @@ const createCascadeTab = (tabData) => {
 
   tabData.sections.forEach((section) => {
     switch (section.type) {
+      case "warningDisclaimer":
+        addWarningDisclaimer(tabData, section.data, tab);
+        break;
+      case "addServiceCredentials":
+        addServiceCredentials(tabData, section.data, tab);
+        break;
+
+      case "personalInformation":
+        addUserField(tabData, section.data, tab);
+        break;
       case "tabDatasets":
         addDatasetDisplaySection(tabData, section.data, tab);
         break;
@@ -161,108 +300,107 @@ const createCascadeTab = (tabData) => {
 
 export { createCascadeTab };
 
-/*
-<div id="zotero" style="display:none;" class="fluxTabs">
-  <span class="flux-title">ZOTERO</span><br><br>
-  This tab lets you send a collection of documents retrieved by PANDORÆ to
-  Zotero, and lets import a Zotero collection (regardless
-  of its origin) to PANDORÆ.
-  <br><br>
-  <hr><br>
-  <form id="zotero-export-form" autocomplete="off">
-    This button lets you display the datasets in <strong>PANDORÆ's memory on
-      your local device</strong> and upload them to Zotero.<br><br>
-    <button type="submit" class="flux-button" id="cslcolret">Display available
-      csljson files</button><br>
-    <div id="selectedCollection">
-      <div id="csljson-dataset-preview"></div>
-      <div id="csljson-dataset-buttons" style="display:none;">
-        <input class="fluxInput" spellcheck="false" class="sendToZotero"
-          id="zoteroCollecName" type="text" placeholder="Enter collection name">
-
-        <button type="submit" class="flux-button sendToZotero"
-          id="zoteroCollecBuild">Create a new Zotero
-          Collection</button>
-      </div>
-    </div>
-    <div id="userCsljsonCollections"></div>
-  </form>
+/* 
+<div id="user" style="display:none;" class="fluxTabs">
+  <span class="flux-title">USER</span><br><br>
+  <span
+    style="font-family: sans-serif;color:white;background-color: red;padding: 5px;text-align: center;display: flex;">The
+    data entered below is
+    unencrypted so as to make this application portable. Click on
+    the button below to access the file and delete it manually if you are on a
+    public computer.</span><br>
+  <button type="submit" id="access-user-id" class="flux-button">Access User ID
+    file</button>
+  <!-- <button type="submit" id="change-user-id" class="flux-button">Change user folder location</button> -->
   <br>
-  <hr><br>
-  <form id="zotero-import-form" autocomplete="off"></form>
-  This button lets you display the collections of documents on <strong>your
-    online Zotero library</strong> and download them to your system.<br><br>
-  <button type="submit" class="flux-button" id="zotcolret">Display online
-    library collections</button><br><br>
-  <!-- <button type="submit" class="flux-button" id="zotcolret" onclick="zoteroLocalRetriever();return false">Display local zotero instance collections</button><br><br> -->
-  <span id="zoteroImportInstruction" style="display:none;">Select the Zotero
-    collections you want to import to PANDORÆ </span><br><br>
 
-  <div id="zoteroResults" style="display:none;">
-    <div id="userZoteroCollections" style="flex:auto"></div>
-
-  </div>
-  <br><br><br>
-  <input class="fluxInput" spellcheck="false" id="zoteroImportName"
-    style="display:none;" type="text" placeholder="Enter import name">
-  <button type="submit" class="flux-button" style="display:none;"
-    id="zotitret">Import selected collections into
-    system</button><br>
-  </form>
-</div>
-
-*/
-
-/* <!-- SYSTEM TAB -->
-<div id="system" style="display:none;" class="fluxTabs">
-  <span class="flux-title">SYSTEM</span><br><br>
-  Datasets listed in SYSTEM are available locally and ready to be exported to
-  one of PANDORÆ's visualisation tools.
-  <button type="submit" class="flux-button" id="systemList">Display available
-    datasets</button><br>
-  <div id="problematics"></div>
-  <div style="display:flex;padding: 5px;margin: 5px;">
-    <div id="system-dataset-preview" style="flex:auto"></div>
-    <div id="system-dataset-buttons" style="display:none">
-      <button type="submit" class="flux-button" id="downloadData">Download
-        dataset</button>
-      <button type="submit" class="flux-button" id="showConsole">Display in
-        Console</button>
-      <button type="submit" class="flux-button" id="checkPPS">Check on
-        PPS</button>
-      <br>
-      <br><br>Export dataset to :<br>
-      <input class='sysDestCheck' value='chronotype' name='chronotype'
-        type='checkbox' /><label>chronotype</label><br>
-      <input class='sysDestCheck' value='geotype' name='geotype'
-        type='checkbox' /><label>geotype</label><br>
-      <input class='sysDestCheck' value='anthropotype' name='anthropotype'
-        type='checkbox' /><label>anthropotype</label><br>
-      <input class='sysDestCheck' value='webArchive' name='webArchive'
-        type='checkbox' /><label>webArchive</label><br>
-      <input class='sysDestCheck' value='hyphotype' name='hyphotype'
-        type='checkbox' /><label>hyphotype</label><br>
-      <input class='sysDestCheck' value='fieldotype' name='fieldotype'
-        type='checkbox' /><label>fieldotype</label><br>
-      <input class='sysDestCheck' value='regards' name='regards'
-        type='checkbox' /><label>regards</label><br>
-      <input class='sysDestCheck' value='gazouillotype' name='gazouillotype'
-        type='checkbox' /><label>gazouillotype</label><br>
-      <input class='sysDestCheck' value='slider' name='slider'
-        type='checkbox' /><label>slider</label><br>
-      <input class="fluxInput" spellcheck="false" id="systemToType" type="text"
-        placeholder="Enter a dataset name">
-      <button type="submit" class="flux-button"
-        id="systitret">Export</button><br>
-    </div>
-  </div>
-  <div id="systemDatasetsList"></div>
   <br>
   <hr>
-  <br>Import local dataset :<br>
-  <input class="fluxInput" id="localUploadPath" type="file"
-    accept=".json" /><br><br>
-  <button type="submit" class="flux-button" id="load-local">Upload local dataset
-    to SYSTEM</button>
+  <br>
 
+  <span class="credential"><b>User information</b></span><br><br>
+  <form id="user-data-form" autocomplete="off">
+    <div class="credential"> Name:<br> <input class="fluxInput"
+        spellcheck="false" id="userNameInput" type="text"
+        placeholder="Enter your name"><br><br></div>
+    <div class="credential"> Email:<br> <input class="fluxInput"
+        spellcheck="false" id="userMailInput" type="text"
+        placeholder="Enter your email"><br><br></div>
+    <div class="credential"> Zotero group id:<br> <input class="fluxInput"
+        spellcheck="false" id="zoterouserinput" type="text"
+        placeholder="Enter your zotero group code"><br><br></div>
+    <button type="submit" id="user-button" class="flux-button">Update User
+      Credentials</button><br>
+
+    <hr>
+    <br>
+    <span class="credential"><b>API Keys</b></span><br><br>
+    <div class="credential APIcred">
+      <i title="Click this button to check your API credentials status"
+        class="material-icons validation"
+        id="zoteroAPIValidation">help_outline</i> Zotero API key: <input
+        class="fluxInput" spellcheck="false" id="zoterokeyinput" type="password"
+        value=""><i title="Click this button to update your credentials"
+        class="material-icons updateCredentials" id="Zotero">cached</i> <br><br>
+    </div>
+    <div class="credential APIcred">
+      <i title="Click this button to check your API credentials status"
+        class="material-icons validation" id="scopusValidation">help_outline</i>
+      Scopus API key: <input class="fluxInput" spellcheck="false"
+        id="scopuskeyinput" type="password" value=""><i
+        title="Click this button to update your credentials"
+        class="material-icons updateCredentials" id="Scopus">cached</i><br><br>
+    </div>
+
+    <div class="credential APIcred">
+      <i title="Click this button to check your API credentials status"
+        class="material-icons validation" id="wosValidation">help_outline</i>
+      WoS API key: <input class="fluxInput" spellcheck="false" id="woskeyinput"
+        type="password" value=""><i
+        title="Click this button to update your credentials"
+        class="material-icons updateCredentials"
+        id="WebOfScience">cached</i><br><br>
+    </div>
+
+    <br>
+    <hr>
+    <br>
+
+    <span class="credential"><b>Local services</b></span><br><br>
+    <div class="credential">
+      <div id="localservices-basic-previewer" style="position:relative;">
+      </div>
+    </div>
+
+    <span class="credential">Use the fields below to add new local
+      services.</span><br><br>
+
+    <div class="credential">
+
+      <input style="width:20%;display:none" class="fluxInput" spellcheck="false"
+        id="newServiceName" type="text" placeholder="Service name">
+      &nbsp;<input style="width:20%;display:none" class="fluxInput"
+        spellcheck="false" id="newServiceLocation" type="text"
+        placeholder="IP:PORT">
+      &nbsp;
+      &nbsp;<input style="width:20%;display:none" class="fluxInput"
+        spellcheck="false" id="newArkViewer" type="text"
+        placeholder="Ark Viewer Address"> &nbsp;
+
+      <select style="width:20%;" class="fluxInput" spellcheck="false"
+        id="newServiceType">
+        <option value=""></option>
+        <option value="BNF-SOLR">BNF-SOLR</option>
+      </select> &nbsp;
+      <button type="submit" id="new-service-button" class="flux-button">Add
+        Service</button>
+      <br><br>
+      <br>
+      <br>
+      <br>
+
+
+
+    </div>
+  </form>
 </div> */
