@@ -7,7 +7,12 @@ const date =
 const sysExport = (destinations, importName, id) => {
   pandodb.open();
   pandodb.flux.toArray().then((datasets) => {
+    console.log(datasets);
     datasets.forEach((dataset) => {
+      console.log("=====");
+      console.log(dataset);
+      console.log(dataset.id);
+      console.log(id);
       if (dataset.id === id) {
         console.log("got there");
         destinations.forEach((dests) =>
@@ -22,6 +27,8 @@ const sysExport = (destinations, importName, id) => {
 const dataWriter = (destination, importName, content, datasetType) => {
   pandodb.open();
 
+  console.log(destination, importName, content, datasetType);
+
   destination.forEach((d) => {
     const table = pandodb[d];
 
@@ -35,11 +42,16 @@ const dataWriter = (destination, importName, content, datasetType) => {
       content,
     };
 
+    const t1 = performance.now();
+
     table
       .add(dataToInsert)
       .catch((e) => console.log(e))
       .then((res) => {
-        table.toArray().then((r) => console.log(r));
+        const t2 = performance.now();
+
+        console.log(`Saved in ${t2 - t1}`);
+
         window.electron.send(
           "console-logs",
           "Retrieval successful. " + importName + " was imported in " + d
@@ -53,12 +65,4 @@ const dataWriter = (destination, importName, content, datasetType) => {
     window.electron.send("win-destroy", true);
   });
 };
-
-const getPasswordFromChaeros = (service, user) =>
-  window.electron.sendSync("keyManager", {
-    user: user,
-    service: service,
-    type: "getPassword",
-  });
-
-export { sysExport, dataWriter, getPasswordFromChaeros, date };
+export { sysExport, dataWriter, date };

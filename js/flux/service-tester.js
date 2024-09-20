@@ -5,13 +5,13 @@ const testingZotero = (data) => {
       .then((r) => r.json())
       .then((r) => {
         if (parseInt(d) === parseInt(r[0].library.id)) {
-          document.getElementById(d).style.backgroundColor = "green";
-          document.getElementById(d).style.color = "white";
+          document.getElementById(d).previousSibling.innerText =
+            r[0].library.name + " (connected)";
         }
       })
       .catch((e) => {
-        document.getElementById(d).style.backgroundColor = "red";
-        document.getElementById(d).style.color = "white";
+        document.getElementById(d).previousSibling.innerText = "Failed";
+        document.getElementById(d).previousSibling.style.color = "red";
       });
   });
 };

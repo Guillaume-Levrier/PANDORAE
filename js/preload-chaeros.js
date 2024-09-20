@@ -8,6 +8,8 @@ contextBridge.exposeInMainWorld("electron", {
   invoke: (channel) => ipcRenderer.invoke(channel, true),
   chaerosCompute: (callback) =>
     ipcRenderer.on("chaerosCompute", (e, ...args) => callback(args[0])),
+  getUserDetails: (callback) =>
+    ipcRenderer.on("getUserDetails", (e, ...args) => callback(args[0])),
 });
 
 console.log("|==== CHAEROS PRELOAD ENDS HERE ====|");

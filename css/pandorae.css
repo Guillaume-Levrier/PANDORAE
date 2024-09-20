@@ -1161,9 +1161,25 @@ display: none;
   width:55px;
   font-family:monospace;
   text-align: center;
+  
 }
 
 hr{
   margin-top:1rem;
-  
 }
+
+.helperBox{
+  padding: 0.4rem;
+  margin: auto;
+  text-align: justify;
+  width: 80%;
+  border: 1px dashed black;
+  cursor: pointer;
+}
+
+.helperBox:hover{
+  color:white;
+  background-color: #141414;
+}
+
+#selectCascade{position:fixed;z-index:20;padding: 5px;left:5px;top:5px;}

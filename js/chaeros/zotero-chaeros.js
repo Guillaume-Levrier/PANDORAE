@@ -3,8 +3,9 @@
 // retrieve 100 items, which can easily trigger the rate limiting.
 
 import bottleneck from "bottleneck";
-import { dataWriter, getPasswordFromChaeros } from "./chaeros-to-system";
+import { dataWriter } from "./chaeros-to-system";
 import { pandodb } from "../db";
+import { userData } from "./chaeros-userdata";
 
 const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
   window.electron.send(
@@ -18,6 +19,8 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
       " into SYSTEM."
   );
 
+  console.log(collections, zoteroUser, importName);
+
   const limiter = new bottleneck({
     // Create a bottleneck to prevent API rate limit
     maxConcurrent: 1, // Only one request at once
@@ -26,7 +29,12 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
 
   const zoteroPromises = [];
 
-  const zoteroApiKey = getPasswordFromChaeros("Zotero", zoteroUser);
+  console.log("getting key");
+  console.log(userData);
+
+  const zoteroApiKey = userData.distantServices.zotero.apikey;
+
+  console.log(zoteroApiKey);
 
   for (let j = 0; j < collections.length; j++) {
     // Loop on collections
@@ -47,11 +55,14 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
   let responseTarget = 0;
   let responseAmount = 0;
 
+  console.log(zoteroPromises);
+
   zoteroPromises.forEach((d) => {
     limiter
       .schedule(() => fetch(d))
       .then((res) => res.json())
       .then((result) => {
+        console.log(result);
         zoteroCollectionResponse.push(result);
 
         if (zoteroCollectionResponse.length === zoteroPromises.length) {
@@ -93,14 +104,12 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
                     f.items.push(d);
 
                     responseAmount++;
-                    window.electron.send(
-                      "chaeros-notification",
-                      "Loading " +
-                        responseAmount +
-                        " of " +
-                        responseTarget +
-                        " documents."
-                    );
+
+                    const updateMessage = `Loading ${responseAmount}/${responseTarget}`;
+
+                    console.log(updateMessage);
+
+                    window.electron.send("chaeros-notification", updateMessage);
 
                     if (responseAmount === responseTarget) {
                       dataWriter(

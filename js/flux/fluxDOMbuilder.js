@@ -143,11 +143,33 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
   const title = document.createElement("div");
   title.innerText = sectionData.name;
   title.style = "font-size:14px; text-transform: capitalize;";
-  serviceContainer.append(title);
+
+  const description = document.createElement("div");
+  description.innerHTML = sectionData.description;
+  description.style = "text-align:justify;padding:1rem;";
+  serviceContainer.append(title, description);
+
+  if (sectionData.hasOwnProperty("helper")) {
+    const helper = document.createElement("div");
+    helper.innerHTML = sectionData.helper.text;
+    helper.className = "helperBox";
+    console.log(sectionData.helper.url);
+    helper.addEventListener("click", () =>
+      window.electron.send("openEx", sectionData.helper.url)
+    );
+    serviceContainer.append(helper);
+  }
 
   if (sectionData.hasOwnProperty("libraries")) {
     let count = 1;
     const librarylist = document.createElement("div");
+    librarylist.style = "margin-top:1rem";
+
+    const addLib = document.createElement("div");
+    addLib.className = "flux-button";
+    addLib.style = "width:100px;margin:0.5rem;margin-left:150px;";
+    addLib.innerText = "Add a new library";
+
     const addLibraryField = (libID) => {
       const libraryfieldContainer = document.createElement("div");
       libraryfieldContainer.style = `display: flex;
@@ -167,20 +189,13 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
       libraryfield.id = libID ? libID : sectionData.name + count + "-Library";
       libraryfield.value = libID ? libID : "";
 
-      const addLib = document.createElement("i");
-      addLib.style.fontSize = "10px";
-      addLib.style.cursor = "pointer";
-      addLib.innerText = "add_circle";
-      addLib.className = "material-icons";
-      addLib.addEventListener("click", () => {
-        addLibraryField();
-        addLib.remove();
-      });
-
-      libraryfieldContainer.append(label, libraryfield, addLib);
+      libraryfieldContainer.append(label, libraryfield);
       librarylist.append(libraryfieldContainer);
       count++;
     };
+
+    addLib.addEventListener("click", () => addLibraryField());
+
     if (userData.distantServices.hasOwnProperty("zotero")) {
       if (userData.distantServices.zotero.libraries.length > 0) {
         userData.distantServices.zotero.libraries.forEach((d) =>
@@ -190,7 +205,8 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
     } else {
       addLibraryField();
     }
-    serviceContainer.append(librarylist);
+
+    serviceContainer.append(librarylist, addLib);
   }
 
   if (sectionData.hasOwnProperty("apikey")) {

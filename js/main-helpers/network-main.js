@@ -2,24 +2,24 @@ import { currentUser, setCurrentUser } from "./user-main";
 
 const dns = require("dns");
 
-const dnslist = [
-  { name: "Gallica", url: "gallica.bnf.fr" },
-  { name: "Scopus", url: "api.elsevier.com" },
-  { name: "BIORXIV", url: "www.biorxiv.org" },
-  { name: "Zotero", url: "api.zotero.org" },
-  { name: "Clinical Trials", url: "clinicaltrials.gov" },
-  { name: "Regards Citoyens", url: "nosdeputes.fr" },
-  { name: "Web Of Science", url: "clarivate.com" },
-  { name: "ISTEX", url: "api.istex.fr" },
-  { name: "Dimensions", url: "app.dimensions.ai" },
-  {
+const dnslist = {
+  gallica: { name: "Gallica", url: "gallica.bnf.fr" },
+  scopus: { name: "Scopus", url: "api.elsevier.com" },
+  biorxiv: { name: "BIORXIV", url: "www.biorxiv.org" },
+  zotero: { name: "Zotero", url: "api.zotero.org" },
+  clintri: { name: "Clinical Trials", url: "clinicaltrials.gov" },
+  regards: { name: "Regards Citoyens", url: "nosdeputes.fr" },
+  wos: { name: "Web Of Science", url: "clarivate.com" },
+  istex: { name: "ISTEX", url: "api.istex.fr" },
+  dimensions: { name: "Dimensions", url: "app.dimensions.ai" },
+  pps: {
     name: "PPS",
     url: "irit.fr",
   },
-];
+};
 
 const availableServicesLookup = () => {
-  dnslist.forEach((d) => {
+  Object.values(dnslist).forEach((d) => {
     dns.lookup(d.url, (err, address, family) => {
       if (address) {
         d.valid = true;

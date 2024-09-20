@@ -28,7 +28,7 @@ ipcRenderer.invoke("checkflux", true).then((result) => {
   meta.content = "default-src 'self';connect-src ";
 
   // allow external API sources
-  domainsToAllow.dnslist.forEach((d) => {
+  Object.values(domainsToAllow.dnslist).forEach((d) => {
     if (d.valid) {
       meta.content += "https://" + d.url + " ";
     }

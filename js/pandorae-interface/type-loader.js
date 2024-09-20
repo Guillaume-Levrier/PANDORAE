@@ -24,6 +24,15 @@ const typeSelect = () => {
   categoryLoader("type");
 };
 
+const resetCategoryStyle = () => {
+  // reset neutral style for other TYPE category tabs
+  const typeContainers = document.getElementsByClassName("typeContainer");
+  for (let i = 0; i < typeContainers.length; i++) {
+    typeContainers[i].style =
+      "display:flex;border-bottom:1px solid rgba(192,192,192,0.3)";
+  }
+};
+
 let notLoadingMenu = true;
 
 const categoryLoader = (cat) => {
@@ -36,18 +45,6 @@ const categoryLoader = (cat) => {
 
     switch (cat) {
       case "type":
-        /* const typeList = [
-          "timeline",
-          "geolocator",
-          "network",
-          "webArchive",
-          "clinicalTrials",
-          "socialMedia",
-          "hyphe",
-          "parliament",
-        ];
-
-         */
         window.electron.send("console-logs", "Displaying available types");
 
         const typeDatasetMap = {};
@@ -64,18 +61,27 @@ const categoryLoader = (cat) => {
 
           Object.keys(typeDatasetMap).forEach((datasetType) => {
             const typeContainer = document.createElement("div");
-            typeContainer.style.display = "flex";
-            typeContainer.style.borderBottom =
-              "1px solid rgba(192,192,192,0.3)";
+            typeContainer.style =
+              "display:flex;border-bottom:1px solid rgba(192,192,192,0.3)";
+
             typeContainer.id = datasetType;
-            typeContainer.className += "tabs menu-item";
+            typeContainer.className += "tabs menu-item typeContainer";
 
             typeContainer.innerText =
               CMT.EN.types.names[datasetType].toLowerCase();
 
-            typeContainer.addEventListener("click", (e) =>
-              mainDisplay(typeDatasetMap[datasetType], datasetType)
-            );
+            typeContainer.addEventListener("click", (e) => {
+              resetCategoryStyle();
+
+              // only load if opening a new/different tab
+
+              // add selected style for the one selected tab
+              typeContainer.style.color = "white";
+              typeContainer.style.backgroundColor = "rgb(20,20,20)";
+
+              // trigger main display
+              mainDisplay(typeDatasetMap[datasetType], datasetType);
+            });
 
             document.getElementById("secMenContent").append(typeContainer);
             loadingCount += 1;
@@ -129,8 +135,10 @@ const categoryLoader = (cat) => {
         notLoadingMenu = true;
         break;
     }
-    toggleSecondaryMenu();
   }
+  toggleSecondaryMenu();
+  resetCategoryStyle();
+  field.value = ``;
 };
 
 const listTableDatasets = (datasets, type) => {
@@ -225,4 +233,5 @@ export {
   setTypeSelector,
   typeSelector,
   currentType,
+  resetCategoryStyle,
 };

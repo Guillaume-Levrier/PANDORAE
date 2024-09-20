@@ -157,6 +157,7 @@ export {
   toggleMenu,
   toggleSecondaryMenu,
   toggleTertiaryMenu,
+  toggledTertiaryMenu,
   openHelper,
   toggleFlux,
   blinker,

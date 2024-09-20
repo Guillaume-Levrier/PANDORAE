@@ -5,6 +5,7 @@
 // - those "heavy" functions are sent to the main process through the 'dataFlux' channel (and dispatched to Chæeros)
 // - the flux  modal window is closed
 
+import { userData } from "./userdata";
 import { closeFluxWindow } from "./window";
 
 const powerValve = (fluxAction, item) => {
@@ -209,27 +210,8 @@ const powerValve = (fluxAction, item) => {
       break;
 
     case "zoteroItemsRetriever":
-      fluxArgs.zoteroItemsRetriever = {
-        collections: [],
-        destination: [],
-      };
-
-      var collecs = document.getElementsByClassName("zotColCheck");
-      for (let i = 0; i < collecs.length; i++) {
-        if (collecs[i].checked) {
-          fluxArgs.zoteroItemsRetriever.collections.push({
-            key: collecs[i].value,
-            name: collecs[i].name,
-          });
-        }
-      }
-
-      fluxArgs.zoteroItemsRetriever.zoteroUser =
-        document.getElementById("zoterouserinput").value;
-
-      fluxArgs.zoteroItemsRetriever.importName = document
-        .getElementById("zoteroImportName")
-        .value.replace(/\s/g, "");
+      fluxArgs.zoteroItemsRetriever = item.powerValveArgs;
+      console.log(fluxArgs);
       message = "Retrieving user collections…";
 
       break;

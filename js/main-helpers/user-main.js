@@ -41,9 +41,10 @@ const readUserIDfile = () =>
     (err, data) => JSON.parse(data)
   );
 
-const getUserDetails = () => {
+const getUserDetails = (event) => {
+  console.log(event);
   const user = JSON.parse(readUserIDfile(userDataPath));
-  fluxWindow.webContents.send("getUserDetails", user);
+  event.sender.send("getUserDetails", user);
 };
 
 const getUserStatus = (req) => {
@@ -82,9 +83,12 @@ const manageUserKeys = (event, request) => {
   // it was then moved to a flat file (with a notice to the user
   // that their API keys are stored as flat files).
 
-  const data = readUserIDfile(userDataPath);
+  const data = JSON.parse(readUserIDfile(userDataPath));
 
   switch (request.type) {
+    case "apikey":
+      event.return = Valuedata[request.service].apikey;
+      break;
     case "setPassword":
       currentUser = JSON.parse(data);
 

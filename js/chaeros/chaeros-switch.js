@@ -29,6 +29,7 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
       " process with the following arguments : " +
       JSON.stringify(fluxArgs)
   );
+
   try {
     switch (fluxAction) {
       case "computePPS":
@@ -106,13 +107,6 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
         webofscienceGeolocate(fluxArgs.webofscienceGeolocate.dataset);
         break;
 
-      /* case "altmetricRetriever":
-        altmetricRetriever(
-          fluxArgs.altmetricRetriever.id,
-          fluxArgs.altmetricRetriever.user
-        );
-        break; */
-
       // ==== RETRIEVERS ====
 
       case "GallicaFullQuery":
@@ -136,11 +130,11 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
         break;
 
       case "zoteroItemsRetriever":
+        console.log(fluxArgs);
         zoteroItemsRetriever(
-          fluxArgs.zoteroItemsRetriever.collections,
-          fluxArgs.zoteroItemsRetriever.zoteroUser,
-          fluxArgs.zoteroItemsRetriever.importName,
-          fluxArgs.zoteroItemsRetriever.destination
+          Object.values(fluxArgs.zoteroItemsRetriever.collections),
+          fluxArgs.zoteroItemsRetriever.libraryID,
+          fluxArgs.zoteroItemsRetriever.importName
         );
         break;
 
@@ -157,6 +151,7 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
         break;
 
       case "sysExport":
+        console.log(fluxArgs.sysExport);
         sysExport(
           fluxArgs.sysExport.dest,
           fluxArgs.sysExport.name,

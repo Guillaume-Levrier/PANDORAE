@@ -100,7 +100,7 @@ const activateMainListeners = () => {
     removeLocalService(service)
   );
 
-  ipcMain.handle("openEx", async (event, target) => shell.openExternal(target));
+  ipcMain.on("openEx", (event, target) => shell.openExternal(target));
 
   ipcMain.handle("checkflux", async (event, mess) => getAvailableFlux());
 

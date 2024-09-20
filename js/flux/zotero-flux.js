@@ -2,6 +2,7 @@
 // Retrieve collections from a Zotero user code. To be noted that a user code can be something else than a user: it can
 // also be a group library ID, allowing for group or even public work on a same Zotero/PANDORÆ corpus.
 
+import { CM } from "../locales/locales";
 import { fluxButtonAction } from "./actionbuttons";
 import { powerValve } from "./powervalve";
 import { checkKey, getPassword, userData } from "./userdata";
@@ -13,7 +14,10 @@ const zoteroCollectionRetriever = (options) => {
 
   options.resultDiv.style.display = "block";
   // purge it of content
-  userCollections.innerHTML = "";
+  userCollections.innerHTML =
+    userData.distantServices.zotero.libraries.length > 1
+      ? `${CM.flux.tabs.zotero.disclaimers.jointImport}<br><br>`
+      : "";
 
   userData.distantServices.zotero.libraries.forEach((libraryID) => {
     window.electron.send("console-logs", `Retrieving library ${libraryID}`); // Log collection request
@@ -22,14 +26,25 @@ const zoteroCollectionRetriever = (options) => {
     fetch(url)
       .then((r) => r.json())
       .then((r) => {
-        console.log(r);
         const zoteroColResponse = r;
+
+        var powerValveArgs = {
+          collections: {},
+          importName: "",
+          libraryID,
+        };
+
         // create import buttons
         const importDiv = document.createElement("div");
         importDiv.style.padding = "1rem";
 
+        if (userData.distantServices.zotero.libraries.length > 1) {
+          userCollections.append(document.createElement("hr"));
+        }
+
         const libTitle = document.createElement("div");
-        libTitle.style = "font-weight:bold;font-size:13px;";
+        libTitle.style =
+          "font-weight:bold;font-size:13px;margin-bottom:1rem;margin-top:1rem;";
         libTitle.innerText = r[0].library.name;
         userCollections.append(libTitle);
 
@@ -46,8 +61,10 @@ const zoteroCollectionRetriever = (options) => {
         importButton.innerText = "Import selected collections into system";
 
         importButton.addEventListener("click", () => {
+          powerValveArgs.importName = importName.value.replace(/\s/g, "");
           powerValve("zoteroItemsRetriever", {
             name: "Zotero Collection Retriever",
+            powerValveArgs,
           });
         });
 
@@ -60,23 +77,27 @@ const zoteroCollectionRetriever = (options) => {
         userCollections.append(collectionList);
 
         for (let i = 0; i < zoteroColResponse.length; i++) {
+          const key = zoteroColResponse[i].data.key;
+          const name = zoteroColResponse[i].data.name;
+          console.log(key, name);
           const checkInput = document.createElement("input");
           checkInput.type = "checkbox";
           checkInput.className = "zotColCheck";
-          checkInput.value = zoteroColResponse[i].data.key;
-          checkInput.name = zoteroColResponse[i].data.name;
+          checkInput.value = key;
+          checkInput.name = name;
+
+          const colID = `${key} - ${name}`;
 
           const checkLabel = document.createElement("label");
           checkLabel.style.paddingLeft = "5px";
-          checkLabel.innerText =
-            zoteroColResponse[i].data.key +
-            " - " +
-            zoteroColResponse[i].data.name;
+          checkLabel.innerText = colID;
 
           checkInput.addEventListener("change", () => {
             if (checkInput.checked) {
               importName.value += zoteroColResponse[i].data.name;
+              powerValveArgs.collections[colID] = { key, name };
             } else {
+              delete powerValveArgs.collections[colID];
               importName.value = importName.value.replace(
                 zoteroColResponse[i].data.name,
                 ""

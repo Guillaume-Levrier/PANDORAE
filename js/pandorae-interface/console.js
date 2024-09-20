@@ -1,12 +1,10 @@
 // =========== CONSOLE ===========
 
-import { CMT } from "../locales/locales";
+import { CM } from "../locales/locales";
 import { displayCore, purgeXtype } from "./core";
-import { toggleMenu, toggleTertiaryMenu } from "./menu";
+import { toggledTertiaryMenu, toggleMenu, toggleTertiaryMenu } from "./menu";
 import { resetPandoratio } from "./pulse";
-import { listTableDatasets } from "./type-loader";
-
-const CM = CMT.EN;
+import { listTableDatasets, resetCategoryStyle } from "./type-loader";
 
 let toggledConsole = false;
 
@@ -38,13 +36,29 @@ const addToLog = (message) => {
   log.scrollTop = log.scrollHeight;
 };
 
+var previousType = 0;
+
 const mainDisplay = (datasets, type) => {
-  field.value = "preparing " + type;
+  field.value = `preparing ${CM.types.names[type].toLowerCase()} exploration`;
   window.electron.send("console-logs", "Preparing " + type);
   displayCore();
   purgeXtype();
-  toggleTertiaryMenu();
-  listTableDatasets(datasets, type);
+  if (toggledTertiaryMenu) {
+    toggleTertiaryMenu();
+    if (type != previousType) {
+      setTimeout(() => {
+        toggleTertiaryMenu();
+        listTableDatasets(datasets, type);
+        previousType = type;
+      }, 200);
+    } else {
+      resetCategoryStyle();
+    }
+  } else {
+    toggleTertiaryMenu();
+    listTableDatasets(datasets, type);
+    previousType = type;
+  }
 };
 
 const cmdinput = (input) => {
@@ -114,6 +128,7 @@ const cmdinput = (input) => {
         toggleMenu();
         categoryLoader("type");
         mainDisplay(input);
+
         break;
 
       case CM.mainField.reload:

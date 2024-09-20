@@ -2,74 +2,97 @@ import * as d3 from "d3";
 import { addHop, drawFlux } from "./tracegraph";
 import { buttonList, fluxSwitch } from "./buttons";
 
+const createCascadeSelectors = (availableCategories) => {
+  const selectCascadeDiv = document.createElement("div");
+  selectCascadeDiv.id = "selectCascade";
+
+  const fieldSet = document.createElement("fieldSet");
+  fieldSet.style = "border:0px";
+
+  const currentSelection = {};
+
+  const addCascadeCategory = (category) => {
+    currentSelection[category] = false;
+
+    const categoryDiv = document.createElement("div");
+
+    const categoryInput = document.createElement("input");
+    categoryInput.type = "checkbox";
+    categoryInput.id = `${category}Select`;
+    categoryInput.name = category;
+
+    const categoryLabel = document.createElement("label");
+    categoryLabel.for = category;
+    categoryLabel.style = "text-transform: capitalize;";
+    categoryLabel.innerText = category;
+
+    categoryInput.addEventListener("change", () => {
+      currentSelection[category] = categoryInput.value;
+      updateCascade(currentSelection);
+    });
+
+    categoryDiv.append(categoryInput, categoryLabel);
+
+    fieldSet.append(categoryDiv);
+  };
+
+  availableCategories.forEach((d) => addCascadeCategory(d));
+
+  selectCascadeDiv.append(fieldSet);
+
+  document.body.append(selectCascadeDiv);
+};
+
 const svg = d3.select("svg");
 
 let traces = [];
 
 var availability;
 
-const selections = {
-  scientometricsSelect: false,
-  digitalLibrariesSelect: false,
-  clinicalTrialsSelect: false,
-  parliamentsSelect: false,
-  twitterSelect: false,
-  hypheSelect: false,
-  localSelect: false,
-};
-
-function configureCascade() {
-  for (const theme in selections) {
-    const select = document.getElementById(theme);
-    select.addEventListener("change", () => {
-      selections[theme] = select.checked;
-      document.getElementById("cascade").innerHTML = "";
-
-      updateCascade();
-    });
-  }
-}
-
-configureCascade();
-
-function updateCascade() {
+function updateCascade(selections) {
   traces = [];
   document.getElementById("cascade").innerHTML = "";
 
-  availability.dnslist.forEach((d) => {
-    if (d.valid) {
-      switch (d.name) {
-        case "Gallica":
+  addHop(["USER", "CSL-JSON"], traces);
+
+  if (availability.dnslist.zotero.valid) {
+    addHop(["CSL-JSON", "ZOTERO", "SYSTEM"], traces);
+  }
+
+  if (selections) {
+    Object.values(availability.dnslist).forEach((d) => {
+      if (d.valid) {
+        // Checkbox switch
+
+        //Hops switch
+        switch (d.name) {
+          /* case "Gallica":
           if (selections.digitalLibrariesSelect) {
             addHop(["OPEN", "GALLICA", "ZOTERO"], traces);
           }
-          break;
-        case "Scopus":
-          if (selections.scientometricsSelect) {
-            addHop(["USER", "SCOPUS", "CSL-JSON"], traces);
-          }
-          break;
+          break; */
+          case "Scopus":
+            if (selections.scientometrics) {
+              addHop(["USER", "SCOPUS", "CSL-JSON"], traces);
+            }
+            break;
 
-        case "Web Of Science":
-          if (selections.scientometricsSelect) {
-            addHop(["USER", "WEBㅤOFㅤSCIENCE", "CSL-JSON"], traces);
-          }
-          break;
+          case "Web Of Science":
+            if (selections.scientometrics) {
+              addHop(["USER", "WEBㅤOFㅤSCIENCE", "CSL-JSON"], traces);
+            }
+            break;
 
-        case "BIORXIV":
-          if (selections.scientometricsSelect) {
-            addHop(["OPEN", "BIORXIV", "ZOTERO"], traces);
-          }
-          break;
+          case "BIORXIV":
+            if (selections.scientometrics) {
+              addHop(["BIORXIV", "CSL-JSON"], traces);
+            }
+            break;
 
-        case "Zotero":
-          addHop(["USER", "CSL-JSON", "MANUAL", "ZOTERO", "SYSTEM"], traces);
-          addHop(["CSL-JSON", "ZOTERO"], traces);
-          break;
-
+          /* 
         case "Clinical Trials":
           if (selections.clinicalTrialsSelect) {
-            addHop(["OPEN", "CLINICALㅤTRIALS", "SYSTEM"], traces);
+            addHop([ d "CLINICALㅤTRIALS", "SYSTEM"], traces);
           }
           break;
 
@@ -79,48 +102,50 @@ function updateCascade() {
           }
           break;
 
-        case "ISTEX":
-          if (selections.scientometricsSelect) {
-            addHop(["OPEN", "ISTEX", "CSL-JSON"], traces);
-          }
-          break;
+*/
+          case "ISTEX":
+            if (selections.scientometrics) {
+              addHop(["ISTEX", "CSL-JSON"], traces);
+            }
+            break;
 
-        case "Dimensions":
-          if (selections.scientometricsSelect) {
-            addHop(["USER", "DIMENSIONS", "CSL-JSON"], traces);
-          }
-          break;
+          case "Dimensions":
+            if (selections.scientometrics) {
+              addHop(["USER", "DIMENSIONS", "CSL-JSON"], traces);
+            }
+            break;
 
-        case "PPS":
-          if (selections.scientometricsSelect) {
-            addHop(["OPEN", "PPS", "CSL-JSON"], traces);
-            window.electron
-              .invoke("getPPSMaturity")
-              .then((time) => updatePPSDate(time));
-          }
-          break;
+          /* case "PPS":
+            if (selections.scientometrics) {
+              addHop(["PPS", "CSL-JSON"], traces);
+              window.electron
+                .invoke("getPPSMaturity")
+                .then((time) => updatePPSDate(time));
+            }
+            break; */
 
-        default:
-          break;
+          default:
+            break;
+        }
       }
-    }
-  });
+    });
 
-  if (selections.twitterSelect) {
+    /* if (selections.twitterSelect) {
     addHop(["USER", "TWITTER", "SYSTEM"]);
   }
   if (selections.hypheSelect) {
     addHop(["OPEN", "HYPHE", "SYSTEM"]);
-  }
+  } */
 
-  if (selections.localSelect) {
-    for (const service in availability.dnsLocalServiceList) {
-      switch (availability.dnsLocalServiceList[service].type) {
-        case "BNF-SOLR":
-          const serv = service.toUpperCase().replace(" ", "-");
+    if (selections.localSelect) {
+      for (const service in availability.dnsLocalServiceList) {
+        switch (availability.dnsLocalServiceList[service].type) {
+          case "BNF-SOLR":
+            const serv = service.toUpperCase().replace(" ", "-");
 
-          addHop([serv, "ZOTERO"], traces);
-          break;
+            addHop([serv, "ZOTERO"], traces);
+            break;
+        }
       }
     }
   }
@@ -154,8 +179,24 @@ const localServicePreviewer = document.createElement("div");
 const retrieveAvailableServices = () =>
   window.electron.invoke("checkflux", true).then((result) => {
     availability = JSON.parse(result);
+    console.log(Object.values(availability.dnslist));
 
-    updateCascade();
+    const availableCategories = new Set();
+
+    Object.values(availability.dnslist).forEach((service) => {
+      if (service.valid) {
+        switch (service.name) {
+          case "ISTEX":
+            availableCategories.add("scientometrics");
+            break;
+
+          default:
+            break;
+        }
+      }
+    });
+
+    createCascadeSelectors([...availableCategories]);
 
     const buttonList = [];
 
@@ -301,6 +342,7 @@ const retrieveAvailableServices = () =>
         }
       }
     }
+    updateCascade();
   });
 
 export { retrieveAvailableServices, localServicePreviewer };

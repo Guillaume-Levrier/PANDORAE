@@ -67,8 +67,6 @@ const windowManager = (message) => {
 
     case "closeWindow":
       try {
-        console.log("trying to close");
-        console.log(file);
         BrowserWindow.fromId(windowIds[file].id).close();
         windowIds[file].open = false;
       } catch (e) {
@@ -142,7 +140,7 @@ const openFlux = () => {
     parent: mainWindow,
     modal: true,
     transparent: true,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     frame: false,
     resizable: false,
     show: false,
@@ -206,6 +204,8 @@ const chaerosCalculator = (powerValveAction) => {
   });
 
   chaerosWindow.loadURL(CHAEROS_WEBPACK_ENTRY);
+
+  console.log("creating chaeros");
 
   chaerosWindow.webContents.on("did-finish-load", function () {
     chaerosWindow.webContents.send("id", chaerosWindow.id);

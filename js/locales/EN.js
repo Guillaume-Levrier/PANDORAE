@@ -104,6 +104,11 @@ const EN = {
             type: "addServiceCredentials",
             data: {
               name: "zotero",
+              description: `PANDORAE helps you retrieve and explore data. To help you manually curate and edit it, the software is built to be interfaced with the Zotero software-cum-database service. You are expected to export the data you retrieve with PANDORAE to one or more Zotero group(s) you have write access to, and import data back from there to start exploring.`,
+              helper: {
+                text: `The process of creating Zotero groups and interfacing these with PANDORAE is detailed on <strong>pandorae.politique.science</strong>, the software's community help forum. Click on this box to open the relevant page in your browser.`,
+                url: "https://pandorae.politique.science",
+              },
               libraries: [],
               apikey: "",
             },
@@ -113,7 +118,13 @@ const EN = {
       zotero: {
         id: "zotero", // id of the main div
         title: "ZOTERO", // title of the tab (displayed on the page)
-        description: `This tab lets you send a collection of CSL-JSON documents retrieved by PANDORÆ to Zotero, and reciprocally import a Zotero collection (regardless of its origin) to PANDORÆ.`, // main description of the tab
+        description: `This tab lets you send a collection of CSL-JSON documents retrieved by PANDORÆ to Zotero,
+         and reciprocally import a Zotero collection (regardless of its origin) to PANDORÆ.`,
+        disclaimers: {
+          jointImport: `Keep in mind that you can jointly import several
+         collections belonging to a single Zotero library/group, but you cannot jointly import several collections from different
+         Zotero libraries/groups.`,
+        },
         sections: [
           { type: "tabDatasets", data: { id: "csljson" } },
           {
