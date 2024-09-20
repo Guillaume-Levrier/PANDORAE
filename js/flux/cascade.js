@@ -20,6 +20,7 @@ const createCascadeSelectors = (availableCategories) => {
     categoryInput.type = "checkbox";
     categoryInput.id = `${category}Select`;
     categoryInput.name = category;
+    categoryInput.checked = false;
 
     const categoryLabel = document.createElement("label");
     categoryLabel.for = category;
@@ -27,7 +28,8 @@ const createCascadeSelectors = (availableCategories) => {
     categoryLabel.innerText = category;
 
     categoryInput.addEventListener("change", () => {
-      currentSelection[category] = categoryInput.value;
+      currentSelection[category] = categoryInput.checked;
+      console.log(currentSelection);
       updateCascade(currentSelection);
     });
 
@@ -179,7 +181,6 @@ const localServicePreviewer = document.createElement("div");
 const retrieveAvailableServices = () =>
   window.electron.invoke("checkflux", true).then((result) => {
     availability = JSON.parse(result);
-    console.log(Object.values(availability.dnslist));
 
     const availableCategories = new Set();
 

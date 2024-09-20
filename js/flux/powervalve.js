@@ -161,9 +161,7 @@ const powerValve = (fluxAction, item) => {
       break;
 
     case "istexRetriever":
-      fluxArgs.istexQuery = document.getElementById(
-        "istexlocalqueryinput"
-      ).value;
+      fluxArgs.istexQuery = item.istexQuery;
 
       message = "Retrieving data from ISTEX";
       break;

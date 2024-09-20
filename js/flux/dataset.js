@@ -369,7 +369,7 @@ const datasetLoader = () => {
   } catch (e) {
     window.electron.send("console-logs", e); // Log error
   } finally {
-    fluxButtonAction("load-local", true, "Uploaded", "");
+    //fluxButtonAction("load-local", true, "Uploaded", "");
   }
 };
 

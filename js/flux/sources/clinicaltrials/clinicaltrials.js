@@ -43,24 +43,12 @@ const clinicTrialBasicRetriever = () => {
         dataBasicPreview;
 
       // Display success in request button
-      fluxButtonAction(
-        "clinical_trials-basic-query",
-        true,
-        "Query Basic Info Retrieved",
-        "errorPhrase"
-      );
-
       // Display next step option: send full request to Chæros
       document.getElementById("clinical_trials-query").style.display = "block";
     })
     .catch(function (e) {
       console.log(e);
-      fluxButtonAction(
-        "scopus-basic-query",
-        false,
-        "Query Basic Info Error",
-        e.message
-      );
+
       window.electron.send("console-logs", "Query error : " + e); // Log error
     });
 };

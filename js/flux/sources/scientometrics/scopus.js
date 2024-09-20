@@ -1,5 +1,4 @@
 import { pandodb } from "../../../db";
-import { fluxButtonAction } from "../../actionbuttons";
 
 var ISSNarr = [];
 
@@ -75,14 +74,6 @@ const scopusBasicRetriever = (checker) => {
         document.getElementById("scopus-basic-previewer").innerHTML =
           dataBasicPreview;
 
-        // Display success in request button
-        fluxButtonAction(
-          "scopus-basic-query",
-          true,
-          "Query Basic Info Retrieved",
-          "errorPhrase"
-        );
-
         // Display next step option: send full request to Chæros
         document.getElementById("scopus-query").style.display = "block";
       }
@@ -90,12 +81,7 @@ const scopusBasicRetriever = (checker) => {
   /*
       .catch(function (e) {
   
-        fluxButtonAction(
-          "scopus-basic-query",
-          false,
-          "Query Basic Info Error",
-          e.message
-        );
+        
         window.electron.send("console-logs", "Query error : " + e); // Log error
       });*/
 };
@@ -290,13 +276,6 @@ const ScopusList = () => {
 
       // Show success on button
 
-      fluxButtonAction(
-        "scopus-list-display",
-        true,
-        "Displaying available Scopus Datasets",
-        "errorPhrase"
-      );
-
       // Preparing and showing additional options
 
       document.getElementById("issn-prepare").style.display = "inline-flex";
@@ -305,7 +284,6 @@ const ScopusList = () => {
         "inline-flex";
     })
     .catch(function (err) {
-      fluxButtonAction("scopus-dataset-ISSN-list", false, "Failure", err);
       window.electron.send(
         "console-logs",
         "Error in fetching Scopus data : " + err

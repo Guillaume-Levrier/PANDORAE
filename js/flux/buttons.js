@@ -294,7 +294,7 @@ function fluxSwitch(funcName, args) {
       break;
 
     case "istexBasicRetriever":
-      istexBasicRetriever();
+      istexBasicRetriever(args);
       break;
 
     case "twitterCat":

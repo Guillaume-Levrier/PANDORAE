@@ -42,7 +42,6 @@ const readUserIDfile = () =>
   );
 
 const getUserDetails = (event) => {
-  console.log(event);
   const user = JSON.parse(readUserIDfile(userDataPath));
   event.sender.send("getUserDetails", user);
 };

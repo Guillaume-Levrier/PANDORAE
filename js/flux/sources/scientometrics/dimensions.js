@@ -39,12 +39,6 @@ const dimensionsUpload = () => {
           content: content,
         })
         .then(() => {
-          fluxButtonAction(
-            "load-dimensions",
-            true,
-            `Dataset saved with ${count} items`,
-            ""
-          );
           window.electron.send(
             "console-logs",
             "Imported dimensions data " + datasetName

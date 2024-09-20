@@ -76,6 +76,26 @@ const EN = {
   },
   flux: {
     tabs: {
+      istex: {
+        id: "istex", // id of the main div
+        title: "ISTEX", // title of the tab (displayed on the page)
+        description: `ISTEX is an open archive of more than 25 million scientific documents in 51 languages maintained by French scientific research agencies.`,
+        sections: [
+          {
+            type: "APIquery",
+            data: {
+              target: "istex",
+              key: "istex",
+              queryField: true,
+              function: {
+                name: "istexBasicRetriever",
+                args: {},
+                aftermath: "timeout", // "disable" disables submitting another query to the same source.
+              },
+            },
+          },
+        ],
+      },
       user: {
         id: "user", // id of the main div
         title: "USER", // title of the tab (displayed on the page)
@@ -136,7 +156,7 @@ const EN = {
               function: {
                 name: "zoteroCollectionRetriever",
                 args: {},
-                disable: true, // "disable" disables submitting another query to the same source.
+                aftermath: "disable", // "disable" disables submitting another query to the same source.
               },
             },
           },

@@ -7,18 +7,16 @@ const date =
 const sysExport = (destinations, importName, id) => {
   pandodb.open();
   pandodb.flux.toArray().then((datasets) => {
-    console.log(datasets);
-    datasets.forEach((dataset) => {
-      console.log("=====");
-      console.log(dataset);
-      console.log(dataset.id);
-      console.log(id);
+    // using every allow for breaking the statement by returning "false" when found
+    datasets.every((dataset) => {
       if (dataset.id === id) {
-        console.log("got there");
         destinations.forEach((dests) =>
           dataWriter(["type"], importName, dataset.content, dests)
         );
+        return false;
       }
+
+      return true;
     });
   });
 };

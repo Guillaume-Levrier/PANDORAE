@@ -1,22 +1,20 @@
-import { fluxButtonAction } from "../../actionbuttons";
 import { date } from "../../flux-display";
+import { powerValve } from "../../powervalve";
 
 //========== istexBasicRetriever ==========
 // Send a single request for a single document to ISTEX in order to retrieve the request's metadata and give the user a
 // rough idea of how big (and therefore how many requests) the response represents. The user is then offered to proceed
 // with the actual request, which will then be channeled to Chæros.
 
-const istexBasicRetriever = (checker) => {
+const istexBasicRetriever = (data) => {
   //document.getElementById("scopus-basic-query").innerText = "Loading ...";
-
-  let query = document.getElementById("istexlocalqueryinput").value; // Request Content
 
   window.electron.send(
     "console-logs",
-    "Sending ISTEX the following query : " + query
+    "Sending ISTEX the following query : " + data.query
   ); // Log query
 
-  const target = `https://api.istex.fr/document/?q=${query}&size=1`;
+  const target = `https://api.istex.fr/document/?q=${data.query}&size=1`;
 
   fetch(target)
     .then((res) => res.json())
@@ -26,31 +24,26 @@ const istexBasicRetriever = (checker) => {
       let getdate = date();
 
       // Display metadata in a div
-      let dataBasicPreview = `<br><strong>Query: ${query}</strong><br>
+      let dataBasicPreview = `<strong>Query: ${data.query}</strong><br>
         Expected results at request time: ${r.total}<br>
-        Query date: ${getdate}`;
+        Query date: ${getdate}<br><br>`;
 
-      document.getElementById("istex-basic-previewer").innerHTML =
-        dataBasicPreview;
+      data.resultDiv.innerHTML = dataBasicPreview;
+      data.resultDiv.style.display = "block";
 
-      // Display success in request button
-      fluxButtonAction(
-        "istex-basic-query",
-        true,
-        "Query Basic Info Retrieved",
-        "errorPhrase"
-      );
+      // propose full query
 
-      // Display next step option: send full request to Chæros
-      document.getElementById("istex-query").style.display = "block";
+      const fullQueryButton = document.createElement("button");
+      fullQueryButton.type = "submit";
+      fullQueryButton.className = "flux-button";
+      fullQueryButton.innerText = "Submit full ISTEX query";
+      fullQueryButton.addEventListener("click", () => {
+        powerValve("istexRetriever", { istexQuery: data.query });
+      });
+
+      data.resultDiv.append(fullQueryButton);
     })
     .catch(function (e) {
-      fluxButtonAction(
-        "istex-basic-query",
-        false,
-        "Query Basic Info Error",
-        e.message
-      );
       window.electron.send("console-logs", "Query error : " + e); // Log error
     });
 };

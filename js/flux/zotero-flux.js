@@ -3,7 +3,7 @@
 // also be a group library ID, allowing for group or even public work on a same Zotero/PANDORÆ corpus.
 
 import { CM } from "../locales/locales";
-import { fluxButtonAction } from "./actionbuttons";
+
 import { powerValve } from "./powervalve";
 import { checkKey, getPassword, userData } from "./userdata";
 
@@ -193,14 +193,6 @@ const zoteroLocalRetriever = () => {
       // Display full list in div
       document.getElementById("userZoteroCollections").innerHTML =
         "<form style='line-height:1.5'>" + collectionList + "</form>";
-
-      // Show success on button
-      fluxButtonAction(
-        "zotcolret",
-        true,
-        "Zotero Collections Successfully Retrieved",
-        "errorPhrase"
-      );
 
       // Preparing and showing additional options
       document.getElementById("zotitret").style.display = "inline-flex";

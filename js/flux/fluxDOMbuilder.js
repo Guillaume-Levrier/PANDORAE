@@ -78,7 +78,7 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
   const tabSection = document.createElement("div");
   tabSection.className = "tabSection";
 
-  const queryPrompt = sectionData.query
+  const queryPrompt = sectionData.queryField
     ? "Fill in the query in the field below."
     : "";
 
@@ -101,12 +101,25 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
   const functionArgs = sectionData.function.args;
   functionArgs.resultDiv = queryResultDiv;
 
+  tabSection.append(sectionDescription);
+
+  const queryField = document.createElement("input");
+
+  if (sectionData.queryField) {
+    queryField.type = "text";
+    queryField.className = "fluxInput";
+    tabSection.append(queryField);
+  }
+
   sendAPIQueryButton.addEventListener("click", () => {
-    fluxButtonClicked(sendAPIQueryButton, sectionData.function.disable);
+    fluxButtonClicked(sendAPIQueryButton, sectionData.function.aftermath);
+    if (sectionData.queryField) {
+      sectionData.function.args.query = queryField.value;
+    }
     fluxSwitch(sectionData.function.name, sectionData.function.args);
   });
 
-  tabSection.append(sectionDescription, sendAPIQueryButton, queryResultDiv);
+  tabSection.append(sendAPIQueryButton, queryResultDiv);
 
   tab.append(genHr(), tabSection);
 };
@@ -233,7 +246,11 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
   serviceTesterButton.innerText = "Test service connectivity";
 
   serviceTesterButton.addEventListener("click", () => {
-    fluxButtonClicked(serviceTesterButton, true, "Requests sent");
+    fluxButtonClicked(
+      serviceTesterButton,
+      sectionData.aftermath,
+      "Requests sent"
+    );
     serviceTester(sectionData.name, userData.distantServices[sectionData.name]);
   });
 
@@ -339,108 +356,25 @@ const createCascadeTab = (tabData) => {
 };
 
 export { createCascadeTab };
+/* <!-- ISTEX TAB -->
+<div id="istex" style="display:none;" class="fluxTabs">
+  <span class="flux-title">ISTEX</span>
+  <br><br>
+  <form id="istex-form" autocomplete="off">ISTEX Query:<br>
+    <input class="fluxInput" spellcheck="false" id="istexlocalqueryinput"
+      type="text" placeholder="Enter your istex Query"><br><br><br>
+    <button type="submit" class="flux-button" id="istex-basic-query">Retrieve
+      basic info</button>&nbsp;&nbsp;
+    <div id="istex-basic-previewer" style="position:relative;"></div><br><br>
+    <button style="display:none;" type="submit" class="flux-button"
+      id="istex-query">Submit ISTEX Query</button>
+    <br><br>
+    <hr><br><br>
 
-/* 
-<div id="user" style="display:none;" class="fluxTabs">
-  <span class="flux-title">USER</span><br><br>
-  <span
-    style="font-family: sans-serif;color:white;background-color: red;padding: 5px;text-align: center;display: flex;">The
-    data entered below is
-    unencrypted so as to make this application portable. Click on
-    the button below to access the file and delete it manually if you are on a
-    public computer.</span><br>
-  <button type="submit" id="access-user-id" class="flux-button">Access User ID
-    file</button>
-  <!-- <button type="submit" id="change-user-id" class="flux-button">Change user folder location</button> -->
-  <br>
+    <div id="istex-list" style="position:relative;"></div><br><br>
 
-  <br>
-  <hr>
-  <br>
-
-  <span class="credential"><b>User information</b></span><br><br>
-  <form id="user-data-form" autocomplete="off">
-    <div class="credential"> Name:<br> <input class="fluxInput"
-        spellcheck="false" id="userNameInput" type="text"
-        placeholder="Enter your name"><br><br></div>
-    <div class="credential"> Email:<br> <input class="fluxInput"
-        spellcheck="false" id="userMailInput" type="text"
-        placeholder="Enter your email"><br><br></div>
-    <div class="credential"> Zotero group id:<br> <input class="fluxInput"
-        spellcheck="false" id="zoterouserinput" type="text"
-        placeholder="Enter your zotero group code"><br><br></div>
-    <button type="submit" id="user-button" class="flux-button">Update User
-      Credentials</button><br>
-
-    <hr>
-    <br>
-    <span class="credential"><b>API Keys</b></span><br><br>
-    <div class="credential APIcred">
-      <i title="Click this button to check your API credentials status"
-        class="material-icons validation"
-        id="zoteroAPIValidation">help_outline</i> Zotero API key: <input
-        class="fluxInput" spellcheck="false" id="zoterokeyinput" type="password"
-        value=""><i title="Click this button to update your credentials"
-        class="material-icons updateCredentials" id="Zotero">cached</i> <br><br>
-    </div>
-    <div class="credential APIcred">
-      <i title="Click this button to check your API credentials status"
-        class="material-icons validation" id="scopusValidation">help_outline</i>
-      Scopus API key: <input class="fluxInput" spellcheck="false"
-        id="scopuskeyinput" type="password" value=""><i
-        title="Click this button to update your credentials"
-        class="material-icons updateCredentials" id="Scopus">cached</i><br><br>
-    </div>
-
-    <div class="credential APIcred">
-      <i title="Click this button to check your API credentials status"
-        class="material-icons validation" id="wosValidation">help_outline</i>
-      WoS API key: <input class="fluxInput" spellcheck="false" id="woskeyinput"
-        type="password" value=""><i
-        title="Click this button to update your credentials"
-        class="material-icons updateCredentials"
-        id="WebOfScience">cached</i><br><br>
-    </div>
-
-    <br>
-    <hr>
-    <br>
-
-    <span class="credential"><b>Local services</b></span><br><br>
-    <div class="credential">
-      <div id="localservices-basic-previewer" style="position:relative;">
-      </div>
-    </div>
-
-    <span class="credential">Use the fields below to add new local
-      services.</span><br><br>
-
-    <div class="credential">
-
-      <input style="width:20%;display:none" class="fluxInput" spellcheck="false"
-        id="newServiceName" type="text" placeholder="Service name">
-      &nbsp;<input style="width:20%;display:none" class="fluxInput"
-        spellcheck="false" id="newServiceLocation" type="text"
-        placeholder="IP:PORT">
-      &nbsp;
-      &nbsp;<input style="width:20%;display:none" class="fluxInput"
-        spellcheck="false" id="newArkViewer" type="text"
-        placeholder="Ark Viewer Address"> &nbsp;
-
-      <select style="width:20%;" class="fluxInput" spellcheck="false"
-        id="newServiceType">
-        <option value=""></option>
-        <option value="BNF-SOLR">BNF-SOLR</option>
-      </select> &nbsp;
-      <button type="submit" id="new-service-button" class="flux-button">Add
-        Service</button>
-      <br><br>
-      <br>
-      <br>
-      <br>
-
-
-
-    </div>
+    <button type="submit" class="flux-button" id="istex-list-display">Update
+      available dataset list</button> &nbsp; &nbsp; &nbsp;
   </form>
+
 </div> */
