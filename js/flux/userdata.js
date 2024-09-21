@@ -139,6 +139,9 @@ const checkKey = (service, status) => {
   }
 };
 
+const date = () =>
+  new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
+
 export {
   basicUserData,
   changeUserID,
@@ -147,4 +150,5 @@ export {
   getUserData,
   getPassword,
   userData,
+  date,
 };

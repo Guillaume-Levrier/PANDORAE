@@ -2,7 +2,7 @@ import { fluxButtonClicked } from "./actionbuttons";
 import { fluxSwitch } from "./buttons";
 import { datasetDisplay } from "./dataset";
 import { serviceTester } from "./service-tester";
-import { generateLocalServiceConfig } from "./sources/BNF/archivesinternet";
+
 import { userData } from "./userdata";
 
 const userDataPath = window.electron.userDataPath;
@@ -19,8 +19,8 @@ const addDatasetDisplaySection = (tabData, sectionData, tab) => {
   tabSection.className = "tabSection";
 
   const sectionDescription = document.createElement("div");
-  sectionDescription.innerHTML = `<h4>Display available ${sectionData.id} datasets</h4>
-  Click on the button below to load available datasets from the ${sectionData.id} data table.`;
+  sectionDescription.innerHTML = `<h4>Display available ${sectionData.id.toUpperCase()} datasets</h4>
+  Click on the button below to load available datasets from the ${sectionData.id.toUpperCase()} data table.`;
 
   // div to show the loaded datasets
   const datasetDisplayDiv = document.createElement("div");
@@ -356,25 +356,3 @@ const createCascadeTab = (tabData) => {
 };
 
 export { createCascadeTab };
-/* <!-- ISTEX TAB -->
-<div id="istex" style="display:none;" class="fluxTabs">
-  <span class="flux-title">ISTEX</span>
-  <br><br>
-  <form id="istex-form" autocomplete="off">ISTEX Query:<br>
-    <input class="fluxInput" spellcheck="false" id="istexlocalqueryinput"
-      type="text" placeholder="Enter your istex Query"><br><br><br>
-    <button type="submit" class="flux-button" id="istex-basic-query">Retrieve
-      basic info</button>&nbsp;&nbsp;
-    <div id="istex-basic-previewer" style="position:relative;"></div><br><br>
-    <button style="display:none;" type="submit" class="flux-button"
-      id="istex-query">Submit ISTEX Query</button>
-    <br><br>
-    <hr><br><br>
-
-    <div id="istex-list" style="position:relative;"></div><br><br>
-
-    <button type="submit" class="flux-button" id="istex-list-display">Update
-      available dataset list</button> &nbsp; &nbsp; &nbsp;
-  </form>
-
-</div> */

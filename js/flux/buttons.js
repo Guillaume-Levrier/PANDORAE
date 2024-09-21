@@ -13,7 +13,7 @@ import {
   checkKey,
   updateUserData,
 } from "./userdata";
-import { fluxDisplay } from "./flux-display";
+
 import { closeFluxWindow, refreshFluxWindow } from "./window";
 import { gallicaBasic } from "./sources/BNF/gallica";
 import { dimensionsUpload } from "./sources/scientometrics/dimensions";
@@ -69,7 +69,7 @@ const buttonList = [
   { id: "scopusValidation", func: "checkKey", arg: "scopusValidation" },
   { id: "Scopus", func: "updateUserData", arg: "Scopus" },
   { id: "WebOfScience", func: "updateUserData", arg: "WebOfScience" },
-  { id: "fluxDisplayButton", func: "fluxDisplay", arg: "flux-manager" },
+
   { id: "fluxCloseButton", func: "closeFluxWindow" },
   { id: "fluxRefreshButton", func: "refreshFluxWindow" },
   { id: "hyphe-checker", func: "hypheCheck" },
@@ -235,10 +235,6 @@ function fluxSwitch(funcName, args) {
       break;
     case "updateUserData":
       updateUserData(...args);
-      break;
-
-    case "fluxDisplay":
-      fluxDisplay(...args);
       break;
 
     case "closeFluxWindow":

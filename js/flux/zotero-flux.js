@@ -8,8 +8,6 @@ import { powerValve } from "./powervalve";
 import { checkKey, getPassword, userData } from "./userdata";
 
 const zoteroCollectionRetriever = (options) => {
-  console.log(options);
-
   const userCollections = options.resultDiv;
 
   options.resultDiv.style.display = "block";
@@ -79,7 +77,7 @@ const zoteroCollectionRetriever = (options) => {
         for (let i = 0; i < zoteroColResponse.length; i++) {
           const key = zoteroColResponse[i].data.key;
           const name = zoteroColResponse[i].data.name;
-          console.log(key, name);
+
           const checkInput = document.createElement("input");
           checkInput.type = "checkbox";
           checkInput.className = "zotColCheck";

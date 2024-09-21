@@ -1,5 +1,5 @@
-import { date } from "../../flux-display";
 import { powerValve } from "../../powervalve";
+import { date } from "../../userdata";
 
 //========== istexBasicRetriever ==========
 // Send a single request for a single document to ISTEX in order to retrieve the request's metadata and give the user a

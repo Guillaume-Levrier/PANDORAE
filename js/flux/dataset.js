@@ -25,11 +25,14 @@ function reviver(key, value) {
   return value;
 }
 
-const datasetDisplay = (displayDiv, kind, detailDiv) => {
+const datasetDisplay = (displayDiv, source, detailDiv) => {
   try {
-    let list = document.createElement("UL");
+    let list = document.createElement("ul");
 
-    pandodb.flux.toArray().then((r) => console.log(r));
+    const dataset = window.electron.send("database", {
+      operation: "getDatasetList",
+      parameters: { table, source },
+    });
 
     pandodb.flux
       .where("datasetType")
@@ -40,20 +43,25 @@ const datasetDisplay = (displayDiv, kind, detailDiv) => {
           line.id = file.id;
 
           let button = document.createElement("SPAN");
-          line.addEventListener("click", (e) => {
-            datasetDetail(detailDiv, kind, file.id);
-          });
-          button.innerText = file.name;
+
+          if (detailDiv) {
+            line.addEventListener("click", (e) =>
+              datasetDetail(detailDiv, kind, file.id)
+            );
+          }
+
+          button.innerText = `${file.name} - ${file.date}`;
 
           let download = document.createElement("i");
           download.className = "fluxDelDataset material-icons";
+
           download.addEventListener("click", (e) => {
-            let name = file.name + ".json";
-            window.electron.invoke(
-              "saveDataset",
-              { defaultPath: name },
-              JSON.stringify(file, replacer)
-            );
+            const name = file.name + ".json";
+
+            window.electron.send("saveDataset", {
+              target: name,
+              data: JSON.stringify(file, replacer),
+            });
           });
 
           download.innerText = "download";

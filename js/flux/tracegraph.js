@@ -1,7 +1,8 @@
 //========== Tracegraph ==========
 import * as d3 from "d3";
 import * as tg from "@hownetworks/tracegraph";
-import { fluxDisplay } from "./flux-display";
+import { createCascadeTab } from "./fluxDOMbuilder";
+import { CM } from "../locales/locales";
 
 const addHop = (steparr, traces) => {
   const hops = {
@@ -181,7 +182,9 @@ const drawFlux = (svg, traces, horizontal, showTexts) => {
       traceGroup.transition().duration(200).style("stroke-opacity", 1);
     })
     .on("click", (event, d) => {
-      fluxDisplay(d.hops[0].name.toLowerCase());
+      const tab = d.hops[0].name.toLowerCase();
+
+      createCascadeTab(CM.flux.tabs[tab]);
     });
 
   nodeGroup

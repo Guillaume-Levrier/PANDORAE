@@ -1,6 +1,6 @@
 import { pandodb } from "../db";
 
-const date =
+const genDate = () =>
   new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
 
 //========== sysExport ==========
@@ -22,8 +22,27 @@ const sysExport = (destinations, importName, id) => {
 };
 
 //========== dataWriter ==========
-const dataWriter = (destination, importName, content, datasetType) => {
+const dataWriter = (table, dataset) =>
+  window.electron.send("database", {
+    operation: "addDataset",
+    parameters: { table, dataset },
+  });
+
+/* {
   pandodb.open();
+
+  //(destination, importName, content, datasetType)
+
+  // {
+  //   destinations:["flux"],
+  //   target_types:["istex","csljson"],
+  //   source:"istex",
+  //   content:{…}
+  //   datasetType:"raw_API_extraction"
+  //   name:"myistexquery"
+  // }
+
+  
 
   console.log(destination, importName, content, datasetType);
 
@@ -62,5 +81,5 @@ const dataWriter = (destination, importName, content, datasetType) => {
     window.electron.send("pulsar", true);
     window.electron.send("win-destroy", true);
   });
-};
-export { sysExport, dataWriter, date };
+}; */
+export { sysExport, dataWriter, genDate };

@@ -1,67 +1,97 @@
+import bottleneck from "bottleneck";
 import { pandodb } from "../../db";
-import { date } from "../chaeros-to-system";
+import { dataWriter, date } from "../chaeros-to-system";
 
 // ========= ISTEX RETRIEVER ==========
 
+function saveContent() {
+  const id = query + date;
+  var content = {
+    type: "ISTEX-dataset",
+    fullquery: query,
+    query: query,
+    queryDate: date,
+    altmetricEnriched: false,
+    articleGeoloc: false,
+    entries,
+  };
+
+  pandodb.open();
+
+  pandodb.flux
+    .add({
+      id,
+      datasetType: "istex",
+      date,
+      name: query,
+      content,
+    })
+    /* .then(() => {
+      pandodb.enriched
+        .add({
+          id,
+          date,
+          name: query,
+          content,
+        }) */
+    .then(() => {
+      window.electron.send("chaeros-notification", "ISTEX API data retrieved"); // signal success to main process
+      window.electron.send("pulsar", true);
+      window.electron.send(
+        "console-logs",
+        "ISTEX dataset on " +
+          query +
+          " for user " +
+          user +
+          " have been successfully retrieved."
+      );
+      setTimeout(() => {
+        window.electron.send("win-destroy", winId);
+      }, 500); // Close Chaeros
+    });
+  //   });
+}
+
 const istexRetriever = (query) => {
-  const target = `https://api.istex.fr/document/?q=${query}&size=5000&output=*`;
+  const limiter = new bottleneck({
+    // Create a bottleneck to prevent API rate limit
+    maxConcurrent: 1, // Only one request at once
+    minTime: 1500, // Every 500 milliseconds
+  });
 
-  var entries = [];
-
-  function saveContent() {
-    const id = query + date;
-    var content = {
-      type: "ISTEX-dataset",
-      fullquery: query,
-      query: query,
-      queryDate: date,
-      altmetricEnriched: false,
-      articleGeoloc: false,
-      entries,
-    };
-
-    pandodb.open();
-
-    pandodb.flux
-      .add({
-        id,
-        datasetType: "istex",
-        date,
-        name: query,
-        content,
-      })
-      /* .then(() => {
-        pandodb.enriched
-          .add({
-            id,
-            date,
-            name: query,
-            content,
-          }) */
-      .then(() => {
-        window.electron.send(
-          "chaeros-notification",
-          "ISTEX API data retrieved"
-        ); // signal success to main process
-        window.electron.send("pulsar", true);
-        window.electron.send(
-          "console-logs",
-          "ISTEX dataset on " +
-            query +
-            " for user " +
-            user +
-            " have been successfully retrieved."
-        );
-        setTimeout(() => {
-          window.electron.send("win-destroy", winId);
-        }, 500); // Close Chaeros
-      });
-    //   });
-  }
+  const target = `https://api.istex.fr/document/?q=${query}&size=1&output=*`;
 
   fetch(target)
     .then((res) => res.json())
     .then((r) => {
+      const totalQueries = 1 + Math.floor(r.total / 5000);
+
+      const requestList = [];
+
+      var entries = [];
+
+      for (let i = 0; i < totalQueries; i++) {
+        requestList.push(
+          `https://api.istex.fr/document/?q=${query}&size=5000&output=*&from=${
+            i * 5000
+          }`
+        );
+      }
+
+      console.log(requestList);
+
+      requestList.forEach((d) => {
+        limiter
+          .schedule(() => fetch(d))
+          .then((res) => res.json())
+          .then((result) => {
+            entries = [...entries, ...result.hits];
+            if (entries.length === result.total) {
+            }
+          });
+      });
+
+      /* 
       entries = [...r.hits];
 
       if (entries.length < 5000) {
@@ -86,7 +116,7 @@ const istexRetriever = (query) => {
               });
           }, 2000 * i);
         }
-      }
+      } */
     });
 };
 

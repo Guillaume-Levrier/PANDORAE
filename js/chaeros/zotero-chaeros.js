@@ -3,8 +3,8 @@
 // retrieve 100 items, which can easily trigger the rate limiting.
 
 import bottleneck from "bottleneck";
-import { dataWriter } from "./chaeros-to-system";
-import { pandodb } from "../db";
+import { dataWriter, genDate } from "./chaeros-to-system";
+
 import { userData } from "./chaeros-userdata";
 
 const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
@@ -29,12 +29,7 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
 
   const zoteroPromises = [];
 
-  console.log("getting key");
-  console.log(userData);
-
   const zoteroApiKey = userData.distantServices.zotero.apikey;
-
-  console.log(zoteroApiKey);
 
   for (let j = 0; j < collections.length; j++) {
     // Loop on collections
@@ -55,14 +50,11 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
   let responseTarget = 0;
   let responseAmount = 0;
 
-  console.log(zoteroPromises);
-
   zoteroPromises.forEach((d) => {
     limiter
       .schedule(() => fetch(d))
       .then((res) => res.json())
       .then((result) => {
-        console.log(result);
         zoteroCollectionResponse.push(result);
 
         if (zoteroCollectionResponse.length === zoteroPromises.length) {
@@ -112,12 +104,25 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
                     window.electron.send("chaeros-notification", updateMessage);
 
                     if (responseAmount === responseTarget) {
-                      dataWriter(
-                        ["flux"],
-                        importName,
-                        zoteroCollectionResponse,
-                        "system"
-                      );
+                      const date = genDate();
+                      const name = importName;
+                      const id = `${name}-${date}`;
+
+                      const dataset = {
+                        id,
+                        date,
+                        name,
+                        data: zoteroCollectionResponse,
+                      };
+
+                      // send dataset to be saved
+                      dataWriter(["flux"], dataset);
+
+                      // stop pulsar
+                      window.electron.send("pulsar", true);
+
+                      // destroy this chaeros window
+                      window.electron.send("win-destroy", true);
                     }
                   });
                 });

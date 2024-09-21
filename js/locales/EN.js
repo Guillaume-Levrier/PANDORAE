@@ -81,6 +81,7 @@ const EN = {
         title: "ISTEX", // title of the tab (displayed on the page)
         description: `ISTEX is an open archive of more than 25 million scientific documents in 51 languages maintained by French scientific research agencies.`,
         sections: [
+          { type: "tabDatasets", data: { id: "istex" } },
           {
             type: "APIquery",
             data: {

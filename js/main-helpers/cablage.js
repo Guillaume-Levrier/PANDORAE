@@ -3,6 +3,7 @@ const { BrowserWindow, ipcMain, shell, app } = electron;
 const userDataPath = app.getPath("userData");
 const appPath = app.getAppPath();
 
+import { databaseOperation, requestDatabase } from "../db";
 import { feedChaerosData, startChaerosProcess } from "./chaeros-main";
 import { addLineToConsole } from "./console-main";
 import {
@@ -66,6 +67,12 @@ const activateMainListeners = () => {
 
   ipcMain.on("keyManager", (event, request) => manageUserKeys(event, request));
 
+  // ==== DB ====
+
+  ipcMain.on("database", (event, req) =>
+    requestDatabase(event, req.operation, req.parameters)
+  );
+
   // ==== WINDOW MANAGEMENT ====
 
   //destroy a window
@@ -114,9 +121,7 @@ const activateMainListeners = () => {
     saveSVG(target, string)
   );
 
-  ipcMain.handle("saveDataset", async (event, target, data) =>
-    exportDataset(target, data)
-  );
+  ipcMain.on("saveDataset", (event, details) => exportDataset(details));
 
   ipcMain.on(
     "read-file",

@@ -106,9 +106,9 @@ async function saveSVG(target, string) {
   });
 }
 
-const exportDataset = (target, data) =>
-  dialog.showSaveDialog(target).then((filePath) => {
-    fs.writeFile(filePath.filePath, data, () => {});
+const exportDataset = (details) =>
+  dialog.showSaveDialog({ defaultPath: details.target }).then((filePath) => {
+    fs.writeFile(filePath.filePath, details.data, () => {});
   });
 
 export {
