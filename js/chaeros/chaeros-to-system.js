@@ -1,5 +1,3 @@
-import { pandodb } from "../db";
-
 const genDate = () =>
   new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
 

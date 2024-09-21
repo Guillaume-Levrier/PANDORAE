@@ -1,7 +1,7 @@
 // =========== DATABASE ===========
 //
 // Since PANDORAE version 2, all database interactions happen here
-// and are commanded by the Main process.
+// and are commanded by the Main Window.
 //
 // The internal PAE database is structured around three tables:
 // - flux, for the stable datasets harvested from various API/scraping/flatfile available sources.
@@ -16,6 +16,9 @@
 //
 // All operations on the database need to happen in this file for clarity reasons.
 //
+
+console.log("|==== DATABASE_MANAGER.JS STARTS HERE ====|");
+
 import Dexie from "dexie";
 
 Dexie.debug = false;
@@ -37,7 +40,6 @@ let pandoraeDatabase = new Dexie("pandoraeDatabase");
 pandoraeDatabase.version(1).stores({
   flux: "id,source",
   standard: "id,source",
-  system: "id,source",
   type: "id,source",
 });
 
@@ -48,13 +50,26 @@ const addDataset = (parameters) =>
   pandoraeDatabase[parameters.table].put(parameters.dataset);
 
 const getDatasetById = (parameters) =>
-  pandoraeDatabase[parameters.table].get(parameters.id);
+  pandoraeDatabase[parameters.table].get(parameters.id).then((r) =>
+    window.electron.send("database_reply", {
+      r,
+      reply_type: "dataset",
+      parameters,
+    })
+  );
 
 const removeDataset = (parameters) =>
   pandoraeDatabase[parameters.table].delete(parameters.id);
 
 const getDatasetList = (parameters) =>
-  pandoraeDatabase[parameters.table].where("source").equals(parameters.value);
+  pandoraeDatabase[parameters.table].toArray().then((r) => {
+    console.log(r);
+    return window.electron.send("database_reply", {
+      r,
+      reply_type: "datasetList",
+      parameters,
+    });
+  });
 
 const databaseOperation = {
   addDataset,
@@ -63,7 +78,9 @@ const databaseOperation = {
   getDatasetList,
 };
 
-const requestDatabase = (event, operation, parameters) =>
-  (event.returnValue = databaseOperation[operation](parameters));
+const requestDatabase = (operation, parameters) =>
+  databaseOperation[operation](parameters);
 
-export { requestDatabase };
+window.electron.database((e, options) =>
+  requestDatabase(options.operation, options.parameters)
+);

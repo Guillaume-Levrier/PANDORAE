@@ -1,5 +1,3 @@
-import { pandodb } from "../../../db";
-
 const twitterCat = () => {
   window.electron.send("coreSignal", "importing categorized tweets"); // Sending notification to console
   window.electron.send("pulsar", false);

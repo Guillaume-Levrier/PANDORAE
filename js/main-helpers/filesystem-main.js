@@ -1,6 +1,7 @@
 import { createUserId } from "./user-main";
 import {
   createAudioManager,
+  createDatabaseManager,
   createMainWindow,
   mainWindow,
 } from "./window-creator";
@@ -71,6 +72,7 @@ const startRoutine = () => {
   createThemes();
   createMainWindow();
   createAudioManager();
+  createDatabaseManager();
 
   themeData = fs.readFileSync(
     userDataPath + "/PANDORAE-DATA/themes/themes.json",

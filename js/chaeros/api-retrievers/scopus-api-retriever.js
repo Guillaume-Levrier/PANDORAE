@@ -4,8 +4,6 @@
 // the total amount of documents). This is sent to chaeros via powerValve because it can be heavy, depending on the
 // size of the sample and the power/broadband available on the user's system.
 
-import { pandodb } from "../../db";
-
 const scopusRetriever = (user, query, bottleRate) => {
   const limiter = new bottleneck({
     // Create a bottleneck to prevent API rate limit

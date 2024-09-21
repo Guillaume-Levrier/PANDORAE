@@ -1,4 +1,3 @@
-import { pandodb } from "../db";
 import { CMT } from "../locales/locales";
 import { typeSwitch } from "../type/typeswitch";
 import { mainDisplay } from "./console";

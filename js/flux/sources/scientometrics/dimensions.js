@@ -1,7 +1,5 @@
 // ==== Dimensions ====
 
-import { pandodb } from "../../../db";
-
 const dimensionsUpload = () => {
   //window.electron.send("coreSignal", "importing categorized tweets"); // Sending notification to console
   //window.electron.send("pulsar", false);

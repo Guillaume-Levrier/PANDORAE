@@ -1,7 +1,5 @@
 //========== scopusConverter ==========
 
-import { pandodb } from "../../db";
-
 //scopusConverter converts a scopus JSON dataset into a Zotero CSL-JSON dataset.
 
 const scopusConverter = (dataset, source, normalize, email) => {

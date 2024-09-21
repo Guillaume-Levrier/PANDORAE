@@ -1,7 +1,5 @@
 // ======== GallicaFullQuery =====
 
-import { pandodb } from "../../db";
-
 const GallicaFullQuery = (targetExpression) => {
   const limiter = new bottleneck({
     maxConcurrent: 4,

@@ -168,7 +168,10 @@ const EN = {
         title: "SYSTEM", // title of the tab (displayed on the page)
         description: `Datasets listed in SYSTEM are available locally and ready to be exported to one of PANDORÆ's visualisation tools.`, // main description of the tab
         sections: [
-          { type: "tabDatasets", data: { id: "system" } },
+          {
+            type: "tabDatasets",
+            data: { id: "system", table: "flux", source: "zotero" },
+          },
           { type: "loadLocalFlatFile", data: { accept: ".json" } },
         ],
       },

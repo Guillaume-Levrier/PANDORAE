@@ -1,7 +1,5 @@
 //========== webofscienceConverter ==========
 
-import { pandodb } from "../../db";
-
 //webofscienceConverter converts a scopus JSON dataset into a Zotero CSL-JSON dataset.
 
 const webofscienceConverter = (dataset, source, normalize, mail) => {

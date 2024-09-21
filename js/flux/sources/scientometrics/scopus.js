@@ -1,5 +1,3 @@
-import { pandodb } from "../../../db";
-
 var ISSNarr = [];
 
 //========== scopusBasicRetriever ==========

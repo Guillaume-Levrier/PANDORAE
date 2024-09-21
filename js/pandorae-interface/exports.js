@@ -1,4 +1,3 @@
-import { pandodb } from "../db";
 import { dataExport } from "../type/data-manager-type";
 import { toggleMenu } from "./menu";
 

@@ -3,7 +3,6 @@ const { BrowserWindow, ipcMain, shell, app } = electron;
 const userDataPath = app.getPath("userData");
 const appPath = app.getAppPath();
 
-import { databaseOperation, requestDatabase } from "../db";
 import { feedChaerosData, startChaerosProcess } from "./chaeros-main";
 import { addLineToConsole } from "./console-main";
 import {
@@ -22,6 +21,8 @@ import { manageTheme } from "./theme-main";
 import { getUserDetails, getUserStatus, manageUserKeys } from "./user-main";
 import {
   bioRxivManager,
+  databaseManagerWindow,
+  fluxWindow,
   mainWindow,
   toggleFullScreen,
   windowIds,
@@ -69,9 +70,25 @@ const activateMainListeners = () => {
 
   // ==== DB ====
 
-  ipcMain.on("database", (event, req) =>
-    requestDatabase(event, req.operation, req.parameters)
+  ipcMain.on("database", (event, req) => {
+    req.parameters.browserWindowId = BrowserWindow.fromWebContents(
+      event.sender
+    ).id;
+
+    databaseManagerWindow.webContents.send("database", req);
+  });
+
+  ipcMain.on("database_reply", (event, res) =>
+    BrowserWindow.fromId(res.parameters.browserWindowId).webContents.send(
+      "databaseReply",
+      res
+    )
   );
+
+  /* {
+    console.log(req);
+    requestDatabase(event, req.operation, req.parameters);
+  }); */
 
   // ==== WINDOW MANAGEMENT ====
 

@@ -24,6 +24,7 @@
     "csv-parser": "^3.0.0",
     "d3": "6.6.0",
     "dexie": "^3.2.2",
+    "dexie-export-import": "^4.1.2",
     "electron-squirrel-startup": "^1.0.1",
     "fastest-levenshtein": "^1.0.16",
     "merge-files": "^0.1.2",
@@ -90,6 +91,14 @@
                   "js": "./js/chaeros.js",
                   "preload": {
                     "js": "./js/preload-chaeros.js"
+                  }
+                },
+                {
+                  "name": "database_manager",
+                  "html": "./html/database_manager.html",
+                  "js": "./js/database_manager.js",
+                  "preload": {
+                    "js": "./js/preload-database_manager.js"
                   }
                 }
               ]

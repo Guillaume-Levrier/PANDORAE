@@ -275,9 +275,35 @@ const bioRxivManager = (message) => {
   }
 };
 
+var databaseManagerWindow;
+
+const createDatabaseManager = () => {
+  databaseManagerWindow = new BrowserWindow({
+    width: 10,
+    height: 10,
+    frame: false,
+    transparent: true,
+    show: false,
+    webPreferences: {
+      preload: basePath + "/js/preload-database_manager.js",
+      nodeIntegrationInWorker: true,
+      plugins: true,
+    },
+  });
+
+  databaseManagerWindow.loadURL(DATABASE_MANAGER_WEBPACK_ENTRY);
+
+  databaseManagerWindow.webContents.on("did-finish-load", function () {
+    databaseManagerWindow.webContents.send("id", databaseManagerWindow.id);
+    databaseManagerWindow.webContents.openDevTools();
+  });
+};
+
 export {
   createMainWindow,
   createAudioManager,
+  createDatabaseManager,
+  databaseManagerWindow,
   mainWindow,
   openModal,
   openFlux,

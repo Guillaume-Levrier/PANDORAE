@@ -1,7 +1,5 @@
 // ====== ISTEX CONVERTER ======
 
-import { pandodb } from "../../db";
-
 const istexCSLconverter = (dataset, source, normalize, email) => {
   const istexToZoteroCSL = (item) => {
     const article = {

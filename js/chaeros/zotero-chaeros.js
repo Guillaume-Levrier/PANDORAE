@@ -110,6 +110,7 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
 
                       const dataset = {
                         id,
+                        source: "zotero",
                         date,
                         name,
                         data: zoteroCollectionResponse,

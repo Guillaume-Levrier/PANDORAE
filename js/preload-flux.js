@@ -18,6 +18,8 @@ contextBridge.exposeInMainWorld("electron", {
     ipcRenderer.on("biorxivRetrieve", (e, ...args) => callback(args[0])),
   getUserDetails: (callback) =>
     ipcRenderer.on("getUserDetails", (e, ...args) => callback(args[0])),
+  databaseReply: (callback) =>
+    ipcRenderer.on("databaseReply", (e, ...args) => callback(args[0])),
 });
 
 ipcRenderer.invoke("checkflux", true).then((result) => {

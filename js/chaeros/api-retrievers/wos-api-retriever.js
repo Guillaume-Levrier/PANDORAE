@@ -1,7 +1,5 @@
 // ===== Web of Science =====
 
-import { pandodb } from "../../db";
-
 const wosFullRetriever = (user, wosReq) => {
   const wosKey = getPassword("WebOfScience", user);
 

@@ -1,5 +1,3 @@
-import { pandodb } from "../db";
-
 // Slider script
 const { Runtime, Inspector } = require("@observablehq/runtime");
 const { selectOption } = require("../pandorae-interface/slide-interface");

@@ -1,5 +1,5 @@
 import bottleneck from "bottleneck";
-import { pandodb } from "../../db";
+
 import { dataWriter, date } from "../chaeros-to-system";
 
 // ========= ISTEX RETRIEVER ==========

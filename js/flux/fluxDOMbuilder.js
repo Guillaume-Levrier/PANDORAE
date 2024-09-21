@@ -2,7 +2,6 @@ import { fluxButtonClicked } from "./actionbuttons";
 import { fluxSwitch } from "./buttons";
 import { datasetDisplay } from "./dataset";
 import { serviceTester } from "./service-tester";
-
 import { userData } from "./userdata";
 
 const userDataPath = window.electron.userDataPath;
@@ -12,7 +11,15 @@ const userDataPath = window.electron.userDataPath;
 // All the necessary information needs to be passed in the tabadata argument, which is defined as
 // below. That object is there only as a descriptive model, it is never called.
 
+// ========
+
+// The <hr> DOM element stands for "horizontal rule" which aims to be a thematic break between two
+// sections of an HTML document. This function yields such an element, which helps us give more
+// structure to our FLUX tab.
 const genHr = () => document.createElement("hr");
+
+// ======= addDatasetDisplaySection =======
+//
 
 const addDatasetDisplaySection = (tabData, sectionData, tab) => {
   const tabSection = document.createElement("div");
@@ -35,10 +42,28 @@ const addDatasetDisplaySection = (tabData, sectionData, tab) => {
 
   const datasetDetailDiv = document.createElement("div");
   datasetDetailDiv.className = "datasetDetail";
+  datasetDetailDiv.id = tabData.id + "-datasetDetail";
 
+  // When the "display available datasets" button is clicked
   displayAvailableDatasetsButton.addEventListener("click", () => {
+    // Indicate:
+    // - in which DOM elements the list of datasets must be shown (display)
+    // - where the detail of each dataset can be shown on click (detail)
+    // - in which table (FLUX, STANDARD or TYPE) the data is
+    // - what is the source/category of data we are looking for
+
+    const data = {
+      table: sectionData.table,
+      source: sectionData.source,
+      display: datasetDisplayDiv.id,
+      detail: datasetDetailDiv.id,
+    };
+
+    // Pass these informations to the datasetDisplay function
+    datasetDisplay(data);
+
+    // Update the button to show that the datasets have been presented to them
     fluxButtonClicked(displayAvailableDatasetsButton, true, "Datasets loaded");
-    datasetDisplay(datasetDisplayDiv, sectionData.id, datasetDetailDiv);
   });
 
   tabSection.append(

@@ -71,6 +71,14 @@ module.exports = {
                 js: "./js/preload-chaeros.js",
               },
             },
+            {
+              name: "database_manager",
+              html: "./html/database_manager.html",
+              js: "./js/database_manager.js",
+              preload: {
+                js: "./js/preload-database_manager.js",
+              },
+            },
           ],
         },
       },
