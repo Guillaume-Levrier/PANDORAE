@@ -1,5 +1,6 @@
 //========== datasetDisplay ==========
 
+import { CM } from "../locales/locales";
 import { powerValve } from "./powervalve";
 
 // datasetDisplay shows the datasets (usually JSON or CSV files) available in the relevant /datasets/ subdirectory.
@@ -230,7 +231,7 @@ const datasetDetail = (detailDiv, dataset) => {
 
       case "zotero":
         //refer to explorer-explainer.md
-        const typeList = [
+        /* const typeList = [
           "timeline",
           "geolocator",
           "network",
@@ -239,7 +240,10 @@ const datasetDetail = (detailDiv, dataset) => {
           "socialMedia",
           "hyphe",
           "parliament",
-        ];
+        ]; */
+
+        const typeList = Object.keys(CM.types.names);
+
         let subArrayContent = "";
 
         if (dataset.data.isArray) {
@@ -297,7 +301,7 @@ const datasetDetail = (detailDiv, dataset) => {
           optionData.name = dataType;
           optionData.type = "checkbox";
           const optionLabel = document.createElement("label");
-          optionLabel.innerText = dataType;
+          optionLabel.innerText = CM.types.names[dataType];
           systemOption.append(optionData, optionLabel);
           optionList.append(systemOption);
         });

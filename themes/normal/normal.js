@@ -1,4 +1,8 @@
 import * as THREE from "three";
+import { OrbitControls } from "../../js/lib/OrbitControls";
+import { getPandoratio } from "../../js/pandorae-interface/pulse";
+
+var timeDelta = performance.now();
 
 const normalCore = (coreCanvasW, coreCanvasH) => {
   /* 
@@ -23,6 +27,9 @@ const normalCore = (coreCanvasW, coreCanvasH) => {
 
   const clock = new THREE.Clock();
  */
+
+  var particles, dispose;
+
   // SHADERLOADER
   var ShaderLoader = function () {
     ShaderLoader.get = function (id) {
@@ -43,15 +50,22 @@ const normalCore = (coreCanvasW, coreCanvasH) => {
       var queue = 0;
       for (var name in ShaderLoader.shaders) {
         queue++;
-        var req = new XMLHttpRequest();
+        /* var req = new XMLHttpRequest();
         req.onload = loadHandler(name, req);
         req.open("get", scope.baseUrl + name + ".glsl", true);
-        req.send();
+        req.send(); */
+        console.log("coucou");
+        console.log(--queue <= 0);
+
+        //loadHandler(name);
       }
+
+      scope[callback]();
 
       function loadHandler(name, req) {
         return function () {
-          ShaderLoader.shaders[name] = req.responseText;
+          //ShaderLoader.shaders[name] = req.responseText;
+          console.log("starting");
           if (--queue <= 0) scope[callback]();
         };
       }
@@ -165,7 +179,7 @@ const normalCore = (coreCanvasW, coreCanvasH) => {
       geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
 
       //the rendermaterial is used to render the particles
-      particles = new THREE.Points(geometry, renderMaterial);
+      var particles = new THREE.Points(geometry, renderMaterial);
 
       exports.particles = particles;
       exports.renderer = renderer;
@@ -204,12 +218,204 @@ const normalCore = (coreCanvasW, coreCanvasH) => {
     var sl = new ShaderLoader();
     sl.loadShaders(
       {
-        simulation_vs: "",
-        simulation_fs: "",
-        render_vs: "",
-        render_fs: "",
+        simulation_vs: `varying vec2 vUv;
+varying float fragDepth;
+void main() {
+    vUv = vec2(uv.x, uv.y);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+}
+`,
+        simulation_fs: `
+// simulation
+ varying vec2 vUv;
+ uniform sampler2D textureA;
+ uniform sampler2D textureB;
+ uniform float timer;
+ uniform float fastParticle;
+ uniform float frequency;
+ uniform float amplitude;
+ uniform float maxDistanceA;
+ uniform float maxDistanceB;
+
+ //
+ // Description : Array and textureless GLSL 2D simplex noise function.
+ //      Author : Ian McEwan, Ashima Arts.
+ //  Maintainer : ijm
+ //     Lastmod : 20110822 (ijm)
+ //     License : Copyright (C) 2011 Ashima Arts. All rights reserved.
+ //               Distributed under the MIT License. See LICENSE file.
+ //               https://github.com/ashima/webgl-noise
+ //
+
+ vec3 mod289(vec3 x) {
+     return x - floor(x * (1.0 / 289.0)) * 289.0;
+ }
+
+ vec2 mod289(vec2 x) {
+     return x - floor(x * (1.0 / 289.0)) * 289.0;
+ }
+
+ vec3 permute(vec3 x) {
+     return mod289(((x*34.0)+1.0)*x);
+ }
+
+ float noise(vec2 v)
+ {
+     const vec4 C = vec4(0.211324865405187,  // (3.0-sqrt(3.0))/6.0
+                       0.366025403784439,  // 0.5*(sqrt(3.0)-1.0)
+                      -0.577350269189626,  // -1.0 + 2.0 * C.x
+                       0.024390243902439); // 1.0 / 41.0
+     // First corner
+     vec2 i  = floor(v + dot(v, C.yy) );
+     vec2 x0 = v -   i + dot(i, C.xx);
+
+     // Other corners
+     vec2 i1;
+     //i1.x = step( x0.y, x0.x ); // x0.x > x0.y ? 1.0 : 0.0
+     //i1.y = 1.0 - i1.x;
+     i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+     // x0 = x0 - 0.0 + 0.0 * C.xx ;
+     // x1 = x0 - i1 + 1.0 * C.xx ;
+     // x2 = x0 - 1.0 + 2.0 * C.xx ;
+     vec4 x12 = x0.xyxy + C.xxzz;
+     x12.xy -= i1;
+
+     // Permutations
+     i = mod289(i); // Avoid truncation effects in permutation
+     vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+         + i.x + vec3(0.0, i1.x, 1.0 ));
+
+     vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+     m = m*m ;
+     m = m*m ;
+
+     // Gradients: 41 points uniformly over a line, mapped onto a diamond.
+     // The ring size 17*17 = 289 is close to a multiple of 41 (41*7 = 287)
+
+     vec3 x = 2.0 * fract(p * C.www) - 1.0;
+     vec3 h = abs(x) - 0.5;
+     vec3 ox = floor(x + 0.5);
+     vec3 a0 = x - ox;
+
+     // Normalise gradients implicitly by scaling m
+     // Approximation of: m *= inversesqrt( a0*a0 + h*h );
+     m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+
+     // Compute final noise value at P
+     vec3 g;
+     g.x  = a0.x  * x0.x  + h.x  * x0.y;
+     g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+     return 130.0 * dot(m, g);
+ }
+
+ vec3 curl(float	x,	float	y,	float	z)
+ {
+
+     float	eps	= 1., eps2 = 2. * eps;
+     float	n1,	n2,	a,	b;
+
+     x += fastParticle * .05;
+     y += fastParticle * .05;
+     z += fastParticle * .05;
+
+     vec3	curl = vec3(0.);
+
+     n1	=	noise(vec2( x,	y	+	eps ));
+     n2	=	noise(vec2( x,	y	-	eps ));
+     a	=	(n1	-	n2)/eps2;
+
+     n1	=	noise(vec2( x,	z	+	eps));
+     n2	=	noise(vec2( x,	z	-	eps));
+     b	=	(n1	-	n2)/eps2;
+
+     curl.x	=	a	-	b;
+
+     n1	=	noise(vec2( y,	z	+	eps));
+     n2	=	noise(vec2( y,	z	-	eps));
+     a	=	(n1	-	n2)/eps2;
+
+     n1	=	noise(vec2( x	+	eps,	z));
+     n2	=	noise(vec2( x	+	eps,	z));
+     b	=	(n1	-	n2)/eps2;
+
+     curl.y	=	a	-	b;
+
+     n1	=	noise(vec2( x	+	eps,	y));
+     n2	=	noise(vec2( x	-	eps,	y));
+     a	=	(n1	-	n2)/eps2;
+
+     n1	=	noise(vec2(  y	+	eps,	z));
+     n2	=	noise(vec2(  y	-	eps,	z));
+     b	=	(n1	-	n2)/eps2;
+
+     curl.z	=	a	-	b;
+
+     return	curl;
+ }
+
+
+ void main() {
+
+     //origin
+     vec3 origin  = texture2D( textureA, vUv ).xyz;
+
+     vec3 tarorigin = origin + curl( origin.x * frequency, origin.y * frequency, origin.z * frequency ) * amplitude;
+
+     float d = length( origin-tarorigin ) / maxDistanceA;
+
+     origin = mix( origin, tarorigin, pow( d, 5. ) );
+
+     //destination
+     vec3 destination = texture2D( textureB, vUv ).xyz;
+
+  //   vec3 tardestination = destination + curl( destination.x * frequency, destination.y * frequency, destination.z * frequency ) * amplitude;
+
+  //   float d = length( destination-tardestination ) / maxDistanceB;
+
+  //   destination = mix( destination, tardestination, pow( d, 5. ) );
+
+     //lerp
+     vec3 pos = mix( origin, destination, timer );
+
+     gl_FragColor = vec4( pos,1. );
+
+ }
+`,
+        render_vs: `//float texture containing the positions of each particle
+uniform sampler2D positions;
+uniform vec2 nearFar;
+uniform float pointSize;
+
+varying float size;
+void main() {
+
+    //the mesh is a normalized square so the uvs = the xy positions of the vertices
+    vec3 pos = texture2D( positions, position.xy ).xyz;
+
+    //pos now contains the position of a point in space thas can be transformed
+    gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );
+
+    gl_PointSize = size = max( 1., ( step( 1. - ( 1. / 512. ), position.x ) ) * pointSize );
+}
+`,
+        render_fs: `uniform vec2 nearFar;
+uniform vec3 small;
+uniform vec3 big;
+
+varying float size;
+void main()
+{
+    gl_FragColor = vec4( small, .35 );
+
+    if( size > 1. )
+    {
+        gl_FragColor = vec4( big * vec3( 1. - length( gl_PointCoord.xy-vec2(.5) ) ) * 1.5, 1 );
+    }
+
+}
+`,
       },
-      "./themes/normal/glsl/morph/",
+      "", //"./themes/normal/glsl/morph/",
       init
     );
   };
@@ -217,6 +423,7 @@ const normalCore = (coreCanvasW, coreCanvasH) => {
   window.onload = reloadCore();
 
   function init() {
+    console.log("initiated");
     var w = coreCanvasW;
     var h = coreCanvasH;
 
@@ -233,7 +440,13 @@ const normalCore = (coreCanvasW, coreCanvasH) => {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(45, w / h, 1, 1000);
 
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.autoRotate = true;
+    controls.dampingFactor = 0.01;
+    controls.enableDamping = true;
+    controls.rotateSpeed = 0.1;
+    controls.autoRotateSpeed = 0.1;
+
     camera.position.z = 450;
     controls.minDistance = 0;
     controls.maxDistance = 4500;
@@ -376,19 +589,32 @@ const normalCore = (coreCanvasW, coreCanvasH) => {
       FBO.update(true);
     } else {
       requestAnimationFrame(update);
+      if (performance.now() - timeDelta > 30) {
+        timeDelta = performance.now();
 
-      //update params
-      simulationShader.uniforms.timer.value = parseFloat(pandoratio);
-      simulationShader.uniforms.fastParticle.value += 0.02 + pandoratio * 2;
-      FBO.particles.rotation.x =
-        ((Math.cos(Date.now() * 0.001) * Math.PI) / 180) * 2;
-      FBO.particles.rotation.y -= (Math.PI / 180) * 0.1;
+        //update params
 
-      //update simulation
-      FBO.update();
-      //render the particles at the new location
-      renderer.render(scene, camera);
-      //composer.render(clock.getDelta());
+        const pandoratio = getPandoratio();
+
+        //calm down on this first
+        if (pandoratio) {
+          simulationShader.uniforms.timer.value = parseFloat(pandoratio);
+          simulationShader.uniforms.fastParticle.value += 0.02 + pandoratio * 2;
+        }
+
+        FBO.particles.rotation.x =
+          ((Math.cos(Date.now() * 0.001) * Math.PI) / 180) * 2;
+        FBO.particles.rotation.y -= (Math.PI / 180) * 0.1;
+
+        //update simulation
+        FBO.update();
+
+        controls.update();
+
+        //render the particles at the new location
+        renderer.render(scene, camera);
+        //composer.render(clock.getDelta());
+      }
     }
   }
 };

@@ -23,6 +23,8 @@ contextBridge.exposeInMainWorld("electron", {
     ipcRenderer.on("tutorial", (e, ...args) => callback(args[0])),
   backToPres: (callback) =>
     ipcRenderer.on("backToPres", (e, ...args) => callback(args[0])),
+  databaseReply: (callback) =>
+    ipcRenderer.on("databaseReply", (e, ...args) => callback(args[0])),
 });
 
 console.log("|==== INDEX PRELOAD ENDS HERE ====|");

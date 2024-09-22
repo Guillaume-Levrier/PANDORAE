@@ -3,6 +3,7 @@ let coreLogoArchive = "";
 var pandoratio = 0;
 
 const resetPandoratio = () => (pandoratio = 0);
+const getPandoratio = () => pandoratio;
 
 const pulse = (status, coeff, rhythm, clear) => {
   let rate = (number) => {
@@ -108,5 +109,7 @@ const nameDisplay = (name) => {
     .getElementById("core-logo")
     .animate([{ opacity: 0 }, { opacity: 1 }], 700);
 };
+pulse(1, 1, 10);
+setTimeout(() => pulse(1, 1, 10, true), 400);
 
-export { nameDisplay, pulse, resetPandoratio };
+export { nameDisplay, pulse, resetPandoratio, pandoratio, getPandoratio };

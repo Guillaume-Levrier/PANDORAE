@@ -2,7 +2,22 @@ const genDate = () =>
   new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
 
 //========== sysExport ==========
-const sysExport = (destinations, importName, id) => {
+const sysExport = (explorers, name, id) => {
+  window.electron.send("database", {
+    operation: "datasetTransfer",
+    parameters: {
+      origin: { table: "flux" },
+      destination: { table: "type" },
+      id,
+      name,
+      explorers,
+    },
+  });
+};
+
+//
+
+/* {
   pandodb.open();
   pandodb.flux.toArray().then((datasets) => {
     // using every allow for breaking the statement by returning "false" when found
@@ -17,7 +32,7 @@ const sysExport = (destinations, importName, id) => {
       return true;
     });
   });
-};
+}; */
 
 //========== dataWriter ==========
 const dataWriter = (table, dataset) =>

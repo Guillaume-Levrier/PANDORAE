@@ -34,7 +34,71 @@ const resetCategoryStyle = () => {
 
 let notLoadingMenu = true;
 
-const categoryLoader = (cat) => {
+const categoryLoader = () => {
+  window.electron.send("database", {
+    operation: "getDatasetList",
+    parameters: {
+      table: "type",
+    },
+  });
+};
+
+window.electron.databaseReply((data) => typeExplorersBuilder(data.r));
+
+const typeExplorersBuilder = (datasets) => {
+  purgeMenuItems("secMenContent");
+  const typeDatasetMap = {};
+
+  datasets.forEach((dataset) => {
+    dataset.explorers.forEach((exp) => {
+      if (!typeDatasetMap.hasOwnProperty(exp)) {
+        typeDatasetMap[exp] = [];
+      }
+      typeDatasetMap[exp].push(dataset);
+    });
+  });
+
+  let loadingCount = 0;
+
+  console.log(typeDatasetMap);
+
+  Object.keys(typeDatasetMap).forEach((datasetType) => {
+    const typeContainer = document.createElement("div");
+    typeContainer.style =
+      "display:flex;border-bottom:1px solid rgba(192,192,192,0.3)";
+
+    typeContainer.id = datasetType;
+    typeContainer.className += "tabs menu-item typeContainer";
+
+    typeContainer.innerText = CMT.EN.types.names[datasetType].toLowerCase();
+
+    typeContainer.addEventListener("click", (e) => {
+      resetCategoryStyle();
+
+      // only load if opening a new/different tab
+
+      // add selected style for the one selected tab
+      typeContainer.style.color = "white";
+      typeContainer.style.backgroundColor = "rgb(20,20,20)";
+
+      // trigger main display
+      mainDisplay(typeDatasetMap[datasetType], datasetType);
+    });
+
+    document.getElementById("secMenContent").append(typeContainer);
+    loadingCount += 1;
+    /* if (loadingCount === blocks.length) {
+      notLoadingMenu = false;
+    } else {
+      notLoadingMenu = true;
+    } */
+  });
+  toggleSecondaryMenu();
+  resetCategoryStyle();
+  field.value = ``;
+};
+
+const categoryBuilder = (cat) => {
   if (notLoadingMenu) {
     purgeMenuItems("secMenContent");
 
@@ -48,49 +112,7 @@ const categoryLoader = (cat) => {
 
         const typeDatasetMap = {};
 
-        pandodb.type.toArray().then((datasets) => {
-          datasets.forEach((dataset) => {
-            if (!typeDatasetMap.hasOwnProperty(dataset.datasetType)) {
-              typeDatasetMap[dataset.datasetType] = [];
-            }
-            typeDatasetMap[dataset.datasetType].push(dataset);
-          });
-
-          let loadingCount = 0;
-
-          Object.keys(typeDatasetMap).forEach((datasetType) => {
-            const typeContainer = document.createElement("div");
-            typeContainer.style =
-              "display:flex;border-bottom:1px solid rgba(192,192,192,0.3)";
-
-            typeContainer.id = datasetType;
-            typeContainer.className += "tabs menu-item typeContainer";
-
-            typeContainer.innerText =
-              CMT.EN.types.names[datasetType].toLowerCase();
-
-            typeContainer.addEventListener("click", (e) => {
-              resetCategoryStyle();
-
-              // only load if opening a new/different tab
-
-              // add selected style for the one selected tab
-              typeContainer.style.color = "white";
-              typeContainer.style.backgroundColor = "rgb(20,20,20)";
-
-              // trigger main display
-              mainDisplay(typeDatasetMap[datasetType], datasetType);
-            });
-
-            document.getElementById("secMenContent").append(typeContainer);
-            loadingCount += 1;
-            /* if (loadingCount === blocks.length) {
-              notLoadingMenu = false;
-            } else {
-              notLoadingMenu = true;
-            } */
-          });
-        });
+        pandodb.type.toArray().then((datasets) => {});
 
         /* blocks.forEach((block) => {
           pandodb[block].count().then((thisBlock) => {

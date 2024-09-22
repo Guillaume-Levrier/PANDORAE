@@ -4,6 +4,7 @@ import { CM } from "../locales/locales";
 import { displayCore, purgeXtype } from "./core";
 import { toggledTertiaryMenu, toggleMenu, toggleTertiaryMenu } from "./menu";
 import { resetPandoratio } from "./pulse";
+import { selectTheme } from "./themes";
 import { listTableDatasets, resetCategoryStyle } from "./type-loader";
 
 let toggledConsole = false;

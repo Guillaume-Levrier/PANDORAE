@@ -33,8 +33,8 @@ const keyShortCuts = (event) => {
           if (toggledMenu === false) {
             toggleMenu();
           }
-          categoryLoader("type");
         }
+        categoryLoader("type");
         break;
 
       case "IntlBackslash":

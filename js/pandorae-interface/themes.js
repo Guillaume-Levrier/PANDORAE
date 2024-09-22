@@ -1,15 +1,15 @@
-//import { normalCore } from "../../themes/normal/normal";
+import { normalCore } from "../../themes/normal/normal";
 import { vega } from "../../themes/vega/vega";
 
-const selectTheme = (themeName) => {
+const selectTheme = (themeName) =>
   window.electron.send("theme", { type: "set", theme: themeName });
-  window.electron.send("keyManager", {
+/* window.electron.send("keyManager", {
     user: "NA",
     service: "theme",
     value: themeName,
     type: "setPassword",
-  });
-};
+  }); */
+//};
 
 var coreCanvasW = window.innerWidth;
 var coreCanvasH = window.innerHeight;
@@ -24,6 +24,7 @@ const requestTheme = () => window.electron.send("theme", { type: "read" });
 window.electron.themeContent((theme) => loadTheme(theme));
 
 const loadTheme = (theme) => {
+  console.log(theme);
   switch (theme.script) {
     case "normal":
       normalCore(coreCanvasW, coreCanvasH);

@@ -3,7 +3,7 @@ const { BrowserWindow, ipcMain, shell, app } = electron;
 const userDataPath = app.getPath("userData");
 const appPath = app.getAppPath();
 
-import { feedChaerosData, startChaerosProcess } from "./chaeros-main";
+import { startChaerosProcess } from "./chaeros-main";
 import { addLineToConsole } from "./console-main";
 import {
   changeUDP,
@@ -161,10 +161,6 @@ const activateMainListeners = () => {
   ipcMain.on("dataFlux", (event, data) =>
     startChaerosProcess(data.fluxAction, data.fluxArgs, data.message)
   );
-
-  // when chaeros is ready
-  // feed it the arguments we kept from the original order
-  ipcMain.on("chaeros-is-ready", (event, arg) => feedChaerosData(event));
 
   // biorxiv scraping needs its own windows
   ipcMain.on("biorxivRetrieve", (event, message) => bioRxivManager(message));

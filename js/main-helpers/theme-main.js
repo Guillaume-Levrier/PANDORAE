@@ -1,32 +1,36 @@
 import { themeData } from "./filesystem-main";
-import { readUserIDfile } from "./user-main";
+import { readUserIDfile, writeUserIDfile } from "./user-main";
 import { mainWindow } from "./window-creator";
 
 const electron = require("electron");
-const { app, BrowserView, BrowserWindow, ipcMain, shell, dialog, WebContents } =
-  electron;
+const { app } = electron;
 const userDataPath = app.getPath("userData");
 
 // can be either read what theme is applied
 // or set a new one
 const manageTheme = (req) => {
+  console.log(req);
+  console.log(themeData[req.theme]);
+
+  const data = readUserIDfile(userDataPath);
+  var currentUser = JSON.parse(data);
+
   switch (req.type) {
     case "read":
-      const data = readUserIDfile(userDataPath);
-      var currentUser = JSON.parse(data);
-
       if (currentUser.theme) {
         mainWindow.webContents.send(
           "themeContent",
           themeData[currentUser.theme.value]
         );
       } else {
-        mainWindow.webContents.send("themeContent", themeData.normal);
+        mainWindow.webContents.send("themeContent", themeData.vega);
       }
 
       break;
 
     case "set":
+      currentUser.theme.value = req.theme;
+      writeUserIDfile(userDataPath, currentUser);
       mainWindow.webContents.send("themeContent", themeData[req.theme]);
       break;
   }

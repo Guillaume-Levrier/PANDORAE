@@ -97,7 +97,7 @@ const webArchive = (datajson) => {
     .then((datajson) => { */
       dataDownload(datajson);
 
-      const documents = datajson.content[0].items;
+      const documents = datajson.data[0].items;
 
       var nodeData = [];
       var linkData = [];
@@ -1409,7 +1409,7 @@ const webArchive = (datajson) => {
     }
   }
 
-  window.electron.send("console-logs", "Starting webArchive");
+  //window.electron.send("console-logs", "Starting webArchive");
 };
 
 export { webArchive };

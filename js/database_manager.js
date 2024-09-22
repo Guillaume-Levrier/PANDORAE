@@ -71,11 +71,20 @@ const getDatasetList = (parameters) =>
     });
   });
 
+const datasetTransfer = (parameters) => {
+  pandoraeDatabase[parameters.origin.table].get(parameters.id).then((r) => {
+    r.name = parameters.name;
+    r.explorers = parameters.explorers;
+    pandoraeDatabase[parameters.destination.table].put(r);
+  });
+};
+
 const databaseOperation = {
   addDataset,
   getDatasetById,
   removeDataset,
   getDatasetList,
+  datasetTransfer,
 };
 
 const requestDatabase = (operation, parameters) =>

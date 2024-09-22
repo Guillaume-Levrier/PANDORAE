@@ -11,6 +11,8 @@ var zoomed, _originalBrushData;
 const timeline = (datajson) => {
   // When called, draw the chronotype
 
+  console.log(datajson);
+
   //========== SVG VIEW =============
   var svg = d3.select(xtype).append("svg").attr("id", "xtypeSVG");
 
@@ -152,7 +154,7 @@ const timeline = (datajson) => {
     .then((datajson) => { */
   dataDownload(datajson);
 
-  const docs = datajson.content; // Second array is the documents (docs)
+  const docs = datajson.data; // Second array is the documents (docs)
   // const clusters = [];
   var links = []; // Declaring links as empty array
   const nodeDocs = [];
