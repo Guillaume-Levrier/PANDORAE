@@ -136,6 +136,21 @@ const EN = {
           },
         ],
       },
+      standardize: {
+        id: "standardize", // id of the main div
+        title: "Standardize", // title of the tab (displayed on the page)
+        description: `This tab lets you convert the datasets you retrieved from various sources into a standard CSL-JSON format. Once this is done, you will have an opportunity to enrich your standardized datasets further.`,
+        sections: [
+          {
+            type: "tabDatasets",
+            data: { id: "API retrieved", table: "flux", source: ["istex"] },
+          },
+          {
+            type: "tabDatasets",
+            data: { id: "Standard", table: "standard", source: ["istex"] },
+          },
+        ],
+      },
       zotero: {
         id: "zotero", // id of the main div
         title: "ZOTERO", // title of the tab (displayed on the page)
@@ -147,7 +162,14 @@ const EN = {
          Zotero libraries/groups.`,
         },
         sections: [
-          { type: "tabDatasets", data: { id: "csljson" } },
+          {
+            type: "tabDatasets",
+            data: {
+              id: "CSL-JSON standardized",
+              table: "standard",
+              source: ["istex"],
+            },
+          },
           {
             type: "APIquery",
             data: {
@@ -170,7 +192,7 @@ const EN = {
         sections: [
           {
             type: "tabDatasets",
-            data: { id: "system", table: "flux", source: "zotero" },
+            data: { id: "system", table: "standard", source: "zotero" },
           },
           { type: "loadLocalFlatFile", data: { accept: ".json" } },
         ],

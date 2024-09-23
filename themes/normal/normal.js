@@ -47,28 +47,7 @@ const normalCore = (coreCanvasW, coreCanvasH) => {
     },
 
     batchLoad: function (scope, callback) {
-      var queue = 0;
-      for (var name in ShaderLoader.shaders) {
-        queue++;
-        /* var req = new XMLHttpRequest();
-        req.onload = loadHandler(name, req);
-        req.open("get", scope.baseUrl + name + ".glsl", true);
-        req.send(); */
-        console.log("coucou");
-        console.log(--queue <= 0);
-
-        //loadHandler(name);
-      }
-
       scope[callback]();
-
-      function loadHandler(name, req) {
-        return function () {
-          //ShaderLoader.shaders[name] = req.responseText;
-          console.log("starting");
-          if (--queue <= 0) scope[callback]();
-        };
-      }
     },
 
     onShadersReady: function () {

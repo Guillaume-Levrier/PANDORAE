@@ -11,6 +11,7 @@ import { istexCSLconverter } from "./csljson-remappers/istex2csljson";
 import { scopusConverter } from "./csljson-remappers/scopus2csljson";
 import { webofscienceConverter } from "./csljson-remappers/wos2csljson";
 import { computePPS } from "./flatfile-parsers/pps-computer";
+import { standardizeDataset } from "./standardizer";
 import {
   zoteroCollectionBuilder,
   zoteroItemsRetriever,
@@ -32,6 +33,11 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
 
   try {
     switch (fluxAction) {
+      case "standardize":
+        standardizeDataset(fluxArgs);
+
+        break;
+
       case "computePPS":
         computePPS(fluxArgs.ppUserlist, fluxArgs.userMail);
         break;

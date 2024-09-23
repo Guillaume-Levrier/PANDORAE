@@ -117,7 +117,7 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
                       };
 
                       // send dataset to be saved
-                      dataWriter(["flux"], dataset);
+                      dataWriter(["standard"], dataset);
 
                       // stop pulsar
                       window.electron.send("pulsar", true);

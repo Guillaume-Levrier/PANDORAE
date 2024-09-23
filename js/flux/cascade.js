@@ -55,10 +55,10 @@ function updateCascade(selections) {
   traces = [];
   document.getElementById("cascade").innerHTML = "";
 
-  addHop(["USER", "CSL-JSON"], traces);
+  addHop(["USER", "STANDARDIZE"], traces);
 
   if (availability.dnslist.zotero.valid) {
-    addHop(["CSL-JSON", "ZOTERO", "SYSTEM"], traces);
+    addHop(["STANDARDIZE", "ZOTERO", "SYSTEM"], traces);
   }
 
   if (selections) {
@@ -75,19 +75,19 @@ function updateCascade(selections) {
           break; */
           case "Scopus":
             if (selections.scientometrics) {
-              addHop(["USER", "SCOPUS", "CSL-JSON"], traces);
+              addHop(["USER", "SCOPUS", "STANDARDIZE"], traces);
             }
             break;
 
           case "Web Of Science":
             if (selections.scientometrics) {
-              addHop(["USER", "WEBㅤOFㅤSCIENCE", "CSL-JSON"], traces);
+              addHop(["USER", "WEBㅤOFㅤSCIENCE", "STANDARDIZE"], traces);
             }
             break;
 
           case "BIORXIV":
             if (selections.scientometrics) {
-              addHop(["BIORXIV", "CSL-JSON"], traces);
+              addHop(["BIORXIV", "STANDARDIZE"], traces);
             }
             break;
 
@@ -100,26 +100,26 @@ function updateCascade(selections) {
 
         case "Regards Citoyens":
           if (selections.parliamentsSelect) {
-            addHop(["OPEN", "REGARDSCITOYENS", "CSL-JSON"], traces);
+            addHop(["OPEN", "REGARDSCITOYENS", "STANDARDIZE"], traces);
           }
           break;
 
 */
           case "ISTEX":
             if (selections.scientometrics) {
-              addHop(["ISTEX", "CSL-JSON"], traces);
+              addHop(["ISTEX", "STANDARDIZE"], traces);
             }
             break;
 
           case "Dimensions":
             if (selections.scientometrics) {
-              addHop(["USER", "DIMENSIONS", "CSL-JSON"], traces);
+              addHop(["USER", "DIMENSIONS", "STANDARDIZE"], traces);
             }
             break;
 
           /* case "PPS":
             if (selections.scientometrics) {
-              addHop(["PPS", "CSL-JSON"], traces);
+              addHop(["PPS", "STANDARDIZE"], traces);
               window.electron
                 .invoke("getPPSMaturity")
                 .then((time) => updatePPSDate(time));

@@ -62,20 +62,35 @@ const removeDataset = (parameters) =>
   pandoraeDatabase[parameters.table].delete(parameters.id);
 
 const getDatasetList = (parameters) =>
-  pandoraeDatabase[parameters.table].toArray().then((r) => {
-    console.log(r);
-    return window.electron.send("database_reply", {
+  pandoraeDatabase[parameters.table]
+    .where("source")
+    .anyOf(parameters.source)
+    .toArray()
+    .then((r) =>
+      window.electron.send("database_reply", {
+        r,
+        reply_type: "datasetList",
+        parameters,
+      })
+    );
+
+const getTypeDatasets = (parameters) => {
+  pandoraeDatabase.type.toArray().then((r) =>
+    window.electron.send("database_reply", {
       r,
       reply_type: "datasetList",
       parameters,
-    });
-  });
+    })
+  );
+};
 
 const datasetTransfer = (parameters) => {
+  console.log(parameters);
   pandoraeDatabase[parameters.origin.table].get(parameters.id).then((r) => {
+    console.log(r);
     r.name = parameters.name;
     r.explorers = parameters.explorers;
-    pandoraeDatabase[parameters.destination.table].put(r);
+    pandoraeDatabase[parameters.destination.table].add(r);
   });
 };
 
@@ -85,6 +100,7 @@ const databaseOperation = {
   removeDataset,
   getDatasetList,
   datasetTransfer,
+  getTypeDatasets,
 };
 
 const requestDatabase = (operation, parameters) =>

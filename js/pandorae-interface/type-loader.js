@@ -1,4 +1,4 @@
-import { CMT } from "../locales/locales";
+import { CMT, CM } from "../locales/locales";
 import { typeSwitch } from "../type/typeswitch";
 import { mainDisplay } from "./console";
 import {
@@ -12,8 +12,6 @@ import { pulse } from "./pulse";
 var typeSelector;
 
 var currentType;
-
-const CM = CMT.EN;
 
 const setTypeSelector = (n) => (typeSelector = n);
 
@@ -36,10 +34,8 @@ let notLoadingMenu = true;
 
 const categoryLoader = () => {
   window.electron.send("database", {
-    operation: "getDatasetList",
-    parameters: {
-      table: "type",
-    },
+    operation: "getTypeDatasets",
+    parameters: {},
   });
 };
 
@@ -59,8 +55,6 @@ const typeExplorersBuilder = (datasets) => {
   });
 
   let loadingCount = 0;
-
-  console.log(typeDatasetMap);
 
   Object.keys(typeDatasetMap).forEach((datasetType) => {
     const typeContainer = document.createElement("div");
@@ -110,15 +104,6 @@ const categoryBuilder = (cat) => {
       case "type":
         window.electron.send("console-logs", "Displaying available types");
 
-        const typeDatasetMap = {};
-
-        pandodb.type.toArray().then((datasets) => {});
-
-        /* blocks.forEach((block) => {
-          pandodb[block].count().then((thisBlock) => {
-           
-          });
-        }); */
         break;
       case "slide":
         blocks = ["load", "edit", "create"];
@@ -191,14 +176,18 @@ const listTableDatasets = (datasets, type) => {
     removeDataset.innerHTML =
       "<span><strong><i class='material-icons'>delete_forever</i></strong><br></span>";
 
-    removeDataset.onclick = () => {
-      pandodb.type.delete(d.id);
-      document.getElementById("thirdMenuContent").removeChild(datasetContainer);
-      field.value = "dataset removed from type";
-      window.electron.send("console-logs", "Removed " + d.id + " from type");
-    };
+    console.log(d);
 
-    datasetContainer.appendChild(removeDataset);
+    removeDataset.addEventListener("click", () => {
+      window.electron.send("database", {
+        operation: "removeDataset",
+        parameters: { table: "type", id: d.id },
+      });
+      datasetContainer.remove();
+      window.electron.send("console-logs", "Removed " + d.id + " from type");
+    });
+
+    datasetContainer.append(removeDataset);
   });
 };
 

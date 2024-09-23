@@ -27,6 +27,10 @@ const powerValve = (fluxAction, item) => {
   switch (
     fluxAction // According to function name ...
   ) {
+    case "standardize":
+      fluxArgs = item;
+      break;
+
     case "computePPS":
       const list = document.getElementById("pubPeerUserList").value.split(",");
       fluxArgs.ppUserlist = [];

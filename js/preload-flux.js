@@ -27,7 +27,7 @@ ipcRenderer.invoke("checkflux", true).then((result) => {
 
   const meta = document.createElement("meta");
   meta.httpEquiv = "Content-Security-Policy";
-  meta.content = "default-src 'self';connect-src ";
+  meta.content = "default-src 'self';style-src 'unsafe-inline';connect-src ";
 
   // allow external API sources
   Object.values(domainsToAllow.dnslist).forEach((d) => {

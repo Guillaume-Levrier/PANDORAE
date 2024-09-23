@@ -1,7 +1,9 @@
-//========== datasetDisplay ==========
+import * as Inputs from "@observablehq/inputs";
 
+//========== datasetDisplay ==========
 import { CM } from "../locales/locales";
 import { powerValve } from "./powervalve";
+import { fluxButtonClicked } from "./actionbuttons";
 
 // datasetDisplay shows the datasets (usually JSON or CSV files) available in the relevant /datasets/ subdirectory.
 
@@ -31,7 +33,8 @@ window.electron.databaseReply((args) => {
       displayDatasetList(
         args.r,
         args.parameters.display,
-        args.parameters.detail
+        args.parameters.detail,
+        args.parameters.table
       );
       break;
 
@@ -43,58 +46,49 @@ window.electron.databaseReply((args) => {
   }
 });
 
-const displayDatasetList = (datasets, displayid, detailid) => {
+const displayDatasetList = (datasets, displayid, detailid, table) => {
   const displayDiv = document.getElementById(displayid);
   const detailDiv = document.getElementById(detailid);
 
-  const list = document.createElement("ul");
-
-  datasets.forEach((dataset) => {
-    let line = document.createElement("LI");
-    line.id = dataset.id;
-
-    let button = document.createElement("SPAN");
-
-    if (detailDiv) {
-      line.addEventListener("click", (e) => datasetDetail(detailDiv, dataset));
-    }
-
-    button.innerText = `${dataset.name} - ${dataset.date}`;
-
-    let download = document.createElement("i");
-    download.className = "fluxDelDataset material-icons";
-
-    download.addEventListener("click", (e) => {
-      const name = dataset.name + ".json";
-
-      window.electron.send("saveDataset", {
-        target: name,
-        data: JSON.stringify(dataset, replacer),
-      });
-    });
-
-    download.innerText = "download";
-
-    let remove = document.createElement("i");
-    remove.className = "fluxDelDataset material-icons";
-    remove.addEventListener("click", (e) => {
-      datasetRemove(kind, dataset.id);
-    });
-    remove.innerText = "close";
-
-    line.appendChild(button);
-    line.appendChild(remove);
-    line.appendChild(download);
-
-    list.appendChild(line);
+  const searchField = Inputs.search(datasets, {
+    placeholder: "Look for a dataset…",
+    label: "Search this data table",
+    spellcheck: false,
   });
 
-  if (datasets.length === 0) {
-    displayDiv.innerHTML = "No dataset available in the system";
-  } else {
-    displayDiv.innerHTML = "";
-    displayDiv.appendChild(list);
-  }
+  searchField.style = "padding:5px;";
+
+  const displayTable = document.createElement("div");
+
+  const updateTable = () => {
+    displayTable.innerHTML = "";
+
+    const searchTable = Inputs.table(searchField.value, {
+      columns: ["name", "date", "source"],
+      width: "100%",
+      multiple: false,
+    });
+
+    searchTable.style =
+      "margin:5px;padding:5px;border:1px solid rgb(220,220,220)";
+
+    searchTable.addEventListener("input", () => {
+      if (searchTable.value) {
+        datasetDetail(detailDiv, searchTable.value, table);
+      } else {
+        datasetDetail.style.display = "none";
+        detailDiv.innerHTML = "";
+      }
+    });
+
+    displayTable.append(searchTable);
+  };
+
+  searchField.addEventListener("input", updateTable);
+
+  updateTable();
+
+  displayDiv.append(searchField, displayTable);
 };
 
 const datasetDisplay = (data) =>
@@ -103,29 +97,11 @@ const datasetDisplay = (data) =>
     parameters: data,
   });
 
-const datasetRemove = (kind, id) => {
-  pandodb.flux.toArray().then((datasets) => {
-    var dataset;
-
-    datasets.forEach((d) => (d.id === id ? (dataset = d) : false));
-
-    if (dataset.content.hasOwnProperty("path")) {
-      fs.unlink(dataset.content.path, (err) => {
-        if (err) throw err;
-      });
-    }
-
-    pandodb.flux.delete(id);
-
-    document
-      .getElementById(id)
-      .parentNode.removeChild(document.getElementById(id));
-    window.electron.send(
-      "console-logs",
-      "Removed " + id + " from database: " + kind
-    );
+const datasetRemove = (table, id) =>
+  window.electron.send("database", {
+    operation: "removeDataset",
+    parameters: { table, id },
   });
-};
 
 //========== datasetDetail ==========
 // Clicking on a dataset displayed by the previous function displays some of its metadata and allows for further actions
@@ -134,163 +110,94 @@ const datasetRemove = (kind, id) => {
 const datasetDetail = (detailDiv, dataset) => {
   // This function provides info on a specific dataset
 
-  let dataPreview = ""; // Created dataPreview variable
+  //Make the div visible
+  detailDiv.style.display = "flex";
 
-  detailDiv.innerHTML = "";
+  // The detail div contains two sub-divs:
+  // 1. information on the dataset
+  // 2. action panel (buttons) of things to do to that dataset
 
-  console.log(dataset);
+  const informationDiv = document.createElement("div");
+  informationDiv.className = "datasetDetailInformationDiv";
+
+  const actionDiv = document.createElement("div");
+  actionDiv.className = "datasetDetailActionDiv";
+
+  detailDiv.append(informationDiv, actionDiv);
+
+  // information div
+  informationDiv.innerHTML = `<span style="font-weight:bold;"> ${dataset.name} </span>
+  <br>Origin : ${dataset.source}
+  <br>Total results : ${dataset.data.length} 
+  <br>Upload date : ${dataset.date}
+  <br>Unique ID : ${dataset.id}`;
+
+  // most basic actions
+
+  // button to click to download the relevant datasets
+  const downloadButton = document.createElement("button");
+  downloadButton.type = "submit";
+  downloadButton.className = "flux-button";
+  downloadButton.innerText = "Download dataset";
+  downloadButton.addEventListener("click", () => {
+    const name = dataset.name + ".json";
+    window.electron.send("saveDataset", {
+      target: name,
+      data: JSON.stringify(dataset, replacer),
+    });
+    fluxButtonClicked(downloadButton, true, "Dataset downloaded");
+  });
+
+  actionDiv.append(downloadButton);
+
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "submit";
+  deleteButton.className = "flux-button";
+  deleteButton.innerText = "Delete dataset";
+  deleteButton.addEventListener("click", () => {
+    // send the coordinates of the dataset to remove from the database
+    datasetRemove(table, dataset.id);
+
+    // remove the DOM element
+    detailDiv.remove();
+  });
+
+  actionDiv.append(deleteButton);
 
   try {
     switch (dataset.source) {
       case "istex":
-        dataPreview = `<strong> ${dataset.name} </strong>
-                <br>Origin: ${dataset.content.type}
-                <br>Total results: ${dataset.content.entries.length} 
-                <br>Upload date: ${dataset.date}`;
-
-        document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
-        // document.getElementById(buttonId).style.display = "block";
-
-        convertButton.dataset.corpusType = dataset.content.type;
-        break;
       case "dimensions":
-        dataPreview = `<strong> ${dataset.name} </strong>
-                <br>Origin: ${dataset.content.type}
-                <br>Total results: ${dataset.content.entries.length} 
-                <br>Upload date: ${dataset.date}`;
-
-        document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
-        // document.getElementById(buttonId).style.display = "block";
-
-        convertButton.dataset.corpusType = dataset.content.type;
-        break;
       case "webofscience":
-        dataPreview = `<strong> ${dataset.name} </strong>
-                <br>Origin: ${dataset.content.type}
-                <br>Query: ${dataset.content.query} 
-                <br>Total results: ${dataset.content.entries.length} 
-                <br>Query date: ${dataset.date}`;
-
-        document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
-        // document.getElementById(buttonId).style.display = "block";
-        document.getElementById("webofscienceGeolocate").style.display =
-          "block";
-        document.getElementById("webofscienceGeolocate").name = dataset.id;
-        //document.getElementById("altmetricRetriever").name = dataset.id;
-        convertButton.dataset.corpusType = dataset.content.type;
-        break;
       case "scopus":
-        dataPreview =
-          "<strong>" +
-          dataset.name +
-          "</strong>" + // dataPreview is the displayed information in the div
-          "<br>Origin: Scopus" +
-          "<br>Query: " +
-          dataset.content.query +
-          "<br>Total results: " +
-          dataset.content.entries.length +
-          "<br>Query date: " +
-          dataset.date;
+        // Standardize to CSL
 
-        document.getElementById(prevId).innerHTML = dataPreview; // Display dataPreview in a div
-        //document.getElementById(buttonId).style.display = "block";
-        document.getElementById("scopusGeolocate").style.display = "block";
-        document.getElementById("scopusGeolocate").name = dataset.id;
-        //document.getElementById("altmetricRetriever").name = dataset.id;
-        convertButton.dataset.corpusType = dataset.content.type;
+        const standardizeCSL = document.createElement("button");
+        standardizeCSL.type = "submit";
+        standardizeCSL.className = "flux-button";
+        standardizeCSL.innerText = "Standardize dataset";
+        standardizeCSL.addEventListener("click", () => {
+          powerValve("standardize", dataset);
+          fluxButtonClicked(standardizeCSL, true, "Dataset standardized");
+        });
+
+        actionDiv.append(standardizeCSL);
+
         break;
-
-      case "enriched":
-        dataPreview = `<strong>${dataset.name} </strong>
-                <br>Origin: ${dataset.content.type}
-                <br>Query: ${dataset.content.query}
-                <br>Total results: ${dataset.content.entries.length}
-                <br>Query date: ${dataset.date}
-                <br>Affiliations geolocated:${dataset.content.articleGeoloc}
-                <br>Altmetric metadata retrieved: ${dataset.content.altmetricEnriched}`;
-
-        document.getElementById(prevId).innerHTML = dataPreview;
-        document.getElementById(buttonId).style.display = "block";
-        const convertButton = document.getElementById("convert-csl");
-        convertButton.style.display = "inline-flex";
-        convertButton.name = dataset.id;
-        convertButton.dataset.corpusType = dataset.content.type;
-        break;
-
-      case "manual":
-      case "csljson":
-        dataPreview =
-          "<strong>" +
-          dataset.name +
-          "</strong><br>Item amount : " +
-          dataset.content.length;
-        document.getElementById(prevId).innerHTML = dataPreview;
-        document.getElementById(prevId).name = dataset.id;
-        document.getElementById(buttonId).style.display = "inline-flex";
+      case "standard":
         break;
 
       case "zotero":
         //refer to explorer-explainer.md
-        /* const typeList = [
-          "timeline",
-          "geolocator",
-          "network",
-          "webArchive",
-          "clinicalTrials",
-          "socialMedia",
-          "hyphe",
-          "parliament",
-        ]; */
 
         const typeList = Object.keys(CM.types.names);
-
-        let subArrayContent = "";
-
-        if (dataset.data.isArray) {
-          dataset.data.forEach((d) => {
-            let subContent =
-              "<tr><td>" +
-              d.name +
-              "</td><td>" +
-              d.items.length +
-              " </td><td>" +
-              d.library.name +
-              "</td></tr>";
-            subArrayContent += subContent;
-          });
-          dataPreview =
-            "<br><strong>" +
-            dataset.name +
-            "</strong><br>" +
-            "Dataset date: " +
-            dataset.date +
-            "<br><br>Arrays contained in the dataset" +
-            "<br><table style='border-collapse: collapse;'><thead><tr style='border:1px solid #141414;'><th>Name</th><th>#</th><th>Origin</th></tr></thead>" +
-            "<tbody>" +
-            subArrayContent +
-            "</tbody></table>";
-        } else {
-          dataPreview =
-            "<br><strong>" +
-            dataset.name +
-            "</strong><br>" +
-            "Dataset date: " +
-            dataset.date +
-            "<br>";
-          "Dataset type: " + dataset.data.type + "<br>";
-        }
-
-        const dataPreviewDiv = document.createElement("div");
-        dataPreviewDiv.style.padding = "5%";
-        dataPreviewDiv.style.width = "40%";
-        dataPreviewDiv.innerHTML = dataPreview;
 
         const optionList = document.createElement("div");
         optionList.style.padding = "5%";
 
         detailDiv.style.display = "flex";
 
-        detailDiv.append(dataPreviewDiv, optionList);
+        actionDiv.append(optionList);
 
         typeList.forEach((dataType) => {
           const systemOption = document.createElement("div");
@@ -314,6 +221,7 @@ const datasetDetail = (detailDiv, dataset) => {
         datasetNameInput.spellcheck = false;
         datasetNameInput.id = "systemToType";
         datasetNameInput.type = "text";
+        datasetNameInput.style.width = "220px";
         datasetNameInput.placeholder = "Enter a dataset name";
         datasetNameInput.value = dataset.name;
 
@@ -332,20 +240,13 @@ const datasetDetail = (detailDiv, dataset) => {
 
         optionList.append(exportOptions);
 
-        //document.getElementById(prevId).name = dataset.id;
-        //document.getElementById(buttonId).style.display = "unset";
-        //document.getElementById(buttonId).style.flex = "auto";
-        //document.getElementById("systemToType").value = dataset.id;
-        //const problematics = document.getElementById("problematics");
-        //problematics.innerHTML = "";
-        //problematics.style.display = "none";
-
         break;
     }
   } catch (error) {
     // If it fails at one point
-    detailDiv.innerHTML = error; // Display error message
+    //detailDiv.innerHTML = error; // Display error message
     window.electron.send("console-logs", error); // Log error
+    throw error;
   }
 };
 

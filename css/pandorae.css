@@ -132,7 +132,7 @@ button:focus {
 ::selection {
   background: #141414;
   color: #fff;
-}
+} 
 
 ::-moz-selection {
   background: #141414;
@@ -461,10 +461,7 @@ h1 {
   word-break: break-word;
 }
 
-li {
-  width: 80%;
-  cursor: pointer;
-}
+
 
 ul {
   list-style-type: square;
@@ -1067,7 +1064,7 @@ z-index: 20;
 }
 
 .fluxDatasetList{
-  padding:1rem;
+  padding: 1rem 0rem 1rem 0rem;
 }
 
 #icons {
@@ -1120,11 +1117,11 @@ display: none;
   display: flex;
     align-items: flex-start;
     flex-direction: row;
-    padding-bottom: 2px;
+    padding: 1px;
 }
 
 .systemOption:hover{
-  border:1px solid black;
+  outline:1px solid black;
 }
 
 .sysDestCheck{
@@ -1182,4 +1179,58 @@ hr{
   background-color: #141414;
 }
 
+
 #selectCascade{position:fixed;z-index:20;padding: 5px;left:5px;top:5px;}
+
+
+.DatasetLine{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: calc(100% - 2rem);
+  }
+
+  .DatasetLineButton{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: calc(100% - 30px);
+    cursor: pointer;
+    }
+
+    .datasetLineColumn{
+      width:30%;
+      text-align: center;
+    }
+
+    .datasetDetail{
+      display: none;
+      padding: 1rem;
+    margin: 1rem;
+    border: 1px dashed #141414;
+    border-radius: 5px;
+    }
+
+    .datasetDetailInformationDiv{
+      width: 50%;
+      padding:3px;
+      border-right: 1px solid #141414;
+    }
+
+    .datasetDetailActionDiv{
+      width: 50%;
+      padding:5px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .datasetDetailActionDiv > * {
+      margin:3px;
+    }
+
+tr {
+      border-top:1px solid #141414;
+    }
+
+    

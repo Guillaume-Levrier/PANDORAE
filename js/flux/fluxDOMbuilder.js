@@ -32,7 +32,7 @@ const addDatasetDisplaySection = (tabData, sectionData, tab) => {
   // div to show the loaded datasets
   const datasetDisplayDiv = document.createElement("div");
   datasetDisplayDiv.className = "fluxDatasetList";
-  datasetDisplayDiv.id = tabData.id + "-datasetDisplay";
+  datasetDisplayDiv.id = sectionData.id + "-datasetDisplay";
 
   // button to click to load the relevant datasets
   const displayAvailableDatasetsButton = document.createElement("button");
@@ -42,7 +42,7 @@ const addDatasetDisplaySection = (tabData, sectionData, tab) => {
 
   const datasetDetailDiv = document.createElement("div");
   datasetDetailDiv.className = "datasetDetail";
-  datasetDetailDiv.id = tabData.id + "-datasetDetail";
+  datasetDetailDiv.id = sectionData.id + "-datasetDetail";
 
   // When the "display available datasets" button is clicked
   displayAvailableDatasetsButton.addEventListener("click", () => {
@@ -343,35 +343,35 @@ const createCascadeTab = (tabData) => {
   tab.append(title, description);
 
   // if this is a tab that lets one display data
+  if (tabData.hasOwnProperty("sections")) {
+    tabData.sections.forEach((section) => {
+      switch (section.type) {
+        case "warningDisclaimer":
+          addWarningDisclaimer(tabData, section.data, tab);
+          break;
+        case "addServiceCredentials":
+          addServiceCredentials(tabData, section.data, tab);
+          break;
 
-  tabData.sections.forEach((section) => {
-    switch (section.type) {
-      case "warningDisclaimer":
-        addWarningDisclaimer(tabData, section.data, tab);
-        break;
-      case "addServiceCredentials":
-        addServiceCredentials(tabData, section.data, tab);
-        break;
+        case "personalInformation":
+          addUserField(tabData, section.data, tab);
+          break;
+        case "tabDatasets":
+          addDatasetDisplaySection(tabData, section.data, tab);
+          break;
 
-      case "personalInformation":
-        addUserField(tabData, section.data, tab);
-        break;
-      case "tabDatasets":
-        addDatasetDisplaySection(tabData, section.data, tab);
-        break;
+        case "loadLocalFlatFile":
+          addLocalFileSection(tabData, section.data, tab);
+          break;
+        case "APIquery":
+          addAPIquerySection(tabData, section.data, tab);
+          break;
 
-      case "loadLocalFlatFile":
-        addLocalFileSection(tabData, section.data, tab);
-        break;
-      case "APIquery":
-        addAPIquerySection(tabData, section.data, tab);
-        break;
-
-      default:
-        break;
-    }
-  });
-
+        default:
+          break;
+      }
+    });
+  }
   // Append section div to flux document body
   document.body.append(tab);
 

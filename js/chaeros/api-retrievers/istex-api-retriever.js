@@ -1,6 +1,6 @@
 import bottleneck from "bottleneck";
 
-import { dataWriter, date } from "../chaeros-to-system";
+import { dataWriter, genDate } from "../chaeros-to-system";
 
 // ========= ISTEX RETRIEVER ==========
 
@@ -78,8 +78,6 @@ const istexRetriever = (query) => {
         );
       }
 
-      console.log(requestList);
-
       requestList.forEach((d) => {
         limiter
           .schedule(() => fetch(d))
@@ -87,6 +85,20 @@ const istexRetriever = (query) => {
           .then((result) => {
             entries = [...entries, ...result.hits];
             if (entries.length === result.total) {
+              const date = genDate();
+              const name = query;
+              const id = `${name}-${date}`;
+              const dataset = {
+                id,
+                source: "istex",
+                date,
+                name,
+                data: entries,
+              };
+
+              dataWriter("flux", dataset);
+
+              window.electron.send("win-destroy", true);
             }
           });
       });

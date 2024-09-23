@@ -9,9 +9,6 @@ const userDataPath = app.getPath("userData");
 // can be either read what theme is applied
 // or set a new one
 const manageTheme = (req) => {
-  console.log(req);
-  console.log(themeData[req.theme]);
-
   const data = readUserIDfile(userDataPath);
   var currentUser = JSON.parse(data);
 
