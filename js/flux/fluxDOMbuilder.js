@@ -247,7 +247,7 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
     serviceContainer.append(librarylist, addLib);
   }
 
-  if (sectionData.hasOwnProperty("apikey")) {
+  if (sectionData.hasOwnProperty("apikey")&&userData.distantServices.hasOwnProperty(sectionData.name)) {
     const label = document.createElement("label");
     label.innerText = `API key : `;
     const apikeyfield = document.createElement("input");

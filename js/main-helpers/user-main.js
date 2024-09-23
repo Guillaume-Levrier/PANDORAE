@@ -14,9 +14,9 @@ const createUserId = (userDataPath) => {
   const userID = {
     UserName: "",
     UserMail: "",
-    ZoteroID: "",
-    theme: { value: "vega" },
-    locale: "EN",
+    theme:  "vega",
+    distantServices:{},
+    localServices:{}  
   };
 
   if (!fs.existsSync(userDataPath + "/PANDORAE-DATA/userID/user-id.json")) {

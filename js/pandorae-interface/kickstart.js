@@ -4,6 +4,8 @@ import { toggleConsole } from "./console";
 //// ========== KICKSTART ========
 
 const menuIcon = document.getElementById("menu-icon");
+const consoleIcon = document.getElementById("console-icon");
+const field = document.getElementById("field");
 
 const openTutorial = (tutoSlide) => {
   if (tutoSlide) {
