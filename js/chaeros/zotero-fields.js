@@ -709,4 +709,6 @@ const zoteroFields = {
   },
 };
 
-export { zoteroFields };
+const createNewDocument = (doctype) => Object.assign({}, zoteroFields[doctype]);
+
+export { zoteroFields, createNewDocument };

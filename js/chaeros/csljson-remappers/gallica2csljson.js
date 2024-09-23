@@ -43,9 +43,7 @@ const dublinCore2csljson = (item) => {
     extra: item["dc:subject"],
     abstractNote: item["dc:description"],
     publisher: item["dc:publisher"],
-
     date: item["dc:date"],
-
     libraryCatalog: item["dc:source"],
     language: item["dc:language"],
     rights: item["dc:rights"],

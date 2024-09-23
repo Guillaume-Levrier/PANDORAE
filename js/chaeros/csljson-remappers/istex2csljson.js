@@ -1,5 +1,26 @@
 // ====== ISTEX CONVERTER ======
 
+import { createNewDocument } from "../zotero-fields";
+
+// The type of article depends on the "genre" listed in an ISTEX item.
+// The list of genres is available here https://doc.istex.fr/tdm/annexes/publication-type.html
+
+const istexDoctypeMatch = {
+  book: "book",
+  other: "document",
+};
+
+const istexConverter = (data) => {
+  const converted = [];
+
+  // create a new document for each data element.
+  data.forEach((doc) => {});
+
+  console.log(converted);
+
+  return converted;
+};
+
 const istexCSLconverter = (dataset, source, normalize, email) => {
   const istexToZoteroCSL = (item) => {
     const article = {
@@ -128,4 +149,4 @@ const istexCSLconverter = (dataset, source, normalize, email) => {
   });
 };
 
-export { istexCSLconverter };
+export { istexConverter };

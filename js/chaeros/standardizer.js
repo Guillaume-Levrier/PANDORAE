@@ -12,12 +12,19 @@
 // table.
 //
 
-import { zoteroFields } from "./zotero-fields";
-
-const createNewDocument = (doctype) => Object.assign({}, zoteroFields[doctype]);
+import { istexConverter } from "./csljson-remappers/istex2csljson";
 
 const standardizeDataset = (dataset) => {
   console.log(dataset);
+
+  switch (dataset.source) {
+    case "istex":
+      istexConverter(dataset.data);
+      break;
+
+    default:
+      break;
+  }
 };
 
 export { standardizeDataset };
