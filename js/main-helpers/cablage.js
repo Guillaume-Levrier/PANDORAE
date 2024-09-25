@@ -18,7 +18,12 @@ import {
   removeLocalService,
 } from "./network-main";
 import { manageTheme } from "./theme-main";
-import { getUserDetails, getUserStatus, manageUserKeys } from "./user-main";
+import {
+  getUserDetails,
+  getUserStatus,
+  manageUserKeys,
+  writeUserIDfile,
+} from "./user-main";
 import {
   bioRxivManager,
   databaseManagerWindow,
@@ -67,6 +72,10 @@ const activateMainListeners = () => {
   ipcMain.on("theme", (event, req) => manageTheme(req));
 
   ipcMain.on("keyManager", (event, request) => manageUserKeys(event, request));
+
+  // change user info
+
+  ipcMain.on("changeUser", (event, request) => writeUserIDfile(request));
 
   // ==== DB ====
 

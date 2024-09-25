@@ -33,7 +33,7 @@ const kickStart = (user) => {
     document.getElementById("menu-icon").style.cursor = "pointer";
     document.getElementById("option-icon").style.cursor = "pointer";
     document.getElementById("version").innerHTML =
-      user.UserName.toUpperCase() + " | " + version;
+      user.UserName.toUpperCase() + " | " + "v2 beta";
   }
 };
 

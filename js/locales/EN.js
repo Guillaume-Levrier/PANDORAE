@@ -135,7 +135,11 @@ const EN = {
               },
               libraries: [],
               apikey: "",
+              proximity: "distant",
             },
+          },
+          {
+            type: "saveUserConfigs",
           },
         ],
       },

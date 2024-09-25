@@ -2,7 +2,7 @@ import { fluxButtonClicked } from "./actionbuttons";
 import { fluxSwitch } from "./buttons";
 import { datasetDisplay } from "./dataset";
 import { serviceTester } from "./service-tester";
-import { userData } from "./userdata";
+import { updateUserData, userData } from "./userdata";
 
 const userDataPath = window.electron.userDataPath;
 
@@ -150,7 +150,6 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
 };
 
 const addUserField = (tabData, sectionData, tab) => {
-  console.log(userData);
   const userFieldContainer = document.createElement("div");
   userFieldContainer.className = "credential";
 
@@ -176,6 +175,8 @@ const addUserField = (tabData, sectionData, tab) => {
 };
 
 const addServiceCredentials = (tabData, sectionData, tab) => {
+  console.log(sectionData);
+
   const serviceContainer = document.createElement("div");
   serviceContainer.style = "padding:0.5rem";
   const title = document.createElement("div");
@@ -191,7 +192,6 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
     const helper = document.createElement("div");
     helper.innerHTML = sectionData.helper.text;
     helper.className = "helperBox";
-    console.log(sectionData.helper.url);
     helper.addEventListener("click", () =>
       window.electron.send("openEx", sectionData.helper.url)
     );
@@ -220,12 +220,18 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
       label.innerText = `Library ${count} : `;
 
       const libraryfield = document.createElement("input");
-      libraryfield.className = "zoteroLibraryField fluxInput";
+      libraryfield.className = "zoteroLibraryField fluxInput fluxServiceInput";
       libraryfield.type = "text";
       libraryfield.placeholder = "0000000"; //5361175
       libraryfield.spellcheck = false;
       libraryfield.id = libID ? libID : sectionData.name + count + "-Library";
       libraryfield.value = libID ? libID : "";
+
+      //adding attributes to populate user data easily;
+      libraryfield.setAttribute("data-proximity", sectionData.proximity);
+      libraryfield.setAttribute("data-service-name", sectionData.name);
+      libraryfield.setAttribute("data-field-type", "array");
+      libraryfield.setAttribute("data-field-name", "libraries");
 
       libraryfieldContainer.append(label, libraryfield);
       librarylist.append(libraryfieldContainer);
@@ -247,17 +253,26 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
     serviceContainer.append(librarylist, addLib);
   }
 
-  if (sectionData.hasOwnProperty("apikey")&&userData.distantServices.hasOwnProperty(sectionData.name)) {
+  if (
+    sectionData.hasOwnProperty("apikey") &&
+    userData.distantServices.hasOwnProperty(sectionData.name)
+  ) {
     const label = document.createElement("label");
     label.innerText = `API key : `;
     const apikeyfield = document.createElement("input");
     apikeyfield.style = "font-size;12px;width:auto;margin-top:15px;";
     apikeyfield.type = "password";
-    apikeyfield.className = "fluxInput";
+    apikeyfield.className = "fluxInput fluxServiceInput";
     apikeyfield.placeholder =
       "Paste your " + sectionData.name + " API key here";
     apikeyfield.spellcheck = false;
     apikeyfield.id = sectionData.name + "-APIkey";
+
+    apikeyfield.setAttribute("data-proximity", sectionData.proximity);
+    apikeyfield.setAttribute("data-service-name", sectionData.name);
+    apikeyfield.setAttribute("data-field-type", "string");
+    apikeyfield.setAttribute("data-field-name", "apikey");
+
     const apikey = userData.distantServices[sectionData.name].apikey;
     apikeyfield.value = apikey ? apikey : 0;
     serviceContainer.append(label, apikeyfield);
@@ -316,6 +331,82 @@ const addWarningDisclaimer = (tabData, sectionData, tab) => {
   tab.append(tabSection);
 };
 
+const saveUserConfigs = (tabData, sectionData, tab) => {
+  const user = Object.assign({}, userData);
+
+  // reset user service config
+  user.distantServices = {};
+  user.localServices = {};
+
+  const updateFields = () => {
+    // credentials
+    const credentials = tab.querySelectorAll("div.credential > input");
+
+    for (let i = 0; i < credentials.length; i++) {
+      const element = credentials[i];
+      const property = element.id.replace("Input", "");
+      user[property] = element.value;
+    }
+
+    // for all service input field
+    const serviceInput = tab.querySelectorAll("input.fluxServiceInput");
+
+    for (let i = 0; i < serviceInput.length; i++) {
+      const input = serviceInput[i];
+
+      // check if it is expected to be a local or distant service
+      // (network wise, relative to this pandorae instance)
+      const proximity = input.dataset.proximity + "Services";
+
+      // name of the given service
+      const serviceName = input.dataset.serviceName;
+
+      // if it doesn't exist in the user data file, create the object
+      if (!user[proximity].hasOwnProperty(serviceName)) {
+        user[proximity][serviceName] = {};
+      }
+
+      // now point to this service
+      const service = user[proximity][serviceName];
+
+      // depending if we are looking for a single value or array
+      switch (input.dataset.fieldType) {
+        case "string":
+          service[input.dataset.fieldName] = input.value;
+          break;
+
+        case "array":
+          if (!service.hasOwnProperty(input.dataset.fieldName)) {
+            service[input.dataset.fieldName] = [];
+          }
+
+          service[input.dataset.fieldName].push(input.value);
+
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    // services
+  };
+
+  const updateUserButton = document.createElement("button");
+  updateUserButton.type = "submit";
+  updateUserButton.className = "flux-button";
+  updateUserButton.innerText = "Save user information";
+
+  updateUserButton.addEventListener("click", () => {
+    updateFields();
+
+    updateUserData(user);
+    fluxButtonClicked(updateUserButton, "disabled", "User updated");
+  });
+
+  tab.append(genHr(), updateUserButton);
+};
+
 // A tab is only created when it is first called.
 var previousTab = false;
 var removePreviousTab = () => (previousTab ? previousTab.remove() : false);
@@ -367,6 +458,10 @@ const createCascadeTab = (tabData) => {
           addAPIquerySection(tabData, section.data, tab);
           break;
 
+        case "saveUserConfigs":
+          saveUserConfigs(tabData, section.data, tab);
+          break;
+
         default:
           break;
       }
@@ -381,3 +476,26 @@ const createCascadeTab = (tabData) => {
 };
 
 export { createCascadeTab };
+
+/* 
+{
+  "UserName": "Guillaume Levrier",
+  "UserMail": "guillaume.levrier@politique.science",
+  "theme": "vega",
+  "locale": "EN",
+  "distantServices": {
+    "zotero": {
+      "libraries": ["2301232", "5361175"],
+      "apikey": "SooWRxlCaT4wJPmK5i8sdaXF"
+    }
+  },
+  "localServices": {
+    "DLWEB-ARCH": {
+      "url": "172.20.64.101",
+      "port": "80",
+      "type": "BNF-SOLR",
+      "arkViewer": "http://archivesinternet.bnf.fr"
+    }
+  }
+}
+ */

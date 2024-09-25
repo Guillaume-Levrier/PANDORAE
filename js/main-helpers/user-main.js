@@ -14,9 +14,9 @@ const createUserId = (userDataPath) => {
   const userID = {
     UserName: "",
     UserMail: "",
-    theme:  "vega",
-    distantServices:{},
-    localServices:{}  
+    theme: "vega",
+    distantServices: {},
+    localServices: {},
   };
 
   if (!fs.existsSync(userDataPath + "/PANDORAE-DATA/userID/user-id.json")) {
@@ -24,7 +24,7 @@ const createUserId = (userDataPath) => {
   }
 };
 
-const writeUserIDfile = (userDataPath, userID) =>
+const writeUserIDfile = (userID) =>
   fs.writeFileSync(
     userDataPath + "/PANDORAE-DATA/userID/user-id.json",
     JSON.stringify(userID),
