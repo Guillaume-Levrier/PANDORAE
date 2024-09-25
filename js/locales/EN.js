@@ -133,8 +133,9 @@ const EN = {
                 text: `The process of creating Zotero groups and interfacing these with PANDORAE is detailed on <strong>pandorae.politique.science</strong>, the software's community help forum. Click on this box to open the relevant page in your browser.`,
                 url: "https://pandorae.politique.science",
               },
-              libraries: [],
-              apikey: "",
+              fields: {
+                libraries: [],
+                apikey: "",},
               proximity: "distant",
             },
           },

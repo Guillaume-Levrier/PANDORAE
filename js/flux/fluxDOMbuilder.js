@@ -198,7 +198,7 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
     serviceContainer.append(helper);
   }
 
-  if (sectionData.hasOwnProperty("libraries")) {
+  if (sectionData.fields.hasOwnProperty("libraries")) {
     let count = 1;
     const librarylist = document.createElement("div");
     librarylist.style = "margin-top:1rem";
@@ -254,7 +254,7 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
   }
 
   if (
-    sectionData.hasOwnProperty("apikey") &&
+    sectionData.fields.hasOwnProperty("apikey") &&
     userData.distantServices.hasOwnProperty(sectionData.name)
   ) {
     const label = document.createElement("label");

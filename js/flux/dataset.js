@@ -193,6 +193,7 @@ const datasetDetail = (detailDiv, dataset) => {
         const typeList = Object.keys(CM.types.names);
 
         const optionList = document.createElement("div");
+        optionList.innerHTML=`<div style="text-decoration: underline;">Select at least one relevant <span style="font-family:monospace;">TYPE</span> explorer below:</div><br>` 
         optionList.style.padding = "5%";
 
         detailDiv.style.display = "flex";
@@ -214,6 +215,7 @@ const datasetDetail = (detailDiv, dataset) => {
         });
 
         const exportOptions = document.createElement("div");
+        
         exportOptions.style = "display:flex;margin-top:1rem;";
 
         const datasetNameInput = document.createElement("input");
