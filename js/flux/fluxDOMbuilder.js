@@ -477,25 +477,3 @@ const createCascadeTab = (tabData) => {
 
 export { createCascadeTab };
 
-/* 
-{
-  "UserName": "Guillaume Levrier",
-  "UserMail": "guillaume.levrier@politique.science",
-  "theme": "vega",
-  "locale": "EN",
-  "distantServices": {
-    "zotero": {
-      "libraries": ["2301232", "5361175"],
-      "apikey": "SooWRxlCaT4wJPmK5i8sdaXF"
-    }
-  },
-  "localServices": {
-    "DLWEB-ARCH": {
-      "url": "172.20.64.101",
-      "port": "80",
-      "type": "BNF-SOLR",
-      "arkViewer": "http://archivesinternet.bnf.fr"
-    }
-  }
-}
- */
