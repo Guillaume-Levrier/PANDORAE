@@ -31,6 +31,7 @@ const availableServicesLookup = () => {
 };
 
 async function addLocalService(message) {
+  console.log(message)
   const loc = message.serviceLocation.split(":");
   dns.lookupService(loc[0], loc[1], (err, hostname, service) => {
     if (hostname || service) {

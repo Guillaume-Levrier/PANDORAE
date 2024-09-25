@@ -55,8 +55,11 @@ const getUserStatus = (req) => {
     if (currentUser.hasOwnProperty("localServices")) {
       for (const service in currentUser.localServices) {
         const d = currentUser.localServices[service];
-
-        dns.lookupService(d.url, d.port, (err, hostname, service) => {
+       
+        const location =d.url.split(":")
+        dns.lookupService(location[0], location[1], (err, hostname, service) => {
+          console.log(hostname)
+          console.log(service)
           if (hostname || service) {
             d.valid = true;
           } else {

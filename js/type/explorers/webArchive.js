@@ -48,23 +48,28 @@ const webArchive = (datajson) => {
   window.electron
     .invoke("checkflux", true)
     .then((result) => {
+
+      console.log(result)
+
       availability = JSON.parse(result);
+
+      console.log(availability)
 
       for (const service in availability.dnsLocalServiceList) {
         switch (availability.dnsLocalServiceList[service].type) {
           case "BNF-SOLR":
             resolver =
-              availability.dnsLocalServiceList[service].url +
-              ":" +
-              availability.dnsLocalServiceList[service].port;
+              availability.dnsLocalServiceList[service].url 
 
             arkViewer = availability.dnsLocalServiceList[service].arkViewer;
 
             break;
         }
       }
-    })
-    .then(() => {
+    
+      console.log(resolver)
+      console.log(arkViewer)
+
       // size is probably not good as such, to be updated
 
       let ma = 4;
