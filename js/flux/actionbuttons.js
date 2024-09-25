@@ -23,6 +23,10 @@ const fluxButtonClicked = (buttonElement, aftermath, buttonText) => {
       buttonElement.disabled = true;
       buttonElement.style.cursor = "not-allowed";
 
+    case "destroy":
+      buttonElement.remove();
+      break;
+
     default:
       break;
   }
