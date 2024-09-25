@@ -139,6 +139,9 @@ const EN = {
               proximity: "distant",
             },
           },
+            {
+            type: "newServiceForm"
+            }, 
           {
             type: "saveUserConfigs",
           },

@@ -1,8 +1,9 @@
 //========== Tracegraph ==========
 import * as d3 from "d3";
 import * as tg from "@hownetworks/tracegraph";
-import { createCascadeTab } from "./fluxDOMbuilder";
+
 import { CM } from "../locales/locales";
+import { createCascadeTab } from "./DOMbuilder/fluxDOMbuilder";
 
 const addHop = (steparr, traces) => {
   const hops = {

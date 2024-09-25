@@ -1,8 +1,8 @@
-import { fluxButtonClicked } from "./actionbuttons";
-import { fluxSwitch } from "./buttons";
-import { datasetDisplay } from "./dataset";
-import { serviceTester } from "./service-tester";
-import { updateUserData, userData } from "./userdata";
+import { fluxButtonClicked } from "../actionbuttons";
+import { fluxSwitch } from "../buttons";
+import { datasetDisplay } from "../dataset";
+import { serviceTester } from "../service-tester";
+import { updateUserData, userData } from "../userdata";
 
 const userDataPath = window.electron.userDataPath;
 
@@ -175,7 +175,7 @@ const addUserField = (tabData, sectionData, tab) => {
 };
 
 const addServiceCredentials = (tabData, sectionData, tab) => {
-  console.log(sectionData);
+  
 
   const serviceContainer = document.createElement("div");
   serviceContainer.style = "padding:0.5rem";
