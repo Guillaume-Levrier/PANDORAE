@@ -303,4 +303,20 @@ const multiFormat = (date) =>
     ? formatMonth
     : formatYear)(date);
 
-export { loadType, width, height, toolWidth };
+const zoomToNode = (node, svg, zoom, width, height) => {
+  const x = parseInt(node.getAttribute("cx"));
+  const y = parseInt(node.getAttribute("cy"));
+
+  svg
+    .transition()
+    .duration(1000)
+    .call(
+      zoom.transform,
+      d3.zoomIdentity
+        .translate(width * 0.36, height / 2)
+        .scale(2)
+        .translate(-x, -y)
+    );
+};
+
+export { loadType, width, height, toolWidth, zoomToNode };

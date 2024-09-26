@@ -1,11 +1,16 @@
 import * as d3 from "d3";
-import { width, height, toolWidth, loadType } from "../type-common-functions";
+import {
+  width,
+  height,
+  toolWidth,
+  loadType,
+  zoomToNode,
+} from "../type-common-functions";
 import { dataDownload } from "../data-manager-type";
+import { displayDatasetBasicInfo } from "../tooltip";
 
 // ========= webArchive =========
 const webArchive = (datajson) => {
-  console.log(datajson);
-
   // When called, draw the webArchive
 
   var availability;
@@ -15,7 +20,7 @@ const webArchive = (datajson) => {
 
   svg.attr("width", width).attr("height", height); // Attributing width and height to svg
 
-  const zoom = d3.zoom();
+  const zoom = d3.zoom().on("zoom", zoomed);
 
   const bgrect = svg
     .append("rect")
@@ -36,39 +41,24 @@ const webArchive = (datajson) => {
       [-Infinity, -Infinity],
       [Infinity, Infinity],
     ]);
-  /* .on("zoom", ({ transform }, d) => {
-        zoomed(transform);
-      }); */
-
-  var criteriaList = [];
-  var currentCriteria = [];
 
   let resolver, arkViewer;
 
   window.electron
     .invoke("checkflux", true)
     .then((result) => {
-
-      console.log(result)
-
       availability = JSON.parse(result);
-
-      console.log(availability)
 
       for (const service in availability.dnsLocalServiceList) {
         switch (availability.dnsLocalServiceList[service].type) {
           case "BNF-SOLR":
-            resolver =
-              availability.dnsLocalServiceList[service].url 
+            resolver = availability.dnsLocalServiceList[service].url;
 
             arkViewer = availability.dnsLocalServiceList[service].arkViewer;
 
             break;
         }
       }
-    
-      console.log(resolver)
-      console.log(arkViewer)
 
       // size is probably not good as such, to be updated
 
@@ -123,7 +113,6 @@ const webArchive = (datajson) => {
         const coreURL = d.URL.replace(arkViewer, "");
 
         const parsedURL = new URL(coreURL.substring(coreURL.indexOf("http")));
-        // console.log(id)
 
         const id = parsedURL.href;
 
@@ -147,7 +136,7 @@ const webArchive = (datajson) => {
         if (!domainMap.hasOwnProperty(domain)) {
           // A domain node doesn't exist in the dataset, it is just a way to group
           // all page captures together, by binding them to their host
-          //console.log(domain)
+
           nodeData.push({
             id: domain,
             name: domain,
@@ -708,33 +697,12 @@ const webArchive = (datajson) => {
             host.innerText = "- " + d;
             host.className = "flux-button";
             host.style = "padding:0px;padding-left:3px;margin-top:3px;";
+
             host.addEventListener("click", () => {
               const domainNode = node
                 .filter((n, i) => n.type === "domain" && n.id === d)
                 .node();
-
-              /* 
-  
-  // for now this is not going to be a thing
-  // PANDORAE needs an electron version upgrade
-  // and a dev env upgrade as well (using webpack)
-  // which will enable using ESM & hence d3 v7
-  
-                console.log(domainNode);
-  
-                console.log(d3);
-                console.log(d3.ZoomTransform);
-                console.log(ZoomTransform);
-  
-                const transform = new d3.ZoomTransform( // only in d3 V7
-                  1,
-                  parseInt(domainNode.getAttribute("cx") - width / 2),
-                  parseInt(domainNode.getAttribute("cy") - height / 2)
-                );
-  
-                console.log(transform);
-  
-                zoomed(transform, 750); */
+              zoomToNode(domainNode, svg, zoom, width, height, 0, 0);
             });
 
             div.append(host);
@@ -1178,7 +1146,6 @@ const webArchive = (datajson) => {
                 if (documentMap.hasOwnProperty(d.id)) {
                   targetCollection =
                     documentMap[d.id].enrichment.solrCollection;
-                  console.log(documentMap[d.id]);
                 }
 
                 if (targetCollection) {
@@ -1377,7 +1344,7 @@ const webArchive = (datajson) => {
       createLegend();
 
       loadType();
-
+      displayDatasetBasicInfo(datajson);
       document.getElementById("tooltip").append(toolContent);
 
       webArchiveSelectionMenu();
@@ -1392,29 +1359,12 @@ const webArchive = (datajson) => {
     });
 
   //======== ZOOM & RESCALE ===========
-  //svg.call(zoom).on("dblclick.zoom", null);
-  /* 
-    zoomed = (thatZoom, transTime) => {
-      if (transTime) {
-        view.transition().duration(transTime).attr("transform", thatZoom);
-      } else {
-        view.attr("transform", thatZoom);
-      }
-    }; */
 
-  svg.call(zoom.on("zoom", (d) => zoomed(d.transform)));
+  svg.call(zoom);
 
-  function zoomed(transform, time) {
-    //console.log(transform);
-    //console.log(time);
-    if (time) {
-      view.transition().duration(time).attr("transform", transform);
-    } else {
-      view.attr("transform", transform);
-    }
+  function zoomed({ transform }) {
+    view.attr("transform", transform);
   }
-
-  //window.electron.send("console-logs", "Starting webArchive");
 };
 
 export { webArchive };

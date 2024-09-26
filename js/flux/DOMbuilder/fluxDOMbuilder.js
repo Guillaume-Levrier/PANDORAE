@@ -16,7 +16,6 @@ import {
   newServiceFormBuilder,
   saveUserConfigs,
 } from "./flux-DOM-user";
-import { serviceModels } from "./service-models";
 
 // A tab is only created when it is first called.
 var previousTab = false;
@@ -65,7 +64,7 @@ const createCascadeTab = (tabData) => {
         type: "addServiceCredentials",
         data: {
           name: service,
-          description: serviceModels[service].description,
+          description: CM.flux.serviceModels[service].description,
           fields: s,
           proximity: "distant",
         },

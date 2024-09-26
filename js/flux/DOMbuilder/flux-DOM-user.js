@@ -2,7 +2,7 @@ import { updateUserData, userData } from "../userdata";
 import { fluxButtonClicked } from "../actionbuttons";
 import { serviceTester } from "../service-tester";
 import { genHr } from "./flux-DOM-common";
-import { serviceModels } from "./service-models";
+import { CM } from "../../locales/locales";
 
 // ===== Flux User DOM button ====
 //
@@ -302,7 +302,7 @@ const newServiceFormBuilder = (tab) => {
 
     thisServiceDOM = [];
 
-    serviceModels[selectServiceType.value].fields.forEach((d) => {
+    CM.flux.serviceModels[selectServiceType.value].fields.forEach((d) => {
       const fieldContainer = document.createElement("div");
       fieldContainer.className = "fluxInputContainer";
 
@@ -341,7 +341,7 @@ const newServiceFormBuilder = (tab) => {
 
   selectServiceType.append(neutral.cloneNode());
 
-  for (const model in serviceModels) {
+  for (const model in CM.flux.serviceModels) {
     const option = document.createElement("option");
     option.innerText = model;
     option.value = model;

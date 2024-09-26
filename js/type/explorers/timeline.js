@@ -1,11 +1,18 @@
 import * as d3 from "d3";
-import { width, height, toolWidth, loadType } from "../type-common-functions";
+import {
+  width,
+  height,
+  toolWidth,
+  loadType,
+  zoomToNode,
+} from "../type-common-functions";
 
 import { dataDownload } from "../data-manager-type";
 import { parseTime } from "../time-management";
 import { iconCreator } from "../../pandorae-interface/icon";
+import { displayDatasetBasicInfo } from "../tooltip";
 
-var zoomed, _originalBrushData;
+var _originalBrushData;
 
 // ========== CHRONOTYPE ==========
 const timeline = (datajson) => {
@@ -16,49 +23,24 @@ const timeline = (datajson) => {
   //========== SVG VIEW =============
   var svg = d3.select(xtype).append("svg").attr("id", "xtypeSVG");
 
-  const zoom = d3.zoom();
+  const zoom = d3.zoom().on("zoom", zoomed);
 
-  svg
-    .attr("width", width - toolWidth)
-    .attr("height", height) // Attributing width and height to svg
-    .attr("viewBox", [
-      -(width - toolWidth) / 2,
-      -height / 2,
-      width - toolWidth,
-      height,
-    ]);
+  svg.attr("width", width).attr("height", height);
 
   var view = svg
     .append("g") // Appending a group to SVG
     .attr("id", "view"); // CSS viewfinder properties
 
   zoom
-    .scaleExtent([0.1, 20]) // Extent to which one can zoom in or out
+    .scaleExtent([-Infinity, Infinity]) // Extent to which one can zoom in or out
     .translateExtent([
       [-Infinity, -Infinity],
       [Infinity, Infinity],
-    ]) // Extent to which one can go up/down/left/right
-    .on("zoom", ({ transform }, e) => {
-      zoomed(transform);
-    });
+    ]); // Extent to which one can go up/down/left/right
 
   var innerRadius = height / 3.5;
   var outerRadius = height / 2.25;
   var brushing;
-  //============ RESET ============
-  d3.select("#reset").on("click", resetted); // Clicking the button "reset" triggers the "resetted" function
-
-  function resetted() {
-    // Going back to origin position function
-    d3.select("#xtypeSVG") // Selecting the relevant svg element in webpage
-      .transition()
-      .duration(2000) // Resetting takes some time
-      .call(zoom.transform, d3.zoomIdentity); // Using "zoomIdentity", go back to initial position
-    window.electron.send(
-      "console-logs",
-      "Resetting chronotype to initial position."
-    ); // Send message in the "console"
-  }
 
   //========== X & Y  ============
   var x = d3.scaleUtc().range([0, 2 * Math.PI]);
@@ -105,10 +87,6 @@ const timeline = (datajson) => {
       "#c56883",
       "#a68199",
     ]);
-
-  // Doc detail can be dependent on document type, as some metadata can only be available
-  // within local, protected networks.
-  const docDetailSet = new Set();
 
   const displayDoc = (d) => {
     tooltip.innerHTML = ""; // purge tooltip
@@ -907,6 +885,11 @@ const timeline = (datajson) => {
         docTitle.addEventListener("mouseover", (e) => {
           node.style("opacity", ".2");
           document.getElementById("node" + d.id).style.opacity = 1;
+
+          const domainNode = document.getElementById("node" + d.id);
+
+          zoomToNode(domainNode, svg, zoom, width, height);
+
           d3.selectAll("line").style("opacity", 0.1);
           links.forEach((link) => {
             if (link.source.id === d.id) {
@@ -1241,19 +1224,13 @@ const timeline = (datajson) => {
   );
 
   loadType();
-  /* })
-    .catch((error) => {
-      field.value = "error - invalid dataset";
-      window.electron.send(
-        "console-logs",
-        "Chronotype error: dataset " + id + " is invalid."
-      );
-      console.log(error);
-    }); */
+  displayDatasetBasicInfo(datajson);
+
   //======== END OF DATA CALL (PROMISES) ===========
 
   //======== ZOOM & RESCALE ===========
-  let dragger = svg
+
+  const dragger = svg
     .append("rect")
     .attr("x", -width)
     .attr("y", -height)
@@ -1264,13 +1241,10 @@ const timeline = (datajson) => {
     .lower();
 
   dragger.call(zoom).on("dblclick.zoom", null); // Zoom and deactivate doubleclick zooming
-  //.on("mousedown.zoom", d=>{if(brushing){return null}})
 
-  zoomed = (thatZoom) => {
-    //thatZoom.x=0;
-    //thatZoom.y=0,
-    view.attr("transform", thatZoom);
-  };
+  function zoomed({ transform }) {
+    view.attr("transform", transform);
+  }
 
   window.electron.send("console-logs", "Starting chronotype"); // Starting Chronotype
 }; // Close Chronotype function

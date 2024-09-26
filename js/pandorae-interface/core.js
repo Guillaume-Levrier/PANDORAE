@@ -1,7 +1,7 @@
 import * as d3 from "d3";
+import { createTooltip, removeTooltip } from "../type/tooltip";
 
 // ========== CORE ACTIONS ===========
-import { createTooltip } from "../pandorae-interface/tooltip";
 
 var coreExists = true; // core does exist on document load
 const setCoreExists = (n) => (coreExists = n);

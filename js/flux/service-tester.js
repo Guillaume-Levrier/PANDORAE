@@ -22,11 +22,6 @@ const testingZotero = (inputs) => {
     fetch(url)
       .then((r) => r.json())
       .then((r) => {
-        console.log(parseInt(r[0].library.id));
-        console.log(console.log(d));
-
-        console.log(document.getElementById(d));
-
         if (parseInt(d) === parseInt(r[0].library.id)) {
           document.getElementById(d).previousSibling.innerText =
             r[0].library.name + " (connected)";
@@ -39,12 +34,39 @@ const testingZotero = (inputs) => {
   });
 };
 
+const testingWebArchive = (inputs) => {
+  var url, label;
+
+  for (let i = 0; i < inputs.length; i++) {
+    const input = inputs[i];
+
+    switch (input.dataset.fieldName) {
+      case "url":
+        url = input.value;
+        label = input.previousSibling;
+        break;
+    }
+  }
+
+  fetch(`http://${url}/solr/`)
+    .then((r) => {
+      console.log(r);
+    })
+    .catch((error) => {
+      label.innerText = "url (failed) :";
+      label.style.color = "red";
+      throw error;
+    });
+};
+
 const serviceTester = (service, serviceData) => {
-  console.log(service);
-  console.log(serviceData);
   switch (service) {
     case "zotero":
       testingZotero(serviceData);
+      break;
+
+    case "Web Archive":
+      testingWebArchive(serviceData);
       break;
 
     default:

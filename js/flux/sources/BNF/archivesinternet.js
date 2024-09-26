@@ -190,8 +190,6 @@ const queryBnFSolr = (but) => {
       query =
         "http://" +
         but.args.url +
-        ":" +
-        but.args.port +
         "/solr/" +
         selectedCollection +
         "/select?facet.field=crawl_year&facet=on" +
