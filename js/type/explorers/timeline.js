@@ -1250,6 +1250,8 @@ const timeline = (datajson) => {
     view.attr("transform", transform);
   }
 
+  view.attr("transform", `translate(${width / 3},${height / 2}) scale(1)`);
+
   window.electron.send("console-logs", "Starting chronotype"); // Starting Chronotype
 }; // Close Chronotype function
 

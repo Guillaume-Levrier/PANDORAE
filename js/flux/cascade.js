@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 import { addHop, drawFlux } from "./tracegraph";
 import { buttonList, fluxSwitch } from "./buttons";
+import { userData } from "./userdata";
 
 const createCascadeSelectors = (availableCategories) => {
   const selectCascadeDiv = document.createElement("div");
@@ -17,9 +18,9 @@ const createCascadeSelectors = (availableCategories) => {
     const categoryDiv = document.createElement("div");
 
     const categoryInput = document.createElement("input");
-    categoryInput.type = "checkbox";
+    categoryInput.type = "radio";
     categoryInput.id = `${category}Select`;
-    categoryInput.name = category;
+    categoryInput.name = "categorySelector";
     categoryInput.checked = false;
 
     const categoryLabel = document.createElement("label");
@@ -28,8 +29,11 @@ const createCascadeSelectors = (availableCategories) => {
     categoryLabel.innerText = category;
 
     categoryInput.addEventListener("change", () => {
-      currentSelection[category] = categoryInput.checked;
-      console.log(currentSelection);
+      for (const cat in currentSelection) {
+        currentSelection[cat] = 0;
+      }
+      currentSelection[category] = true;
+
       updateCascade(currentSelection);
     });
 
@@ -73,19 +77,25 @@ function updateCascade(selections) {
 
         //Hops switch
         switch (d.name) {
-          /* case "Gallica":
-          if (selections.digitalLibrariesSelect) {
-            addHop(["OPEN", "GALLICA", "ZOTERO"], traces);
-          }
-          break; */
+          case "Gallica":
+            if (selections.libraries) {
+              addHop(["GALLICA", "ZOTERO"], traces);
+            }
+            break;
           case "Scopus":
-            if (selections.scientometrics) {
+            if (
+              selections.scientometrics &&
+              userData.distantServices.hasOwnProperty("scopus")
+            ) {
               addHop(["USER", "SCOPUS", "STANDARDIZE"], traces);
             }
             break;
 
           case "Web Of Science":
-            if (selections.scientometrics) {
+            if (
+              selections.scientometrics &
+              userData.distantServices.hasOwnProperty("web of science")
+            ) {
               addHop(["USER", "WEBㅤOFㅤSCIENCE", "STANDARDIZE"], traces);
             }
             break;
@@ -96,20 +106,18 @@ function updateCascade(selections) {
             }
             break;
 
-          /* 
-        case "Clinical Trials":
-          if (selections.clinicalTrialsSelect) {
-            addHop([ d "CLINICALㅤTRIALS", "SYSTEM"], traces);
-          }
-          break;
+          case "Clinical Trials":
+            if (selections.clinicalTrialsSelect) {
+              addHop(["CLINICALㅤTRIALS", "SYSTEM"], traces);
+            }
+            break;
 
-        case "Regards Citoyens":
-          if (selections.parliamentsSelect) {
-            addHop(["OPEN", "REGARDSCITOYENS", "STANDARDIZE"], traces);
-          }
-          break;
+          case "Regards Citoyens":
+            if (selections.parliaments) {
+              addHop(["REGARDSCITOYENS", "STANDARDIZE"], traces);
+            }
+            break;
 
-*/
           case "ISTEX":
             if (selections.scientometrics) {
               addHop(["ISTEX", "STANDARDIZE"], traces);
@@ -117,7 +125,10 @@ function updateCascade(selections) {
             break;
 
           case "Dimensions":
-            if (selections.scientometrics) {
+            if (
+              selections.scientometrics &&
+              userData.distantServices.hasOwnProperty("dimensions")
+            ) {
               addHop(["USER", "DIMENSIONS", "STANDARDIZE"], traces);
             }
             break;
@@ -192,8 +203,20 @@ const retrieveAvailableServices = () =>
     Object.values(availability.dnslist).forEach((service) => {
       if (service.valid) {
         switch (service.name) {
+          case "Dimensions":
+          case "Web Of Science":
+          case "BIORXIV":
+          case "Scopus":
           case "ISTEX":
             availableCategories.add("scientometrics");
+            break;
+
+          case "Regards Citoyens":
+            availableCategories.add("parliaments");
+            break;
+
+          case "Gallica":
+            availableCategories.add("libraries");
             break;
 
           default:
