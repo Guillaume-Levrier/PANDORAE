@@ -15,8 +15,6 @@
 import { istexConverter } from "./csljson-remappers/istex2csljson";
 
 const standardizeDataset = (dataset) => {
-  console.log(dataset);
-
   switch (dataset.source) {
     case "istex":
       istexConverter(dataset.data);

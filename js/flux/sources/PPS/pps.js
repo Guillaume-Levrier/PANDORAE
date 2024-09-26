@@ -38,8 +38,6 @@ const checkPPS = () => {
 
   var count = 0;
 
-  //window.electron.invoke("getPPS", true).then((res) => console.log(res));
-
   pandodb.system
     .get(id)
     .then((data) => {

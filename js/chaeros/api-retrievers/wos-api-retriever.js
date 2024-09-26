@@ -113,8 +113,6 @@ const wosFullRetriever = (user, wosReq) => {
             }
           });
       });
-      //const documents = res.Data.Records.records.REC;
-      //      console.log(JSON.stringify(documents[0]));
     });
 };
 

@@ -19,8 +19,6 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
       " into SYSTEM."
   );
 
-  console.log(collections, zoteroUser, importName);
-
   const limiter = new bottleneck({
     // Create a bottleneck to prevent API rate limit
     maxConcurrent: 1, // Only one request at once
@@ -98,8 +96,6 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
                     responseAmount++;
 
                     const updateMessage = `Loading ${responseAmount}/${responseTarget}`;
-
-                    console.log(updateMessage);
 
                     window.electron.send("chaeros-notification", updateMessage);
 

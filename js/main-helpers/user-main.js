@@ -62,8 +62,6 @@ const getUserStatus = (req) => {
           location[0],
           location[1],
           (err, hostname, service) => {
-            console.log(hostname);
-            console.log(service);
             if (hostname || service) {
               d.valid = true;
             } else {

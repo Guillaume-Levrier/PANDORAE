@@ -213,7 +213,6 @@ const powerValve = (fluxAction, item) => {
 
     case "zoteroItemsRetriever":
       fluxArgs.zoteroItemsRetriever = item.powerValveArgs;
-      console.log(fluxArgs);
       message = "Retrieving user collections…";
 
       break;
@@ -260,9 +259,6 @@ const powerValve = (fluxAction, item) => {
   )}.`;
 
   window.electron.send("console-logs", logMessage);
-
-  console.log(logMessage);
-
   window.electron.send("dataFlux", { fluxAction, fluxArgs, message }); // Send request to main process
   window.electron.send("pulsar", false);
   closeFluxWindow();

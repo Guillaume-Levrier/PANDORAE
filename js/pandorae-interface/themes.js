@@ -24,7 +24,6 @@ const requestTheme = () => window.electron.send("theme", { type: "read" });
 window.electron.themeContent((theme) => loadTheme(theme));
 
 const loadTheme = (theme) => {
-  console.log(theme);
   switch (theme.script) {
     case "normal":
       normalCore(coreCanvasW, coreCanvasH);

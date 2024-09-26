@@ -84,15 +84,12 @@ const getTypeDatasets = (parameters) => {
   );
 };
 
-const datasetTransfer = (parameters) => {
-  console.log(parameters);
+const datasetTransfer = (parameters) =>
   pandoraeDatabase[parameters.origin.table].get(parameters.id).then((r) => {
-    console.log(r);
     r.name = parameters.name;
     r.explorers = parameters.explorers;
     pandoraeDatabase[parameters.destination.table].add(r);
   });
-};
 
 const databaseOperation = {
   addDataset,

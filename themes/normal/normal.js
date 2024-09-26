@@ -402,7 +402,6 @@ void main()
   window.onload = reloadCore();
 
   function init() {
-    console.log("initiated");
     var w = coreCanvasW;
     var h = coreCanvasH;
 

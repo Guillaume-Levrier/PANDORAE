@@ -99,7 +99,7 @@ const timeline = (datajson) => {
       doiResolveButton.innerText = "Resolve DOI in browser";
       //doiResolveButton.id = "https://dx.doi.org/" + d.DOI;
       doiResolveButton.addEventListener("click", (e) =>
-        window.electron.invoke("openEx", "https://dx.doi.org/" + d.DOI)
+        window.electron.send("openEx", "https://dx.doi.org/" + d.DOI)
       );
 
       //shell.openExternal("https://dx.doi.org/" + d.DOI))
@@ -500,10 +500,12 @@ const timeline = (datajson) => {
         });
 
       _brushG.select("path.extent").on("mousedown.brush", (event) => {
+        event.stopPropagation();
         resizeDown(event);
       });
 
       _brushG.selectAll("path.resize").on("mousedown.brush", (event) => {
+        event.stopPropagation();
         resizeDown(event);
       });
 
@@ -881,6 +883,7 @@ const timeline = (datajson) => {
         docTitle.style.color = color(d.zone);
         docTitle.id = "list-" + d.id;
         docTitle.innerText = d.title;
+        docTitle.style.cursor = "pointer";
         docTitle.addEventListener("click", (e) => displayDoc(d));
         docTitle.addEventListener("mouseover", (e) => {
           node.style("opacity", ".2");
@@ -958,11 +961,12 @@ const timeline = (datajson) => {
         }
       });
 
-      dragger.on("click", (e, d) => {
+      dragger.on("click", (event, d) => {
         link.style("stroke-opacity", 1).style("opacity", 1);
         node.style("opacity", 1);
         tooltip.innerHTML = ""; // purge tooltip
         tooltip.appendChild(currentDocList); // repopulate with document list
+        event.stopPropagation();
       });
 
       link = link
@@ -1240,7 +1244,7 @@ const timeline = (datajson) => {
     .style("cursor", "all-scroll")
     .lower();
 
-  dragger.call(zoom).on("dblclick.zoom", null); // Zoom and deactivate doubleclick zooming
+  svg.call(zoom).on("dblclick.zoom", null); // Zoom and deactivate doubleclick zooming
 
   function zoomed({ transform }) {
     view.attr("transform", transform);

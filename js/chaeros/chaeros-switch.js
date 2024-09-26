@@ -21,8 +21,6 @@ import {
 // Switch used to choose the function to execute in CHÆROS.
 
 const chaerosSwitch = (fluxAction, fluxArgs) => {
-  console.log(fluxAction, fluxArgs);
-
   window.electron.send(
     "console-logs",
     "CHÆROS started a " +
@@ -136,7 +134,6 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
         break;
 
       case "zoteroItemsRetriever":
-        console.log(fluxArgs);
         zoteroItemsRetriever(
           Object.values(fluxArgs.zoteroItemsRetriever.collections),
           fluxArgs.zoteroItemsRetriever.libraryID,
@@ -157,7 +154,6 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
         break;
 
       case "sysExport":
-        console.log(fluxArgs.sysExport);
         sysExport(
           fluxArgs.sysExport.dest,
           fluxArgs.sysExport.name,

@@ -175,9 +175,6 @@ const listTableDatasets = (datasets, type) => {
     removeDataset.id = "del" + d.id;
     removeDataset.innerHTML =
       "<span><strong><i class='material-icons'>delete_forever</i></strong><br></span>";
-
-    console.log(d);
-
     removeDataset.addEventListener("click", () => {
       window.electron.send("database", {
         operation: "removeDataset",

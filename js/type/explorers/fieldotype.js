@@ -35,8 +35,6 @@ const fieldotype = (id) => {
 
       const data = datajson.content;
 
-      //console.log(data);
-
       const keywordMap = {};
       var minYear = 9999;
       var maxYear = 0;

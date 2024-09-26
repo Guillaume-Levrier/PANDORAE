@@ -94,11 +94,6 @@ const activateMainListeners = () => {
     )
   );
 
-  /* {
-    console.log(req);
-    requestDatabase(event, req.operation, req.parameters);
-  }); */
-
   // ==== WINDOW MANAGEMENT ====
 
   //destroy a window

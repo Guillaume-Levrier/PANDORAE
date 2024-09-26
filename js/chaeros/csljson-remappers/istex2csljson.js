@@ -16,8 +16,6 @@ const istexConverter = (data) => {
   // create a new document for each data element.
   data.forEach((doc) => {});
 
-  console.log(converted);
-
   return converted;
 };
 
