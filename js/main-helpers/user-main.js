@@ -15,12 +15,13 @@ const createUserId = (userDataPath) => {
     UserName: "",
     UserMail: "",
     theme: "vega",
+    locale: "EN",
     distantServices: {},
     localServices: {},
   };
 
   if (!fs.existsSync(userDataPath + "/PANDORAE-DATA/userID/user-id.json")) {
-    writeUserIDfile(userDataPath, userID);
+    writeUserIDfile(userID);
   }
 };
 
@@ -55,17 +56,21 @@ const getUserStatus = (req) => {
     if (currentUser.hasOwnProperty("localServices")) {
       for (const service in currentUser.localServices) {
         const d = currentUser.localServices[service];
-       
-        const location =d.url.split(":")
-        dns.lookupService(location[0], location[1], (err, hostname, service) => {
-          console.log(hostname)
-          console.log(service)
-          if (hostname || service) {
-            d.valid = true;
-          } else {
-            d.valid = false;
+
+        const location = d.url.split(":");
+        dns.lookupService(
+          location[0],
+          location[1],
+          (err, hostname, service) => {
+            console.log(hostname);
+            console.log(service);
+            if (hostname || service) {
+              d.valid = true;
+            } else {
+              d.valid = false;
+            }
           }
-        });
+        );
       }
     }
 
@@ -99,7 +104,7 @@ const manageUserKeys = (event, request) => {
         value: request.value,
       };
 
-      writeUserIDfile(userDataPath, currentUser);
+      writeUserIDfile(currentUser);
 
       break;
 

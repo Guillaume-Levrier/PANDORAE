@@ -936,11 +936,13 @@ label {
 .credential {
   padding: 0.2rem;
   
-  width:500px;
+  width:80%;
     display: flex;
     justify-content: flex-start;
 }
-
+.credential:hover {
+outline:1px solid black;
+}
 .validation {
   font-size: 22px;
   cursor: pointer;
@@ -1234,3 +1236,20 @@ tr {
     }
 
     
+    .fluxInputContainer{
+      display: flex;
+      width: 80%;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      margin:0.2rem;
+      padding:0.1rem;
+    }
+
+    .fluxInputContainer:hover{
+      outline:1px solid black;
+    }
+
+    .newServiceForm{
+      padding:0.3rem;
+    }

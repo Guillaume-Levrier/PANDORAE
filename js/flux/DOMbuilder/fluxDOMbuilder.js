@@ -3,6 +3,8 @@
 // All the necessary information needs to be passed in the tabadata argument, which is defined as
 // below. That object is there only as a descriptive model, it is never called.
 
+import { CM } from "../../locales/locales";
+import { userData } from "../userdata";
 import { addAPIquerySection, addLocalFileSection } from "./flux-DOM-api-query";
 import {
   addDatasetDisplaySection,
@@ -14,6 +16,7 @@ import {
   newServiceFormBuilder,
   saveUserConfigs,
 } from "./flux-DOM-user";
+import { serviceModels } from "./service-models";
 
 // A tab is only created when it is first called.
 var previousTab = false;
@@ -21,8 +24,6 @@ const removePreviousTab = () => (previousTab ? previousTab.remove() : false);
 
 const createCascadeTab = (tabData) => {
   removePreviousTab();
-
-  console.log(tabData);
 
   // main container element
   const tab = document.createElement("div");
@@ -42,6 +43,45 @@ const createCascadeTab = (tabData) => {
   description.innerHTML = tabData.description;
 
   tab.append(title, description);
+
+  if (tabData.id === "user") {
+    // add already registered data
+
+    //prepopulate Zotero tab if it exists or fill it if it doesn't
+
+    tabData.sections.forEach((section) => {
+      if (section.data.name === "zotero") {
+        if (userData.distantServices.hasOwnProperty("zotero")) {
+          section.data.fields = userData.distantServices.zotero;
+        } else {
+          section.data.fields = { library: [], apikey: "" };
+        }
+      }
+    });
+
+    for (const service in userData.localServices) {
+      const s = userData.localServices[service];
+      tabData.sections.push({
+        type: "addServiceCredentials",
+        data: {
+          name: service,
+          description: serviceModels[service].description,
+          fields: s,
+          proximity: "distant",
+        },
+      });
+    }
+
+    // add new service button & save config button
+    tabData.sections.push(
+      {
+        type: "newServiceForm",
+      },
+      {
+        type: "saveUserConfigs",
+      }
+    );
+  }
 
   // if this is a tab that lets one display data
   if (tabData.hasOwnProperty("sections")) {

@@ -4,6 +4,16 @@ import { serviceTester } from "../service-tester";
 import { genHr } from "./flux-DOM-common";
 import { serviceModels } from "./service-models";
 
+// ===== Flux User DOM button ====
+//
+// The USER tab is very specific, with routines that only apply to it.
+// Some of it (like DOM field generation) could be mutualized, but
+// the clarity cost is too important.
+//
+// This file is hence longer than most, but it belongs to the core
+// PANDORAE architecture so it should not change very often.
+//
+
 const saveUserConfigs = (tabData, sectionData, tab) => {
   const user = Object.assign({}, userData);
 
@@ -26,8 +36,6 @@ const saveUserConfigs = (tabData, sectionData, tab) => {
 
     for (let i = 0; i < serviceInput.length; i++) {
       const input = serviceInput[i];
-
-      console.log(input.dataset);
 
       // check if it is expected to be a local or distant service
       // (network wise, relative to this pandorae instance)
@@ -63,9 +71,6 @@ const saveUserConfigs = (tabData, sectionData, tab) => {
           break;
       }
     }
-
-    // services
-    console.log(user);
   };
 
   const updateUserButton = document.createElement("button");
@@ -95,6 +100,7 @@ const addUserField = (tabData, sectionData, tab) => {
   field.className = "fluxInput";
   field.style = "font-size;12px;width:400px;";
   field.type = "text";
+
   field.placeholder = "Enter your " + sectionData.name;
   field.spellcheck = false;
   field.id = sectionData.id + "Input";
@@ -108,6 +114,56 @@ const addUserField = (tabData, sectionData, tab) => {
   tab.append(userFieldContainer);
 };
 
+const addField = (sectionData, service, value, serviceContainer, fieldType) => {
+  const fieldContainer = document.createElement("div");
+  fieldContainer.className = "fluxInputContainer";
+
+  const label = document.createElement("label");
+  label.style = "width:20%";
+  label.innerText = `${service} : `;
+
+  const field = document.createElement("input");
+  field.className = "fluxInput fluxServiceInput";
+  field.style =
+    "width:80%;font-family:monospace;font-size:11px;margin-left:1rem;";
+  field.type =
+    service === "apikey" || service === "password" ? "password" : "text";
+  field.placeholder = service;
+  field.spellcheck = false;
+  field.value = value;
+  field.setAttribute("id", field.value);
+
+  field.addEventListener("change", () => field.setAttribute("id", field.value));
+
+  //adding attributes to populate user data easily;
+  field.setAttribute("data-proximity", sectionData.proximity);
+  field.setAttribute("data-service-name", sectionData.name);
+  field.setAttribute("data-field-type", fieldType);
+  field.setAttribute("data-field-name", service);
+
+  fieldContainer.append(label, field);
+
+  serviceContainer.append(fieldContainer);
+};
+
+const addFieldButton = (
+  sectionData,
+  service,
+  value,
+  fieldList,
+  serviceContainer
+) => {
+  const addFieldButton = document.createElement("div");
+  addFieldButton.className = "flux-button";
+  addFieldButton.style = "width:100px;margin:0.5rem;margin-left:150px;";
+  addFieldButton.innerText = "Add a new library";
+  addFieldButton.addEventListener("click", () =>
+    addField(sectionData, service, value, fieldList, "array")
+  );
+
+  serviceContainer.append(addFieldButton);
+};
+
 const addServiceCredentials = (tabData, sectionData, tab) => {
   const serviceContainer = document.createElement("div");
   serviceContainer.style = "padding:0.5rem";
@@ -115,10 +171,14 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
   title.innerText = sectionData.name;
   title.style = "font-size:14px; text-transform: capitalize;";
 
-  const description = document.createElement("div");
-  description.innerHTML = sectionData.description;
-  description.style = "text-align:justify;padding:1rem;";
-  serviceContainer.append(title, description);
+  serviceContainer.append(title);
+
+  if (sectionData.description.length > 0) {
+    const description = document.createElement("div");
+    description.innerHTML = sectionData.description;
+    description.style = "text-align:justify;padding:1rem;";
+    serviceContainer.append(description);
+  }
 
   if (sectionData.hasOwnProperty("helper")) {
     const helper = document.createElement("div");
@@ -130,89 +190,41 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
     serviceContainer.append(helper);
   }
 
-  if (sectionData.fields.hasOwnProperty("libraries")) {
-    let count = 1;
-    const librarylist = document.createElement("div");
-    librarylist.style = "margin-top:1rem";
+  for (const service in sectionData.fields) {
+    const value = sectionData.fields[service];
 
-    const addLib = document.createElement("div");
-    addLib.className = "flux-button";
-    addLib.style = "width:100px;margin:0.5rem;margin-left:150px;";
-    addLib.innerText = "Add a new library";
+    if (Array.isArray(value)) {
+      const fieldList = document.createElement("div");
+      fieldList.style = "margin-top:1rem";
+      serviceContainer.append(fieldList);
 
-    const addLibraryField = (libID) => {
-      const libraryfieldContainer = document.createElement("div");
-      libraryfieldContainer.style = `display: flex;
-      width: 220px;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-around;padding:0.3rem;`;
+      value.forEach((d, i) => {
+        addField(sectionData, service, d, fieldList, "array");
+      });
 
-      const label = document.createElement("label");
-      label.innerText = `Library ${count} : `;
-
-      const libraryfield = document.createElement("input");
-      libraryfield.className = "zoteroLibraryField fluxInput fluxServiceInput";
-      libraryfield.type = "text";
-      libraryfield.placeholder = "0000000"; //5361175
-      libraryfield.spellcheck = false;
-      libraryfield.id = libID ? libID : sectionData.name + count + "-Library";
-      libraryfield.value = libID ? libID : "";
-
-      //adding attributes to populate user data easily;
-      libraryfield.setAttribute("data-proximity", sectionData.proximity);
-      libraryfield.setAttribute("data-service-name", sectionData.name);
-      libraryfield.setAttribute("data-field-type", "array");
-      libraryfield.setAttribute("data-field-name", "libraries");
-
-      libraryfieldContainer.append(label, libraryfield);
-      librarylist.append(libraryfieldContainer);
-      count++;
-    };
-
-    addLib.addEventListener("click", () => addLibraryField());
-
-    if (userData.distantServices.hasOwnProperty("zotero")) {
-      if (userData.distantServices.zotero.libraries.length > 0) {
-        userData.distantServices.zotero.libraries.forEach((d) =>
-          addLibraryField(d)
-        );
+      if (value.length === 0) {
+        addField(sectionData, service, "", serviceContainer, "array");
       }
+
+      addFieldButton(sectionData, service, "", fieldList, serviceContainer);
     } else {
-      addLibraryField();
+      addField(sectionData, service, value, serviceContainer, "string");
     }
-
-    serviceContainer.append(librarylist, addLib);
-  }
-
-  if (
-    sectionData.fields.hasOwnProperty("apikey") &&
-    userData.distantServices.hasOwnProperty(sectionData.name)
-  ) {
-    const label = document.createElement("label");
-    label.innerText = `API key : `;
-    const apikeyfield = document.createElement("input");
-    apikeyfield.style = "font-size;12px;width:auto;margin-top:15px;";
-    apikeyfield.type = "password";
-    apikeyfield.className = "fluxInput fluxServiceInput";
-    apikeyfield.placeholder =
-      "Paste your " + sectionData.name + " API key here";
-    apikeyfield.spellcheck = false;
-    apikeyfield.id = sectionData.name + "-APIkey";
-
-    apikeyfield.setAttribute("data-proximity", sectionData.proximity);
-    apikeyfield.setAttribute("data-service-name", sectionData.name);
-    apikeyfield.setAttribute("data-field-type", "string");
-    apikeyfield.setAttribute("data-field-name", "apikey");
-
-    const apikey = userData.distantServices[sectionData.name].apikey;
-    apikeyfield.value = apikey ? apikey : 0;
-    serviceContainer.append(label, apikeyfield);
   }
 
   // service tester
   // button to click to load the relevant datasets
+
+  addServiceTesterButton(sectionData, serviceContainer);
+
+  tab.append(genHr(), serviceContainer);
+};
+
+const addServiceTesterButton = (sectionData, serviceContainer) => {
+  const inputs = serviceContainer.querySelectorAll("input.fluxServiceInput");
+
   const serviceTesterButton = document.createElement("button");
+  serviceTesterButton.style.margin = "1rem";
   serviceTesterButton.type = "submit";
   serviceTesterButton.className = "flux-button";
   serviceTesterButton.innerText = "Test service connectivity";
@@ -223,12 +235,10 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
       sectionData.aftermath,
       "Requests sent"
     );
-    serviceTester(sectionData.name, userData.distantServices[sectionData.name]);
+    serviceTester(sectionData.name, inputs);
   });
 
   serviceContainer.append(serviceTesterButton);
-
-  tab.append(genHr(), serviceContainer);
 };
 
 // This one is static, and needs to be enriched every time a new non-standard
@@ -245,6 +255,7 @@ const newServiceFormBuilder = (tab) => {
   // proximity
 
   const proximityDiv = document.createElement("div");
+  proximityDiv.className = "newServiceForm";
 
   const proximityLabel = document.createElement("label");
   proximityLabel.for = "proximitySelect";
@@ -268,6 +279,7 @@ const newServiceFormBuilder = (tab) => {
 
   // ===== service type
   const serviceTypeDiv = document.createElement("div");
+  serviceTypeDiv.className = "newServiceForm";
 
   const serviceTypeLabel = document.createElement("label");
   serviceTypeLabel.for = "selectServiceType";
@@ -286,22 +298,21 @@ const newServiceFormBuilder = (tab) => {
   let thisServiceDOM = [];
 
   selectServiceType.addEventListener("change", () => {
-    console.log(serviceModels[selectServiceType.value]);
-
     modelDiv.innerHTML = "";
 
     thisServiceDOM = [];
 
-    serviceModels[selectServiceType.value].forEach((d) => {
+    serviceModels[selectServiceType.value].fields.forEach((d) => {
       const fieldContainer = document.createElement("div");
+      fieldContainer.className = "fluxInputContainer";
 
       const label = document.createElement("label");
       label.innerText = `${d} : `;
-      label.style.width = "100px";
+      label.style.width = "20%";
 
       const field = document.createElement("input");
       field.className = "fluxInput fluxServiceInput";
-      field.style = "font-size;12px;width:400px;";
+      field.style = "font-size:11px;width:80%;font-family:monospace;";
       field.type = "text";
       field.placeholder = "Enter " + d;
       field.spellcheck = false;
@@ -339,7 +350,7 @@ const newServiceFormBuilder = (tab) => {
 
   const formDiv = document.createElement("div");
   formDiv.innerHTML =
-    "To connect to a new service, select the relevant options below:";
+    "To connect to a new service, select the relevant options below:<br>";
 
   formDiv.append(proximityDiv, serviceTypeDiv, modelDiv);
 

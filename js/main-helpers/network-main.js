@@ -31,7 +31,7 @@ const availableServicesLookup = () => {
 };
 
 async function addLocalService(message) {
-  console.log(message)
+  console.log(message);
   const loc = message.serviceLocation.split(":");
   dns.lookupService(loc[0], loc[1], (err, hostname, service) => {
     if (hostname || service) {
@@ -54,7 +54,7 @@ async function addLocalService(message) {
 
       setCurrentUser("localServices", localServices);
 
-      writeUserIDfile(userDataPath, currentUser);
+      writeUserIDfile(currentUser);
     }
   });
 }
@@ -70,7 +70,7 @@ async function removeLocalService(service) {
 
   setCurrentUser("localServices", localServices);
 
-  writeUserIDfile(userDataPath, currentUser);
+  writeUserIDfile(currentUser);
 }
 
 async function getAvailableFlux() {

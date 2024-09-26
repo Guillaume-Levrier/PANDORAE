@@ -57,9 +57,14 @@ function updateCascade(selections) {
 
   addHop(["USER", "STANDARDIZE"], traces);
 
-  if (availability.dnslist.zotero.valid) {
-    addHop(["STANDARDIZE", "ZOTERO", "SYSTEM"], traces);
-  }
+  //if (availability.dnslist.zotero.valid) {
+
+  // zotero is always accessible, even if not connected
+  // so as to give access to system.
+  // in the future, pandorae will be able to connect to
+  // local instance of zotero
+  addHop(["STANDARDIZE", "ZOTERO", "SYSTEM"], traces);
+  //}
 
   if (selections) {
     Object.values(availability.dnslist).forEach((d) => {

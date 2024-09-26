@@ -27,7 +27,7 @@ const manageTheme = (req) => {
 
     case "set":
       currentUser.theme = req.theme;
-      writeUserIDfile(userDataPath, currentUser);
+      writeUserIDfile(currentUser);
       mainWindow.webContents.send("themeContent", themeData[req.theme]);
       break;
   }

@@ -37,11 +37,13 @@ ipcRenderer.invoke("checkflux", true).then((result) => {
   });
 
   // allow local API sources
-  Object.values(domainsToAllow.dnsLocalServiceList).forEach((d) => {
-    if (d.valid) {
-      meta.content += "https://" + d.url + ":" + d.port + " ";
-    }
-  });
+  if (domainsToAllow.dnsLocalServiceList) {
+    Object.values(domainsToAllow.dnsLocalServiceList).forEach((d) => {
+      if (d.valid) {
+        meta.content += "https://" + d.url + ":" + d.port + " ";
+      }
+    });
+  }
 
   document.addEventListener("DOMContentLoaded", () =>
     document.getElementsByTagName("head")[0].append(meta)

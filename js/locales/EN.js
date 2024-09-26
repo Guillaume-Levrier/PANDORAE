@@ -134,16 +134,11 @@ const EN = {
                 url: "https://pandorae.politique.science",
               },
               fields: {
-                libraries: [],
-                apikey: "",},
+                library: [],
+                apikey: "",
+              },
               proximity: "distant",
             },
-          },
-            {
-            type: "newServiceForm"
-            }, 
-          {
-            type: "saveUserConfigs",
           },
         ],
       },
@@ -208,9 +203,6 @@ const EN = {
           { type: "loadLocalFlatFile", data: { accept: ".json" } },
         ],
       },
-    },
-    divs: {
-      hyphendpoint: "Enter your Hyphe endpoint below :",
     },
     field: {},
     console: {},
