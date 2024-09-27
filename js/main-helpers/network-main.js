@@ -72,7 +72,7 @@ async function removeLocalService(service) {
   writeUserIDfile(currentUser);
 }
 
-async function getAvailableFlux() {
+async function getAvailableServices() {
   const dnsLocalServiceList = currentUser.localServices;
 
   const result = JSON.stringify({ dnslist, dnsLocalServiceList });
@@ -84,5 +84,5 @@ export {
   availableServicesLookup,
   addLocalService,
   removeLocalService,
-  getAvailableFlux,
+  getAvailableServices,
 };

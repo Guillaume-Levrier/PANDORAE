@@ -61,7 +61,10 @@ const changeUDP = () => {
 var themeData;
 
 const startRoutine = () => {
+  // use this to get all API responses
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    delete details.responseHeaders["access-control-allow-origin"];
+
     callback({
       responseHeaders: Object.assign(
         {

@@ -13,11 +13,11 @@ const zoteroCollectionRetriever = (options) => {
   options.resultDiv.style.display = "block";
   // purge it of content
   userCollections.innerHTML =
-    userData.distantServices.zotero.libraries.length > 1
+    userData.distantServices.zotero.library.length > 1
       ? `${CM.flux.tabs.zotero.disclaimers.jointImport}<br><br>`
       : "";
 
-  userData.distantServices.zotero.libraries.forEach((libraryID) => {
+  userData.distantServices.zotero.library.forEach((libraryID) => {
     window.electron.send("console-logs", `Retrieving library ${libraryID}`); // Log collection request
 
     const url = `https://api.zotero.org/groups/${libraryID}/collections?v=3&key=${userData.distantServices.zotero.apikey}`;
@@ -36,7 +36,7 @@ const zoteroCollectionRetriever = (options) => {
         const importDiv = document.createElement("div");
         importDiv.style.padding = "1rem";
 
-        if (userData.distantServices.zotero.libraries.length > 1) {
+        if (userData.distantServices.zotero.library.length > 1) {
           userCollections.append(document.createElement("hr"));
         }
 

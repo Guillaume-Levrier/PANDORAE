@@ -14,7 +14,7 @@ import {
 } from "./filesystem-main";
 import {
   addLocalService,
-  getAvailableFlux,
+  getAvailableServices,
   removeLocalService,
 } from "./network-main";
 import { manageTheme } from "./theme-main";
@@ -130,7 +130,9 @@ const activateMainListeners = () => {
 
   ipcMain.on("openEx", (event, target) => shell.openExternal(target));
 
-  ipcMain.handle("checkflux", async (event, mess) => getAvailableFlux());
+  ipcMain.handle("checkflux", async (event, mess) => getAvailableServices());
+
+  ipcMain.handle("checkchaeros", async (event, mess) => getAvailableServices());
 
   ipcMain.on("forceUpdatePPS", async (event, req) => updatePPS(Date.now()));
 

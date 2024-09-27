@@ -21,7 +21,7 @@ contextBridge.exposeInMainWorld("electron", {
   databaseReply: (callback) =>
     ipcRenderer.on("databaseReply", (e, ...args) => callback(args[0])),
 });
-
+/* 
 ipcRenderer.invoke("checkflux", true).then((result) => {
   const domainsToAllow = JSON.parse(result);
 
@@ -49,5 +49,5 @@ ipcRenderer.invoke("checkflux", true).then((result) => {
     document.getElementsByTagName("head")[0].append(meta)
   );
 });
-
+ */
 console.log("|==== FLUX PRELOAD ENDS HERE ====|");
