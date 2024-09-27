@@ -126,28 +126,7 @@ const powerValve = (fluxAction, item) => {
       break;
 
     case "GallicaFullQuery":
-      const radioButtons = document.getElementsByClassName("gallicaDCradio");
-
-      let selected;
-
-      for (let i = 0; i < radioButtons.length; i++) {
-        const rad = radioButtons[i];
-        if (rad.checked && rad.value != "none") {
-          selected = rad.value;
-        }
-      }
-
-      var queryString;
-      const targetExpression = document.getElementById(
-        "gallicalocalqueryinput"
-      ).value;
-
-      if (selected) {
-        queryString = `(dc.${selected} all '${targetExpression}')`;
-      } else {
-        queryString = targetExpression;
-      }
-      fluxArgs.GallicaFullQuery = { queryString };
+      fluxArgs.GallicaFullQuery = item.query;
 
       message = "Querying Gallica";
       break;

@@ -8,4 +8,7 @@ window.electron.getUserDetails((user) => (userData = user));
 
 const updateUserData = (user) => window.electron.send("changeUser", user);
 
-export { userData, getUserData, changeUserID, updateUserData };
+const genDate = () =>
+  new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
+
+export { userData, getUserData, changeUserID, updateUserData, genDate };

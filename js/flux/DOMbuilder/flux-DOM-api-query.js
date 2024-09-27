@@ -38,6 +38,19 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
     ${queryPrompt} Click on the button to submit the request.`;
   sectionDescription.style.paddingBottom = "1rem";
 
+  tabSection.append(sectionDescription);
+
+  if (sectionData.hasOwnProperty("helper")) {
+    const helper = document.createElement("div");
+    helper.innerHTML = sectionData.helper.text;
+    helper.className = "helperBox";
+    helper.style.marginBottom = "1rem";
+    helper.addEventListener("click", () =>
+      window.electron.send("openEx", sectionData.helper.url)
+    );
+    tabSection.append(helper);
+  }
+
   // button to click to load the relevant datasets
   const sendAPIQueryButton = document.createElement("button");
   sendAPIQueryButton.type = "submit";
@@ -51,8 +64,6 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
 
   const functionArgs = sectionData.function.args;
   functionArgs.resultDiv = queryResultDiv;
-
-  tabSection.append(sectionDescription);
 
   const queryField = document.createElement("input");
 

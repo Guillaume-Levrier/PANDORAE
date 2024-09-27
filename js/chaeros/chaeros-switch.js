@@ -17,6 +17,8 @@ import {
   zoteroItemsRetriever,
 } from "./zotero-chaeros";
 
+import { GallicaFullQuery } from "./api-retrievers/gallica-api-retriever";
+
 //========== chaerosSwitch ==========
 // Switch used to choose the function to execute in CHÆROS.
 
@@ -114,7 +116,9 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
       // ==== RETRIEVERS ====
 
       case "GallicaFullQuery":
-        GallicaFullQuery(fluxArgs.GallicaFullQuery.queryString);
+        console.log(fluxArgs);
+
+        GallicaFullQuery(fluxArgs.GallicaFullQuery);
         break;
 
       case "istexRetriever":

@@ -19,7 +19,7 @@ const createCascadeSelectors = (availableCategories) => {
 
     const categoryInput = document.createElement("input");
     categoryInput.type = "radio";
-    categoryInput.id = `${category}Select`;
+    //categoryInput.id = `${category}Select`;
     categoryInput.name = "categorySelector";
     categoryInput.checked = false;
 
@@ -99,7 +99,7 @@ function updateCascade(selections) {
               addHop(["USER", "WEBㅤOFㅤSCIENCE", "STANDARDIZE"], traces);
             }
             break;
-
+          /* 
           case "BIORXIV":
             if (selections.scientometrics) {
               addHop(["BIORXIV", "STANDARDIZE"], traces);
@@ -108,15 +108,15 @@ function updateCascade(selections) {
 
           case "Clinical Trials":
             if (selections.clinicalTrialsSelect) {
-              addHop(["CLINICALㅤTRIALS", "SYSTEM"], traces);
+              addHop(["CLINICAL TRIALS", "SYSTEM"], traces);
             }
             break;
 
           case "Regards Citoyens":
             if (selections.parliaments) {
-              addHop(["REGARDSCITOYENS", "STANDARDIZE"], traces);
+              addHop(["REGARDS CITOYENS", "STANDARDIZE"], traces);
             }
-            break;
+            break; */
 
           case "ISTEX":
             if (selections.scientometrics) {
@@ -151,11 +151,12 @@ function updateCascade(selections) {
     /* if (selections.twitterSelect) {
     addHop(["USER", "TWITTER", "SYSTEM"]);
   }
-  if (selections.hypheSelect) {
-    addHop(["OPEN", "HYPHE", "SYSTEM"]);
-  } */
+    */
+    if (selections.hyphe) {
+      addHop(["HYPHE", "SYSTEM"], traces);
+    }
 
-    if (selections.localSelect) {
+    if (selections.local) {
       for (const service in availability.dnsLocalServiceList) {
         switch (availability.dnsLocalServiceList[service].type) {
           case "BNF-SOLR":
@@ -224,6 +225,8 @@ const retrieveAvailableServices = () =>
         }
       }
     });
+
+    availableCategories.add("hyphe");
 
     createCascadeSelectors([...availableCategories]);
 

@@ -76,6 +76,34 @@ const EN = {
   },
   flux: {
     tabs: {
+      gallica: {
+        id: "gallica", // id of the main div
+        title: "Gallica", // title of the tab (displayed on the page)
+        description: `Gallica is the digital library for online users of the Bibliothèque nationale de France and its partners. It holds more than 10 million documents, most of which have been parsed by OCR processors.`,
+        sections: [
+          {
+            type: "tabDatasets",
+            data: { id: "gallica", table: "flux", source: ["gallica"] },
+          },
+          {
+            type: "APIquery",
+            data: {
+              helper: {
+                text: `Crafting Gallica queries requires using the Gallica advanced search form. Clicking on this box will open this page in your browser. Paste your query in the field below when its results seem relevant. You will find more help and tutorials on the PANDORAE forum.`,
+                url: "https://gallica.bnf.fr/services/engine/search/advancedSearch/?lang=EN",
+              },
+              target: "gallica",
+              key: "gallica",
+              queryField: true,
+              function: {
+                name: "gallicaBasicRetriever",
+                args: {},
+                aftermath: "timeout", // "disable" disables submitting another query to the same source.
+              },
+            },
+          },
+        ],
+      },
       istex: {
         id: "istex", // id of the main div
         title: "ISTEX", // title of the tab (displayed on the page)
@@ -149,11 +177,19 @@ const EN = {
         sections: [
           {
             type: "tabDatasets",
-            data: { id: "API retrieved", table: "flux", source: ["istex"] },
+            data: {
+              id: "API retrieved",
+              table: "flux",
+              source: ["istex", "gallica"],
+            },
           },
           {
             type: "tabDatasets",
-            data: { id: "Standard", table: "standard", source: ["istex"] },
+            data: {
+              id: "Standard",
+              table: "standard",
+              source: ["istex", "gallica"],
+            },
           },
         ],
       },

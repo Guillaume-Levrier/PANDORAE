@@ -403,7 +403,7 @@
 </div>
 
 <!-- GALLICA TAB -->
-<div id="gallica" style="display:none;" class="fluxTabs">
+<!-- <div id="gallica" style="display:none;" class="fluxTabs">
   <span class="flux-title">GALLICA SRU</span><br><br>
 
   <span>This tab lets you access the Gallica search and retrieve
@@ -485,136 +485,14 @@
 
   <br>
   <br>
-</div>
-
-
-<!-- ZOTERO TAB -->
-<!-- <div id="zotero" style="display:none;" class="fluxTabs">
-  <span class="flux-title">ZOTERO</span><br><br>
-  This tab lets you send a collection of documents retrieved by PANDORÆ to
-  Zotero, and lets import a Zotero collection (regardless
-  of its origin) to PANDORÆ.
-  <br><br>
-  <hr><br>
-  <form id="zotero-export-form" autocomplete="off">
-    This button lets you display the datasets in <strong>PANDORÆ's memory on
-      your local device</strong> and upload them to Zotero.<br><br>
-    <button type="submit" class="flux-button" id="cslcolret">Display available
-      csljson files</button><br>
-    <div id="selectedCollection">
-      <div id="csljson-dataset-preview"></div>
-      <div id="csljson-dataset-buttons" style="display:none;">
-        <input class="fluxInput" spellcheck="false" class="sendToZotero"
-          id="zoteroCollecName" type="text" placeholder="Enter collection name">
-
-        <button type="submit" class="flux-button sendToZotero"
-          id="zoteroCollecBuild">Create a new Zotero
-          Collection</button>
-      </div>
-    </div>
-    <div id="userCsljsonCollections"></div>
-  </form>
-  <br>
-  <hr><br>
-  <form id="zotero-import-form" autocomplete="off"></form>
-  This button lets you display the collections of documents on <strong>your
-    online Zotero library</strong> and download them to your system.<br><br>
-  <button type="submit" class="flux-button" id="zotcolret">Display online
-    library collections</button><br><br>
-  
-<span id="zoteroImportInstruction" style="display:none;">Select the Zotero
-  collections you want to import to PANDORÆ </span><br><br>
-
-<div id="zoteroResults" style="display:none;">
-  <div id="userZoteroCollections" style="flex:auto"></div>
-
-</div>
-<br><br><br>
-<input class="fluxInput" spellcheck="false" id="zoteroImportName"
-  style="display:none;" type="text" placeholder="Enter import name">
-<button type="submit" class="flux-button" style="display:none;"
-  id="zotitret">Import selected collections into
-  system</button><br>
-</form>
 </div> -->
 
-<!-- LOCAL TAB -->
 
-
-<!-- CAPCO TAB 
-<div id="capco" style="display:none;" class="fluxTabs">
-    <span class="flux-title">CAPCO</span><br><br>
-    This tab is currently disabled but will be unlocked soon.
-      <form id="pubdeb-import-form" autocomplete="off">
-        <br><br>
-        <p>Select CapCo dataset <br><input class="fluxInput" id="load-local-pubdeb" type="file" accept="all" disabled/></p>
-        <p>Select Matching dataset<br> <input class="fluxInput" id="load-local-links" type="file" accept="all" disabled/></p>
-        <button type="submit" class="flux-button" id="" onclick='powerValve("capcoRebuilder",this);return false' disabled>Rebuild CapCo Dataset</button>
-      </form>
-  </div>
--->
-
-<!-- SYSTEM TAB -->
-<!-- 
-<div id="system" style="display:none;" class="fluxTabs">
-  <span class="flux-title">SYSTEM</span><br><br>
-  Datasets listed in SYSTEM are available locally and ready to be exported to
-  one of PANDORÆ's visualisation tools.
-  <button type="submit" class="flux-button" id="systemList">Display available
-    datasets</button><br>
-  <div id="problematics"></div>
-  <div style="display:flex;padding: 5px;margin: 5px;">
-    <div id="system-dataset-preview" style="flex:auto"></div>
-    <div id="system-dataset-buttons" style="display:none">
-      <button type="submit" class="flux-button" id="downloadData">Download
-        dataset</button>
-      <button type="submit" class="flux-button" id="showConsole">Display in
-        Console</button>
-      <button type="submit" class="flux-button" id="checkPPS">Check on
-        PPS</button>
-      <br>
-      <br><br>Export dataset to :<br>
-      <input class='sysDestCheck' value='chronotype' name='chronotype'
-        type='checkbox' /><label>chronotype</label><br>
-      <input class='sysDestCheck' value='geotype' name='geotype'
-        type='checkbox' /><label>geotype</label><br>
-      <input class='sysDestCheck' value='anthropotype' name='anthropotype'
-        type='checkbox' /><label>anthropotype</label><br>
-      <input class='sysDestCheck' value='webArchive' name='webArchive'
-        type='checkbox' /><label>webArchive</label><br>
-      <input class='sysDestCheck' value='hyphotype' name='hyphotype'
-        type='checkbox' /><label>hyphotype</label><br>
-      <input class='sysDestCheck' value='fieldotype' name='fieldotype'
-        type='checkbox' /><label>fieldotype</label><br>
-      <input class='sysDestCheck' value='regards' name='regards'
-        type='checkbox' /><label>regards</label><br>
-      <input class='sysDestCheck' value='gazouillotype' name='gazouillotype'
-        type='checkbox' /><label>gazouillotype</label><br>
-      <input class='sysDestCheck' value='slider' name='slider'
-        type='checkbox' /><label>slider</label><br>
-      <input class="fluxInput" spellcheck="false" id="systemToType" type="text"
-        placeholder="Enter a dataset name">
-      <button type="submit" class="flux-button"
-        id="systitret">Export</button><br>
-    </div>
-  </div>
-  <div id="systemDatasetsList"></div>
-  <br>
-  <hr>
-  <br>Import local dataset :<br>
-  <input class="fluxInput" id="localUploadPath" type="file"
-    accept=".json" /><br><br>
-
-  <button type="submit" class="flux-button" id="load-local">Upload local dataset
-    to SYSTEM</button>
-
-</div>
- -->
 
 <div
   style="position:fixed;z-index:20;padding: 5px;right:0px;top:0px;user-select: none;">
-  <i class="material-icons  dialog-buttons"
-    id="fluxDisplayButton">arrow_back</i>
+  <i class="material-icons  dialog-buttons" id="fluxDisplayButton"
+    style="display:none">arrow_back</i>
   <i class="material-icons dialog-buttons" id="fluxRefreshButton">refresh</i>
   <i class="material-icons dialog-buttons" id="fluxCloseButton">close</i>
 </div>

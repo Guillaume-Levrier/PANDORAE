@@ -15,7 +15,7 @@ import {
 } from "./userdata";
 
 import { closeFluxWindow, refreshFluxWindow } from "./window";
-import { gallicaBasic } from "./sources/BNF/gallica";
+import { gallicaBasicRetriever } from "./sources/BNF/gallica";
 import { dimensionsUpload } from "./sources/scientometrics/dimensions";
 import { regardsBasic } from "./sources/parlements/regardscitoyens";
 import { endpointConnector, hypheCheck } from "./sources/hyphe/hyphe-flux";
@@ -249,8 +249,8 @@ function fluxSwitch(funcName, args) {
       generateLocalServiceConfig();
       break;
 
-    case "gallicaBasic":
-      gallicaBasic();
+    case "gallicaBasicRetriever":
+      gallicaBasicRetriever(args);
       break;
 
     case "dimensionsUpload":

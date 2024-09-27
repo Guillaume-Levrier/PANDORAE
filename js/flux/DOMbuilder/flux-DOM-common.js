@@ -1,6 +1,7 @@
 import { datasetDisplay } from "../dataset";
 import { fluxButtonClicked } from "../actionbuttons";
-
+import { genDate } from "../userdata";
+import { powerValve } from "../powervalve";
 // ========
 
 // The <hr> DOM element stands for "horizontal rule" which aims to be a thematic break between two
@@ -98,4 +99,39 @@ const addWarningDisclaimer = (tabData, sectionData, tab) => {
   tab.append(tabSection);
 };
 
-export { addDatasetDisplaySection, addWarningDisclaimer, genHr };
+const basicQueryResultDiv = (queryData, resultNum) => {
+  // query data is an object with both the query string to the service
+  // and the result div
+
+  console.log(queryData, resultNum);
+
+  // fill in results
+  queryData.resultDiv.innerHTML = `
+        <strong>Query: ${queryData.query}</strong><br>
+        Expected results at request time: ${resultNum}<br>
+        Query date: ${genDate()}<br><br>`;
+
+  // display result div
+  queryData.resultDiv.style.display = "block";
+
+  // display fill query div
+};
+
+const addFullQueryButton = (data, buttonText, powerAction, powerArg) => {
+  const fullQueryButton = document.createElement("button");
+  fullQueryButton.type = "submit";
+  fullQueryButton.className = "flux-button";
+  fullQueryButton.innerText = buttonText;
+  fullQueryButton.addEventListener("click", () =>
+    powerValve(powerAction, powerArg)
+  );
+  data.resultDiv.append(fullQueryButton);
+};
+
+export {
+  addDatasetDisplaySection,
+  addWarningDisclaimer,
+  genHr,
+  basicQueryResultDiv,
+  addFullQueryButton,
+};

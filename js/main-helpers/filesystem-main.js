@@ -8,7 +8,7 @@ import {
 
 const electron = require("electron");
 const fs = require("fs");
-const { dialog, app } = electron;
+const { dialog, app, session } = electron;
 
 const basePath = app.getAppPath();
 const userDataPath = app.getPath("userData");
@@ -61,6 +61,17 @@ const changeUDP = () => {
 var themeData;
 
 const startRoutine = () => {
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: Object.assign(
+        {
+          "Access-Control-Allow-Origin": "*",
+        },
+        details.responseHeaders
+      ),
+    });
+  });
+
   userDataDirTree(userDataPath, [
     "/PANDORAE-DATA/logs",
     "/PANDORAE-DATA/userID",

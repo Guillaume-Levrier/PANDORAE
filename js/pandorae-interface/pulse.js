@@ -65,9 +65,7 @@ const progBarSign = (prog) => {
  */
 
 // ========== CORE SIGNALS ===========
-// TO BE REINSTATED
 
-/* 
 window.electron.coreSignal((message) => {
   try {
     field.value = message;
@@ -76,21 +74,21 @@ window.electron.coreSignal((message) => {
   }
 });
 
-ipcRenderer.on("chaeros-notification", (event, message, options) => {
-  field.value = message;
+window.electron.chaerosNotification((message, options) => {
+  console.log(message, options);
+  field.value = message[0];
   if (message === "return to tutorial") {
     tutoSlide = options;
   }
 });
 
-ipcRenderer.on("chaeros-failure", (event, message) => {
+window.electron.chaerosFailure((event, message) => {
+  console.log(message);
   field.value = message;
   window.electron.send("audio-channel", "error");
 });
 
-ipcRenderer.on("pulsar", (event, message) => {
-  pulse(1, 1, 10, message);
-}); */
+window.electron.pulsar((message) => pulse(1, 1, 10, message));
 
 const nameDisplay = (name) => {
   document

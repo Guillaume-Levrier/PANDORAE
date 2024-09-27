@@ -25,6 +25,12 @@ contextBridge.exposeInMainWorld("electron", {
     ipcRenderer.on("backToPres", (e, ...args) => callback(args[0])),
   databaseReply: (callback) =>
     ipcRenderer.on("databaseReply", (e, ...args) => callback(args[0])),
+  chaerosNotification: (callback) =>
+    ipcRenderer.on("chaeros-notification", (e, ...args) => callback(args)),
+  chaerosFailure: (callback) =>
+    ipcRenderer.on("chaeros-failure", (e, ...args) => callback(args)),
+  pulsar: (callback) =>
+    ipcRenderer.on("pulsar", (e, ...args) => callback(args)),
 });
 
 console.log("|==== INDEX PRELOAD ENDS HERE ====|");

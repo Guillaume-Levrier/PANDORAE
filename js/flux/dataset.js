@@ -107,7 +107,7 @@ const datasetRemove = (table, id) =>
 // Clicking on a dataset displayed by the previous function displays some of its metadata and allows for further actions
 // to be triggered (such as sending a larger request to Chæros).
 
-const datasetDetail = (detailDiv, dataset) => {
+const datasetDetail = (detailDiv, dataset, table) => {
   // This function provides info on a specific dataset
 
   //Make the div visible
@@ -156,10 +156,8 @@ const datasetDetail = (detailDiv, dataset) => {
   deleteButton.innerText = "Delete dataset";
   deleteButton.addEventListener("click", () => {
     // send the coordinates of the dataset to remove from the database
+    detailDiv.innerHTML = "Dataset deleted";
     datasetRemove(table, dataset.id);
-
-    // remove the DOM element
-    detailDiv.remove();
   });
 
   actionDiv.append(deleteButton);
@@ -193,7 +191,7 @@ const datasetDetail = (detailDiv, dataset) => {
         const typeList = Object.keys(CM.types.names);
 
         const optionList = document.createElement("div");
-        optionList.innerHTML=`<div style="text-decoration: underline;">Select at least one relevant <span style="font-family:monospace;">TYPE</span> explorer below:</div><br>` 
+        optionList.innerHTML = `<div style="text-decoration: underline;">Select at least one relevant <span style="font-family:monospace;">TYPE</span> explorer below:</div><br>`;
         optionList.style.padding = "5%";
 
         detailDiv.style.display = "flex";
@@ -215,7 +213,7 @@ const datasetDetail = (detailDiv, dataset) => {
         });
 
         const exportOptions = document.createElement("div");
-        
+
         exportOptions.style = "display:flex;margin-top:1rem;";
 
         const datasetNameInput = document.createElement("input");
