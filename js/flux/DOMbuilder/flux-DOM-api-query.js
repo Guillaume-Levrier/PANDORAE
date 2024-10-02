@@ -29,6 +29,8 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
   const tabSection = document.createElement("div");
   tabSection.className = "tabSection";
 
+
+
   const queryPrompt = sectionData.queryField
     ? "Fill in the query in the field below."
     : "";
@@ -81,7 +83,17 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
     fluxSwitch(sectionData.function.name, sectionData.function.args);
   });
 
-  tabSection.append(sendAPIQueryButton, queryResultDiv);
+console.log(sectionData)
+
+  tabSection.append(sendAPIQueryButton)
+  
+const functionArguments= Object.values(sectionData.function.args)
+
+  if (functionArguments.length>0) {
+
+  } 
+  
+  tabSection.append(queryResultDiv);
 
   tab.append(genHr(), tabSection);
 };

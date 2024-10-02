@@ -41,7 +41,7 @@ const createMainWindow = () => {
 
   mainWindow.setMenu(null);
 
-  mainWindow.webContents.openDevTools();
+ // mainWindow.webContents.openDevTools();
 
   mainWindow.on("closed", () => (mainWindow = null));
 
@@ -130,7 +130,7 @@ const openModal = (modalFile, scrollTo) => {
         setTimeout(() => win.webContents.send("scroll-to", scrollTo), 1000);
       }
     });
-    win.webContents.openDevTools();
+  //  win.webContents.openDevTools();
   }
 };
 var fluxWindow;
@@ -205,11 +205,9 @@ const chaerosCalculator = (powerValveAction) => {
 
   chaerosWindow.loadURL(CHAEROS_WEBPACK_ENTRY);
 
-  console.log("creating chaeros");
-
   chaerosWindow.webContents.on("did-finish-load", function () {
     chaerosWindow.webContents.send("id", chaerosWindow.id);
-    chaerosWindow.webContents.openDevTools();
+   // chaerosWindow.webContents.openDevTools();
     chaerosWindow.webContents.send("chaerosCompute", powerValveAction);
   });
 };
@@ -295,7 +293,7 @@ const createDatabaseManager = () => {
 
   databaseManagerWindow.webContents.on("did-finish-load", function () {
     databaseManagerWindow.webContents.send("id", databaseManagerWindow.id);
-    databaseManagerWindow.webContents.openDevTools();
+   // databaseManagerWindow.webContents.openDevTools();
   });
 };
 

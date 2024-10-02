@@ -90,12 +90,12 @@ const EN = {
                 text: `Crafting API queries is hard. It is recommended to use the form available on AILabs, which helps you craft your query and preview results. Click on this box to open the AILabs page..`,
                 url: "http://ailabs.bnf.fr/all-ftform-advanced",
               },
-              target: "web-archive",
-              key: "web-archive",
+              target: "bnf-solr",
+              key: "bnf-solr",
               queryField: true,
               function: {
                 name: "queryBnFSolr",
-                args: {},
+                args: {dateFrom:"date",dateTo:"date",collections:"radio",facets:"checkbox"},
                 aftermath: "timeout", // "disable" disables submitting another query to the same source.
               },
             },
