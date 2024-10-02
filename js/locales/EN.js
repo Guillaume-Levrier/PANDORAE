@@ -76,6 +76,33 @@ const EN = {
   },
   flux: {
     tabs: {
+      "web-archive":{
+        id: "web-archive", // id of the main div
+        title: "Web archive", // title of the tab (displayed on the page)
+        description: `The web archive.`,
+        sections: [ {
+            type: "tabDatasets",
+            data: { id: "web-archive", table: "flux", source: ["web archive"] },
+          },{
+            type: "APIquery",
+            data: {
+              helper: {
+                text: `Crafting API queries is hard. It is recommended to use the form available on AILabs, which helps you craft your query and preview results. Click on this box to open the AILabs page..`,
+                url: "http://ailabs.bnf.fr/all-ftform-advanced",
+              },
+              target: "web-archive",
+              key: "web-archive",
+              queryField: true,
+              function: {
+                name: "queryBnFSolr",
+                args: {},
+                aftermath: "timeout", // "disable" disables submitting another query to the same source.
+              },
+            },
+          },]
+          
+      },
+
       gallica: {
         id: "gallica", // id of the main div
         title: "Gallica", // title of the tab (displayed on the page)

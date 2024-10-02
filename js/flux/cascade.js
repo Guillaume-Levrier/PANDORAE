@@ -201,6 +201,18 @@ const retrieveAvailableServices = () =>
 
     const availableCategories = new Set();
 
+    console.log(availability)
+
+     Object.values(availability.dnsLocalServiceList).forEach((service) => {
+      if (service.valid) {
+        switch (service.name) {
+            
+        default:
+           availableCategories.add("local");
+            break;
+        }
+      }
+    });
     Object.values(availability.dnslist).forEach((service) => {
       if (service.valid) {
         switch (service.name) {

@@ -184,7 +184,8 @@ const drawFlux = (svg, traces, horizontal, showTexts) => {
     })
     .on("click", (event, d) => {
       const tab = d.hops[0].name.toLowerCase();
-
+      console.log(tab)
+      console.log(CM.flux.tabs[tab])
       createCascadeTab(CM.flux.tabs[tab]);
     });
 
