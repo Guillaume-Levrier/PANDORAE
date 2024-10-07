@@ -63,16 +63,16 @@ var themeData;
 const startRoutine = () => {
   // use this to get all API responses
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    delete details.responseHeaders["access-control-allow-origin"];
-
-    callback({
-      responseHeaders: Object.assign(
-        {
-          "Access-Control-Allow-Origin": "*",
-        },
-        details.responseHeaders
-      ),
-    });
+    
+     callback({
+    responseHeaders: {
+      ...details.responseHeaders,
+      'Access-Control-Allow-Origin': ['*'],  // Allow any domain to access
+      'Access-Control-Allow-Methods': ['GET, POST, PUT, DELETE, OPTIONS'],  // Allowed methods
+      'Access-Control-Allow-Headers': ['Content-Type, Authorization']  // Allowed headers
+    },
+  });
+   
   });
 
   userDataDirTree(userDataPath, [

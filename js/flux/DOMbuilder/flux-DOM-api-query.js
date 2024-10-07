@@ -70,11 +70,7 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
 
   const queryField = document.createElement("input");
 
-  if (sectionData.queryField) {
-    queryField.type = "text";
-    queryField.className = "fluxInput";
-    tabSection.append(queryField);
-  }
+  
 
   sendAPIQueryButton.addEventListener("click", () => {
     fluxButtonClicked(sendAPIQueryButton, sectionData.function.aftermath);
@@ -86,24 +82,32 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
 
 console.log(sectionData)
 
-  tabSection.append(sendAPIQueryButton)
+   
+  if (sectionData.queryField) {
+    queryField.type = "text";
+    queryField.className = "fluxInput";
+    tabSection.append(queryField);
+  }
+  
+  
+   tabSection.append(sendAPIQueryButton)
   
 const functionArguments= Object.values(sectionData.function.args);
 
   if (functionArguments.length>0) {
-      buildAdditionalArguments(sectionData) 
+      buildAdditionalArguments(sectionData,tabSection) 
   } 
-  
-  tabSection.append(queryResultDiv);
+
+tabSection.append(queryResultDiv);
 
   tab.append(genHr(), tabSection);
 };
 
-const buildAdditionalArguments=(data)=> {
+const buildAdditionalArguments=(data,sectionDiv)=> {
 switch (data.key) {
   case "bnf-solr":
   
-    buildBnFsolrArguments(data);
+    buildBnFsolrArguments(data,sectionDiv);
 
     break;
 
@@ -114,17 +118,20 @@ switch (data.key) {
 
 } 
 
-const buildBnFsolrArguments=(data)=>{
-  console.log("===building bnf solr args")
-console.log(data)
-console.log(availability)
+const buildBnFsolrArguments=(data,sectionDiv)=>{
+
+
+const optionsDiv = document.createElement("div");
+optionsDiv.className="fluxRequestOptionDiv";
+
+sectionDiv.append(optionsDiv)
 
 for (const key in availability.dnsLocalServiceList) {
  const service = availability.dnsLocalServiceList[key]
  
  if (service.type==="BNF-SOLR"){
   
-    const buttonList = [];
+    
 
             const solrCont = document.createElement("div");
 
@@ -145,25 +152,48 @@ for (const key in availability.dnsLocalServiceList) {
               .then((r) => r.json())
               .then((r) => {
                 console.log(r)
+
+                optionsDiv.innerHTML+="Available sources<br>";
                 coreSource = r.collections[0];
                 for (let i = 0; i < r.collections.length; i++) {
                   const col = r.collections[i];
                   let checked = i === 0 ? "checked" : "";
 
-                  sourceSolrRadio += `<div>
-            <input type="radio" name="bnf-solr-radio-${serv}" class="bnf-solr-radio-${serv}" id="${col}"  ${checked}  />
-            <label for="${col}">${col}</label>
-          </div>`;
+                  const collectionContainer = document.createElement("div");
+                  
+                  const collectionRadio = document.createElement("input")
+                  collectionRadio.type="radio";
+                  collectionRadio.name=`bnf-solr-radio-${key}`
+                  collectionRadio.id=col;
+                  collectionRadio.checked=checked;
+
+                  const collectionLabel = document.createElement("label")
+                  collectionLabel.for=col;
+                  collectionLabel.innerText=col;
+
+                  collectionContainer.append(collectionRadio,collectionLabel)
+
+                  optionsDiv.append(collectionContainer)
+                  
                 }
+                optionsDiv.append(genHr())
               })
               .then(() => fetch(`http://${service.url}/solr/${coreSource}/select?q=*rows=0&facet=on&facet.field=collections`)
                   .then((facet) => facet.json())
                   .then((facets) => {
                     console.log(facets)
+                    console.log(key)
+
+                     optionsDiv.innerHTML+="Available collections<br>";
+
                     const facetList =
                       facets.facet_counts.facet_fields.collections;
 
                     var facetCheckBox = "";
+
+                    const facetBox =   document.createElement("div");
+
+optionsDiv.append(facetBox)
 
                     for (let i = 0; i < facetList.length; i++) {
                       const face = facetList[i];
@@ -171,27 +201,38 @@ for (const key in availability.dnsLocalServiceList) {
                       if (typeof face === "string") {
                         let checked = i === 0 ? "checked" : "";
 
-                        facetCheckBox += `<div>
-            <input type="checkbox" name="bnf-solr-checkbox-${serv}" class="bnf-solr-checkbox-${serv}" id="${face}"  ${checked}  />
-            <label for="${face}">${face}</label>
-          </div>`;
+                        const facetContainer = document.createElement("div");
+                  
+                  const facetCheckBox = document.createElement("input")
+                  facetCheckBox.type="checkbox";
+                  facetCheckBox.name=`bnf-solr-radio-${key}`
+                  facetCheckBox.id=face;
+                  facetCheckBox.checked=checked;
+
+                  const facetLabel = document.createElement("label")
+                  facetLabel.for=face;
+                  facetLabel.innerText=face;
+
+                  facetContainer.append(facetCheckBox,facetLabel)
+
+                  facetBox.append(facetContainer)
                       }
                     }
-
+/*
                     solrCont.innerHTML = `<!-- BNF SOLR TAB -->     
           <span class="flux-title">${service.toUpperCase()}</span>
           <br><br>
           <form id="bnf-solr-form" autocomplete="off">Query:<br>
-            <input class="fluxInput" spellcheck="false" id="bnf-solr-query-${serv}" type="text" value=""><br><br>
-            From: <input type="date" id="bnf-solr-${serv}-date-from"> - To: <input type="date" id="bnf-solr-${serv}-date-to"><br>
+            <input class="fluxInput" spellcheck="false" id="bnf-solr-query-${key}" type="text" value=""><br><br>
+            From: <input type="date" id="bnf-solr-${key}-date-from"> - To: <input type="date" id="bnf-solr-${key}-date-to"><br>
             <br>Selected source:
             ${sourceSolrRadio}<br><br>
              <br>Select collection:
             ${facetCheckBox}<br><br>
-            <button type="submit" class="flux-button" id="bnf-solr-basic-query-${serv}">Retrieve
+            <button type="submit" class="flux-button" id="bnf-solr-basic-query-${key}">Retrieve
               basic info</button>&nbsp;&nbsp;
-            <div id="bnf-solr-basic-previewer-${serv}" style="position:relative;"></div><br><br>
-            <button style="display: none;" type="submit" class="flux-button" id="bnf-solr-fullquery-${serv}">Submit Full Query</button>
+            <div id="bnf-solr-basic-previewer-${key}" style="position:relative;"></div><br><br>
+            <button style="display: none;" type="submit" class="flux-button" id="bnf-solr-fullquery-${key}">Submit Full Query</button>
             <br><br>
           </form>`;
 
@@ -221,6 +262,10 @@ for (const key in availability.dnsLocalServiceList) {
                           return false;
                         });
                     });
+
+
+
+                    */
                   })
               );
 
