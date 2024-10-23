@@ -262,11 +262,7 @@ function fluxSwitch(funcName, args) {
       break;
 
     case "hypheCheck":
-      hypheCheck(document.getElementById("hypheaddress").value);
-      break;
-
-    case "endpointConnector":
-      endpointConnector("hyphe", hyphetarget);
+      hypheCheck(args);
       break;
 
     case "datasetDisplay":

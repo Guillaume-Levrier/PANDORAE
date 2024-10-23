@@ -4,6 +4,7 @@ import * as Inputs from "@observablehq/inputs";
 import { CM } from "../locales/locales";
 import { powerValve } from "./powervalve";
 import { fluxButtonClicked } from "./actionbuttons";
+import { loadHyphe } from "./sources/hyphe/hyphe-flux";
 
 // datasetDisplay shows the datasets (usually JSON or CSV files) available in the relevant /datasets/ subdirectory.
 
@@ -111,6 +112,7 @@ const datasetDetail = (detailDiv, dataset, table) => {
   // This function provides info on a specific dataset
 
   //Make the div visible
+  detailDiv.innerHTML = "";
   detailDiv.style.display = "flex";
 
   // The detail div contains two sub-divs:
@@ -185,6 +187,7 @@ const datasetDetail = (detailDiv, dataset, table) => {
       case "standard":
         break;
 
+      case "hyphe":
       case "zotero":
         //refer to explorer-explainer.md
 
@@ -373,4 +376,102 @@ const downloadData = () => {
   });
 };
 
-export { datasetDisplay, localUpload, downloadData };
+// ===== CORPUS DISPLAY =====
+// This is a bit like dataset display, except that the datasets
+// are not from the internal PANDORAE database but from an external
+// API such as the Zotero API or the Hyphe API.
+//
+// This is called a "corpus" list but it doesn't have to be a collection
+// of documents.
+
+const displayCorpusList = (
+  corpora,
+  displayDiv,
+  detailDiv,
+  corpusType,
+  multiple
+) => {
+  const searchField = Inputs.search(corpora, {
+    placeholder: "Look for a dataset…",
+    label: "",
+    spellcheck: false,
+  });
+
+  searchField.style = "padding:5px;";
+
+  searchField.children[0].children[0].style = "margin-right:10px";
+
+  const displayTable = document.createElement("div");
+
+  const updateTable = () => {
+    displayTable.innerHTML = "";
+
+    const searchTable = Inputs.table(searchField.value, {
+      columns: Object.keys(corpora[0]),
+      width: "100%",
+      multiple,
+      layout: "fixed",
+    });
+
+    searchTable.addEventListener("input", () => {
+      if (searchTable.value) {
+        corpusDetail(corpusType, detailDiv, searchTable.value);
+      } else {
+        datasetDetail.style.display = "none";
+        detailDiv.innerHTML = "";
+      }
+    });
+
+    displayTable.append(searchTable);
+  };
+
+  searchField.addEventListener("input", updateTable);
+
+  updateTable();
+
+  displayDiv.append(searchField, displayTable);
+};
+
+const corpusDetail = (corpusType, detailDiv, selected) => {
+  console.log(selected);
+
+  detailDiv.innerHTML = "";
+  //detailDiv.innerHTML = JSON.stringify(selected);
+
+  detailDiv.style.display = "block";
+
+  switch (corpusType) {
+    case "zotero":
+      break;
+
+    case "hyphe":
+      detailDiv.innerHTML = `<strong>${selected.Name}</strong><br>
+      ${selected["Web Entities IN"]} web entities classified as within the corpus.<br>
+      This corpus was last active on ${selected["Last Activity"]}.<br>`;
+      const passwordInput = document.createElement("input");
+      passwordInput.className = "fluxInput";
+      passwordInput.spellcheck = false;
+      passwordInput.type = "password";
+      passwordInput.style.width = "220px";
+
+      const importButton = document.createElement("button");
+      importButton.type = "submit";
+      importButton.className = "flux-button";
+      importButton.innerText = "Import Hyphe corpus";
+      importButton.addEventListener("click", () =>
+        loadHyphe(selected.Name, passwordInput.value)
+      );
+
+      if (selected.Password) {
+        detailDiv.append(passwordInput);
+      }
+      detailDiv.append(importButton);
+
+      break;
+
+    default:
+      break;
+  }
+};
+
+export { datasetDisplay, localUpload, downloadData, displayCorpusList };

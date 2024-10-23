@@ -15,48 +15,10 @@
 </style>
 
 
-
-
-<!-- OPEN TAB -->
-<div id="open" style="display:none;" class="fluxTabs">
-
-  <span class="flux-title">Open</span><br><br>
-  <p>The open databases you can request are:
-  <ul>
-    <li>datasets from currently running hyphe servers</li>
-    <li>bioRxiv requests (scraped then rehydrated through the API)</li>
-    <li>clinical trials requests (obtained through clinical trials gov API)</li>
-  </ul>
-  </p>
-
-</div>
-
 <div id="flux-manager" class="fluxTabs">
   <svg id="cascade"></svg>
 </div>
 
-<!-- HYPHE TAB -->
-<div id="hyphe" style="display:none;" class="fluxTabs">
-
-  <span class="flux-title">Hyphe</span><br><br>
-  <p id="hyphendpoint"></p>
-  <input class="fluxInput" spellcheck="false" id="hypheaddress" type="text"
-    value="https://hyphe.medialab.sciences-po.fr/demo"><br><br>
-  <button type="submit" class="flux-button" id="hyphe-checker">Check Hyphe
-    endpoint</button><br><br>
-  <button type="submit" style="display:none;" class="flux-button"
-    id="hyphe-exporter">Add to Hyphe
-    endpoints</button><br><br>
-  <button type="submit" class="flux-button" id="hypheDataset">Display available
-    Hyphe endpoints</button><br>
-  <div id="hyphe-dataset-preview"
-    style="position:relative;max-height: 200px;overflow-y: scroll;"></div>
-
-  <div id="hyphe-dataset-list" style="position:relative;"></div>
-
-  <!-- send to SYSTEM instead -->
-
-</div>
 
 <!-- CLINICAL_TRIALS TAB -->
 <div id="clinicalㅤtrials" style="display:none;" class="fluxTabs">
@@ -493,7 +455,7 @@
   style="position:fixed;z-index:20;padding: 5px;right:0px;top:0px;user-select: none;">
   <i class="material-icons  dialog-buttons" id="fluxDisplayButton"
     style="display:none">arrow_back</i>
-  <i class="material-icons dialog-buttons" id="fluxRefreshButton">refresh</i>
+  <i class="material-icons dialog-buttons" id="fluxRefreshButton">arrow_back</i>
   <i class="material-icons dialog-buttons" id="fluxCloseButton">close</i>
 </div>
 

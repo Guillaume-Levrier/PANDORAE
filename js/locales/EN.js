@@ -76,14 +76,16 @@ const EN = {
   },
   flux: {
     tabs: {
-      "web-archive":{
+      "web-archive": {
         id: "web-archive", // id of the main div
         title: "Web archive", // title of the tab (displayed on the page)
         description: `The web archive.`,
-        sections: [ {
+        sections: [
+          {
             type: "tabDatasets",
             data: { id: "web-archive", table: "flux", source: ["web archive"] },
-          },{
+          },
+          {
             type: "APIquery",
             data: {
               helper: {
@@ -95,12 +97,17 @@ const EN = {
               queryField: true,
               function: {
                 name: "queryBnFSolr",
-                args: {dateFrom:"date",dateTo:"date",collections:"radio",facets:"checkbox"},
+                args: {
+                  dateFrom: "date",
+                  dateTo: "date",
+                  collections: "radio",
+                  facets: "checkbox",
+                },
                 aftermath: "timeout", // "disable" disables submitting another query to the same source.
               },
             },
-          },]
-          
+          },
+        ],
       },
 
       gallica: {
@@ -124,6 +131,33 @@ const EN = {
               queryField: true,
               function: {
                 name: "gallicaBasicRetriever",
+                args: {},
+                aftermath: "timeout", // "disable" disables submitting another query to the same source.
+              },
+            },
+          },
+        ],
+      },
+      hyphe: {
+        id: "hyphe", // id of the main div
+        title: "HYPHE", // title of the tab (displayed on the page)
+        description: `Hyphe is a web corpus curation tool
+featuring a research-driven web crawler. Its provides users with a method to build hand-curated web corpora. PANDORAE lets you connect to a hyphe instance and retrieve already built (and ideally tagged) web corpora.<br><br>
+Start by entering a Hyphe API endpoint, then select a corpus. Click Load to directly send that corpus to the explorer.`,
+        sections: [
+          {
+            type: "APIquery",
+            data: {
+              helper: {
+                text: `Hyphe is a software for advanced users, and requires both a deep expertise in the subject being inquired and an solid understanding of how to operate the software. Click this panel to access the hyphe start page.`,
+                url: "https://hyphe.medialab.sciences-po.fr/",
+              },
+              target: "hyphe",
+              key: "hyphe",
+              queryField: true,
+              placeholder: "https://hyphe.medialab.sciences-po.fr/demo/#/login",
+              function: {
+                name: "hypheCheck",
                 args: {},
                 aftermath: "timeout", // "disable" disables submitting another query to the same source.
               },
@@ -261,7 +295,11 @@ const EN = {
         sections: [
           {
             type: "tabDatasets",
-            data: { id: "system", table: "standard", source: "zotero" },
+            data: {
+              id: "system",
+              table: "standard",
+              source: ["zotero", "hyphe"],
+            },
           },
           { type: "loadLocalFlatFile", data: { accept: ".json" } },
         ],

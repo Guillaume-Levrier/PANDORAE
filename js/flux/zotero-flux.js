@@ -3,6 +3,7 @@
 // also be a group library ID, allowing for group or even public work on a same Zotero/PANDORÆ corpus.
 
 import { CM } from "../locales/locales";
+import { displayCorpusList } from "./dataset";
 
 import { powerValve } from "./powervalve";
 import { checkKey, getPassword, userData } from "./userdata";
@@ -33,7 +34,11 @@ const zoteroCollectionRetriever = (options) => {
         };
 
         // create import buttons
+
         const importDiv = document.createElement("div");
+
+        /* 
+        
         importDiv.style.padding = "1rem";
 
         if (userData.distantServices.zotero.library.length > 1) {
@@ -67,9 +72,19 @@ const zoteroCollectionRetriever = (options) => {
         });
 
         importDiv.append(importName, importButton);
-
+ */
         // add list
-        const collectionList = document.createElement("form");
+
+        const collection = [];
+
+        for (let i = 0; i < zoteroColResponse.length; i++) {
+          const key = zoteroColResponse[i].data.key;
+          const name = zoteroColResponse[i].data.name;
+
+          collection.push({ key, name });
+        }
+
+        /* const collectionList = document.createElement("form");
         collectionList.style = "line-height:1.5";
 
         userCollections.append(collectionList);
@@ -110,7 +125,19 @@ const zoteroCollectionRetriever = (options) => {
           );
         }
 
+         */
         userCollections.append(importDiv);
+
+        console.log("=zotero import=");
+        console.log(collection, userCollections, importDiv);
+
+        displayCorpusList(
+          collection,
+          userCollections,
+          importDiv,
+          "zotero",
+          true
+        );
 
         userCollections.style.display = "block";
       })

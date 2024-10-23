@@ -5,7 +5,7 @@ import { istexRetriever } from "./api-retrievers/istex-api-retriever";
 import { regardsRetriever } from "./api-retrievers/regards-citoyens-api-retriever";
 import { reqISSN } from "./api-retrievers/scopus-api-retriever";
 import { wosFullRetriever } from "./api-retrievers/wos-api-retriever";
-import { sysExport } from "./chaeros-to-system";
+import { dataWriter, sysExport } from "./chaeros-to-system";
 import { dimensionsCSLconverter } from "./csljson-remappers/dimensions2csljson";
 import { istexCSLconverter } from "./csljson-remappers/istex2csljson";
 import { scopusConverter } from "./csljson-remappers/scopus2csljson";
@@ -35,7 +35,11 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
     switch (fluxAction) {
       case "standardize":
         standardizeDataset(fluxArgs);
+        break;
 
+      case "hypheImporter":
+        console.log(fluxArgs);
+        dataWriter(["standard"], fluxArgs.hypheCorpus);
         break;
 
       case "computePPS":

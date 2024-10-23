@@ -13,7 +13,7 @@ import { fieldotype } from "./explorers/fieldotype";
 import { filotype } from "./explorers/filotype";
 import { gazouillotype } from "./explorers/gazouillotype";
 import { geotype } from "./explorers/geotype";
-import { hyphotype } from "./explorers/hyphotype";
+import { hyphe } from "./explorers/hyphe";
 import { pharmacotype } from "./explorers/pharmacotype";
 import { regards } from "./explorers/regardotype";
 
@@ -35,8 +35,8 @@ const typeSwitch = (type, data) => {
       pharmacotype(data);
       break;
 
-    case "hyphotype":
-      hyphotype(data);
+    case "hyphe":
+      hyphe(data);
       break;
 
     case "filotype":

@@ -221,6 +221,11 @@ const powerValve = (fluxAction, item) => {
       message = "retrieving bioRxiv data";
       break;
 
+    case "hypheImporter":
+      fluxArgs.hypheCorpus = item;
+
+      break;
+
     case "tweetImporter":
       fluxArgs.tweetImporter = {};
       fluxArgs.tweetImporter.dataset =
@@ -236,6 +241,8 @@ const powerValve = (fluxAction, item) => {
   const logMessage = `Sending to CHÆROS action ${fluxAction} with arguments ${JSON.stringify(
     fluxArgs
   )}.`;
+
+  console.log({ fluxAction, fluxArgs, message });
 
   window.electron.send("console-logs", logMessage);
   window.electron.send("dataFlux", { fluxAction, fluxArgs, message }); // Send request to main process

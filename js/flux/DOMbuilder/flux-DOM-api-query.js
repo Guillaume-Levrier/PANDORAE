@@ -30,8 +30,6 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
   const tabSection = document.createElement("div");
   tabSection.className = "tabSection";
 
-
-
   const queryPrompt = sectionData.queryField
     ? "Fill in the query in the field below."
     : "";
@@ -70,8 +68,6 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
 
   const queryField = document.createElement("input");
 
-  
-
   sendAPIQueryButton.addEventListener("click", () => {
     fluxButtonClicked(sendAPIQueryButton, sectionData.function.aftermath);
     if (sectionData.queryField) {
@@ -80,145 +76,137 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
     fluxSwitch(sectionData.function.name, sectionData.function.args);
   });
 
-console.log(sectionData)
-
-   
   if (sectionData.queryField) {
     queryField.type = "text";
     queryField.className = "fluxInput";
     tabSection.append(queryField);
+
+    if (sectionData.hasOwnProperty("placeholder")) {
+      queryField.placeholder = sectionData.placeholder;
+    }
   }
-  
-  
-   tabSection.append(sendAPIQueryButton)
-  
-const functionArguments= Object.values(sectionData.function.args);
 
-  if (functionArguments.length>0) {
-      buildAdditionalArguments(sectionData,tabSection) 
-  } 
+  tabSection.append(sendAPIQueryButton);
 
-tabSection.append(queryResultDiv);
+  const functionArguments = Object.values(sectionData.function.args);
+
+  if (functionArguments.length > 0) {
+    buildAdditionalArguments(sectionData, tabSection);
+  }
+
+  tabSection.append(queryResultDiv);
 
   tab.append(genHr(), tabSection);
 };
 
-const buildAdditionalArguments=(data,sectionDiv)=> {
-switch (data.key) {
-  case "bnf-solr":
-  
-    buildBnFsolrArguments(data,sectionDiv);
+const buildAdditionalArguments = (data, sectionDiv) => {
+  switch (data.key) {
+    case "bnf-solr":
+      buildBnFsolrArguments(data, sectionDiv);
 
-    break;
+      break;
 
-  default:
-    break;
-}
+    default:
+      break;
+  }
+};
 
+const buildBnFsolrArguments = (data, sectionDiv) => {
+  const optionsDiv = document.createElement("div");
+  optionsDiv.className = "fluxRequestOptionDiv";
 
-} 
+  sectionDiv.append(optionsDiv);
 
-const buildBnFsolrArguments=(data,sectionDiv)=>{
+  for (const key in availability.dnsLocalServiceList) {
+    const service = availability.dnsLocalServiceList[key];
 
+    if (service.type === "BNF-SOLR") {
+      const solrCont = document.createElement("div");
 
-const optionsDiv = document.createElement("div");
-optionsDiv.className="fluxRequestOptionDiv";
+      solrCont.id = "BNF-SOLR";
+      solrCont.style.display = "none";
+      solrCont.className = "fluxTabs";
 
-sectionDiv.append(optionsDiv)
+      const sourceRequest = `http://${service.url}/solr/admin/collections?action=LIST&wt=json`;
 
-for (const key in availability.dnsLocalServiceList) {
- const service = availability.dnsLocalServiceList[key]
- 
- if (service.type==="BNF-SOLR"){
-  
-    
+      // The answer is in the array at r.collections
 
-            const solrCont = document.createElement("div");
+      var sourceSolrRadio = "";
 
-            solrCont.id = "BNF-SOLR";
-            solrCont.style.display = "none";
-            solrCont.className = "fluxTabs";
+      var coreSource; // In theory, there is only one core collection
 
-            const sourceRequest = `http://${service.url}/solr/admin/collections?action=LIST&wt=json` 
-          
+      fetch(sourceRequest)
+        .then((r) => r.json())
+        .then((r) => {
+          console.log(r);
 
-            // The answer is in the array at r.collections
+          optionsDiv.innerHTML += "Available sources<br>";
+          coreSource = r.collections[0];
+          for (let i = 0; i < r.collections.length; i++) {
+            const col = r.collections[i];
+            let checked = i === 0 ? "checked" : "";
 
-            var sourceSolrRadio = "";
+            const collectionContainer = document.createElement("div");
 
-            var coreSource; // In theory, there is only one core collection
+            const collectionRadio = document.createElement("input");
+            collectionRadio.type = "radio";
+            collectionRadio.name = `bnf-solr-radio-${key}`;
+            collectionRadio.id = col;
+            collectionRadio.checked = checked;
 
-            fetch(sourceRequest)
-              .then((r) => r.json())
-              .then((r) => {
-                console.log(r)
+            const collectionLabel = document.createElement("label");
+            collectionLabel.for = col;
+            collectionLabel.innerText = col;
 
-                optionsDiv.innerHTML+="Available sources<br>";
-                coreSource = r.collections[0];
-                for (let i = 0; i < r.collections.length; i++) {
-                  const col = r.collections[i];
+            collectionContainer.append(collectionRadio, collectionLabel);
+
+            optionsDiv.append(collectionContainer);
+          }
+          optionsDiv.append(genHr());
+        })
+        .then(() =>
+          fetch(
+            `http://${service.url}/solr/${coreSource}/select?q=*rows=0&facet=on&facet.field=collections`
+          )
+            .then((facet) => facet.json())
+            .then((facets) => {
+              console.log(facets);
+              console.log(key);
+
+              optionsDiv.innerHTML += "Available collections<br>";
+
+              const facetList = facets.facet_counts.facet_fields.collections;
+
+              var facetCheckBox = "";
+
+              const facetBox = document.createElement("div");
+
+              optionsDiv.append(facetBox);
+
+              for (let i = 0; i < facetList.length; i++) {
+                const face = facetList[i];
+
+                if (typeof face === "string") {
                   let checked = i === 0 ? "checked" : "";
 
-                  const collectionContainer = document.createElement("div");
-                  
-                  const collectionRadio = document.createElement("input")
-                  collectionRadio.type="radio";
-                  collectionRadio.name=`bnf-solr-radio-${key}`
-                  collectionRadio.id=col;
-                  collectionRadio.checked=checked;
+                  const facetContainer = document.createElement("div");
 
-                  const collectionLabel = document.createElement("label")
-                  collectionLabel.for=col;
-                  collectionLabel.innerText=col;
+                  const facetCheckBox = document.createElement("input");
+                  facetCheckBox.type = "checkbox";
+                  facetCheckBox.name = `bnf-solr-radio-${key}`;
+                  facetCheckBox.id = face;
+                  facetCheckBox.checked = checked;
 
-                  collectionContainer.append(collectionRadio,collectionLabel)
+                  const facetLabel = document.createElement("label");
+                  facetLabel.for = face;
+                  facetLabel.innerText = face;
 
-                  optionsDiv.append(collectionContainer)
-                  
+                  facetContainer.append(facetCheckBox, facetLabel);
+
+                  facetBox.append(facetContainer);
                 }
-                optionsDiv.append(genHr())
-              })
-              .then(() => fetch(`http://${service.url}/solr/${coreSource}/select?q=*rows=0&facet=on&facet.field=collections`)
-                  .then((facet) => facet.json())
-                  .then((facets) => {
-                    console.log(facets)
-                    console.log(key)
-
-                     optionsDiv.innerHTML+="Available collections<br>";
-
-                    const facetList =
-                      facets.facet_counts.facet_fields.collections;
-
-                    var facetCheckBox = "";
-
-                    const facetBox =   document.createElement("div");
-
-optionsDiv.append(facetBox)
-
-                    for (let i = 0; i < facetList.length; i++) {
-                      const face = facetList[i];
-
-                      if (typeof face === "string") {
-                        let checked = i === 0 ? "checked" : "";
-
-                        const facetContainer = document.createElement("div");
-                  
-                  const facetCheckBox = document.createElement("input")
-                  facetCheckBox.type="checkbox";
-                  facetCheckBox.name=`bnf-solr-radio-${key}`
-                  facetCheckBox.id=face;
-                  facetCheckBox.checked=checked;
-
-                  const facetLabel = document.createElement("label")
-                  facetLabel.for=face;
-                  facetLabel.innerText=face;
-
-                  facetContainer.append(facetCheckBox,facetLabel)
-
-                  facetBox.append(facetContainer)
-                      }
-                    }
-/*
+              }
+              /*
                     solrCont.innerHTML = `<!-- BNF SOLR TAB -->     
           <span class="flux-title">${service.toUpperCase()}</span>
           <br><br>
@@ -266,17 +254,10 @@ optionsDiv.append(facetBox)
 
 
                     */
-                  })
-              );
-
-          
- } 
- 
-}
-
-
-  
-
-} 
+            })
+        );
+    }
+  }
+};
 
 export { addLocalFileSection, addAPIquerySection };

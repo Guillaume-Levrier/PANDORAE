@@ -1,24 +1,26 @@
 //======== Hyphe Endpoint Chercker ======
-var hyphetarget;
 
-const hypheCheck = (target) => {
-  let chk = document.getElementById("hyphe-checker");
+import { displayCorpusList } from "../../dataset";
+import { powerValve } from "../../powervalve";
 
+const hypheCheck = (args) => {
+  var target = args.query;
+  console.log(target);
   if (target.indexOf("/#/login") > -1) {
     target = target.replace("/#/login", "");
   }
 
+  var hyphetarget;
+
   fetch(target + "/api/", {
     method: "POST",
     body: { method: "get_status", params: [null] },
-    headers: { "Content-Type": "application/json" },
+    /* headers: { "Content-Type": "application/json" }, */
   })
     .then((res) => {
       if (res.ok) {
         hyphetarget = target + "/api/";
-        chk.style.color = "DarkOliveGreen";
-        chk.innerText = "Hyphe enpoint reached";
-        document.getElementById("hyphe-exporter").style.display = "block";
+        hypheCorpusList(hyphetarget, args.resultDiv);
       } else {
         fetch(target + "-api/", {
           method: "POST",
@@ -26,108 +28,59 @@ const hypheCheck = (target) => {
           headers: { "Content-Type": "application/json" },
         }).then((res2) => {
           if (res2.ok) {
-            hyphetarget = target + "-api/";
-            chk.style.color = "DarkOliveGreen";
-            chk.innerText = "Hyphe enpoint reached";
-            document.getElementById("hyphe-exporter").style.display = "block";
-          } else {
-            chk.style.color = "DarkRed";
-            chk.innerText = "Failure";
+            hypheCorpusList(hyphetarget, args.resultDiv);
           }
         });
       }
     })
     .catch((e) => {
       console.log(e);
-      chk.style.color = "DarkRed";
-      chk.innerText = "Failure";
     });
 };
 
-//======== Hyphe Endpoint Chercker ======
+//======== Hyphe Endpoint Loader ======
 
-const hypheCorpusList = (target, prevId) => {
+let lastEndpointUsed = "";
+
+const hypheCorpusList = (target, resultDiv) =>
   fetch(target, {
     method: "POST",
     body: JSON.stringify({ method: "list_corpus" }),
   })
     .then((res) => res.json())
     .then((hypheResponse) => {
+      console.log(hypheResponse);
       if (hypheResponse[0].code === "success") {
-        let corpusList = document.createElement("UL");
-
-        for (var corpus in hypheResponse[0].result) {
-          let corpusID = hypheResponse[0].result[corpus].corpus_id;
-
-          if (hypheResponse[0].result[corpus].password) {
-            var line = document.createElement("LI");
-            line.id = corpusID;
-
-            var linCont = document.createElement("DIV");
-            linCont.innerHTML =
-              "<strong>" +
-              hypheResponse[0].result[corpus].name +
-              "</strong> - IN WE:" +
-              hypheResponse[0].result[corpus].webentities_in +
-              " - password : <input id=" +
-              corpus +
-              "pass" +
-              " type='password'>";
-
-            var load = document.createElement("INPUT");
-            load.type = "button";
-            load.value = "load";
-            load.style.marginLeft = "10px";
-            load.addEventListener("click", (e) => {
-              loadHyphe(hypheResponse[0].result[corpus].corpus_id, target);
-            });
-
-            line.appendChild(linCont);
-            linCont.appendChild(load);
-            corpusList.appendChild(line);
-          } else {
-            var line = document.createElement("LI");
-            line.id = corpusID;
-
-            var linCont = document.createElement("DIV");
-            linCont.innerHTML =
-              "<strong>" +
-              hypheResponse[0].result[corpus].name +
-              "</strong> - IN WE:" +
-              hypheResponse[0].result[corpus].webentities_in +
-              " - ";
-
-            var load = document.createElement("INPUT");
-            load.type = "button";
-            load.value = "load";
-            load.addEventListener("click", (e) => {
-              loadHyphe(corpusID, target);
-            });
-
-            line.appendChild(linCont);
-            linCont.appendChild(load);
-            corpusList.appendChild(line);
-          }
+        lastEndpointUsed = target;
+        const collection = [];
+        for (var corpusName in hypheResponse[0].result) {
+          const corpus = hypheResponse[0].result[corpusName];
+          const Name = corpus.corpus_id;
+          const webin = corpus.webentities_in;
+          const lastActive = new Date(
+            corpus.last_activity
+          ).toLocaleDateString();
+          collection.push({
+            Name,
+            "Web Entities IN": webin,
+            "Last Activity": lastActive,
+            Password: corpus.password,
+          });
         }
 
-        document.getElementById(prevId).appendChild(corpusList); // Display dataPreview in a div
-      } else {
+        const detailDiv = document.createElement("div");
+        detailDiv.style = `padding:1rem;margin:1,5rem;line-height:1.2rem;border: 1px solid #141414;display:none`;
+        resultDiv.append(detailDiv);
+        displayCorpusList(collection, resultDiv, detailDiv, "hyphe", false);
+        resultDiv.style.display = "block";
       }
     })
-    .catch((e) => {});
-};
+    .catch((e) => {
+      throw e;
+    });
 
-const loadHyphe = (corpus, endpoint, pass) => {
-  let password = false;
-  if (pass) {
-    password = document.getElementById(corpus + "pass").value;
-  }
-
-  document.getElementById(corpus).innerHTML = "Loading corpus, please wait ...";
-
-  var corpusRequests = [];
-
-  fetch(endpoint + "/api/", {
+const loadHyphe = (corpus, password) =>
+  fetch(lastEndpointUsed, {
     method: "POST",
     body: JSON.stringify({
       method: "start_corpus",
@@ -136,6 +89,7 @@ const loadHyphe = (corpus, endpoint, pass) => {
   })
     .then((res) => res.json())
     .then((startingCorpus) => {
+      var corpusRequests = [];
       let corpusStatus = startingCorpus[0].result;
 
       //get WE stats
@@ -152,7 +106,7 @@ const loadHyphe = (corpus, endpoint, pass) => {
         method: "POST",
         body: JSON.stringify({
           method: "store.get_webentities_by_status",
-          params: { corpus: corpus, status: "in", count: -1 },
+          params: { corpus, status: "in", count: -1 },
         }),
       });
 
@@ -161,7 +115,11 @@ const loadHyphe = (corpus, endpoint, pass) => {
         method: "POST",
         body: JSON.stringify({
           method: "store.get_webentities_network",
-          params: { corpus: corpus },
+          params: {
+            corpus,
+            include_links_from_OUT: false,
+            include_links_from_DISCOVERED: false,
+          },
         }),
       });
 
@@ -170,12 +128,12 @@ const loadHyphe = (corpus, endpoint, pass) => {
         method: "POST",
         body: JSON.stringify({
           method: "store.get_tags",
-          params: { namespace: null, corpus: corpus },
+          params: { namespace: null, corpus },
         }),
       });
 
       const retrieveCorpus = () => {
-        Promise.all(corpusRequests.map((d) => fetch(endpoint + "/api/", d)))
+        Promise.all(corpusRequests.map((d) => fetch(lastEndpointUsed, d)))
           .then((responses) => Promise.all(responses.map((res) => res.json())))
           .then((status) => {
             let success = true;
@@ -198,11 +156,17 @@ const loadHyphe = (corpus, endpoint, pass) => {
 
             // With the response
             if (success) {
-              pandodb.hyphotype.add({
+              const date = () =>
+                new Date().toLocaleDateString() +
+                "-" +
+                new Date().toLocaleTimeString();
+
+              const hypheCorpus = {
                 id: corpus + date(),
                 date: date(),
                 name: corpus,
-                content: {
+                source: "hyphe",
+                data: {
                   corpusStatus: corpusStatus,
                   weStatus: weStatus,
                   nodeData: nodeData,
@@ -210,12 +174,9 @@ const loadHyphe = (corpus, endpoint, pass) => {
                   tags: tags,
                 },
                 corpus: true,
-              });
-              document.getElementById(corpus).innerHTML =
-                "<mark>Corpus added to hyphotype</mark>";
-            } else {
-              document.getElementById(corpus).innerHTML =
-                "<mark><strong>Failure</strong> - check your password or the server's endpoints</mark>";
+              };
+
+              powerValve("hypheImporter", hypheCorpus);
             }
           })
           .catch((e) => {
@@ -227,22 +188,5 @@ const loadHyphe = (corpus, endpoint, pass) => {
     .catch((e) => {
       console.log(e);
     });
-};
 
-// ======== endpointConnector ======
-
-const endpointConnector = (service, target) => {
-  pandodb.open();
-
-  pandodb[service].add({
-    id: target,
-    date: date(),
-    name: target,
-    content: target,
-  });
-
-  document.getElementById(service + "-exporter").innerText =
-    "Added to " + service + " endpoints";
-};
-
-export { hypheCheck, endpointConnector };
+export { hypheCheck, loadHyphe };

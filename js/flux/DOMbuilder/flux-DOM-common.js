@@ -50,6 +50,8 @@ const addDatasetDisplaySection = (tabData, sectionData, tab) => {
       detail: datasetDetailDiv.id,
     };
 
+    console.log(data);
+
     // Pass these informations to the datasetDisplay function
     datasetDisplay(data);
 

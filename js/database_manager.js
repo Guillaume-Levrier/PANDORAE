@@ -66,13 +66,18 @@ const getDatasetList = (parameters) =>
     .where("source")
     .anyOf(parameters.source)
     .toArray()
-    .then((r) =>
-      window.electron.send("database_reply", {
+    .then((r) => {
+      console.log(r);
+      console.log(parameters);
+
+      pandoraeDatabase.standard.toArray().then((r) => console.log(r));
+
+      return window.electron.send("database_reply", {
         r,
         reply_type: "datasetList",
         parameters,
-      })
-    );
+      });
+    });
 
 const getTypeDatasets = (parameters) => {
   pandoraeDatabase.type.toArray().then((r) =>
