@@ -12,7 +12,7 @@ var whois;
 // back to Types only what it needs to know.
 
 // If the SharedWorker doesn't exist yet
-
+/* 
 var multiThreader = new Worker("mul[type]threader.js"); // Create a SharedWorker named multiThreader based on that file
 
 multiThreader.postMessage({
@@ -34,7 +34,7 @@ multiThreader.onerror = (err) => {
 
   window.electron.send("console-logs", "ERROR - MULTITHREADING DISABLED"); // Send an error message to the console
   window.electron.send("console-logs", JSON.stringify(err)); // Send the actual error content to the console
-};
+}; */
 
 // ========= HYPHOTYPE =========
 const hyphe = (datajson) => {
@@ -220,7 +220,7 @@ const hyphe = (datajson) => {
     "<br><div id='tagList'></div>" +
     "<br><br><div id='weDetail'></div><br><br><br><div id='whois'></div><br><br><br><br><br>";
 
-  multiThreader.postMessage({
+  /* multiThreader.postMessage({
     type: "hy",
     nodeData: nodeData,
     links: links,
@@ -229,388 +229,438 @@ const hyphe = (datajson) => {
     height: height,
   });
 
-  multiThreader.onmessage = (hyWorkerAnswer) => {
-    if (hyWorkerAnswer.data.type === "tick") {
-      progBarSign(hyWorkerAnswer.data.prog);
-    } // removed in export
-    else if (hyWorkerAnswer.data.type === "hy") {
-      nodeData = hyWorkerAnswer.data.nodeData;
-      links = hyWorkerAnswer.data.links;
-      contours = hyWorkerAnswer.data.contours;
+  multiThreader.onmessage = (hyWorkerAnswer) => { */
 
-      var densityContour = view
-        .insert("g") // Create contour density graph
-        .attr("fill", "none") // Start by making it empty/transparent
-        .attr("class", "contours")
-        .attr("stroke", "GoldenRod") // Separation lines color
-        .attr("stroke-width", 0.5) // Line thickness
-        .attr("stroke-linejoin", "round") // Join style
-        .selectAll("path")
-        .data(contours)
-        .enter()
-        .append("path")
-        .attr("stroke-width", 0.5)
-        .attr("fill", (d) => colorFill(d.value * 100))
-        .attr("d", d3.geoPath());
+  console.log("got there1");
 
-      const drawAltitudeLevel = (selectedData) => {
-        var thresholds = [];
+  nodeData.forEach((node) => {
+    for (let tag in tags) {
+      if (node.tags.hasOwnProperty("USER")) {
+      } else {
+        node.tags.USER = {};
+      }
 
-        selectedData.forEach((thisContour) =>
-          thresholds.push(parseInt(thisContour.value * 10000))
-        );
-
-        function addlabel(text, xy, angle) {
-          angle += Math.cos(angle) < 0 ? Math.PI : 0;
-
-          labels_g
-            .append("text")
-            .attr("fill", "#fff")
-            .attr("stroke", "none")
-            .attr("class", "labels")
-            .attr("text-anchor", "middle")
-            .attr("dy", "0.3em")
-            .attr(
-              "transform",
-              `translate(${xy})rotate(${parseInt(angle * (180 / Math.PI))})`
-            )
-            .style("font-weight", "bolder")
-            .text(text)
-            .style("font-size", ".5px");
-        }
-
-        var labels_g = view.append("g").attr("id", "labels_g");
-
-        for (const cont of selectedData) {
-          cont.coordinates.forEach((polygon) =>
-            polygon.forEach((ring, j) => {
-              const p = ring.slice(1, Infinity),
-                possibilities = d3.range(
-                  cont.coordinates.length,
-                  cont.coordinates.length * 5
-                ),
-                scores = possibilities.map((d) => -((p.length - 1) % d)),
-                n = possibilities[d3.leastIndex(scores)],
-                start =
-                  1 +
-                  (d3.leastIndex(p.map((xy) => (j === 0 ? -1 : 1) * xy[1])) %
-                    n),
-                margin = 2;
-
-              p.forEach((xy, i) => {
-                if (
-                  i % n === start &&
-                  xy[0] > margin &&
-                  xy[0] < width - margin &&
-                  xy[1] > margin &&
-                  xy[1] < height - margin
-                ) {
-                  const a = (i - 2 + p.length) % p.length,
-                    b = (i + 2) % p.length,
-                    dx = p[b][0] - p[a][0],
-                    dy = p[b][1] - p[a][1];
-                  if (dx === 0 && dy === 0) return;
-
-                  addlabel(
-                    parseInt(cont.value * 10000),
-                    xy,
-                    Math.atan2(dy, dx)
-                  );
-                }
-              });
-            })
-          );
-        }
-      };
-
-      drawAltitudeLevel(contours);
-
-      var nodes = view
-        .insert("g")
-        .selectAll("circle")
-        .data(nodeData)
-        .enter()
-        .append("circle")
-        .style("fill", (d) => color(d.tags.USER))
-        .attr("stroke", "black")
-        .attr("cx", (d) => d.x)
-        .attr("cy", (d) => d.y)
-        .style("cursor", "pointer")
-        .attr("stroke-width", 0.2)
-        .attr("r", (d) => 1 + Math.log(d.indegree + 1))
-        .attr("id", (d) => d.id)
-        .on("click", (event, d) => {
-          var weDetail = "<h3>WE Detail</h3>";
-
-          for (var prop in d) {
-            weDetail =
-              weDetail + "<br><strong>" + prop + "</strong>: " + d[prop];
-          }
-
-          document.getElementById("weDetail").innerHTML = weDetail;
-          document.getElementById("whois").innerHTML = "";
-
-          (async function () {
-            var whoisDetails = await whois(d.name);
-
-            var whoisResult = "<h3>Whois result</h3>";
-            for (var prop in whoisDetails) {
-              whoisResult =
-                whoisResult +
-                "<br><strong>" +
-                prop +
-                "</strong>: " +
-                whoisDetails[prop];
-            }
-
-            document.getElementById("whois").innerHTML = whoisResult;
-          })();
-        });
-
-      const addWeTitle = () => {
-        var webEntName = view
-          .selectAll(".webEntName")
-          .data(nodeData)
-          .enter()
-          .append("text")
-          .attr("class", "webEntName")
-          .attr("id", (d) => d.name)
-          .style("font-size", "2px")
-          .attr("x", (d) => d.x)
-          .attr("y", (d) => d.y)
-          .attr("dy", -0.5)
-          .style("font-family", "sans-serif")
-          .text((d) => d.name);
-
-        document
-          .querySelectorAll(".webEntName")
-          .forEach((d) => (d.__data__.dx = -d.getBBox().width / 2));
-        webEntName.attr("dx", (d) => d.dx);
-
-        nodeData.forEach(
-          (d) => (d.box = document.getElementById(d.name).getBBox())
-        );
-
-        var webEntNameRect = view
-          .selectAll("rect")
-          .data(nodeData)
-          .enter()
-          .append("rect")
-          .attr("class", "contrastRect")
-          .attr("fill", "white")
-          .attr("stroke", "black")
-          .attr("stroke-width", 0.1)
-          .attr("x", (d) => d.box.x)
-          .attr("y", (d) => d.box.y)
-          .attr("width", (d) => d.box.width + 1)
-          .attr("height", (d) => d.box.height + 0.2);
-
-        nodes.raise();
-        webEntName.raise();
-      };
-
-      addWeTitle();
-
-      const resetContourGraph = () => {
-        d3.selectAll(".contours").remove();
-        d3.select("#labels_g").remove();
-
-        view
-          .insert("g") // Create contour density graph
-          .attr("fill", "none") // Start by making it empty/transparent
-          .attr("class", "contours")
-          .attr("stroke", "GoldenRod") // Separation lines color
-          .attr("stroke-width", 0.5) // Line thickness
-          .attr("stroke-linejoin", "round") // Join style
-          .selectAll("path")
-          .data(contours)
-          .enter()
-          .append("path")
-          .attr("stroke-width", 0.5)
-          .attr("fill", (d) => colorFill(d.value * 100))
-          .attr("d", d3.geoPath());
-
-        drawAltitudeLevel(contours);
-
-        d3.selectAll(".contours").lower();
-        d3.selectAll("circle").attr("opacity", "1");
-        d3.selectAll(".contrastRect").attr("opacity", "1");
-        d3.selectAll(".webEntName").attr("opacity", "1");
-        d3.selectAll(".labels").attr("opacity", "1");
-      };
-
-      const displayContour = () => {
-        let checkTags = document.querySelectorAll("input.tagCheckbox");
-
-        let cat = document.getElementById("tagDiv").value;
-
-        let tags = [];
-
-        checkTags.forEach((box) => {
-          if (box.checked) {
-            tags.push(box.value);
-          }
-        });
-
-        d3.selectAll(".contours").remove();
-
-        view
-          .insert("g") // Create contour density graph
-          .attr("fill", "none") // Start by making it empty/transparent
-          .attr("class", "contours")
-          .attr("id", "oldContour")
-          .attr("stroke", "GoldenRod") // Separation lines color
-          .attr("stroke-width", 0.5) // Line thickness
-          .attr("stroke-linejoin", "round") // Join style
-          .attr("opacity", 0.25)
-          .selectAll("path")
-          .data(contours)
-          .enter()
-          .append("path")
-          .attr("stroke-width", 0.5)
-          .attr("fill", (d) => colorFill(d.value * 100))
-          .attr("d", d3.geoPath());
-        d3.selectAll(".contours").lower();
-
-        var tagNodes = [];
-
-        tags.forEach((tag) => {
-          let thisTagNodes = nodeData.filter(
-            (item) => item.tags.USER[cat][0] === tag
-          );
-          thisTagNodes.forEach((node) => tagNodes.push(node));
-        });
-
-        var thisContour = d3
-          .contourDensity()
-          .size([width, height])
-          .weight((d) => d.indegree)
-          .x((d) => d.x)
-          .y((d) => d.y)
-          .bandwidth(9)
-          .thresholds(d3.max(tagNodes, (d) => d.indegree))(tagNodes);
-
-        d3.select("#labels_g").remove();
-
-        var thisContourPath = view
-          .insert("g") // Create contour density graph
-          .attr("fill", "none") // Start by making it empty/transparent
-          .attr("class", "contours")
-          .attr("stroke", "GoldenRod") // Separation lines color
-          .attr("stroke-width", 0.5) // Line thickness
-          .attr("stroke-linejoin", "round") // Join style
-          .selectAll("path")
-          .data(thisContour)
-          .enter()
-          .append("path")
-          .attr("stroke-width", 0.5)
-          .attr("fill", (d) => colorFill(d.value * 100))
-          .attr("d", d3.geoPath());
-
-        drawAltitudeLevel(thisContour);
-
-        d3.selectAll(".contours").lower();
-        d3.select("#oldContour").lower();
-        d3.selectAll("circle").attr("opacity", ".1");
-        d3.selectAll(".contrastRect").attr("opacity", ".1");
-        d3.selectAll(".webEntName").attr("opacity", ".1");
-        tags.forEach((tag) => {
-          d3.selectAll("circle")
-            .filter((item) => item.tags.USER[cat][0] === tag)
-            .attr("opacity", "1");
-          d3.selectAll(".contrastRect")
-            .filter((item) => item.tags.USER[cat][0] === tag)
-            .attr("opacity", "1");
-          d3.selectAll(".webEntName")
-            .filter((item) => item.tags.USER[cat][0] === tag)
-            .attr("opacity", "1");
-        });
-
-        d3.select("#legend").remove();
-
-        var legend = svg.insert("g").attr("id", "legend");
-
-        var shownTags = "";
-
-        for (let i = 0; i < tags.length; i++) {
-          shownTags = shownTags + tags[i] + " ";
-        }
-
-        var legendText = legend.append("text").text(cat + " - " + shownTags);
-
-        let textBound = document.querySelector("#legend").getBBox();
-
-        legend
-          .append("rect")
-          .attr("id", "legend")
-          .attr("fill", "white")
-          .attr("stroke", "black")
-          .attr("stroke-width", 0.5)
-          .attr("x", width - toolWidth - parseInt(textBound.width) - 20)
-          .attr("y", height - 30)
-          .attr("width", parseInt(textBound.width) + 20)
-          .attr("height", 30);
-
-        legendText
-          .attr("x", width - toolWidth - parseInt(textBound.width) - 15)
-          .attr("y", height - 30)
-          .attr("dx", 5)
-          .attr("dy", 20);
-
-        legendText.raise();
-      };
-
-      const showTags = (tag, list) => {
-        let tagList = document.getElementById(list);
-        tagList.innerHTML = "";
-        let thisTagList = document.createElement("DIV");
-        let tagsArray = [];
-
-        for (var prop in tags) {
-          if (prop === tag) {
-            for (let thisTag in tags[prop]) {
-              // let criteria = prop;
-              var thisTagCheckbox = document.createElement("INPUT");
-              thisTagCheckbox.type = "checkbox";
-              thisTagCheckbox.className = "tagCheckbox";
-              //thisTagCheckbox.id = "chck"+thisTag;
-              thisTagCheckbox.value = thisTag;
-              thisTagCheckbox.addEventListener("change", (e) => {
-                displayContour();
-              });
-
-              var thisTagOption = document.createElement("SPAN");
-              thisTagOption.innerText = thisTag + ":" + tags[prop][thisTag];
-              thisTagOption.style.color = color(thisTag);
-
-              var thisTagLine = document.createElement("DIV");
-              thisTagLine.value = parseInt(tags[prop][thisTag]);
-              thisTagLine.appendChild(thisTagCheckbox);
-              thisTagLine.appendChild(thisTagOption);
-
-              tagsArray.push(thisTagLine);
-            }
-          }
-        }
-
-        tagsArray.sort((a, b) => d3.descending(a.value, b.value));
-        tagsArray.forEach((d) => thisTagList.appendChild(d));
-        tagList.appendChild(thisTagList);
-        nodes.style("fill", (d) => color(d.tags.USER[tag][0]));
-        nodes.raise();
-      };
-
-      setTimeout(() => {
-        document.getElementById("tagDiv").addEventListener("change", (e) => {
-          resetContourGraph();
-          showTags(e.srcElement.value, "tagList");
-        });
-      }, 200);
-
-      loadType();
-      document.getElementById("tooltip").innerHTML = tooltipTop;
+      if (node.tags.USER.hasOwnProperty(tag)) {
+      } else {
+        node.tags.USER[tag] = ["NA"];
+      }
     }
-  }; // end of HY worker answer
+  });
+
+  var simulation = d3
+    .forceSimulation(nodeData) // Start the force graph
+    .force(
+      "link",
+      d3
+        .forceLink(links)
+        .id((d) => d.id)
+        .distance(0)
+        .strength(1)
+    )
+    .force("charge", d3.forceManyBody().strength(-600))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .stop();
+
+  for (
+    var i = 0,
+      n = Math.ceil(
+        Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay())
+      );
+    i <= n;
+    ++i
+  ) {
+    simulation.tick();
+    let prog = (i / n) * 100;
+    postMessage({ type: "tick", prog: prog });
+  }
+
+  var contours = d3
+    .contourDensity()
+    .size([width, height])
+    .weight((d) => d.indegree)
+    .x((d) => d.x)
+    .y((d) => d.y)
+    .bandwidth(9)
+    .thresholds(d3.max(nodeData, (d) => d.indegree))(nodeData);
+
+  //  nodeData = hyWorkerAnswer.data.nodeData;
+  //      links = hyWorkerAnswer.data.links;
+  //     contours = hyWorkerAnswer.data.contours;
+
+  var densityContour = view
+    .insert("g") // Create contour density graph
+    .attr("fill", "none") // Start by making it empty/transparent
+    .attr("class", "contours")
+    .attr("stroke", "GoldenRod") // Separation lines color
+    .attr("stroke-width", 0.5) // Line thickness
+    .attr("stroke-linejoin", "round") // Join style
+    .selectAll("path")
+    .data(contours)
+    .enter()
+    .append("path")
+    .attr("stroke-width", 0.5)
+    .attr("fill", (d) => colorFill(d.value * 100))
+    .attr("d", d3.geoPath());
+
+  const drawAltitudeLevel = (selectedData) => {
+    var thresholds = [];
+
+    selectedData.forEach((thisContour) =>
+      thresholds.push(parseInt(thisContour.value * 10000))
+    );
+
+    function addlabel(text, xy, angle) {
+      angle += Math.cos(angle) < 0 ? Math.PI : 0;
+
+      labels_g
+        .append("text")
+        .attr("fill", "#fff")
+        .attr("stroke", "none")
+        .attr("class", "labels")
+        .attr("text-anchor", "middle")
+        .attr("dy", "0.3em")
+        .attr(
+          "transform",
+          `translate(${xy})rotate(${parseInt(angle * (180 / Math.PI))})`
+        )
+        .style("font-weight", "bolder")
+        .text(text)
+        .style("font-size", ".5px");
+    }
+
+    var labels_g = view.append("g").attr("id", "labels_g");
+
+    for (const cont of selectedData) {
+      cont.coordinates.forEach((polygon) =>
+        polygon.forEach((ring, j) => {
+          const p = ring.slice(1, Infinity),
+            possibilities = d3.range(
+              cont.coordinates.length,
+              cont.coordinates.length * 5
+            ),
+            scores = possibilities.map((d) => -((p.length - 1) % d)),
+            n = possibilities[d3.leastIndex(scores)],
+            start =
+              1 +
+              (d3.leastIndex(p.map((xy) => (j === 0 ? -1 : 1) * xy[1])) % n),
+            margin = 2;
+
+          p.forEach((xy, i) => {
+            if (
+              i % n === start &&
+              xy[0] > margin &&
+              xy[0] < width - margin &&
+              xy[1] > margin &&
+              xy[1] < height - margin
+            ) {
+              const a = (i - 2 + p.length) % p.length,
+                b = (i + 2) % p.length,
+                dx = p[b][0] - p[a][0],
+                dy = p[b][1] - p[a][1];
+              if (dx === 0 && dy === 0) return;
+
+              addlabel(parseInt(cont.value * 10000), xy, Math.atan2(dy, dx));
+            }
+          });
+        })
+      );
+    }
+  };
+
+  console.log("got there2");
+
+  drawAltitudeLevel(contours);
+
+  var nodes = view
+    .insert("g")
+    .selectAll("circle")
+    .data(nodeData)
+    .enter()
+    .append("circle")
+    .style("fill", (d) => color(d.tags.USER))
+    .attr("stroke", "black")
+    .attr("cx", (d) => d.x)
+    .attr("cy", (d) => d.y)
+    .style("cursor", "pointer")
+    .attr("stroke-width", 0.2)
+    .attr("r", (d) => 1 + Math.log(d.indegree + 1))
+    .attr("id", (d) => d.id)
+    .on("click", (event, d) => {
+      var weDetail = "<h3>WE Detail</h3>";
+
+      for (var prop in d) {
+        weDetail = weDetail + "<br><strong>" + prop + "</strong>: " + d[prop];
+      }
+
+      document.getElementById("weDetail").innerHTML = weDetail;
+      document.getElementById("whois").innerHTML = "";
+
+      (async function () {
+        var whoisDetails = await whois(d.name);
+
+        var whoisResult = "<h3>Whois result</h3>";
+        for (var prop in whoisDetails) {
+          whoisResult =
+            whoisResult +
+            "<br><strong>" +
+            prop +
+            "</strong>: " +
+            whoisDetails[prop];
+        }
+
+        document.getElementById("whois").innerHTML = whoisResult;
+      })();
+    });
+
+  const addWeTitle = () => {
+    var webEntName = view
+      .selectAll(".webEntName")
+      .data(nodeData)
+      .enter()
+      .append("text")
+      .attr("class", "webEntName")
+      .attr("id", (d) => d.name)
+      .style("font-size", "2px")
+      .attr("x", (d) => d.x)
+      .attr("y", (d) => d.y)
+      .attr("dy", -0.5)
+      .style("font-family", "sans-serif")
+      .text((d) => d.name);
+
+    document
+      .querySelectorAll(".webEntName")
+      .forEach((d) => (d.__data__.dx = -d.getBBox().width / 2));
+    webEntName.attr("dx", (d) => d.dx);
+
+    nodeData.forEach(
+      (d) => (d.box = document.getElementById(d.name).getBBox())
+    );
+
+    var webEntNameRect = view
+      .selectAll("rect")
+      .data(nodeData)
+      .enter()
+      .append("rect")
+      .attr("class", "contrastRect")
+      .attr("fill", "white")
+      .attr("stroke", "black")
+      .attr("stroke-width", 0.1)
+      .attr("x", (d) => d.box.x)
+      .attr("y", (d) => d.box.y)
+      .attr("width", (d) => d.box.width + 1)
+      .attr("height", (d) => d.box.height + 0.2);
+
+    nodes.raise();
+    webEntName.raise();
+  };
+
+  addWeTitle();
+
+  const resetContourGraph = () => {
+    d3.selectAll(".contours").remove();
+    d3.select("#labels_g").remove();
+
+    view
+      .insert("g") // Create contour density graph
+      .attr("fill", "none") // Start by making it empty/transparent
+      .attr("class", "contours")
+      .attr("stroke", "GoldenRod") // Separation lines color
+      .attr("stroke-width", 0.5) // Line thickness
+      .attr("stroke-linejoin", "round") // Join style
+      .selectAll("path")
+      .data(contours)
+      .enter()
+      .append("path")
+      .attr("stroke-width", 0.5)
+      .attr("fill", (d) => colorFill(d.value * 100))
+      .attr("d", d3.geoPath());
+
+    console.log("got there3");
+    drawAltitudeLevel(contours);
+
+    d3.selectAll(".contours").lower();
+    d3.selectAll("circle").attr("opacity", "1");
+    d3.selectAll(".contrastRect").attr("opacity", "1");
+    d3.selectAll(".webEntName").attr("opacity", "1");
+    d3.selectAll(".labels").attr("opacity", "1");
+  };
+
+  const displayContour = () => {
+    let checkTags = document.querySelectorAll("input.tagCheckbox");
+
+    let cat = document.getElementById("tagDiv").value;
+
+    let tags = [];
+
+    checkTags.forEach((box) => {
+      if (box.checked) {
+        tags.push(box.value);
+      }
+    });
+
+    d3.selectAll(".contours").remove();
+
+    view
+      .insert("g") // Create contour density graph
+      .attr("fill", "none") // Start by making it empty/transparent
+      .attr("class", "contours")
+      .attr("id", "oldContour")
+      .attr("stroke", "GoldenRod") // Separation lines color
+      .attr("stroke-width", 0.5) // Line thickness
+      .attr("stroke-linejoin", "round") // Join style
+      .attr("opacity", 0.25)
+      .selectAll("path")
+      .data(contours)
+      .enter()
+      .append("path")
+      .attr("stroke-width", 0.5)
+      .attr("fill", (d) => colorFill(d.value * 100))
+      .attr("d", d3.geoPath());
+    d3.selectAll(".contours").lower();
+
+    var tagNodes = [];
+
+    tags.forEach((tag) => {
+      let thisTagNodes = nodeData.filter(
+        (item) => item.tags.USER[cat][0] === tag
+      );
+      thisTagNodes.forEach((node) => tagNodes.push(node));
+    });
+
+    var thisContour = d3
+      .contourDensity()
+      .size([width, height])
+      .weight((d) => d.indegree)
+      .x((d) => d.x)
+      .y((d) => d.y)
+      .bandwidth(9)
+      .thresholds(d3.max(tagNodes, (d) => d.indegree))(tagNodes);
+
+    d3.select("#labels_g").remove();
+
+    var thisContourPath = view
+      .insert("g") // Create contour density graph
+      .attr("fill", "none") // Start by making it empty/transparent
+      .attr("class", "contours")
+      .attr("stroke", "GoldenRod") // Separation lines color
+      .attr("stroke-width", 0.5) // Line thickness
+      .attr("stroke-linejoin", "round") // Join style
+      .selectAll("path")
+      .data(thisContour)
+      .enter()
+      .append("path")
+      .attr("stroke-width", 0.5)
+      .attr("fill", (d) => colorFill(d.value * 100))
+      .attr("d", d3.geoPath());
+
+    drawAltitudeLevel(thisContour);
+
+    d3.selectAll(".contours").lower();
+    d3.select("#oldContour").lower();
+    d3.selectAll("circle").attr("opacity", ".1");
+    d3.selectAll(".contrastRect").attr("opacity", ".1");
+    d3.selectAll(".webEntName").attr("opacity", ".1");
+    tags.forEach((tag) => {
+      d3.selectAll("circle")
+        .filter((item) => item.tags.USER[cat][0] === tag)
+        .attr("opacity", "1");
+      d3.selectAll(".contrastRect")
+        .filter((item) => item.tags.USER[cat][0] === tag)
+        .attr("opacity", "1");
+      d3.selectAll(".webEntName")
+        .filter((item) => item.tags.USER[cat][0] === tag)
+        .attr("opacity", "1");
+    });
+
+    d3.select("#legend").remove();
+
+    var legend = svg.insert("g").attr("id", "legend");
+
+    var shownTags = "";
+
+    for (let i = 0; i < tags.length; i++) {
+      shownTags = shownTags + tags[i] + " ";
+    }
+
+    var legendText = legend.append("text").text(cat + " - " + shownTags);
+
+    let textBound = document.querySelector("#legend").getBBox();
+
+    legend
+      .append("rect")
+      .attr("id", "legend")
+      .attr("fill", "white")
+      .attr("stroke", "black")
+      .attr("stroke-width", 0.5)
+      .attr("x", width - toolWidth - parseInt(textBound.width) - 20)
+      .attr("y", height - 30)
+      .attr("width", parseInt(textBound.width) + 20)
+      .attr("height", 30);
+
+    legendText
+      .attr("x", width - toolWidth - parseInt(textBound.width) - 15)
+      .attr("y", height - 30)
+      .attr("dx", 5)
+      .attr("dy", 20);
+
+    legendText.raise();
+  };
+
+  console.log("got there3");
+
+  const showTags = (tag, list) => {
+    let tagList = document.getElementById(list);
+    tagList.innerHTML = "";
+    let thisTagList = document.createElement("DIV");
+    let tagsArray = [];
+
+    for (var prop in tags) {
+      if (prop === tag) {
+        for (let thisTag in tags[prop]) {
+          // let criteria = prop;
+          var thisTagCheckbox = document.createElement("INPUT");
+          thisTagCheckbox.type = "checkbox";
+          thisTagCheckbox.className = "tagCheckbox";
+          //thisTagCheckbox.id = "chck"+thisTag;
+          thisTagCheckbox.value = thisTag;
+          thisTagCheckbox.addEventListener("change", (e) => {
+            displayContour();
+          });
+
+          var thisTagOption = document.createElement("SPAN");
+          thisTagOption.innerText = thisTag + ":" + tags[prop][thisTag];
+          thisTagOption.style.color = color(thisTag);
+
+          var thisTagLine = document.createElement("DIV");
+          thisTagLine.value = parseInt(tags[prop][thisTag]);
+          thisTagLine.appendChild(thisTagCheckbox);
+          thisTagLine.appendChild(thisTagOption);
+
+          tagsArray.push(thisTagLine);
+        }
+      }
+    }
+
+    tagsArray.sort((a, b) => d3.descending(a.value, b.value));
+    tagsArray.forEach((d) => thisTagList.appendChild(d));
+    tagList.appendChild(thisTagList);
+    nodes.style("fill", (d) => color(d.tags.USER[tag][0]));
+    nodes.raise();
+  };
+
+  setTimeout(() => {
+    document.getElementById("tagDiv").addEventListener("change", (e) => {
+      resetContourGraph();
+      console.log("got there4");
+      showTags(document.getElementById("tagDiv").value, "tagList");
+      console.log("got there5");
+    });
+  }, 200);
+
+  loadType();
+  document.getElementById("tooltip").innerHTML = tooltipTop;
+  //    }
+  //}; // end of HY worker answer
 
   //    })  // end of get webentities data
 
@@ -659,7 +709,7 @@ const hyphe = (datajson) => {
   // ===== NARRATIVE =====
 
   zoomed = (thatZoom, transTime) => {
-    currentZoom = thatZoom;
+    //currentZoom = thatZoom;
     view.transition().duration(transTime).attr("transform", thatZoom);
     gXGrid
       .transition()

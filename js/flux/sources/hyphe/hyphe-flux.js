@@ -5,7 +5,7 @@ import { powerValve } from "../../powervalve";
 
 const hypheCheck = (args) => {
   var target = args.query;
-  console.log(target);
+
   if (target.indexOf("/#/login") > -1) {
     target = target.replace("/#/login", "");
   }
@@ -71,7 +71,13 @@ const hypheCorpusList = (target, resultDiv) =>
         const detailDiv = document.createElement("div");
         detailDiv.style = `padding:1rem;margin:1,5rem;line-height:1.2rem;border: 1px solid #141414;display:none`;
         resultDiv.append(detailDiv);
-        displayCorpusList(collection, resultDiv, detailDiv, "hyphe", false);
+        displayCorpusList(
+          collection,
+          resultDiv,
+          detailDiv,
+          { type: "hyphe" },
+          false
+        );
         resultDiv.style.display = "block";
       }
     })

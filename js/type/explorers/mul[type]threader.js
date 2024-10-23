@@ -12,6 +12,10 @@ importScripts("../node_modules/d3/dist/d3.min.js");
 onmessage = (message) => {
   // END WORKER SPECIFICITY
 
+  console.log("coucou, le message est arrivé");
+
+  console.log(message);
+
   switch (message.data.type) {
     case "checkup":
       notifySystem("console-logs", message.data.validation);

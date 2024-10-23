@@ -27,15 +27,10 @@ const zoteroCollectionRetriever = (options) => {
       .then((r) => {
         const zoteroColResponse = r;
 
-        var powerValveArgs = {
-          collections: {},
-          importName: "",
-          libraryID,
-        };
-
         // create import buttons
 
-       
+        const importDiv = document.createElement("div");
+        importDiv.style.padding = "1rem";
 
         if (userData.distantServices.zotero.library.length > 1) {
           userCollections.append(document.createElement("hr"));
@@ -48,8 +43,6 @@ const zoteroCollectionRetriever = (options) => {
 
         userCollections.append(libTitle);
 
-       
- 
         // add list
 
         const collection = [];
@@ -60,58 +53,18 @@ const zoteroCollectionRetriever = (options) => {
 
           collection.push({ key, name });
         }
-
-        /* const collectionList = document.createElement("form");
-        collectionList.style = "line-height:1.5";
-
-        userCollections.append(collectionList);
-
-        for (let i = 0; i < zoteroColResponse.length; i++) {
-          const key = zoteroColResponse[i].data.key;
-          const name = zoteroColResponse[i].data.name;
-
-          const checkInput = document.createElement("input");
-          checkInput.type = "checkbox";
-          checkInput.className = "zotColCheck";
-          checkInput.value = key;
-          checkInput.name = name;
-
-          const colID = `${key} - ${name}`;
-
-          const checkLabel = document.createElement("label");
-          checkLabel.style.paddingLeft = "5px";
-          checkLabel.innerText = colID;
-
-          checkInput.addEventListener("change", () => {
-            if (checkInput.checked) {
-              importName.value += zoteroColResponse[i].data.name;
-              powerValveArgs.collections[colID] = { key, name };
-            } else {
-              delete powerValveArgs.collections[colID];
-              importName.value = importName.value.replace(
-                zoteroColResponse[i].data.name,
-                ""
-              );
-            }
-          });
-
-          collectionList.append(
-            checkInput,
-            checkLabel,
-            document.createElement("br")
-          );
-        }
-
-         */
         userCollections.append(importDiv);
 
-        console.log("=zotero import=");
-        
+        const corpusOptions = {
+          type: "zotero",
+          libraryID,
+        };
+
         displayCorpusList(
           collection,
           userCollections,
           importDiv,
-          "zotero",
+          corpusOptions,
           true
         );
 
