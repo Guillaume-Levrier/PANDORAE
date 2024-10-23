@@ -35,11 +35,7 @@ const zoteroCollectionRetriever = (options) => {
 
         // create import buttons
 
-        const importDiv = document.createElement("div");
-
-        /* 
-        
-        importDiv.style.padding = "1rem";
+       
 
         if (userData.distantServices.zotero.library.length > 1) {
           userCollections.append(document.createElement("hr"));
@@ -49,30 +45,11 @@ const zoteroCollectionRetriever = (options) => {
         libTitle.style =
           "font-weight:bold;font-size:13px;margin-bottom:1rem;margin-top:1rem;";
         libTitle.innerText = r[0].library.name;
+
         userCollections.append(libTitle);
 
-        const importName = document.createElement("input");
-        importName.className = "fluxInput";
-        importName.spellcheck = false;
-        importName.type = "text";
-        importName.placeholder = "Enter import name";
-        importName.id = "zoteroImportName";
-
-        const importButton = document.createElement("button");
-        importButton.className = "flux-button";
-        importButton.type = "submit";
-        importButton.innerText = "Import selected collections into system";
-
-        importButton.addEventListener("click", () => {
-          powerValveArgs.importName = importName.value.replace(/\s/g, "");
-          powerValve("zoteroItemsRetriever", {
-            name: "Zotero Collection Retriever",
-            powerValveArgs,
-          });
-        });
-
-        importDiv.append(importName, importButton);
- */
+       
+ 
         // add list
 
         const collection = [];
@@ -129,8 +106,7 @@ const zoteroCollectionRetriever = (options) => {
         userCollections.append(importDiv);
 
         console.log("=zotero import=");
-        console.log(collection, userCollections, importDiv);
-
+        
         displayCorpusList(
           collection,
           userCollections,

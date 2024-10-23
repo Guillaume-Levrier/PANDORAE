@@ -411,6 +411,7 @@ const displayCorpusList = (
       width: "100%",
       multiple,
       layout: "fixed",
+      maxHeight:"100%"
     });
 
     searchTable.addEventListener("input", () => {
@@ -440,8 +441,42 @@ const corpusDetail = (corpusType, detailDiv, selected) => {
 
   detailDiv.style.display = "block";
 
+const importButton = document.createElement("button");
+        importButton.className = "flux-button";
+        importButton.type = "submit";
+
   switch (corpusType) {
     case "zotero":
+ const importDiv = document.createElement("div");
+
+       
+        
+        importDiv.style.padding = "1rem";
+     const importName = document.createElement("input");
+        importName.className = "fluxInput";
+        importName.spellcheck = false;
+        importName.type = "text";
+        importName.placeholder = "Enter import name";
+        importName.id = "zoteroImportName";
+
+        
+        importButton.innerText = "Import selected collections into system";
+
+        importButton.addEventListener("click", () => {
+          powerValveArgs.importName = importName.value.replace(/\s/g, "");
+          console.log(selected)
+         // powerValveArgs.collections[colID] = { key, name };
+
+          /*
+          powerValve("zoteroItemsRetriever", {
+            name: "Zotero Collection Retriever",
+            powerValveArgs,
+          });
+          */
+        });
+
+        importDiv.append(importName, importButton);
+detailDiv.append(importDiv)
       break;
 
     case "hyphe":
@@ -454,9 +489,7 @@ const corpusDetail = (corpusType, detailDiv, selected) => {
       passwordInput.type = "password";
       passwordInput.style.width = "220px";
 
-      const importButton = document.createElement("button");
-      importButton.type = "submit";
-      importButton.className = "flux-button";
+    
       importButton.innerText = "Import Hyphe corpus";
       importButton.addEventListener("click", () =>
         loadHyphe(selected.Name, passwordInput.value)
