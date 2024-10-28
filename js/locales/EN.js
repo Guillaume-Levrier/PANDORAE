@@ -165,6 +165,35 @@ Start by entering a Hyphe API endpoint, then select a corpus. Click Load to dire
           },
         ],
       },
+      "regards citoyens": {
+        id: "regards citoyens", // id of the main div
+        title: "Regards Citoyens", // title of the tab (displayed on the page)
+        description: `Regards Citoyens est une association française fondée en 2009 qui vise à promouvoir l'ouverture des données publiques et valoriser les institutions démocratiques françaises.`,
+        sections: [
+          {
+            type: "tabDatasets",
+            data: {
+              id: "regards citoyens",
+              table: "flux",
+              source: ["regards"],
+            },
+          },
+          {
+            type: "APIquery",
+            data: {
+              target: "regards citoyens",
+              key: "regards citoyens",
+              queryField: true,
+              placeholder: "souveraineté",
+              function: {
+                name: "regardsBasic",
+                args: {},
+                aftermath: "timeout", // "disable" disables submitting another query to the same source.
+              },
+            },
+          },
+        ],
+      },
       istex: {
         id: "istex", // id of the main div
         title: "ISTEX", // title of the tab (displayed on the page)

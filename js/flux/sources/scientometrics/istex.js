@@ -1,4 +1,3 @@
-import { powerValve } from "../../powervalve";
 import {
   basicQueryResultDiv,
   addFullQueryButton,

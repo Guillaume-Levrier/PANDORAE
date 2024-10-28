@@ -112,11 +112,13 @@ function updateCascade(selections) {
             }
             break;
 
+           */
+
           case "Regards Citoyens":
             if (selections.parliaments) {
               addHop(["REGARDS CITOYENS", "STANDARDIZE"], traces);
             }
-            break; */
+            break;
 
           case "ISTEX":
             if (selections.scientometrics) {
@@ -201,14 +203,13 @@ const retrieveAvailableServices = () =>
 
     const availableCategories = new Set();
 
-    console.log(availability)
+    console.log(availability);
 
-     Object.values(availability.dnsLocalServiceList).forEach((service) => {
+    Object.values(availability.dnsLocalServiceList).forEach((service) => {
       if (service.valid) {
         switch (service.name) {
-            
-        default:
-           availableCategories.add("local");
+          default:
+            availableCategories.add("local");
             break;
         }
       }
@@ -245,4 +246,4 @@ const retrieveAvailableServices = () =>
     updateCascade();
   });
 
-export { retrieveAvailableServices, localServicePreviewer,availability };
+export { retrieveAvailableServices, localServicePreviewer, availability };
