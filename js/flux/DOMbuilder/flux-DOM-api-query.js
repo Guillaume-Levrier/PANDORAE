@@ -1,4 +1,4 @@
-import { fluxSwitch } from "../buttons";
+import { fluxSwitch } from "../fluxswitch";
 import { fluxButtonClicked } from "../actionbuttons";
 import { genHr } from "./flux-DOM-common";
 import { availability } from "../cascade";
@@ -96,19 +96,60 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
 
   tabSection.append(queryResultDiv);
 
+  const errorDiv = document.createElement("div");
+  errorDiv.id = sectionData.target + "_error";
+  errorDiv.className = "fluxErrorDiv";
+  tabSection.append(errorDiv);
+
   tab.append(genHr(), tabSection);
 };
 
+const displayInErrorDiv = (text, target) =>
+  (document.getElementById(target + "_error").innerText = text);
+
 const buildAdditionalArguments = (data, sectionDiv) => {
+  console.log(data, sectionDiv);
+
   switch (data.key) {
     case "bnf-solr":
       buildBnFsolrArguments(data, sectionDiv);
 
       break;
 
+    case "nos deputes":
+      buildNosDeputesArguments(data, sectionDiv);
+      break;
+
     default:
       break;
   }
+};
+
+const buildNosDeputesArguments = (data, sectionDiv) => {
+  const optionsDiv = document.createElement("div");
+  optionsDiv.className = "fluxRequestOptionDiv";
+  sectionDiv.append(optionsDiv);
+
+  const legislatures = ["2007-2012", "2012-2017", "2017-2022", "2022-2024"];
+
+  const selectElement = document.createElement("select");
+  selectElement.id = "nosDeplegSelect";
+  selectElement.name = "nosDeplegSelect";
+
+  const label = document.createElement("label");
+  label.innerText = "Choisissez une législature : ";
+  label.for = "nosDeplegSelect";
+  //<label for="pet-select">Choose a pet:</label>
+
+  optionsDiv.append(label, selectElement);
+
+  legislatures.forEach((leg) => {
+    const optionEl = document.createElement("option");
+    optionEl.innerText = leg;
+    optionEl.value = leg;
+
+    selectElement.append(optionEl);
+  });
 };
 
 const buildBnFsolrArguments = (data, sectionDiv) => {
@@ -138,8 +179,6 @@ const buildBnFsolrArguments = (data, sectionDiv) => {
       fetch(sourceRequest)
         .then((r) => r.json())
         .then((r) => {
-          console.log(r);
-
           optionsDiv.innerHTML += "Available sources<br>";
           coreSource = r.collections[0];
           for (let i = 0; i < r.collections.length; i++) {
@@ -170,9 +209,6 @@ const buildBnFsolrArguments = (data, sectionDiv) => {
           )
             .then((facet) => facet.json())
             .then((facets) => {
-              console.log(facets);
-              console.log(key);
-
               optionsDiv.innerHTML += "Available collections<br>";
 
               const facetList = facets.facet_counts.facet_fields.collections;
@@ -206,58 +242,10 @@ const buildBnFsolrArguments = (data, sectionDiv) => {
                   facetBox.append(facetContainer);
                 }
               }
-              /*
-                    solrCont.innerHTML = `<!-- BNF SOLR TAB -->     
-          <span class="flux-title">${service.toUpperCase()}</span>
-          <br><br>
-          <form id="bnf-solr-form" autocomplete="off">Query:<br>
-            <input class="fluxInput" spellcheck="false" id="bnf-solr-query-${key}" type="text" value=""><br><br>
-            From: <input type="date" id="bnf-solr-${key}-date-from"> - To: <input type="date" id="bnf-solr-${key}-date-to"><br>
-            <br>Selected source:
-            ${sourceSolrRadio}<br><br>
-             <br>Select collection:
-            ${facetCheckBox}<br><br>
-            <button type="submit" class="flux-button" id="bnf-solr-basic-query-${key}">Retrieve
-              basic info</button>&nbsp;&nbsp;
-            <div id="bnf-solr-basic-previewer-${key}" style="position:relative;"></div><br><br>
-            <button style="display: none;" type="submit" class="flux-button" id="bnf-solr-fullquery-${key}">Submit Full Query</button>
-            <br><br>
-          </form>`;
-
-                    document.body.append(solrCont);
-
-                    buttonList.push({
-                      id: "bnf-solr-basic-query-" + serv,
-                      serv,
-                      func: "queryBnFSolr",
-                      args: availability.dnsLocalServiceList[service],
-                    });
-
-                    buttonList.push({
-                      id: "bnf-solr-fullquery-" + serv,
-                      serv,
-                      func: "powerValve",
-                      arg: "BNF-SOLR",
-                    });
-
-                    buttonList.forEach((but) => {
-                      document
-                        .getElementById(but.id)
-                        .addEventListener("click", (e) => {
-                          e.preventDefault();
-                          fluxSwitch(e, but);
-
-                          return false;
-                        });
-                    });
-
-
-
-                    */
             })
         );
     }
   }
 };
 
-export { addLocalFileSection, addAPIquerySection };
+export { addLocalFileSection, addAPIquerySection, displayInErrorDiv };

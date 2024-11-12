@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import { addHop, drawFlux } from "./tracegraph";
-import { buttonList, fluxSwitch } from "./buttons";
+
 import { userData } from "./userdata";
 
 const createCascadeSelectors = (availableCategories) => {
@@ -172,27 +172,6 @@ function updateCascade(selections) {
   }
 
   drawFlux(svg, traces, false, true);
-
-  buttonList.forEach((but) => {
-    const buttonDOM = document.getElementById(but.id);
-    if (buttonDOM) {
-      var clickable = 1;
-      buttonDOM.addEventListener("click", (e) => {
-        if (clickable) {
-          fluxSwitch(e, but);
-          clickable = 0;
-          setTimeout(() => (clickable = 1), 5000);
-        } else {
-          window.electron.send(
-            "console-logs",
-            `Cooldown not finished for action ${but.id}.`
-          );
-        }
-        e.preventDefault();
-        return false;
-      });
-    }
-  });
 }
 
 const localServicePreviewer = document.createElement("div");

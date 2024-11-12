@@ -101,20 +101,22 @@ const addWarningDisclaimer = (tabData, sectionData, tab) => {
   tab.append(tabSection);
 };
 
-const basicQueryResultDiv = (queryData, resultNum) => {
+const basicQueryResultDiv = (queryData, resultNum, error) => {
   // query data is an object with both the query string to the service
   // and the result div
 
-  console.log(queryData, resultNum);
-
-  // fill in results
-  queryData.resultDiv.innerHTML = `
+  if (!error) {
+    // fill in results
+    queryData.resultDiv.innerHTML = `
         <strong>Query: ${queryData.query}</strong><br>
         Expected results at request time: ${resultNum}<br>
         Query date: ${genDate()}<br><br>`;
 
-  // display result div
-  queryData.resultDiv.style.display = "block";
+    // display result div
+    queryData.resultDiv.style.display = "block";
+  } else {
+    queryData.resultDiv.style.display = "none";
+  }
 
   // display fill query div
 };

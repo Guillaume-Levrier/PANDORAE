@@ -167,6 +167,9 @@ const alienSightBasic = (data) =>
       // get the total number of results
       const numberOfResults = r.total; // This depends on how the metadata is given to you by the API service
 
+      // purge previous results.
+      displayInErrorDiv("", "alien_sighting_project");
+
       // generate the response preview
       basicQueryResultDiv(data, r.total);
 
@@ -181,6 +184,8 @@ const alienSightBasic = (data) =>
       );
     })
     .catch(function (e) {
+      basicQueryResultDiv(data, 0, true);
+      displayInErrorDiv(e, "alien_sighting_project");
       window.electron.send("console-logs", "Query error : " + e); // Log error
       throw e;
     });

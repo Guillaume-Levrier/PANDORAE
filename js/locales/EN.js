@@ -181,13 +181,15 @@ Start by entering a Hyphe API endpoint, then select a corpus. Click Load to dire
           {
             type: "APIquery",
             data: {
-              target: "regards citoyens",
-              key: "regards citoyens",
+              target: "nos deputes",
+              key: "nos deputes",
               queryField: true,
               placeholder: "souveraineté",
               function: {
-                name: "regardsBasic",
-                args: {},
+                name: "nosDeputesBasic",
+                args: {
+                  legislature: "radio",
+                },
                 aftermath: "timeout", // "disable" disables submitting another query to the same source.
               },
             },

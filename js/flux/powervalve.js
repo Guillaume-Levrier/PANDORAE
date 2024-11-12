@@ -111,7 +111,7 @@ const powerValve = (fluxAction, item) => {
 
     case "regards":
       fluxArgs.regquery = document.getElementById("regardsrecherche").value;
-      fluxArgs.legislature = document.getElementById("legislature").value;
+      fluxArgs.legislature = document.getElementById("nosDeplegSelect").value;
       message = "Connecting to Regards Citoyens";
       break;
 

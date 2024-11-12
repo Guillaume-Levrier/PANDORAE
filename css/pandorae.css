@@ -1268,3 +1268,7 @@ tr {
     border-radius: 0.5rem;
     width: fit-content;
   } 
+
+  .fluxErrorDiv{
+    color:red;
+  }

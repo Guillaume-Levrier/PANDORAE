@@ -1,32 +1,42 @@
+import { displayInErrorDiv } from "../../DOMbuilder/flux-DOM-api-query";
+import {
+  basicQueryResultDiv,
+  addFullQueryButton,
+} from "../../DOMbuilder/flux-DOM-common";
+
 //===== Regards Citoyens ======
 
-const regardsBasic = () => {
-  var queryContent = document.getElementById("regardsrecherche").value;
-  const legislature = document.getElementById("legislature").value;
-  var query = `https://${legislature}.nosdeputes.fr/recherche/${encodeURI(
-    queryContent
-  )}?format=json`;
-
-  fetch(query)
+const nosDeputesBasic = (data) =>
+  fetch(
+    `https://${
+      document.getElementById("nosDeplegSelect").value
+    }.nosdeputes.fr/recherche/${encodeURI(data.query)}?format=json`
+  )
     .then((r) => r.json())
-    .then((res) => {
-      let totalreq =
-        parseInt(res.last_result / 500) + parseInt(res.last_result);
-      var previewer = document.getElementById("regards-basic-previewer");
-      previewer.innerHTML =
-        "<br><p>Total document number:" +
-        res.last_result +
-        "</p>" +
-        "<p>Necessary requests to obtain all document contents:" +
-        totalreq +
-        "</p>";
+    .then((r) => {
+      let totalreq = parseInt(r.last_result / 500) + parseInt(r.last_result);
 
-      document.getElementById("regards-query").style.display = "flex";
+      //purge error
+      displayInErrorDiv("", "nos deputes");
 
-      if (totalreq === 0) {
-        document.getElementById("regards-query").disabled = true;
-      }
+      // generate the response preview
+      basicQueryResultDiv(data, totalreq);
+
+      // add a full query button
+      addFullQueryButton(
+        data,
+        "Submit full Regards Citoyens API query",
+        "nosDeputesRetriever",
+        {
+          query: data.query,
+          legislature: document.getElementById("nosDeplegSelect").value,
+        }
+      );
+    })
+    .catch((e) => {
+      basicQueryResultDiv(data, 0, true);
+      displayInErrorDiv(e, "nos deputes");
+      throw e;
     });
-};
 
-export { regardsBasic };
+export { nosDeputesBasic };
