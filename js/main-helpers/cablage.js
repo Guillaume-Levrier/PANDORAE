@@ -165,7 +165,7 @@ const activateMainListeners = () => {
   // open a chaeros window
   // store arguments guiding process for when chaeros is ready
   ipcMain.on("dataFlux", (event, data) =>
-    startChaerosProcess(data.fluxAction, data.fluxArgs, data.message)
+    startChaerosProcess(data.powerAction, data.powerArg, data.message)
   );
 
   // biorxiv scraping needs its own windows

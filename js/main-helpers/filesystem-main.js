@@ -61,8 +61,10 @@ const changeUDP = () => {
 var themeData;
 
 const startRoutine = () => {
-  // use this to get all API responses
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    // this breaks zotero interactions
+    details.responseHeaders["Access-Control-Allow-Origin"] = ["*"];
+
     callback({
       responseHeaders: {
         ...details.responseHeaders,

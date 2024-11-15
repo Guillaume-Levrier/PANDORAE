@@ -121,13 +121,17 @@ const basicQueryResultDiv = (queryData, resultNum, error) => {
   // display fill query div
 };
 
-const addFullQueryButton = (data, buttonText, powerAction, powerArg) => {
+const addFullQueryButton = (
+  data,
+  buttonText,
+  { powerAction, powerArg, message }
+) => {
   const fullQueryButton = document.createElement("button");
   fullQueryButton.type = "submit";
   fullQueryButton.className = "flux-button";
   fullQueryButton.innerText = buttonText;
   fullQueryButton.addEventListener("click", () =>
-    powerValve(powerAction, powerArg)
+    powerValve(powerAction, powerArg, message)
   );
   data.resultDiv.append(fullQueryButton);
 };

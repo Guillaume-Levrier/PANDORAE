@@ -5,26 +5,36 @@
 // - those "heavy" functions are sent to the main process through the 'dataFlux' channel (and dispatched to Chæeros)
 // - the flux  modal window is closed
 
-import { userData } from "./userdata";
 import { closeFluxWindow } from "./window";
 
-const powerValve = (fluxAction, item) => {
+const powerValve = (powerAction, powerArg, message) => {
   // powerValve main function
 
-  window.electron.send(
+  /* window.electron.send(
     "console-logs",
     "Actioning powerValve on " +
       JSON.stringify(item.name) +
       " through the " +
       fluxAction +
       " procedure."
-  );
+  ); */
 
-  let fluxArgs = {}; // Arguments are stored in an object
+  /* let fluxArgs = {}; // Arguments are stored in an object
   let message = ""; // Creating the default message variable
   let itemname = item.name; // item argument is usually stored in "this"
+ */
+  console.log("====== POWERVALVE =====");
 
-  switch (
+  console.log(powerAction);
+  console.log(powerArg);
+  console.log(message);
+
+  window.electron.send("console-logs", message);
+  window.electron.send("dataFlux", { powerAction, powerArg, message }); // Send request to main process
+  window.electron.send("pulsar", false);
+  closeFluxWindow();
+
+  /* switch (
     fluxAction // According to function name ...
   ) {
     case "standardize":
@@ -94,13 +104,7 @@ const powerValve = (fluxAction, item) => {
       message = "Connecting to BNF-SOLR";
       break;
 
-    /* case "altmetricRetriever":
-      fluxArgs.altmetricRetriever = {};
-      fluxArgs.altmetricRetriever.id =
-        document.getElementById("altmetricRetriever").name;
-      fluxArgs.altmetricRetriever.user =
-        document.getElementById("userNameInput").value;
-      break; */
+    
 
     case "reqISSN":
       prepareISSN();
@@ -237,17 +241,18 @@ const powerValve = (fluxAction, item) => {
       message = "loading twitter dataset";
       break;
   }
+ */
 
-  const logMessage = `Sending to CHÆROS action ${fluxAction} with arguments ${JSON.stringify(
+  /*   const logMessage = `Sending to CHÆROS action ${fluxAction} with arguments ${JSON.stringify(
     fluxArgs
   )}.`;
 
   console.log({ fluxAction, fluxArgs, message });
 
-  window.electron.send("console-logs", logMessage);
-  window.electron.send("dataFlux", { fluxAction, fluxArgs, message }); // Send request to main process
-  window.electron.send("pulsar", false);
-  closeFluxWindow();
+  
+  
+ */
+  console.log("====== END OF POWERVALVE =====");
 };
 
 export { powerValve };

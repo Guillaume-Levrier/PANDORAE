@@ -173,14 +173,22 @@ const alienSightBasic = (data) =>
       // generate the response preview
       basicQueryResultDiv(data, r.total);
 
+      // powervalve sends the instructons for the Chaeros (/headless) context
+      // to execute
+      const powervalveArguments = {
+        powerAction: "alienSightRetriever", // string, the name of the function to call
+        powerArg: {
+          // object, the arguments for that function
+          alienSightQuery: data.query,
+        },
+        message: "Starting Alien Sight Data Retrieval", // string, the notification message
+      };
+
       // add a full query button
       addFullQueryButton(
         data,
         "Submit full Alien Sighting API query",
-        "alienSightRetriever",
-        {
-          alienSightQuery: data.query,
-        }
+        powervalveArguments
       );
     })
     .catch(function (e) {

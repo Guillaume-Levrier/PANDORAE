@@ -2,7 +2,7 @@ import { biorxivRetriever } from "./api-retrievers/biorxiv-retriever";
 import { solrMetaExplorer } from "./api-retrievers/bnfsolr-api-retriever";
 import { clinTriRetriever } from "./api-retrievers/clinical-trials-api-retriever";
 import { istexRetriever } from "./api-retrievers/istex-api-retriever";
-import { regardsRetriever } from "./api-retrievers/regards-citoyens-api-retriever";
+
 import { reqISSN } from "./api-retrievers/scopus-api-retriever";
 import { wosFullRetriever } from "./api-retrievers/wos-api-retriever";
 import { dataWriter, sysExport } from "./chaeros-to-system";
@@ -19,8 +19,15 @@ import {
 
 import { GallicaFullQuery } from "./api-retrievers/gallica-api-retriever";
 
+import { nosDeputesRetriever } from "./api-retrievers/regards-citoyens-api-retriever";
+
 //========== chaerosSwitch ==========
 // Switch used to choose the function to execute in CHÆROS.
+
+const chaerosFunctions = {
+  istexRetriever,
+  nosDeputesRetriever,
+};
 
 const chaerosSwitch = (fluxAction, fluxArgs) => {
   window.electron.send(
@@ -31,6 +38,12 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
       JSON.stringify(fluxArgs)
   );
 
+  console.log(fluxAction);
+  console.log(fluxArgs);
+
+  chaerosFunctions[fluxAction](fluxArgs);
+
+  /* 
   try {
     switch (fluxAction) {
       case "standardize":
@@ -185,7 +198,7 @@ const chaerosSwitch = (fluxAction, fluxArgs) => {
     window.electron.send("console-logs", err);
     window.electron.send("chaeros-failure", JSON.stringify(err));
     throw err;
-  }
+  } */
 };
 
 export { chaerosSwitch };

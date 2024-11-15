@@ -3,14 +3,20 @@
 // par l'association Regards Citoyens. A partir d'une requête textuelle (un mot ou une)
 // expression, chaeros va interroger cette API afin de reconstruire un jeu de données
 // ordonné qui récupère tous les usages de cette expression.
+
+import bottleneck from "bottleneck";
+
 // Cette fonction est encore en cours de construction
 
-const regardsRetriever = (queryContent, legislature) => {
+const nosDeputesRetriever = ({ query, legislature }) => {
   // La première étape consiste à relancer la requête telle qu'obtenue dans le FLUX
   // Afin de disposer du nombre de pages de 500 éléments à demander à  l'API
 
-  const query = `https://${legislature}.nosdeputes.fr/recherche/${encodeURI(
-    queryContent
+  console.log(query);
+  console.log(legislature);
+
+  const queryString = `https://${legislature}.nosdeputes.fr/recherche/${encodeURI(
+    query
   )}?format=json`;
 
   // Déclaration d'un objet constant dont les propriétés renvoient à des
@@ -23,7 +29,9 @@ const regardsRetriever = (queryContent, legislature) => {
     minTime: 600,
   });
 
-  fetch(query)
+  console.log(queryString);
+
+  fetch(queryString)
     .then((r) => r.json())
     .then((res) => {
       let totalReq = parseInt(res.last_result / 500) + 1;
@@ -35,7 +43,7 @@ const regardsRetriever = (queryContent, legislature) => {
       for (let i = 1; i <= totalReq; i++) {
         pagesReq.push(
           `https://${legislature}.nosdeputes.fr/recherche/${encodeURI(
-            queryContent
+            query
           )}?format=json&count=500&page=${i}`
         );
       }
@@ -54,6 +62,7 @@ const regardsRetriever = (queryContent, legislature) => {
           .schedule(() => fetch(pageReq))
           .then((res) => res.json())
           .then((resPage) => {
+            console.log(resPage);
             pageN++;
             window.electron.send(
               "chaeros-notification",
@@ -91,8 +100,9 @@ const regardsRetriever = (queryContent, legislature) => {
                 });
               });
 
-              // Puis
+              console.log(regContent);
 
+              // Puis
               // envoyer des requêtes sur la base de tous les liens de résultats
               // récupérés précédemment
 
@@ -110,17 +120,35 @@ const regardsRetriever = (queryContent, legislature) => {
                     );
 
                     resDocs.push(documentResponse);
+
                     if (resDocs.length === docReq.length) {
                       // pour chaque document
                       resDocs.forEach((doc) => {
                         // récupérer le type de document (formatage étrange) cf https://github.com/regardscitoyens/nosdeputes.fr/issues/178
-                        for (const doctype in doc) {
+
+                        for (var doctype in doc) {
+                          const docContent = Object.assign({}, doc[doctype]);
+                          var id =
+                            JSON.stringify(docContent.id).indexOf("-") === -1
+                              ? parseInt(docContent.id)
+                              : docContent.id;
+
+                          switch (doctype) {
+                            case "depute":
+                            case "senateur":
+                              doctype = "parlementaire";
+
+                              break;
+
+                            default:
+                              break;
+                          }
+
                           // mettre à jour le document dans la map avec le contenu des ressources obtenu
-                          let docInMap = regContent[doctype].get(
-                            doc[doctype].id
-                          );
-                          docInMap.content = doc[doctype];
-                          regContent[doctype].set(doc[doctype].id, docInMap);
+                          const docInMap = regContent[doctype].get(id);
+
+                          docInMap.content = docContent;
+                          regContent[doctype].set(id, docInMap);
                         }
                       });
 
@@ -168,6 +196,11 @@ const regardsRetriever = (queryContent, legislature) => {
                                 seanceReqs.length
                             );
                             resSeances.push(resSeance);
+
+                            console.log(resSeances.length);
+
+                            console.log(seanceReqs.length);
+
                             if (resSeances.length === seanceReqs.length) {
                               // verser les résultats dans la Map seances
                               resSeances.forEach((sc) => {
@@ -213,7 +246,7 @@ const regardsRetriever = (queryContent, legislature) => {
                               fetch("https://www.nosdeputes.fr/deputes/json")
                                 .then((dep) => dep.json())
                                 .then((deps) => {
-                                  depMap = new Map();
+                                  const depMap = new Map();
                                   deps.deputes.forEach((d) =>
                                     depMap.set(d.depute.id, d)
                                   );
@@ -241,9 +274,16 @@ const regardsRetriever = (queryContent, legislature) => {
                                     totalMap += regContent[itemType].size;
                                   }
 
+                                  console.log(regContent);
+                                  console.log(totalMap);
+                                  console.log(totalNum);
+
                                   // Si c'est bien le cas, formatage puis sauvegarde
                                   if (totalMap >= totalNum) {
-                                    dataWriter(
+                                    console.log(query);
+                                    console.log(regContent);
+
+                                    /* dataWriter(
                                       ["system"],
                                       queryContent,
                                       regContent
@@ -264,7 +304,7 @@ const regardsRetriever = (queryContent, legislature) => {
                                         "win-destroy",
                                         winId
                                       );
-                                    }, 500);
+                                    }, 500); */
                                   }
                                 });
                             }
@@ -279,4 +319,4 @@ const regardsRetriever = (queryContent, legislature) => {
     });
 };
 
-export { regardsRetriever };
+export { nosDeputesRetriever };

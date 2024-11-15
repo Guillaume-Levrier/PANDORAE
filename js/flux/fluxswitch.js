@@ -7,12 +7,7 @@ import { checkPPS, forceUpdatePPS } from "./sources/PPS/pps";
 import { biorxivBasicRetriever } from "./sources/scientometrics/biorxiv";
 
 import { wosBasicRetriever } from "./sources/scientometrics/wos";
-import {
-  changeUserID,
-  basicUserData,
-  checkKey,
-  updateUserData,
-} from "./userdata";
+import { changeUserID, checkKey, updateUserData } from "./userdata";
 
 import { refreshFluxWindow } from "./window";
 import { gallicaBasicRetriever } from "./sources/BNF/gallica";
@@ -52,7 +47,6 @@ const fluxFunctions = {
   // User Data operations
   //
   changeUserID,
-  basicUserData,
   updateUserData,
   // ==================
   // Service management

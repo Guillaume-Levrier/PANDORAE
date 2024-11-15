@@ -18,10 +18,19 @@ const istexBasicRetriever = (data) =>
       // generate the response preview
       basicQueryResultDiv(data, r.total);
 
+      // powervalve sends the instructons for the Chaeros (/headless) context
+      // to execute
+      const powervalveArguments = {
+        powerAction: "istexRetriever", // string, the name of the function to call
+        powerArg: {
+          // object, the arguments for that function
+          istexQuery: data.query,
+        },
+        message: "Starting ISTEX", // string, the notification message
+      };
+
       // add a full query button
-      addFullQueryButton(data, "Submit full ISTEX query", "istexRetriever", {
-        istexQuery: data.query,
-      });
+      addFullQueryButton(data, "Submit full ISTEX query", powervalveArguments);
     })
     .catch(function (e) {
       window.electron.send("console-logs", "Query error : " + e); // Log error

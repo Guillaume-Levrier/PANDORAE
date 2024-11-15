@@ -22,15 +22,22 @@ const nosDeputesBasic = (data) =>
       // generate the response preview
       basicQueryResultDiv(data, totalreq);
 
+      // powervalve sends the instructons for the Chaeros (/headless) context
+      // to execute
+      const powervalveArguments = {
+        powerAction: "nosDeputesRetriever", // string, the name of the function to call
+        powerArg: {
+          query: data.query,
+          legislature: document.getElementById("nosDeplegSelect").value,
+        },
+        message: "Starting Regards Citoyens", // string, the notification message
+      };
+
       // add a full query button
       addFullQueryButton(
         data,
         "Submit full Regards Citoyens API query",
-        "nosDeputesRetriever",
-        {
-          query: data.query,
-          legislature: document.getElementById("nosDeplegSelect").value,
-        }
+        powervalveArguments
       );
     })
     .catch((e) => {

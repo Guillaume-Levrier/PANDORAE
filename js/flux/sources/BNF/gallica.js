@@ -37,12 +37,22 @@ const gallicaBasicRetriever = (data) =>
       // generate the response preview
       basicQueryResultDiv(data, numberOfResults);
 
+      // powervalve sends the instructons for the Chaeros (/headless) context
+      // to execute
+      const powervalveArguments = {
+        powerAction: "GallicaFullQuery", // string, the name of the function to call
+        powerArg: {
+          // object, the arguments for that function
+          query: data.query,
+        },
+        message: "Starting Gallica", // string, the notification message
+      };
+
       // add a button to execute the full query
       addFullQueryButton(
         data,
         "Submit full Gallica query",
-        "GallicaFullQuery",
-        { query: data.query }
+        powervalveArguments
       );
     })
     .catch((e) => {
