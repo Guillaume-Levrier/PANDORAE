@@ -27,6 +27,9 @@ import { nosDeputesRetriever } from "./api-retrievers/regards-citoyens-api-retri
 const chaerosFunctions = {
   istexRetriever,
   nosDeputesRetriever,
+  standardizeDataset,
+  zoteroItemsRetriever,
+  zoteroCollectionBuilder,
 };
 
 const chaerosSwitch = (fluxAction, fluxArgs) => {

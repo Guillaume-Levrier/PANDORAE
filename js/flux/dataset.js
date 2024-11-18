@@ -128,9 +128,11 @@ const datasetDetail = (detailDiv, dataset, table) => {
   detailDiv.append(informationDiv, actionDiv);
 
   // information div
-  informationDiv.innerHTML = `<span style="font-weight:bold;"> ${dataset.name} </span>
+  informationDiv.innerHTML = `<span style="font-weight:bold;"> ${
+    dataset.name
+  } </span>
   <br>Origin : ${dataset.source}
-  <br>Total results : ${dataset.data.length} 
+  <br>Total results : ${dataset.data.length || dataset.content.length} 
   <br>Upload date : ${dataset.date}
   <br>Unique ID : ${dataset.id}`;
 
@@ -165,84 +167,123 @@ const datasetDetail = (detailDiv, dataset, table) => {
   actionDiv.append(deleteButton);
 
   try {
-    switch (dataset.source) {
-      case "istex":
-      case "dimensions":
-      case "webofscience":
-      case "scopus":
-        // Standardize to CSL
+    console.log(table);
 
-        const standardizeCSL = document.createElement("button");
-        standardizeCSL.type = "submit";
-        standardizeCSL.className = "flux-button";
-        standardizeCSL.innerText = "Standardize dataset";
-        standardizeCSL.addEventListener("click", () => {
-          powerValve("standardize", dataset);
-          fluxButtonClicked(standardizeCSL, true, "Dataset standardized");
-        });
+    // Here you will find a switch in a switch.
+    // Option one is the flux switch, that is data that has just been retrieved
+    // then the deeper level is by data source
+    // Switch two is standard table, it's already been CSL remapped for Zotero
+    //
+    //
+    switch (table) {
+      case "flux":
+        switch (dataset.source) {
+          case "istex":
+          case "dimensions":
+          case "webofscience":
+          case "scopus":
+          case "regards citoyens":
+            // Standardize to CSL
 
-        actionDiv.append(standardizeCSL);
+            const standardizeCSL = document.createElement("button");
+            standardizeCSL.type = "submit";
+            standardizeCSL.className = "flux-button";
+            standardizeCSL.innerText = "Standardize dataset";
+            standardizeCSL.addEventListener("click", () => {
+              powerValve("standardizeDataset", dataset);
+              fluxButtonClicked(standardizeCSL, true, "Dataset standardized");
+            });
 
+            actionDiv.append(standardizeCSL);
+
+            break;
+        }
         break;
+
       case "standard":
+        switch (dataset.source) {
+          case "istex":
+          case "dimensions":
+          case "webofscience":
+          case "scopus":
+          case "regards citoyens":
+            // Standardize to CSL
+
+            const sendToZotero = document.createElement("button");
+            sendToZotero.type = "submit";
+            sendToZotero.className = "flux-button";
+            sendToZotero.innerText = "Upload to Zotero";
+            sendToZotero.addEventListener("click", () => {
+              //powerValve("standardizeDataset", dataset);
+              fluxButtonClicked(sendToZotero, true, "Sending dataset");
+            });
+
+            actionDiv.append(sendToZotero);
+
+            break;
+          case "hyphe":
+          case "zotero":
+            //refer to explorer-explainer.md
+
+            const typeList = Object.keys(CM.types.names);
+
+            const optionList = document.createElement("div");
+            optionList.innerHTML = `<div style="text-decoration: underline;">Select at least one relevant <span style="font-family:monospace;">TYPE</span> explorer below:</div><br>`;
+            optionList.style.padding = "5%";
+
+            detailDiv.style.display = "flex";
+
+            actionDiv.append(optionList);
+
+            typeList.forEach((dataType) => {
+              const systemOption = document.createElement("div");
+              systemOption.className = "systemOption";
+              const optionData = document.createElement("input");
+              optionData.className = "sysDestCheck";
+              optionData.value = dataType;
+              optionData.name = dataType;
+              optionData.type = "checkbox";
+              const optionLabel = document.createElement("label");
+              optionLabel.innerText = CM.types.names[dataType];
+              systemOption.append(optionData, optionLabel);
+              optionList.append(systemOption);
+            });
+
+            const exportOptions = document.createElement("div");
+
+            exportOptions.style = "display:flex;margin-top:1rem;";
+
+            const datasetNameInput = document.createElement("input");
+            datasetNameInput.className = "fluxInput";
+            datasetNameInput.spellcheck = false;
+            datasetNameInput.id = "systemToType";
+            datasetNameInput.type = "text";
+            datasetNameInput.style.width = "220px";
+            datasetNameInput.placeholder = "Enter a dataset name";
+            datasetNameInput.value = dataset.name;
+
+            const exportButton = document.createElement("button");
+            exportButton.type = "submit";
+            exportButton.className = "flux-button";
+            exportButton.innerText = "Export";
+            exportButton.addEventListener("click", () =>
+              powerValve("sysExport", {
+                id: dataset.id,
+                name: datasetNameInput.value,
+              })
+            );
+
+            exportOptions.append(datasetNameInput, exportButton);
+
+            optionList.append(exportOptions);
+
+            break;
+          default:
+            break;
+        }
         break;
 
-      case "hyphe":
-      case "zotero":
-        //refer to explorer-explainer.md
-
-        const typeList = Object.keys(CM.types.names);
-
-        const optionList = document.createElement("div");
-        optionList.innerHTML = `<div style="text-decoration: underline;">Select at least one relevant <span style="font-family:monospace;">TYPE</span> explorer below:</div><br>`;
-        optionList.style.padding = "5%";
-
-        detailDiv.style.display = "flex";
-
-        actionDiv.append(optionList);
-
-        typeList.forEach((dataType) => {
-          const systemOption = document.createElement("div");
-          systemOption.className = "systemOption";
-          const optionData = document.createElement("input");
-          optionData.className = "sysDestCheck";
-          optionData.value = dataType;
-          optionData.name = dataType;
-          optionData.type = "checkbox";
-          const optionLabel = document.createElement("label");
-          optionLabel.innerText = CM.types.names[dataType];
-          systemOption.append(optionData, optionLabel);
-          optionList.append(systemOption);
-        });
-
-        const exportOptions = document.createElement("div");
-
-        exportOptions.style = "display:flex;margin-top:1rem;";
-
-        const datasetNameInput = document.createElement("input");
-        datasetNameInput.className = "fluxInput";
-        datasetNameInput.spellcheck = false;
-        datasetNameInput.id = "systemToType";
-        datasetNameInput.type = "text";
-        datasetNameInput.style.width = "220px";
-        datasetNameInput.placeholder = "Enter a dataset name";
-        datasetNameInput.value = dataset.name;
-
-        const exportButton = document.createElement("button");
-        exportButton.type = "submit";
-        exportButton.className = "flux-button";
-        exportButton.innerText = "Export";
-        exportButton.addEventListener("click", () =>
-          powerValve("sysExport", {
-            id: dataset.id,
-            name: datasetNameInput.value,
-          })
-        );
-
-        exportOptions.append(datasetNameInput, exportButton);
-
-        optionList.append(exportOptions);
-
+      default:
         break;
     }
   } catch (error) {

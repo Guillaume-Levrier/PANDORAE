@@ -151,7 +151,7 @@ const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
 
   const colName = collectionName;
 
-  pandodb.csljson.get(id).then((data) => {
+  pandodb.standard.get(id).then((data) => {
     var file = data.content;
 
     try {

@@ -175,7 +175,7 @@ Start by entering a Hyphe API endpoint, then select a corpus. Click Load to dire
             data: {
               id: "regards citoyens",
               table: "flux",
-              source: ["regards"],
+              source: ["regards citoyens"],
             },
           },
           {
@@ -272,7 +272,7 @@ Start by entering a Hyphe API endpoint, then select a corpus. Click Load to dire
             data: {
               id: "API retrieved",
               table: "flux",
-              source: ["istex", "gallica"],
+              source: ["istex", "gallica", "regards citoyens"],
             },
           },
           {
@@ -301,7 +301,7 @@ Start by entering a Hyphe API endpoint, then select a corpus. Click Load to dire
             data: {
               id: "CSL-JSON standardized",
               table: "standard",
-              source: ["istex"],
+              source: ["istex", "regards citoyens"],
             },
           },
           {

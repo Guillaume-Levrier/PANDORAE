@@ -5,6 +5,7 @@
 // ordonné qui récupère tous les usages de cette expression.
 
 import bottleneck from "bottleneck";
+import { dataWriter, genDate } from "../chaeros-to-system";
 
 // Cette fonction est encore en cours de construction
 
@@ -12,10 +13,13 @@ const nosDeputesRetriever = ({ query, legislature }) => {
   // La première étape consiste à relancer la requête telle qu'obtenue dans le FLUX
   // Afin de disposer du nombre de pages de 500 éléments à demander à  l'API
 
-  console.log(query);
-  console.log(legislature);
+  if (legislature === "2022-2024") {
+    legislature = "";
+  } else {
+    legislature += ".";
+  }
 
-  const queryString = `https://${legislature}.nosdeputes.fr/recherche/${encodeURI(
+  const queryString = `https://${legislature}nosdeputes.fr/recherche/${encodeURI(
     query
   )}?format=json`;
 
@@ -29,8 +33,6 @@ const nosDeputesRetriever = ({ query, legislature }) => {
     minTime: 600,
   });
 
-  console.log(queryString);
-
   fetch(queryString)
     .then((r) => r.json())
     .then((res) => {
@@ -42,7 +44,7 @@ const nosDeputesRetriever = ({ query, legislature }) => {
 
       for (let i = 1; i <= totalReq; i++) {
         pagesReq.push(
-          `https://${legislature}.nosdeputes.fr/recherche/${encodeURI(
+          `https://${legislature}nosdeputes.fr/recherche/${encodeURI(
             query
           )}?format=json&count=500&page=${i}`
         );
@@ -274,19 +276,24 @@ const nosDeputesRetriever = ({ query, legislature }) => {
                                     totalMap += regContent[itemType].size;
                                   }
 
-                                  console.log(regContent);
-                                  console.log(totalMap);
-                                  console.log(totalNum);
-
                                   // Si c'est bien le cas, formatage puis sauvegarde
                                   if (totalMap >= totalNum) {
-                                    console.log(query);
-                                    console.log(regContent);
+                                    const date = genDate();
+                                    const name = query;
+                                    const id = `${name}-${date}`;
+                                    const dataset = {
+                                      id,
+                                      source: "regards citoyens",
+                                      date,
+                                      name,
+                                      data: regContent,
+                                    };
 
-                                    /* dataWriter(
-                                      ["system"],
-                                      queryContent,
-                                      regContent
+                                    dataWriter("flux", dataset);
+
+                                    window.electron.send(
+                                      "chaeros-notification",
+                                      "Data successfully retrieved"
                                     );
                                   } else {
                                     window.electron.send(
@@ -298,14 +305,13 @@ const nosDeputesRetriever = ({ query, legislature }) => {
                                       "console-logs",
                                       "Failure to retrieve data from Regards API"
                                     ); // Sending notification to console
-
-                                    setTimeout(() => {
-                                      window.electron.send(
-                                        "win-destroy",
-                                        winId
-                                      );
-                                    }, 500); */
                                   }
+
+                                  window.electron.send("pulsar", true);
+
+                                  setTimeout(() => {
+                                    window.electron.send("win-destroy", winId);
+                                  }, 1000);
                                 });
                             }
                           });

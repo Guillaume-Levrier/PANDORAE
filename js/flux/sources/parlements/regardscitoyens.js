@@ -6,11 +6,23 @@ import {
 
 //===== Regards Citoyens ======
 
+const getLegislature = () => {
+  var legislature = document.getElementById("nosDeplegSelect").value;
+
+  if (legislature === "2022-2024") {
+    legislature = "";
+  } else {
+    legislature += ".";
+  }
+
+  return legislature;
+};
+
 const nosDeputesBasic = (data) =>
   fetch(
-    `https://${
-      document.getElementById("nosDeplegSelect").value
-    }.nosdeputes.fr/recherche/${encodeURI(data.query)}?format=json`
+    `https://${getLegislature()}nosdeputes.fr/recherche/${encodeURI(
+      data.query
+    )}?format=json`
   )
     .then((r) => r.json())
     .then((r) => {

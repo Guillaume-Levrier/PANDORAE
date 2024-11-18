@@ -13,11 +13,20 @@
 //
 
 import { istexConverter } from "./csljson-remappers/istex2csljson";
+import { regardsCitoyensConverter } from "./csljson-remappers/regardscitoyens2csljson";
 
 const standardizeDataset = (dataset) => {
   switch (dataset.source) {
+    case "gallica":
+      console.log("gallica remapper should happen here");
+      break;
+
     case "istex":
       istexConverter(dataset.data);
+      break;
+
+    case "regards citoyens":
+      regardsCitoyensConverter(dataset);
       break;
 
     default:
