@@ -8,6 +8,7 @@ import {
 } from "../type-common-functions";
 import { dataDownload } from "../data-manager-type";
 import { displayDatasetBasicInfo } from "../tooltip";
+import { setkeylock } from "../../pandorae-interface/keyboard-shortcuts";
 
 // ========= webArchive =========
 const webArchive = (datajson) => {

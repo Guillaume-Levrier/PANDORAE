@@ -30,6 +30,7 @@ const chaerosFunctions = {
   standardizeDataset,
   zoteroItemsRetriever,
   zoteroCollectionBuilder,
+  sysExport,
 };
 
 const chaerosSwitch = (fluxAction, fluxArgs) => {

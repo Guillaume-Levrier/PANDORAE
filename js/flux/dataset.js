@@ -333,12 +333,21 @@ const datasetDetail = (detailDiv, dataset, table) => {
             exportButton.type = "submit";
             exportButton.className = "flux-button";
             exportButton.innerText = "Export";
-            exportButton.addEventListener("click", () =>
+            exportButton.addEventListener("click", () => {
+              var dest = document.getElementsByClassName("sysDestCheck");
+              const explorers = [];
+              for (let i = 0; i < dest.length; i++) {
+                if (dest[i].checked) {
+                  explorers.push(dest[i].value);
+                }
+              }
+
               powerValve("sysExport", {
                 id: dataset.id,
                 name: datasetNameInput.value,
-              })
-            );
+                explorers,
+              });
+            });
 
             exportOptions.append(datasetNameInput, exportButton);
 
@@ -581,12 +590,7 @@ const corpusDetail = (corpusOptions, detailDiv, selected) => {
 
         selected.forEach((s) => (powerValveArgs.collections[s.key] = s));
 
-        console.log(powerValveArgs);
-
-        powerValve("zoteroItemsRetriever", {
-          name: "Zotero Collection Retriever",
-          powerValveArgs,
-        });
+        powerValve("zoteroItemsRetriever", powerValveArgs);
       });
 
       detailDiv.append(importName, importButton);

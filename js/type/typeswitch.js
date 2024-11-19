@@ -15,17 +15,27 @@ import { gazouillotype } from "./explorers/gazouillotype";
 import { geotype } from "./explorers/geotype";
 import { hyphe } from "./explorers/hyphe";
 import { pharmacotype } from "./explorers/pharmacotype";
-import { regards } from "./explorers/regardotype";
+
+import { parliament } from "./explorers/parliament";
 
 //========== typesSwitch ==========
 // Switch used to which type to draw/generate
 
-const typeSwitch = (type, data) => {
+const types = {
+  webArchive,
+  timeline,
+  parliament,
+};
+
+const typeSwitch = (type, data) => types[type](data);
+
+/* const typeSwitch = (type, data) => {
   document.getElementById("field").value = "loading " + type;
 
   switch (type) {
     case "regards":
-      regards(data);
+      
+      //regards(data);
       break;
     case "fieldotype":
       fieldotype(data);
@@ -77,6 +87,6 @@ const typeSwitch = (type, data) => {
   }
 
   document.getElementById("source").innerText = "Source: " + data.id;
-};
+}; */
 
 export { typeSwitch };

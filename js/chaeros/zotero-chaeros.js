@@ -7,17 +7,13 @@ import { dataWriter, genDate } from "./chaeros-to-system";
 
 import { userData } from "./chaeros-userdata";
 
-const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
-  window.electron.send(
-    "console-logs",
-    "Started retrieving collections " +
-      collections +
-      "for user " +
-      zoteroUser +
-      " under the import name " +
-      importName +
-      " into SYSTEM."
-  );
+const zoteroItemsRetriever = (data) => {
+  console.log(data);
+  const collections = Object.values(data.collections);
+  const importName = data.importName;
+
+  //collections, zoteroUser, importName
+  window.electron.send("console-logs", "Started retrieving collections ");
 
   const limiter = new bottleneck({
     // Create a bottleneck to prevent API rate limit
@@ -38,10 +34,12 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
     let collectionComp = "&v=3&key=";
 
     let zoteroCollectionRequest =
-      rootUrl + zoteroUser + urlBase + "?" + collectionComp + zoteroApiKey; // Build the url
+      rootUrl + data.libraryID + urlBase + "?" + collectionComp + zoteroApiKey; // Build the url
 
     zoteroPromises.push(zoteroCollectionRequest); // Push promise in the relevant array
   }
+
+  console.log(zoteroPromises);
 
   var zoteroCollectionResponse = [];
 
@@ -53,6 +51,7 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
       .schedule(() => fetch(d))
       .then((res) => res.json())
       .then((result) => {
+        console.log(result);
         zoteroCollectionResponse.push(result);
 
         if (zoteroCollectionResponse.length === zoteroPromises.length) {
@@ -71,10 +70,16 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
               var zoteroVersion =
                 "/items/top?&v=3&format=csljson&start=" + i + "&limit=100&key=";
               let zoteroItemsRequest =
-                rootUrl + zoteroUser + urlBase + zoteroVersion + zoteroApiKey;
+                rootUrl +
+                data.libraryID +
+                urlBase +
+                zoteroVersion +
+                zoteroApiKey;
 
               itemRequests.push(zoteroItemsRequest);
             }
+
+            console.log(itemRequests);
 
             itemRequests.forEach((d) => {
               limiter
@@ -82,15 +87,6 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
                 .then((res) => res.json())
                 .then((response) => {
                   response.items.forEach((d) => {
-                    if (d.hasOwnProperty("shortTitle")) {
-                      //var enrichment = ;
-                      if (d.shortTitle[0] === "{") {
-                        d.enrichment = JSON.parse(d.shortTitle);
-                      }
-                      //if (d.enrichment.hasOwnProperty("altmetric")) {
-                      //  d.enrichment.altmetric = JSON.parse(d.enrichment.altmetric);
-                      //}
-                    }
                     f.items.push(d);
 
                     responseAmount++;
@@ -100,26 +96,101 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
                     window.electron.send("chaeros-notification", updateMessage);
 
                     if (responseAmount === responseTarget) {
-                      const date = genDate();
-                      const name = importName;
-                      const id = `${name}-${date}`;
+                      //https://api.zotero.org/groups/5765094/collections/88DD94XI/items/0/children?key=SooWRxlCaT4wJPmK5i8sdaXF&limit=100
 
-                      const dataset = {
-                        id,
-                        source: "zotero",
-                        date,
-                        name,
-                        data: zoteroCollectionResponse,
+                      // Now retrieve the notes.
+
+                      const responseMap = {};
+
+                      f.items.forEach((d) => (responseMap[d.shortTitle] = d));
+
+                      const noteRequests = [];
+
+                      for (var i = 0; i < f.meta.numItems; i += 100) {
+                        let rootUrl = "https://api.zotero.org/groups/";
+                        let urlBase = "/collections/" + f.data.key;
+                        var zoteroVersion =
+                          "/items/0/children?&v=3&start=" +
+                          i +
+                          "&limit=100&key=";
+                        let zoteroItemsRequest =
+                          rootUrl +
+                          data.libraryID +
+                          urlBase +
+                          zoteroVersion +
+                          zoteroApiKey;
+
+                        noteRequests.push(zoteroItemsRequest);
+                      }
+
+                      window.electron.send(
+                        "chaeros-notification",
+                        "Retrieving notes…"
+                      );
+
+                      console.log(noteRequests);
+
+                      var resCount = 0;
+
+                      noteRequests.forEach((d) => {
+                        limiter
+                          .schedule(() => fetch(d))
+                          .then((res) => res.json())
+                          .then((response) => {
+                            console.log(response);
+
+                            response.forEach((note) => {
+                              if (note.data.itemType === "note") {
+                                const noteContent = JSON.parse(note.data.note);
+                                const noteID = noteContent.id;
+                                console.log(noteID);
+                                responseMap[noteID].note = noteContent;
+                              }
+                            });
+
+                            resCount++;
+
+                            if (resCount === noteRequests.length) {
+                              const noteResponse = Object.values(responseMap);
+                              console.log(noteResponse);
+
+                              saveDataset(noteResponse);
+                            }
+                          });
+                      });
+
+                      const saveDataset = (data) => {
+                        const date = genDate();
+                        const name = importName;
+                        const id = `${name}-${date}`;
+
+                        const dataset = {
+                          id,
+                          source: "zotero",
+                          date,
+                          name,
+                          data,
+                        };
+
+                        // send dataset to be saved
+                        dataWriter(["standard"], dataset);
+
+                        // stop pulsar
+                        window.electron.send("pulsar", true);
+                        // destroy this chaeros window
+
+                        window.electron.send(
+                          "chaeros-notification",
+                          "Collection retrieved"
+                        );
+
+                        setTimeout(
+                          () => window.electron.send("win-destroy", true),
+                          1000
+                        );
                       };
 
-                      // send dataset to be saved
-                      dataWriter(["standard"], dataset);
-
-                      // stop pulsar
-                      window.electron.send("pulsar", true);
-
-                      // destroy this chaeros window
-                      window.electron.send("win-destroy", true);
+                      //saveDataset()
                     }
                   });
                 });
