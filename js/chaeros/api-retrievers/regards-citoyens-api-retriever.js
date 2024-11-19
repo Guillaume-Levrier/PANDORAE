@@ -199,10 +199,6 @@ const nosDeputesRetriever = ({ query, legislature }) => {
                             );
                             resSeances.push(resSeance);
 
-                            console.log(resSeances.length);
-
-                            console.log(seanceReqs.length);
-
                             if (resSeances.length === seanceReqs.length) {
                               // verser les résultats dans la Map seances
                               resSeances.forEach((sc) => {

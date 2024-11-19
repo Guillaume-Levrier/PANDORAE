@@ -22,14 +22,21 @@ const testingZotero = (inputs) => {
     fetch(url)
       .then((r) => r.json())
       .then((r) => {
-        if (parseInt(d) === parseInt(r[0].library.id)) {
+        if (r.length > 0) {
+          if (parseInt(d) === parseInt(r[0].library.id)) {
+            document.getElementById(d).previousSibling.innerText =
+              r[0].library.name + " (connected)";
+          }
+        } else {
           document.getElementById(d).previousSibling.innerText =
-            r[0].library.name + " (connected)";
+            "(empty library connected)";
         }
       })
       .catch((e) => {
+        console.log(e);
         document.getElementById(d).previousSibling.innerText = "Failed";
         document.getElementById(d).previousSibling.style.color = "red";
+        throw e;
       });
   });
 };

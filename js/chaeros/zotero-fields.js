@@ -600,7 +600,6 @@ const zoteroFields = {
     accessDate: "",
     rights: "",
     extra: "",
-    creator: "",
   },
   thesis: {
     title: "",
@@ -709,6 +708,19 @@ const zoteroFields = {
   },
 };
 
-const createNewDocument = (doctype) => Object.assign({}, zoteroFields[doctype]);
+const createNewDocument = (itemType) =>
+  Object.assign({ itemType }, zoteroFields[itemType]);
 
-export { zoteroFields, createNewDocument };
+const createNote = () =>
+  Object.assign(
+    {},
+    {
+      itemType: "note",
+      note: "",
+      tags: [],
+      collections: [],
+      relations: {},
+    }
+  );
+
+export { zoteroFields, createNewDocument, createNote };

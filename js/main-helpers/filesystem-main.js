@@ -63,7 +63,12 @@ var themeData;
 const startRoutine = () => {
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     // this breaks zotero interactions
-    details.responseHeaders["Access-Control-Allow-Origin"] = ["*"];
+
+    if (details.hasOwnProperty("url")) {
+      if (details.url.indexOf("zotero") === -1) {
+        details.responseHeaders["Access-Control-Allow-Origin"] = ["*"];
+      }
+    }
 
     callback({
       responseHeaders: {

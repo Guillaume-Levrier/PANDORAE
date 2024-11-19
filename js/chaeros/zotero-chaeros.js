@@ -133,130 +133,179 @@ const zoteroItemsRetriever = (collections, zoteroUser, importName) => {
 //========== zoteroCollectionBuilder ==========
 // zoteroCollectionBuilder creates a new collection from a CSL-JSON dataset.
 
-const zoteroCollectionBuilder = (collectionName, zoteroUser, id) => {
-  window.electron.send(
-    "console-logs",
-    "Building collection" +
-      collectionName +
-      " for user " +
-      zoteroUser +
-      " in path " +
-      id
-  );
+const zoteroCollectionBuilder = (dataset) => {
+  console.log("=== STARTING COLLECTION BUILDER ===");
+
+  console.log(dataset);
+
+  const colName = dataset.name;
+
+  const zoteroApiKey = userData.distantServices.zotero.apikey;
+
+  window.electron.send("console-logs", "Building collection" + colName);
 
   window.electron.send(
     "chaeros-notification",
-    "Creating collection " + collectionName
+    "Creating collection " + colName
   ); // Send message to main Display
 
-  const colName = collectionName;
+  var file = dataset.dataset.data;
 
-  pandodb.standard.get(id).then((data) => {
-    var file = data.content;
+  try {
+    const collectionCreationUrl = `https://api.zotero.org/groups/${dataset.id}/collections?&v=3&key=${zoteroApiKey}`;
 
-    try {
-      // If the file is valid, do the following:
+    var collectionItem = [{ name: colName, parentCollection: "" }]; // Create the Collection item to be sent
 
-      let zoteroApiKey = getPassword("Zotero", zoteroUser);
+    let collectionCode = { code: "" };
 
-      // URL Building blocks
-      var rootUrl = "https://api.zotero.org/groups/";
-      var collectionCreationUrl =
-        rootUrl + zoteroUser + "/collections?&v=3&key=" + zoteroApiKey;
+    const noteMap = {};
 
-      var collectionItem = [{ name: "", parentCollection: "" }]; // Create the Collection item to be sent
-      collectionItem[0].name = collectionName;
+    fetch(collectionCreationUrl, {
+      method: "POST",
+      body: JSON.stringify(collectionItem),
+    })
+      .then((res) => res.json())
+      .then((collectionName) => {
+        console.log("===  COLLECTION CREATED ===");
+        console.log(collectionName);
 
-      let collectionCode = { code: "" };
+        collectionCode.code = collectionName.success["0"]; // Retrieve name from the response
 
-      fetch(collectionCreationUrl, {
-        method: "POST",
-        body: JSON.stringify(collectionItem),
-      })
-        .then((res) => res.json())
-        .then((collectionName) => {
-          collectionCode.code = collectionName.success["0"]; // Retrieve name from the response
+        let fileArrays = []; // Create empty array
 
-          let fileArrays = []; // Create empty array
+        file.forEach((d) => {
+          // For each file object
+          d.collections = []; // Create a "collections" property
+          d.collections.push(collectionCode.code); // Push the collection code attributed by Zotero
+        });
 
-          file.forEach((d) => {
-            // For each file object
-            d.collections = []; // Create a "collections" property
-            d.collections.push(collectionCode.code); // Push the collection code attributed by Zotero
-          });
-
-          for (let i = 0; i < file.length; i += 50) {
-            // Only 50 items can be sent per request
-            let subArray = { items: [] }; // Create subArray item
-            let limit = i + 50; // The upper limit is start + 50 items
-            for (let j = i; j < limit; j++) {
-              // Iterate on items to be sent
-              if (file[j]) {
-                subArray.items.push(file[j]); // Push files in subarray
-              }
+        for (let i = 0; i < file.length; i += 50) {
+          // Only 50 items can be sent per request
+          let subArray = { items: [] }; // Create subArray item
+          let limit = i + 50; // The upper limit is start + 50 items
+          for (let j = i; j < limit; j++) {
+            // Iterate on items to be sent
+            if (file[j]) {
+              const thisfile = file[j];
+              const note = thisfile.note;
+              noteMap[thisfile.shortTitle] = note;
+              delete thisfile.note;
+              subArray.items.push(thisfile); // Push files in subarray
             }
-            fileArrays.push(subArray); // Push subArray in fileArrays
           }
+          fileArrays.push(subArray); // Push subArray in fileArrays
+        }
 
-          let fetchTargets = [];
+        let fetchTargets = [];
 
-          fileArrays.forEach((d) => {
-            fetchTargets.push({
-              uri: rootUrl + zoteroUser + "/items?&v=3&key=" + zoteroApiKey,
-              body: d.items,
-            });
-          });
-
-          const limiter = new bottleneck({
-            // Create a bottleneck to prevent hitting API rate limits
-            maxConcurrent: 1, // Only one request at once
-            minTime: 200, // Every 200 milliseconds
-          });
-
-          let resultList = [];
-
-          let count = 0;
-
-          fetchTargets.forEach((d) => {
-            limiter
-              .schedule(() =>
-                fetch(d.uri, {
-                  method: "POST",
-                  body: JSON.stringify(d.body),
-                })
-              )
-              .then((res) => res.json())
-              .then((result) => {
-                resultList.push(result);
-
-                count++;
-
-                window.electron.send(
-                  "chaeros-notification",
-                  `Uploading ${colName} - (${count}/${fileArrays.length})`
-                );
-                if (resultList.length === fileArrays.length) {
-                  setTimeout(() => {
-                    window.electron.send(
-                      "chaeros-notification",
-                      "Collection created"
-                    ); // Send success message to main Display
-                    window.electron.send("pulsar", true);
-                    window.electron.send("win-destroy", winId);
-                  }, 2000);
-                } // If all responses have been recieved, delay then close chaeros
-              })
-              .catch((e) => window.electron.send("console-logs", e));
-            window.electron.send(
-              "console-logs",
-              "Collection " + JSON.stringify(collectionName) + " built."
-            ); // Send success message to console
+        fileArrays.forEach((d) => {
+          fetchTargets.push({
+            uri: `https://api.zotero.org/groups/${dataset.id}/items?&v=3&key=${zoteroApiKey}`,
+            body: d.items,
           });
         });
-    } catch (e) {
-      window.electron.send("console-logs", e);
-    }
-  });
+
+        const limiter = new bottleneck({
+          // Create a bottleneck to prevent hitting API rate limits
+          maxConcurrent: 1, // Only one request at once
+          minTime: 200, // Every 200 milliseconds
+        });
+
+        let resultList = [];
+
+        let count = 0;
+
+        console.log("=== PACKAGES ===");
+        console.log(fetchTargets);
+
+        fetchTargets.forEach((d) => {
+          limiter
+            .schedule(() =>
+              fetch(d.uri, {
+                method: "POST",
+                body: JSON.stringify(d.body),
+              })
+            )
+            .then((res) => res.json())
+            .then((result) => {
+              const idList = Object.values(result.success);
+
+              //result.forEach((d) => resultList.push(...d.body));
+
+              resultList.push(...idList);
+
+              count++;
+
+              console.log(resultList);
+
+              console.log(file);
+
+              if (resultList.length === file.length) {
+                // NEW PART
+                // UPLOAD A NOTE
+                // INSTEAD OF HACKING
+                // SHORTTITLE
+
+                // get documents page by page
+                // and add the note.
+
+                let notecount = 0;
+
+                const addNoteToDoc = (itemID) => {
+                  const url = `https://api.zotero.org/groups/${dataset.id}/items/${itemID}?&v=3&key=${zoteroApiKey}`;
+
+                  console.log(itemID);
+                  console.log(url);
+
+                  fetch(url)
+                    .then((r) => r.json())
+                    .then((r) => {
+                      const id = r.data.shortTitle;
+                      const note = noteMap[id];
+                      note.parentItem = r.key;
+
+                      limiter.schedule(() =>
+                        fetch(
+                          `https://api.zotero.org/groups/${dataset.id}/items?&v=3&key=${zoteroApiKey}`,
+                          {
+                            method: "POST",
+                            body: JSON.stringify([note]),
+                          }
+                        )
+                          .then((r) => r.json())
+                          .then((r) => {
+                            notecount++;
+                            window.electron.send(
+                              "chaeros-notification",
+                              `Uploading note (${notecount}/${resultList.length})`
+                            );
+
+                            if (notecount === resultList.length) {
+                              setTimeout(() => {
+                                window.electron.send(
+                                  "chaeros-notification",
+                                  "Collection created"
+                                ); // Send success message to main Display
+                                window.electron.send("pulsar", true);
+                              }, 2000);
+                            }
+                          })
+                      );
+                    });
+                };
+                resultList.forEach((d) => addNoteToDoc(d, noteMap));
+              } // If all responses have been received, delay then close chaeros
+            })
+            .catch((e) => window.electron.send("console-logs", e));
+          window.electron.send(
+            "console-logs",
+            "Collection " + JSON.stringify(collectionName) + " built."
+          ); // Send success message to console
+        });
+      });
+  } catch (e) {
+    window.electron.send("console-logs", e);
+  }
 };
 
 export { zoteroItemsRetriever, zoteroCollectionBuilder };

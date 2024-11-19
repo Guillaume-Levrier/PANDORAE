@@ -5,6 +5,7 @@ import { CM } from "../locales/locales";
 import { powerValve } from "./powervalve";
 import { fluxButtonClicked } from "./actionbuttons";
 import { loadHyphe } from "./sources/hyphe/hyphe-flux";
+import { userData } from "./userdata";
 
 // datasetDisplay shows the datasets (usually JSON or CSV files) available in the relevant /datasets/ subdirectory.
 
@@ -127,12 +128,23 @@ const datasetDetail = (detailDiv, dataset, table) => {
 
   detailDiv.append(informationDiv, actionDiv);
 
+  console.log(dataset);
+
+  let size = 0;
+
+  if (Array.isArray(dataset.data)) {
+    size = dataset.data.length;
+  } else if (typeof dataset.data === "object") {
+    size = "";
+    for (const key in dataset.data) {
+      size += ` ${dataset.data[key].size} ${key} `;
+    }
+  }
+
   // information div
-  informationDiv.innerHTML = `<span style="font-weight:bold;"> ${
-    dataset.name
-  } </span>
+  informationDiv.innerHTML = `<span style="font-weight:bold;"> ${dataset.name} </span>
   <br>Origin : ${dataset.source}
-  <br>Total results : ${dataset.data.length || dataset.content.length} 
+  <br>Total results : ${size} 
   <br>Upload date : ${dataset.date}
   <br>Unique ID : ${dataset.id}`;
 
@@ -214,8 +226,62 @@ const datasetDetail = (detailDiv, dataset, table) => {
             sendToZotero.className = "flux-button";
             sendToZotero.innerText = "Upload to Zotero";
             sendToZotero.addEventListener("click", () => {
-              //powerValve("standardizeDataset", dataset);
-              fluxButtonClicked(sendToZotero, true, "Sending dataset");
+              const selectLibrary = (userData, dataset, button) => {
+                console.log(button);
+                console.log(userData);
+                // add a name field
+                const nameField = document.createElement("input");
+                nameField.type = "text";
+                nameField.className = "fluxInput";
+                nameField.placeholder = "Collection name";
+                nameField.value = dataset.name;
+                button.parentNode.append(nameField);
+
+                userData.distantServices.zotero.library.forEach((id) => {
+                  console.log(id);
+                  const url = `https://api.zotero.org/groups/${id}/collections?v=3&key=${userData.distantServices.zotero.apikey}`;
+                  fetch(url)
+                    .then((r) => r.json())
+                    .then((r) => {
+                      var name = "(empty library)";
+                      if (r.length > 0) {
+                        if (parseInt(id) === parseInt(r[0].library.id)) {
+                          name = r[0].library.name;
+                        }
+                      }
+                      const sendToCollectionButton =
+                        document.createElement("button");
+                      sendToCollectionButton.type = "submit";
+                      sendToCollectionButton.className = "flux-button";
+                      sendToCollectionButton.innerText = "Upload to " + name;
+                      sendToCollectionButton.addEventListener("click", () => {
+                        powerValve("zoteroCollectionBuilder", {
+                          name: nameField.value,
+                          id,
+                          dataset,
+                        });
+                        fluxButtonClicked(
+                          sendToCollectionButton,
+                          true,
+                          "Sending to " + name
+                        );
+                      });
+                      button.parentNode.append(sendToCollectionButton);
+                    })
+                    .catch((e) => {
+                      console.log(e);
+                      throw e;
+                    });
+                });
+              };
+
+              selectLibrary(userData, dataset, sendToZotero);
+
+              fluxButtonClicked(
+                sendToZotero,
+                true,
+                "Loading Zotero collection names"
+              );
             });
 
             actionDiv.append(sendToZotero);
@@ -260,6 +326,7 @@ const datasetDetail = (detailDiv, dataset, table) => {
             datasetNameInput.type = "text";
             datasetNameInput.style.width = "220px";
             datasetNameInput.placeholder = "Enter a dataset name";
+
             datasetNameInput.value = dataset.name;
 
             const exportButton = document.createElement("button");

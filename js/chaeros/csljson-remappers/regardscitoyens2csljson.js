@@ -6,6 +6,7 @@
 //
 
 import { dataWriter } from "../chaeros-to-system";
+import { createNewDocument, createNote } from "../zotero-fields";
 
 const regardsCitoyensConverter = (dataset) => {
   const flattenedDataset = [];
@@ -48,39 +49,46 @@ const regardsCitoyensConverter = (dataset) => {
     data: convertedDataset,
   };
 
+  console.log(converteddata);
+
   dataWriter("standard", converteddata);
+  console.log("done");
 };
 
 // Zotero-flavoured CSL JSON
 //
 const regardDocRemapper = (item) => {
-  const convertedDocument = {
-    itemType: "legislation",
-    creators: [],
-    pages: "",
-    series: "",
-    seriesTitle: "",
-    seriesText: "",
-    journalAbbreviation: "",
-    language: "",
-    url: "",
-    accessDate: "",
-    archive: "",
-    archiveLocation: "",
-    libraryCatalog: "",
-    callNumber: "",
-    rights: "",
-    extra: "",
-    tags: [],
-    collections: [],
-    relations: {},
-  };
+  const convertedDocument = createNewDocument("statute");
 
-  convertedDocument.title = item.titre;
-  convertedDocument.abstractNote = item.contenu;
-  convertedDocument.date = item.date;
+  console.log(item);
 
-  convertedDocument.shortTitle = JSON.stringify(item);
+  var titre = item.document_type;
+
+  if (item.hasOwnProperty("titre")) {
+    titre += " " + item.titre;
+  }
+
+  if (item.hasOwnProperty("aut")) {
+    if (item.aut) {
+      if (item.aut.hasOwnProperty("depute")) {
+        titre += " " + item.aut.depute.nom;
+      }
+    }
+  }
+
+  if (item.hasOwnProperty("signataires")) {
+    titre += " " + item.signataires;
+  }
+
+  convertedDocument.nameOfAct = titre;
+  convertedDocument.dateEnacted = item.date;
+  const note = createNote();
+  note.note = JSON.stringify(item);
+
+  convertedDocument.shortTitle = item.id;
+  convertedDocument.note = note;
+
+  console.log(convertedDocument);
 
   return convertedDocument;
 };

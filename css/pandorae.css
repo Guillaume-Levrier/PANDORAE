@@ -969,7 +969,8 @@ outline:1px solid black;
 }
 
 .fluxInput {
-  width: 350px;
+  width:80%;
+  max-width: 350px;
   border: none;
   border-bottom: 1px solid #141414;
   height: 20px;
