@@ -6,7 +6,6 @@ import { setkeylock } from "../../pandorae-interface/keyboard-shortcuts";
 
 // ========== regardotype ==========
 const parliament = (datajson) => {
-  console.log(datajson);
   // When called, draw the regards chronology
 
   var svg = d3.select(xtype).append("svg").attr("id", "xtypeSVG");
@@ -168,74 +167,17 @@ const parliament = (datajson) => {
     if (d.depth === 3) {
       tooltip.innerHTML = "";
 
-      const toolSearch = document.createElement("input");
-      toolSearch.style = "padding:5px;border-bottom:1px solid #141414";
-      toolSearch.type = "text";
-      toolSearch.placeholder = "Search term or expression";
+      const dt = d.data.note;
 
-      toolSearch.addEventListener("focusin", () => setkeylock(1));
-      toolSearch.addEventListener("focusout", () => setkeylock(0));
-
-      const toolResult = document.createElement("div");
-      console.log("got there");
-      const searchTerm = () => {
-        console.log("HELLOOOO");
-
-        toolResult.innerHTML =
-          "Fragments from the content of the document:<br><br>";
-        var sliced = "";
-
-        const target = toolSearch.value;
-        previousSearch = target;
-
-        if (target.length > 2) {
-          var re = new RegExp(target, "gi"),
-            str = doc.content;
-          while ((match = re.exec(str)) != null) {
-            // var extrait = doc.content.substring(match.index - 150, match.index + 150)
-            //.replace(target, "<mark>" + target + "</mark>")
-
-            const extrait =
-              doc.content.substring(match.index - 150, match.index) +
-              "<mark>" +
-              doc.content.substring(match.index, match.index + target.length) +
-              "</mark>" +
-              doc.content.substring(
-                match.index + target.length,
-                match.index + 150
-              );
-
-            sliced += extrait + "<br><hr><br>";
-          }
-
-          toolResult.innerHTML =
-            "<div style = 'border:1px solid black; padding:5px'>" +
-            sliced +
-            "</div><br><hr><br>";
-        }
-      };
-
-      if (previousSearch) {
-        toolSearch.value = previousSearch;
-        searchTerm();
-      }
-
-      toolSearch.addEventListener("change", (e) => {
-        console.log("ploc");
-        searchTerm(e);
-      });
-
-      console.log(toolSearch);
-
-      tooltip.append(toolSearch, toolResult);
-
-      var dt = d.data.note;
+      const docContent = document.createElement("div");
 
       switch (dt.document_type) {
         case "QuestionEcrite":
-          tooltip.innerHTML +=
+          var nom = dt.hasOwnProperty("aut") ? dt.aut.depute.nom : "";
+
+          docContent.innerHTML +=
             "<h3>" +
-            dt.aut.depute.nom +
+            nom +
             "</h3><h4>" +
             dt.themes +
             "</h4>" +
@@ -250,7 +192,7 @@ const parliament = (datajson) => {
 
         case "texteLoi":
         case "Amendement":
-          tooltip.innerHTML +=
+          docContent.innerHTML +=
             "<h3>" +
             dt.signataires +
             "</h3><h4>" +
@@ -268,18 +210,83 @@ const parliament = (datajson) => {
           break;
 
         case "Intervention":
-          tooltip.innerHTML +=
-            "<h3>" + dt.aut.depute.nom + "</h3>" + dt.intervention;
+          var nom = dt.hasOwnProperty("aut") ? dt.aut.depute.nom : "";
+
+          if (nom === "" && dt.hasOwnProperty("fonction")) {
+            nom = dt.fonction;
+          }
+
+          docContent.innerHTML += "<h3>" + nom + "</h3>" + dt.intervention;
 
           break;
         default:
           break;
       }
-      if (dt.hasOwnProperty("contenu")) {
-        // intervention
-      } else if (dt.hasOwnProperty("expose")) {
-        // amendement
+
+      const toolSearch = document.createElement("input");
+      const toolResult = document.createElement("div");
+
+      toolSearch.style =
+        "padding:5px;border: 0px;border-bottom: 1px solid red;";
+      toolSearch.type = "text";
+      toolSearch.placeholder = "Search term or expression";
+
+      toolSearch.addEventListener("focusin", () => setkeylock(1));
+      toolSearch.addEventListener("focusout", () => setkeylock(0));
+
+      const searchTerm = () => {
+        toolResult.innerHTML =
+          "Fragments from the content of the document:<br><br>";
+        var sliced = "";
+
+        const target = toolSearch.value;
+        previousSearch = target;
+
+        const doc = { content: docContent.textContent };
+
+        if (target.length > 2) {
+          var re = new RegExp(target, "gi"),
+            str = doc.content;
+          let match;
+
+          var count = 0;
+
+          while ((match = re.exec(str)) != null) {
+            // var extrait = doc.content.substring(match.index - 150, match.index + 150)
+            //.replace(target, "<mark>" + target + "</mark>")
+
+            const extrait =
+              doc.content.substring(match.index - 150, match.index) +
+              "<mark>" +
+              doc.content.substring(match.index, match.index + target.length) +
+              "</mark>" +
+              doc.content.substring(
+                match.index + target.length,
+                match.index + 150
+              );
+
+            if (count > 0) sliced += "<br><hr><br>";
+            sliced += extrait;
+            count++;
+          }
+          if (count === 0) {
+            sliced = `Expression "${target}" not found`;
+          }
+
+          toolResult.innerHTML =
+            "<div style = 'border:1px solid black; padding:5px;margin-top:10px;'>" +
+            sliced +
+            "</div><br><hr><br>";
+        }
+      };
+
+      if (previousSearch) {
+        toolSearch.value = previousSearch;
+        searchTerm();
       }
+
+      toolSearch.addEventListener("change", searchTerm);
+      tooltip.append(toolSearch, toolResult, docContent);
     }
   }
 
