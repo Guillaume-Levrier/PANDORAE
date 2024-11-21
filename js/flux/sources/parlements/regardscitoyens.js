@@ -2,6 +2,7 @@ import { displayInErrorDiv } from "../../DOMbuilder/flux-DOM-api-query";
 import {
   basicQueryResultDiv,
   addFullQueryButton,
+  genHr,
 } from "../../DOMbuilder/flux-DOM-common";
 
 //===== Regards Citoyens ======
@@ -58,4 +59,33 @@ const nosDeputesBasic = (data) =>
       throw e;
     });
 
-export { nosDeputesBasic };
+    const buildNosDeputesArguments = (data, sectionDiv) => {
+  const optionsDiv = document.createElement("div");
+  optionsDiv.className = "fluxRequestOptionDiv";
+  sectionDiv.append(optionsDiv);
+
+  const legislatures = ["2007-2012", "2012-2017", "2017-2022", "2022-2024"];
+
+  const selectElement = document.createElement("select");
+  selectElement.id = "nosDeplegSelect";
+  selectElement.name = "nosDeplegSelect";
+
+  const label = document.createElement("label");
+  label.innerText = "Choisissez une législature : ";
+  label.for = "nosDeplegSelect";
+  //<label for="pet-select">Choose a pet:</label>
+
+  optionsDiv.append(label, selectElement);
+
+  legislatures.forEach((leg) => {
+    const optionEl = document.createElement("option");
+    optionEl.innerText = leg;
+    optionEl.value = leg;
+
+    selectElement.append(optionEl);
+  });
+};
+
+
+
+export { nosDeputesBasic,buildNosDeputesArguments };
