@@ -2,7 +2,29 @@
 // function to remap documents from BnF solr to Zotero compatible
 // CSL - JSON format.
 
-const bnfRemap = (doc, solrCollection) => {
+import { dataWriter } from "../chaeros-to-system";
+
+   
+
+const webArchiveRemap=(dataset)=> {
+
+  console.log(dataset)
+const cslData = [];
+
+          dataset.data.forEach((d) =>
+            cslData.push(bnfRemap(d))
+          );
+
+
+dataset.data = cslData
+
+console.log(dataset)
+
+  dataWriter("standard", dataset);
+
+} 
+
+const bnfRemap = (doc) => {
   const remappedDocument = { itemType: "webpage" };
 
   const originalBnfFields = {
@@ -51,12 +73,15 @@ const bnfRemap = (doc, solrCollection) => {
     );
   }
 
-  remappedDocument.shortTitle = JSON.stringify({
+  remappedDocument.note = JSON.stringify({
     id: doc.id,
     collections: doc.collections,
     links: hyperlinks,
-    solrCollection,
+    solrCollection:doc.solrCollection,
   });
 
   return remappedDocument;
 };
+
+
+export {webArchiveRemap}  

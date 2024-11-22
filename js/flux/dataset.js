@@ -195,6 +195,7 @@ const datasetDetail = (detailDiv, dataset, table) => {
           case "webofscience":
           case "scopus":
           case "regards citoyens":
+            case "web archive" :
             // Standardize to CSL
 
             const standardizeCSL = document.createElement("button");
@@ -219,7 +220,8 @@ const datasetDetail = (detailDiv, dataset, table) => {
           case "webofscience":
           case "scopus":
           case "regards citoyens":
-            // Standardize to CSL
+              case "web archive" :
+                // send to zotero
 
             const sendToZotero = document.createElement("button");
             sendToZotero.type = "submit";

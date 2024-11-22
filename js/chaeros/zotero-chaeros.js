@@ -331,8 +331,13 @@ const zoteroCollectionBuilder = (dataset) => {
                   fetch(url)
                     .then((r) => r.json())
                     .then((r) => {
+
+                      console.log(r)
+
                       const id = r.data.shortTitle;
+                      if (noteMap.hasOwnProperty(id)) { 
                       const note = noteMap[id];
+                      
                       note.parentItem = r.key;
 
                       limiter.schedule(() =>
@@ -362,7 +367,9 @@ const zoteroCollectionBuilder = (dataset) => {
                             }
                           })
                       );
+                      }
                     });
+                    
                 };
                 resultList.forEach((d) => addNoteToDoc(d, noteMap));
               } // If all responses have been received, delay then close chaeros

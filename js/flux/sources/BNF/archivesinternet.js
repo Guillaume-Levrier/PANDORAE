@@ -1,4 +1,4 @@
-import { genHr } from "../../DOMbuilder/flux-DOM-common";
+import { addFullQueryButton, genHr } from "../../DOMbuilder/flux-DOM-common";
 import { availability } from "../../cascade";
 import * as d3 from "d3";
 //===== Solr BNF ======
@@ -222,8 +222,12 @@ const facets = DOMquery.facets;
 
       solrbnfcount[args.query] = {
         count: numFound,
-        args,
+        targetfacets,
         selectedCollection,
+        query:args.query,
+        dateFrom,
+        dateTo,
+        url:DOMquery.service.url,
         countByCollection: parseSolrFacetFields(byCollection.collections),
       };
 
@@ -254,6 +258,26 @@ const facets = DOMquery.facets;
         });
 
         args.resultDiv.append(yearChart, collectionChart, domainDiv);
+
+
+         // powervalve sends the instructons for the Chaeros (/headless) context
+      // to execute
+      const powervalveArguments = {
+        powerAction: "solrMetaExplorer", // string, the name of the function to call
+        powerArg: {
+          // object, the arguments for that function
+          query: solrbnfcount[args.query] ,
+        },
+        message: "Connecting to BnF Solr", // string, the notification message
+      };
+
+      // add a button to execute the full query
+      addFullQueryButton(
+        args,
+        "Submit full query",
+        powervalveArguments
+      );
+
       } else if (numFound >= document_limit) {
         args.resultDiv.innerHTML = `You cannot request more than ${document_limit} documents.`;
       }

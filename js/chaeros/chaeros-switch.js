@@ -31,6 +31,7 @@ const chaerosFunctions = {
   zoteroItemsRetriever,
   zoteroCollectionBuilder,
   sysExport,
+  solrMetaExplorer
 };
 
 const chaerosSwitch = (fluxAction, fluxArgs) => {

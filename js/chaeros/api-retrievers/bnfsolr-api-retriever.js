@@ -1,29 +1,39 @@
-const solrMetaExplorer = (req, meta, dateFrom, dateTo, targetCollections) => {
+import bottleneck from "bottleneck";
+
+import { dataWriter, genDate } from "../chaeros-to-system";
+
+const solrMetaExplorer = (data) => {
   const limiter = new bottleneck({
     maxConcurrent: 3,
     minTime: 1500,
   });
 
+console.log(data)
+
+
+
+  //req, meta, dateFrom, dateTo, targetCollections
+
+
   const url = (req, start, end) =>
     "http://" +
-    meta.but.args.url +
-    ":" +
-    meta.but.args.port +
+    data.query.url +
+    
     "/solr/" +
-    meta.selectedCollection +
+    data.query.selectedCollection +
     "/" +
     "select?" +
     "fl=title,description,content_type_norm,content_language,host,wayback_date,author,url,links,crawl_date,id,collections" +
     "&facet.field=crawl_year&facet=on" +
     "&fq=collections:(" +
-    targetCollections +
+    data.query.targetfacets +
     ")&fq=crawl_date:[" +
-    dateFrom +
+    data.query.dateFrom +
     "T00:00:00Z" +
     "%20TO%20" +
-    dateTo +
-    "T00:00:00Z]&q=" +
-    req +
+    data.query.dateTo +
+    "T00:00:00Z]&q=" +req
+     +
     "&start=" +
     start +
     "&rows=" +
@@ -42,18 +52,20 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo, targetCollections) => {
   // make smaller packages (not necessary since supposed to be local)
   // but a good practice
 
-  if (meta.count > 200) {
-    for (let i = 0; i < meta.count / 200 + 1; i++) {
-      urlArray.push(url(req, i * 200, (i + 1) * 200));
+  if (data.query.count > 200) {
+    for (let i = 0; i < data.query.count / 200 + 1; i++) {
+      urlArray.push(url(data.query.query, i * 200, (i + 1) * 200));
     }
   } else {
-    urlArray.push(url(req, 0, 200));
+    urlArray.push(url(data.query.query, 0, 200));
 
-    window.electron.send("console-logs", `First request: ${url(req, 0, 200)}`);
+    window.electron.send("console-logs", `First request: ${url(data.query.query, 0, 200)}`);
   }
 
   var totalResponse = [];
   let count = 0;
+
+  console.log(urlArray)
 
   urlArray.forEach((solrReq) => {
     limiter
@@ -72,21 +84,32 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo, targetCollections) => {
         totalResponse = [...totalResponse, ...docs];
 
         if (count === urlArray.length) {
-          const importName = req + "-" + new Date();
 
-          const cslData = [];
+          totalResponse.forEach(d=>d.solrCollection = data.query.selectedCollection)
 
-          totalResponse.forEach((d) =>
-            cslData.push(bnfRemap(d, meta.selectedCollection))
-          );
+          const date = genDate()
 
-          const cslConvertedDataset = {
-            id: importName,
-            date: JSON.stringify(new Date()),
-            name: importName,
-            content: cslData,
+          const dataset = {
+            id: data.query.query + "-" + date,
+             source: "web archive",
+            date,
+            name: data.query.query,
+            data: totalResponse,
           };
 
+         
+
+                                    dataWriter("flux", dataset);
+
+ window.electron.send(
+          "chaeros-notification",
+          `Data retrieved`
+        );
+
+                                  
+
+         // console.log(cslConvertedDataset)
+/*
           pandodb.csljson
             .add(cslConvertedDataset)
             .then(() => {
@@ -104,6 +127,8 @@ const solrMetaExplorer = (req, meta, dateFrom, dateTo, targetCollections) => {
             .catch((e) => {
               console.log(e);
             });
+
+            */
         }
       });
   });

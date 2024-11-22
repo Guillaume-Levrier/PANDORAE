@@ -12,10 +12,21 @@
 // table.
 //
 
+import { webArchiveRemap } from "./csljson-remappers/bnfsolr2csljson";
 import { istexConverter } from "./csljson-remappers/istex2csljson";
 import { regardsCitoyensConverter } from "./csljson-remappers/regardscitoyens2csljson";
 
-const standardizeDataset = (dataset) => {
+const converters ={
+  istex:istexConverter,
+  "regards citoyens":regardsCitoyensConverter,
+  "web archive":webArchiveRemap
+}  
+
+
+const standardizeDataset = (dataset) => converters[dataset.source](dataset) 
+
+/*
+{
   switch (dataset.source) {
     case "gallica":
       console.log("gallica remapper should happen here");
@@ -33,5 +44,5 @@ const standardizeDataset = (dataset) => {
       break;
   }
 };
-
+*/
 export { standardizeDataset };
