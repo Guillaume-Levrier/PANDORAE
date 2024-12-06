@@ -94,7 +94,11 @@ const parliament = (datajson) => {
               d.note.id;
             break;
           case "Intervention":
-            d.name = d.title + " " + d.note.id;
+            d.name = "";
+            if (d.note.hasOwnProperty("aut")) {
+              d.name = d.note.aut.depute.groupe_sigle + " ";
+            }
+            d.name += d.title + " " + d.note.id;
             break;
           default:
             break;
@@ -168,7 +172,6 @@ const parliament = (datajson) => {
       tooltip.innerHTML = "";
 
       const dt = d.data.note;
-
       const docContent = document.createElement("div");
 
       switch (dt.document_type) {
@@ -210,13 +213,30 @@ const parliament = (datajson) => {
           break;
 
         case "Intervention":
+          console.log(dt);
           var nom = dt.hasOwnProperty("aut") ? dt.aut.depute.nom : "";
 
           if (nom === "" && dt.hasOwnProperty("fonction")) {
             nom = dt.fonction;
           }
 
-          docContent.innerHTML += "<h3>" + nom + "</h3>" + dt.intervention;
+          docContent.innerHTML += "<h3>" + nom + "</h3>";
+
+          if (dt.hasOwnProperty("aut")) {
+            if (dt.aut.hasOwnProperty("depute")) {
+              docContent.innerHTML += `
+              <div style="padding:5px;margin:5px;border:1px dashed #141414">
+              <div><span style="text-decoration: underline;">Appartenance:</span> ${dt.aut.depute.groupe_sigle} - ${dt.aut.depute.parti_ratt_financier}</div>
+              <div><span style="text-decoration: underline;">Naissance:</span> ${dt.aut.depute.date_naissance} - ${dt.aut.depute.lieu_naissance}</div>
+              <div><span style="text-decoration: underline;">Circonscription:</span> ${dt.aut.depute.num_circo} ${dt.aut.depute.nom_circo} (${dt.aut.depute.num_deptmt})</div>
+              </div>
+              `;
+            }
+          }
+
+          docContent.innerHTML += `<hr>Ouvrir sur <a href="${dt.source}" target="_blank">assemblee-nationale.fr </a><hr>`;
+
+          docContent.innerHTML += dt.intervention;
 
           break;
         default:
@@ -304,6 +324,7 @@ const parliament = (datajson) => {
       d3.selectAll("text").style("font-weight", "normal");
       let el = event.currentTarget;
       el.style.fontWeight = "bolder";
+
       toolBuilder(d);
     })
     .style("display", (d) => (d.depth === 0 ? "none" : "block"))

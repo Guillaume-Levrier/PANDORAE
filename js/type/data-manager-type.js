@@ -3,6 +3,8 @@ var dataExport;
 const dataDownload = (data) => {
   var source = document.getElementById("source");
 
+  console.log(data);
+
   var datasetName = "";
 
   if (data.hasOwnProperty("id")) {
@@ -14,16 +16,18 @@ const dataDownload = (data) => {
   source.style.cursor = "pointer";
 
   const triggerDownload = () =>
-    window.electron.invoke(
-      "saveDataset",
-      { defaultPath: datasetName + ".json" },
-      JSON.stringify(data)
-    );
+    window.electron.send("saveDataset", {
+      target: datasetName + ".json",
+      data: JSON.stringify(data),
+    });
 
   dataExport = triggerDownload;
+
+  source.textContent = datasetName;
   source.addEventListener("click", triggerDownload);
 };
 
+// Not sure this has an actual purpose anymore
 const localDownload = (data) => {
   //same but for exports
 

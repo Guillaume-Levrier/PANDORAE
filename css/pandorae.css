@@ -701,6 +701,13 @@ td {
   cursor: text;
   padding-left: 5px;
   padding-right: 5px;
+  border-top: 1px solid #141414;
+  border-right: 1px solid #141414;
+  border-radius: 0px 4px;
+  color: white;
+  background: #141414;
+  user-select: none;
+  pointer-events: all;
 }
 
 .option {
