@@ -84,10 +84,19 @@ const parliament = (datajson) => {
             break;
 
           case "Amendement":
+            var signataires = d.note.signataires.split(",");
+            if (signataires.length > 2) {
+              signataires = `${signataires[0]}, ${signataires[1]}, +${
+                signataires.length - 2
+              }`;
+            } else {
+              signataires = d.note.signataires;
+            }
+
             d.name =
               d.note["auteur_groupe_acronyme"] +
               " " +
-              d.note.signataires +
+              signataires +
               " | " +
               d.note.sujet +
               " | " +
@@ -98,7 +107,7 @@ const parliament = (datajson) => {
             if (d.note.hasOwnProperty("aut")) {
               d.name = d.note.aut.depute.groupe_sigle + " ";
             }
-            d.name += d.title + " " + d.note.id;
+            d.name += d.title + " | " + d.note.id;
             break;
           default:
             break;
@@ -213,7 +222,6 @@ const parliament = (datajson) => {
           break;
 
         case "Intervention":
-          console.log(dt);
           var nom = dt.hasOwnProperty("aut") ? dt.aut.depute.nom : "";
 
           if (nom === "" && dt.hasOwnProperty("fonction")) {
