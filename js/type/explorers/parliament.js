@@ -107,6 +107,11 @@ const parliament = (datajson) => {
             if (d.note.hasOwnProperty("aut")) {
               d.name = d.note.aut.depute.groupe_sigle + " ";
             }
+
+            if (d.name === "" && d.note.hasOwnProperty("fonction")) {
+              d.name = "GOV " + d.note.fonction + " ";
+            }
+
             d.name += d.title + " | " + d.note.id;
             break;
           default:
