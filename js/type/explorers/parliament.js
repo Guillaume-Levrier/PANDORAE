@@ -247,7 +247,11 @@ const parliament = (datajson) => {
             }
           }
 
-          docContent.innerHTML += `<hr>Ouvrir sur <a href="${dt.source}" target="_blank">assemblee-nationale.fr </a><hr>`;
+          docContent.innerHTML += `<hr>Ouvrir sur <a href="${dt.source}" target="_blank">assemblee-nationale.fr </a>
+          <br>
+          ${dt.source}
+          <br>
+          <hr>`;
 
           docContent.innerHTML += dt.intervention;
 
