@@ -47,29 +47,46 @@ const createCascadeTab = (tabData) => {
     // add already registered data
 
     //prepopulate Zotero tab if it exists or fill it if it doesn't
-
+/*
     tabData.sections.forEach((section) => {
       if (section.data.name === "zotero") {
-        if (userData.distantServices.hasOwnProperty("zotero")) {
-          section.data.fields = userData.distantServices.zotero;
+
+        userData.distantServices.forEach(distantService=>{
+        if (distantService.serviceType ==="zotero") {
+          section.data.fields = userData.distantServices.serviceConfig.zotero;
         } else {
           section.data.fields = { library: [], apikey: "" };
         }
+        }  )
       }
     });
+*/
 
-    for (const service in userData.localServices) {
-      const s = userData.localServices[service];
+ userData.distantServices.forEach(s=> {
       tabData.sections.push({
         type: "addServiceCredentials",
         data: {
-          name: service,
-          description: CM.flux.serviceModels[service].description,
-          fields: s,
+          name: s.serviceType+" - "+s.serviceConfig.accountName,
+          description: CM.flux.serviceModels[s.serviceType].description,
+          fields: s.serviceConfig,
           proximity: "distant",
         },
       });
-    }
+    })
+
+
+    userData.localServices.forEach(s=> {
+      tabData.sections.push({
+        type: "addServiceCredentials",
+        data: {
+          name: s.serviceType+" - "+s.serviceConfig.accountName,
+          description: CM.flux.serviceModels[s.serviceType].description,
+          fields: s.serviceConfig,
+          proximity: "local",
+        },
+      });
+      })
+  
 
     // add new service button & save config button
     tabData.sections.push(

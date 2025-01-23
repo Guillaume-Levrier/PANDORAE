@@ -53,11 +53,20 @@ const getUserStatus = (req) => {
 
     currentUser = data;
 
-    if (currentUser.hasOwnProperty("localServices")) {
-      for (const service in currentUser.localServices) {
-        const d = currentUser.localServices[service];
+    console.log(currentUser)
 
-        const location = d.url.split(":");
+    if (currentUser.hasOwnProperty("localServices")) {
+
+
+
+      currentUser.localServices.forEach(d => {
+        
+     
+
+     // for (const service in currentUser.localServices) {
+      //  const d = currentUser.localServices[service];
+
+        const location = d.serviceConfig.url.split(":");
         dns.lookupService(
           location[0],
           location[1],
@@ -69,7 +78,8 @@ const getUserStatus = (req) => {
             }
           }
         );
-      }
+         });
+   //   }
     }
 
     // Making this systematic is too heavy on the user

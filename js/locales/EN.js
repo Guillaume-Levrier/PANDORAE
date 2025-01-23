@@ -343,6 +343,17 @@ Start by entering a Hyphe API endpoint, then select a corpus. Click Load to dire
         description: `Web archiving is the process of collecting portions of the World Wide Web, preserving the collections in an archival format, and then serving the archives for access and use. The fields below help PANDORAE connect to web archive repositories for you to build and explore corpuses.`,
         fields: ["url", "type", "arkViewer"],
       },
+      "zotero": {
+        titre: "Zotero",
+         description: `This tab lets you send a collection of CSL-JSON documents retrieved by PANDORÆ to Zotero,
+         and reciprocally import a Zotero collection (regardless of its origin) to PANDORÆ.`,
+        disclaimers: {
+          jointImport: `Keep in mind that you can jointly import several
+         collections belonging to a single Zotero library/group, but you cannot jointly import several collections from different
+         Zotero libraries/groups.`,
+        },
+        fields: ["account ID", "library"],
+      },
     },
     field: {},
     console: {},

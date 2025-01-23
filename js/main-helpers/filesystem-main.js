@@ -13,6 +13,8 @@ const { dialog, app, session } = electron;
 const basePath = app.getAppPath();
 const userDataPath = app.getPath("userData");
 
+console.log(userDataPath)
+
 //FileSystem
 const userDataDirTree = (path, dirTree) =>
   dirTree.forEach((d) => {
