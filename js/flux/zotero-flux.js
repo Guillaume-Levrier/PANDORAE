@@ -3,7 +3,8 @@
 // also be a group library ID, allowing for group or even public work on a same Zotero/PANDORÆ corpus.
 
 import { CM } from "../locales/locales";
-import { displayCorpusList } from "./dataset";
+import { displayCorpusList } from "./dataset/corpus-display";
+
 import { checkKey, getPassword, userData } from "./userdata";
 
 const zoteroCollectionRetriever = (options) => {

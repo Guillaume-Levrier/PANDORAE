@@ -14,12 +14,15 @@ import { gallicaBasicRetriever } from "./sources/IIIF/gallica";
 import { dimensionsUpload } from "./sources/scientometrics/dimensions";
 import { nosDeputesBasic } from "./sources/parlements/regardscitoyens";
 import { hypheCheck } from "./sources/hyphe/hyphe-flux";
-import { datasetDisplay, downloadData, localUpload } from "./dataset";
+import {
+  datasetDisplay,
+  downloadData,
+  localUpload,
+} from "./dataset/dataset-details";
 import { powerValve } from "./powervalve";
 import { clinicTrialBasicRetriever } from "./sources/clinicaltrials/clinicaltrials";
 import { istexBasicRetriever } from "./sources/scientometrics/istex";
 import { zoteroCollectionRetriever } from "./zotero-flux";
-
 
 // The flux switch matches a string with a function
 //

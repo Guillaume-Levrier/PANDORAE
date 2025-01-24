@@ -1285,3 +1285,10 @@ tr {
   padding-top: 1rem;
   padding-bottom: 2rem;
  } 
+
+ .radioFlux{
+  display:flex;
+  flex-direction: row;
+  align-items: center;
+  padding-bottom: 0.5rem;
+ }

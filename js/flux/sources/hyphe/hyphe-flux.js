@@ -1,6 +1,6 @@
 //======== Hyphe Endpoint Chercker ======
 
-import { displayCorpusList } from "../../dataset";
+import { displayCorpusList } from "../../dataset/corpus-display";
 import { powerValve } from "../../powervalve";
 
 const hypheCheck = (args) => {

@@ -15,11 +15,13 @@ const createCascadeSelectors = (availableCategories) => {
     currentSelection[category] = false;
 
     const categoryDiv = document.createElement("div");
+    categoryDiv.className = "radioFlux";
 
     const categoryInput = document.createElement("input");
     categoryInput.type = "radio";
     //categoryInput.id = `${category}Select`;
     categoryInput.name = "categorySelector";
+    categoryInput.style.cursor = "pointer";
     categoryInput.checked = false;
 
     const categoryLabel = document.createElement("label");
@@ -158,7 +160,9 @@ function updateCascade(selections) {
     }
 
     if (selections.local) {
-          availability.dnsLocalServiceList.forEach(service=>addHop([service.serviceType, "ZOTERO"], traces))
+      availability.dnsLocalServiceList.forEach((service) =>
+        addHop([service.serviceType, "ZOTERO"], traces)
+      );
     }
   }
 

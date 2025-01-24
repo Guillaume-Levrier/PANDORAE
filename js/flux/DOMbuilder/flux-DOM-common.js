@@ -1,7 +1,8 @@
-import { datasetDisplay } from "../dataset";
 import { fluxButtonClicked } from "../actionbuttons";
 import { genDate } from "../userdata";
 import { powerValve } from "../powervalve";
+import { datasetDisplay } from "../dataset/db-exchanges";
+
 // ========
 
 // The <hr> DOM element stands for "horizontal rule" which aims to be a thematic break between two
