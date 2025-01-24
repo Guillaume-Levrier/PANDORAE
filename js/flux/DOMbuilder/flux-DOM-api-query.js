@@ -2,7 +2,7 @@ import { fluxSwitch } from "../fluxswitch";
 import { fluxButtonClicked } from "../actionbuttons";
 import { genHr } from "./flux-DOM-common";
 
-import { buildBnFsolrArguments } from "../sources/BNF/archivesinternet";
+import { buildBnFsolrArguments } from "../sources/webArchives/archivesinternet";
 import { buildNosDeputesArguments } from "../sources/parlements/regardscitoyens";
 
 const addLocalFileSection = (tabData, sectionData, tab) => {
@@ -36,12 +36,18 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
     ? "Fill in the query in the field below."
     : "";
 
-  const sectionDescription = document.createElement("div");
-  sectionDescription.innerHTML = `<h4>Retrieve datasets from ${sectionData.target.toUpperCase()}</h4>
-    ${queryPrompt} Click on the button to submit the request.`;
-  sectionDescription.style.paddingBottom = "1rem";
+    
 
-  tabSection.append(sectionDescription);
+  const sectionTitle = document.createElement("div");
+  sectionTitle.innerHTML =`<h4>Retrieve datasets from ${sectionData.target.toUpperCase()}</h4>`
+tabSection.append(sectionTitle)
+
+  const sectionDescription = document.createElement("div");
+  sectionDescription.innerHTML =`${queryPrompt} Click on the button to submit the request.`;
+  sectionDescription.style.paddingBottom = "1rem";
+const descHelp=document.createElement("div");
+    descHelp.style.display="none"
+  descHelp.append(sectionDescription);
 
   if (sectionData.hasOwnProperty("helper")) {
     const helper = document.createElement("div");
@@ -51,8 +57,37 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
     helper.addEventListener("click", () =>
       window.electron.send("openEx", sectionData.helper.url)
     );
-    tabSection.append(helper);
+    descHelp.append(helper);
   }
+
+   if (descHelp.children.length>0) {   // if there is either description or helper, add the descHelp box
+
+  const toggleHelp = document.createElement("span") // the descHelp box appears when a ? button is clicked
+  toggleHelp.innerHTML=`<i style='cursor: pointer;font-size:1rem;padding-left:0.5rem;' class='material-icons'>help_outline</i>`
+  toggleHelp.addEventListener("click",()=> {
+    
+    switch (descHelp.style.display) {
+      case "block":
+        descHelp.style.display="none"
+        break;
+
+         case "none":
+        descHelp.style.display="block"
+        break;
+    
+      default:
+        break;
+    }
+    
+  })
+
+
+   sectionTitle.style = "font-size:14px; text-transform: capitalize;display:flex;flex-direction: row;align-items: center;";
+  sectionTitle.append(toggleHelp)
+  tabSection.append(descHelp)
+  } 
+
+
 
   // button to click to load the relevant datasets
   const sendAPIQueryButton = document.createElement("button");
@@ -110,7 +145,6 @@ const displayInErrorDiv = (text, target) =>
   (document.getElementById(target + "_error").innerText = text);
 
 const buildAdditionalArguments = (data, sectionDiv) => {
-  console.log(data, sectionDiv);
 
   switch (data.key) {
     case "bnf-solr":

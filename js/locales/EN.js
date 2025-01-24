@@ -76,10 +76,10 @@ const EN = {
   },
   flux: {
     tabs: {
-      "web-archive": {
+      "web archive": {
         id: "web-archive", // id of the main div
         title: "Web archive", // title of the tab (displayed on the page)
-        description: `The web archive.`,
+        description: `Web archiving is the process of collecting portions of the World Wide Web, preserving the collections in an archival format, and then serving the archives for access and use.`,
         sections: [
           {
             type: "tabDatasets",
@@ -244,7 +244,7 @@ Start by entering a Hyphe API endpoint, then select a corpus. Click Load to dire
             type: "personalInformation",
             data: { id: "UserMail", name: "Email" },
           },
-          {
+         /* {
             type: "addServiceCredentials",
             data: {
               name: "zotero",
@@ -259,7 +259,7 @@ Start by entering a Hyphe API endpoint, then select a corpus. Click Load to dire
               },
               proximity: "distant",
             },
-          },
+          },*/
         ],
       },
       standardize: {
@@ -341,18 +341,17 @@ Start by entering a Hyphe API endpoint, then select a corpus. Click Load to dire
       "Web Archive": {
         titre: "Web Archive",
         description: `Web archiving is the process of collecting portions of the World Wide Web, preserving the collections in an archival format, and then serving the archives for access and use. The fields below help PANDORAE connect to web archive repositories for you to build and explore corpuses.`,
-        fields: ["url", "type", "arkViewer"],
+        fields: ["account name","url", "type", "arkViewer"],
       },
       "zotero": {
         titre: "Zotero",
-         description: `This tab lets you send a collection of CSL-JSON documents retrieved by PANDORÆ to Zotero,
-         and reciprocally import a Zotero collection (regardless of its origin) to PANDORÆ.`,
-        disclaimers: {
-          jointImport: `Keep in mind that you can jointly import several
-         collections belonging to a single Zotero library/group, but you cannot jointly import several collections from different
-         Zotero libraries/groups.`,
-        },
-        fields: ["account ID", "library"],
+         description: `PANDORAE helps you retrieve and explore data. To help you manually curate and edit it, the software is built to be interfaced with the Zotero software-cum-database service. You are expected to export the data you retrieve with PANDORAE to one or more Zotero group(s) you have write access to, and import data back from there to start exploring.`,
+              helper: {
+                text: `The process of creating Zotero groups and interfacing these with PANDORAE is detailed on <strong>pandorae.politique.science</strong>, the software's community help forum. Click on this box to open the relevant page in your browser.`,
+                url: "https://pandorae.politique.science",
+              },
+              fields: ["account name","library", "apikey"],
+             
       },
     },
     field: {},

@@ -24,6 +24,8 @@ const removePreviousTab = () => (previousTab ? previousTab.remove() : false);
 const createCascadeTab = (tabData) => {
   removePreviousTab();
 
+console.log(tabData)
+
   // main container element
   const tab = document.createElement("div");
   tab.className = "fluxTabs";
@@ -66,8 +68,9 @@ const createCascadeTab = (tabData) => {
       tabData.sections.push({
         type: "addServiceCredentials",
         data: {
-          name: s.serviceType+" - "+s.serviceConfig.accountName,
+          name: s.serviceType+" - "+s.serviceConfig["account name"],
           description: CM.flux.serviceModels[s.serviceType].description,
+          helper: CM.flux.serviceModels[s.serviceType].helper,
           fields: s.serviceConfig,
           proximity: "distant",
         },
@@ -79,8 +82,9 @@ const createCascadeTab = (tabData) => {
       tabData.sections.push({
         type: "addServiceCredentials",
         data: {
-          name: s.serviceType+" - "+s.serviceConfig.accountName,
+          name: s.serviceType+" - "+s.serviceConfig["account name"],
           description: CM.flux.serviceModels[s.serviceType].description,
+          helper: CM.flux.serviceModels[s.serviceType].helper,
           fields: s.serviceConfig,
           proximity: "local",
         },

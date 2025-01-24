@@ -57,7 +57,7 @@ const testingWebArchive = (inputs) => {
 
   fetch(`http://${url}/solr/`)
     .then((r) => {
-      console.log(r);
+      label.innerText = "url (connected) :"
     })
     .catch((error) => {
       label.innerText = "url (failed) :";
@@ -67,7 +67,13 @@ const testingWebArchive = (inputs) => {
 };
 
 const serviceTester = (service, serviceData) => {
-  switch (service) {
+  console.log(service)
+  console.log(serviceData)
+  const serviceType = service.substring(0,service.indexOf("-")-1)
+
+  console.log(serviceType)
+
+  switch (serviceType) {
     case "zotero":
       testingZotero(serviceData);
       break;

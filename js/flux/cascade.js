@@ -1,6 +1,5 @@
 import * as d3 from "d3";
 import { addHop, drawFlux } from "./tracegraph";
-
 import { userData } from "./userdata";
 
 const createCascadeSelectors = (availableCategories) => {
@@ -159,15 +158,7 @@ function updateCascade(selections) {
     }
 
     if (selections.local) {
-      for (const service in availability.dnsLocalServiceList) {
-        switch (availability.dnsLocalServiceList[service].type) {
-          case "BNF-SOLR":
-            const serv = service.toUpperCase().replace(" ", "-");
-
-            addHop([serv, "ZOTERO"], traces);
-            break;
-        }
-      }
+          availability.dnsLocalServiceList.forEach(service=>addHop([service.serviceType, "ZOTERO"], traces))
     }
   }
 
@@ -181,8 +172,6 @@ const retrieveAvailableServices = () =>
     availability = JSON.parse(result);
 
     const availableCategories = new Set();
-
-    console.log(availability);
 
     Object.values(availability.dnsLocalServiceList).forEach((service) => {
       if (service.valid) {

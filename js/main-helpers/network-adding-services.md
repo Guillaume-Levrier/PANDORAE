@@ -13,10 +13,12 @@ One software user might have need for several accounts for each service. Service
     {
       "serviceType": "zotero",            // This is required and PANDORAE-normalized. You cannot make this one up.
       "serviceConfig": {
-        "accountName":"default_user",     // This is required and PANDORAE-limited. It lets you choose this account for that service within PAE.
+        "account name":"default_user",     // This is required and PANDORAE-limited. It lets you choose this account for that service within PAE.
         "library": ["0123456"],           // Service-specific: this is the actual service-side "user name" (here, a group library ID).
         "apikey": "myGreatAPIkey"         // Service-specific: the API key registered for the service user name registered above.
       }
     }
   ],
 ```
+
+This will be used both to generate configuration options for the user tab, but also to generate new API options for the relevant FLUX tab.

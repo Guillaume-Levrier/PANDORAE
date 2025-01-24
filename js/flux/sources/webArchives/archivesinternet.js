@@ -124,9 +124,6 @@ var DOMquery={}
 
 const queryBnFSolr = (args) => {
 
-  console.log(args)
-
-  console.log(DOMquery)
   let targetfacets = "";
 
 const facets = DOMquery.facets;
@@ -215,7 +212,7 @@ const facets = DOMquery.facets;
   fetch(query)
     .then(r=>r.json())
     .then((r) => {
-      console.log(r)
+      
       let numFound = r.grouped.url.ngroups;
 
       let byCollection = r.facet_counts.facet_fields;
@@ -306,12 +303,6 @@ const generateLocalServiceConfig = () => {
 };
 
 const buildBnFsolrArguments = (data, sectionDiv) => {
-
-console.log("build bnf solr arguments")
-
-console.log(data)
-
-console.log(sectionDiv)
 
   const optionsDiv = document.createElement("div");
   optionsDiv.className = "fluxRequestOptionDiv";

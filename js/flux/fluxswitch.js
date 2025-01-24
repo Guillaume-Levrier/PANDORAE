@@ -2,7 +2,7 @@ import { addLocalService } from "./services";
 import {
   generateLocalServiceConfig,
   queryBnFSolr,
-} from "./sources/BNF/archivesinternet";
+} from "./sources/webArchives/archivesinternet";
 import { checkPPS, forceUpdatePPS } from "./sources/PPS/pps";
 import { biorxivBasicRetriever } from "./sources/scientometrics/biorxiv";
 
@@ -10,7 +10,7 @@ import { wosBasicRetriever } from "./sources/scientometrics/wos";
 import { changeUserID, checkKey, updateUserData } from "./userdata";
 
 import { refreshFluxWindow } from "./window";
-import { gallicaBasicRetriever } from "./sources/BNF/gallica";
+import { gallicaBasicRetriever } from "./sources/IIIF/gallica";
 import { dimensionsUpload } from "./sources/scientometrics/dimensions";
 import { nosDeputesBasic } from "./sources/parlements/regardscitoyens";
 import { hypheCheck } from "./sources/hyphe/hyphe-flux";
@@ -19,6 +19,7 @@ import { powerValve } from "./powervalve";
 import { clinicTrialBasicRetriever } from "./sources/clinicaltrials/clinicaltrials";
 import { istexBasicRetriever } from "./sources/scientometrics/istex";
 import { zoteroCollectionRetriever } from "./zotero-flux";
+
 
 // The flux switch matches a string with a function
 //
@@ -86,7 +87,7 @@ const fluxFunctions = {
   checkPPS,
   forceUpdatePPS,
   dimensionsUpload,
-  twitterThread,
+  //twitterThread,
 };
 
 const fluxSwitch = (funcName, args) => fluxFunctions[funcName](args);
