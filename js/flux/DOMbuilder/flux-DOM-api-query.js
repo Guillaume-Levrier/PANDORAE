@@ -32,6 +32,8 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
   const tabSection = document.createElement("div");
   tabSection.className = "tabSection";
 
+
+
   const queryPrompt = sectionData.queryField
     ? "Fill in the query in the field below."
     : "";
@@ -87,6 +89,50 @@ const descHelp=document.createElement("div");
   tabSection.append(descHelp)
   } 
 
+  // select config file if applicable
+    console.log(tabData)
+
+var config;
+
+    if (tabData.relevantServicesConfig.length>0) {
+      const targetSelection =document.createElement("div");
+      targetSelection.className="fluxTargetSelection";
+      const label = document.createElement("label")
+      label.innerText="Select target for request: "
+      label.for=tabData.id+"target-selection";
+
+      const select = document.createElement("select")
+      select.id=tabData.id+"target-selection";
+
+      const optionMap = {}; 
+      
+      tabData.relevantServicesConfig.forEach( (service,i)=> {
+        const option = document.createElement("option");
+
+        const name = service.serviceConfig["account name"] 
+        option.value=name
+        option.innerText=name
+
+        optionMap[name]= service.serviceConfig;
+
+        if (i===0){  
+        config = service.serviceConfig
+        }
+        select.append(option)
+      })
+
+      select.addEventListener("change",()=>{
+
+config=optionMap[select.value]
+        if (functionArguments.length > 0) {
+    buildAdditionalArguments(config,sectionData, tabSection);
+  }
+      }) 
+
+      targetSelection.append(label,select)
+      tabSection.append(targetSelection)
+    } 
+
 
 
   // button to click to load the relevant datasets
@@ -109,6 +155,7 @@ const descHelp=document.createElement("div");
     fluxButtonClicked(sendAPIQueryButton, sectionData.function.aftermath);
     if (sectionData.queryField) {
       sectionData.function.args.query = queryField.value;
+      sectionData.function.args.config = config;
     }
     fluxSwitch(sectionData.function.name, sectionData.function.args);
   });
@@ -128,7 +175,7 @@ const descHelp=document.createElement("div");
   const functionArguments = Object.values(sectionData.function.args);
 
   if (functionArguments.length > 0) {
-    buildAdditionalArguments(sectionData, tabSection);
+    buildAdditionalArguments(config,sectionData, tabSection);
   }
 
   tabSection.append(queryResultDiv);
@@ -144,16 +191,16 @@ const descHelp=document.createElement("div");
 const displayInErrorDiv = (text, target) =>
   (document.getElementById(target + "_error").innerText = text);
 
-const buildAdditionalArguments = (data, sectionDiv) => {
+const buildAdditionalArguments = (config,sectionData, sectionDiv) => {
 
-  switch (data.key) {
+  switch (sectionData.key) {
     case "bnf-solr":
-      buildBnFsolrArguments(data, sectionDiv);
+      buildBnFsolrArguments(config,sectionData, sectionDiv);
 
       break;
 
     case "nos deputes":
-      buildNosDeputesArguments(data, sectionDiv);
+      buildNosDeputesArguments(config,sectionData, sectionDiv);
       break;
 
     default:

@@ -24,8 +24,6 @@ const removePreviousTab = () => (previousTab ? previousTab.remove() : false);
 const createCascadeTab = (tabData) => {
   removePreviousTab();
 
-console.log(tabData)
-
   // main container element
   const tab = document.createElement("div");
   tab.className = "fluxTabs";
@@ -45,24 +43,8 @@ console.log(tabData)
 
   tab.append(title, description);
 
+  // If this is the user tab, then it needs to give relevant config options
   if (tabData.id === "user") {
-    // add already registered data
-
-    //prepopulate Zotero tab if it exists or fill it if it doesn't
-/*
-    tabData.sections.forEach((section) => {
-      if (section.data.name === "zotero") {
-
-        userData.distantServices.forEach(distantService=>{
-        if (distantService.serviceType ==="zotero") {
-          section.data.fields = userData.distantServices.serviceConfig.zotero;
-        } else {
-          section.data.fields = { library: [], apikey: "" };
-        }
-        }  )
-      }
-    });
-*/
 
  userData.distantServices.forEach(s=> {
       tabData.sections.push({
@@ -102,6 +84,30 @@ console.log(tabData)
       }
     );
   }
+  // If this is not the user tab, then we need to check whether this is a public endpoint
+  // or something that needs configuration "file" (more like JSON object as userdata property).
+  else{
+    // To check whether there is config info, we start by normalizing both the tab ID
+    // And the configs we have to see if we have any matches.
+
+    const tabID = tabData.id;
+
+    const services =[...userData.distantServices,...userData.localServices];
+    
+    const relevantServicesConfig=[];
+    
+    services.forEach(s=>{
+      const serviceID = s.serviceType.toLowerCase().replaceAll(" ","-")
+      if (serviceID===tabID){
+        relevantServicesConfig.push(s)
+      } 
+    }  )
+
+    // We then add the config to the tabData, which enables us to find
+    // which endpoint to target and how
+    tabData.relevantServicesConfig=relevantServicesConfig;
+
+  } 
 
   // if this is a tab that lets one display data
   if (tabData.hasOwnProperty("sections")) {
