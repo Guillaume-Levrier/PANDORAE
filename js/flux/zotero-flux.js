@@ -4,36 +4,36 @@
 
 import { CM } from "../locales/locales";
 import { displayCorpusList } from "./dataset";
-
-import { powerValve } from "./powervalve";
 import { checkKey, getPassword, userData } from "./userdata";
 
 const zoteroCollectionRetriever = (options) => {
-  const userCollections = options.resultDiv;
+  // Get the config file with the library IDs and API key
 
-  options.resultDiv.style.display = "block";
-  // purge it of content
-  userCollections.innerHTML =
-    userData.distantServices.zotero.library.length > 1
-      ? `${CM.flux.tabs.zotero.disclaimers.jointImport}<br><br>`
-      : "";
+  const config = options.config;
 
-  userData.distantServices.zotero.library.forEach((libraryID) => {
+  // prepare the result div by purging it of its potential content
+  const userCollectionsDiv = options.resultDiv;
+  userCollectionsDiv.style.display = "block";
+  userCollectionsDiv.innerHTML = `${CM.flux.tabs.zotero.disclaimers.jointImport}<br><br>`;
+
+  config.library.forEach((libraryID) => {
     window.electron.send("console-logs", `Retrieving library ${libraryID}`); // Log collection request
 
-    const url = `https://api.zotero.org/groups/${libraryID}/collections?v=3&key=${userData.distantServices.zotero.apikey}`;
+    const url = `https://api.zotero.org/groups/${libraryID}/collections?v=3&key=${config.apikey}`;
     fetch(url)
       .then((r) => r.json())
       .then((r) => {
         const zoteroColResponse = r;
+
+        console.log(zoteroColResponse);
 
         // create import buttons
 
         const importDiv = document.createElement("div");
         importDiv.style.padding = "1rem";
 
-        if (userData.distantServices.zotero.library.length > 1) {
-          userCollections.append(document.createElement("hr"));
+        if (config.library.length > 1) {
+          userCollectionsDiv.append(document.createElement("hr"));
         }
 
         const libTitle = document.createElement("div");
@@ -41,7 +41,7 @@ const zoteroCollectionRetriever = (options) => {
           "font-weight:bold;font-size:13px;margin-bottom:1rem;margin-top:1rem;";
         libTitle.innerText = r[0].library.name;
 
-        userCollections.append(libTitle);
+        userCollectionsDiv.append(libTitle);
 
         // add list
 
@@ -53,7 +53,7 @@ const zoteroCollectionRetriever = (options) => {
 
           collection.push({ key, name });
         }
-        userCollections.append(importDiv);
+        userCollectionsDiv.append(importDiv);
 
         const corpusOptions = {
           type: "zotero",
@@ -62,38 +62,18 @@ const zoteroCollectionRetriever = (options) => {
 
         displayCorpusList(
           collection,
-          userCollections,
+          userCollectionsDiv,
           importDiv,
           corpusOptions,
           true
         );
 
-        userCollections.style.display = "block";
+        userCollectionsDiv.style.display = "block";
       })
-      .catch((e) => {});
+      .catch((e) => {
+        console.log(e);
+      });
   });
-
-  // checkKey("zoteroAPIValidation", true);
-  /* })
-    .catch(function (err) {
-      console.log(err);
-      userCollections.innerHTML = "Failed retrieving data from Zotero";
-      userCollections.style.display = "block";
-      checkKey("zoteroAPIValidation", false);
-      fluxButtonAction(
-        "zotcolret",
-        false,
-        "Failed at retrieving Zotero collections",
-        err
-      );
-      window.electron.send(
-        "console-logs",
-        "Error in retrieving collections for Zotero id " +
-          zoteroUser +
-          " : " +
-          err
-      ); // Log error
-    }); */
 };
 
 //========== zoteroLocalRetriever ==========

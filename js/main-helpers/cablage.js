@@ -3,6 +3,8 @@ const { BrowserWindow, ipcMain, shell, app } = electron;
 const userDataPath = app.getPath("userData");
 const appPath = app.getAppPath();
 
+console.log(userDataPath);
+
 import { startChaerosProcess } from "./chaeros-main";
 import { addLineToConsole } from "./console-main";
 import {

@@ -128,8 +128,6 @@ const datasetDetail = (detailDiv, dataset, table) => {
 
   detailDiv.append(informationDiv, actionDiv);
 
-  console.log(dataset);
-
   let size = 0;
 
   if (Array.isArray(dataset.data)) {
@@ -179,8 +177,6 @@ const datasetDetail = (detailDiv, dataset, table) => {
   actionDiv.append(deleteButton);
 
   try {
-    console.log(table);
-
     // Here you will find a switch in a switch.
     // Option one is the flux switch, that is data that has just been retrieved
     // then the deeper level is by data source
@@ -195,7 +191,7 @@ const datasetDetail = (detailDiv, dataset, table) => {
           case "webofscience":
           case "scopus":
           case "regards citoyens":
-            case "web archive" :
+          case "web archive":
             // Standardize to CSL
 
             const standardizeCSL = document.createElement("button");
@@ -220,8 +216,8 @@ const datasetDetail = (detailDiv, dataset, table) => {
           case "webofscience":
           case "scopus":
           case "regards citoyens":
-              case "web archive" :
-                // send to zotero
+          case "web archive":
+            // send to zotero
 
             const sendToZotero = document.createElement("button");
             sendToZotero.type = "submit";
@@ -229,8 +225,6 @@ const datasetDetail = (detailDiv, dataset, table) => {
             sendToZotero.innerText = "Upload to Zotero";
             sendToZotero.addEventListener("click", () => {
               const selectLibrary = (userData, dataset, button) => {
-                console.log(button);
-                console.log(userData);
                 // add a name field
                 const nameField = document.createElement("input");
                 nameField.type = "text";
@@ -240,7 +234,6 @@ const datasetDetail = (detailDiv, dataset, table) => {
                 button.parentNode.append(nameField);
 
                 userData.distantServices.zotero.library.forEach((id) => {
-                  console.log(id);
                   const url = `https://api.zotero.org/groups/${id}/collections?v=3&key=${userData.distantServices.zotero.apikey}`;
                   fetch(url)
                     .then((r) => r.json())
@@ -521,7 +514,7 @@ const displayCorpusList = (
   searchField.children[0].children[0].style = "margin-right:10px";
 
   const displayTable = document.createElement("div");
-
+  displayTable.style = "max-height:350px;overflow-y:scroll";
   const updateTable = () => {
     displayTable.innerHTML = "";
 
@@ -530,7 +523,8 @@ const displayCorpusList = (
       width: "100%",
       multiple,
       layout: "fixed",
-      maxHeight: "100%",
+      rows: Infinity,
+      maxHeight: "350px",
     });
 
     searchTable.addEventListener("input", () => {
@@ -553,8 +547,6 @@ const displayCorpusList = (
 };
 
 const corpusDetail = (corpusOptions, detailDiv, selected) => {
-  console.log(selected);
-
   detailDiv.innerHTML = "";
   //detailDiv.innerHTML = JSON.stringify(selected);
 

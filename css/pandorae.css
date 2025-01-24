@@ -1281,7 +1281,7 @@ tr {
     color:red;
   }
 
- #fluxTargetSelection{
+ .fluxTargetSelection{
   padding-top: 1rem;
   padding-bottom: 2rem;
  } 

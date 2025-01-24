@@ -32,23 +32,19 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
   const tabSection = document.createElement("div");
   tabSection.className = "tabSection";
 
-
-
   const queryPrompt = sectionData.queryField
     ? "Fill in the query in the field below."
     : "";
 
-    
-
   const sectionTitle = document.createElement("div");
-  sectionTitle.innerHTML =`<h4>Retrieve datasets from ${sectionData.target.toUpperCase()}</h4>`
-tabSection.append(sectionTitle)
+  sectionTitle.innerHTML = `<h4>Retrieve datasets from ${sectionData.target.toUpperCase()}</h4>`;
+  tabSection.append(sectionTitle);
 
   const sectionDescription = document.createElement("div");
-  sectionDescription.innerHTML =`${queryPrompt} Click on the button to submit the request.`;
+  sectionDescription.innerHTML = `${queryPrompt} Click on the button to submit the request.`;
   sectionDescription.style.paddingBottom = "1rem";
-const descHelp=document.createElement("div");
-    descHelp.style.display="none"
+  const descHelp = document.createElement("div");
+  descHelp.style.display = "none";
   descHelp.append(sectionDescription);
 
   if (sectionData.hasOwnProperty("helper")) {
@@ -62,78 +58,74 @@ const descHelp=document.createElement("div");
     descHelp.append(helper);
   }
 
-   if (descHelp.children.length>0) {   // if there is either description or helper, add the descHelp box
+  if (descHelp.children.length > 0) {
+    // if there is either description or helper, add the descHelp box
 
-  const toggleHelp = document.createElement("span") // the descHelp box appears when a ? button is clicked
-  toggleHelp.innerHTML=`<i style='cursor: pointer;font-size:1rem;padding-left:0.5rem;' class='material-icons'>help_outline</i>`
-  toggleHelp.addEventListener("click",()=> {
-    
-    switch (descHelp.style.display) {
-      case "block":
-        descHelp.style.display="none"
-        break;
+    const toggleHelp = document.createElement("span"); // the descHelp box appears when a ? button is clicked
+    toggleHelp.innerHTML = `<i style='cursor: pointer;font-size:1rem;padding-left:0.5rem;' class='material-icons'>help_outline</i>`;
+    toggleHelp.addEventListener("click", () => {
+      switch (descHelp.style.display) {
+        case "block":
+          descHelp.style.display = "none";
+          break;
 
-         case "none":
-        descHelp.style.display="block"
-        break;
-    
-      default:
-        break;
-    }
-    
-  })
+        case "none":
+          descHelp.style.display = "block";
+          break;
 
+        default:
+          break;
+      }
+    });
 
-   sectionTitle.style = "font-size:14px; text-transform: capitalize;display:flex;flex-direction: row;align-items: center;";
-  sectionTitle.append(toggleHelp)
-  tabSection.append(descHelp)
-  } 
+    sectionTitle.style =
+      "font-size:14px; text-transform: capitalize;display:flex;flex-direction: row;align-items: center;";
+    sectionTitle.append(toggleHelp);
+    tabSection.append(descHelp);
+  }
 
   // select config file if applicable
-    console.log(tabData)
+  console.log(tabData);
 
-var config;
+  var config;
 
-    if (tabData.relevantServicesConfig.length>0) {
-      const targetSelection =document.createElement("div");
-      targetSelection.className="fluxTargetSelection";
-      const label = document.createElement("label")
-      label.innerText="Select target for request: "
-      label.for=tabData.id+"target-selection";
+  if (tabData.relevantServicesConfig.length > 0) {
+    const targetSelection = document.createElement("div");
+    targetSelection.className = "fluxTargetSelection";
+    const label = document.createElement("label");
+    label.innerText = "Select target for request: ";
+    label.for = tabData.id + "target-selection";
 
-      const select = document.createElement("select")
-      select.id=tabData.id+"target-selection";
+    const select = document.createElement("select");
+    select.id = tabData.id + "target-selection";
 
-      const optionMap = {}; 
-      
-      tabData.relevantServicesConfig.forEach( (service,i)=> {
-        const option = document.createElement("option");
+    const optionMap = {};
 
-        const name = service.serviceConfig["account name"] 
-        option.value=name
-        option.innerText=name
+    tabData.relevantServicesConfig.forEach((service, i) => {
+      const option = document.createElement("option");
 
-        optionMap[name]= service.serviceConfig;
+      const name = service.serviceConfig["account name"];
+      option.value = name;
+      option.innerText = name;
 
-        if (i===0){  
-        config = service.serviceConfig
-        }
-        select.append(option)
-      })
+      optionMap[name] = service.serviceConfig;
 
-      select.addEventListener("change",()=>{
+      if (i === 0) {
+        config = service.serviceConfig;
+      }
+      select.append(option);
+    });
 
-config=optionMap[select.value]
-        if (functionArguments.length > 0) {
-    buildAdditionalArguments(config,sectionData, tabSection);
+    select.addEventListener("change", () => {
+      config = optionMap[select.value];
+      if (functionArguments.length > 0) {
+        buildAdditionalArguments(config, sectionData, tabSection);
+      }
+    });
+
+    targetSelection.append(label, select);
+    tabSection.append(targetSelection);
   }
-      }) 
-
-      targetSelection.append(label,select)
-      tabSection.append(targetSelection)
-    } 
-
-
 
   // button to click to load the relevant datasets
   const sendAPIQueryButton = document.createElement("button");
@@ -155,8 +147,10 @@ config=optionMap[select.value]
     fluxButtonClicked(sendAPIQueryButton, sectionData.function.aftermath);
     if (sectionData.queryField) {
       sectionData.function.args.query = queryField.value;
-      sectionData.function.args.config = config;
     }
+    sectionData.function.args.config = config;
+    console.log(sectionData.function.name);
+    console.log(sectionData.function.args);
     fluxSwitch(sectionData.function.name, sectionData.function.args);
   });
 
@@ -175,7 +169,7 @@ config=optionMap[select.value]
   const functionArguments = Object.values(sectionData.function.args);
 
   if (functionArguments.length > 0) {
-    buildAdditionalArguments(config,sectionData, tabSection);
+    buildAdditionalArguments(config, sectionData, tabSection);
   }
 
   tabSection.append(queryResultDiv);
@@ -191,25 +185,19 @@ config=optionMap[select.value]
 const displayInErrorDiv = (text, target) =>
   (document.getElementById(target + "_error").innerText = text);
 
-const buildAdditionalArguments = (config,sectionData, sectionDiv) => {
-
+const buildAdditionalArguments = (config, sectionData, sectionDiv) => {
   switch (sectionData.key) {
     case "bnf-solr":
-      buildBnFsolrArguments(config,sectionData, sectionDiv);
-
+      buildBnFsolrArguments(config, sectionData, sectionDiv);
       break;
 
     case "nos deputes":
-      buildNosDeputesArguments(config,sectionData, sectionDiv);
+      buildNosDeputesArguments(config, sectionData, sectionDiv);
       break;
 
     default:
       break;
   }
 };
-
-
-
-
 
 export { addLocalFileSection, addAPIquerySection, displayInErrorDiv };
