@@ -135,18 +135,60 @@ const datasetDetail = (detailDiv, dataset, table) => {
             // send to zotero
 
             const sendToZotero = genActionButton("Upload to Zotero");
+
             sendToZotero.addEventListener("click", () => {
               const selectLibrary = (userData, dataset, button) => {
                 // add a name field
                 const nameField = document.createElement("input");
                 nameField.type = "text";
                 nameField.className = "fluxInput";
-                nameField.placeholder = "Collection name";
+                nameField.placeholder = "New collection name";
                 nameField.value = dataset.name;
                 button.parentNode.append(nameField);
 
-                userData.distantServices.zotero.library.forEach((id) => {
-                  const url = `https://api.zotero.org/groups/${id}/collections?v=3&key=${userData.distantServices.zotero.apikey}`;
+                console.log(userData);
+
+                // create a list of zotero profiles
+
+                const zoteroProfiles = [];
+
+                userData.distantServices.forEach((service) => {
+                  if (service.serviceType === "zotero") {
+                    zoteroProfiles.push(service.serviceConfig);
+                  }
+                });
+
+                // Create a dropdown "Select" list
+
+                const zoteroAccountSelect = document.createElement("select");
+
+                button.parentNode.append(zoteroAccountSelect);
+
+                var library, apikey;
+
+                zoteroProfiles.forEach((account, i) => {
+                  const zoteroAccount = document.createElement("option");
+                  zoteroAccount.value = account.apikey;
+                  zoteroAccount.innerText = account["account name"];
+                  zoteroAccountSelect.append(zoteroAccount);
+
+                  if (!i) {
+                    library = account.library; // libraries are the first account by default
+                    apikey = account.apikey;
+                  }
+                });
+
+                zoteroAccountSelect.addEventListener("change", () =>
+                  zoteroProfiles.forEach((account) => {
+                    if (account.apikey === zoteroAccountSelect.value) {
+                      library = account.library;
+                      apikey = account.apikey;
+                    }
+                  })
+                );
+
+                library.forEach((id) => {
+                  const url = `https://api.zotero.org/groups/${id}/collections?v=3&key=${apikey}`;
                   fetch(url)
                     .then((r) => r.json())
                     .then((r) => {
