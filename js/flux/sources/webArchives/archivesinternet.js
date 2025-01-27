@@ -193,7 +193,7 @@ const queryBnFSolr = (args) => {
         "&rows=0&sort=crawl_date%20desc&group=true&group.field=url" +
         "&group.limit=1&group.sort=score+desc%2Ccrawl_date+desc&start=0" +
         "&rows=0&sort=score+desc&group.ngroups=true&facet.field=collections" +
-        "&facet.field=domain&facet.limit=10";
+        "&facet.field=host&facet.limit=10";
 
       // logging the request
       window.electron.send("console-logs", `Sending request: ${query}`);
@@ -240,7 +240,7 @@ const queryBnFSolr = (args) => {
           parseSolrFacetFields(byCollection.collections)
         );
 
-        const domainList = parseSolrFacetFields(byCollection.domain);
+        const domainList = parseSolrFacetFields(byCollection.host);
 
         const domainDiv = document.createElement("div");
 
@@ -442,7 +442,7 @@ const getFacets = (config, service, coreSource, optionsDiv, DOMquery) =>
           }
 
           document.getElementById("dateFrom").value = start + "-01-01";
-          document.getElementById("dateTo").value = end + "-01-01";
+          document.getElementById("dateTo").value = end + "-12-31";
 
           const inputQueryText =
             optionsDiv.parentNode.querySelector(".fluxInput");
