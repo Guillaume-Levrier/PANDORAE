@@ -14,6 +14,8 @@ import { setkeylock } from "../../pandorae-interface/keyboard-shortcuts";
 const webArchive = (datajson) => {
   // When called, draw the webArchive
 
+  console.log(datajson);
+
   var availability;
 
   //========== SVG VIEW =============

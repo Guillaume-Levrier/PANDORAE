@@ -3,6 +3,7 @@ import { CM } from "../../locales/locales";
 import { powerValve } from "../powervalve";
 import { fluxButtonClicked } from "../actionbuttons";
 import { userData } from "../userdata";
+import { datasetRemove } from "./db-exchanges";
 
 //========== datasetDetail ==========
 // Clicking on a dataset displayed by the previous function displays some of its metadata and allows for further actions

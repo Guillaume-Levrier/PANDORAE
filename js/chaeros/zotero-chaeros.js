@@ -22,7 +22,19 @@ const zoteroItemsRetriever = (data) => {
 
   const zoteroPromises = [];
 
-  const zoteroApiKey = userData.distantServices.zotero.apikey;
+  console.log(data);
+
+  var zoteroApiKey;
+
+  userData.distantServices.forEach((service) => {
+    if (service.serviceType === "zotero") {
+      service.serviceConfig.library.forEach((lib) => {
+        if (lib === data.libraryID) {
+          zoteroApiKey = service.serviceConfig.apikey;
+        }
+      });
+    }
+  });
 
   for (let j = 0; j < collections.length; j++) {
     // Loop on collections
@@ -90,8 +102,6 @@ const zoteroItemsRetriever = (data) => {
                     window.electron.send("chaeros-notification", updateMessage);
 
                     if (responseAmount === responseTarget) {
-                      //https://api.zotero.org/groups/5765094/collections/88DD94XI/items/0/children?key=SooWRxlCaT4wJPmK5i8sdaXF&limit=100
-
                       // Now retrieve the notes.
 
                       const responseMap = {};
@@ -102,11 +112,14 @@ const zoteroItemsRetriever = (data) => {
 
                       for (var i = 0; i < f.meta.numItems; i += 100) {
                         let rootUrl = "https://api.zotero.org/groups/";
+
                         let urlBase = "/collections/" + f.data.key;
+
                         var zoteroVersion =
                           "/items/0/children?&v=3&start=" +
                           i +
                           "&limit=100&key=";
+
                         let zoteroItemsRequest =
                           rootUrl +
                           data.libraryID +
@@ -129,11 +142,11 @@ const zoteroItemsRetriever = (data) => {
                           .schedule(() => fetch(d))
                           .then((res) => res.json())
                           .then((response) => {
+                            console.log(response);
                             response.forEach((note) => {
                               if (note.data.itemType === "note") {
                                 const noteContent = JSON.parse(note.data.note);
                                 const noteID = noteContent.id;
-
                                 responseMap[noteID].note = noteContent;
                               }
                             });
@@ -142,6 +155,7 @@ const zoteroItemsRetriever = (data) => {
 
                             if (resCount === noteRequests.length) {
                               const noteResponse = Object.values(responseMap);
+                              console.log(noteResponse);
                               saveDataset(noteResponse);
                             }
                           });

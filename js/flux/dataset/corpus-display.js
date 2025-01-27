@@ -1,4 +1,5 @@
 import * as Inputs from "@observablehq/inputs";
+import { powerValve } from "../powervalve";
 
 // ===== CORPUS DISPLAY =====
 // This is a bit like dataset display, except that the datasets
