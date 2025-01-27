@@ -120,15 +120,12 @@ const generateSolrExplorationChart = (data, type) => {
 // This is the actual request
 var solrbnfcount = {};
 
-var DOMquery={} 
+var DOMquery = {};
 
 const queryBnFSolr = (args) => {
-
-  console.log(args)
-
   let targetfacets = "";
 
-const facets = DOMquery.facets;
+  const facets = DOMquery.facets;
 
   for (let i = 0; i < facets.length; i++) {
     const facet = facets[i];
@@ -164,9 +161,9 @@ const facets = DOMquery.facets;
   var query;
   var selectedCollection;
 
-  const dateTo = DOMquery.dateTo.value;
+  const dateTo = document.getElementById("dateTo").value;
 
-  const dateFrom = DOMquery.dateFrom.value;
+  const dateFrom = document.getElementById("dateFrom").value;
 
   const collections = DOMquery.collections;
 
@@ -208,13 +205,13 @@ const facets = DOMquery.facets;
   // hardcoded in PANDORAE.
 
   const document_limit = 50000;
- args.resultDiv.style.display="block";
+  args.resultDiv.style.display = "block";
 
-  args.resultDiv.innerHTML="Loading ...";
+  args.resultDiv.innerHTML = "Loading ...";
+
   fetch(query)
-    .then(r=>r.json())
+    .then((r) => r.json())
     .then((r) => {
-      
       let numFound = r.grouped.url.ngroups;
 
       let byCollection = r.facet_counts.facet_fields;
@@ -223,20 +220,18 @@ const facets = DOMquery.facets;
         count: numFound,
         targetfacets,
         selectedCollection,
-        query:args.query,
+        query: args.query,
         dateFrom,
         dateTo,
-        url:DOMquery.service.url,
+        url: DOMquery.service.url,
         countByCollection: parseSolrFacetFields(byCollection.collections),
       };
 
-     
-
-      args.resultDiv.innerHTML = `<br><p>  ${numFound} unique documents found</p> `;
+      args.resultDiv.innerHTML = `
+      <p style="text-decoration:underline">Result profile for query <strong>${args.query}</strong> on period ${dateFrom} to ${dateTo} </p>
+      <br><p>  ${numFound} unique documents found</p> `;
 
       if (numFound > 0 && numFound < document_limit) {
-        
-
         const yearChart = generateSolrExplorationChart(
           parseSolrFacetFields(byCollection.crawl_year),
           "crawl_year"
@@ -258,25 +253,19 @@ const facets = DOMquery.facets;
 
         args.resultDiv.append(yearChart, collectionChart, domainDiv);
 
+        // powervalve sends the instructons for the Chaeros (/headless) context
+        // to execute
+        const powervalveArguments = {
+          powerAction: "solrMetaExplorer", // string, the name of the function to call
+          powerArg: {
+            // object, the arguments for that function
+            query: solrbnfcount[args.query],
+          },
+          message: "Connecting to BnF Solr", // string, the notification message
+        };
 
-         // powervalve sends the instructons for the Chaeros (/headless) context
-      // to execute
-      const powervalveArguments = {
-        powerAction: "solrMetaExplorer", // string, the name of the function to call
-        powerArg: {
-          // object, the arguments for that function
-          query: solrbnfcount[args.query] ,
-        },
-        message: "Connecting to BnF Solr", // string, the notification message
-      };
-
-      // add a button to execute the full query
-      addFullQueryButton(
-        args,
-        "Submit full query",
-        powervalveArguments
-      );
-
+        // add a button to execute the full query
+        addFullQueryButton(args, "Submit full query", powervalveArguments);
       } else if (numFound >= document_limit) {
         args.resultDiv.innerHTML = `You cannot request more than ${document_limit} documents.`;
       }
@@ -304,174 +293,195 @@ const generateLocalServiceConfig = () => {
   }
 };
 
-const buildBnFsolrArguments = (config,data, sectionDiv) => {
+const buildBnFsolrArguments = (config, data, sectionDiv) => {
+  // get section div first input text and neutralize until found
+  const inputQueryText = sectionDiv.querySelector(".fluxInput");
+  inputQueryText.setAttribute("disabled", true);
+  inputQueryText.value = "Loading available collections...";
 
-  if(sectionDiv.querySelector(".fluxRequestOptionDiv")){
-      sectionDiv.querySelector(".fluxRequestOptionDiv").remove()
-  } 
-
-
-  const optionsDiv = document.createElement("div");
+  var optionsDiv = document.createElement("div");
   optionsDiv.className = "fluxRequestOptionDiv";
+
+  DOMquery = {};
+
+  if (sectionDiv.querySelector(".fluxRequestOptionDiv")) {
+    optionsDiv = sectionDiv.querySelector(".fluxRequestOptionDiv");
+    sectionDiv.querySelector(".fluxRequestOptionDiv").innerHTML = "";
+    sectionDiv.querySelector(".fluxQueryResult").innerHTML = "";
+    sectionDiv.querySelector(".fluxQueryResult").style.display = "none";
+  }
 
   sectionDiv.append(optionsDiv);
 
-  const dateFromDiv = document.createElement("div")
-  const dateFrom = document.createElement("input")
-  dateFrom.id="dateFrom";
-  dateFrom.name="dateFrom";
-  dateFrom.type="date";
-  dateFrom.value = "2000-01-01"
-  const dateFromLabel = document.createElement("label")
-  dateFromLabel.innerText="From: "
-    dateFrom.for="dateFrom"
-  dateFromDiv.append(dateFromLabel,dateFrom)
+  const dateFromDiv = document.createElement("div");
 
-  DOMquery.dateFrom=dateFrom;
+  const dateFrom = document.createElement("input");
+  dateFrom.type = "date";
+  dateFrom.id = "dateFrom";
+  dateFrom.name = "dateFrom";
 
-const dateToDiv = document.createElement("div")
-  const dateTo = document.createElement("input")
-  dateTo.id="dateTo";
-  dateTo.name="dateTo";
-  dateTo.type="date";
-  dateTo.value = "2010-01-01"
-  const dateToLabel = document.createElement("label")
-  dateToLabel.innerText="To: "
-  dateToLabel.for="dateTo"
-  dateToDiv.append(dateToLabel,dateTo);
+  const dateFromLabel = document.createElement("label");
+  dateFromLabel.innerText = "From: ";
+  dateFromLabel.for = "dateFrom";
+  dateFromDiv.append(dateFromLabel, dateFrom);
 
-   DOMquery.dateTo=dateTo;
+  DOMquery.dateFrom = dateFrom;
 
-  optionsDiv.append(dateFromDiv,dateToDiv)
+  const dateToDiv = document.createElement("div");
+  const dateTo = document.createElement("input");
+  dateTo.id = "dateTo";
+  dateTo.name = "dateTo";
+  dateTo.type = "date";
 
-    const service = config
-console.log(service)
-      const solrCont = document.createElement("div");
+  const dateToLabel = document.createElement("label");
+  dateToLabel.innerText = "To: ";
+  dateToLabel.for = "dateTo";
 
-      solrCont.id = "BNF-SOLR";
-      solrCont.style.display = "none";
-      solrCont.className = "fluxTabs";
+  dateToDiv.append(dateToLabel, dateTo);
 
-      DOMquery.service=service
+  DOMquery.dateTo = dateTo;
 
-      const sourceRequest = `http://${service.url}/solr/admin/collections?action=LIST&wt=json`;
+  optionsDiv.append(dateFromDiv, dateToDiv);
 
-      // The answer is in the array at r.collections;
+  const service = config;
 
-      var coreSource; 
+  const solrCont = document.createElement("div");
 
-      fetch(sourceRequest)
-        .then((r) => r.json())
-        .then((r) => {
-          optionsDiv.innerHTML += "Available sources<br>";
-          coreSource = r.collections[0];
+  solrCont.id = "BNF-SOLR";
+  solrCont.style.display = "none";
+  solrCont.className = "fluxTabs";
 
-          DOMquery.collections = []; 
+  const sourceRequest = `http://${service.url}/solr/admin/collections?action=LIST&wt=json`;
 
-          const fieldset = document.createElement("fieldset");
-          optionsDiv.append(fieldset)
+  // The answer is in the array at r.collections;
 
-          for (let i = 0; i < r.collections.length; i++) {
-            const col = r.collections[i];
-            let checked = i < 1 
+  var coreSource;
 
-            const collectionContainer = document.createElement("div");
+  fetch(sourceRequest)
+    .then((r) => r.json())
+    .then((r) => {
+      optionsDiv.innerHTML += "Available sources<br>";
+      coreSource = r.collections[0];
 
-            const collectionRadio = document.createElement("input");
-            collectionRadio.type = "radio";
-            collectionRadio.name = `bnf-solr-radio-${config["account name"]}`;
-            collectionRadio.id = col;
-            collectionRadio.value=col; 
+      DOMquery.collections = [];
 
-            collectionRadio.addEventListener("change", (e)=>{
-              console.log(e)
-              e.preventDefault()
-                console.log("coucou")
-               
-                  getFacets(config,service,col,optionsDiv,DOMquery)
-                
-              }  )
- 
-            if (!i ) { 
-            collectionRadio.setAttribute("checked",true)
-            try {
-               getFacets(config,service,coreSource,optionsDiv,DOMquery)
-            } catch (error) {
-              
-            }
-           
-            }
+      const fieldset = document.createElement("fieldset");
+      fieldset.style = "border:0px;outline:0px";
 
-            DOMquery.collections.push(collectionRadio)
+      optionsDiv.append(fieldset);
 
-            const collectionLabel = document.createElement("label");
-            collectionLabel.for = col;
-            collectionLabel.innerText = col;
+      for (let i = 0; i < r.collections.length; i++) {
+        const col = r.collections[i];
 
-            console.log(collectionRadio)
+        const collectionContainer = document.createElement("div");
 
-              
+        const collectionRadio = document.createElement("input");
+        collectionRadio.type = "radio";
+        collectionRadio.name = `bnf-solr-radio-${config["account name"]}`;
+        collectionRadio.id = col;
+        collectionRadio.value = col;
 
-            collectionContainer.append(collectionRadio, collectionLabel);
-              
-            fieldset.append(collectionContainer);
-          }
-          optionsDiv.append(genHr());
+        collectionRadio.addEventListener("change", (e) => {
+          e.preventDefault();
 
-           
-        })
-       
+          getFacets(config, service, col, optionsDiv, DOMquery);
+        });
 
+        if (!i) {
+          collectionRadio.setAttribute("checked", true);
+
+          try {
+            getFacets(config, service, coreSource, optionsDiv, DOMquery);
+          } catch (error) {}
+        }
+
+        DOMquery.collections.push(collectionRadio);
+
+        const collectionLabel = document.createElement("label");
+        collectionLabel.for = col;
+        collectionLabel.innerText = col;
+        collectionContainer.append(collectionRadio, collectionLabel);
+
+        fieldset.append(collectionContainer);
+      }
+      optionsDiv.append(genHr());
+    });
 };
 
-const getFacets = (config,service,coreSource,optionsDiv,DOMquery) =>fetch(
-            `http://${service.url}/solr/${coreSource}/select?q=*rows=0&facet=on&facet.field=collections`
-          )
-            .then((facet) => facet.json())
-            
-            .then((facets) => {
-             if(facets.responseHeader.status===0) {
-              const facetList = facets.facet_counts.facet_fields.collections;
+const getFacets = (config, service, coreSource, optionsDiv, DOMquery) =>
+  fetch(
+    `http://${service.url}/solr/${coreSource}/select?q=*&rows=1&facet=on&facet.field=collections&facet.field=crawl_year`
+  )
+    .then((facet) => facet.json())
+    .then((facets) => {
+      DOMquery.service = service;
+      if (facets.responseHeader.status === 0) {
+        const facetList = facets.facet_counts.facet_fields.collections;
 
-              if (facetList.length===0) {
-                optionsDiv.innerHTML += "No available collections<br>";
-               
-              } else {
-                 optionsDiv.innerHTML += "Available collections<br>";
-                const facetBox = document.createElement("div");
-              optionsDiv.append(facetBox);
+        const periodList = facets.facet_counts.facet_fields.crawl_year;
 
-              DOMquery.facets = [] 
-              for (let i = 0; i < facetList.length; i++) {
-                const face = facetList[i];
+        if (facetList.length === 0) {
+          optionsDiv.innerHTML += "No available collections<br>";
+        } else {
+          optionsDiv.innerHTML += "Available collections<br>";
+          const facetBox = document.createElement("div");
+          optionsDiv.append(facetBox);
 
-                if (typeof face === "string") {
-                  let checked = 0
+          // determine period
+          var start = Infinity;
+          var end = -Infinity;
+          for (let i = 0; i < periodList.length; i++) {
+            const year = periodList[i];
 
-                  const facetContainer = document.createElement("div");
+            if (typeof year === "string") {
+              const yearNum = parseInt(year);
 
-                  const facetCheckBox = document.createElement("input");
-                  facetCheckBox.type = "checkbox";
-                  facetCheckBox.name = `bnf-solr-checkbox-facet-${config["account name"]}`;
-                  facetCheckBox.id = face;
-                  facetCheckBox.checked = checked;
+              if (yearNum < start) start = yearNum;
+              if (yearNum > end) end = yearNum;
+            }
+          }
 
-                  DOMquery.facets.push(facetCheckBox)
+          document.getElementById("dateFrom").value = start + "-01-01";
+          document.getElementById("dateTo").value = end + "-01-01";
 
-                  const facetLabel = document.createElement("label");
-                  facetLabel.for = face;
-                  facetLabel.innerText = face;
+          const inputQueryText =
+            optionsDiv.parentNode.querySelector(".fluxInput");
+          inputQueryText.disabled = false;
+          inputQueryText.value = "";
 
-                  facetContainer.append(facetCheckBox, facetLabel);
+          // manage sub collections
+          DOMquery.facets = [];
+          for (let i = 0; i < facetList.length; i++) {
+            const face = facetList[i];
 
-                  facetBox.append(facetContainer);
-                }
-              }
-              } }  
-            }).catch(e=>{
-              console.log(e)
-optionsDiv.innerHTML += "No available collections<br>";
+            if (typeof face === "string") {
+              let checked = 0;
 
-            }  )
+              const facetContainer = document.createElement("div");
 
-export { queryBnFSolr, generateLocalServiceConfig ,buildBnFsolrArguments};
+              const facetCheckBox = document.createElement("input");
+              facetCheckBox.type = "checkbox";
+              facetCheckBox.name = `bnf-solr-checkbox-facet-${config["account name"]}`;
+              facetCheckBox.id = face;
+              facetCheckBox.checked = checked;
+
+              DOMquery.facets.push(facetCheckBox);
+
+              const facetLabel = document.createElement("label");
+              facetLabel.for = face;
+              facetLabel.innerText = face;
+
+              facetContainer.append(facetCheckBox, facetLabel);
+
+              facetBox.append(facetContainer);
+            }
+          }
+        }
+      }
+    })
+    .catch((e) => {
+      console.log(e);
+      optionsDiv.innerHTML += "No available collections<br>";
+    });
+
+export { queryBnFSolr, generateLocalServiceConfig, buildBnFsolrArguments };
