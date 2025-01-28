@@ -6,26 +6,47 @@ import bottleneck from "bottleneck";
 import { dataWriter, genDate } from "./chaeros-to-system";
 
 import { userData } from "./chaeros-userdata";
+//===== Zotero Items Retrievers =====
+// Items here are documents but not only.
+// The idea is to take an array of collections (often one, sometimes more)
+// and retrieve not only all the document metadata but also the notes (which
+// can contain non-CSL metadata but also potentially the partial or full content)
+// of the documents.
+//
+// This is tricky because of the "potentially several" collections and the
+// "not only metadata but also notes" parts that can build onto one another and
+// end up sending a lot of async API calls to Zotero and make it unfriendly.
+//
+
+/*
+ *   THE SOLUTION HERE IS TO LOOK FOR ALL NON-ATTACHMENTS AND
+ *   THEN ALL THE ATTACHMENTS.
+ *
+ */
 
 const zoteroItemsRetriever = (data) => {
+  // find which collections to call
   const collections = Object.values(data.collections);
+
+  // find the name of the result dataset
   const importName = data.importName;
 
-  //collections, zoteroUser, importName
+  // signal that the chaeros heavy lifting is starting
   window.electron.send("console-logs", "Started retrieving collections ");
 
+  // Create a bottleneck to prevent API rate limit
   const limiter = new bottleneck({
-    // Create a bottleneck to prevent API rate limit
     maxConcurrent: 1, // Only one request at once
     minTime: 500, // Every 500 milliseconds
   });
 
   const zoteroPromises = [];
 
-  console.log(data);
-
+  // Find the relevant zotero API key.
   var zoteroApiKey;
 
+  // The trick here is that even if the user is targetting several
+  // collections, they have to belong the same (group) library.
   userData.distantServices.forEach((service) => {
     if (service.serviceType === "zotero") {
       service.serviceConfig.library.forEach((lib) => {
@@ -36,18 +57,14 @@ const zoteroItemsRetriever = (data) => {
     }
   });
 
+  // At this point we have the collections and the API key
+  // Now we iterate on the collections to create the requests
+  // and find what's inside the collections
   for (let j = 0; j < collections.length; j++) {
-    // Loop on collections
-
-    // URL Building blocks
-    let rootUrl = "https://api.zotero.org/groups/";
-    let urlBase = "/collections/" + collections[j].key;
-    let collectionComp = "&v=3&key=";
-
-    let zoteroCollectionRequest =
-      rootUrl + data.libraryID + urlBase + "?" + collectionComp + zoteroApiKey; // Build the url
-
-    zoteroPromises.push(zoteroCollectionRequest); // Push promise in the relevant array
+    // This format yields the metadata  of a zotero collection
+    const collectionMetaRequest = `https://api.zotero.org/groups/${data.libraryID}/collections/${collections[j].key}?&v=3&key=${zoteroApiKey}`;
+    // Push promise in the relevant array
+    zoteroPromises.push(collectionMetaRequest);
   }
 
   var zoteroCollectionResponse = [];
@@ -55,79 +72,96 @@ const zoteroItemsRetriever = (data) => {
   let responseTarget = 0;
   let responseAmount = 0;
 
+  // For each collection (again, part of a single library) that
+  // we are looking for
+
   zoteroPromises.forEach((d) => {
     limiter
       .schedule(() => fetch(d))
       .then((res) => res.json())
-      .then((result) => {
-        zoteroCollectionResponse.push(result);
+      .then((collectionMetadata) => {
+        // Add the collection metadata to the array
+        zoteroCollectionResponse.push(collectionMetadata);
 
+        // If we have answers for all the collections we're looking for
         if (zoteroCollectionResponse.length === zoteroPromises.length) {
-          zoteroCollectionResponse.forEach((f) => {
-            var thisCollectionAmount = parseInt(f.meta.numItems);
+          // We proceed by iterating over each collection metadata
+          zoteroCollectionResponse.forEach((colMeta) => {
+            // We first find how many documents this particular collection has
+            var thisCollectionAmount = parseInt(colMeta.meta.numItems);
+
+            // We add this number to the total responseTarget, which counts
+            // all the documents we're looking for among the (potentially several)
+            // collections that we are looking for.
             responseTarget = responseTarget + thisCollectionAmount;
 
-            f.name = f.data.name;
-            f.items = [];
+            // Find the name of the collection
+            colMeta.name = colMeta.data.name;
 
+            // Create an array to fill
+            colMeta.items = [];
+
+            // Create one request per hundred documents, since document metadata
+            // can come in pages of 100 items.
             let itemRequests = [];
 
-            for (var i = 0; i < f.meta.numItems; i += 100) {
-              let rootUrl = "https://api.zotero.org/groups/";
-              let urlBase = "/collections/" + f.data.key;
-              var zoteroVersion =
-                "/items/top?&v=3&format=csljson&start=" + i + "&limit=100&key=";
-              let zoteroItemsRequest =
-                rootUrl +
-                data.libraryID +
-                urlBase +
-                zoteroVersion +
-                zoteroApiKey;
+            // URL creator
+            const itemRequestCreator = (start) =>
+              `https://api.zotero.org/groups/${data.libraryID}/collections/${colMeta.key}/items/?v=3&format=csljson&start=${start}&limit=100&itemType=-note&key=${zoteroApiKey}`;
 
-              itemRequests.push(zoteroItemsRequest);
+            for (var i = 0; i < colMeta.meta.numItems; i += 100) {
+              itemRequests.push(itemRequestCreator(i));
             }
+
+            // Now that we have the pages to request for this particular collection
+            // Send them to the Zotero API
 
             itemRequests.forEach((d) => {
               limiter
                 .schedule(() => fetch(d))
                 .then((res) => res.json())
-                .then((response) => {
-                  response.items.forEach((d) => {
-                    f.items.push(d);
+                .then((documentPage) => {
+                  // A document page is a page of up to 100 documents from a
+                  // given collection.
 
+                  // For each document
+                  documentPage.items.forEach((d) => {
+                    // Add it to the array of results of this particular collection
+                    colMeta.items.push(d);
+
+                    // Add 1 to the number of TOTAL document responses we had (ie
+                    // throughout all collections requested)
                     responseAmount++;
 
+                    // Signal our kind user that we have received another document
+                    // and that soon they shall bask in the light of their newly
+                    // accessible corpus.
                     const updateMessage = `Loading ${responseAmount}/${responseTarget}`;
 
                     window.electron.send("chaeros-notification", updateMessage);
 
+                    // If all the documents throughout all the collections have
+                    // been retrieved.
                     if (responseAmount === responseTarget) {
-                      // Now retrieve the notes.
+                      // Now retrieve the potential notes that might exist
 
-                      const responseMap = {};
+                      // First, map the responses.
+                      const documentMap = {};
 
-                      f.items.forEach((d) => (responseMap[d.shortTitle] = d));
+                      colMeta.items.forEach((doc) => {
+                        const doc_id = doc.id.substring(
+                          doc.id.indexOf("/") + 1
+                        );
+                        documentMap[doc_id] = doc;
+                      });
 
                       const noteRequests = [];
 
-                      for (var i = 0; i < f.meta.numItems; i += 100) {
-                        let rootUrl = "https://api.zotero.org/groups/";
+                      const noteRequestCreator = (start) =>
+                        `https://api.zotero.org/groups/${data.libraryID}/collections/${colMeta.key}/items/?&v=3&start=${start}&limit=100&itemType=note&key=${zoteroApiKey}`;
 
-                        let urlBase = "/collections/" + f.data.key;
-
-                        var zoteroVersion =
-                          "/items/0/children?&v=3&start=" +
-                          i +
-                          "&limit=100&key=";
-
-                        let zoteroItemsRequest =
-                          rootUrl +
-                          data.libraryID +
-                          urlBase +
-                          zoteroVersion +
-                          zoteroApiKey;
-
-                        noteRequests.push(zoteroItemsRequest);
+                      for (var i = 0; i < colMeta.meta.numItems; i += 100) {
+                        noteRequests.push(noteRequestCreator(i));
                       }
 
                       window.electron.send(
@@ -141,22 +175,20 @@ const zoteroItemsRetriever = (data) => {
                         limiter
                           .schedule(() => fetch(d))
                           .then((res) => res.json())
-                          .then((response) => {
-                            console.log(response);
-                            response.forEach((note) => {
+                          .then((noteList) => {
+                            noteList.forEach((note) => {
                               if (note.data.itemType === "note") {
                                 const noteContent = JSON.parse(note.data.note);
-                                const noteID = noteContent.id;
-                                responseMap[noteID].note = noteContent;
+                                const parent_id = note.data.parentItem;
+                                documentMap[parent_id].note = noteContent;
                               }
                             });
 
                             resCount++;
 
                             if (resCount === noteRequests.length) {
-                              const noteResponse = Object.values(responseMap);
-                              console.log(noteResponse);
-                              saveDataset(noteResponse);
+                              const dataset = Object.values(documentMap);
+                              saveDataset(dataset);
                             }
                           });
                       });
