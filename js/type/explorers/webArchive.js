@@ -14,8 +14,6 @@ import { setkeylock } from "../../pandorae-interface/keyboard-shortcuts";
 const webArchive = (datajson) => {
   // When called, draw the webArchive
 
-  console.log(datajson);
-
   var availability;
 
   //========== SVG VIEW =============
@@ -45,23 +43,42 @@ const webArchive = (datajson) => {
       [Infinity, Infinity],
     ]);
 
-  let resolver, arkViewer;
-
   window.electron
     .invoke("checkflux", true)
     .then((result) => {
       availability = JSON.parse(result);
 
-      for (const service in availability.dnsLocalServiceList) {
-        switch (availability.dnsLocalServiceList[service].type) {
-          case "BNF-SOLR":
-            resolver = availability.dnsLocalServiceList[service].url;
+      const archiveLocations = {};
+      var resolver, arkViewer;
 
-            arkViewer = availability.dnsLocalServiceList[service].arkViewer;
+      const archiveLocSelect = document.createElement("select");
+      archiveLocSelect.style.margin = "0.5rem";
+      archiveLocSelect.addEventListener("change", () => {
+        resolver = archiveLocations[archiveLocSelect.value].url;
+        arkViewer = archiveLocations[archiveLocSelect.value].arkViewer;
+      });
 
-            break;
+      const services = availability.dnsLocalServiceList;
+
+      services.forEach((service, i) => {
+        if (service.serviceType === "Web Archive") {
+          const config = service.serviceConfig;
+          const name = config["account name"];
+
+          archiveLocations[name] = config;
+
+          const option = document.createElement("option");
+          option.value = name;
+          option.innerText = name;
+
+          archiveLocSelect.append(option);
+
+          if (i === 0) {
+            resolver = config.url;
+            arkViewer = config.arkViewer;
+          }
         }
-      }
+      });
 
       // size is probably not good as such, to be updated
 
@@ -90,12 +107,11 @@ const webArchive = (datajson) => {
 
       //======== DATA CALL & SORT =========
 
-      /* pandodb.webArchive
-    .get(id)
-    .then((datajson) => { */
+      var clusterSelected = false;
+
       dataDownload(datajson);
 
-      const documents = datajson.data[0].items;
+      const documents = datajson.data;
 
       var nodeData = [];
       var linkData = [];
@@ -174,7 +190,7 @@ const webArchive = (datajson) => {
       for (let i = 0; i < documents.length / divider; ++i) {
         const d = documents[i];
 
-        const pageCaptureHypertextLinks = d.enrichment.links;
+        const pageCaptureHypertextLinks = d.note.links;
 
         // these hypertext links the page capture is listed as having
 
@@ -576,6 +592,9 @@ const webArchive = (datajson) => {
         .force("center", d3.forceCenter(width / 2, height / 2).strength(0.5))
         .on("tick", ticked);
 
+      // do not start simulation from the ground up
+      simulation.stop();
+
       // Set the position attributes of links and nodes each time the simulation ticks.
       function ticked() {
         link
@@ -619,7 +638,30 @@ const webArchive = (datajson) => {
         (a, b) => a.nodes.length - b.nodes.length
       );
 
-      let clusterMeta = "";
+      var clusterMeta = document.createElement("div");
+      clusterMeta.id = "clusterMetaData";
+      clusterMeta.style =
+        "margin-bottom:2rem;padding-bottom:2rem;border-bottom:1px solid #141414";
+
+      var soloGhosts = new Set();
+      var soloMap = {};
+
+      const toggleSoloGhosts = (display) => {
+        node.style("display", (n) => {
+          if (n) {
+            if (soloGhosts.has(n.id)) {
+              return display;
+            }
+          }
+        });
+        link.style("display", (l) => {
+          if (l) {
+            if (soloGhosts.has(l.target.id)) {
+              return display;
+            }
+          }
+        });
+      };
 
       const selectedClusterMetadata = (
         localNodeData,
@@ -627,115 +669,100 @@ const webArchive = (datajson) => {
         node,
         link
       ) => {
-        const div = document.getElementById("clusterMetaData");
-        if (div) {
-          // look for solo ghosts by mapping links
+        clusterMeta.innerHTML = "";
 
-          const soloGhosts = new Set();
-          const soloMap = {};
-          localLinkData.forEach((l) => {
-            if (l.target.type === "ghost") {
-              if (!soloMap.hasOwnProperty(l.target.id)) {
-                soloMap[l.target.id] = 0;
-              }
-              soloMap[l.target.id]++;
+        // look for solo ghosts by mapping links
+        soloGhosts = new Set();
+        soloMap = {};
+        localLinkData.forEach((l) => {
+          if (l.target.type === "ghost") {
+            if (!soloMap.hasOwnProperty(l.target.id)) {
+              soloMap[l.target.id] = 0;
             }
-          });
-
-          for (const id in soloMap) {
-            if (soloMap[id] < 2) {
-              soloGhosts.add(id);
-            }
+            soloMap[l.target.id]++;
           }
+        });
 
-          const toggleSoloGhosts = (display) => {
-            node.style("display", (n) => {
-              if (soloGhosts.has(n.id)) {
-                return display;
-              }
-            });
-            link.style("display", (l) => {
-              if (soloGhosts.has(l.target.id)) {
-                return display;
-              }
-            });
-          };
+        for (const id in soloMap) {
+          if (soloMap[id] < 2) {
+            soloGhosts.add(id);
+          }
+        }
 
-          // count node types to provide metadata to the user
+        // count node types to provide metadata to the user
 
-          var counter = { ghosts: 0, captures: 0, domains: [] };
+        var counter = { ghosts: 0, captures: 0, domains: [] };
 
-          localNodeData.forEach((n) => {
-            switch (n.type) {
-              case "capture":
-                counter.captures++;
-                break;
+        localNodeData.forEach((n) => {
+          switch (n.type) {
+            case "capture":
+              counter.captures++;
+              break;
 
-              case "ghost":
-                counter.ghosts++;
-                break;
+            case "ghost":
+              counter.ghosts++;
+              break;
 
-              case "domain":
-                counter.domains.push(n.id);
-                break;
+            case "domain":
+              counter.domains.push(n.id);
+              break;
 
-              default:
-                break;
-            }
-          });
+            default:
+              break;
+          }
+        });
 
-          clusterMeta = `<br><hr><br>For this corpus, this cluster contains: <br>
+        const header = document.createElement("div");
+        header.innerHTML = `<br><hr><br>For this corpus, this cluster contains: <br>
   - ${counter.captures} captured pages available in the archive<br>
   - ${counter.ghosts} pages "linked to pages" by the most recent available capture in the corpus, which might or might not be in the corpus<br>
   <br><br>
   The captures in this cluster come from ${counter.domains.length} domain(s):<br>
   `;
+        clusterMeta.append(header);
+        // add domains
 
-          div.innerHTML = clusterMeta;
+        counter.domains.forEach((d) => {
+          const host = document.createElement("div");
+          host.innerText = "- " + d;
+          host.className = "flux-button";
+          host.style = "padding:0px;padding-left:3px;margin-top:3px;";
 
-          // add domains
-
-          counter.domains.forEach((d) => {
-            const host = document.createElement("div");
-            host.innerText = "- " + d;
-            host.className = "flux-button";
-            host.style = "padding:0px;padding-left:3px;margin-top:3px;";
-
-            host.addEventListener("click", () => {
-              const domainNode = node
-                .filter((n, i) => n.type === "domain" && n.id === d)
-                .node();
-              zoomToNode(domainNode, svg, zoom, width, height, 0, 0);
-            });
-
-            div.append(host);
+          host.addEventListener("click", () => {
+            const domainNode = node
+              .filter((n, i) => n.type === "domain" && n.id === d)
+              .node();
+            zoomToNode(domainNode, svg, zoom, width, height, 0, 0);
           });
 
-          // add ghost tickbox
+          clusterMeta.append(host);
+        });
 
-          const ghostBox = document.createElement("div");
-          const ghostTick = document.createElement("input");
-          ghostTick.type = "checkbox";
-          ghostTick.checked = true;
-          ghostTick.id = "ghostTick";
-          ghostTick.name = "ghostTick";
-          const ghostLabel = document.createElement("label");
-          ghostLabel.for = "ghostTick";
-          ghostLabel.innerText = "Hide solo ghosts";
+        // add ghost tickbox
 
-          ghostTick.addEventListener("click", () => {
-            if (ghostTick.checked) {
-              toggleSoloGhosts("none");
-            } else {
-              toggleSoloGhosts("block");
-            }
-          });
+        const ghostBox = document.createElement("div");
+        const ghostTick = document.createElement("input");
+        ghostTick.type = "checkbox";
+        ghostTick.checked = true;
+        ghostTick.id = "ghostTick";
+        ghostTick.name = "ghostTick";
+        const ghostLabel = document.createElement("label");
+        ghostLabel.for = "ghostTick";
+        ghostLabel.innerText = "Hide solo ghosts";
+        ghostBox.style.padding = "0.5rem";
 
-          ghostBox.append(ghostTick, ghostLabel);
-          div.append(ghostBox);
+        ghostTick.addEventListener("click", () => {
+          if (ghostTick.checked) {
+            toggleSoloGhosts("none");
+          } else {
+            toggleSoloGhosts("block");
+          }
+        });
 
-          toggleSoloGhosts("none");
-        }
+        ghostBox.append(ghostTick, ghostLabel);
+        clusterMeta.append(ghostBox, archiveLocSelect);
+
+        toggleSoloGhosts("none");
       };
 
       const webArchiveSelectionMenu = () => {
@@ -746,9 +773,10 @@ const webArchive = (datajson) => {
             .attr("transform", `translate(${width},${height * 0.1})`);
         }
 
-        if (clusterMeta) {
-          toolContent.innerHTML =
-            "<div id='clusterMetaData'>" + clusterMeta + "</div><br><hr><br>";
+        toolContent.innerHTML = "";
+
+        if (clusterSelected) {
+          toolContent.append(clusterMeta);
         } else {
           toolContent.innerHTML =
             "<div id='clusterMetaData'><h3>Select a cluster</h3></div><br><hr><br>";
@@ -756,6 +784,8 @@ const webArchive = (datajson) => {
 
         link.style("display", "block");
         node.style("display", "block");
+
+        toggleSoloGhosts("none");
 
         nodeGroupArray.forEach((group, i) => {
           // radio selection
@@ -766,16 +796,17 @@ const webArchive = (datajson) => {
 
           const radioGroup = document.createElement("input");
           radioGroup.type = "radio";
-          radioGroup.checked = currentSelection === i;
+          //radioGroup.checked = currentSelection === i;
           radioGroup.value = groupName;
           radioGroup.name = "nodeCluster";
           radioGroup.id = groupName;
 
           radioGroup.addEventListener("change", () => {
             if (radioGroup.checked) {
-              regenerateGraph(group.nodes);
-
+              clusterSelected = true;
               currentSelection = i;
+              webArchiveSelectionMenu();
+              regenerateGraph(group.nodes);
             }
           });
 
@@ -911,7 +942,7 @@ const webArchive = (datajson) => {
 
           const permalink = `${arkViewer}/${doc.wayback_date}/${doc.url}`;
           copyButton.addEventListener("click", () =>
-            clipboard.writeText(permalink)
+            navigator.clipboard.writeText(permalink)
           );
 
           const content = document.createElement("div");
@@ -937,6 +968,9 @@ const webArchive = (datajson) => {
             if (target.length > 2) {
               var re = new RegExp(target, "gi"),
                 str = doc.content;
+
+              let match;
+
               while ((match = re.exec(str)) != null) {
                 // var extrait = doc.content.substring(match.index - 150, match.index + 150)
                 //.replace(target, "<mark>" + target + "</mark>")
@@ -1139,7 +1173,7 @@ const webArchive = (datajson) => {
                 localLinkData.forEach((l) => {
                   if (l.target.id === d.id) {
                     targetCollection =
-                      documentMap[l.source.id].enrichment.solrCollection;
+                      documentMap[l.source.id].note.solrCollection;
                   }
                 });
 
@@ -1147,8 +1181,7 @@ const webArchive = (datajson) => {
                 // find the collection to target
                 // if this is a capture, this is straightforward
                 if (documentMap.hasOwnProperty(d.id)) {
-                  targetCollection =
-                    documentMap[d.id].enrichment.solrCollection;
+                  targetCollection = documentMap[d.id].note.solrCollection;
                 }
 
                 if (targetCollection) {
@@ -1193,7 +1226,7 @@ const webArchive = (datajson) => {
                             }  <br><hr>`;
                           }
 
-                          documentMap[d.id].enrichment.links.forEach(
+                          documentMap[d.id].note.links.forEach(
                             (l) => (toolContent.innerHTML += `<br>${l}`)
                           );
 
@@ -1226,7 +1259,7 @@ const webArchive = (datajson) => {
                   }  <br><hr>`;
                 }
 
-                documentMap[d.id].enrichment.links.forEach(
+                documentMap[d.id].note.links.forEach(
                   (l) => (toolContent.innerHTML += `<br>${l}`)
                 );
 
@@ -1255,8 +1288,26 @@ const webArchive = (datajson) => {
         selectedClusterMetadata(localNodeData, localLinkData, node, link);
       };
 
+      // selectedClusterMetadata();
+
       //select first, smallest corpus to display something on start
+      /*
+      selectedClusterMetadata(
+        nodeGroupArray[0].nodes,
+        nodeGroupArray[0].links,
+        node,
+        link
+      );
+
+      
       regenerateGraph(nodeGroupArray[0].nodes);
+
+      clusterMeta = `<br><hr><br>For this corpus, this cluster contains: <br>
+  - ${counter.captures} captured pages available in the archive<br>
+  - ${counter.ghosts} pages "linked to pages" by the most recent available capture in the corpus, which might or might not be in the corpus<br>
+  <br><br>
+  The captures in this cluster come from ${counter.domains.length} domain(s):<br>
+  `;*/
 
       // legend
       const createLegend = () => {
@@ -1360,7 +1411,6 @@ const webArchive = (datajson) => {
         "webArchive error: dataset " + id + " is invalid."
       );
     });
-
   //======== ZOOM & RESCALE ===========
 
   svg.call(zoom);

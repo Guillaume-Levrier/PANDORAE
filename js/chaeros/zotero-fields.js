@@ -15,7 +15,13 @@ const zoteroFields = {
     accessDate: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   attachment: { title: "", accessDate: "", url: "" },
   audioRecording: {
@@ -40,7 +46,13 @@ const zoteroFields = {
     accessDate: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   bill: {
     title: "",
@@ -60,7 +72,13 @@ const zoteroFields = {
     shortTitle: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   blogPost: {
     title: "",
@@ -74,7 +92,13 @@ const zoteroFields = {
     shortTitle: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   book: {
     title: "",
@@ -99,7 +123,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   bookSection: {
     title: "",
@@ -125,7 +155,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   case: {
     caseName: "",
@@ -143,7 +179,13 @@ const zoteroFields = {
     accessDate: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   computerProgram: {
     title: "",
@@ -165,7 +207,13 @@ const zoteroFields = {
     callNumber: "",
     accessDate: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   conferencePaper: {
     title: "",
@@ -190,7 +238,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   dictionaryEntry: {
     title: "",
@@ -216,7 +270,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   document: {
     title: "",
@@ -233,7 +293,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   email: {
     subject: "",
@@ -245,7 +311,13 @@ const zoteroFields = {
     language: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   encyclopediaArticle: {
     title: "",
@@ -271,7 +343,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   film: {
     title: "",
@@ -291,7 +369,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   forumPost: {
     title: "",
@@ -305,7 +389,13 @@ const zoteroFields = {
     accessDate: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   hearing: {
     title: "",
@@ -326,7 +416,13 @@ const zoteroFields = {
     accessDate: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   instantMessage: {
     title: "",
@@ -338,7 +434,13 @@ const zoteroFields = {
     accessDate: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   interview: {
     title: "",
@@ -355,7 +457,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   journalArticle: {
     title: "",
@@ -381,7 +489,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   letter: {
     title: "",
@@ -398,7 +512,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   magazineArticle: {
     title: "",
@@ -419,7 +539,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   manuscript: {
     title: "",
@@ -438,7 +564,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   map: {
     title: "",
@@ -461,7 +593,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   newspaperArticle: {
     title: "",
@@ -483,7 +621,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   note: "",
   patent: {
@@ -507,7 +651,13 @@ const zoteroFields = {
     accessDate: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   podcast: {
     title: "",
@@ -522,7 +672,13 @@ const zoteroFields = {
     shortTitle: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   presentation: {
     title: "",
@@ -537,7 +693,13 @@ const zoteroFields = {
     shortTitle: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   radioBroadcast: {
     title: "",
@@ -559,7 +721,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   report: {
     title: "",
@@ -581,7 +749,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   statute: {
     nameOfAct: "",
@@ -619,7 +793,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   tvBroadcast: {
     title: "",
@@ -641,7 +821,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   videoRecording: {
     title: "",
@@ -665,7 +851,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   webpage: {
     title: "",
@@ -679,7 +871,13 @@ const zoteroFields = {
     language: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
   annotation: "",
   preprint: {
@@ -704,7 +902,13 @@ const zoteroFields = {
     callNumber: "",
     rights: "",
     extra: "",
-    creator: "",
+    creators: [
+      {
+        creatorType: "author",
+        firstName: "",
+        lastName: "",
+      },
+    ],
   },
 };
 

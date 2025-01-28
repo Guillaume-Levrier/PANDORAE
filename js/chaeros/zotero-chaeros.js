@@ -18,12 +18,6 @@ import { userData } from "./chaeros-userdata";
 // end up sending a lot of async API calls to Zotero and make it unfriendly.
 //
 
-/*
- *   THE SOLUTION HERE IS TO LOOK FOR ALL NON-ATTACHMENTS AND
- *   THEN ALL THE ATTACHMENTS.
- *
- */
-
 const zoteroItemsRetriever = (data) => {
   // find which collections to call
   const collections = Object.values(data.collections);
@@ -279,6 +273,11 @@ const zoteroCollectionBuilder = (dataset) => {
       .then((collectionName) => {
         collectionCode.code = collectionName.success["0"]; // Retrieve name from the response
 
+        window.electron.send(
+          "chaeros-notification",
+          "Creating collection " + collectionCode.code
+        );
+
         let fileArrays = []; // Create empty array
 
         file.forEach((d) => {
@@ -323,6 +322,11 @@ const zoteroCollectionBuilder = (dataset) => {
 
         let count = 0;
 
+        window.electron.send(
+          "chaeros-notification",
+          `Uploading page 1/${fileArrays.length}`
+        );
+
         fetchTargets.forEach((d) => {
           limiter
             .schedule(() =>
@@ -340,6 +344,12 @@ const zoteroCollectionBuilder = (dataset) => {
               resultList.push(...idList);
 
               count++;
+              if (count <= fileArrays.length) {
+                window.electron.send(
+                  "chaeros-notification",
+                  `Uploading page ${count + 1}/${fileArrays.length}`
+                );
+              }
 
               if (resultList.length === file.length) {
                 // NEW PART
@@ -387,7 +397,8 @@ const zoteroCollectionBuilder = (dataset) => {
                                     "Collection created"
                                   ); // Send success message to main Display
                                   window.electron.send("pulsar", true);
-                                }, 2000);
+                                  window.electron.send("win-destroy", true);
+                                }, 1000);
                               }
                             })
                         );

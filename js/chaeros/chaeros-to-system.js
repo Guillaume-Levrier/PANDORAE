@@ -2,7 +2,7 @@ const genDate = () =>
   new Date().toLocaleDateString() + "-" + new Date().toLocaleTimeString();
 
 //========== sysExport ==========
-const sysExport = (data) =>
+const sysExport = (data) => {
   window.electron.send("database", {
     operation: "datasetTransfer",
     parameters: {
@@ -13,6 +13,14 @@ const sysExport = (data) =>
       explorers: data.explorers,
     },
   });
+
+  window.electron.send(
+    "chaeros-notification",
+    "Collection transfered to system"
+  );
+
+  setTimeout(() => window.electron.send("win-destroy", true), 1000);
+};
 
 //========== dataWriter ==========
 const dataWriter = (table, dataset) =>

@@ -49,18 +49,15 @@ const regardsCitoyensConverter = (dataset) => {
     data: convertedDataset,
   };
 
-  console.log(converteddata);
-
   dataWriter("standard", converteddata);
-  console.log("done");
+
+  setTimeout(() => window.electron.send("win-destroy", true), 1000);
 };
 
 // Zotero-flavoured CSL JSON
 //
 const regardDocRemapper = (item) => {
   const convertedDocument = createNewDocument("statute");
-
-  console.log(item);
 
   var titre = item.document_type;
 
@@ -88,13 +85,11 @@ const regardDocRemapper = (item) => {
   convertedDocument.shortTitle = item.id;
   convertedDocument.note = note;
 
-  console.log(convertedDocument);
-
   return convertedDocument;
 };
 
 // ==== on récupère chaque document par type (intervention / question / amendement/ etc)
-// et on injecte toute ça dans array
+// et on injecte tout ça dans un array
 //
 //
 const compilerDocument = (doc) => {

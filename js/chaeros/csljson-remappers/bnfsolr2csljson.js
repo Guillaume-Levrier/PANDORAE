@@ -3,29 +3,24 @@
 // CSL - JSON format.
 
 import { dataWriter } from "../chaeros-to-system";
+import { createNewDocument, createNote } from "../zotero-fields";
 
-   
+const webArchiveRemap = (dataset) => {
+  const cslData = [];
 
-const webArchiveRemap=(dataset)=> {
+  dataset.data.forEach((d) => cslData.push(bnfRemap(d)));
 
-  console.log(dataset)
-const cslData = [];
-
-          dataset.data.forEach((d) =>
-            cslData.push(bnfRemap(d))
-          );
-
-
-dataset.data = cslData
-
-console.log(dataset)
+  dataset.data = cslData;
 
   dataWriter("standard", dataset);
 
-} 
+  window.electron.send("chaeros-notification", "Web archive converted to CSL");
+
+  setTimeout(() => window.electron.send("win-destroy", true), 1000);
+};
 
 const bnfRemap = (doc) => {
-  const remappedDocument = { itemType: "webpage" };
+  const convertedDocument = createNewDocument("webpage");
 
   const originalBnfFields = {
     title: "title",
@@ -37,29 +32,18 @@ const bnfRemap = (doc) => {
 
   for (const key in doc) {
     if (doc.hasOwnProperty(key)) {
-      remappedDocument[originalBnfFields[key]] = doc[key];
+      convertedDocument[originalBnfFields[key]] = doc[key];
     }
   }
 
-  remappedDocument.URL =
+  convertedDocument.URL =
     "http://archivesinternet.bnf.fr/" + doc.wayback_date + "/" + doc.url;
 
-  remappedDocument.creators = [];
+  convertedDocument.creators = [];
 
-  if (doc.hasOwnProperty("author")) {
-    if (typeof doc.author === "string") {
-      remappedDocument.author = [{ lastName: doc.author }];
-    } else {
-      remappedDocument.author = [];
-      doc.author.forEach((auth) => {
-        remappedDocument.author.push({ lastName: auth });
-      });
-    }
-  }
+  convertedDocument.date = doc.crawl_date;
 
-  remappedDocument.date = doc.crawl_date;
-
-  delete remappedDocument.undefined;
+  delete convertedDocument.undefined;
 
   // Here, filter out all document links that contain "mailto"
   // The warc-indexers take all <a> elements, the mailto is potentially problematic
@@ -73,15 +57,20 @@ const bnfRemap = (doc) => {
     );
   }
 
-  remappedDocument.note = JSON.stringify({
+  const item = {
     id: doc.id,
     collections: doc.collections,
     links: hyperlinks,
-    solrCollection:doc.solrCollection,
-  });
+    solrCollection: doc.solrCollection,
+  };
 
-  return remappedDocument;
+  const note = createNote();
+  note.note = JSON.stringify(item);
+
+  convertedDocument.shortTitle = item.id;
+  convertedDocument.note = note;
+
+  return convertedDocument;
 };
 
-
-export {webArchiveRemap}  
+export { webArchiveRemap };

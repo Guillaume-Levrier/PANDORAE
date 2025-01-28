@@ -8,17 +8,11 @@ const solrMetaExplorer = (data) => {
     minTime: 1500,
   });
 
-console.log(data)
-
-
-
   //req, meta, dateFrom, dateTo, targetCollections
-
 
   const url = (req, start, end) =>
     "http://" +
     data.query.url +
-    
     "/solr/" +
     data.query.selectedCollection +
     "/" +
@@ -32,8 +26,8 @@ console.log(data)
     "T00:00:00Z" +
     "%20TO%20" +
     data.query.dateTo +
-    "T00:00:00Z]&q=" +req
-     +
+    "T00:00:00Z]&q=" +
+    req +
     "&start=" +
     start +
     "&rows=" +
@@ -59,13 +53,14 @@ console.log(data)
   } else {
     urlArray.push(url(data.query.query, 0, 200));
 
-    window.electron.send("console-logs", `First request: ${url(data.query.query, 0, 200)}`);
+    window.electron.send(
+      "console-logs",
+      `First request: ${url(data.query.query, 0, 200)}`
+    );
   }
 
   var totalResponse = [];
   let count = 0;
-
-  console.log(urlArray)
 
   urlArray.forEach((solrReq) => {
     limiter
@@ -84,51 +79,27 @@ console.log(data)
         totalResponse = [...totalResponse, ...docs];
 
         if (count === urlArray.length) {
+          totalResponse.forEach(
+            (d) => (d.solrCollection = data.query.selectedCollection)
+          );
 
-          totalResponse.forEach(d=>d.solrCollection = data.query.selectedCollection)
-
-          const date = genDate()
+          const date = genDate();
 
           const dataset = {
             id: data.query.query + "-" + date,
-             source: "web archive",
+            source: "web archive",
             date,
             name: data.query.query,
             data: totalResponse,
           };
 
-         
+          dataWriter("flux", dataset);
 
-                                    dataWriter("flux", dataset);
+          window.electron.send("chaeros-notification", `Data retrieved`);
 
- window.electron.send(
-          "chaeros-notification",
-          `Data retrieved`
-        );
-
-                                  
-
-         // console.log(cslConvertedDataset)
-/*
-          pandodb.csljson
-            .add(cslConvertedDataset)
-            .then(() => {
-              window.electron.send("chaeros-notification", "Dataset retrieved"); // Send a success message
-              window.electron.send("pulsar", true);
-              window.electron.send(
-                "console-logs",
-                "Solr data successfully converted"
-              ); // Log success
-
-              setTimeout(() => {
-                window.electron.send("win-destroy", winId);
-              }, 500);
-            })
-            .catch((e) => {
-              console.log(e);
-            });
-
-            */
+          setTimeout(() => {
+            window.electron.send("win-destroy", winId);
+          }, 1000);
         }
       });
   });
