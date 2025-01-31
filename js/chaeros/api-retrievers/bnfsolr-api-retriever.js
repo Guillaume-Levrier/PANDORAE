@@ -8,6 +8,8 @@ const solrMetaExplorer = (data) => {
     minTime: 1500,
   });
 
+  console.log(data);
+
   //req, meta, dateFrom, dateTo, targetCollections
 
   const url = (req, start, end) =>
@@ -93,6 +95,7 @@ const solrMetaExplorer = (data) => {
             data: totalResponse,
           };
 
+          /*
           dataWriter("flux", dataset);
 
           window.electron.send("chaeros-notification", `Data retrieved`);
@@ -100,6 +103,7 @@ const solrMetaExplorer = (data) => {
           setTimeout(() => {
             window.electron.send("win-destroy", winId);
           }, 1000);
+        */
         }
       });
   });

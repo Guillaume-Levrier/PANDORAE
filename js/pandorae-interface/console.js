@@ -206,7 +206,7 @@ const cmdinput = (input) => {
     }
   }
   field.value = commandReturn;
-  setTimeout(() => (field.value = ""), 1500);
+  //setTimeout(() => (field.value = ""), 1500);
   document.getElementById("cli-field").value = commandReturn;
 };
 

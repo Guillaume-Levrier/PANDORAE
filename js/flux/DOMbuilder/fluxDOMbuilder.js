@@ -45,34 +45,31 @@ const createCascadeTab = (tabData) => {
 
   // If this is the user tab, then it needs to give relevant config options
   if (tabData.id === "user") {
-
- userData.distantServices.forEach(s=> {
+    userData.distantServices.forEach((s) => {
       tabData.sections.push({
         type: "addServiceCredentials",
         data: {
-          name: s.serviceType+" - "+s.serviceConfig["account name"],
+          name: s.serviceType + " - " + s.serviceConfig["account name"],
           description: CM.flux.serviceModels[s.serviceType].description,
           helper: CM.flux.serviceModels[s.serviceType].helper,
           fields: s.serviceConfig,
           proximity: "distant",
         },
       });
-    })
+    });
 
-
-    userData.localServices.forEach(s=> {
+    userData.localServices.forEach((s) => {
       tabData.sections.push({
         type: "addServiceCredentials",
         data: {
-          name: s.serviceType+" - "+s.serviceConfig["account name"],
+          name: s.serviceType + " - " + s.serviceConfig["account name"],
           description: CM.flux.serviceModels[s.serviceType].description,
           helper: CM.flux.serviceModels[s.serviceType].helper,
           fields: s.serviceConfig,
           proximity: "local",
         },
       });
-      })
-  
+    });
 
     // add new service button & save config button
     tabData.sections.push(
@@ -86,28 +83,32 @@ const createCascadeTab = (tabData) => {
   }
   // If this is not the user tab, then we need to check whether this is a public endpoint
   // or something that needs configuration "file" (more like JSON object as userdata property).
-  else{
+  else {
     // To check whether there is config info, we start by normalizing both the tab ID
     // And the configs we have to see if we have any matches.
 
     const tabID = tabData.id;
 
-    const services =[...userData.distantServices,...userData.localServices];
-    
-    const relevantServicesConfig=[];
-    
-    services.forEach(s=>{
-      const serviceID = s.serviceType.toLowerCase().replaceAll(" ","-")
-      if (serviceID===tabID){
-        relevantServicesConfig.push(s)
-      } 
-    }  )
+    const services = [...userData.distantServices, ...userData.localServices];
+
+    const relevantServicesConfig = [];
+
+    console.log(services);
+    console.log(tabID);
+
+    services.forEach((s) => {
+      const serviceID = s.serviceType.toLowerCase().replaceAll(" ", "-");
+
+      console.log(serviceID);
+      if (serviceID === tabID) {
+        relevantServicesConfig.push(s);
+      }
+    });
 
     // We then add the config to the tabData, which enables us to find
     // which endpoint to target and how
-    tabData.relevantServicesConfig=relevantServicesConfig;
-
-  } 
+    tabData.relevantServicesConfig = relevantServicesConfig;
+  }
 
   // if this is a tab that lets one display data
   if (tabData.hasOwnProperty("sections")) {

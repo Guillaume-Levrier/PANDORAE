@@ -169,6 +169,7 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
   const functionArguments = Object.values(sectionData.function.args);
 
   if (functionArguments.length > 0) {
+    console.log(config);
     buildAdditionalArguments(config, sectionData, tabSection);
   }
 

@@ -253,6 +253,9 @@ const queryBnFSolr = (args) => {
 
         args.resultDiv.append(yearChart, collectionChart, domainDiv);
 
+        console.log("----- last args ----");
+        console.log(args);
+
         // powervalve sends the instructons for the Chaeros (/headless) context
         // to execute
         const powervalveArguments = {
@@ -260,9 +263,35 @@ const queryBnFSolr = (args) => {
           powerArg: {
             // object, the arguments for that function
             query: solrbnfcount[args.query],
+            banlist: {},
           },
           message: "Connecting to BnF Solr", // string, the notification message
         };
+
+        // give the opportunity to add banlists to the full request
+        if (args.config.hasOwnProperty("banlists")) {
+          const banListCheckDiv = document.createElement("div");
+          banListCheckDiv.style.padding = "1rem";
+
+          for (const banName in args.config.banlists) {
+            const checkDiv = document.createElement("div");
+            const checkBox = document.createElement("input");
+            checkBox.type = "checkbox";
+            const checkLabel = document.createElement("label");
+            checkLabel.innerText = banName;
+
+            checkBox.addEventListener(
+              "input",
+              () =>
+                (powervalveArguments.powerArg.banlist[banName] =
+                  args.config.banlists[banName])
+            );
+
+            checkDiv.append(checkBox, checkLabel);
+            banListCheckDiv.append(checkDiv);
+          }
+          args.resultDiv.append(banListCheckDiv);
+        }
 
         // add a button to execute the full query
         addFullQueryButton(args, "Submit full query", powervalveArguments);
@@ -351,6 +380,8 @@ const buildBnFsolrArguments = (config, data, sectionDiv) => {
   solrCont.style.display = "none";
   solrCont.className = "fluxTabs";
 
+  console.log(service);
+
   const sourceRequest = `http://${service.url}/solr/admin/collections?action=LIST&wt=json`;
 
   // The answer is in the array at r.collections;
@@ -368,41 +399,49 @@ const buildBnFsolrArguments = (config, data, sectionDiv) => {
       const fieldset = document.createElement("fieldset");
       fieldset.style = "border:0px;outline:0px";
 
+      var solrSet = 0;
+
+      if (config.hasOwnProperty("solrCollections")) {
+        solrSet = new Set(config.solrCollections);
+      }
+
       optionsDiv.append(fieldset);
 
       for (let i = 0; i < r.collections.length; i++) {
         const col = r.collections[i];
 
-        const collectionContainer = document.createElement("div");
+        if (solrSet ? solrSet.has(col) : true) {
+          const collectionContainer = document.createElement("div");
 
-        const collectionRadio = document.createElement("input");
-        collectionRadio.type = "radio";
-        collectionRadio.name = `bnf-solr-radio-${config["account name"]}`;
-        collectionRadio.id = col;
-        collectionRadio.value = col;
+          const collectionRadio = document.createElement("input");
+          collectionRadio.type = "radio";
+          collectionRadio.name = `bnf-solr-radio-${config["account name"]}`;
+          collectionRadio.id = col;
+          collectionRadio.value = col;
 
-        collectionRadio.addEventListener("change", (e) => {
-          e.preventDefault();
+          collectionRadio.addEventListener("change", (e) => {
+            e.preventDefault();
 
-          getFacets(config, service, col, optionsDiv, DOMquery);
-        });
+            getFacets(config, service, col, optionsDiv, DOMquery);
+          });
 
-        if (!i) {
-          collectionRadio.setAttribute("checked", true);
+          if (!i) {
+            collectionRadio.setAttribute("checked", true);
 
-          try {
-            getFacets(config, service, coreSource, optionsDiv, DOMquery);
-          } catch (error) {}
+            try {
+              getFacets(config, service, coreSource, optionsDiv, DOMquery);
+            } catch (error) {}
+          }
+
+          DOMquery.collections.push(collectionRadio);
+
+          const collectionLabel = document.createElement("label");
+          collectionLabel.for = col;
+          collectionLabel.innerText = col;
+          collectionContainer.append(collectionRadio, collectionLabel);
+
+          fieldset.append(collectionContainer);
         }
-
-        DOMquery.collections.push(collectionRadio);
-
-        const collectionLabel = document.createElement("label");
-        collectionLabel.for = col;
-        collectionLabel.innerText = col;
-        collectionContainer.append(collectionRadio, collectionLabel);
-
-        fieldset.append(collectionContainer);
       }
       optionsDiv.append(genHr());
     });
@@ -410,7 +449,7 @@ const buildBnFsolrArguments = (config, data, sectionDiv) => {
 
 const getFacets = (config, service, coreSource, optionsDiv, DOMquery) =>
   fetch(
-    `http://${service.url}/solr/${coreSource}/select?q=*&rows=1&facet=on&facet.field=collections&facet.field=crawl_year`
+    `http://${service.url}/solr/${coreSource}/select?q=*&rows=0&facet=on&facet.field=collections`
   )
     .then((facet) => facet.json())
     .then((facets) => {
@@ -418,7 +457,7 @@ const getFacets = (config, service, coreSource, optionsDiv, DOMquery) =>
       if (facets.responseHeader.status === 0) {
         const facetList = facets.facet_counts.facet_fields.collections;
 
-        const periodList = facets.facet_counts.facet_fields.crawl_year;
+        // const periodList = facets.facet_counts.facet_fields.crawl_year;
 
         if (facetList.length === 0) {
           optionsDiv.innerHTML += "No available collections<br>";
@@ -428,6 +467,8 @@ const getFacets = (config, service, coreSource, optionsDiv, DOMquery) =>
           optionsDiv.append(facetBox);
 
           // determine period
+          // removed for now because to intensive for the Solr to manage
+          /*
           var start = Infinity;
           var end = -Infinity;
           for (let i = 0; i < periodList.length; i++) {
@@ -443,37 +484,46 @@ const getFacets = (config, service, coreSource, optionsDiv, DOMquery) =>
 
           document.getElementById("dateFrom").value = start + "-01-01";
           document.getElementById("dateTo").value = end + "-12-31";
-
+          */
           const inputQueryText =
             optionsDiv.parentNode.querySelector(".fluxInput");
           inputQueryText.disabled = false;
           inputQueryText.value = "";
 
           // manage sub collections
+
+          var facetSet = 0;
+
+          if (config.hasOwnProperty("indexedDatasets")) {
+            facetSet = new Set(config.indexedDatasets);
+          }
+
           DOMquery.facets = [];
+
           for (let i = 0; i < facetList.length; i++) {
             const face = facetList[i];
+            if (facetSet ? facetSet.has(face) : true) {
+              if (typeof face === "string") {
+                let checked = 0;
 
-            if (typeof face === "string") {
-              let checked = 0;
+                const facetContainer = document.createElement("div");
 
-              const facetContainer = document.createElement("div");
+                const facetCheckBox = document.createElement("input");
+                facetCheckBox.type = "checkbox";
+                facetCheckBox.name = `bnf-solr-checkbox-facet-${config["account name"]}`;
+                facetCheckBox.id = face;
+                facetCheckBox.checked = checked;
 
-              const facetCheckBox = document.createElement("input");
-              facetCheckBox.type = "checkbox";
-              facetCheckBox.name = `bnf-solr-checkbox-facet-${config["account name"]}`;
-              facetCheckBox.id = face;
-              facetCheckBox.checked = checked;
+                DOMquery.facets.push(facetCheckBox);
 
-              DOMquery.facets.push(facetCheckBox);
+                const facetLabel = document.createElement("label");
+                facetLabel.for = face;
+                facetLabel.innerText = face;
 
-              const facetLabel = document.createElement("label");
-              facetLabel.for = face;
-              facetLabel.innerText = face;
+                facetContainer.append(facetCheckBox, facetLabel);
 
-              facetContainer.append(facetCheckBox, facetLabel);
-
-              facetBox.append(facetContainer);
+                facetBox.append(facetContainer);
+              }
             }
           }
         }

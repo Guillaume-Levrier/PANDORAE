@@ -42,9 +42,21 @@ const readUserIDfile = () =>
     (err, data) => JSON.parse(data)
   );
 
-const getUserDetails = (event) => {
-  const user = JSON.parse(readUserIDfile(userDataPath));
-  event.sender.send("getUserDetails", user);
+const getUserDetails = (event) =>
+  event.sender.send("getUserDetails", currentUser);
+// const user = JSON.parse(readUserIDfile(userDataPath));
+
+//};
+
+const checkLocalService = (service) => {
+  const location = service.serviceConfig.url.split(":");
+  dns.lookupService(location[0], location[1], (err, hostname, s) => {
+    if (hostname || s) {
+      service.valid = true;
+    } else {
+      service.valid = false;
+    }
+  });
 };
 
 const getUserStatus = (req) => {
@@ -53,23 +65,47 @@ const getUserStatus = (req) => {
 
     currentUser = data;
 
-    if (currentUser.hasOwnProperty("localServices")) {
+    var block = 0;
 
-      currentUser.localServices.forEach(d => {
-     
-        const location = d.serviceConfig.url.split(":");
-        dns.lookupService(
-          location[0],
-          location[1],
-          (err, hostname, service) => {
-            if (hostname || service) {
-              d.valid = true;
-            } else {
-              d.valid = false;
-            }
-          }
-        );
-         });
+    if (currentUser.hasOwnProperty("localServices")) {
+      currentUser.localServices.forEach((service) => {
+        switch (service.serviceType) {
+          case "LocalNetworkConfig":
+            block++;
+
+            fetch(service.serviceConfig.url)
+              .then((r) => r.json())
+              .then((config) => {
+                config.forEach((localAdminService) => {
+                  checkLocalService(localAdminService);
+
+                  currentUser.localServices.push(localAdminService);
+                });
+                block--;
+
+                if (block === 0) {
+                  //purge config files
+
+                  const localServices = [];
+
+                  currentUser.localServices.forEach((s) => {
+                    if (s.serviceType != "LocalNetworkConfig") {
+                      localServices.push(s);
+                    }
+                  });
+
+                  currentUser.localServices = localServices;
+
+                  mainWindow.webContents.send("userStatus", currentUser);
+                }
+              });
+            break;
+
+          default:
+            checkLocalService(service);
+            break;
+        }
+      });
     }
 
     // Making this systematic is too heavy on the user
@@ -77,8 +113,9 @@ const getUserStatus = (req) => {
     //  if (currentUser.UserName.length > 0) {
     //    getPPSData();
     //  }
-
-    mainWindow.webContents.send("userStatus", currentUser);
+    if (block === 0) {
+      mainWindow.webContents.send("userStatus", currentUser);
+    }
   }
 };
 
