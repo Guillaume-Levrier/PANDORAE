@@ -10,6 +10,18 @@ const solrMetaExplorer = (data) => {
 
   console.log(data);
 
+  var banlist = [];
+
+  if (data.hasOwnProperty("banlist")) {
+    Object.values(data.banlist).forEach(
+      (banArray) => (banlist = [...banlist, ...banArray])
+    );
+  }
+
+  banlist = new Set(banlist);
+
+  console.log(banlist);
+
   //req, meta, dateFrom, dateTo, targetCollections
 
   const url = (req, start, end) =>
@@ -82,8 +94,18 @@ const solrMetaExplorer = (data) => {
 
         if (count === urlArray.length) {
           totalResponse.forEach(
-            (d) => (d.solrCollection = data.query.selectedCollection)
+            (doc) => (doc.solrCollection = data.query.selectedCollection)
           );
+
+          if (banlist.size > 0) {
+            totalResponse.forEach((doc) => {
+              const links = [];
+              doc.links.forEach((link) => {
+                if (!banlist.has(link)) links.push(link);
+              });
+              doc.links = links;
+            });
+          }
 
           const date = genDate();
 
@@ -95,15 +117,15 @@ const solrMetaExplorer = (data) => {
             data: totalResponse,
           };
 
-          /*
+          console.log(dataset);
+
           dataWriter("flux", dataset);
 
           window.electron.send("chaeros-notification", `Data retrieved`);
 
           setTimeout(() => {
-            window.electron.send("win-destroy", winId);
+            window.electron.send("win-destroy", true);
           }, 1000);
-        */
         }
       });
   });

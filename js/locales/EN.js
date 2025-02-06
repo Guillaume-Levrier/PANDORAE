@@ -89,8 +89,8 @@ const EN = {
             type: "APIquery",
             data: {
               helper: {
-                text: `Crafting API queries is hard. It is recommended to use the form available on AILabs, which helps you craft your query and preview results. Click on this box to open the AILabs page..`,
-                url: "http://ailabs.bnf.fr/all-ftform-advanced",
+                text: `Crafting API queries is hard. It is recommended to build and test requests using the search engine form if there is one.`,
+                url: "",
               },
               target: "bnf-solr",
               key: "bnf-solr",
@@ -244,7 +244,7 @@ Start by entering a Hyphe API endpoint, then select a corpus. Click Load to dire
             type: "personalInformation",
             data: { id: "UserMail", name: "Email" },
           },
-         /* {
+          /* {
             type: "addServiceCredentials",
             data: {
               name: "zotero",
@@ -272,7 +272,7 @@ Start by entering a Hyphe API endpoint, then select a corpus. Click Load to dire
             data: {
               id: "API retrieved",
               table: "flux",
-              source: ["istex", "gallica", "regards citoyens","web archive"],
+              source: ["istex", "gallica", "regards citoyens", "web archive"],
             },
           },
           {
@@ -280,7 +280,7 @@ Start by entering a Hyphe API endpoint, then select a corpus. Click Load to dire
             data: {
               id: "Standard",
               table: "standard",
-              source: ["istex", "gallica", "regards citoyens","web archive"],
+              source: ["istex", "gallica", "regards citoyens", "web archive"],
             },
           },
         ],
@@ -301,7 +301,7 @@ Start by entering a Hyphe API endpoint, then select a corpus. Click Load to dire
             data: {
               id: "CSL-JSON standardized",
               table: "standard",
-              source: ["istex", "regards citoyens","web archive"],
+              source: ["istex", "regards citoyens", "web archive"],
             },
           },
           {
@@ -341,17 +341,16 @@ Start by entering a Hyphe API endpoint, then select a corpus. Click Load to dire
       "Web Archive": {
         titre: "Web Archive",
         description: `Web archiving is the process of collecting portions of the World Wide Web, preserving the collections in an archival format, and then serving the archives for access and use. The fields below help PANDORAE connect to web archive repositories for you to build and explore corpuses.`,
-        fields: ["account name","url", "type", "arkViewer"],
+        fields: ["account name", "url", "type", "arkViewer"],
       },
-      "zotero": {
+      zotero: {
         titre: "Zotero",
-         description: `PANDORAE helps you retrieve and explore data. To help you manually curate and edit it, the software is built to be interfaced with the Zotero software-cum-database service. You are expected to export the data you retrieve with PANDORAE to one or more Zotero group(s) you have write access to, and import data back from there to start exploring.`,
-              helper: {
-                text: `The process of creating Zotero groups and interfacing these with PANDORAE is detailed on <strong>pandorae.politique.science</strong>, the software's community help forum. Click on this box to open the relevant page in your browser.`,
-                url: "https://pandorae.politique.science",
-              },
-              fields: ["account name","library", "apikey"],
-             
+        description: `PANDORAE helps you retrieve and explore data. To help you manually curate and edit it, the software is built to be interfaced with the Zotero software-cum-database service. You are expected to export the data you retrieve with PANDORAE to one or more Zotero group(s) you have write access to, and import data back from there to start exploring.`,
+        helper: {
+          text: `The process of creating Zotero groups and interfacing these with PANDORAE is detailed on <strong>pandorae.politique.science</strong>, the software's community help forum. Click on this box to open the relevant page in your browser.`,
+          url: "https://pandorae.politique.science",
+        },
+        fields: ["account name", "library", "apikey"],
       },
     },
     field: {},

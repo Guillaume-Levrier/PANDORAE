@@ -271,6 +271,8 @@ const queryBnFSolr = (args) => {
         // give the opportunity to add banlists to the full request
         if (args.config.hasOwnProperty("banlists")) {
           const banListCheckDiv = document.createElement("div");
+          banListCheckDiv.innerHTML =
+            "Select a premade list of URLs to remove from found links:";
           banListCheckDiv.style.padding = "1rem";
 
           for (const banName in args.config.banlists) {
@@ -449,7 +451,7 @@ const buildBnFsolrArguments = (config, data, sectionDiv) => {
 
 const getFacets = (config, service, coreSource, optionsDiv, DOMquery) =>
   fetch(
-    `http://${service.url}/solr/${coreSource}/select?q=*&rows=0&facet=on&facet.field=collections`
+    `http://${service.url}/solr/${coreSource}/select?facet=on&facet.field=collections`
   )
     .then((facet) => facet.json())
     .then((facets) => {
