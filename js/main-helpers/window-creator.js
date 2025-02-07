@@ -14,6 +14,8 @@ var windowIds = {
   index: { id: 0, open: false },
 };
 
+const openWindowDevTools = 0;
+
 let mainWindow;
 
 const createMainWindow = () => {
@@ -41,7 +43,7 @@ const createMainWindow = () => {
 
   mainWindow.setMenu(null);
 
-  // mainWindow.webContents.openDevTools();
+  if (openWindowDevTools) mainWindow.webContents.openDevTools();
 
   mainWindow.on("closed", () => (mainWindow = null));
 
@@ -90,7 +92,7 @@ const createAudioManager = () => {
 
   audioManager.loadFile("html/audioManager.html");
   audioManager.webContents.on("did-finish-load", function () {
-    // audioManager.webContents.openDevTools();
+    if (openWindowDevTools) audioManager.webContents.openDevTools();
   });
   ipcMain.on("audio-channel", (event, audio) => {
     audioManager.webContents.send("audio-channel", audio);
@@ -130,7 +132,7 @@ const openModal = (modalFile, scrollTo) => {
         setTimeout(() => win.webContents.send("scroll-to", scrollTo), 1000);
       }
     });
-    //  win.webContents.openDevTools();
+    if (openWindowDevTools) win.webContents.openDevTools();
   }
 };
 var fluxWindow;
@@ -162,7 +164,7 @@ const openFlux = () => {
     windowIds["flux"].open = true;
   });
 
-  fluxWindow.webContents.openDevTools();
+  if (openWindowDevTools) fluxWindow.webContents.openDevTools();
 };
 const biorXivScraper = (model, address, chaerosWinId) => {
   let biorXivWindow = new BrowserWindow({
@@ -185,7 +187,7 @@ const biorXivScraper = (model, address, chaerosWinId) => {
       biorXivWindow.webContents.send("chaeros-id", chaerosWinId);
     }
 
-    //  biorXivWindow.webContents.openDevTools();
+    if (openWindowDevTools) biorXivWindow.webContents.openDevTools();
   });
 };
 
@@ -207,7 +209,7 @@ const chaerosCalculator = (powerValveAction) => {
 
   chaerosWindow.webContents.on("did-finish-load", function () {
     chaerosWindow.webContents.send("id", chaerosWindow.id);
-    chaerosWindow.webContents.openDevTools();
+    if (openWindowDevTools) chaerosWindow.webContents.openDevTools();
     chaerosWindow.webContents.send("chaerosCompute", powerValveAction);
   });
 };
@@ -293,7 +295,7 @@ const createDatabaseManager = () => {
 
   databaseManagerWindow.webContents.on("did-finish-load", function () {
     databaseManagerWindow.webContents.send("id", databaseManagerWindow.id);
-    databaseManagerWindow.webContents.openDevTools();
+    if (openWindowDevTools) databaseManagerWindow.webContents.openDevTools();
   });
 };
 

@@ -8,8 +8,6 @@ const solrMetaExplorer = (data) => {
     minTime: 1500,
   });
 
-  console.log(data);
-
   var banlist = [];
 
   if (data.hasOwnProperty("banlist")) {
@@ -19,8 +17,6 @@ const solrMetaExplorer = (data) => {
   }
 
   banlist = new Set(banlist);
-
-  console.log(banlist);
 
   //req, meta, dateFrom, dateTo, targetCollections
 
@@ -116,8 +112,6 @@ const solrMetaExplorer = (data) => {
             name: data.query.query,
             data: totalResponse,
           };
-
-          console.log(dataset);
 
           dataWriter("flux", dataset);
 
