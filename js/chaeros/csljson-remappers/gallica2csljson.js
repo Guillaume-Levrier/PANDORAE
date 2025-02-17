@@ -1,3 +1,16 @@
+/*
+Correspondance between Gallica Dublin Core & Zotero documents types:
+- audio : audioRecording
+- cartes : map
+- manuscrit : manuscript
+- monographies : book
+- images : artwork
+- objets : artwork
+- partitions : document
+- periodiques : newspaperArticle
+- videos : videoRecording
+*/
+
 const dublinCore2csljson = (item) => {
   //article.creators.push({ creatorType: "author", firstName, lastName });
 
