@@ -9,6 +9,14 @@ module.exports = {
   rebuildConfig: {},
   makers: [
     {
+      name: "@electron-forge/maker-dmg",
+      platforms: ["darwin"],
+      config: {
+        background: "./assets/dmg-background.png",
+        format: "ULFO",
+      },
+    },
+    {
       name: "@electron-forge/maker-squirrel",
       config: {},
     },
