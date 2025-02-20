@@ -5,8 +5,6 @@
 import { CM } from "../locales/locales";
 import { displayCorpusList } from "./dataset/corpus-display";
 
-import { checkKey, getPassword, userData } from "./userdata";
-
 const zoteroCollectionRetriever = (options) => {
   // Get the config file with the library IDs and API key
 
@@ -85,8 +83,6 @@ const zoteroCollectionRetriever = (options) => {
 const zoteroLocalRetriever = () => {
   window.electron.send("console-logs", "Retrieving local Zotero collections."); // Log collection request
 
-  let zoteroApiKey = getPassword("Zotero", zoteroUser);
-
   // URL Building blocks
   let rootUrl = "http://127.0.0.1:23119/";
 
@@ -135,8 +131,6 @@ const zoteroLocalRetriever = () => {
       document.getElementById("zoteroImportName").style.display = "inline-flex";
       document.getElementById("zoteroImportInstruction").style.display =
         "inline-flex";
-
-      checkKey("zoteroAPIValidation", true);
     })
     .catch((err) => {
       console.log(err);

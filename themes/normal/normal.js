@@ -454,7 +454,7 @@ void main()
       height,
       THREE.RGBAFormat,
       THREE.FloatType,
-      THREE.DEFAULT_MAPPING,
+      THREE.UVMapping,
       THREE.RepeatWrapping,
       THREE.RepeatWrapping
     );
@@ -469,7 +469,7 @@ void main()
       height,
       THREE.RGBAFormat,
       THREE.FloatType,
-      THREE.DEFAULT_MAPPING,
+      THREE.UVMapping,
       THREE.RepeatWrapping,
       THREE.RepeatWrapping
     );

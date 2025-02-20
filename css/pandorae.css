@@ -1112,7 +1112,7 @@ z-index: 20;
 
 /*Dev issue*/
 #webpack-dev-server-client-overlay{
-display: none;
+/* display: none; */
 }
 
 

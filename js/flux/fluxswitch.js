@@ -7,18 +7,13 @@ import { checkPPS, forceUpdatePPS } from "./sources/PPS/pps";
 import { biorxivBasicRetriever } from "./sources/scientometrics/biorxiv";
 
 import { wosBasicRetriever } from "./sources/scientometrics/wos";
-import { changeUserID, checkKey, updateUserData } from "./userdata";
+import { changeUserID, updateUserData } from "./userdata";
 
 import { refreshFluxWindow } from "./window";
 import { gallicaBasicRetriever } from "./sources/IIIF/gallica";
 import { dimensionsUpload } from "./sources/scientometrics/dimensions";
 import { nosDeputesBasic } from "./sources/parlements/regardscitoyens";
 import { hypheCheck } from "./sources/hyphe/hyphe-flux";
-import {
-  datasetDisplay,
-  downloadData,
-  localUpload,
-} from "./dataset/dataset-details";
 import { powerValve } from "./powervalve";
 import { clinicTrialBasicRetriever } from "./sources/clinicaltrials/clinicaltrials";
 import { istexBasicRetriever } from "./sources/scientometrics/istex";
@@ -56,15 +51,11 @@ const fluxFunctions = {
   // Service management
   //
   addLocalService,
-  checkKey,
   generateLocalServiceConfig,
   // ==================
   // Data management
   //
-  datasetDisplay,
-  localUpload,
   zoteroCollectionRetriever,
-  downloadData,
   // ==================
   // Basic API Probes
   //

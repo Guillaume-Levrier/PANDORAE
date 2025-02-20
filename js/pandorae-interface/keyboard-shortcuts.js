@@ -12,50 +12,57 @@ const setkeylock = (n) => (keylock = n);
 field.addEventListener("focusin", () => (keylock = 1));
 field.addEventListener("focusout", () => (keylock = 0));
 
+var timer = 1;
+
 const keyShortCuts = (event) => {
   if (!keylock) {
-    switch (event.isComposing || event.code) {
-      case "Digit1":
-        if (coreExists) {
-          toggleMenu();
-        }
-        break;
+    if (timer) {
+      timer = 0;
+      setTimeout(() => (timer = 1), 200);
 
-      case "Digit2":
-        if (coreExists) {
-          toggleFlux();
-          toggleMenu();
-        }
-        break;
-
-      case "Digit3":
-        if (coreExists) {
-          if (toggledMenu === false) {
+      switch (event.isComposing || event.code) {
+        case "Digit1":
+          if (coreExists) {
             toggleMenu();
           }
-        }
-        categoryLoader("type");
-        break;
+          break;
 
-      case "IntlBackslash":
-      case "Backquote":
-        location.reload();
-
-        break;
-
-      case "Digit4":
-        toggleConsole();
-        break;
-
-      case "Digit5":
-        if (xtypeExists) {
-          if (toggledMenu === false) {
+        case "Digit2":
+          if (coreExists) {
+            toggleFlux();
             toggleMenu();
           }
-          categoryLoader("export");
-        }
+          break;
 
-        break;
+        case "Digit3":
+          if (coreExists) {
+            if (toggledMenu === false) {
+              toggleMenu();
+            }
+          }
+          categoryLoader("type");
+          break;
+
+        case "IntlBackslash":
+        case "Backquote":
+          location.reload();
+
+          break;
+
+        case "Digit4":
+          toggleConsole();
+          break;
+
+        case "Digit5":
+          if (xtypeExists) {
+            if (toggledMenu === false) {
+              toggleMenu();
+            }
+            categoryLoader("export");
+          }
+
+          break;
+      }
     }
   }
 };

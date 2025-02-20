@@ -30,6 +30,7 @@ const toggleMenu = () => {
       toggleSecondaryMenu();
       toggleMenu();
     } else {
+      if (toggledSecondaryMenu) toggleSecondaryMenu();
       menu.style.left = "-150px";
       iconDiv.style.left = "25px";
       consoleDiv.style.left = "0px";
@@ -70,7 +71,7 @@ const toggleSecondaryMenu = () => {
 
     xtype.style.left = "150px";
     toggledSecondaryMenu = false;
-  } else {
+  } else if (toggleMenu) {
     document.getElementById("secmenu").style.left = "150px";
     consoleDiv.style.left = "300px";
     iconDiv.style.left = "325px";
