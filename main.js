@@ -3,8 +3,10 @@ const electron = require("electron");
 const { app, ipcMain } = electron;
 const { startRoutine } = require("./js/main-helpers/filesystem-main");
 const { mainWindow } = require("./js/main-helpers/window-creator");
-const { availableServicesLookup } = require("./js/main-helpers/network-main");
 const { writeLogFlatFile } = require("./js/main-helpers/console-main");
+const {
+  availableServicesLookup,
+} = require("./js/main-helpers/services/distant-services");
 
 // ====== BASIC APP BEHAVIOR =======
 

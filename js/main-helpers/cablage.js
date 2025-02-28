@@ -14,11 +14,9 @@ import {
   savePNG,
   saveSVG,
 } from "./filesystem-main";
-import {
-  addLocalService,
-  getAvailableServices,
-  removeLocalService,
-} from "./network-main";
+import { getAvailableServices } from "./network-main";
+import { addLocalService, removeLocalService } from "./services/local-services";
+
 import { manageTheme } from "./theme-main";
 import {
   getUserDetails,

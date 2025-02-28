@@ -1,14 +1,12 @@
-import { fluxWindow, mainWindow } from "./window-creator";
+import { checkConfiguredLocalServices } from "./services/local-services";
 
 const fs = require("fs");
-const dns = require("dns");
+
 const electron = require("electron");
 const { app } = electron;
 const userDataPath = app.getPath("userData");
 
-var currentUser = {
-  localServices: [],
-};
+var currentUser;
 
 const setCurrentUser = (key, value) => (currentUser[key] = value);
 
@@ -18,7 +16,7 @@ const createUserId = (userDataPath) => {
     UserMail: "",
     theme: "vega",
     locale: "EN",
-    distantServices: {},
+    distantServices: [],
     localServices: [],
   };
 
@@ -50,78 +48,10 @@ const getUserDetails = (event) =>
 
 //};
 
-const checkLocalService = (service) => {
-  const location = service.serviceConfig.url.split(":");
-  dns.lookupService(location[0], location[1], (err, hostname, s) => {
-    if (hostname || s) {
-      service.valid = true;
-    } else {
-      service.valid = false;
-    }
-  });
-};
-
 const getUserStatus = (req) => {
   if (req) {
-    const data = JSON.parse(readUserIDfile(userDataPath));
-
-    currentUser = data;
-
-    var block = 0;
-
-    if (currentUser.hasOwnProperty("localServices")) {
-      console.log(1);
-      console.log(currentUser.localServices);
-      currentUser.localServices.forEach((service) => {
-        switch (service.serviceType) {
-          case "LocalNetworkConfig":
-            block++;
-
-            fetch(service.serviceConfig.url)
-              .then((r) => r.json())
-              .then((config) => {
-                config.forEach((localAdminService) => {
-                  checkLocalService(localAdminService);
-
-                  currentUser.localServices.push(localAdminService);
-                });
-                block--;
-
-                if (block === 0) {
-                  //purge config files
-
-                  const localServices = [];
-                  if (currentUser.hasOwnProperty("localServices")) {
-                    console.log(2);
-                    console.log(currentUser.localServices);
-                    currentUser.localServices.forEach((s) => {
-                      if (s.serviceType != "LocalNetworkConfig") {
-                        localServices.push(s);
-                      }
-                    });
-                  }
-
-                  currentUser.localServices = localServices;
-                  mainWindow.webContents.send("userStatus", currentUser);
-                }
-              });
-            break;
-
-          default:
-            checkLocalService(service);
-            break;
-        }
-      });
-    }
-
-    // Making this systematic is too heavy on the user
-    // we need to find a better way
-    //  if (currentUser.UserName.length > 0) {
-    //    getPPSData();
-    //  }
-    if (block === 0) {
-      mainWindow.webContents.send("userStatus", currentUser);
-    }
+    currentUser = JSON.parse(readUserIDfile());
+    checkConfiguredLocalServices(currentUser);
   }
 };
 

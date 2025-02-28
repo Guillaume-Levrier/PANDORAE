@@ -14,7 +14,7 @@ var windowIds = {
   index: { id: 0, open: false },
 };
 
-const openWindowDevTools = 0;
+const openWindowDevTools = 1;
 
 let mainWindow;
 
