@@ -1,12 +1,12 @@
-const { FusesPlugin } = require("@electron-forge/plugin-fuses");
-const { FuseV1Options, FuseVersion } = require("@electron/fuses");
-
 module.exports = {
   packagerConfig: {
+    name: "PANDORÆ",
     asar: true,
-    icon: "/icons",
+    icon: "icons/PANDORAE",
   },
-  rebuildConfig: {},
+  rebuildConfig: {
+    force: true,
+  },
   makers: [
     {
       name: "@electron-forge/maker-dmg",
@@ -23,6 +23,7 @@ module.exports = {
     {
       name: "@electron-forge/maker-zip",
       platforms: ["darwin", "linux"],
+      config: { icon: "/icons/PANDORAE" },
     },
     {
       name: "@electron-forge/maker-deb",

@@ -19,7 +19,7 @@ const saveUserConfigs = (tabData, sectionData, tab) => {
 
   // reset user service config
   user.distantServices = {};
-  user.localServices = {};
+  user.localServices = [];
 
   const updateFields = () => {
     // credentials
@@ -165,27 +165,29 @@ const addFieldButton = (
 };
 
 const addServiceCredentials = (tabData, sectionData, tab) => {
-  const serviceContainer = document.createElement("div");  // the div for that service
+  const serviceContainer = document.createElement("div"); // the div for that service
   serviceContainer.style = "padding:0.5rem";
 
-  const title = document.createElement("div");   // The title of that service (type + account name)
+  const title = document.createElement("div"); // The title of that service (type + account name)
   title.innerText = sectionData.name;
   title.style = "font-size:14px; text-transform: capitalize;";
 
   serviceContainer.append(title);
 
-  const descHelp=document.createElement("div");  // A div with a toggleable help
-  descHelp.style.display="none";
+  const descHelp = document.createElement("div"); // A div with a toggleable help
+  descHelp.style.display = "none";
 
-  if (sectionData.description.length > 0) {  // if there is a description, add it
+  if (sectionData.description.length > 0) {
+    // if there is a description, add it
     const description = document.createElement("div");
     description.innerHTML = sectionData.description;
     description.style = "text-align:justify;padding:1rem;";
     descHelp.append(description);
   }
-  
-  if (sectionData.helper) {   // if there is a helper, add it too
-    
+
+  if (sectionData.helper) {
+    // if there is a helper, add it too
+
     const helper = document.createElement("div");
     helper.innerHTML = sectionData.helper.text;
     helper.className = "helperBox";
@@ -195,32 +197,30 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
     descHelp.append(helper);
   }
 
-  if (descHelp.children.length>0) {   // if there is either description or helper, add the descHelp box
+  if (descHelp.children.length > 0) {
+    // if there is either description or helper, add the descHelp box
 
-  const toggleHelp = document.createElement("span") // the descHelp box appears when a ? button is clicked
-  toggleHelp.innerHTML=`<i style='cursor: pointer;font-size:1rem;padding-left:0.5rem;' class='material-icons'>help_outline</i>`
-  toggleHelp.addEventListener("click",()=> {
-    
-    switch (descHelp.style.display) {
-      case "block":
-        descHelp.style.display="none"
-        break;
+    const toggleHelp = document.createElement("span"); // the descHelp box appears when a ? button is clicked
+    toggleHelp.innerHTML = `<i style='cursor: pointer;font-size:1rem;padding-left:0.5rem;' class='material-icons'>help_outline</i>`;
+    toggleHelp.addEventListener("click", () => {
+      switch (descHelp.style.display) {
+        case "block":
+          descHelp.style.display = "none";
+          break;
 
-         case "none":
-        descHelp.style.display="block"
-        break;
-    
-      default:
-        break;
-    }
-    
-  } )
+        case "none":
+          descHelp.style.display = "block";
+          break;
 
+        default:
+          break;
+      }
+    });
 
-  title.style = "font-size:14px; text-transform: capitalize;display:flex;";
-  title.append(toggleHelp)
-  serviceContainer.append(descHelp)
-  } 
+    title.style = "font-size:14px; text-transform: capitalize;display:flex;";
+    title.append(toggleHelp);
+    serviceContainer.append(descHelp);
+  }
 
   for (const service in sectionData.fields) {
     const value = sectionData.fields[service];

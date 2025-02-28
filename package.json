@@ -1,5 +1,5 @@
 {
-  "name": "pandorae",
+  "name": "PANDORÆ",
   "version": "2-beta",
   "description": "A document-centered research protocol",
   "license": "MIT",
@@ -112,9 +112,11 @@
         {
           "name": "@electron-forge/maker-zip",
           "platforms": [
-            "darwin",
-            "linux"
-          ]
+            "darwin"
+          ],
+          "config": {
+            "icon": "/icons/PANDORAE"
+          }
         }
       ]
     }

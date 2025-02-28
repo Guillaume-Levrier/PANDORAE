@@ -6,7 +6,9 @@ const electron = require("electron");
 const { app } = electron;
 const userDataPath = app.getPath("userData");
 
-var currentUser;
+var currentUser = {
+  localServices: [],
+};
 
 const setCurrentUser = (key, value) => (currentUser[key] = value);
 
@@ -17,7 +19,7 @@ const createUserId = (userDataPath) => {
     theme: "vega",
     locale: "EN",
     distantServices: {},
-    localServices: {},
+    localServices: [],
   };
 
   if (!fs.existsSync(userDataPath + "/PANDORAE-DATA/userID/user-id.json")) {
@@ -68,6 +70,8 @@ const getUserStatus = (req) => {
     var block = 0;
 
     if (currentUser.hasOwnProperty("localServices")) {
+      console.log(1);
+      console.log(currentUser.localServices);
       currentUser.localServices.forEach((service) => {
         switch (service.serviceType) {
           case "LocalNetworkConfig":
@@ -87,15 +91,17 @@ const getUserStatus = (req) => {
                   //purge config files
 
                   const localServices = [];
-
-                  currentUser.localServices.forEach((s) => {
-                    if (s.serviceType != "LocalNetworkConfig") {
-                      localServices.push(s);
-                    }
-                  });
+                  if (currentUser.hasOwnProperty("localServices")) {
+                    console.log(2);
+                    console.log(currentUser.localServices);
+                    currentUser.localServices.forEach((s) => {
+                      if (s.serviceType != "LocalNetworkConfig") {
+                        localServices.push(s);
+                      }
+                    });
+                  }
 
                   currentUser.localServices = localServices;
-
                   mainWindow.webContents.send("userStatus", currentUser);
                 }
               });
