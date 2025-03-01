@@ -1,5 +1,5 @@
 import { dnslist } from "./services/distant-services";
-import { currentUser, setCurrentUser } from "./user-main";
+import { currentUser } from "./user-main";
 
 async function getAvailableServices() {
   const dnsLocalServiceList = currentUser.localServices;

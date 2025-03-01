@@ -187,73 +187,80 @@ const webArchive = (datajson) => {
       var ghostNodeMap = {};
       var ghostLinksMap = {};
 
+      const field = document.getElementById("field");
+
       for (let i = 0; i < documents.length / divider; ++i) {
         const d = documents[i];
 
-        const pageCaptureHypertextLinks = d.note.links;
+        console.log(`Parsing document ${i + 1}/${documents.length / divider}`);
 
-        // these hypertext links the page capture is listed as having
+        field.value = `Parsing document ${i + 1}/${documents.length / divider}`;
 
-        if (pageCaptureHypertextLinks) {
-          // d.URL is the complete permalink, with the URL of the hosting service / the timestamp
-          // i.e. http://archivemachine.com/20090609015145/http://www.example.com/spip.php?document8683
+        if (d.hasOwnProperty("note")) {
+          const pageCaptureHypertextLinks = d.note.links;
 
-          // sourceURL is d.URL without the hosting service and the timestamp, built as an URL object
+          // these hypertext links the page capture is listed as having
 
-          try {
-            const sourceURL = new URL(
-              d.URL.substring(d.URL.lastIndexOf("http"))
-            );
+          if (pageCaptureHypertextLinks) {
+            // d.URL is the complete permalink, with the URL of the hosting service / the timestamp
+            // i.e. http://archivemachine.com/20090609015145/http://www.example.com/spip.php?document8683
 
-            // source is the href of the sourceURL object
-            // i.e. http://www.example.com/spip.php?document8683
-            const source = sourceURL.href;
+            // sourceURL is d.URL without the hosting service and the timestamp, built as an URL object
 
-            // source host is the website host
-            // i.e. www.example.com
-            const sourceHost = sourceURL.host; // || source.hostname;
+            try {
+              const sourceURL = new URL(
+                d.URL.substring(d.URL.lastIndexOf("http"))
+              );
 
-            if (nodemap.hasOwnProperty(source)) {
-              // For each hypertext link the document is listed as having, check:
-              // 1- if there is a direct link between pages at time of their latest capture (blue link)
-              // 2- if there is a link between this page and another page of the target domain, but which isn't in the corpus
+              // source is the href of the sourceURL object
+              // i.e. http://www.example.com/spip.php?document8683
+              const source = sourceURL.href;
 
-              pageCaptureHypertextLinks.forEach((target) => {
-                var host;
-                try {
-                  const thisURL = new URL(target);
-                  host = thisURL.host; //|| thisURL.hostname;
-                } catch (error) {
-                  console.log(error);
-                  window.electron.send(
-                    "console-logs",
-                    "webArchive error: url " + target + " is invalid."
-                  );
+              // source host is the website host
+              // i.e. www.example.com
+              const sourceHost = sourceURL.host; // || source.hostname;
 
-                  //This will allow skipping the next part
-                  host = "";
-                }
+              if (nodemap.hasOwnProperty(source)) {
+                // For each hypertext link the document is listed as having, check:
+                // 1- if there is a direct link between pages at time of their latest capture (blue link)
+                // 2- if there is a link between this page and another page of the target domain, but which isn't in the corpus
 
-                if (host.length > 2) {
-                  if (nodemap.hasOwnProperty(target)) {
-                    // link type 1 - blue
+                pageCaptureHypertextLinks.forEach((target) => {
+                  var host;
+                  try {
+                    const thisURL = new URL(target);
+                    host = thisURL.host; //|| thisURL.hostname;
+                  } catch (error) {
+                    console.log(error);
+                    window.electron.send(
+                      "console-logs",
+                      "webArchive error: url " + target + " is invalid."
+                    );
 
-                    linkData.push({
-                      source,
-                      target,
-                      color: "rgb(100,160,210)",
-                      weight: 0.5,
-                      type: "page2page",
-                    });
-                  } else if (
-                    domainMap.hasOwnProperty(host) &&
-                    host != sourceHost &&
-                    host.indexOf(sourceHost) === -1 &&
-                    sourceHost.indexOf(host) === -1
-                  ) {
-                    // link type 2 - orange
-                    //deactivated for testing
-                    /* linkData.push({
+                    //This will allow skipping the next part
+                    host = "";
+                  }
+
+                  if (host.length > 2) {
+                    if (nodemap.hasOwnProperty(target)) {
+                      // link type 1 - blue
+
+                      linkData.push({
+                        source,
+                        target,
+                        color: "rgb(100,160,210)",
+                        weight: 0.5,
+                        type: "page2page",
+                      });
+                    } else if (
+                      domainMap.hasOwnProperty(host) &&
+                      host != sourceHost &&
+                      host.indexOf(sourceHost) === -1 &&
+                      sourceHost.indexOf(host) === -1
+                    ) {
+                      // link type 2 - orange
+                      //deactivated for testing
+                      /* linkData.push({
                       source,
                       target: host,
                       color: "rgb(255,140,10)",
@@ -261,25 +268,29 @@ const webArchive = (datajson) => {
                       type: "pageNOTcorpus",
                     });
                      */
-                  } else {
-                    // this links to a page that wasn't captured, so add a ghost node+link;
-                    ghostNodeMap[target] = 1;
-                    ghostLinksMap[sourceURL + target] = {
-                      source,
-                      target,
-                      color: "rgb(150,150,150)",
-                      weight: 0.1,
-                      type: "ghost",
-                    };
+                    } else {
+                      // this links to a page that wasn't captured, so add a ghost node+link;
+                      ghostNodeMap[target] = 1;
+                      ghostLinksMap[sourceURL + target] = {
+                        source,
+                        target,
+                        color: "rgb(150,150,150)",
+                        weight: 0.1,
+                        type: "ghost",
+                      };
+                    }
                   }
-                }
-              });
+                });
+              }
+            } catch (error) {
+              console.log(error);
             }
-          } catch (error) {
-            console.log(error);
           }
         }
       }
+
+      console.log("document parsed");
+
       // add ghosts nodes
       Object.keys(ghostNodeMap).forEach((d) =>
         nodeData.push({
@@ -408,6 +419,8 @@ const webArchive = (datajson) => {
 
         const ghostMap = {};
 
+        console.log(41);
+
         nodeData.forEach((node) => {
           if (node.type === "ghost") {
             ghostMap[node.id] = node;
@@ -417,6 +430,8 @@ const webArchive = (datajson) => {
         const linkByTarget = {};
 
         // then, iterate on links and map them by target;
+
+        console.log(42);
 
         linkData.forEach((link) => {
           if (link.type === "ghost") {
@@ -434,6 +449,7 @@ const webArchive = (datajson) => {
         //store bridge links in an array
         const bridgeLinks = new Set();
 
+        console.log(43);
         for (const target in linkByTarget) {
           const linksArray = linkByTarget[target];
 
@@ -455,12 +471,12 @@ const webArchive = (datajson) => {
 
         // remove the multiples
         const linkMap = {};
-
+        console.log(44);
         bridgeLinks.forEach((d) => (linkMap[d.sourceHost + d.targetHost] = d));
 
         //now map by targets
         const targetMap = {};
-
+        console.log(45);
         Object.values(linkMap).forEach((target) => {
           if (!targetMap.hasOwnProperty(target.targetHost)) {
             targetMap[target.targetHost] = [];
@@ -470,7 +486,8 @@ const webArchive = (datajson) => {
 
         // now comes the tedious part
         // first, iterate over the map
-
+        console.log(46);
+        console.log(Object.keys(targetMap).length);
         for (const target in targetMap) {
           // make an array of hosts that belong to the same group
           const hosts = targetMap[target];
@@ -507,6 +524,7 @@ const webArchive = (datajson) => {
               }
             });
           }
+          console.log(47);
         }
       }
 
@@ -527,26 +545,32 @@ const webArchive = (datajson) => {
 
       function groupNodes() {
         // step one, group captures by domain.
+        console.log(1);
         groupCapturesByDomain();
 
         // step two, group ghosts by capture
         // and give them the domain name
+        console.log(2);
         groupGhostsByCapture();
 
         // now all nodes have group.
         // next step is to connect clusters that link to one another.
+        console.log(3);
         groupByCaptureToCaptureLinks();
 
         // last step is to connect the groups that link
         // to common ghosts
-
+        console.log(4);
         groupByGhostBridgeLinks();
 
         // solve domains
+        console.log(5);
         reattributeDomains();
       }
 
       groupNodes();
+
+      console.log("Clusters rebuilt");
 
       /// ============ END OF REBUILDING CLUSTERS
 
@@ -1395,12 +1419,14 @@ const webArchive = (datajson) => {
         }
       };
 
-      createLegend();
+      console.log("Create legend");
 
+      createLegend();
+      console.log("Load Type");
       loadType();
       displayDatasetBasicInfo(datajson);
       document.getElementById("tooltip").append(toolContent);
-
+      console.log("Create menu");
       webArchiveSelectionMenu();
     })
     .catch((error) => {

@@ -9,7 +9,7 @@
 // - add a new config for a local service
 //
 
-import { currentUser, setCurrentUser } from "../user-main";
+import { currentUser, setCurrentUser, writeUserIDfile } from "../user-main";
 import { mainWindow } from "../window-creator";
 const dns = require("dns");
 
