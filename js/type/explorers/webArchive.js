@@ -289,8 +289,6 @@ const webArchive = (datajson) => {
         }
       }
 
-      console.log("document parsed");
-
       // add ghosts nodes
       Object.keys(ghostNodeMap).forEach((d) =>
         nodeData.push({
@@ -419,8 +417,6 @@ const webArchive = (datajson) => {
 
         const ghostMap = {};
 
-        console.log(41);
-
         nodeData.forEach((node) => {
           if (node.type === "ghost") {
             ghostMap[node.id] = node;
@@ -430,8 +426,6 @@ const webArchive = (datajson) => {
         const linkByTarget = {};
 
         // then, iterate on links and map them by target;
-
-        console.log(42);
 
         linkData.forEach((link) => {
           if (link.type === "ghost") {
@@ -449,7 +443,6 @@ const webArchive = (datajson) => {
         //store bridge links in an array
         const bridgeLinks = new Set();
 
-        console.log(43);
         for (const target in linkByTarget) {
           const linksArray = linkByTarget[target];
 
@@ -471,12 +464,10 @@ const webArchive = (datajson) => {
 
         // remove the multiples
         const linkMap = {};
-        console.log(44);
         bridgeLinks.forEach((d) => (linkMap[d.sourceHost + d.targetHost] = d));
 
         //now map by targets
         const targetMap = {};
-        console.log(45);
         Object.values(linkMap).forEach((target) => {
           if (!targetMap.hasOwnProperty(target.targetHost)) {
             targetMap[target.targetHost] = [];
@@ -486,9 +477,17 @@ const webArchive = (datajson) => {
 
         // now comes the tedious part
         // first, iterate over the map
-        console.log(46);
-        console.log(Object.keys(targetMap).length);
+
+        const total = Object.keys(targetMap).length;
+        var count = 0;
+
         for (const target in targetMap) {
+          count++;
+
+          window.electron.send(
+            "chaeros-notification",
+            "Mapping ghosts " + count + "/" + total
+          );
           // make an array of hosts that belong to the same group
           const hosts = targetMap[target];
           hosts.push(target);
@@ -524,7 +523,6 @@ const webArchive = (datajson) => {
               }
             });
           }
-          console.log(47);
         }
       }
 
@@ -545,32 +543,25 @@ const webArchive = (datajson) => {
 
       function groupNodes() {
         // step one, group captures by domain.
-        console.log(1);
         groupCapturesByDomain();
 
         // step two, group ghosts by capture
         // and give them the domain name
-        console.log(2);
         groupGhostsByCapture();
 
         // now all nodes have group.
         // next step is to connect clusters that link to one another.
-        console.log(3);
         groupByCaptureToCaptureLinks();
 
         // last step is to connect the groups that link
         // to common ghosts
-        console.log(4);
         groupByGhostBridgeLinks();
 
         // solve domains
-        console.log(5);
         reattributeDomains();
       }
 
       groupNodes();
-
-      console.log("Clusters rebuilt");
 
       /// ============ END OF REBUILDING CLUSTERS
 
@@ -670,6 +661,25 @@ const webArchive = (datajson) => {
       var soloGhosts = new Set();
       var soloMap = {};
 
+      var allGhostsSet = new Set();
+
+      const toggleAllGhosts = (display) => {
+        node.style("display", (n) => {
+          if (n) {
+            if (allGhostsSet.has(n.id)) {
+              return display;
+            }
+          }
+        });
+        link.style("display", (l) => {
+          if (l) {
+            if (allGhostsSet.has(l.target.id)) {
+              return display;
+            }
+          }
+        });
+      };
+
       const toggleSoloGhosts = (display) => {
         node.style("display", (n) => {
           if (n) {
@@ -708,6 +718,7 @@ const webArchive = (datajson) => {
         });
 
         for (const id in soloMap) {
+          allGhostsSet.add(id);
           if (soloMap[id] < 2) {
             soloGhosts.add(id);
           }
@@ -762,7 +773,31 @@ const webArchive = (datajson) => {
           clusterMeta.append(host);
         });
 
-        // add ghost tickbox
+        // add solo ghost tickbox
+
+        const soloGhostBox = document.createElement("div");
+        const soloGhostTick = document.createElement("input");
+        soloGhostTick.type = "checkbox";
+        soloGhostTick.checked = true;
+        soloGhostTick.id = "ghostTick";
+        soloGhostTick.name = "ghostTick";
+
+        const soloGhostLabel = document.createElement("label");
+        soloGhostLabel.for = "ghostTick";
+        soloGhostLabel.innerText = "Hide solo ghosts";
+        soloGhostBox.style.padding = "0.5rem";
+
+        soloGhostTick.addEventListener("click", () => {
+          if (soloGhostTick.checked) {
+            toggleSoloGhosts("none");
+          } else {
+            toggleSoloGhosts("block");
+          }
+        });
+
+        soloGhostBox.append(soloGhostTick, soloGhostLabel);
+
+        // add total ghost tickbox
 
         const ghostBox = document.createElement("div");
         const ghostTick = document.createElement("input");
@@ -770,23 +805,26 @@ const webArchive = (datajson) => {
         ghostTick.checked = true;
         ghostTick.id = "ghostTick";
         ghostTick.name = "ghostTick";
+
         const ghostLabel = document.createElement("label");
         ghostLabel.for = "ghostTick";
-        ghostLabel.innerText = "Hide solo ghosts";
+        ghostLabel.innerText = "Hide all ghosts";
         ghostBox.style.padding = "0.5rem";
 
         ghostTick.addEventListener("click", () => {
           if (ghostTick.checked) {
-            toggleSoloGhosts("none");
+            toggleAllGhosts("none");
           } else {
-            toggleSoloGhosts("block");
+            toggleAllGhosts("block");
           }
         });
 
         ghostBox.append(ghostTick, ghostLabel);
-        clusterMeta.append(ghostBox, archiveLocSelect);
+
+        clusterMeta.append(soloGhostBox, ghostBox, archiveLocSelect);
 
         toggleSoloGhosts("none");
+        toggleAllGhosts("none");
       };
 
       const webArchiveSelectionMenu = () => {
@@ -810,6 +848,7 @@ const webArchive = (datajson) => {
         node.style("display", "block");
 
         toggleSoloGhosts("none");
+        toggleAllGhosts("none");
 
         nodeGroupArray.forEach((group, i) => {
           // radio selection
@@ -1419,14 +1458,10 @@ const webArchive = (datajson) => {
         }
       };
 
-      console.log("Create legend");
-
       createLegend();
-      console.log("Load Type");
       loadType();
       displayDatasetBasicInfo(datajson);
       document.getElementById("tooltip").append(toolContent);
-      console.log("Create menu");
       webArchiveSelectionMenu();
     })
     .catch((error) => {
