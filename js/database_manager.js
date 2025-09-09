@@ -45,6 +45,8 @@ pandoraeDatabase.version(1).stores({
 
 pandoraeDatabase.open();
 
+console.log(pandoraeDatabase);
+
 // the add operation is a PUT operation, which enables replacing a dataset with the same ID.
 const addDataset = (parameters) =>
   pandoraeDatabase[parameters.table].put(parameters.dataset);

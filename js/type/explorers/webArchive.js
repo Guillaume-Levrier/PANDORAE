@@ -54,7 +54,7 @@ const webArchive = (datajson) => {
       const archiveLocSelect = document.createElement("select");
       archiveLocSelect.style.margin = "0.5rem";
       archiveLocSelect.addEventListener("change", () => {
-        resolver = archiveLocations[archiveLocSelect.value].url;
+        resolver = archiveLocations[archiveLocSelect.value].host;
         arkViewer = archiveLocations[archiveLocSelect.value].arkViewer;
       });
 
@@ -74,7 +74,7 @@ const webArchive = (datajson) => {
           archiveLocSelect.append(option);
 
           if (i === 0) {
-            resolver = config.url;
+            resolver = config.host;
             arkViewer = config.arkViewer;
           }
         }
