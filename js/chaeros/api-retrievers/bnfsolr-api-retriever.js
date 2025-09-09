@@ -22,7 +22,7 @@ const solrMetaExplorer = (data) => {
 
   const url = (req, start, end) =>
     "http://" +
-    data.query.url +
+    data.query.host +
     "/solr/" +
     data.query.selectedCollection +
     "/" +

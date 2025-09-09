@@ -77,7 +77,8 @@ const getDatasetList = (parameters) =>
         reply_type: "datasetList",
         parameters,
       });
-    });
+    })
+    .catch((e) => console.log(e));
 
 const getTypeDatasets = (parameters) => {
   pandoraeDatabase.type.toArray().then((r) =>

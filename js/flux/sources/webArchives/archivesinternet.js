@@ -176,7 +176,7 @@ const queryBnFSolr = (args) => {
 
       query =
         "http://" +
-        DOMquery.service.url +
+        DOMquery.service.host +
         "/solr/" +
         selectedCollection +
         "/select?facet.field=crawl_year&facet=on" +
@@ -223,7 +223,7 @@ const queryBnFSolr = (args) => {
         query: args.query,
         dateFrom,
         dateTo,
-        url: DOMquery.service.url,
+        host: DOMquery.service.host,
         countByCollection: parseSolrFacetFields(byCollection.collections),
       };
 
@@ -252,9 +252,6 @@ const queryBnFSolr = (args) => {
         });
 
         args.resultDiv.append(yearChart, collectionChart, domainDiv);
-
-        console.log("----- last args ----");
-        console.log(args);
 
         // powervalve sends the instructons for the Chaeros (/headless) context
         // to execute
@@ -382,95 +379,107 @@ const buildBnFsolrArguments = (config, data, sectionDiv) => {
   solrCont.style.display = "none";
   solrCont.className = "fluxTabs";
 
-  console.log(service);
-
   const sourceRequest = `http://${service.url}/solr/admin/collections?action=LIST&wt=json`;
 
   // The answer is in the array at r.collections;
 
   var coreSource;
 
+  /*
+  This double lock is disabled if the host system is unable to cope with it.
+  If your system can handle it, do re-activate it.
+
   fetch(sourceRequest)
     .then((r) => r.json())
     .then((r) => {
-      optionsDiv.innerHTML += "Available sources<br>";
-      coreSource = r.collections[0];
+      */
+  optionsDiv.innerHTML += "Available sources<br>";
+  coreSource = config.solrCollections[0];
 
-      DOMquery.collections = [];
+  DOMquery.collections = [];
 
-      const fieldset = document.createElement("fieldset");
-      fieldset.style = "border:0px;outline:0px";
+  const fieldset = document.createElement("fieldset");
+  fieldset.style = "border:0px;outline:0px";
 
-      var solrSet = 0;
+  var solrSet = 0;
 
-      if (config.hasOwnProperty("solrCollections")) {
-        solrSet = new Set(config.solrCollections);
-      }
+  if (config.hasOwnProperty("solrCollections")) {
+    solrSet = new Set(config.solrCollections);
+  }
 
-      optionsDiv.append(fieldset);
+  optionsDiv.append(fieldset);
 
-      for (let i = 0; i < r.collections.length; i++) {
-        const col = r.collections[i];
+  for (let i = 0; i < config.solrCollections.length; i++) {
+    const col = config.solrCollections[i];
 
-        if (solrSet ? solrSet.has(col) : true) {
-          const collectionContainer = document.createElement("div");
+    //if (solrSet ? solrSet.has(col) : true) {
+    const collectionContainer = document.createElement("div");
 
-          const collectionRadio = document.createElement("input");
-          collectionRadio.type = "radio";
-          collectionRadio.name = `bnf-solr-radio-${config["account name"]}`;
-          collectionRadio.id = col;
-          collectionRadio.value = col;
+    const collectionRadio = document.createElement("input");
+    collectionRadio.type = "radio";
+    collectionRadio.name = `bnf-solr-radio-${config["account name"]}`;
+    collectionRadio.id = col;
+    collectionRadio.value = col;
 
-          collectionRadio.addEventListener("change", (e) => {
-            e.preventDefault();
+    collectionRadio.addEventListener("change", (e) => {
+      e.preventDefault();
 
-            getFacets(config, service, col, optionsDiv, DOMquery);
-          });
-
-          if (!i) {
-            collectionRadio.setAttribute("checked", true);
-
-            try {
-              getFacets(config, service, coreSource, optionsDiv, DOMquery);
-            } catch (error) {}
-          }
-
-          DOMquery.collections.push(collectionRadio);
-
-          const collectionLabel = document.createElement("label");
-          collectionLabel.for = col;
-          collectionLabel.innerText = col;
-          collectionContainer.append(collectionRadio, collectionLabel);
-
-          fieldset.append(collectionContainer);
-        }
-      }
-      optionsDiv.append(genHr());
+      getFacets(config, service, col, optionsDiv, DOMquery);
     });
+
+    DOMquery.collections.push(collectionRadio);
+
+    const collectionLabel = document.createElement("label");
+    collectionLabel.for = col;
+    collectionLabel.innerText = col;
+    collectionContainer.append(collectionRadio, collectionLabel);
+
+    fieldset.append(collectionContainer);
+
+    if (!i) {
+      collectionRadio.setAttribute("checked", true);
+
+      try {
+        getFacets(config, service, coreSource, optionsDiv, DOMquery);
+      } catch (error) {}
+    }
+    //}
+  }
+  optionsDiv.append(genHr());
+  // });
 };
 
-const getFacets = (config, service, coreSource, optionsDiv, DOMquery) =>
+const getFacets = (config, service, coreSource, optionsDiv, DOMquery) => {
+  /*
+
+Do reimplement if double lock is available
+
   fetch(
     `http://${service.url}/solr/${coreSource}/select?facet=on&facet.field=collections`
   )
     .then((facet) => facet.json())
     .then((facets) => {
-      DOMquery.service = service;
-      if (facets.responseHeader.status === 0) {
-        const facetList = facets.facet_counts.facet_fields.collections;
 
-        // const periodList = facets.facet_counts.facet_fields.crawl_year;
+      */
 
-        if (facetList.length === 0) {
-          optionsDiv.innerHTML += "No available collections<br>";
-        } else {
-          optionsDiv.innerHTML += "Available collections<br>";
-          const facetBox = document.createElement("div");
-          optionsDiv.append(facetBox);
+  DOMquery.service = service;
+  //if (facets.responseHeader.status === 0) {
+  //const facetList = facets.facet_counts.facet_fields.collections;
 
-          // determine period
-          // removed for now because to intensive for the Solr to manage
-          /*
+  const facetList = config.indexedDatasets;
+
+  // const periodList = facets.facet_counts.facet_fields.crawl_year;
+
+  if (facetList.length === 0) {
+    optionsDiv.innerHTML += "No available collections<br>";
+  } else {
+    optionsDiv.innerHTML += "Available collections<br>";
+    const facetBox = document.createElement("div");
+    optionsDiv.append(facetBox);
+
+    // determine period
+    // removed for now because to intensive for the Solr to manage
+    /*
           var start = Infinity;
           var end = -Infinity;
           for (let i = 0; i < periodList.length; i++) {
@@ -487,53 +496,54 @@ const getFacets = (config, service, coreSource, optionsDiv, DOMquery) =>
           document.getElementById("dateFrom").value = start + "-01-01";
           document.getElementById("dateTo").value = end + "-12-31";
           */
-          const inputQueryText =
-            optionsDiv.parentNode.querySelector(".fluxInput");
-          inputQueryText.disabled = false;
-          inputQueryText.value = "";
+    const inputQueryText = optionsDiv.parentNode.querySelector(".fluxInput");
+    inputQueryText.disabled = false;
+    inputQueryText.value = "";
 
-          // manage sub collections
+    // manage sub collections
 
-          var facetSet = 0;
+    var facetSet = 0;
 
-          if (config.hasOwnProperty("indexedDatasets")) {
-            facetSet = new Set(config.indexedDatasets);
-          }
+    if (config.hasOwnProperty("indexedDatasets")) {
+      facetSet = new Set(config.indexedDatasets);
+    }
 
-          DOMquery.facets = [];
+    DOMquery.facets = [];
 
-          for (let i = 0; i < facetList.length; i++) {
-            const face = facetList[i];
-            if (facetSet ? facetSet.has(face) : true) {
-              if (typeof face === "string") {
-                let checked = 0;
+    for (let i = 0; i < facetList.length; i++) {
+      const face = facetList[i];
+      if (facetSet ? facetSet.has(face) : true) {
+        if (typeof face === "string") {
+          let checked = 0;
 
-                const facetContainer = document.createElement("div");
+          const facetContainer = document.createElement("div");
 
-                const facetCheckBox = document.createElement("input");
-                facetCheckBox.type = "checkbox";
-                facetCheckBox.name = `bnf-solr-checkbox-facet-${config["account name"]}`;
-                facetCheckBox.id = face;
-                facetCheckBox.checked = checked;
+          const facetCheckBox = document.createElement("input");
+          facetCheckBox.type = "checkbox";
+          facetCheckBox.name = `bnf-solr-checkbox-facet-${config["account name"]}`;
+          facetCheckBox.id = face;
+          facetCheckBox.checked = checked;
 
-                DOMquery.facets.push(facetCheckBox);
+          DOMquery.facets.push(facetCheckBox);
 
-                const facetLabel = document.createElement("label");
-                facetLabel.for = face;
-                facetLabel.innerText = face;
+          const facetLabel = document.createElement("label");
+          facetLabel.for = face;
+          facetLabel.innerText = face;
 
-                facetContainer.append(facetCheckBox, facetLabel);
+          facetContainer.append(facetCheckBox, facetLabel);
 
-                facetBox.append(facetContainer);
-              }
-            }
-          }
+          facetBox.append(facetContainer);
         }
       }
+    }
+  }
+  //}
+  /*
     })
     .catch((e) => {
       console.log(e);
       optionsDiv.innerHTML += "No available collections<br>";
     });
-
+*/
+};
 export { queryBnFSolr, generateLocalServiceConfig, buildBnFsolrArguments };
