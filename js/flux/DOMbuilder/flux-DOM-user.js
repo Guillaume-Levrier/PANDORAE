@@ -18,7 +18,7 @@ const saveUserConfigs = (tabData, sectionData, tab) => {
   const user = Object.assign({}, userData);
 
   // reset user service config
-  user.distantServices = {};
+  user.distantServices = [];
   user.localServices = [];
 
   const updateFields = () => {

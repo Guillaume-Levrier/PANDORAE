@@ -59,7 +59,7 @@ const nosDeputesBasic = (data) =>
       throw e;
     });
 
-    const buildNosDeputesArguments = (data, sectionDiv) => {
+const buildNosDeputesArguments = (config, sectionData, sectionDiv) => {
   const optionsDiv = document.createElement("div");
   optionsDiv.className = "fluxRequestOptionDiv";
   sectionDiv.append(optionsDiv);
@@ -73,7 +73,6 @@ const nosDeputesBasic = (data) =>
   const label = document.createElement("label");
   label.innerText = "Choisissez une législature : ";
   label.for = "nosDeplegSelect";
-  //<label for="pet-select">Choose a pet:</label>
 
   optionsDiv.append(label, selectElement);
 
@@ -86,6 +85,4 @@ const nosDeputesBasic = (data) =>
   });
 };
 
-
-
-export { nosDeputesBasic,buildNosDeputesArguments };
+export { nosDeputesBasic, buildNosDeputesArguments };
