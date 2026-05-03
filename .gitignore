@@ -12,3 +12,4 @@ yarn.lock
 dist/
 out/
 .webpack
+.DS_Store
