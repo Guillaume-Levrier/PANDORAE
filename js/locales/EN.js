@@ -223,7 +223,7 @@ Start by entering a Hyphe API endpoint, then select a corpus. Click Load to dire
       user: {
         id: "user", // id of the main div
         title: "USER", // title of the tab (displayed on the page)
-        description: `The user tab lets you fill in your information and API keys. Do scroll down and click "save user information" when you make a change : the system does <span style="font-weight:bold">not</span> save your information automatically.`,
+        description: `The user tab lets you fill in your information and API keys. Do scroll down and click "save user information" when you make a change : the system does <span style="font-weight:bold">not</span> save your information automatically. If you connect a new service, please restart PANDORÆ after saving your credentials.`,
         sections: [
           {
             type: "warningDisclaimer",

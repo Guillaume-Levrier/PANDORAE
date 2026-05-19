@@ -32,44 +32,64 @@ const saveUserConfigs = (tabData, sectionData, tab) => {
     }
 
     // for all service input field
-    const serviceInput = tab.querySelectorAll("input.fluxServiceInput");
+    const serviceInputDivs = tab.querySelectorAll("div.ServiceInputDiv");
 
-    for (let i = 0; i < serviceInput.length; i++) {
-      const input = serviceInput[i];
+    for (let k = 0; k < serviceInputDivs.length; k++) {
+      const ServiceInputDiv = serviceInputDivs[k];
 
-      // check if it is expected to be a local or distant service
-      // (network wise, relative to this pandorae instance)
-      const proximity = input.dataset.proximity + "Services";
+      const serviceInput = ServiceInputDiv.querySelectorAll(
+        "input.fluxServiceInput",
+      );
 
-      // name of the given service
-      const serviceName = input.dataset.serviceName;
+      const service = { serviceType: ServiceInputDiv.id, serviceConfig: {} };
+      var proximity;
 
-      // if it doesn't exist in the user data file, create the object
-      if (!user[proximity].hasOwnProperty(serviceName)) {
-        user[proximity][serviceName] = {};
+      for (let i = 0; i < serviceInput.length; i++) {
+        const input = serviceInput[i];
+
+        // check if it is expected to be a local or distant service
+        // (network wise, relative to this pandorae instance)
+        proximity = input.dataset.proximity + "Services";
+
+        // name of the given service
+        //const serviceName = input.dataset.serviceName;
+
+        //console.log(serviceName);
+
+        //service.serviceType = serviceName;
+
+        console.log(JSON.stringify(service));
+
+        // if it doesn't exist in the user data file, create the object
+        //if (!user[proximity].hasOwnProperty(serviceName)) {
+        //  user[proximity][serviceName] = {};
+        //}
+
+        // now point to this service
+        // const service = user[proximity][serviceName];
+
+        // depending if we are looking for a single value or array
+        switch (input.dataset.fieldType) {
+          case "string":
+            service.serviceConfig[input.dataset.fieldName] = input.value;
+            break;
+
+          case "array":
+            if (
+              !service.serviceConfig.hasOwnProperty(input.dataset.fieldName)
+            ) {
+              service.serviceConfig[input.dataset.fieldName] = [];
+            }
+
+            service.serviceConfig[input.dataset.fieldName].push(input.value);
+
+            break;
+
+          default:
+            break;
+        }
       }
-
-      // now point to this service
-      const service = user[proximity][serviceName];
-
-      // depending if we are looking for a single value or array
-      switch (input.dataset.fieldType) {
-        case "string":
-          service[input.dataset.fieldName] = input.value;
-          break;
-
-        case "array":
-          if (!service.hasOwnProperty(input.dataset.fieldName)) {
-            service[input.dataset.fieldName] = [];
-          }
-
-          service[input.dataset.fieldName].push(input.value);
-
-          break;
-
-        default:
-          break;
-      }
+      user[proximity].push(service);
     }
   };
 
@@ -151,14 +171,14 @@ const addFieldButton = (
   service,
   value,
   fieldList,
-  serviceContainer
+  serviceContainer,
 ) => {
   const addFieldButton = document.createElement("div");
   addFieldButton.className = "flux-button";
   addFieldButton.style = "width:100px;margin:0.5rem;margin-left:150px;";
   addFieldButton.innerText = "Add a new library";
   addFieldButton.addEventListener("click", () =>
-    addField(sectionData, service, value, fieldList, "array")
+    addField(sectionData, service, value, fieldList, "array"),
   );
 
   serviceContainer.append(addFieldButton);
@@ -192,7 +212,7 @@ const addServiceCredentials = (tabData, sectionData, tab) => {
     helper.innerHTML = sectionData.helper.text;
     helper.className = "helperBox";
     helper.addEventListener("click", () =>
-      window.electron.send("openEx", sectionData.helper.url)
+      window.electron.send("openEx", sectionData.helper.url),
     );
     descHelp.append(helper);
   }
@@ -265,7 +285,7 @@ const addServiceTesterButton = (sectionData, serviceContainer) => {
     fluxButtonClicked(
       serviceTesterButton,
       sectionData.aftermath,
-      "Requests sent"
+      "Requests sent",
     );
     serviceTester(sectionData.name, inputs);
   });
@@ -326,6 +346,7 @@ const newServiceFormBuilder = (tab) => {
   serviceTypeDiv.append(serviceTypeLabel, selectServiceType);
 
   const modelDiv = document.createElement("div");
+  modelDiv.className = "ServiceInputDiv";
 
   let thisServiceDOM = [];
 
@@ -333,6 +354,8 @@ const newServiceFormBuilder = (tab) => {
     modelDiv.innerHTML = "";
 
     thisServiceDOM = [];
+
+    modelDiv.id = selectServiceType.value;
 
     CM.flux.serviceModels[selectServiceType.value].fields.forEach((d) => {
       const fieldContainer = document.createElement("div");

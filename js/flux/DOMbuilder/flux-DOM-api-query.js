@@ -53,7 +53,7 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
     helper.className = "helperBox";
     helper.style.marginBottom = "1rem";
     helper.addEventListener("click", () =>
-      window.electron.send("openEx", sectionData.helper.url)
+      window.electron.send("openEx", sectionData.helper.url),
     );
     descHelp.append(helper);
   }
@@ -93,7 +93,7 @@ const addAPIquerySection = (tabData, sectionData, tab) => {
     const targetSelection = document.createElement("div");
     targetSelection.className = "fluxTargetSelection";
     const label = document.createElement("label");
-    label.innerText = "Select target for request: ";
+    label.innerText = "Select account target for request: ";
     label.for = tabData.id + "target-selection";
 
     const select = document.createElement("select");
