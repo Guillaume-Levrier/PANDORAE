@@ -1,4 +1,4 @@
-import { themeData } from "./filesystem-main";
+import { themes } from "../../local-data/themes";
 import { readUserIDfile, writeUserIDfile } from "./user-main";
 import { mainWindow } from "./window-creator";
 
@@ -15,12 +15,9 @@ const manageTheme = (req) => {
   switch (req.type) {
     case "read":
       if (currentUser.theme) {
-        mainWindow.webContents.send(
-          "themeContent",
-          themeData[currentUser.theme]
-        );
+        mainWindow.webContents.send("themeContent", themes[currentUser.theme]);
       } else {
-        mainWindow.webContents.send("themeContent", themeData.vega);
+        mainWindow.webContents.send("themeContent", themes.vega);
       }
 
       break;
@@ -28,7 +25,7 @@ const manageTheme = (req) => {
     case "set":
       currentUser.theme = req.theme;
       writeUserIDfile(currentUser);
-      mainWindow.webContents.send("themeContent", themeData[req.theme]);
+      mainWindow.webContents.send("themeContent", themes[req.theme]);
       break;
   }
 };

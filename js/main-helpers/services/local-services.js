@@ -19,7 +19,6 @@ var expectedServices = 0;
 const checkLocalService = (service) => {
   const location = service.serviceConfig.url.split(":");
   dns.lookupService(location[0], location[1], (err, hostname, s) => {
-    console.log(location[0], location[1]);
     if (hostname || s) {
       service.valid = true;
     } else {
@@ -64,7 +63,7 @@ const checkConfiguredLocalServices = (currentUser) => {
         // the specific local network config.
         case "LocalNetworkConfig":
           localNetworkConfigs.push(
-            fetch(service.serviceConfig.url).then((r) => r.json())
+            fetch(service.serviceConfig.url).then((r) => r.json()),
           );
           break;
 
@@ -85,7 +84,7 @@ const checkConfiguredLocalServices = (currentUser) => {
 
         configs.forEach((config) => {
           config.forEach((localAdminService) =>
-            checkLocalService(localAdminService)
+            checkLocalService(localAdminService),
           );
         });
       });

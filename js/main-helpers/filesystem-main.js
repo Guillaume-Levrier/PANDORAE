@@ -27,15 +27,8 @@ const readFlatFile = (path) =>
   fs.readFile(
     path, // Read the user data file
     "utf8",
-    (err, data) => data
+    (err, data) => data,
   );
-
-const createThemes = () => {
-  fs.copyFileSync(
-    basePath + "/json/themes.json",
-    userDataPath + "/PANDORAE-DATA/themes/themes.json"
-  );
-};
 
 const changeUDP = () => {
   const userDataPath = dialog.showOpenDialogSync(null, {
@@ -50,15 +43,14 @@ const changeUDP = () => {
   userDataDirTree(userDataPath, [
     "/PANDORAE-DATA/logs",
     "/PANDORAE-DATA/userID",
-    "/PANDORAE-DATA/themes",
+    // flat datasets for geotype will need to be modularized
+    // this will comme with THREE geotype rebuild
     "/PANDORAE-DATA/flatDatasets",
   ]);
 
   createUserId(userDataPath);
   createThemes();
 };
-
-var themeData;
 
 const startRoutine = () => {
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
@@ -83,24 +75,14 @@ const startRoutine = () => {
   userDataDirTree(userDataPath, [
     "/PANDORAE-DATA/logs",
     "/PANDORAE-DATA/userID",
-    "/PANDORAE-DATA/themes",
     "/PANDORAE-DATA/flatDatasets",
   ]);
 
   createUserId(userDataPath);
-  createThemes();
+  // createThemes();
   createMainWindow();
   createAudioManager();
   createDatabaseManager();
-
-  themeData = fs.readFileSync(
-    userDataPath + "/PANDORAE-DATA/themes/themes.json",
-    "utf8",
-    (err, data) => JSON.parse(data)
-  );
-
-  //weird but ok
-  themeData = JSON.parse(themeData);
 
   mainWindow.onbeforeunload = (e) => {
     BrowserView.getAllViews().forEach((view) => view.destroy());
@@ -137,7 +119,6 @@ export {
   userDataDirTree,
   changeUDP,
   startRoutine,
-  themeData,
   savePNG,
   saveSVG,
   exportDataset,
