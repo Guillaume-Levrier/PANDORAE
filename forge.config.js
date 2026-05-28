@@ -22,7 +22,7 @@ module.exports = {
     },
     {
       name: "@electron-forge/maker-zip",
-      platforms: ["darwin", "linux"],
+      platforms: ["darwin", "win32"],
       config: { icon: "/icons/PANDORAE" },
     },
     {
