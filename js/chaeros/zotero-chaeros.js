@@ -314,8 +314,8 @@ const zoteroCollectionBuilder = (dataset) => {
 
         const limiter = new bottleneck({
           // Create a bottleneck to prevent hitting API rate limits
-          maxConcurrent: 3, // Only one request at once
-          minTime: 2000, // Every 2000 milliseconds - slow for notes but be kind with Zotero
+          maxConcurrent: 2, // Only one request at once
+          minTime: 3000, // Every 2000 milliseconds - slow for notes but be kind with Zotero
         });
 
         let resultList = [];
