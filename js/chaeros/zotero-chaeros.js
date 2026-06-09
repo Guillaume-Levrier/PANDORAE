@@ -144,7 +144,7 @@ const zoteroItemsRetriever = (data) => {
 
                       colMeta.items.forEach((doc) => {
                         const doc_id = doc.id.substring(
-                          doc.id.indexOf("/") + 1
+                          doc.id.indexOf("/") + 1,
                         );
                         documentMap[doc_id] = doc;
                       });
@@ -160,7 +160,7 @@ const zoteroItemsRetriever = (data) => {
 
                       window.electron.send(
                         "chaeros-notification",
-                        "Retrieving notes…"
+                        "Retrieving notes…",
                       );
 
                       var resCount = 0;
@@ -209,12 +209,12 @@ const zoteroItemsRetriever = (data) => {
 
                         window.electron.send(
                           "chaeros-notification",
-                          "Collection retrieved"
+                          "Collection retrieved",
                         );
 
                         setTimeout(
                           () => window.electron.send("win-destroy", true),
-                          1000
+                          1000,
                         );
                       };
 
@@ -251,7 +251,7 @@ const zoteroCollectionBuilder = (dataset) => {
 
   window.electron.send(
     "chaeros-notification",
-    "Creating collection " + colName
+    "Creating collection " + colName,
   ); // Send message to main Display
 
   var file = dataset.dataset.data;
@@ -275,7 +275,7 @@ const zoteroCollectionBuilder = (dataset) => {
 
         window.electron.send(
           "chaeros-notification",
-          "Creating collection " + collectionCode.code
+          "Creating collection " + collectionCode.code,
         );
 
         let fileArrays = []; // Create empty array
@@ -314,8 +314,8 @@ const zoteroCollectionBuilder = (dataset) => {
 
         const limiter = new bottleneck({
           // Create a bottleneck to prevent hitting API rate limits
-          maxConcurrent: 1, // Only one request at once
-          minTime: 200, // Every 200 milliseconds
+          maxConcurrent: 3, // Only one request at once
+          minTime: 2000, // Every 2000 milliseconds - slow for notes but be kind with Zotero
         });
 
         let resultList = [];
@@ -324,7 +324,7 @@ const zoteroCollectionBuilder = (dataset) => {
 
         window.electron.send(
           "chaeros-notification",
-          `Uploading page 1/${fileArrays.length}`
+          `Uploading page 1/${fileArrays.length}`,
         );
 
         fetchTargets.forEach((d) => {
@@ -333,7 +333,7 @@ const zoteroCollectionBuilder = (dataset) => {
               fetch(d.uri, {
                 method: "POST",
                 body: JSON.stringify(d.body),
-              })
+              }),
             )
             .then((res) => res.json())
             .then((result) => {
@@ -347,7 +347,7 @@ const zoteroCollectionBuilder = (dataset) => {
               if (count <= fileArrays.length) {
                 window.electron.send(
                   "chaeros-notification",
-                  `Uploading page ${count + 1}/${fileArrays.length}`
+                  `Uploading page ${count + 1}/${fileArrays.length}`,
                 );
               }
 
@@ -365,45 +365,47 @@ const zoteroCollectionBuilder = (dataset) => {
                 const addNoteToDoc = (itemID) => {
                   const url = `https://api.zotero.org/groups/${dataset.id}/items/${itemID}?&v=3&key=${zoteroApiKey}`;
 
-                  fetch(url)
-                    .then((r) => r.json())
-                    .then((r) => {
-                      const id = r.data.shortTitle;
-                      if (noteMap.hasOwnProperty(id)) {
-                        const note = noteMap[id];
+                  limiter.schedule(() =>
+                    fetch(url)
+                      .then((r) => r.json())
+                      .then((r) => {
+                        const id = r.data.shortTitle;
+                        if (noteMap.hasOwnProperty(id)) {
+                          const note = noteMap[id];
 
-                        note.parentItem = r.key;
+                          note.parentItem = r.key;
 
-                        limiter.schedule(() =>
-                          fetch(
-                            `https://api.zotero.org/groups/${dataset.id}/items?&v=3&key=${zoteroApiKey}`,
-                            {
-                              method: "POST",
-                              body: JSON.stringify([note]),
-                            }
-                          )
-                            .then((r) => r.json())
-                            .then((r) => {
-                              notecount++;
-                              window.electron.send(
-                                "chaeros-notification",
-                                `Uploading note (${notecount}/${resultList.length})`
-                              );
+                          limiter.schedule(() =>
+                            fetch(
+                              `https://api.zotero.org/groups/${dataset.id}/items?&v=3&key=${zoteroApiKey}`,
+                              {
+                                method: "POST",
+                                body: JSON.stringify([note]),
+                              },
+                            )
+                              .then((r) => r.json())
+                              .then((r) => {
+                                notecount++;
+                                window.electron.send(
+                                  "chaeros-notification",
+                                  `Uploading note (${notecount}/${resultList.length})`,
+                                );
 
-                              if (notecount === resultList.length) {
-                                setTimeout(() => {
-                                  window.electron.send(
-                                    "chaeros-notification",
-                                    "Collection created"
-                                  ); // Send success message to main Display
-                                  window.electron.send("pulsar", true);
-                                  window.electron.send("win-destroy", true);
-                                }, 1000);
-                              }
-                            })
-                        );
-                      }
-                    });
+                                if (notecount === resultList.length) {
+                                  setTimeout(() => {
+                                    window.electron.send(
+                                      "chaeros-notification",
+                                      "Collection created",
+                                    ); // Send success message to main Display
+                                    window.electron.send("pulsar", true);
+                                    window.electron.send("win-destroy", true);
+                                  }, 1000);
+                                }
+                              }),
+                          );
+                        }
+                      }),
+                  );
                 };
                 resultList.forEach((d) => addNoteToDoc(d, noteMap));
               } // If all responses have been received, delay then close chaeros
@@ -411,7 +413,7 @@ const zoteroCollectionBuilder = (dataset) => {
             .catch((e) => window.electron.send("console-logs", e));
           window.electron.send(
             "console-logs",
-            "Collection " + JSON.stringify(collectionName) + " built."
+            "Collection " + JSON.stringify(collectionName) + " built.",
           ); // Send success message to console
         });
       });
