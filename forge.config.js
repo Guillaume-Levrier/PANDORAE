@@ -8,31 +8,32 @@ module.exports = {
     force: true,
   },
   makers: [
-    {
+    /* {
       name: "@electron-forge/maker-dmg",
       platforms: ["darwin"],
       config: {
-        background: "./assets/dmg-background.png",
+        // background: "./assets/dmg-background.png",
         format: "ULFO",
       },
-    },
-    {
+    }, */
+    /* {
       name: "@electron-forge/maker-squirrel",
       config: {},
-    },
+    }, */
     {
       name: "@electron-forge/maker-zip",
       platforms: ["darwin", "win32"],
       config: { icon: "/icons/PANDORAE" },
     },
-    {
+    // use  npm run make -- --platform=win32 --arch=x64 to compile for windows
+    /* {
       name: "@electron-forge/maker-deb",
       config: {},
     },
     {
       name: "@electron-forge/maker-rpm",
       config: {},
-    },
+    }, */
   ],
 
   publishers: [
@@ -50,33 +51,11 @@ module.exports = {
 
   plugins: [
     {
-      name: "@electron-forge/plugin-auto-unpack-natives",
-      config: {},
-    },
-    {
       name: "@electron-forge/plugin-webpack",
       config: {
-        devServer: {
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods":
-              "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-            "Access-Control-Allow-Headers":
-              "X-Requested-With, content-type, Authorization",
-          },
-          server: "https",
-          secure: true,
-          stats: "verbose",
-          hot: false,
-          inline: false,
-          client: {
-            overlay: {
-              errors: false,
-              warnings: false,
-            },
-          },
-        },
         mainConfig: "./webpack.main.config.js",
+        devContentSecurityPolicy:
+          "default-src * self blob: data: gap:; style-src * self 'unsafe-inline' blob: data: gap:; script-src * 'self' 'unsafe-eval' 'unsafe-inline' blob: data: gap:; object-src * 'self' blob: data: gap:; img-src * self 'unsafe-inline' blob: data: gap:; connect-src self * 'unsafe-inline' blob: data: gap:; frame-src * self blob: data: gap:;",
         renderer: {
           config: "./webpack.renderer.config.js",
           entryPoints: [
@@ -105,6 +84,14 @@ module.exports = {
               },
             },
             {
+              name: "audio",
+              html: "./html/audio.html",
+              js: "./js/audio.js",
+              preload: {
+                js: "./js/preload-audio.js",
+              },
+            },
+            {
               name: "database_manager",
               html: "./html/database_manager.html",
               js: "./js/database_manager.js",
@@ -116,18 +103,5 @@ module.exports = {
         },
       },
     },
-    // Fuses are used to enable/disable various Electron functionality
-    // at package time, before code signing the application
-    /*
-    new FusesPlugin({
-      version: FuseVersion.V1,
-      [FuseV1Options.RunAsNode]: false,
-      [FuseV1Options.EnableCookieEncryption]: true,
-      [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
-      [FuseV1Options.EnableNodeCliInspectArguments]: false,
-      [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
-      [FuseV1Options.OnlyLoadAppFromAsar]: true,
-    }),
-    */
   ],
 };

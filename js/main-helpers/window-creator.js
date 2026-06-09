@@ -86,23 +86,23 @@ const createAudioManager = () => {
     transparent: true,
     show: false,
     webPreferences: {
-      preload: basePath + "/js/preload-audio.js",
+      preload: AUDIO_PRELOAD_WEBPACK_ENTRY,
     },
   });
 
-  audioManager.loadFile("html/audioManager.html");
+  audioManager.loadURL(AUDIO_WEBPACK_ENTRY);
+
+  // This needs to be re-enabled, a job for the future
+
+  /* 
   audioManager.webContents.on("did-finish-load", function () {
     if (openWindowDevTools) audioManager.webContents.openDevTools();
   });
+
   ipcMain.on("audio-channel", (event, audio) => {
     audioManager.webContents.send("audio-channel", audio);
   });
-
-  mainWindow.on("closed", () => {
-    setTimeout(() => {
-      app.quit();
-    }, 1000);
-  });
+   */
 };
 
 const openModal = (modalFile, scrollTo) => {
@@ -199,7 +199,7 @@ const chaerosCalculator = (powerValveAction) => {
     transparent: true,
     show: false,
     webPreferences: {
-      preload: basePath + "/js/preload-chaeros.js",
+      preload: CHAEROS_PRELOAD_WEBPACK_ENTRY,
       nodeIntegrationInWorker: true,
       plugins: true,
     },
@@ -261,14 +261,14 @@ const bioRxivManager = (message) => {
     case "biorxiv-amount":
       BrowserWindow.fromId(windowIds.flux.id).webContents.send(
         "biorxivRetrieve",
-        message
+        message,
       );
       break;
 
     case "biorxiv-content":
       BrowserWindow.fromId(message.charWindId).webContents.send(
         "biorxivRetrieve",
-        message
+        message,
       );
 
       break;
@@ -285,7 +285,7 @@ const createDatabaseManager = () => {
     transparent: true,
     show: false,
     webPreferences: {
-      preload: basePath + "/js/preload-database_manager.js",
+      preload: DATABASE_MANAGER_PRELOAD_WEBPACK_ENTRY,
       nodeIntegrationInWorker: true,
       plugins: true,
     },

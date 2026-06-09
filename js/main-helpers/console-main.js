@@ -4,6 +4,8 @@ const electron = require("electron");
 const { app } = electron;
 const userDataPath = app.getPath("userData");
 
+const fs = require("fs");
+
 const date = new Date().toJSON().replace(/:/g, "-"); // Create a timestamp
 var dataLog = "PANDORÆ Log - " + date;
 
@@ -22,7 +24,6 @@ const writeLogFlatFile = () =>
     "utf8", // Path/name, data, format
     (err) => {
       if (err) throw err;
-    }
+    },
   );
-
 export { addLineToConsole, writeLogFlatFile };

@@ -8,4 +8,4 @@ contextBridge.exposeInMainWorld("electron", {
   invoke: (channel) => ipcRenderer.invoke(channel, true),
 });
 
-console.log("|==== INDEX PRELOAD ENDS HERE ====|");
+console.log("|==== AUDIO PRELOAD ENDS HERE ====|");
