@@ -314,8 +314,8 @@ const zoteroCollectionBuilder = (dataset) => {
 
         const limiter = new bottleneck({
           // Create a bottleneck to prevent hitting API rate limits
-          maxConcurrent: 2, // Only one request at once
-          minTime: 3000, // Every 2000 milliseconds - slow for notes but be kind with Zotero
+          maxConcurrent: 1, // Only one request at once
+          minTime: 300, // Every 300 milliseconds - slow for notes but be kind with Zotero
         });
 
         let resultList = [];
@@ -360,6 +360,7 @@ const zoteroCollectionBuilder = (dataset) => {
                 // get documents page by page
                 // and add the note.
 
+                let noteStatusCount = 0;
                 let notecount = 0;
 
                 const addNoteToDoc = (itemID) => {
@@ -369,6 +370,11 @@ const zoteroCollectionBuilder = (dataset) => {
                     fetch(url)
                       .then((r) => r.json())
                       .then((r) => {
+                        window.electron.send(
+                          "chaeros-notification",
+                          `Checking item ${noteStatusCount + 1}/${resultList.length}`,
+                        );
+                        noteStatusCount++;
                         const id = r.data.shortTitle;
                         if (noteMap.hasOwnProperty(id)) {
                           const note = noteMap[id];
